@@ -34,7 +34,9 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return ( (patterns[0] == "1")) && (patterns[1] == "DRAIN") && (patterns[2] == "W");//重力型雨水斗
+            var isGravityPattern = ((patterns[0] == "1")) && (patterns[1] == "DRAIN") && (patterns[2] == "W");
+            var is87Pattern = name.Contains("87");
+            return isGravityPattern || is87Pattern;//重力型雨水斗
         }
     }
 }

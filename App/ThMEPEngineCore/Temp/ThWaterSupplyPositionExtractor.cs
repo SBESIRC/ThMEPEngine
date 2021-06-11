@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Temp
         public List<Curve> WaterSupplyPositions { get; private set; }
         public ThWaterSupplyPositionExtractor()
         {
-            Category = "给水点位";
+            Category = "WaterSupplyPoint";
             ElementLayer = "给水点位";
             WaterSupplyPositions = new List<Curve>();
         }

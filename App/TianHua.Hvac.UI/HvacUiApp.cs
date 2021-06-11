@@ -25,8 +25,8 @@ namespace TianHua.Hvac.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THDUCTPORTS", CommandFlags.Modal)]
-        public void ThDuctPorts()
+        [CommandMethod("TIANHUACAD", "THDKFPM", CommandFlags.Modal)]
+        public void THDKFPM()
         {
             using (var cmd = new ThHvacDuctPortsCmd())
             {

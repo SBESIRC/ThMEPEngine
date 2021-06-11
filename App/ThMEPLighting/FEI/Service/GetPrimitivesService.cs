@@ -43,7 +43,7 @@ namespace ThMEPLighting.FEI
                     objs.Add(transCurve);
                 });
             }
-
+            
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
             if (sprayLines.Count <= 0)
@@ -53,7 +53,7 @@ namespace ThMEPLighting.FEI
             sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
 
             //处理车道线
-            var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+            var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 100.0, 2.0, Math.PI / 180.0);
             var parkingLinesService = new ParkingLinesService();
             var parkingLines = parkingLinesService.CreateNodedParkingLines(polyline, handleLines, out List<List<Line>> otherPLines);
             otherLanes = otherPLines;
@@ -84,10 +84,10 @@ namespace ThMEPLighting.FEI
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
-                var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
+                var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
                 archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var archWallEngine = new ThArchitectureWallRecognitionEngine();
+                var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
                 ////获取柱
@@ -115,6 +115,31 @@ namespace ThMEPLighting.FEI
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 获取区域内的主要疏散路径或辅助
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public List<Curve> GetMainEvacuate(Polyline polyline,string name) 
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var exitLines = acdb.ModelSpace
+                .OfType<Curve>()
+                .Where(x => x.Layer == name);
+                exitLines.ForEach(x =>
+                {
+                    var transCurve = x.Clone() as Curve;
+                    originTransformer.Transform(transCurve);
+                    objs.Add(transCurve);
+                });
+            }
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+            return sprayLines;
         }
 
         /// <summary>

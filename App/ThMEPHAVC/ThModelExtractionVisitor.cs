@@ -1,9 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
-using System;
 using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC
@@ -27,8 +25,7 @@ namespace ThMEPHVAC
         {
             if (entity is BlockReference reference)
             {
-                var blockName = reference.GetEffectiveName();
-                return blockName.Contains(ThHvacCommon.HTFC_BLOCK_NAME);
+                return reference.IsRawModel();
             }
             return false;
         }
@@ -42,7 +39,6 @@ namespace ThMEPHVAC
         {
             elements.Add(new ThRawIfcDistributionElementData()
             {
-                Data = blkref.GetEffectiveName(),
                 Geometry = blkref.GetTransformedCopy(matrix),
             });
         }

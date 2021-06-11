@@ -9,7 +9,7 @@ namespace ThMEPEngineCore.Service
 {
     public class ThArchitectureWallSimplifier
     {
-        private const double OFFSET_DISTANCE = 30.0;
+        private const double OFFSET_DISTANCE = 20.0;
         private const double DISTANCE_TOLERANCE = 1.0;
 
         public static DBObjectCollection Simplify(DBObjectCollection walls)

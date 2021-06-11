@@ -15,11 +15,15 @@
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
+            <ComponentGroupRef Id="ProductComponentsAppMvvmLight" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppCGAL" />
+            <ComponentGroupRef Id="ProductComponentsAppGDAL" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
             <ComponentGroupRef Id="ProductComponentsHVACWin64" />
             <ComponentGroupRef Id="ProductComponentsDevExpress" />
+            <ComponentGroupRef Id="ProductComponentsWPF" />
+            <ComponentGroupRef Id="ProductComponentsLightingWin64" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
         </Feature>
@@ -34,8 +38,6 @@
                         <Directory Id="INSTALLFOLDER" Name="ThMEPPlugin.bundle">
                             <Directory Id="DIR_Autoloader_Contents" Name="Contents">
                                 <Directory Id="DIR_Autoloader_Contents_App_Win64" Name="Win64">
-                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R18" Name="2012">
-                                    </Directory>
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R19" Name="2014">
                                     </Directory>
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R20" Name="2016">

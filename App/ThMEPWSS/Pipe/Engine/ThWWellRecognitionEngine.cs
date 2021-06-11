@@ -28,7 +28,9 @@ namespace ThMEPWSS.Pipe.Engine
         }
     }
     public class ThWWellRecognitionEngine : ThBuildingElementRecognitionEngine
-    {      
+    {
+        public IEnumerable<object> Datas { get; internal set; }
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             var engine = new ThWellExtractionEngine();

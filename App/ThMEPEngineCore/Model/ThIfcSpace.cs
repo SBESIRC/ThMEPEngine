@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcSpace : ThIfcSpatialStructureElement
     {
+        public Curve Boundary { get; set; }
+        public List<string> Tags { get; set; }
         public List<ThIfcSpace> SubSpaces { get; set; }
+        public Dictionary<string, object> Properties { get; set; }
         public ThIfcSpace()
         {
-            SubSpaces = new List<ThIfcSpace>();
+            Tags = new List<string>();
             Uuid = Guid.NewGuid().ToString();
+            SubSpaces = new List<ThIfcSpace>();
+            Properties = new Dictionary<string, object>();
         }
     }
 }

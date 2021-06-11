@@ -1,14 +1,13 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using Dreambuild.AutoCAD;
-using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Geometries.Utilities;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADCore.NTS
 {
@@ -16,32 +15,28 @@ namespace ThCADCore.NTS
     {
         public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(objs.ToNTSPolygons().ToArray());
+            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygon());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
-        public static List<Polygon> ToNTSPolygons(this DBObjectCollection curves)
+        public static MultiLineString ToMultiLineString(this DBObjectCollection objs)
         {
-            var polygons = new List<Polygon>();
-            curves.Cast<Entity>().ForEach(e => polygons.Add(e.ToNTSPolygon()));
-            return polygons;
+            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLineString());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
-        public static List<Geometry> ToNTSLineStrings(this DBObjectCollection curves)
-        {
-            var geometries = new List<Geometry>();
-            curves.Cast<Entity>().ForEach(e => geometries.Add(e.ToNTSGeometry()));
-            return geometries;
-        }
-
-        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
+        public static Geometry ToNTSNodedLineStrings(this MultiLineString linestrings)
         {
             // UnaryUnionOp.Union()有Robust issue
             // 会抛出"non-noded intersection" TopologyException
-            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException
-            // 为了规避这个问题，这里使用Geometry.Union()
-            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
+            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException (NTS 2.2.0)
             Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
-            return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
+            return OverlayNGRobust.Overlay(linestrings, lineString, SpatialFunction.Union);
+        }
+
+        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection objs)
+        {
+            return objs.ToMultiLineString().ToNTSNodedLineStrings();
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
@@ -79,27 +74,28 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
-        {
-            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSGeometry());
-            var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
-        }
-
         public static Geometry Combine(this DBObjectCollection curves)
         {
-            var geometries = curves.ToNTSLineStrings();
-            return GeometryCombiner.Combine(geometries);
-        }
-
-        public static bool Covers(this DBObjectCollection curves, Line line)
-        {
-            return curves.ToMultiLineString().Covers(line.ToNTSGeometry());
+            return GeometryCombiner.Combine(curves.ToMultiLineString().Geometries);
         }
 
         public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
-            return geometry.ToDbObjects().ToCollection<DBObject>();
+            return geometry.ToDbObjects(keepHoles).ToCollection();
+        }
+
+        public static Point3d GetMaximumInscribedCircleCenter(this DBObjectCollection curves)
+        {
+            var builder = new ThCADCoreNTSBuildArea();
+            var geometry = builder.Build(curves.ToMultiLineString());
+            if (geometry is Polygon polygon)
+            {
+                return polygon.GetMaximumInscribedCircleCenter();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

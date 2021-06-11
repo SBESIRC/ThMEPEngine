@@ -11,7 +11,7 @@ namespace ThMEPEngineCore.Features
     {
         public static Feature Construct(ThGeometry geometry)
         {
-            if (geometry != null)
+            if (geometry != null && geometry.Boundary!=null)
             {
                 if (geometry.Boundary is Polyline polyline)
                 {

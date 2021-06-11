@@ -28,6 +28,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Accept(Visitor);
             extractor.Extract(database);
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ThWCompositeRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -90,6 +95,11 @@ namespace ThMEPWSS.Pipe.Engine
                  .ForEach(o => Elements.Add(ThWSideEntryWaterBucket.Create(o.Geometry)));
             }
         }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine, IDisposable
     {
@@ -150,7 +160,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var engine = new ThWStoreysRecognitionEngine();
+                var engine = new ThStoreysRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, pts);
                 if (engine.Elements.Count == 0)
                 {
@@ -176,13 +186,19 @@ namespace ThMEPWSS.Pipe.Engine
                     frameSpaces.Add(roofSpaces[0]);
                 }
 
-                // 获取房间空间
+                var boundaryEngine = new ThMEPEngineCore.Engine.ThDB3RoomRecognitionEngine();
+                boundaryEngine.RecognizeMS(acadDatabase.Database, pts);
+                var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var markEngine = new ThRoomMarkRecognitionEngine();
+                markEngine.RecognizeMS(acadDatabase.Database, pts);
+                var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
-                this.Spaces = builder.Build(database, pts).Select(o => new ThIfcSpace()
-                {
-                    Tags = o.Tags,
-                    Boundary = o.Boundary,
-                }).ToList();
+                builder.Build(rooms, marks);
+                //this.Spaces = rooms.Select(o => new ThIfcSpace()
+                //{
+                //    Tags = o.Tags,
+                //    Boundary = o.Boundary,
+                //}).ToList();
 
                 var rainPipesEngine = new ThWCompositeRecognitionEngine();
                 rainPipesEngine.Recognize(database, GetBoundaryVertices(frameSpaces, standardSpaces));

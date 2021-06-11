@@ -16,7 +16,16 @@ namespace ThMEPWSS.Pipe.Engine
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
-            Results = visitor.Results;
+            Results.AddRange(visitor.Results);
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            var visitor = new ThWGravityWaterBucketExtractionVisitor();
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database);// 提取ModelSpace下的块
+            Results.AddRange(visitor.Results);
         }
     }
     public class ThWGravityWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -32,6 +41,19 @@ namespace ThMEPWSS.Pipe.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
             Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWGravityWaterBucket.Create(o)));
-        }  
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThWGravityWaterBucketExtractionEngine();
+            engine.ExtractFromMS(database);
+            var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+            }
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWGravityWaterBucket.Create(o)));
+        }
     }
 }

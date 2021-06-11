@@ -9,15 +9,15 @@ using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-  public  class ThWGravityWaterBucketExtractionVisitor : ThDistributionElementExtractionVisitor
-    {     
+    public class ThWGravityWaterBucketExtractionVisitor : ThDistributionElementExtractionVisitor
+    {
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference blkref)
             {
-                HandleBlockReference(elements,blkref, matrix);
+                HandleBlockReference(elements, blkref, matrix);
             }
-        }     
+        }
 
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
@@ -46,6 +46,7 @@ namespace ThMEPWSS.Pipe.Engine
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
+            if (!blkref.ObjectId.IsValid) return;
             elements.Add(new ThRawIfcDistributionElementData()
             {
                 Geometry = blkref.GetTransformedCopy(matrix),

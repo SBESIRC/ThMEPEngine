@@ -1,31 +1,32 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThColumnExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
+    public class ThColumnExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
     {
         public List<Polyline> Columns { get; private set; }
-        private List<ThTempSpace> Spaces { get; set; }
-        public bool UseDb3ColumnEngine { get; set; }
+        private List<ThTempSpace> Spaces { get; set; }  
+        
         public ThColumnExtractor()
         {
             Columns = new List<Polyline>();
-            Category = "Column";
-            UseDb3ColumnEngine = false;
+            Category = BuiltInCategory.Column.ToString();
+            UseDb3Engine = true;
             ElementLayer = "柱";
+            Spaces = new List<ThTempSpace>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            if (UseDb3ColumnEngine)
+            if (UseDb3Engine)
             {
                 var columnEngine = new ThColumnRecognitionEngine();
                 columnEngine.Recognize(database, pts);
@@ -33,12 +34,12 @@ namespace ThMEPEngineCore.Temp
             }
             else
             {
-                var instance = new ThExtractColumnService()
+                var instance = new ThExtractPolylineService()
                 {
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Columns = instance.Columns;
+                Columns = instance.Polys;
             }
         }
 
@@ -47,16 +48,20 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Columns.ForEach(o =>
             {
-                var isolate = IsIsolate(Spaces, o);
-                if(isolate)
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                if (IsolateSwitch)
                 {
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add(CategoryPropertyName, Category);
+                    var isolate = IsIsolate(Spaces, o);
                     geometry.Properties.Add(IsolatePropertyName, isolate);
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
                 }
+                
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
+                }
+                geometry.Boundary = o;
+                geos.Add(geometry);
             });
             return geos;
         }
@@ -86,7 +91,10 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            if(GroupSwitch)
+            {
+                Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            }
         }
     }
 }

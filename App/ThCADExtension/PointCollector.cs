@@ -70,6 +70,11 @@ namespace ThCADExtension
             CollectedPoints = new Point3dCollection();
         }
 
+        public PointCollector(Shape shape) : this(shape, new List<string>())
+        {
+            //
+        }
+
         private void Editor_PointMonitor(object sender, PointMonitorEventArgs e)
         {
             if (mTempPline != null)

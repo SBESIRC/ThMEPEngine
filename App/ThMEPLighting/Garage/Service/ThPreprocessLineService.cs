@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service;
 using ThMEPLighting.Common;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service
 {

@@ -10,9 +10,15 @@ namespace ThMEPEngineCore.Temp
 {
     public abstract class ThExtractorBase
     {
+        public IElevationQuery IEleQuery { get; set; }
         public string Category { get; set; }
         public short ColorIndex { get; set; }
         public string ElementLayer { get; set; }
+        public List<System.Type> Types { get; set; }
+        public bool UseDb3Engine { get; set; }
+        public bool GroupSwitch { get; set; }
+        public bool IsolateSwitch { get; set; }
+
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
         protected string GroupIdPropertyName = "GroupId";
@@ -21,11 +27,17 @@ namespace ThMEPEngineCore.Temp
         protected string CategoryPropertyName = "Category";
         protected string AreaOwnerPropertyName = "AreaId";
         protected string IsolatePropertyName = "Isolated";
+        protected string ElevationPropertyName = "Elevation";
+        protected string StoreyBorderPropertyName = "StoreyBorder";
+
         public ThExtractorBase()
         {
             Category = "";
             ElementLayer = "";
+            GroupSwitch = false;
+            IsolateSwitch = true;
             GroupOwner = new Dictionary<Entity, List<string>>();
+            Types = new List<System.Type>() { typeof(Polyline)};
         }
         protected string ToString(Polyline poly)
         {
@@ -65,6 +77,8 @@ namespace ThMEPEngineCore.Temp
         
         protected bool IsIsolate(List<ThTempSpace> spaces , Entity o)
         {
+            if (spaces == null)
+                return false;
             foreach(var space in spaces)
             {
                 if(space.Outline.IsFullContains(o))

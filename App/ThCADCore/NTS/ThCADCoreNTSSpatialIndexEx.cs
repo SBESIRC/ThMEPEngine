@@ -108,6 +108,10 @@ namespace ThCADCore.NTS
                 {
                     return poly.ToNTSPolygon();
                 }
+                else if (obj is MPolygon mPolygon)
+                {
+                    return mPolygon.ToNTSPolygon();
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -142,11 +146,11 @@ namespace ThCADCore.NTS
         /// <summary>
         /// Crossing selection
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
+        public DBObjectCollection SelectCrossingPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(polyline);
+            var geometry = ToNTSPolygon(entity);
             return CrossingFilter(
                 Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
@@ -177,11 +181,11 @@ namespace ThCADCore.NTS
         /// <summary>
         /// Window selection
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
+        public DBObjectCollection SelectWindowPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(polyline);
+            var geometry = ToNTSPolygon(entity);
             return WindowFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }

@@ -44,13 +44,13 @@
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />
     <Compile Include="ThCurveCollectionExtension.cs" />
-    <Compile Include="ThDisposableSet.cs" />
+    <Compile Include="ThDbObjectCollectionExtension.cs" />
+    <Compile Include="ThDynamicBlockUtils.cs" />
     <Compile Include="ThEditorExtension.cs" />
-    <Compile Include="ThEntTool.cs" />
-    <Compile Include="ThGeExtension.cs" />
+    <Compile Include="ThExtents3dExtension.cs" />
+    <Compile Include="ThBoundBlock3dExtension.cs" />
     <Compile Include="ThHatchTool.cs" />
     <Compile Include="ThBlockImageTool.cs" />
-    <Compile Include="ThLayerTool.cs" />
     <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThLinqExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />

@@ -73,7 +73,7 @@ namespace ThMEPEngineCore.BuildRoom.Service
         }
         private void ObtainWalls(Database db, Point3dCollection pts)
         {
-            using (var architectureEngine = new ThArchitectureWallRecognitionEngine())
+            using (var architectureEngine = new ThDB3ArchWallRecognitionEngine())
             using (var shearwallEngine = new ThShearWallRecognitionEngine())
             {
                 architectureEngine.Recognize(db, pts);

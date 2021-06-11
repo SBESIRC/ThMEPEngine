@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Linq;
+using NFox.Cad;
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using AcHelper.Commands;
@@ -14,7 +15,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service.Hvac;
-using NFox.Cad;
+using GeometryExtensions;
 
 namespace ThMEPHVAC.Command
 {
@@ -28,58 +29,64 @@ namespace ThMEPHVAC.Command
         {
             using (var adb = AcadDatabase.Active())
             {
-                var frame = GetEntity<Polyline>(adb, "\n请选择范围框");
-                if (frame == null) return;
-
-                var visitor = new ThModelExtractionVisitor();
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(adb.Database);
-                if (visitor.Results.Count == 0) return;
-
-                var spatialIndex = GetSpatialIndex(visitor);
-                var fanBlks = GetFanBlocks(frame, spatialIndex);
-                if (fanBlks.Count == 0) return;
-
-                var showLabelBox = QueryYesOrNo("\n是否显示提示框");
-                if (showLabelBox)
+                using (PointCollector pc = new PointCollector(PointCollector.Shape.Window))
                 {
-                    AddAndSetDateLayer(adb.Database);
-                }
-
-                ImportLayer(adb.Database, ThHvacCommon.FOUNDATION_LAYER);
-                fanBlks.Cast<Entity>().ForEach(e =>
-                {
-                    var entitySet = new DBObjectCollection();
-                    e.Explode(entitySet);
-                    var ents = entitySet.Cast<Entity>()
-                         .Where(o => o.Layer.Contains(ThHvacCommon.FOUNDATION_LAYER)).ToList();
-                    ents.ForEach(ent =>
+                    try
                     {
-                        adb.ModelSpace.Add(ent);
-                        ent.SetDatabaseDefaults();
-                        ent.Layer = ThHvacCommon.FOUNDATION_LAYER;
-                    });
+                        pc.Collect();
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                    Point3dCollection winCorners = pc.CollectedPoints;
+                    var frame = new Polyline();
+                    frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                    frame.TransformBy(Active.Editor.UCS2WCS());
+
+                    var visitor = new ThModelExtractionVisitor();
+                    var extractor = new ThDistributionElementExtractor();
+                    extractor.Accept(visitor);
+                    extractor.Extract(adb.Database);
+                    if (visitor.Results.Count == 0) return;
+                    var fanBlks = GetFanBlocks(visitor.Results, frame);
+                    if (fanBlks.Count == 0) return;
+
+                    var showLabelBox = QueryYesOrNo("\n是否显示提示框");
                     if (showLabelBox)
                     {
-                        DrawLabelBox(adb.Database, ents);
+                        AddAndSetDateLayer(adb.Database);
                     }
-                });
+
+                    ImportLayer(adb.Database, ThHvacCommon.FOUNDATION_LAYER);
+                    fanBlks.ForEach(o =>
+                    {
+                        var entitySet = new DBObjectCollection();
+                        var blkref = o.Geometry as BlockReference;
+                        blkref.ExplodeWithVisible(entitySet);
+                        var foundations = entitySet.Cast<Entity>().Where(e => IsFoundation(e));
+                        foundations.ForEach(c =>
+                        {
+                            adb.ModelSpace.Add(c);
+                            c.Layer = ThHvacCommon.FOUNDATION_LAYER;
+                        });
+                        if (showLabelBox)
+                        {
+                            DrawLabelBox(adb.Database, foundations);
+                        }
+                    });
+
+                }
             }
         }
 
-        public T GetEntity<T>(AcadDatabase adb, string title) where T : DBObject
+        private bool IsFoundation(Entity entity)
         {
-            var opt = new PromptEntityOptions(title);
-            var ret = Active.Editor.GetEntity(opt);
-            if (ret.Status != PromptStatus.OK) return null;
-            return adb.ElementOrDefault<T>(ret.ObjectId);
-        }
-
-        private  ThCADCoreNTSSpatialIndex GetSpatialIndex(ThModelExtractionVisitor visitor)
-        {
-            var objs = visitor.Results.Select(o => o.Geometry).ToCollection();
-            return new ThCADCoreNTSSpatialIndex(objs);
+            if (entity is Curve curve)
+            {
+                return curve.Layer.Contains(ThHvacCommon.FOUNDATION_LAYER);
+            }
+            return false;
         }
 
         public  void ImportLayer(Database database, string name, bool replaceIfDuplicate = false)
@@ -91,9 +98,12 @@ namespace ThMEPHVAC.Command
             }
         }
 
-        private DBObjectCollection GetFanBlocks(Polyline frame, ThCADCoreNTSSpatialIndex spatialIndex)
+        private List<ThRawIfcDistributionElementData> GetFanBlocks(List<ThRawIfcDistributionElementData> blocks, Polyline frame)
         {
-            return spatialIndex.SelectCrossingPolygon(frame.Vertices());
+            var objs = blocks.Select(o => o.Geometry).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var result = spatialIndex.SelectCrossingPolygon(frame.Vertices());
+            return blocks.Where(o => result.Contains(o.Geometry)).ToList();
         }
 
         public  bool QueryYesOrNo(string text)

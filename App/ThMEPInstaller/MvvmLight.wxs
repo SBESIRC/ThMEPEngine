@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Debug" Guid="{415ACCA9-D66B-4EEF-9A30-68E268B70B52}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Debug" Guid="{3E36CDA4-2139-40F1-B85F-935187AE6293}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Debug" Guid="{0575E2B6-F8F1-4BBE-AA0F-78E8700CA955}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Debug" Guid="{0909D5F4-0474-4621-AA7E-7B3558EC0705}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Debug" Guid="{22B16C0D-B3E2-4E96-9DD1-E3C66C271E51}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Debug" Guid="{CAD44174-D818-407C-B176-99BD1B7A2200}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Debug" Guid="{17598CC2-D439-4289-8AC7-A6DE89372BF1}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Debug" Guid="{9109E562-A054-4F33-A715-04B1D6FD01EA}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Debug" Guid="{D45F7542-9E61-4A87-A3C6-F08ECA6C4184}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Release" Guid="{482B0E14-6291-47D7-AB62-638ED4911744}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Release" Guid="{A7F7103C-1097-4999-B3F9-73B3FAC8EE18}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Release" Guid="{18B07A3D-55CE-4C34-A1BE-BCF067E64983}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Release" Guid="{91A2DD98-8AB8-4817-AE52-AED9B75287D4}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Release" Guid="{62749193-AA11-43DE-A96C-6D1034701453}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Release" Guid="{F58E5010-3D62-4437-B691-9E444DEEEA8C}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Release" Guid="{53DDF5C8-1F64-4B9F-B40C-3B8FC75155E1}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\GalaSoft.MvvmLight.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Release" Guid="{F1FA65B6-BD4C-450F-BACA-5F4BAEFD1CC7}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\GalaSoft.MvvmLight.Extras.dll" />
+			</Component>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Release" Guid="{BF3F24EB-5BA1-4B0D-9D0C-57929A14877E}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\GalaSoft.MvvmLight.Platform.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsAppMvvmLight">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Debug" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Extras_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MvvmLight_Platform_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Extras_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MvvmLight_Platform_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Extras_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MvvmLight_Platform_Release" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -8,44 +7,54 @@ namespace ThCADExtension
 {
     public static class ThMPolygonExtension
     {
+        /// <summary>
+        /// MPolygon顶点集合（不支持圆弧段）
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <returns></returns>
         public static Point3dCollection Vertices(this MPolygon mPolygon)
-        {            
-            Point3dCollection vertices = new Point3dCollection();
-            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
-            {
-                MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                Polyline polyline = new Polyline()
-                {
-                    Closed = true
-                };
-                for (int j = 0; j < mPolygonLoop.Count; j++)
-                {
-                    var bulgeVertex = mPolygonLoop[j];
-                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
-                }
-                var pts=polyline.Vertices();
-                pts.Cast<Point3d>().ForEach(o => vertices.Add(o));
-            }
-            return vertices;
+        {
+            var vertices = mPolygon
+                .Loops()
+                .Select(o => o.Vertices())
+                .SelectMany(o => o.Cast<Point3d>());
+            return new Point3dCollection(vertices.ToArray());
+        }
+        /// <summary>
+        /// MPolygon顶点集合（支持圆弧段）
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Point3dCollection VerticesEx(this MPolygon mPolygon, double length)
+        {
+            var vertices = mPolygon
+                .Loops()
+                .Select(o => o.VerticesEx(length))
+                .SelectMany(o => o.Cast<Point3d>());
+            return new Point3dCollection(vertices.ToArray());
         }
         public static List<Polyline> Loops(this MPolygon mPolygon)
         {
             var loops = new List<Polyline>();
             for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
             {
-                MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                Polyline polyline = new Polyline()
-                {
-                    Closed = true
-                };
-                for (int j = 0; j < mPolygonLoop.Count; j++)
-                {
-                    var bulgeVertex = mPolygonLoop[j];
-                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
-                }
-                loops.Add(polyline);
+                loops.Add(ToDbPolyline(mPolygon.GetMPolygonLoopAt(i)));
             }
             return loops;
+        }
+        public static Polyline ToDbPolyline(this MPolygonLoop loop)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            for (int i = 0; i < loop.Count; i++)
+            {
+                var bulgeVertex = loop[i];
+                polyline.AddVertexAt(i, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
+            }
+            return polyline;
         }
     }
 }

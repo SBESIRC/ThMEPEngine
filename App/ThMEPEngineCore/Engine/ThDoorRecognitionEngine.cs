@@ -11,13 +11,41 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThDoorExtractionEngine : ThBuildingElementExtractionEngine
     {
+        public List<string> DoorMarkLayerFilter { get; set; }
+        public List<string> DoorStoneLayerFilter { get; set; }
+        public ThDoorExtractionEngine()
+        {
+            DoorMarkLayerFilter = new List<string>();
+            DoorStoneLayerFilter = new List<string>();
+        }
         public override void Extract(Database database)
         {
-            var visitor = new ThDoorExtractionVisitor();
+            Init(database);
+            var doorMarkVisitor = new ThDoorMarkExtractionVisitor()
+            {
+                LayerFilter = this.DoorMarkLayerFilter,
+            };
+            var doorStoneVisitor = new ThDoorStoneExtractionVisitor()
+            {
+                LayerFilter = this.DoorStoneLayerFilter,
+            };
             var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(visitor);
+            extractor.Accept(doorMarkVisitor);
+            extractor.Accept(doorStoneVisitor);
             extractor.Extract(database);
-            Results = visitor.Results;
+            Results.AddRange(doorMarkVisitor.Results);
+            Results.AddRange(doorStoneVisitor.Results);
+        }
+        private void Init(Database database)
+        {
+            if (DoorMarkLayerFilter.Count == 0)
+            {
+                DoorMarkLayerFilter = ThDoorMarkLayerManager.XrefLayers(database);
+            }
+            if (DoorStoneLayerFilter.Count == 0)
+            {
+                DoorStoneLayerFilter = ThDoorStoneLayerManager.XrefLayers(database);
+            }
         }
     }
 
@@ -28,11 +56,11 @@ namespace ThMEPEngineCore.Engine
             // 构件索引服务
             ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
             {
-                BuiltInCategory.OST_ArchitectureWall,
-                BuiltInCategory.OST_Column,
-                BuiltInCategory.OST_CurtainWall,
-                BuiltInCategory.OST_ShearWall,
-                BuiltInCategory.OST_Window
+                BuiltInCategory.ArchitectureWall,
+                BuiltInCategory.Column,
+                BuiltInCategory.CurtainWall,
+                BuiltInCategory.ShearWall,
+                BuiltInCategory.Window
             });
             ThSpatialIndexCacheService.Instance.Build(database, polygon);
 

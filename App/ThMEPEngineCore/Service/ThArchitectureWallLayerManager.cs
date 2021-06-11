@@ -26,12 +26,8 @@ namespace ThMEPEngineCore.Service
 
         private static bool IsArchitectureWallCurveLayer(string name)
         {
-            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
-            if (patterns.Count() < 2)
-            {
-                return false;
-            }
-            return (patterns[0] == "WALL") && (patterns[1] == "AE");
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('$').Reverse().ToArray();
+            return patterns[0] == "AE-WALL";
         }
     }
 }

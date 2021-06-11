@@ -29,7 +29,7 @@ namespace ThMEPWSS.Pipe.Service
         public void Extract(Database db,Point3dCollection pts)
         {
             SelectFrames();         
-            var roomEngine = new ThRoomRecognitionEngine();
+            var roomEngine = new ThDB3RoomRecognitionEngine();
             roomEngine.Recognize(db, pts);
             var spaceNames = new Dictionary<Polyline, string>();
             roomEngine.Elements.Cast<ThIfcRoom>().ToList().ForEach(o =>

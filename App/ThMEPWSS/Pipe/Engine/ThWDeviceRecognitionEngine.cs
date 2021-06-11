@@ -24,6 +24,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThWDeviceRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -39,6 +44,11 @@ namespace ThMEPWSS.Pipe.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
             Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWDevice.Create(o.GeometricExtents.ToRectangle())));
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

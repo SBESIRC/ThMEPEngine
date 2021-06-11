@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -17,14 +18,29 @@ namespace ThMEPEngineCore.Temp
         {
             Walls = new List<Entity>();
             Category = "ShearWall";
+            UseDb3Engine = true;
+            Spaces = new List<ThTempSpace>();
+            ElementLayer = "剪力墙";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            using (var engine=new ThShearWallRecognitionEngine())
+            if (UseDb3Engine)
             {
-                engine.Recognize(database, pts);
-                engine.Elements.ForEach(o=>Walls.Add(o.Outline));
+                using (var engine = new ThShearWallRecognitionEngine())
+                {
+                    engine.Recognize(database, pts);
+                    engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                }
+            }
+            else
+            {
+                var instance = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Walls = instance.Polys.Cast<Entity>().ToList();
             }
         }
 
@@ -33,15 +49,19 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
-                var isolate = IsIsolate(Spaces, o);
-                if(isolate)
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                if(IsolateSwitch)
                 {
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add(CategoryPropertyName, Category);
+                    var isolate = IsIsolate(Spaces, o);
                     geometry.Properties.Add(IsolatePropertyName, isolate);
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
+                }                
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
+                geometry.Boundary = o;
+                geos.Add(geometry);
             });
             return geos;
         }
@@ -69,7 +89,10 @@ namespace ThMEPEngineCore.Temp
         }
         public void Group(Dictionary<Entity, string> groupId)
         {
-            throw new NotImplementedException();
+            if(GroupSwitch)
+            {
+                Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            }            
         }
     }
 }

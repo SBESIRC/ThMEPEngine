@@ -1,7 +1,6 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -79,8 +78,7 @@ namespace ThCADCore.NTS
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)
         {
             var poylgons = new DBObjectCollection();
-            var builder = new ThCADCoreNTSBuildArea();
-            Geometry geometry = builder.Build(objs.ExplodeCurves().ToMultiLineString());
+            Geometry geometry = objs.BuildAreaGeometry();
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());
@@ -97,6 +95,29 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
             return poylgons;
+        }
+
+        public static MPolygon BuildMPolygon(this DBObjectCollection objs)
+        {
+            Geometry geometry = objs.BuildAreaGeometry();
+            if (geometry is Polygon polygon)
+            {
+                return polygon.ToDbMPolygon();
+            }
+            else if (geometry is MultiPolygon mPolygons)
+            {
+                return mPolygons.ToDbMPolygon();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
+        {
+            var builder = new ThCADCoreNTSBuildArea();
+            return builder.Build(objs.ToMultiLineString());
         }
     }
 }

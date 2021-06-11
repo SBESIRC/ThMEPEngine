@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -106,12 +106,6 @@ namespace ThMEPEngineCore.Engine
                 Geometry = mText.TextOBB(),
             };
         }
-
-        private new bool IsAnnotationElement(Entity entity)
-        {
-            return base.IsAnnotationElement(entity);
-        }
-
         private Point3d GetTextPosition(object ent)
         {
             if (ent is DBText dbText)
@@ -126,6 +120,15 @@ namespace ThMEPEngineCore.Engine
             {
                 throw new NotSupportedException();
             }
+        }
+        public override bool IsAnnotationElement(Entity entity)
+        {
+            if(entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsDoor;
+            }
+            return false;
         }
     }
 }

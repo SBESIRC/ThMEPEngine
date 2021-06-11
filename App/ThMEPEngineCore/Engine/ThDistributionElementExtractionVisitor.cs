@@ -12,10 +12,15 @@ namespace ThMEPEngineCore.Engine
 
         public ThDistributionElementExtractionVisitor()
         {
+            LayerFilter = new HashSet<string>();
             Results = new List<ThRawIfcDistributionElementData>();
         }
 
         public abstract void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix);
+        public virtual void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj)
+        {
+            //
+        }
 
         public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
 

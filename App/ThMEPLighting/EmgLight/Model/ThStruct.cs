@@ -1,6 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.EmgLight.Common;
 
 
 namespace ThMEPLighting.EmgLight.Model

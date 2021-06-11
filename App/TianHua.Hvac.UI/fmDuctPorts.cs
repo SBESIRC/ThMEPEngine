@@ -1,0 +1,284 @@
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using ThMEPHVAC.CAD;
+
+namespace TianHua.Hvac.UI
+{
+    public partial class fmDuctPorts : Form
+    {
+        public int port_num;
+        public double air_volume;
+        public double elevation;
+        public double air_speed;
+        public string duct_size;
+        public string port_size;
+        public string graph_scale;
+        public string scenario;
+        public string port_range;
+        private double air_speed_max;
+        private double air_speed_min;
+        public fmDuctPorts()
+        {
+            InitializeComponent();
+            Combobox_init();
+            Scenario_init();
+            Duct_size_init();
+            Set_duct_variables();
+            Port_init();
+            Set_port_speed();
+            Set_port_range();
+        }
+        private void buttonOK_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+            this.Close();
+        }
+        private void Combobox_init()
+        {
+            comboBox1.Text = "1:150";
+            comboBox2.Text = "消防排烟";
+        }
+
+        private void Set_port_range()
+        {
+            if (radioButton3.Checked)
+                port_range = radioButton3.Text;
+            else if (radioButton4.Checked)
+                port_range = radioButton4.Text;
+        }
+
+        private void Set_port_speed()
+        {
+            if (textBox7.Text == "" || textBox8.Text == "" || textBox1.Text == "")
+                return;
+            port_num = (int)Double.Parse(textBox7.Text);
+            double avg_air_volumn = air_volume / port_num;
+            port_size = textBox8.Text + "x" + textBox1.Text;
+            double air_speed = Calc_air_speed(avg_air_volumn, Double.Parse(textBox8.Text), Double.Parse(textBox1.Text));
+            label22.Text = air_speed.ToString("0.00");
+        }
+
+        private void Duct_size_init()
+        {
+            if (textBox2.Text == "" || textBox3.Text == "")
+                return;
+            air_volume = Double.Parse(textBox2.Text);
+            Limit_air_volumn(ref air_volume);
+            double air_speed = Double.Parse(textBox3.Text);
+            Limit_air_speed(ref air_speed);
+            ThDuctParameter Duct = new ThDuctParameter(air_volume, air_speed);
+            listBox1.Items.Clear();
+            foreach (var duct_size in Duct.DuctSizeInfor.DefaultDuctsSizeString)
+                listBox1.Items.Add(duct_size);
+            listBox1.SelectedItem = Duct.DuctSizeInfor.RecommendOuterDuctSize;
+            duct_size = listBox1.SelectedItem.ToString();
+        }
+        private void Limit_air_volumn(ref double air_volumn)
+        {
+            if (Math.Abs(air_volumn) < 1e-3)
+                return;
+            if (air_volumn > 200000)
+                air_volumn = 200000;
+            if (air_volumn < 1500)
+                air_volumn = 1500;
+            textBox2.Text = air_volumn.ToString();
+        }
+        private void Limit_air_speed(ref double air_speed)
+        {
+            if (Math.Abs(air_speed) < 1e-3)
+                return;
+            if (air_speed > air_speed_max)
+                air_speed = air_speed_max;
+            if (air_speed < air_speed_min)
+                air_speed = air_speed_min;
+            textBox3.Text = air_speed.ToString();
+        }
+        private void Port_init()
+        {
+            switch (comboBox2.Text)
+            {
+                case "消防排烟":
+                case "厨房排油烟":
+                case "平时排风":
+                case "消防排烟兼平时排风":
+                case "事故排风":
+                case "平时排风兼事故排风":
+                    radioButton3.Text = "下回单层百叶";
+                    radioButton4.Text = "侧回单层百叶";
+                    break;
+                case "消防补风":
+                case "消防加压送风":
+                case "厨房排油烟补风":
+                case "平时送风":
+                case "消防补风兼平时送风":
+                case "事故补风":
+                case "平时送风兼事故补风":
+                    radioButton3.Text = "下送单层百叶";
+                    radioButton4.Text = "侧送单层百叶";
+                    break;
+            }
+        }
+        private void Scenario_init()
+        {
+            switch (comboBox2.Text)
+            {
+                case "消防排烟":
+                case "消防补风":
+                case "消防加压送风":
+                    air_speed = 15;
+                    air_speed_min = 5;
+                    air_speed_max = 20;
+                    textBox3.Text = air_speed.ToString("0");
+                    break;
+                case "厨房排油烟":
+                case "厨房排油烟补风":
+                case "事故排风":
+                case "事故补风":
+                case "平时送风":
+                case "平时排风":
+                case "消防排烟兼平时排风":
+                case "消防补风兼平时送风":
+                case "平时送风兼事故补风":
+                case "平时排风兼事故排风":
+                    air_speed = 8;
+                    air_speed_min = 5;
+                    air_speed_max = 10;
+                    textBox3.Text = air_speed.ToString("0");
+                    break;
+            }
+        }
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton1.Checked)
+                radioButton2.Checked = false;
+            splitContainer3.Panel1Collapsed = false;
+            splitContainer3.Panel2Collapsed = true;
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton2.Checked)
+                radioButton1.Checked = false;
+            splitContainer3.Panel1Collapsed = true;
+            splitContainer3.Panel2Collapsed = false;
+            Update_duct_size();
+        }
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton3.Checked)
+                radioButton4.Checked = false;
+            port_range = radioButton3.Text;
+        }
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton4.Checked)
+                radioButton3.Checked = false;
+            port_range = radioButton4.Text;
+        }
+        private void Update_duct_size()
+        {
+            if (textBox6.Text == null || textBox5.Text == null)
+                return;
+            string s = listBox1.SelectedItem.ToString();
+            string[] str = s.Split('x');
+            textBox6.Text = str[0];
+            textBox5.Text = str[1];
+            double air_speed = Calc_air_speed(air_volume, Double.Parse(textBox5.Text), Double.Parse(textBox6.Text));
+            label13.Text = air_speed.ToString("0.00");
+            duct_size = textBox6.Text + "x" + textBox5.Text;
+        }
+        private double Calc_air_speed(double air_volume, double duct_width, double duct_height)
+        {
+            return air_volume / 3600 / (duct_width * duct_height / 1000000);
+        }
+        private void Set_duct_variables()
+        {
+            if (radioButton1.Checked)
+            {
+                duct_size = listBox1.SelectedItem.ToString();
+                air_speed = Double.Parse(textBox3.Text);
+            }
+            else
+            {
+                duct_size = textBox6.Text + "x" + textBox5.Text;
+                air_speed = Double.Parse(label13.Text);
+            }
+            graph_scale = comboBox1.Text;
+            scenario = comboBox2.Text;
+            air_volume = Double.Parse(textBox2.Text);
+            elevation = Double.Parse(textBox4.Text);
+        }
+        private bool Is_integer_str(string text)
+        {
+            string reg = "^[1-9][0-9]*$";
+            return Regex.Match(text, reg).Success;
+        }
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (!Is_integer_str(textBox1.Text))
+                textBox1.Text = "";
+            Set_port_speed();
+        }
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            if (Is_integer_str(textBox2.Text))
+                air_volume = Double.Parse(textBox2.Text);
+            else
+                textBox2.Text = "";
+            Set_port_speed();
+        }
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            double air_speed = 0;
+            if (Is_integer_str(textBox3.Text))
+                air_speed = Double.Parse(textBox3.Text);
+            else
+                textBox3.Text = "";
+            Limit_air_speed(ref air_speed);
+        }
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            if (Is_integer_str(textBox4.Text))
+                elevation = Double.Parse(textBox4.Text);
+            else
+                textBox4.Text = "";
+        }
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+            if (!Is_integer_str(textBox5.Text))
+                textBox5.Text = "";
+            Update_duct_size();
+        }
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            if (!Is_integer_str(textBox6.Text))
+                textBox6.Text = "";
+            Update_duct_size();
+        }
+        private void textBox7_TextChanged(object sender, EventArgs e)
+        {
+            if (Is_integer_str(textBox7.Text))
+                port_num = (int)Double.Parse(textBox7.Text);
+            else
+                textBox7.Text = "";
+            Set_port_speed();
+        }
+        private void textBox8_TextChanged(object sender, EventArgs e)
+        {
+            if (!Is_integer_str(textBox8.Text))
+                textBox8.Text = "";
+            Set_port_speed();
+        }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            graph_scale = comboBox1.Text;
+        }
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Scenario_init();
+            Port_init();
+            scenario = comboBox2.Text;
+        }
+    }
+}

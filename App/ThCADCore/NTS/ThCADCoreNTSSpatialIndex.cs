@@ -108,6 +108,10 @@ namespace ThCADCore.NTS
                 {
                     return poly.ToNTSPolygon();
                 }
+                else if (obj is MPolygon mPolygon)
+                {
+                    return mPolygon.ToNTSPolygon();
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -139,35 +143,18 @@ namespace ThCADCore.NTS
             Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
         }
 
+
         /// <summary>
         /// Crossing selection
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
+        public DBObjectCollection SelectCrossingPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(polyline);
+            var geometry = ToNTSPolygon(entity);
             return CrossingFilter(
                 Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        public DBObjectCollection SelectCrossingPolygon(MPolygon mPolygon)
-        {
-            /*
-             * 线获取MPolygon外圈内所有的物体
-             * 减去洞内包括的物体
-             */
-            var loops = mPolygon.Loops();
-            var objs = SelectCrossingPolygon(loops[0]);
-            for (int i = 1; i < loops.Count; i++)
-            {
-                foreach (DBObject innerObj in SelectWindowPolygon(loops[i]))
-                {
-                    objs.Remove(innerObj);
-                }
-            }
-            return objs;
         }
 
         public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
@@ -195,11 +182,11 @@ namespace ThCADCore.NTS
         /// <summary>
         /// Window selection
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
+        public DBObjectCollection SelectWindowPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(polyline);
+            var geometry = ToNTSPolygon(entity);
             return WindowFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }

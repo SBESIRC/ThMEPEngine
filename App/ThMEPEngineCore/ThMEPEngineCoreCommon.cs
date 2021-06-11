@@ -5,11 +5,14 @@ namespace ThMEPEngineCore
 {
     public class ThMEPEngineCoreCommon
     {
+        public static string BUILDELEMENT_SECTION_S = "下层";
         public static string BUILDELEMENT_PROPERTY_CATEGORY = "Category";
         public static string BUILDELEMENT_PROPERTY_USER_TYPE = "UserType";
         public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
+        public static string BUILDELEMENT_PROPERTY_HATCH_LAYER = "填充图层";
+        public static string BUILDELEMENT_PROPERTY_HATCH_PATTERN = "填充图案";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
         public static List<string> BUILDELEMENT_PROPERTIES = new List<string>
         {
@@ -18,7 +21,9 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_MATERIAL,
             BUILDELEMENT_PROPERTY_LAYER,
             BUILDELEMENT_PROPERTY_PROJECT_LEVEL,
-            BUILDELEMENT_PROPERTY_Boundary
+            BUILDELEMENT_PROPERTY_Boundary,
+            BUILDELEMENT_PROPERTY_HATCH_LAYER,
+            BUILDELEMENT_PROPERTY_HATCH_PATTERN,
         };
 
         // 图层
@@ -27,6 +32,9 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-WIND";
         public static string BUILDELEMENT_LAYER_FLOOR = "AE-FLOR";
         public static string BUILDELEMENT_LAYER_RAILING = "AE-HDWR";
+        public static string BUILDELEMENT_LAYER_STRU_HACH = "AE-STRU-HACH";
+        public static string BUILDELEMENT_LAYER_STRU_WALL = "S_WALL_BELW_DASH_HACH";
+        public static string BUILDELEMENT_LAYER_STRU_COLUMN = "S_COlU_BELW_DASH_HACH";
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
@@ -55,6 +63,10 @@ namespace ThMEPEngineCore
         public static double LOOSE_CLOSED_POLYLINE = 100.0;
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
+
+        // Tolerance.Global.EqualPoint: 1E-10
+        // Tolerance.Global.EqualVector: 1E-12
+        public static Tolerance DEFAULT_THMAP_TOLERANCE = new Tolerance(1e-6, 1e-5);
 
         // 相似度公差
         public const double SIMILARITYMEASURETOLERANCE = 0.9;

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 

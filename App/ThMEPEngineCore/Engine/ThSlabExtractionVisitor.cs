@@ -50,11 +50,6 @@ namespace ThMEPEngineCore.Engine
             return false;
         }
 
-        public override bool CheckLayerValid(Entity curve)
-        {
-            return true;
-        }
-
         private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)
         {
             return new ThRawIfcBuildingElementData()

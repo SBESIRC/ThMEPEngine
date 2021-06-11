@@ -2,7 +2,7 @@
 
 namespace ThMEPEngineCore.Interface
 {
-    interface IBuffer
+    public interface IBuffer
     {
         Entity Buffer(Entity entity, double length);
     }

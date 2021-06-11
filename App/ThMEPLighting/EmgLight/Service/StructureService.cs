@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.EmgLight.Model;
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLight.Service
 {

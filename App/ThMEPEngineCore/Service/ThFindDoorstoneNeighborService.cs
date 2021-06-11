@@ -24,37 +24,37 @@ namespace ThMEPEngineCore.Service
         public void Find(Polyline doorStone)
         {
             //获取门垛符合条件的邻居
-            var nearArchwalls = FindElements(BuiltInCategory.OST_ArchitectureWall, doorStone);
-            var nearShearwalls = FindElements(BuiltInCategory.OST_ShearWall, doorStone);
-            var nearColumns = FindElements(BuiltInCategory.OST_Column, doorStone);
-            var nearWindows = FindElements(BuiltInCategory.OST_Window, doorStone);
-            var nearCurtainwalls = FindElements(BuiltInCategory.OST_CurtainWall, doorStone);
+            var nearArchwalls = FindElements(BuiltInCategory.ArchitectureWall, doorStone);
+            var nearShearwalls = FindElements(BuiltInCategory.ShearWall, doorStone);
+            var nearColumns = FindElements(BuiltInCategory.Column, doorStone);
+            var nearWindows = FindElements(BuiltInCategory.Window, doorStone);
+            var nearCurtainwalls = FindElements(BuiltInCategory.CurtainWall, doorStone);
 
             //分析
             if (nearArchwalls.Count>0)
             {
                 Neighbor = nearArchwalls[0];
-                Kind = BuiltInCategory.OST_ArchitectureWall;
+                Kind = BuiltInCategory.ArchitectureWall;
             }
             if (nearShearwalls.Count > 0)
             {
                 Neighbor = nearShearwalls[0];
-                Kind = BuiltInCategory.OST_ShearWall;
+                Kind = BuiltInCategory.ShearWall;
             }
             if (nearColumns.Count > 0)
             {
                 Neighbor = nearColumns[0];
-                Kind = BuiltInCategory.OST_Column;
+                Kind = BuiltInCategory.Column;
             }
             if (nearWindows.Count > 0)
             {
                 Neighbor = nearWindows[0];
-                Kind = BuiltInCategory.OST_Window;
+                Kind = BuiltInCategory.Window;
             }
             if (nearCurtainwalls.Count > 0)
             {
                 Neighbor = nearCurtainwalls[0];
-                Kind = BuiltInCategory.OST_CurtainWall;
+                Kind = BuiltInCategory.CurtainWall;
             }
         }
         private List<Polyline> FindElements(BuiltInCategory builtInCategory, Polyline doorStone)

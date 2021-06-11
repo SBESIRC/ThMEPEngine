@@ -23,6 +23,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -32,6 +35,10 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="Assistant\FengDbgTesting.cs" />
+    <Compile Include="Assistant\FengKeys.cs" />
+    <Compile Include="Assistant\FengNTSTest.cs" />
+    <Compile Include="Assistant\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\BoundaryProtectBussiness\BoundaryProtestService.cs" />
@@ -45,6 +52,11 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
+    <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
+    <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
+    <Compile Include="Command\ThFireControlSystemDiagramCmd.cs" />
+    <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
@@ -56,11 +68,33 @@
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
+    <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
+    <Compile Include="Common\Utils.cs" />
+    <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
+    <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
+    <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThObstacleExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThParkingStallExtractor.cs" />
+    <Compile Include="FlushPoint\Model\ThFlushPointParameter.cs" />
+    <Compile Include="FlushPoint\Service\ThCollectingWellNearbyService.cs" />
+    <Compile Include="FlushPoint\Service\ThDrainageDitchNearbyService.cs" />
+    <Compile Include="FlushPoint\Service\ThFilterWashPointsService.cs" />
+    <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
+    <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
+    <Compile Include="FlushPoint\Service\ThLayoutWashPointMarkService.cs" />
+    <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
+    <Compile Include="FlushPoint\Service\ThPointIdentificationService.cs" />
+    <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />
+    <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
+    <Compile Include="Pipe\Engine\ThWCleanToolsRecongnitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWDeepWellPumpEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeExtractionVisitor.cs" />
@@ -76,14 +110,16 @@
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeIndexEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWStoreysRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWaterWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Model\ThWaterWellPumpArrangement.cs" />
+    <Compile Include="Pipe\Model\ThWDeepWellPump.cs" />
     <Compile Include="Pipe\Model\ThWPipeInterfaces.cs" />
     <Compile Include="Pipe\Model\ThWPipeRun.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
@@ -92,6 +128,7 @@
     <Compile Include="Pipe\Model\ThWRainSystemDiagram.cs" />
     <Compile Include="Pipe\Model\ThWStoreys.cs" />
     <Compile Include="Pipe\Model\ThWSystemDiagram.cs" />
+    <Compile Include="Pipe\Model\ThWSystemDiagram.WaterSuply.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWSideEntryWaterBucket.cs" />
@@ -101,6 +138,7 @@
     <Compile Include="Pipe\Model\ThWRoofRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWCondensePipe.cs" />
+    <Compile Include="Pipe\Model\ThWWaterWell.cs" />
     <Compile Include="Pipe\Model\ThWWell.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
@@ -125,6 +163,7 @@
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
     <Compile Include="Pipe\Service\ThBasintoolLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThCleanToolsManager.cs" />
     <Compile Include="Pipe\Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Pipe\Service\ThCondensePipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
@@ -191,11 +230,26 @@
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
+    <Compile Include="ThLayoutFlushPointCmds.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.cs" />
+    <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
+    <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Command\ThFireHydrantCmd.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\MainlineLoop.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\PipeDiameter.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\PointType.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
+    <Compile Include="ViewModel\DrainageSetViewModel.cs" />
+    <Compile Include="ViewModel\DrainageViewModel.cs" />
+    <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Content Include="Uitl\todoList.txt" />
+    <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
+    <Compile Include="ThWaterwellPumpCmds.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
@@ -206,7 +260,11 @@
     <Compile Include="Uitl\ThWTangentService.cs" />
     <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1</Version>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
@@ -224,6 +282,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
@@ -233,6 +295,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
@@ -261,6 +324,9 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

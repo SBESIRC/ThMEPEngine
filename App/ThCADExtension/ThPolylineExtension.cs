@@ -1,6 +1,4 @@
 ﻿using System;
-using DotNetARX;
-using System.Linq;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -52,52 +50,19 @@ namespace ThCADExtension
             }
         }
 
-        public static double[] Coordinates2D(this Polyline pLine)
+        /// <summary>
+        /// 多段线包围盒
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline BoundBlock(this Polyline polyline)
         {
-            var vertices = (Point3dList)pLine.Vertices();
-            return vertices.Select(o => o.ToPoint2d().ToArray()).SelectMany(o => o).ToArray();
-        }
-
-        public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
-        {
-            var points = new Point3dCollection()
-            {
-                pt1,
-                pt2,
-                pt3,
-                pt4
-            };
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(points);
-            return pline;
-        }
-
-        public static Polyline CreateTriangle(Point2d pt1, Point2d pt2, Point2d pt3)
-        {
-            var points = new Point2dCollection()
-            {
-                pt1,
-                pt2,
-                pt3,
-            };
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(points);
-            return pline;
-        }
-
-        public static Polyline ToRectangle(this Extents3d extents)
-        {
-            Point3d pt1 = extents.MinPoint;
-            Point3d pt3 = extents.MaxPoint;
-            Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
-            Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
-            return CreateRectangle(pt1, pt2, pt3, pt4);
+#if ACAD_ABOVE_2012
+            // https://forums.autodesk.com/t5/objectarx/boundblock-function-of-acgecurve2d-in-acge-lib-error/td-p/9971906
+            return polyline.GetGeCurve().BoundBlock.ToPolyline();
+#else
+            throw new NotSupportedException();
+#endif
         }
 
         /// <summary>
@@ -220,6 +185,11 @@ namespace ThCADExtension
                 }
             }
             return segments;
+        }
+
+        public static Polyline Tessellate(this Polyline polyline, double length)
+        {
+            return polyline.TessellatePolylineWithArc(length);
         }
 
         public static Polyline Tessellate(this Circle circle, double length)

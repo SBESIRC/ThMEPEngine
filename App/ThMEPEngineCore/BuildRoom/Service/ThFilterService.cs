@@ -1,9 +1,7 @@
 ﻿using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Service;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BuildRoom.Interface;

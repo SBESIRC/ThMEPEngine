@@ -12,11 +12,20 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
     {
+        public List<string> LayerFilter { get; set; }
+        public ThRoomMarkExtractionEngine()
+        {
+            LayerFilter = new List<string>();
+        }
         public override void Extract(Database database)
         {
+            if(LayerFilter.Count==0)
+            {
+                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database);
+            }
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database)
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -26,9 +35,13 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
+            if (LayerFilter.Count == 0)
+            {
+                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database);
+            }
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database)
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -38,16 +51,28 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
+        public List<string> LayerFilter { get; set; }
+        public ThRoomMarkRecognitionEngine()
+        {
+            LayerFilter = new List<string>();
+        }
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine();
+            var engine = new ThRoomMarkExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine();
+            var engine = new ThRoomMarkExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }        

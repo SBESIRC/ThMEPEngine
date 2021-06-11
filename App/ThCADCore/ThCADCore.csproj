@@ -27,13 +27,13 @@
     <Compile Include="NTS\IO\ThCADCoreNTSGeometryWriter.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonReader.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonWriter.cs" />
+    <Compile Include="NTS\ThCADCoreNTSArcTessellationLength.cs" />
     <Compile Include="NTS\ThCADCoreNTSBuildArea.cs" />
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSConcaveHull.cs" />
     <Compile Include="NTS\ThCADCoreNTSDistance.cs" />
     <Compile Include="NTS\ThCADCoreNTSEarCutTriangulationBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
-    <Compile Include="NTS\ThCADCoreNTSExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSFastGeometryClipper.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryClipper.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryComparer.cs" />
@@ -42,6 +42,7 @@
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometrySmoother.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSInscribedCircle.cs" />
     <Compile Include="NTS\ThCADCoreNTSKdTree.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSMatch.cs" />

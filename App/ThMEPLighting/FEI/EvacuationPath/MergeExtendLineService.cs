@@ -77,7 +77,6 @@ namespace ThMEPLighting.FEI.EvacuationPath
             usefulLines.Add(firstLine);
             var resLines = GetAroudLines(firstLine.line, extendLines.Select(x => x.line).ToList(), removeDis);
             extendLines.RemoveAll(x => resLines.Contains(x.line));
-
             if (extendLines.Count > 0)
             {
                 var lastLine = extendLines.Last();
@@ -261,7 +260,10 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     {
                         if (IsOverloop(lane, mLine.line))
                         {
-                            extendLines.Remove(mLine);
+                            if (IsCheckLane(lane, mLine))
+                            {
+                                extendLines.Remove(mLine);
+                            }
                         }
                     }
                 }
@@ -325,6 +327,55 @@ namespace ThMEPLighting.FEI.EvacuationPath
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 判断是否是需要比较的车道线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="extendLine"></param>
+        /// <returns></returns>
+        private bool IsCheckLane(List<Line> lines, ExtendLineModel extendLine)
+        {
+            bool startCheck = false;
+            foreach (var lane in extendLine.startLane)
+            {
+                foreach (var line in lines)
+                {
+                    var sCPt = lane.GetClosestPointTo(line.StartPoint, false);
+                    var eCPt = lane.GetClosestPointTo(line.EndPoint, false);
+                    if (sCPt.IsEqualTo(line.StartPoint, new Tolerance(5, 5)) || eCPt.IsEqualTo(line.EndPoint, new Tolerance(5, 5)))
+                    {
+                        startCheck = true;
+                        break;
+                    }
+                }
+                if (startCheck)
+                {
+                    break;
+                }
+            }
+
+            bool endCheck = false;
+            foreach (var lane in extendLine.endLane)
+            {
+                foreach (var line in lines)
+                {
+                    var sCPt = lane.GetClosestPointTo(line.StartPoint, false);
+                    var eCPt = lane.GetClosestPointTo(line.EndPoint, false);
+                    if (sCPt.IsEqualTo(line.StartPoint, new Tolerance(5, 5)) || eCPt.IsEqualTo(line.EndPoint, new Tolerance(5, 5)))
+                    {
+                        endCheck = true;
+                        break;
+                    }
+                }
+                if (endCheck)
+                {
+                    break;
+                }
+            }
+
+            return startCheck && endCheck;
         }
 
         /// <summary>

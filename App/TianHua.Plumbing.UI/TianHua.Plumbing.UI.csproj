@@ -43,8 +43,11 @@
     <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\RelayCommand.cs" />
     <Compile Include="fmFDParam.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,8 +97,14 @@
     <Compile Include="LoadingCircle.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Model\FlushPointParameter.cs" />
     <Compile Include="PlumbingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Validation\ProtectRadiusRule.cs" />
+    <Compile Include="ViewModel\FlushPointVM.cs" />
+    <Compile Include="View\FlushPointUI.xaml.cs">
+      <DependentUpon>FlushPointUI.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="fmFDParam.resx">
       <DependentUpon>fmFDParam.cs</DependentUpon>
     </EmbeddedResource>
@@ -198,6 +208,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -212,6 +225,12 @@
       <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="View\FlushPointUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

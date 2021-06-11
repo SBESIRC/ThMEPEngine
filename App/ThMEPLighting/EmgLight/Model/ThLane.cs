@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.EmgLight.Common;
 
 
 namespace ThMEPLighting.EmgLight.Model

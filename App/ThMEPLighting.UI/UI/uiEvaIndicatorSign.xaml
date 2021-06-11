@@ -1,0 +1,76 @@
+﻿<cus:ThCustomWindow x:Class="ThMEPLighting.UI.UI.uiEvaIndicatorSign"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns:local="clr-namespace:ThMEPLighting.UI.UI"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="地库疏散指示灯布置">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:LayoutToBoolConverter x:Key="layoutTypeConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
+            <Label Content="安装方式："  Focusable="False" />
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
+                <RadioButton Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True"
+                             TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="{Binding LightLayoutType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Height="70" Width="80" Margin="-20,0,0,0"  Focusable="False" Source="/ThMEPLighting.UI;component/Resource/Image/优先壁装.png"  />
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="优先壁装" ></Label>
+                    </Grid>
+                </RadioButton>
+                <RadioButton Width="80" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="{Binding LightLayoutType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Height="70" Width="80" Margin="-20,0,0,0" Source="/ThMEPLighting.UI;component/Resource/Image/优先吊装.png"  />
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="优先吊装" ></Label>
+                    </Grid>
+                </RadioButton>
+            </StackPanel>
+            <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical"  Focusable="False" Margin="0,5,0,10" >
+            <Label Content="间距约束：" Margin="0,5,0,0" Focusable="False" ></Label>
+            <Label Content="灯具标志面与疏散方向垂直时：" Margin="10,5,0,5"  Focusable="False" ></Label>
+            <StackPanel Orientation="Horizontal"  Height="30" Margin="10,5,0,5" Focusable="False">
+                <Label Content="间距≤" VerticalContentAlignment="Center"  Focusable="False"></Label>
+                <ComboBox Width="130" Height="22" VerticalAlignment="Center" TabIndex="4"
+                          SelectedItem="{Binding VerticalSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding VerticalSpaceItems,Mode=OneWay,NotifyOnSourceUpdated=True}" />
+                <Label Content="m" VerticalContentAlignment="Bottom"  Focusable="False" ></Label>
+            </StackPanel>
+            <Label Content="灯具标志面与疏散方向平行时：" Margin="10,0,0,0"  Focusable="False" ></Label>
+            <StackPanel Orientation="Horizontal" Height="30" Margin="10,5,0,5"  Focusable="False">
+                <Label Content="间距≤" VerticalContentAlignment="Center"  Focusable="False"></Label>
+                <ComboBox Width="130" TabIndex="5" Height="22"   Focusable="True" 
+                          SelectedItem="{Binding ParallelSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding ParallelSpaceItems,Mode=OneWay,NotifyOnSourceUpdated=True}">
+                </ComboBox>
+                <Label Content="m" VerticalContentAlignment="Bottom"  Focusable="False" />
+            </StackPanel>
+            <Border BorderThickness="0,0,0,1" Height="5"  Focusable="False" ></Border>
+            <Label Content="图层控制：" Margin="0,5,0,0" Focusable="False" ></Label>
+            <CheckBox Margin="5,5,0,0" Content="显示疏散路径" IsTabStop="True"  Focusable="True" TabIndex="6" Name="checkFEIHide" Checked="checkFEIHide_Checked" Unchecked="checkFEIHide_Unchecked"></CheckBox>
+        </StackPanel>
+        <cus:ImageButton Grid.Row="2" IsTabStop="True" Focusable="True" TabIndex="0" Content="生成疏散路径" x:Name="btnLayoutLaneLine" Height="24" Margin="0,5,0,0" Click="btnLayoutLaneLine_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="3" IsTabStop="True" Focusable="True"  TabIndex="1"  Content="布置灯具" x:Name="btnStartLayout" Height="24" Margin="0,10,0,10" Click="btnStartLayout_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
+    </Grid>
+</cus:ThCustomWindow>

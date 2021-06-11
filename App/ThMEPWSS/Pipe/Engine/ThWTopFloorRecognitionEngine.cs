@@ -150,7 +150,7 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private Tuple<List<ThWCompositeRoom>, List<ThWCompositeBalconyRoom>>  Getcompositeroom(Database database, Point3dCollection pts,List<ThIfcSpace> spaces)
         {
-            using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
+            using (var compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
             {
                 compositeRoomRecognitionEngine.Spaces = spaces;
                 compositeRoomRecognitionEngine.rainPipes = rainPipes;

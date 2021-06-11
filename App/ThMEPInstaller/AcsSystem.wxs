@@ -1,104 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<?include Variable.wxi ?>
-	<Fragment>
-		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Debug="bin\Debug" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_AcsCommon_Debug" Guid="{33FA5199-13BA-44C0-B5FE-F06CEEFFD3A6}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_AcsConnector_Debug" Guid="{6629915E-4BF8-4054-95D2-C97765D30961}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" Guid="{8ED7E0B1-FF1F-4BF4-8182-3EFFB50CA355}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" Guid="{14C123A3-2987-44E9-A0FD-503E10EE2E30}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" Guid="{4E728861-D720-43FF-936C-AF805E4FBBA0}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" Guid="{85B3A61F-1D39-4FF0-BB0C-E45F36475256}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" Guid="{CCE5B3AA-11B3-4C24-A495-7E139A90F7EB}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" Guid="{39921419-1411-422F-8D69-EB1768B5D10B}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Release="bin\Release" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_AcsCommon_Release" Guid="{801825D0-608C-4DB6-B346-D550131FB0BB}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_AcsConnector_Release" Guid="{AC5EC184-E776-4B27-8130-F10BBA42CE60}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" Guid="{5DF85E05-8D48-4087-9D28-95822B274C14}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" Guid="{F1D09BBF-8A74-4219-8433-A2EEC97BCC4B}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsConnector.exe" />
-			</Component>			
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" Guid="{48F5F415-641E-4571-B17B-DCE3DCC98672}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" Guid="{FC1D5A62-08E9-456E-A5FC-60DDA1D177B3}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" Guid="{5014F8E9-6DBB-42CF-9939-20FE8ED25A70}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\AcsCommon.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" Guid="{26BC2727-CAC9-4FCC-9672-0ACF082DDD1E}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\AcsConnector.exe" />
-			</Component>
-		</DirectoryRef>
-		<?endif?>
-	</Fragment>
-	<Fragment>
-		<ComponentGroup Id="ProductComponentsAcsConnector">
-			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_AcsCommon_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_AcsConnector_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" />
-			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_AcsCommon_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_AcsConnector_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" />
-			<?endif?>
-		</ComponentGroup>
-	</Fragment>
+  <?include Variable.wxi ?>
+  <Fragment>
+    <?if $(var.Configuration) = Debug ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" Guid="{8ED7E0B1-FF1F-4BF4-8182-3EFFB50CA355}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" Guid="{14C123A3-2987-44E9-A0FD-503E10EE2E30}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\AcsConnector.exe" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" Guid="{4E728861-D720-43FF-936C-AF805E4FBBA0}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" Guid="{85B3A61F-1D39-4FF0-BB0C-E45F36475256}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\AcsConnector.exe" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" Guid="{CCE5B3AA-11B3-4C24-A495-7E139A90F7EB}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" Guid="{39921419-1411-422F-8D69-EB1768B5D10B}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\AcsConnector.exe" />
+      </Component>
+    </DirectoryRef>
+    <?elseif $(var.Configuration) = Release ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" Guid="{5DF85E05-8D48-4087-9D28-95822B274C14}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" Guid="{F1D09BBF-8A74-4219-8433-A2EEC97BCC4B}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\AcsConnector.exe" />
+      </Component>			
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" Guid="{48F5F415-641E-4571-B17B-DCE3DCC98672}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" Guid="{FC1D5A62-08E9-456E-A5FC-60DDA1D177B3}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\AcsConnector.exe" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" Guid="{5014F8E9-6DBB-42CF-9939-20FE8ED25A70}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\AcsCommon.dll" />
+      </Component>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" Guid="{26BC2727-CAC9-4FCC-9672-0ACF082DDD1E}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\AcsConnector.exe" />
+      </Component>
+    </DirectoryRef>
+    <?endif?>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsAcsConnector">
+      <?if $(var.Configuration) = Debug ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Debug" />
+      <?elseif $(var.Configuration) = Release ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsCommon_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_AcsConnector_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsCommon_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_AcsConnector_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsCommon_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_AcsConnector_Release" />
+      <?endif?>
+    </ComponentGroup>
+  </Fragment>
 </Wix>

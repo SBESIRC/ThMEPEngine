@@ -28,6 +28,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TianHua.Publics.BaseCode">
+      <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\AStarAlgorithm\AdjustAStarPath.cs" />
@@ -48,14 +51,50 @@
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToCurveMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToPointMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MinHeap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\CostGetterService\CotterGetterService.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\NodeModel.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\PointMap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\RoutePlanMap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
+    <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
+    <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
+    <Compile Include="Algorithm\ThMEPTCHService.cs" />
+    <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
-    <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />
-    <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
-    <Compile Include="BuildRoom\Service\ThNTSPolygonizeService.cs" />
+    <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
+    <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
+    <Compile Include="Engine\ThParkingStallVisitor.cs" />
+    <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="GeojsonExtractor\Interface\IGroup.cs" />
+    <Compile Include="GeojsonExtractor\Interface\IPrint.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThElementIsolateFilterService.cs" />
+    <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
+    <Compile Include="GeojsonExtractor\ThExtractorPropertyNameManager.cs" />
+    <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
+    <Compile Include="Model\Electrical\ThFireCompartment.cs" />
+    <Compile Include="Model\ThAXISLine.cs" />
+    <Compile Include="Service\ThBuildElementSimplifier.cs" />
+    <Compile Include="Service\ThDoorStoneLayerManager.cs" />
+    <Compile Include="Service\ThDoorMarkLayerManager.cs" />
+    <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
+    <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThMPolygonSerializeService.cs" />
+    <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
@@ -92,10 +131,11 @@
     <Compile Include="BuildRoom\Interface\IRoomFilter.cs" />
     <Compile Include="BuildRoom\Service\ThExplodeService.cs" />
     <Compile Include="BuildRoom\Service\ThFilterService.cs" />
-    <Compile Include="BuildRoom\Service\ThNTSBufferService.cs" />
-    <Compile Include="BuildRoom\Service\ThNTSBuildAreaService.cs" />
-    <Compile Include="BuildRoom\Service\ThNTSSimilarityMeasureService.cs" />
-    <Compile Include="BuildRoom\Service\ThNTSSpatialIndexService.cs" />
+    <Compile Include="Service\ThNTSBufferService.cs" />
+    <Compile Include="Service\ThNTSBuildAreaService.cs" />
+    <Compile Include="Service\ThNTSSimilarityMeasureService.cs" />
+    <Compile Include="Service\ThNTSSpatialIndexService.cs" />
+    <Compile Include="CAD\ThAuxiliaryUtils.cs" />
     <Compile Include="CAD\ThDbObjectRecognitionEngine.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
@@ -108,7 +148,7 @@
     <Compile Include="Engine\ThAnnotationElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThAnnotationElementExtractor.cs" />
     <Compile Include="Engine\ThAnnotationElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThArchitectureWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3ArchWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
@@ -116,6 +156,8 @@
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDrainageWellExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDrainageWellRecognitionEngine.cs" />
     <Compile Include="Engine\ThLineFootExtractionVisitor.cs" />
     <Compile Include="Engine\ThLineFootRecognitionEngine.cs" />
     <Compile Include="Engine\ThRailingExtractionVisitor.cs" />
@@ -126,36 +168,48 @@
     <Compile Include="Engine\ThRoomOutlineBuilderEngine.cs" />
     <Compile Include="Engine\ThSpatialElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThSpatialElementExtractor.cs" />
+    <Compile Include="Engine\ThStoreysRecognitionEngine.cs" />
     <Compile Include="Interface\IBuffer.cs" />
     <Compile Include="Interface\IBuildArea.cs" />
     <Compile Include="Interface\IExplode.cs" />
+    <Compile Include="Interface\IMakeValid.cs" />
     <Compile Include="Interface\IPolygonize.cs" />
     <Compile Include="Interface\ISimilarityMeasure.cs" />
+    <Compile Include="Interface\ISimplify.cs" />
     <Compile Include="Interface\ISpatialIndex.cs" />
+    <Compile Include="Model\Common\ThPipeCommon.cs" />
+    <Compile Include="Model\Common\ThStoreys.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcLineFoot.cs" />
     <Compile Include="Model\ThIfcOpening.cs" />
     <Compile Include="Model\ThIfcRailing.cs" />
+    <Compile Include="Model\ThIfcSensor.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
     <Compile Include="BuildRoom\Service\ThBuildRoomDataService.cs" />
+    <Compile Include="Service\ThBreakDrainageFacilityService.cs" />
     <Compile Include="Service\ThContourRelationQueryService.cs" />
+    <Compile Include="Service\ThDrainageFacilityCleanService.cs" />
+    <Compile Include="Service\ThDrainageWellLayerManager.cs" />
     <Compile Include="Service\ThLineFootLayerManager.cs" />
+    <Compile Include="Service\ThNTSMakeValidService.cs" />
+    <Compile Include="Service\ThNTSSimplifyService.cs" />
+    <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
+    <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThPolylineSerializeService.cs" />
+    <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
     <Compile Include="Engine\ThSlabExtractionVisitor.cs" />
-    <Compile Include="Engine\ThDoorExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThSlabRecognitionEngine.cs" />
     <Compile Include="Engine\ThDoorStoneExtractionVisitor.cs" />
     <Compile Include="Engine\ThColumnExtractionVisitor.cs" />
-    <Compile Include="Engine\ThDoorMarkRecognitionEngine.cs" />
-    <Compile Include="Engine\ThDoorStoneRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementExtractionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThDistributionElementExtractor.cs" />
     <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
-    <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ArchWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
@@ -164,8 +218,8 @@
     <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
-    <Compile Include="Engine\ThRoomExtractionVisitor.cs" />
-    <Compile Include="Engine\ThRoomRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3RoomExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3RoomRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
@@ -174,7 +228,6 @@
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementExtractionEngine.cs" />
     <Compile Include="Engine\ThWindowExtractionVisitor.cs" />
@@ -299,7 +352,8 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
-    <Compile Include="Service\ThWindowSimplifier.cs" />
+    <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
+    <Compile Include="Service\ThElementSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
     <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
@@ -325,7 +379,6 @@
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />
     <Compile Include="Service\ThRoomDbExtension.cs" />
-    <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
@@ -377,18 +430,30 @@
     <Compile Include="Algorithm\ThMEPCollisionDetector.cs" />
     <Compile Include="Service\ThWellsDbExtension.cs" />
     <Compile Include="Service\ThWellsLayerManager.cs" />
-    <Compile Include="Service\ThWindowDbExtension.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
+    <Compile Include="Service\ThSlabLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
+    <Compile Include="Temp\IColumnData.cs" />
+    <Compile Include="Temp\IElevationQuery.cs" />
     <Compile Include="Temp\IExtract.cs" />
     <Compile Include="Temp\IGroup.cs" />
     <Compile Include="Temp\IParse.cs" />
     <Compile Include="Temp\IPrint.cs" />
     <Compile Include="Temp\IRead.cs" />
+    <Compile Include="Temp\IShearWallData.cs" />
+    <Compile Include="Temp\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
+    <Compile Include="Temp\ThBeamExtractor.cs" />
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
     <Compile Include="Temp\ThColumnExtractor.cs" />
     <Compile Include="Temp\ThConnectPortExtractor.cs" />
+    <Compile Include="Temp\ThExternalSpaceExtractor.cs" />
+    <Compile Include="Temp\ThExtractOuterBoundaryService.cs" />
+    <Compile Include="Temp\ThExtractLineService.cs" />
+    <Compile Include="Temp\ThExtractOuterOtherShearWallService.cs" />
+    <Compile Include="Temp\ThExtractOuterOtherColumnService.cs" />
+    <Compile Include="Temp\ThLightningReceivingBeltExtractor.cs" />
+    <Compile Include="Temp\ThOuterBoundaryExtractor.cs" />
     <Compile Include="Temp\ThDoorOpeningExtractor.cs" />
     <Compile Include="Temp\ThDoorExtractor.cs" />
     <Compile Include="Temp\ThDrainageFacilityExtractor.cs" />
@@ -396,10 +461,14 @@
     <Compile Include="Temp\ThExtractDoorOpeningService.cs" />
     <Compile Include="Temp\ThExtractHydrantService.cs" />
     <Compile Include="Temp\ThExtractExtinguisherService.cs" />
+    <Compile Include="Temp\ThExtractLevelMarkService.cs" />
+    <Compile Include="Temp\ThExtractBigRoofService.cs" />
+    <Compile Include="Temp\ThExtractSmallRoofService.cs" />
+    <Compile Include="Temp\ThExtractRainshedService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
-    <Compile Include="Temp\ThExtractColumnService.cs" />
+    <Compile Include="Temp\ThExtractPolylineService.cs" />
     <Compile Include="Temp\ThExtractConnectPortService.cs" />
     <Compile Include="Temp\ThExtractCenterLineService.cs" />
     <Compile Include="Temp\ThExtractorBase.cs" />
@@ -411,19 +480,28 @@
     <Compile Include="Temp\ThExtractService.cs" />
     <Compile Include="Temp\ThExtractSpaceRecognitionEngine.cs" />
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
+    <Compile Include="Temp\ThOuterOtherShearWallExtractor.cs" />
+    <Compile Include="Temp\ThOuterOtherColumnExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFireHydrantResultParseService.cs" />
+    <Compile Include="Temp\ThBigRoofExtractor.cs" />
+    <Compile Include="Temp\ThSmallRoofExtractor.cs" />
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
+    <Compile Include="Temp\ThRainshedExtractor.cs" />
+    <Compile Include="Temp\ThStoreyExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
     <Compile Include="Temp\ThWaterSupplyPositionExtractor.cs" />
     <Compile Include="Temp\ThToiletGroupExtractor.cs" />
     <Compile Include="Temp\ThWaterSupplyStartExtractor.cs" />
+    <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
+    <Compile Include="ThMEPEngineCoreLayerUtils.cs" />
+    <Compile Include="ThMEPEngineCoreRoomCmds.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
   </ItemGroup>
@@ -493,5 +571,10 @@
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup>
+    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
+    <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.3" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

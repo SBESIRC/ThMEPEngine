@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Interface;
-using ThMEPEngineCore.BuildRoom.Service;
-using NFox.Cad;
 using System.Linq;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Interface;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -18,11 +17,16 @@ namespace ThMEPEngineCore.Temp
         public List<Entity> Walls { get; private set; }
 
         private List<ThTempSpace> Spaces { get; set; }
+        public bool BuildAreaSwitch { get; set; }
+        public bool CheckIsolated { get; set; }
         public ThWallExtractor()
         {
             Walls = new List<Entity>();
             Category = "Wall";
             ElementLayer = "墙";
+            BuildAreaSwitch = true;
+            CheckIsolated = true;
+            Spaces = new List<ThTempSpace>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -30,22 +34,27 @@ namespace ThMEPEngineCore.Temp
             var instance = new ThExtractWallService()
             {
                 ElementLayer = this.ElementLayer,
+                Types = this.Types
             };
             instance.Extract(database, pts);
-
-            IBuffer buffer = new ThNTSBufferService();
-            var outlines = new List<Entity>();
-            double offsetDis = 5.0;
-            instance.Walls.ForEach(o =>
+            if(BuildAreaSwitch)
             {
-                outlines.Add(buffer.Buffer(o, -offsetDis));
-            });
-
-            IBuildArea buildArea = new ThNTSBuildAreaService();
-            var objs = buildArea.BuildArea(outlines.ToCollection());
-
-            Walls = objs.Cast<Entity>().Select(o=> buffer.Buffer(o, offsetDis)).ToList();
-            Walls = Walls.Where(o => o != null).ToList();
+                IBuffer buffer = new ThNTSBufferService();
+                var outlines = new List<Entity>();
+                double offsetDis = 5.0;
+                instance.Walls.ForEach(o =>
+                {
+                    outlines.Add(buffer.Buffer(o, -offsetDis));
+                });
+                IBuildArea buildArea = new ThNTSBuildAreaService();
+                var objs = buildArea.BuildArea(outlines.ToCollection());
+                Walls = objs.Cast<Entity>().Select(o => buffer.Buffer(o, offsetDis)).ToList();
+                Walls = Walls.Where(o => o != null).ToList();
+            }
+            else
+            {
+                Walls = instance.Walls;
+            }
         }
 
         public List<ThGeometry> BuildGeometries()
@@ -53,12 +62,28 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
-                var isolate = IsIsolate(Spaces, o);
-                if(isolate)
+                if(CheckIsolated)
+                {
+                    var isolate = IsIsolate(Spaces, o);
+                    if (isolate)
+                    {
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add(CategoryPropertyName, Category);
+                        geometry.Properties.Add(IsolatePropertyName, isolate);
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    }
+                }
+                else
                 {
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(CategoryPropertyName, Category);
-                    geometry.Properties.Add(IsolatePropertyName, isolate);
+                    geometry.Properties.Add(IsolatePropertyName, false);
+                    var eles = IEleQuery.Query(o);
+                    if(eles.Count>0)
+                    {
+                        geometry.Properties.Add(ElevationPropertyName, eles);
+                    }
                     geometry.Boundary = o;
                     geos.Add(geometry);
                 }

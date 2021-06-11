@@ -1,126 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<?include Variable.wxi ?>
-	<Fragment>
-		<DirectoryRef Id="DIR_Autoloader_Contents_Support">
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" Guid="{709830D4-071F-4060-A5D8-0FDF02030EB5}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Broadcast" Source="$(var.AutoloaderContentsPath)\Support\消防应急广播.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" Guid="{D8BBCB17-68E6-4898-A97E-D7D4DC8DC032}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Sensor" Source="$(var.AutoloaderContentsPath)\Support\烟感温感图块.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Spray" Guid="{3672DEE5-E3ED-4E05-BCF6-7ED249249922}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Spray" Source="$(var.AutoloaderContentsPath)\Support\给排水.喷淋.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Fan" Guid="{D510B440-E5DC-430E-816A-0D28F3AA7550}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Fan" Source="$(var.AutoloaderContentsPath)\Support\暖通.选型.风机.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" Guid="{125C830F-C903-45DB-AEDD-D364A43FEBA8}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Pipe" Source="$(var.AutoloaderContentsPath)\Support\暖通图层图块.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" Guid="{4484A7C6-7202-4B4D-9180-89684485FEA4}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_LaneLineLight" Source="$(var.AutoloaderContentsPath)\Support\车道灯图块.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" Guid="{8EF2BF90-0220-4317-9722-5BDF61C8FE28}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_EmergencyLight" Source="$(var.AutoloaderContentsPath)\Support\地库应急照明图块.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Guid="{A21AD44A-402A-4739-94C6-9EA6524A9013}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Source="$(var.AutoloaderContentsPath)\Support\离心风机选型.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" Guid="{5EED9740-ACFC-436D-9D28-0A0C3F299361}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" Source="$(var.AutoloaderContentsPath)\Support\轴流风机选型.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" Guid="{7776A5E4-3418-4D7F-B73F-63A172A02641}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" Source="$(var.AutoloaderContentsPath)\Support\离心风机效率.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" Guid="{2FBF488C-1266-4637-A98E-45C59F507205}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" Source="$(var.AutoloaderContentsPath)\Support\轴流风机效率.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" Guid="{B87DC7C6-2B71-4BB8-8F0C-B13D82D7C557}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_Motor_Power" Source="$(var.AutoloaderContentsPath)\Support\电机功率.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Guid="{4955B07D-0D16-454C-99EA-996F704DB3A3}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-单速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Guid="{4F368CF5-01C2-4660-9D47-0B8719B3D699}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-后倾-单速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Guid="{75EDECE9-2E7F-436F-B61B-38CA8ABAEBFC}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-双速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Guid="{6D973CE6-05A1-4C4D-B439-7E71AE88D0EF}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\轴流-单速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" Guid="{1A15FE4B-0F16-40AF-AB25-62CF67A2B613}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\轴流-双速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" Guid="{FFAB3BF2-0266-4603-B88B-D64E06ADBB3D}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\电机功率-双速.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" Guid="{CAEFA342-E8E6-47A1-9BFB-7C0EB04AB09E}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HRR" Source="$(var.AutoloaderContentsPath)\Support\火灾达到静态时的热释放速率.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Guid="{476B199B-7697-4C5B-A3E8-1588E45605FE}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Source="$(var.AutoloaderContentsPath)\Support\最小排烟量.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" Guid="{C1774E6F-B9FA-4539-ABF3-BC55D799F668}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Duct_Size_Parameter" Source="$(var.AutoloaderContentsPath)\Support\风管尺寸参数信息.json" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" Guid="{04686F39-60FC-434F-9863-CA6DC8DA0B45}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_Duct_Port_Match" Source="$(var.AutoloaderContentsPath)\Support\管道内外段与进出风口对照.json" KeyPath="yes" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
-			<Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_DesignData_FanCalc" Source="$(var.AutoloaderContentsPath)\Support\DesignData\FanCalc.xlsx" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" Guid="{BB17ACBD-1EE9-4B04-AE72-71FBDC777F92}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_DesignData_FanPara" Source="$(var.AutoloaderContentsPath)\Support\DesignData\FanPara.xlsx" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" Guid="{97EF5451-4DA6-4EED-AAE5-1F54156099EF}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" Source="$(var.AutoloaderContentsPath)\Support\DesignData\SmokeProofScenario.xlsx" KeyPath="yes" />
-			</Component>
-			<Component Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" Guid="{AACF05D0-CEEB-4281-9071-726FB021E01E}" Win64="yes">
-				<File Id="FILE_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" Source="$(var.AutoloaderContentsPath)\Support\DesignData\SmokeDischargeScenario.xlsx" KeyPath="yes" />
-			</Component>
-		</DirectoryRef>
-	</Fragment>
-	<Fragment>
-		<ComponentGroup Id="ProductComponentsSupport">
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />			
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
-		</ComponentGroup>
-	</Fragment>
+  <?include Variable.wxi ?>
+  <Fragment>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Support">
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" Guid="{709830D4-071F-4060-A5D8-0FDF02030EB5}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Broadcast" Source="$(var.AutoloaderContentsPath)\Support\消防应急广播.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" Guid="{D8BBCB17-68E6-4898-A97E-D7D4DC8DC032}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Sensor" Source="$(var.AutoloaderContentsPath)\Support\烟感温感图块.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Spray" Guid="{3672DEE5-E3ED-4E05-BCF6-7ED249249922}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Spray" Source="$(var.AutoloaderContentsPath)\Support\给排水.喷淋.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Fan" Guid="{D510B440-E5DC-430E-816A-0D28F3AA7550}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Fan" Source="$(var.AutoloaderContentsPath)\Support\暖通.选型.风机.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" Guid="{125C830F-C903-45DB-AEDD-D364A43FEBA8}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Pipe" Source="$(var.AutoloaderContentsPath)\Support\暖通图层图块.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" Guid="{4484A7C6-7202-4B4D-9180-89684485FEA4}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_LaneLineLight" Source="$(var.AutoloaderContentsPath)\Support\车道灯图块.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" Guid="{8EF2BF90-0220-4317-9722-5BDF61C8FE28}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_EmergencyLight" Source="$(var.AutoloaderContentsPath)\Support\地库应急照明图块.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_EvacuationLight" Guid="{50401006-C41B-40C3-A0D2-6111794E616A}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_EvacuationLight" Source="$(var.AutoloaderContentsPath)\Support\疏散指示灯图块.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" Guid="{3F30BE8F-A8F1-41A4-ABD5-735D23DB7F0F}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_AFAS" Source="$(var.AutoloaderContentsPath)\Support\火灾自动报警系统图.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" Guid="{43833F2E-6239-4C90-A71E-61903B3F7A2A}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_HVAC" Source="$(var.AutoloaderContentsPath)\Support\地上给水排水平面图模板.dwg" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Guid="{A21AD44A-402A-4739-94C6-9EA6524A9013}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Source="$(var.AutoloaderContentsPath)\Support\离心风机选型.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" Guid="{5EED9740-ACFC-436D-9D28-0A0C3F299361}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" Source="$(var.AutoloaderContentsPath)\Support\轴流风机选型.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" Guid="{7776A5E4-3418-4D7F-B73F-63A172A02641}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" Source="$(var.AutoloaderContentsPath)\Support\离心风机效率.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" Guid="{2FBF488C-1266-4637-A98E-45C59F507205}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" Source="$(var.AutoloaderContentsPath)\Support\轴流风机效率.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" Guid="{B87DC7C6-2B71-4BB8-8F0C-B13D82D7C557}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_Motor_Power" Source="$(var.AutoloaderContentsPath)\Support\电机功率.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Guid="{4955B07D-0D16-454C-99EA-996F704DB3A3}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-单速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Guid="{4F368CF5-01C2-4660-9D47-0B8719B3D699}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-后倾-单速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Guid="{75EDECE9-2E7F-436F-B61B-38CA8ABAEBFC}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\离心-前倾-双速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Guid="{6D973CE6-05A1-4C4D-B439-7E71AE88D0EF}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" Source="$(var.AutoloaderContentsPath)\Support\轴流-单速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" Guid="{1A15FE4B-0F16-40AF-AB25-62CF67A2B613}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\轴流-双速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" Guid="{FFAB3BF2-0266-4603-B88B-D64E06ADBB3D}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" Source="$(var.AutoloaderContentsPath)\Support\电机功率-双速.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" Guid="{CAEFA342-E8E6-47A1-9BFB-7C0EB04AB09E}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HRR" Source="$(var.AutoloaderContentsPath)\Support\火灾达到静态时的热释放速率.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Guid="{476B199B-7697-4C5B-A3E8-1588E45605FE}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Source="$(var.AutoloaderContentsPath)\Support\最小排烟量.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" Guid="{C1774E6F-B9FA-4539-ABF3-BC55D799F668}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Duct_Size_Parameter" Source="$(var.AutoloaderContentsPath)\Support\风管尺寸参数信息.json" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" Guid="{04686F39-60FC-434F-9863-CA6DC8DA0B45}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Duct_Port_Match" Source="$(var.AutoloaderContentsPath)\Support\管道内外段与进出风口对照.json" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
+      <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_DesignData_FanCalc" Source="$(var.AutoloaderContentsPath)\Support\DesignData\FanCalc.xlsx" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" Guid="{BB17ACBD-1EE9-4B04-AE72-71FBDC777F92}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_DesignData_FanPara" Source="$(var.AutoloaderContentsPath)\Support\DesignData\FanPara.xlsx" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" Guid="{97EF5451-4DA6-4EED-AAE5-1F54156099EF}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" Source="$(var.AutoloaderContentsPath)\Support\DesignData\SmokeProofScenario.xlsx" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" Guid="{AACF05D0-CEEB-4281-9071-726FB021E01E}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" Source="$(var.AutoloaderContentsPath)\Support\DesignData\SmokeDischargeScenario.xlsx" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsSupport">
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />			
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EvacuationLight" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Efficiency" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Efficiency" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Single_Speed" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter_Double_Speed" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan_Parameter_Double_Speed" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
+    </ComponentGroup>
+  </Fragment>
 </Wix>

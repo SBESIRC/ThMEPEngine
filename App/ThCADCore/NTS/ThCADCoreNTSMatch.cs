@@ -10,5 +10,11 @@ namespace ThCADCore.NTS
             var measure = new HausdorffSimilarityMeasure();
             return measure.Measure(pline.ToNTSPolygon(), other.ToNTSPolygon());
         }
+
+        public static bool IsSimilar(this Polyline pline, Polyline other, double degree)
+        {
+            var measure = new HausdorffSimilarityMeasure();
+            return measure.Measure(pline.ToNTSPolygon(), other.ToNTSPolygon()) >= degree;
+        }
     }
 }

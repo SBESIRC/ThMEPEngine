@@ -38,5 +38,10 @@ namespace ThMEPWSS.Pipe.Engine
                 });
             }
         }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

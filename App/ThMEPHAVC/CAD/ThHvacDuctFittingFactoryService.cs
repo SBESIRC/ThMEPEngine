@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
 using DotNetARX;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
-using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPHVAC.CAD
 {

@@ -2,10 +2,12 @@
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage;
 using ThMEPLighting.Common;
 using QuickGraph.Algorithms;
@@ -28,15 +30,18 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 2;
-                var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Area == 0.0)
+                var pts = ThGarageInteractionUtils.PolylineJig((short)ColorIndex.BYLAYER);
+                if (pts.Count <= 1)
                 {
                     return;
-                }                
-                ThLayerTool.CreateLayer(ThGarageLightCommon.DxCenterLineLayerName,
-                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
-                polyline.Layer = ThGarageLightCommon.DxCenterLineLayerName;
-                acdb.ModelSpace.Add(polyline);
+                }
+                // 添加到图纸中
+                var dx = ThDrawTool.CreatePolyline(pts,false);
+                acdb.ModelSpace.Add(dx);
+                // 设置到指定图层
+                acdb.Database.AddLayer(ThGarageLightCommon.DxCenterLineLayerName);
+                acdb.Database.SetLayerColor(ThGarageLightCommon.DxCenterLineLayerName, colorIndex);
+                dx.Layer = ThGarageLightCommon.DxCenterLineLayerName;
             }
         }
         [CommandMethod("TIANHUACAD", "THFDXC", CommandFlags.Modal)]
@@ -45,15 +50,18 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 1;
-                var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Area == 0.0)
+                var pts = ThGarageInteractionUtils.PolylineJig((short)ColorIndex.BYLAYER);
+                if (pts.Count <= 1)
                 {
                     return;
-                }                
-                ThLayerTool.CreateLayer(ThGarageLightCommon.FdxCenterLineLayerName,
-                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
-                polyline.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
-                acdb.ModelSpace.Add(polyline);
+                }
+                // 添加到图纸中
+                var fdx = ThDrawTool.CreatePolyline(pts, false);
+                acdb.ModelSpace.Add(fdx);
+                // 设置到指定图层
+                acdb.Database.AddLayer(ThGarageLightCommon.FdxCenterLineLayerName);
+                acdb.Database.SetLayerColor(ThGarageLightCommon.FdxCenterLineLayerName, colorIndex);
+                fdx.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
             }
         }
         [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]

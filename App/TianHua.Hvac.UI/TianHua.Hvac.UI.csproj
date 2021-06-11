@@ -64,6 +64,12 @@
     <Compile Include="fmBypass.Designer.cs">
       <DependentUpon>fmBypass.cs</DependentUpon>
     </Compile>
+    <Compile Include="fmDuctPorts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmDuctPorts.Designer.cs">
+      <DependentUpon>fmDuctPorts.cs</DependentUpon>
+    </Compile>
     <Compile Include="fmDuctSpec.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -152,6 +158,9 @@
   <ItemGroup>
     <EmbeddedResource Include="fmBypass.resx">
       <DependentUpon>fmBypass.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmDuctPorts.resx">
+      <DependentUpon>fmDuctPorts.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmDuctSpec.resx">
       <DependentUpon>fmDuctSpec.cs</DependentUpon>

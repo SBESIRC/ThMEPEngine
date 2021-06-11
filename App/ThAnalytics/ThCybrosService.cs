@@ -42,7 +42,12 @@ namespace ThAnalytics
             {"THCDBH", "车道照明编号"},
             {"THCDTJ", "车道照明回路"},
             {"THCDZMBZ", "车道照明布置"},
+
+            // 照明
             {"THYJZM", "车道应急照明"},
+            {"THYJZMLX", "应急照明连线"},
+            {"THSSLJ", "生成疏散途径"},
+            {"THSSZSDBZ", "疏散指示灯布置"},
 
             // 给排水
             {"THPL", "喷头工具"},

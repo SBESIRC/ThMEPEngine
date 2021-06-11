@@ -1,15 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcParkingStall : ThIfcSpace
+    public class ThIfcParkingStall : ThIfcSpatialElement
     {
+        public Curve Boundary { get; set; }
+
         public static ThIfcParkingStall Create(Curve boundary)
         {
             return new ThIfcParkingStall()

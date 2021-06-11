@@ -13,6 +13,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
                 CreateWSSPanel(tab);
+                CreateInventoryPanel(tab);
                 //CreateHelpPanel(tab);
                 //CreateSettingsPanel(tab);
                 //CreateCheckToolPanel(tab);
@@ -106,8 +107,8 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THGBMQ_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
-				
-			// 车道照明
+                
+            // 车道照明
             row.AddNewButton("车道照明",
             "天华车道照明",
             "THCDZM",
@@ -115,8 +116,17 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THCDZM_SMALL",
             "IDI_THCAD_THCDZM_LARGE",
             RibbonButtonStyle.LargeWithText);
-				
-			// 车道应急照明
+
+            // 疏散指示灯
+            row.AddNewButton("地库\r\n疏散指示灯",
+            "天华疏散指示灯",
+            "THSSZSD",
+            "天华疏散指示灯",
+            "IDI_THCAD_THSSZSD_SMALL",
+            "IDI_THCAD_THSSZSD_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            // 车道应急照明
             row.AddNewButton("车道应急照明",
             "天华车道应急照明",
             "THYJZM",
@@ -124,18 +134,69 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THYJZM_SMALL",
             "IDI_THCAD_THYJZM_LARGE",
             RibbonButtonStyle.LargeWithText);
+
+            // 车道应急照明连线
+            row.AddNewButton("地库应急\r\n照明连线",
+            "天华车道应急照明连线",
+            "THYJZMLX",
+            "天华车道应急照明连线",
+            "IDI_THCAD_THYJZMLX_SMALL",
+            "IDI_THCAD_THYJZMLX_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("Water", "给排水");
             var row = panel.AddNewRibbonRow();
 
-            row.AddNewButton("喷头工具",
-                "天华喷头工具",
-                "THPL",
-                "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
-                "IDI_THCAD_THPLPT_SMALL",
-                "IDI_THCAD_THPLPT_LARGE",
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("喷头工具",
+                    "天华喷头工具",
+                    "THPL",
+                    "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
+                    "IDI_THCAD_THPLPT_SMALL",
+                    "IDI_THCAD_THPLPT_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 地上雨水系统图
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上雨水系统图",
+                    "天华地上雨水系统图",
+                    "THYSXTT",
+                    "天华地上雨水系统图",
+                    "IDI_THCAD_THYSXTT_SMALL",
+                    "IDI_THCAD_THYSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 地上雨水系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上给水系统图",
+                    "天华地上给水系统图",
+                    "THJSXTT",
+                    "天华地上给水系统图",
+                    "IDI_THCAD_THJSXTT_SMALL",
+                    "IDI_THCAD_THJSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+        }
+
+        private static void CreateInventoryPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("Inventory", "机电提资");
+            var row = panel.AddNewRibbonRow();
+
+            row.AddNewButton("风机基础",
+                "天华风机基础提资",
+                "THFJJC",
+                "天华风机基础提资",
+                "IDI_THCAD_THFJJC_SMALL",
+                "IDI_THCAD_THFJJC_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
         private static void CreateHelpPanel(RibbonTabSource tab)

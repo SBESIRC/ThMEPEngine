@@ -1,12 +1,9 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
-using System.Windows.Documents;
-using System.Collections.Generic;
-using System;
-using Linq2Acad;
-using AcHelper;
-using System.Linq;
 
 namespace ThCADExtension
 {
@@ -17,21 +14,22 @@ namespace ThCADExtension
             string ver = Application.GetSystemVariable("ACADVER").ToString().Substring(0, 2);
             SystemObjects.DynamicLinker.LoadModule("AcMPolygonObj" + ver + ".dbx", false, false);
         }
-        public static MPolygon CreateMPolygon(Curve external, List<Curve> innerCurves)
+
+        public static MPolygon CreateMPolygon(Curve shell, List<Curve> holes)
         {
             MPolygon mPolygon = new MPolygon();
-            if (external is Polyline polyline)
+            if (shell is Polyline polyline)
             {
-                if(polyline.Area>0.0)
+                if (polyline.Area > 0.0)
                 {
                     mPolygon.AppendLoopFromBoundary(polyline, false, 0.0);
                 }
             }
-            else if(external is Polyline2d polyline2d)
+            else if (shell is Polyline2d polyline2d)
             {
                 mPolygon.AppendLoopFromBoundary(polyline2d, false, 0.0);
             }
-            else if(external is Circle circle)
+            else if (shell is Circle circle)
             {
                 mPolygon.AppendLoopFromBoundary(circle, false, 0.0);
             }
@@ -40,7 +38,7 @@ namespace ThCADExtension
                 throw new NotSupportedException();
             }
 
-            innerCurves.ForEach(o =>
+            holes.ForEach(o =>
             {
                 if (o is Polyline innerPolyline)
                 {
@@ -61,13 +59,32 @@ namespace ThCADExtension
             });
 
             mPolygon.SetLoopDirection(0, LoopDirection.Exterior);
-            if (innerCurves.Count > 0)
+            if (holes.Count > 0)
             {
-                for (int i = 1; i <= innerCurves.Count; i++)
+                for (int i = 1; i <= holes.Count; i++)
                 {
                     mPolygon.SetLoopDirection(i, LoopDirection.Interior);
                 }
             }
+            return mPolygon;
+        }
+
+        public static MPolygon CreateMPolygon(DBObjectCollection curves)
+        {
+            return CreateMPolygon(curves[0] as Curve, curves.Cast<Curve>().Skip(1).ToList());
+        }
+
+        public static MPolygon CreateMPolygon(List<DBObjectCollection> loops)
+        {
+            MPolygon mPolygon = new MPolygon();
+            loops.ForEach(o =>
+            {
+                var item = CreateMPolygon(o);
+                for (int i = 0; i < item.NumMPolygonLoops; i++)
+                {
+                    mPolygon.AppendMPolygonLoop(item.GetMPolygonLoopAt(i), false, 0.0);
+                }
+            });
             return mPolygon;
         }
     }

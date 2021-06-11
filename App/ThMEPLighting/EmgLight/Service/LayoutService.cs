@@ -9,6 +9,7 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLight.Model;
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLight.Service
 {

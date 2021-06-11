@@ -38,71 +38,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static List<Polyline> createSecLink(ThSingleSideBlocks side, List<Point3d> allMain)
-        {
-            var lineList = new List<Polyline>();
-
-            List<Point3d> tempMain = null;
-            if (side.getTotalMainBlock().Count > 0)
-            {
-                tempMain = side.getTotalMainBlock();
-            }
-            else
-            {
-                tempMain = allMain;
-            }
-
-            foreach (var secBlk in side.secBlk)
-            {
-                var sLine = new Polyline();
-                var mainBlk = tempMain.Where(x => x.DistanceTo(secBlk) == tempMain.Select(dist => dist.DistanceTo(secBlk)).Min()).First();
-
-                sLine.AddVertexAt(sLine.NumberOfVertices, secBlk.ToPoint2D(), 0, 0, 0);
-                sLine.AddVertexAt(sLine.NumberOfVertices, mainBlk.ToPoint2D(), 0, 0, 0);
-
-                lineList.Add(sLine);
-            }
-            return lineList;
-        }
-
-        private static List<Line> createAddMainLink(ThSingleSideBlocks side)
-        {
-            var lineList = new List<Line>();
-            var addMLink = new Point3d();
-
-            var mainBlkTrans = side.mainBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
-            var addMBlkTrans = side.addMainBlock.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
-
-            for (int i = 0; i < addMBlkTrans.Count; i++)
-            {
-                if (i == 0)
-                {
-                    addMLink = side.mainBlk.OrderBy(dist => dist.DistanceTo(addMBlkTrans[i].Key)).First();
-                }
-                else
-                {
-                    var distM = side.mainBlk.Select(dist => dist.DistanceTo(addMBlkTrans[i].Key)).Min();
-
-                    var distAM = addMBlkTrans[i].Key.DistanceTo(addMBlkTrans[i - 1].Key);
-
-                    if (distM <= distAM)
-                    {
-                        addMLink = side.mainBlk.OrderBy(dist => dist.DistanceTo(addMBlkTrans[i].Key)).First();
-                    }
-                    else
-                    {
-                        addMLink = addMBlkTrans[i - 1].Key;
-
-                    }
-                }
-
-                var sLine = new Line(addMBlkTrans[i].Key, addMLink);
-                lineList.Add(sLine);
-            }
-
-            return lineList;
-        }
-
         public static void forDebugOptimalGroup(List<List<ThSingleSideBlocks>> OptimalGroupBlocks)
         {
             List<Polyline> groupLine = new List<Polyline>();
@@ -124,8 +59,10 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
                 groupLine.Add(mLine);
 
-                DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
-
+                if (mLine.NumberOfVertices > 0)
+                {
+                    DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
+                }
             }
 
             DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
@@ -142,10 +79,48 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
 
             DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 30));
+        }
 
+        public static void forDebugLaneSideNo(List<ThSingleSideBlocks> singleSideBlocks)
+        {
+            for (int i = 0; i < singleSideBlocks.Count; i++)
+            {
+                var side = singleSideBlocks[i];
+                var lanePoly = new Polyline();
+
+
+                for (int j = 0; j < side.laneSide.Count; j++)
+                {
+                    lanePoly.AddVertexAt(lanePoly.NumberOfVertices, side.laneSide[j].Item1.StartPoint.ToPoint2d(), 0, 0, 0);
+
+                    if (j == side.laneSide.Count - 1)
+                    {
+                        lanePoly.AddVertexAt(lanePoly.NumberOfVertices, side.laneSide[j].Item1.EndPoint.ToPoint2d(), 0, 0, 0);
+                    }
+                }
+
+                var midPoint = lanePoly.GetPointAtDist(lanePoly.Length / 2);
+
+                var zDir = side.laneSide[0].Item2 == 0 ? 1 : -1;
+                var newPt = midPoint + 100 * (lanePoly.EndPoint - lanePoly.StartPoint).GetNormal().RotateBy(Math.PI / 2, Vector3d.ZAxis * zDir);
+
+                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "l5laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
+            }
 
         }
 
+        public static void forDebugPrintBlkLable(List<Point3d> pts, string layer)
+        {
+            for (int j = 0; j < pts.Count; j++)
+            {
+                DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), layer, Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+            }
+        }
+
+        public static void forDebugBlkOutline(List<ThBlock> blks)
+        {
+            blks.ForEach(x => DrawUtils.ShowGeometry(x.outline, EmgConnectCommon.LayerBlkOutline, Color.FromColorIndex(ColorMethod.ByColor, 40)));
+        }
     }
 
 }

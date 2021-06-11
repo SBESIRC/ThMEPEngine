@@ -39,7 +39,7 @@ namespace ThMEPHVAC.CAD
             double calculateDuctArea = fanvolume / 3600.0 / airspeed;
             var jsonReader = new ThDuctParameterJsonReader();
             var biggerDucts = jsonReader.Parameters.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
-            var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea - calculateDuctArea < 0.15 * calculateDuctArea).ToList();
+            var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea< 1.3 * calculateDuctArea).ToList();
 
             if (satisfiedDucts.Count == 0)
             {

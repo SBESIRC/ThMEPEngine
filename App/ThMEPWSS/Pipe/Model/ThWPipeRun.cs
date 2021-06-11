@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using System.Linq;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Assistant;
+using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
@@ -25,77 +24,6 @@ namespace ThMEPWSS.Pipe.Model
         virtual public void Draw(Point3d basePt)
         {
             throw new NotImplementedException();
-        }
-    }
-    public static class TranslatorLazyDrawer
-    {
-        class Context
-        {
-            public Point3d BasePoint;
-            public Point3d Start;
-            public Point3d End;
-            public TranslatorTypeEnum TranslatorType;
-        }
-        static List<Context> Contexts = new List<Context>();
-        public static void DrawNormal(Point3d basePt)
-        {
-            //DU.DrawTextLazy("DrawNormal", basePt);
-            //Contexts.Add(new Context() { BasePoint = basePt, TranslatorType = TranslatorTypeEnum.None });
-            Dr.DrawNormalLine(basePt);
-        }
-        public static void DrawShort(Point3d basePt)
-        {
-            //DU.DrawTextLazy("DrawShort", basePt);
-            //Contexts.Add(new Context() { BasePoint = basePt, TranslatorType = TranslatorTypeEnum.Short });
-            Dr.DrawShortTranslator(basePt);
-        }
-        public static void DrawLong(Point3d basePt)
-        {
-            //DU.DrawTextLazy("DrawLong", basePt);
-            //Contexts.Add(new Context() { BasePoint = basePt, TranslatorType = TranslatorTypeEnum.Long });
-            Dr.DrawLongTranslator(basePt);
-        }
-        public static void Test()
-        {
-
-        }
-        public static void DrawPipeLazy(Point3d start, Point3d ent)
-        {
-            //if (Contexts.Count == 0) return;
-            //var list = Contexts.OrderByDescending(ctx => ctx.BasePoint.Y).ToList();
-            //Contexts.Clear();
-            //var points = new List<Point3d>();
-            
-            //foreach (var item in list)
-            //{
-            //    switch (item.TranslatorType)
-            //    {
-            //        case TranslatorTypeEnum.None:
-            //            {
-            //                item.Start = item.BasePoint.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            //                item.End = item.BasePoint;
-            //            }
-            //            break;
-            //        case TranslatorTypeEnum.Long:
-            //            {
-            //                item.Start = item.BasePoint.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            //                item.End = item.Start.OffsetXY(-3000, -1000);
-            //            }
-            //            break;
-            //        case TranslatorTypeEnum.Short:
-            //            {
-            //                item.Start = item.BasePoint.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            //                item.End = item.Start.OffsetXY(-1000, -1000);
-            //            }
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
-            //foreach (var item in list)
-            //{
-            //    DU.DrawLineLazy(item.Start, item.End);
-            //}
         }
     }
     public class DrLazy
@@ -179,36 +107,6 @@ namespace ThMEPWSS.Pipe.Model
             var basePt = BasePoint;
             cb(basePt);
         }
-        public static List<Point3d> FixLines(List<Point3d> pts)
-        {
-            if (pts.Count < 2) return pts;
-            var ret = new List<Point3d>(pts.Count);
-            Point3d p1 = pts[0], p2 = pts[1];
-            for (int i = 2; i < pts.Count; i++)
-            {
-                var p3 = pts[i];
-                var v1 = p2.ToPoint2D() - p1.ToPoint2D();
-                var v2 = p3.ToPoint2D() - p2.ToPoint2D();
-                if (
-                    (Math.Abs(GeoAlgorithm.AngleToDegree(v1.Angle) - GeoAlgorithm.AngleToDegree(v2.Angle)) < 1)
-                    ||
-                    (GeoAlgorithm.Distance(p1, p2) < 1)
-                    ||
-                    (GeoAlgorithm.Distance(p2, p3) < 1)
-                    )
-                {
-                }
-                else
-                {
-                    ret.Add(p1);
-                    p1 = p2;
-                }
-                p2 = p3;
-            }
-            ret.Add(p1);
-            ret.Add(p2);
-            return ret;
-        }
         public void DrawLazy()
         {
             Break();
@@ -218,7 +116,7 @@ namespace ThMEPWSS.Pipe.Model
             PointLists = new List<List<Point3d>>();
             DU.DrawingQueue.Enqueue(adb =>
             {
-                foreach (var pts in ptLists.Select(lst => FixLines(lst)))
+                foreach (var pts in ptLists.Select(lst => YesDraw.FixLines(lst)))
                 {
                     for (int i = 0; i < pts.Count - 1; i++)
                     {
@@ -233,32 +131,269 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
-        public static void DrawWaterWell(Point3d basePt)
+        public static void DrawStarterPipeHeightLabel(Point3d basePt)
         {
-            DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: basePt,
+            var text = "起端管底标高-0.65";
+            var height = 300;
+            var width = height * .7 * text.Length;
+            var yd = new YesDraw();
+            yd.OffsetXY(0, -700 - 500);
+            yd.OffsetX(-width);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            Dr.SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
+            Dr.SetLabelStylesForRainNote(t);
+        }
+        public static void DrawRainPortLabel(Point3d basePt)
+        {
+            var text = "接至雨水口";
+            DrawLabel(basePt, text);
+        }
+
+        public static void DrawLabel(Point3d basePt, string text)
+        {
+            var height = 300;
+            var width = height * .8 * text.Length;
+            var yd = new YesDraw();
+            yd.OffsetXY(0, -700);
+            yd.OffsetX(-width);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            Dr.SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(50, 50));
+            Dr.SetLabelStylesForRainNote(t);
+        }
+
+        public static void DrawUnderBoardLabelAtLeftTop(Point3d basePt)
+        {
+            var text = "贴底板敷设";
+            var height = 300;
+            var width = height * 0.8 * text.Length + 200;
+            var yd = new YesDraw();
+            yd.OffsetXY(460, -830 - ThWRainPipeRun.FIX_Y_OFFSET);
+            yd.OffsetX(width);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            Dr.SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, pts[1].OffsetXY(100, 50));
+            Dr.SetLabelStylesForRainNote(t);
+        }
+        public static void DrawUnderBoardLabelAtRightButtom(Point3d basePt)
+        {
+            var pl = ThMEPWSS.Pipe.Service.PolylineTools.CreatePolyline(new Point3d[] { basePt.OffsetXY(-75, -75), basePt.OffsetXY(75, 75) });
+            pl.ConstantWidth = 25;
+            pl.Layer = "W-RAIN-NOTE";
+            DU.DrawEntityLazy(pl);
+            var text = "贴底板敷设";
+            var height = 300;
+            var width = height * 0.8 * text.Length + 200;
+            var yd = new YesDraw();
+            yd.OffsetXY(-450, 830);
+            yd.OffsetX(-width);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            Dr.SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
+            Dr.SetLabelStylesForRainNote(t);
+        }
+        public static void DrawWrappingPipe(Point3d basePt)
+        {
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                var fbk = DrawingTransaction.Cur.fbk;
+                var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
+                fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
+                {
+                    DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+
+                }, after: br =>
+                {
+                    if (br.IsDynamicBlock)
+                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
+                        {
+                            if (!prop.ReadOnly)
+                            {
+                                if (d.TryGetValue(prop.PropertyName, out object value))
+                                {
+                                    prop.Value = value;
+                                }
+                            }
+                        }
+                });
+            });
+        }
+        public static void DrawFloorDrain(Point3d basePt)
+        {
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                var fbk = DrawingTransaction.Cur.fbk;
+                var d = new Dictionary<string, object>() { { "可见性", "普通地漏无存水弯" }, };
+                fbk.InsertBlockReference(basePt.OffsetY(-390), "地漏系统", before: br =>
+                {
+                    br.ScaleFactors = new Scale3d(2);
+                    DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br);
+
+                }, after: br =>
+                {
+                    if (br.IsDynamicBlock)
+                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
+                        {
+                            if (!prop.ReadOnly)
+                            {
+                                if (d.TryGetValue(prop.PropertyName, out object value))
+                                {
+                                    prop.Value = value;
+                                }
+                            }
+                        }
+                });
+            });
+        }
+        public static void DrawCondensePipe(Point3d basePt)
+        {
+            var c = DU.DrawCircleLazy(basePt, 30);
+            DU.SetLayerAndColorIndex("W-RAIN-EQPM", 256, c);
+        }
+
+        public static void InsetDNBlock(Point3d pt, string dn, double angle, double scale = 1)
+        {
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                var fbk = DrawingTransaction.Cur.fbk;
+                var d = new Dictionary<string, object>() { { "可见性", dn }, { "角度1", angle } };
+                fbk.InsertBlockReference(pt, "雨水管径100", before: br =>
+                {
+                    br.ScaleFactors = new Scale3d(scale);
+                    br.Layer = "W-NOTE";
+                }, after: br =>
+                {
+                    if (br.IsDynamicBlock)
+                    {
+                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>())
+                        {
+                            if (!prop.ReadOnly)
+                            {
+                                if (d.TryGetValue(prop.PropertyName, out object value))
+                                {
+                                    prop.Value = value;
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        public static void DrawRainPort(Point3d basePt)
+        {
+            DU.DrawBlockReference(
+                blkName: "$TwtSys$00000132",
+                basePt: basePt.OffsetXY(-450, 0),
+                cb: br => DU.SetLayerAndColorIndex("W-DRAI-NOTE", 256, br));
+        }
+
+        public static void DrawWaterWell(Point3d basePt, string DN)
+        {
+            DU.DrawBlockReference(
+                blkName: "重力流雨水井编号",
+                basePt: basePt,
                 scale: 0.5,
-                props: new Dictionary<string, string>() { { "-", "666" } },
-               layer: "W-RAIN-EQPM"
-               );
+                props: new Dictionary<string, string>() { { "-", DN ?? "" } },
+                layer: "W-RAIN-EQPM");
         }
 
         public static void DrawShortTranslatorLabel(Point3d basePt)
         {
-            var h = 300;
-            var t = DU.DrawTextLazy("DN100乙字弯", h, basePt.OffsetXY(-2854, 954));
-            t.Layer = "W-RAIN-NOTE";
-            t.ColorIndex = 256;
-            //t.TextStyleName = "TH-STYLE3";
-            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-            //t.ObjectId.SetTextStyle("TH-STYLE3");
-            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
-            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
+            var text = "DN100乙字弯";
+            var height = 300;
+            var width = height * .7 * text.Length + 10;
+            var yd = new YesDraw();
+            yd.OffsetXY(-800, 1000);
+            yd.OffsetX(-width);
+            basePt = basePt.OffsetXY(-67, 83);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
+            SetLabelStylesForRainNote(t);
         }
 
+        public static void DrawLabelLeft(Point3d basePt, string text)
+        {
+            var height = 300;
+            {
+                var width = height * 0.8 * text.Length + 200;
+                var yd = new YesDraw();
+                yd.Rotate(505, 90 + 45);
+                yd.OffsetX(-width);
+                var pts = yd.GetPoint3ds(basePt).ToList();
+                var lines = DU.DrawLinesLazy(pts);
+                SetLabelStylesForRainNote(lines.ToArray());
+                var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
+                SetLabelStylesForRainNote(t);
+            }
+        }
+        public static void SetLabelStylesForRainNote(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = "W-RAIN-NOTE";
+                e.ColorIndex = 256;
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void SetLabelStylesForRainDims(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = "W-RAIN-DIMS";
+                e.ColorIndex = 256;
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        static string fix(string str, string dft = null)
+        {
+            return string.IsNullOrWhiteSpace(str) ? dft : str;
+        }
+        public static string GetFloorDrainDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.BalconyFloorDrainDN, "DN25");//阳台地漏
+        public static string GetRoofRainPipeDN() => "DN100";
+        public static string GetCondensePipeHorizontalDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CondensePipeHorizontalDN, "DN25");//冷凝横管
+        public static string GetCondensePipeVerticalDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CondensePipeVerticalDN, "DN25");//冷凝立管
+        public static string GetBalconyRainPipeDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.BalconyRainPipeDN, "DN25");//阳台雨立
+        public static bool GetCanPeopleBeOnRoof() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CouldHavePeopleOnRoof ?? false;//屋面上人
+        public static bool GetHasAiringForCondensePipe() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.HasAiringForCondensePipe ?? true;//冷凝立管设通气
+        public static bool GetHasAirConditionerFloorDrain() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.HasAirConditionerFloorDrain ?? true;//空调板夹层地漏
+        public static void SetLabelStylesForWNote(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = "W-NOTE";
+                e.ColorIndex = 256;
+                if (e is DBText t)
+                {
+                    t.WidthFactor = 0.7;
+                    t.Height = 350;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void DrawLabelRight(Point3d basePt, string txt1, string txt2)
+        {
+            var h = 300;
+            var t1 = DU.DrawTextLazy(txt1, h, basePt.OffsetXY(2854, 954));
+            var t2 = DU.DrawTextLazy(txt2, h, basePt.OffsetXY(2854, 954));
+            var line = DU.DrawTextUnderlineLazy(t1, 10, 10);
+            line = DU.DrawLineLazy(line.StartPoint, basePt.OffsetXY(60, -60));
+            SetLabelStylesForRainNote(line, t1, t2);
+        }
         public static void DrawNormalLine(Point3d basePt)
         {
             basePt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
@@ -311,41 +446,48 @@ namespace ThMEPWSS.Pipe.Model
             var deltax = p.X - basePt.X;
             return deltax;
         }
-        public static void DrawSideWaterBucketLabel(Point3d basePt)
+        public static void DrawSideWaterBucketLabel(Point3d basePt, string label = "侧入式雨水斗DN100")
         {
-            var h = 300;
-            var t = DU.DrawTextLazy("侧入式雨水斗DN100", h, basePt.OffsetXY(-4000, 954));
-            t.Layer = "W-RAIN-NOTE";
-            t.ColorIndex = 256;
-            //t.TextStyleName = "TH-STYLE3";
-            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-            //t.ObjectId.SetTextStyle("TH-STYLE3");
-            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
-            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
+            DrawLabelForRainNote(basePt, label);
         }
+        public static void DrawPipeLabel(Point3d basePt, string text1, string text2)
+        {
+            var height = 350;
+            var width = Math.Max(height * 0.7 * text1.Length, height * 0.7 * text2.Length);
+            var yd = new YesDraw();
+            yd.Rotate(505, 45);
+            yd.OffsetX(width);
+            basePt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN * .2);
+            var pts = yd.GetPoint3ds(basePt).ToList();
+            var lines = DU.DrawLinesLazy(pts);
+            SetLabelStylesForRainNote(lines.ToArray());
+            var t1 = DU.DrawTextLazy(text1, height, pts[1].OffsetXY(100, 50));
+            var t2 = DU.DrawTextLazy(text2, height, pts[1].OffsetXY(100, -50 - height));
+            SetLabelStylesForRainNote(t1, t2);
+        }
+        private static void DrawLabelForRainNote(Point3d basePt, string text)
+        {
+            var height = 350;
+            {
+                var width = height * 0.7 * text.Length + 200;
+                var yd = new YesDraw();
+                yd.Rotate(505, 90 + 45);
+                yd.OffsetX(-width);
+                var pts = yd.GetPoint3ds(basePt).ToList();
+                var lines = DU.DrawLinesLazy(pts);
+                SetLabelStylesForRainNote(lines.ToArray());
+                var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
+                SetLabelStylesForRainNote(t);
+            }
+        }
+
         public static void DrawSideWaterBucket(Point3d basePt)
         {
             DU.DrawBlockReference("侧排雨水斗系统", basePt, layer: "W-RAIN-EQPM", cb: br => br.ColorIndex = 256);
         }
-        public static void DrawGravityWaterBucketLabel(Point3d basePt)
+        public static void DrawGravityWaterBucketLabel(Point3d basePt, string label = "重力雨水斗DN100")
         {
-            var h = 300;
-            var t = DU.DrawTextLazy("重力雨水斗DN100", h, basePt.OffsetXY(-3500, 954));
-            t.Layer = "W-RAIN-NOTE";
-            t.ColorIndex = 256;
-            //t.TextStyleName = "TH-STYLE3";
-            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-            //t.ObjectId.SetTextStyle("TH-STYLE3");
-            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
-            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
-            line.Layer = "W-RAIN-NOTE";
-            line.ColorIndex = 256;
+            DrawLabelForRainNote(basePt, label);
         }
 
         public static void DrawGravityWaterBucket(Point3d basePt)
@@ -355,8 +497,7 @@ namespace ThMEPWSS.Pipe.Model
 
         public static void DrawCheckPoint(Point3d basePt)
         {
-            //var pt = basePt.OffsetY(-ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            DU.DrawBlockReference("立管检查口", basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN / 2), br =>
+            DU.DrawBlockReference("立管检查口", basePt.OffsetY(800), br =>
             {
                 br.Layer = "W-RAIN-EQPM";
                 br.Rotation = GeoAlgorithm.AngleFromDegree(180);
@@ -365,13 +506,55 @@ namespace ThMEPWSS.Pipe.Model
 
         public static void DrawCheckPointLabel(Point3d basePt)
         {
-            //var pt = basePt.OffsetY(-ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            var t = DU.DrawTextLazy("DN100", 200, basePt);
-            t.Rotate(basePt.OffsetX(-400), GeoAlgorithm.AngleFromDegree(90));
+            DrawDNLabelLeft(basePt);
+            DrawDimLabelRight(basePt);
+        }
+
+        private static void DrawDimLabelRight(Point3d basePt)
+        {
+            var pt1 = basePt;
+            var pt2 = pt1.OffsetY(800);
+            var dim = new AlignedDimension();
+            dim.XLine1Point = pt1;
+            dim.XLine2Point = pt2;
+            dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetX(1000);
+            dim.DimensionText = "1000";
+            dim.Layer = "W-RAIN-EQPM";
+            dim.ColorIndex = 256;
+            DU.DrawEntityLazy(dim);
+        }
+
+        public static void DrawDNLabelRight(Point3d basePt, string lb = "DN100")
+        {
+            basePt = basePt.OffsetXY(300, 200);
+            var t = DU.DrawTextLazy(lb, 250, basePt);
+            t.Rotate(basePt, GeoAlgorithm.AngleFromDegree(90));
+            SetLabelStylesForRainDims(t);
+        }
+        public static void DrawDNLabel(Point3d basePt, string lb = "DN100")
+        {
+            var t = DU.DrawTextLazy(lb, 250, basePt);
+            SetLabelStylesForRainDims(t);
+        }
+        public static void DrawDNLabelLeft(Point3d basePt, string lb = "DN100")
+        {
+            basePt = basePt.OffsetXY(-300, 200);
+            var t = DU.DrawTextLazy(lb, 250, basePt);
+            t.Rotate(basePt, GeoAlgorithm.AngleFromDegree(90));
+            SetLabelStylesForRainDims(t);
         }
     }
-    public class ThWRainPipeRun //: ThWPipeRun, IEquatable<ThWRainPipeRun>
+    public class PipeRunDrawingContext
     {
+        public Point3d BasePoint;
+        public YesDraw YesDraw = new YesDraw();
+        public Point3d? TopPoint;
+        public ThWRainPipeRun ThWRainPipeRun;
+    }
+    public class ThWRainPipeRun
+    {
+        public const double FIX_Y_OFFSET = 520.0;
+        public bool HasBrokenCondensePipe { get; set; }
         /// <summary>
         /// 楼层
         /// </summary>
@@ -385,7 +568,7 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 地漏
         /// </summary>
-        public List<ThWSDDrain> FloorDrains { get; set; } = new List<ThWSDDrain>();
+        public List<ThWSDFloorDrain> FloorDrains { get; set; } = new List<ThWSDFloorDrain>();
 
         /// <summary>
         /// 冷凝管
@@ -402,124 +585,252 @@ namespace ThMEPWSS.Pipe.Model
         /// </summary>
         public ThWSDCheckPoint CheckPoint { get; set; } = new ThWSDCheckPoint();
 
+        /// <summary>
+        /// 冷凝管是否要画在偏下方
+        /// </summary>
+        public bool IsLow => CondensePipes.Select(cp => cp.IsLow).FirstOrDefault();
+
         public ThWRainPipeRun()
         {
-            //FloorDrains = new List<ThWFloorDrain>();
-            //CondensePipes = new List<ThWCondensePipe>();
         }
-
-        //override public void Draw(Point3d _basePt)
-        public void Draw(Point3d basePt)
+        public void Draw(PipeRunDrawingContext ctx)
         {
-            //DU.DrawRectLazyFromLeftButtom(basePt.OffsetXY(100,100),2000,1000);
+            drawLazy(ctx);
+        }
+        private void drawLazy(PipeRunDrawingContext ctx)
+        {
+            if (Storey == null) return;
+            if (Dbg.__showXLabel)
+            {
+                DU.DrawingQueue.Enqueue(adb =>
+                {
+                    var basePt = ctx.BasePoint;
+                    Dbg.ShowXLabel(basePt);
+                });
+            }
 
+            DrawTranslatorLazy(ctx);
+            DrawCheckPointLazy(ctx);
+            DrawCondensePipesLazy(ctx);
+            DrawFloorDrainsLazy(ctx);
+        }
+        private void DrawCheckPointLazy(PipeRunDrawingContext ctx)
+        {
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                DrawCheckPoint(ctx);
+            });
+        }
+        Point3d GetBasePoint(Point3d pt)
+        {
+            if (TranslatorPipe.TranslatorType == TranslatorTypeEnum.Long)
+            {
+                var yd = new YesDraw();
+                ThWRainPipeRun.CalcOffsets(TranslatorPipe.TranslatorType, yd);
+                var dx = yd.GetCurX();
+                return pt.OffsetX(dx);
+            }
+            return pt;
+        }
+        private void DrawCheckPoint(PipeRunDrawingContext ctx)
+        {
+            var basePt = GetBasePoint(ctx.BasePoint);
             if (CheckPoint.HasCheckPoint)
             {
                 Dr.DrawCheckPoint(basePt);
                 Dr.DrawCheckPointLabel(basePt);
-                //DrLazy.Default.DrawLazy(Dr.DrawCheckPoint);
-                //DrLazy.Default.DrawLazy(Dr.DrawCheckPointLabel);
-                //Dbg.ShowXLabel(DrLazy.Default.BasePoint);
             }
-
-            //DrawGravityWaterBucket(basePt);
-            //DrawSideWaterBucket(basePt);
-            if (Storey != null)
-            {
-                switch (TranslatorPipe.TranslatorType)
-                {
-                    case TranslatorTypeEnum.None:
-                        if (false) Dr.DrawNormalLine(basePt);
-                        TranslatorLazyDrawer.DrawNormal(basePt);
-                        //DrLazy.Default.DrawNormalLine();
-                        break;
-                    case TranslatorTypeEnum.Long:
-                        if (false) Dr.DrawLongTranslator(basePt);
-                        TranslatorLazyDrawer.DrawLong(basePt);
-                        //DrLazy.Default.DrawLongTranslator();
-                        break;
-                    case TranslatorTypeEnum.Short:
-                        if (false) Dr.DrawShortTranslator(basePt);
-                        if (false) Dr.DrawShortTranslatorLabel(basePt);
-                        TranslatorLazyDrawer.DrawShort(basePt);
-                        Dr.DrawShortTranslatorLabel(basePt);
-                        //DrLazy.Default.DrawShortTranslator();
-                        //DrLazy.Default.DrawLazy(Dr.DrawShortTranslatorLabel);
-                        break;
-                    default:
-                        break;
-                }
-                if (false) OldTestCode(basePt);
-                if (false)
-                {
-                    Dr.DrawCheckPoint(basePt);
-                    Dr.DrawNormalLine(basePt);
-                    Dr.DrawLongTranslator(basePt);
-                    Dr.DrawShortTranslator(basePt);
-                    Dr.DrawShortTranslatorLabel(basePt);
-                    Dr.DrawWaterWell(basePt);
-                    return;
-                }
-            }
-            else
-            {
-                //DrawUtils.DrawTextLazy($"雨水立管，TranslatorPipe.Label:{TranslatorPipe.Label} Storey is null ...", 100, basePt);
-            }
-
-            //NoDraw.Text("ThWRainPipeRun " + TranslatorPipe.Label, 100, basePt).AddToCurrentSpace();
-            //return;
-            //MainRainPipe.Draw(basePt);
-            //todo
-
         }
 
-
-
-        private void OldTestCode(Point3d basePt)
+        private void DrawFloorDrainsLazy(PipeRunDrawingContext ctx)
         {
-            DrawUtils.DrawTextLazy($"雨水立管，Label:{TranslatorPipe.Label} Storey.Label:{Storey.Label}", 100, basePt);
-
-            var r = DrawUtils.DrawRectLazyFromLeftTop(basePt.OffsetXY(100, -100), 5000, 1500);
-            r.ColorIndex = 4;
-            int i = 2, j = 2;
-            int delta = 200;
-            FloorDrains.ForEach(o => o.Draw(basePt.OffsetXY(i++ * delta, -j * delta)));
-            j++;
-            CondensePipes.ForEach(o => o.Draw(basePt.OffsetXY(i++ * delta, -j * delta)));
-            j++;
-            TranslatorPipe.Draw(basePt.OffsetXY(i++ * delta, -j * delta));
-            DrawUtils.DrawCircleLazy(basePt, 500);
-            switch (TranslatorPipe.TranslatorType)
+            DU.DrawingQueue.Enqueue(adb =>
             {
-                case TranslatorTypeEnum.None:
+                DrawFloorDrains(ctx);
+            });
+        }
+
+        private void DrawFloorDrains(PipeRunDrawingContext ctx)
+        {
+            var basePt = GetBasePoint(ctx.BasePoint);
+            var fds = FloorDrains.Where(fd => fd.HasDrivePipe).Concat(FloorDrains.Where(fd => !fd.HasDrivePipe)).ToList();
+            if (fds.Count == 1 || fds.Count == 2)
+            {
+                {
+                    var fd = fds[0];
+                    Dr.DrawFloorDrain(basePt.OffsetX(-1200 + 180));
+                    var yd = new YesDraw();
+                    yd.OffsetX(1200 - 100);
+                    yd.OffsetXY(100, -100);
+                    var pts = yd.GetPoint3ds(basePt.OffsetXY(-1200, -550)).ToList();
+                    var lines = DU.DrawLinesLazy(pts);
+                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), basePt.OffsetXY(-1000, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
+                    if (fd.HasDrivePipe)
                     {
-                        DrawUtils.DrawLineLazy(basePt, basePt.OffsetY(-ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
+                        Dr.DrawWrappingPipe(basePt.OffsetY(-550));
                     }
-                    break;
+                }
+                if (fds.Count == 2)
+                {
+                    var fd = fds[1];
+                    Dr.DrawFloorDrain(basePt.OffsetX(1200 + 180));
+                    var yd = new YesDraw();
+                    yd.OffsetX(-1200 + 100);
+                    yd.OffsetXY(-100, -100);
+                    var pts = yd.GetPoint3ds(basePt.OffsetXY(1200, -550)).ToList();
+                    var lines = DU.DrawLinesLazy(pts);
+                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), basePt.OffsetXY(500, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
+                    if (fd.HasDrivePipe)
+                    {
+                        Dr.DrawWrappingPipe(basePt.OffsetXY(900, -550));
+                    }
+                }
+                if (Dr.GetHasAirConditionerFloorDrain() && ctx.ThWRainPipeRun.MainRainPipe.Label.StartsWith("Y2L"))
+                {
+                    var _basePt = basePt.OffsetY(-800);
+                    {
+                        var line = DU.DrawLineLazy(_basePt, _basePt.OffsetX(2000));
+                        Dr.SetLabelStylesForWNote(line);
+                    }
+                    Dr.DrawFloorDrain(_basePt.OffsetX(1200 + 180));
+                    var yd = new YesDraw();
+                    yd.OffsetX(-1200 + 100);
+                    yd.OffsetXY(-100, -100);
+                    var pts = yd.GetPoint3ds(_basePt.OffsetXY(1200, -550)).ToList();
+                    var lines = DU.DrawLinesLazy(pts);
+                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), _basePt.OffsetXY(500, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
+                }
+                return;
+            }
+            for (int i = 0; i < fds.Count; i++)
+            {
+                var fd = fds[i];
+                var pt = basePt;
+                Dr.DrawFloorDrain(pt.OffsetX(-1000 + 1900 * i));
+                pt = pt.OffsetY(-550);
+                if (i > 0)
+                {
+                    pt = pt.OffsetX(-1000 + 1900 * i - 180);
+                }
+                var line = DU.DrawLineLazy(pt.OffsetX(-1000 - 180), pt);
+                {
+                    var p2 = pt.OffsetX(-1000 - 180).OffsetXY(100, 100);
+                    if (i > 0)
+                    {
+                        p2 = p2.OffsetX(500);
+                    }
+                    DU.DrawTextLazy(fd.DN, p2);
+                }
+                ThWRainPipeSystem.SetPipeRunLineStyle(line);
+                if (fd.HasDrivePipe)
+                {
+                    Dr.DrawWrappingPipe(pt);
+                }
+            }
+        }
+
+        private void DrawCondensePipesLazy(PipeRunDrawingContext ctx)
+        {
+            DrawCondensePipes(ctx);
+        }
+
+        private void DrawCondensePipes(PipeRunDrawingContext ctx)
+        {
+            var basePt = GetBasePoint(ctx.BasePoint);
+            if (CondensePipes.Count > 0)
+            {
+                if (HasBrokenCondensePipe)
+                {
+                    for (int i = 0; i < CondensePipes.Count; i++)
+                    {
+                        var yd = new YesDraw();
+                        yd.OffsetXY(-150, 150);
+                        yd.OffsetX(-1000);
+                        yd.OffsetY(150);
+                        var topPt = basePt.OffsetY(30 + 650 * i);
+                        ctx.TopPoint = topPt;
+                        var pts = yd.GetPoint3ds(topPt).ToList();
+                        var lines = DU.DrawLinesLazy(YesDraw.FixLines(pts));
+                        ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                        Dr.DrawCondensePipe(pts.Last().OffsetXY(-100, 100));
+
+                        var t = DU.DrawTextLazy(CondensePipes.First().DN, pts.GetLast(2).OffsetXY(100, 100));
+                        Dr.SetLabelStylesForRainDims(t);
+                    }
+                }
+                else
+                {
+                    var pt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN / 2);
+                    if (ctx.ThWRainPipeRun.CheckPoint.HasCheckPoint || ctx.ThWRainPipeRun.IsLow)
+                    {
+                        pt = pt.OffsetY(-600);
+                    }
+                    for (int i = 0; i < CondensePipes.Count; i++)
+                    {
+                        Dr.DrawCondensePipe(pt.OffsetX(500 * i - 1200));
+                        var p1 = pt.OffsetX(500 * i - 1200);
+                        var p2 = p1.OffsetY(-150);
+                        var line = DU.DrawLineLazy(p1, p2);
+                        ThWRainPipeSystem.SetPipeRunLineStyle(line);
+                    }
+                    {
+                        var p1 = pt.OffsetXY(-1200, -150);
+                        var p2 = pt.OffsetY(-150).OffsetX(-130);
+                        var p3 = pt.OffsetY(-150).OffsetY(-130);
+                        var topPt = p3;
+                        ctx.TopPoint = topPt;
+                        var lines = DU.DrawLinesLazy(p1, p2, p3);
+                        ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                        var t = DU.DrawTextLazy(Dr.GetCondensePipeHorizontalDN(), p1.OffsetY(-120).OffsetXY(80, 160));
+                        Dr.SetLabelStylesForRainDims(t);
+                    }
+                }
+            }
+        }
+        public static void CalcOffsets(TranslatorTypeEnum translatorType, YesDraw yd)
+        {
+            switch (translatorType)
+            {
                 case TranslatorTypeEnum.Long:
+                    yd.OffsetY(-280 - FIX_Y_OFFSET + ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
+                    yd.Rotate(170, 180 + 45);
+                    yd.OffsetX(-1260);
+                    yd.Rotate(170, 180 + 45);
+                    break;
                 case TranslatorTypeEnum.Short:
-                    {
-                        var len1 = 200;
-                        DrawUtils.DrawLineLazy(basePt, basePt.OffsetY(len1));
-                        DrawUtils.DrawLineLazy(basePt.OffsetY(len1), basePt.OffsetXY(300, len1));
-                        DrawUtils.DrawLineLazy(basePt.OffsetXY(300, len1), basePt.OffsetXY(300, -ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
-                        //DrawUtils.DrawLineLazy(basePt, basePt.OffsetY(-j * delta));
-                        //DrawUtils.DrawLineLazy(basePt.OffsetXY(deltaX ,- j * delta), basePt.OffsetXY(deltaX ,- ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
-                        //DrawUtils.DrawLineLazy(basePt.OffsetY(-j * delta), basePt.OffsetXY(deltaX, -j * delta));
-                    }
+                    yd.OffsetY(150);
+                    yd.GoXY(-150, 0);
                     break;
                 default:
                     break;
             }
-            j++;
-            CheckPoint.Draw(basePt.OffsetXY(i++ * delta, -j * delta));
+        }
+        private void DrawTranslatorLazy(PipeRunDrawingContext ctx)
+        {
+            if (Storey == null) return;
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                switch (TranslatorPipe.TranslatorType)
+                {
+                    case TranslatorTypeEnum.Short:
+                        Dr.DrawShortTranslatorLabel(ctx.BasePoint);
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
 
         public override int GetHashCode()
         {
             return this.Storey.GetHashCode();
         }
-
         public bool Equals(ThWRainPipeRun other)
         {
             return this.Storey.Equals(other.Storey)

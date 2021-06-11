@@ -5,6 +5,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -16,12 +18,12 @@ namespace ThMEPEngineCore.Algorithm
             var curves = ExplodeCurves(dBObjectCollection);
             var lines = new List<Line>();
             var arcs = new List<Arc>();
-            curves.ForEach(o => 
+            curves.ForEach(o =>
             {
-                if(o is Line l)
+                if (o is Line l)
                 {
                     lines.Add(l);
-                } 
+                }
                 else
                 {
                     arcs.Add(o as Arc);
@@ -46,13 +48,13 @@ namespace ThMEPEngineCore.Algorithm
             var results = new List<Line>();
             results.AddRange(crossedLines);
             // arc打成多段线
-            arcs.ForEach(o => 
+            arcs.ForEach(o =>
             {
-                
+
                 var polyline = o.TessellateArcWithChord(ArcChord);
                 var entitySet = new DBObjectCollection();
                 polyline.Explode(entitySet);
-                foreach(var obj in entitySet)
+                foreach (var obj in entitySet)
                 {
                     results.Add(obj as Line);
                 }
@@ -104,9 +106,9 @@ namespace ThMEPEngineCore.Algorithm
             {
                 var direction = new Vector3d(0, 0, 1);
                 var plane = new Plane(new Point3d(0.0, 0.0, 0.0), direction);
-                lines_z0.Add(o.GetProjectedCurve(plane,direction) as Line);
+                lines_z0.Add(o.GetProjectedCurve(plane, direction) as Line);
             });
-            return lines_z0; 
+            return lines_z0;
         }
 
         /// <summary>
@@ -122,8 +124,8 @@ namespace ThMEPEngineCore.Algorithm
             var lists = new List<Tuple<int, int, string>>();
             lines.ForEach(o =>
             {
-                var near = lines.FindAll(x => (o.GetDistToPoint(x.StartPoint,false) <= Math.Sqrt(2.0) * DistGap2Extend) || 
-                    (o.GetDistToPoint(x.EndPoint,false) <= Math.Sqrt(2.0) * DistGap2Extend));
+                var near = lines.FindAll(x => (o.GetDistToPoint(x.StartPoint, false) <= Math.Sqrt(2.0) * DistGap2Extend) ||
+                    (o.GetDistToPoint(x.EndPoint, false) <= Math.Sqrt(2.0) * DistGap2Extend));
                 near.Remove(o);
                 var collinear = new List<Line>();
                 var cross = new List<Line>();
@@ -131,7 +133,7 @@ namespace ThMEPEngineCore.Algorithm
                 {
                     if (x.Delta.GetAngleTo(o.Delta) <= AngleTolerance || x.Delta.GetAngleTo(o.Delta) >= Math.PI - AngleTolerance)
                     {
-                        if((o.GetDistToPoint(x.StartPoint, false) <= DistGap2Extend) || (o.GetDistToPoint(x.EndPoint, false) <= DistGap2Extend))
+                        if ((o.GetDistToPoint(x.StartPoint, false) <= DistGap2Extend) || (o.GetDistToPoint(x.EndPoint, false) <= DistGap2Extend))
                         {
                             collinear.Add(x);
                         }
@@ -164,7 +166,7 @@ namespace ThMEPEngineCore.Algorithm
                         {
                             lists.Add(Tuple.Create(linePair.Min(), linePair.Max(), "overlap/join"));
                         }
-                        else if(Dist_Start <= DistGap2Extend || Dist_End <= DistGap2Extend)
+                        else if (Dist_Start <= DistGap2Extend || Dist_End <= DistGap2Extend)
                         {
                             lists.Add(Tuple.Create(linePair.Min(), linePair.Max(), "join"));
                         }
@@ -373,6 +375,33 @@ namespace ThMEPEngineCore.Algorithm
                     throw new NotSupportedException();
                 }
             }
+        }
+
+        /// <summary>
+        /// 判断两根线是否有共线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="otherLine"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
+        public static bool IsOverlapByTol(this Line line, Line otherLine, double tol)
+        {
+            if (line.Length < tol || otherLine.Length < tol)
+            {
+                return false;
+            }
+
+            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
+            Vector3d otherDir = (otherLine.EndPoint - otherLine.StartPoint).GetNormal();
+            if (!dir.IsEqualTo(otherDir, new Tolerance(0.0001, 0.0001)))
+            {
+                return false;
+            }
+
+            Line newLine = new Line(line.StartPoint + dir * tol, line.EndPoint - dir * tol);
+            Polyline poly = newLine.Buffer(tol);
+
+            return poly.IsIntersects(otherLine);
         }
     }
 }

@@ -7,27 +7,95 @@ using System;
 using System.Collections.Generic;
 using ThCADExtension;
 using ThMEPWSS.Uitl;
+using System.Linq;
+using NetTopologySuite.Geometries;
+using ThMEPWSS.DebugNs;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
     public static class LinqExtensions
     {
-        public static void AddRange<T>(this HashSet<T> source,IEnumerable<T> items)
+        public static IEnumerable<KeyValuePair<T, T>> Select<T>(this IList<KeyValuePair<int, int>> lis, IList<T> source)
+        {
+            return lis.Select(kv => new KeyValuePair<T, T>(source[kv.Key], source[kv.Value]));
+        }
+        public static IEnumerable<T> Select<T>(this IList<int> lis, IList<T> source)
+        {
+            return lis.Select(li => source[li]);
+        }
+        public static T TryGet<T>(this IList<T> source, int i, T dft = default(T))
+        {
+            if (0 <= i && i < source.Count) return source[i];
+            return dft;
+        }
+        public static IEnumerable<T> Flattern<T>(this IEnumerable<KeyValuePair<T, T>> source)
+        {
+            foreach (var kv in source)
+            {
+                yield return kv.Key;
+                yield return kv.Value;
+            }
+        }
+        public static List<T> ToList<T>(this IList<T> source, IList<int> lis)
+        {
+            return lis.Select(li => source[li]).ToList();
+        }
+        public static IEnumerable<int> SelectInts<T>(this IList<T> source, IList<T> std)
+        {
+            for (int i = 0; i < source.Count; i++)
+            {
+                yield return std.IndexOf(source[i]);
+            }
+        }
+        public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
+        {
+            for (int i = 0; i < source.Count; i++)
+            {
+                if (f(source[i])) yield return i;
+            }
+        }
+        public static string JoinWith(this IEnumerable<string> strs, string s)
+        {
+            return string.Join(s, strs);
+        }
+        public static void AddRange<T>(this HashSet<T> source, IEnumerable<T> items)
         {
             foreach (var item in items)
             {
                 source.Add(item);
             }
         }
-        public static KeyValuePair<K,V> ToKV<K,V>(this Tuple<K,V> t)
+        public static KeyValuePair<K, V> ToKV<K, V>(this Tuple<K, V> t)
         {
             return new KeyValuePair<K, V>(t.Item1, t.Item2);
         }
-
+        public static GRect ToGRect(this Extents2d extents2D)
+        {
+            return new GRect(extents2D.MinPoint, extents2D.MaxPoint);
+        }
+        public static GRect ToGRect(this Extents3d extents3D)
+        {
+            return new GRect(extents3D.MinPoint, extents3D.MaxPoint);
+        }
+        public static GRect ToGRect(this Extents3d? extents3D, double radius)
+        {
+            if (extents3D is Extents3d ext)
+            {
+                var center = GeoAlgorithm.MidPoint(ext.MinPoint, ext.MaxPoint);
+                return GRect.Create(center, radius);
+            }
+            return default;
+        }
+        public static GRect ToGRect(this Extents3d? extents3D)
+        {
+            if (extents3D is Extents3d _ext) return new GRect(_ext.MinPoint, _ext.MaxPoint);
+            return default;
+        }
     }
     public static class JsonExtensions
     {
-        public static string ToJson(this ThWGRect rect)
+        public static string ToJson(this GRect rect)
         {
             return $"[{rect.MinX},{rect.MinY},{rect.MaxX},{rect.MaxY}]";
         }
@@ -43,10 +111,10 @@ namespace ThMEPWSS.JsonExtensionsNs
             var jo = JsonConvert.DeserializeObject<JObject>(json);
             return new Point2d(jo["x"].ToObject<double>(), jo["y"].ToObject<double>());
         }
-        public static ThWGRect JsonToThWGRect(this string json)
+        public static GRect JsonToGRect(this string json)
         {
             var ja = JsonConvert.DeserializeObject<JArray>(json);
-            return new ThWGRect(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>(), ja[3].ToObject<double>());
+            return new GRect(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>(), ja[3].ToObject<double>());
         }
         public static string ToJson(this object obj)
         {
@@ -62,6 +130,72 @@ namespace ThMEPWSS.CADExtensionsNs
 {
     public static class CADExtensions
     {
+        public static GRect ToGRect(this Geometry geo)
+        {
+            var env = geo.EnvelopeInternal;
+            return new GRect(env.MinX, env.MinY, env.MaxX, env.MaxY);
+        }
+        public static LinearRing ToLinearRing(this GRect r)
+        {
+            return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
+        }
+        public static LineString ToLineString(this IList<Point3d> pts)
+        {
+            var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points);
+        }
+        public static LinearRing ToLinearRing(this IList<Point3d> pts)
+        {
+            var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
+        }
+        public static Polygon ToPolygon(this GRect r)
+        {
+            return new Polygon(r.ToLinearRing());
+        }
+        public static LineString ToLineString(this GLineSegment seg)
+        {
+            var points = new Coordinate[]
+            {
+                seg.StartPoint.ToNTSCoordinate(),
+                seg.EndPoint.ToNTSCoordinate(),
+            };
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points);
+        }
+        public static NetTopologySuite.Geometries.Prepared.IPreparedGeometry CreateIPreparedGeometry(this Geometry geo)
+        {
+            return ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+        }
+        public static Geometry Buffer(this GLineSegment seg, double distance)
+        {
+            return seg.ToLineString().Buffer(distance, NetTopologySuite.Operation.Buffer.EndCapStyle.Flat);
+        }
+        public static GRect ToGRect(this Envelope env)
+        {
+            return new GRect(env.MinX, env.MinY, env.MaxX, env.MaxY);
+        }
+        public static Polyline ToCadPolyline(this GRect r)
+        {
+            var pline = new Polyline() { Closed = true };
+            var pts = new Point2dCollection() { new Point2d(r.MinX, r.MaxY), new Point2d(r.MaxX, r.MaxY), new Point2d(r.MaxX, r.MinY), new Point2d(r.MinX, r.MinY), };
+            for (int i = 0; i < pts.Count; i++)
+            {
+                pline.AddVertexAt(i, pts[i], 0, 0, 0);
+            }
+            return pline;
+        }
+        public static Polyline CreatePolygon(this GRect r, int num)
+        {
+            return Pipe.Service.PolylineTools.CreatePolygon(r.Center, num, r.Radius);
+        }
+        public static Point3dCollection ToPoint3dCollection(this GRect r)
+        {
+            return new Point3dCollection() { new Point3d(r.MinX, r.MinY, 0), new Point3d(r.MinX, r.MaxY, 0), new Point3d(r.MaxX, r.MaxY, 0), new Point3d(r.MaxX, r.MinY, 0) };
+        }
+        public static Line ToCadLine(this GLineSegment lineSegment)
+        {
+            return new Line() { StartPoint = lineSegment.StartPoint.ToPoint3d(), EndPoint = lineSegment.EndPoint.ToPoint3d() };
+        }
         public static Dictionary<K, V> ToDict<T, K, V>(this IEnumerable<T> source, Func<T, V> getValue, Func<T, K> getKey)
         {
             var d = new Dictionary<K, V>();
@@ -70,10 +204,6 @@ namespace ThMEPWSS.CADExtensionsNs
                 d[getKey(item)] = getValue(item);
             }
             return d;
-        }
-        public static Point3dCollection ToPoint3dCollection(this ThWGRect rect)
-        {
-            return (new Tuple<Point3d, Point3d>(rect.LeftTop.ToPoint3d(), rect.RightButtom.ToPoint3d())).ToPoint3dCollection();
         }
         public static Point3dCollection ToPoint3dCollection(this Tuple<Point3d, Point3d> input)
         {
@@ -103,6 +233,7 @@ namespace ThMEPWSS.CADExtensionsNs
         }
         public static string GetAttributesStrValue(this Entity e, string key)
         {
+            if (!(e is BlockReference)) return null;
             var d = e.ToDataItem().Attributes;
             d.TryGetValue(key, out string ret);
             return ret;
@@ -122,6 +253,13 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return ret;
         }
+        public static Polyline ClonePolyline(this Polyline pl)
+        {
+            var r = new Polyline();
+            for (int i = 0; i < pl.NumberOfVertices; i++) r.AddVertexAt(i, pl.GetPoint2dAt(i), 0, 0, 0);
+            r.Closed = pl.Closed;
+            return r;
+        }
         public static Point3dCollection ToPoint3dCollection(this Polyline pl)
         {
             var r = new Point3dCollection();
@@ -134,7 +272,28 @@ namespace ThMEPWSS.CADExtensionsNs
             ent.Explode(entitySet);
             return entitySet;
         }
-
+        public static DBObjectCollection ExplodeBlockRef(this BlockReference blk)
+        {
+            var entitySet = new DBObjectCollection();
+            void explode(Entity ent)
+            {
+                var obl = new DBObjectCollection();
+                ent.Explode(obl);
+                foreach (Entity e in obl)
+                {
+                    if (e is BlockReference br)
+                    {
+                        explode(br);
+                    }
+                    else
+                    {
+                        entitySet.Add(e);
+                    }
+                }
+            }
+            explode(blk);
+            return entitySet;
+        }
         public static List<DBObject> ToDBObjectList(this DBObjectCollection colle)
         {
             var list = new List<DBObject>();
@@ -152,6 +311,55 @@ namespace ThMEPWSS.CADExtensionsNs
                 ret[p.PropertyName] = p.Value;
             }
             return ret;
+        }
+
+        public static double DistanceToOtherLineSegment(this Line thisLine, Line otherLine)
+        {
+            double distance = 0.0;
+            Point3d this_point1 = thisLine.StartPoint;
+            Point3d this_point2 = thisLine.EndPoint;
+            Vector3d this_vector = thisLine.Delta;
+
+            Point3d other_point1 = otherLine.StartPoint;
+            Point3d other_point2 = otherLine.EndPoint;
+            Vector3d other_vector = otherLine.Delta;
+
+            Vector3d vector00 = this_point1.GetVectorTo(other_point1);
+            Vector3d vector01 = this_point1.GetVectorTo(other_point2);
+
+            Vector3d vector10 = this_point2.GetVectorTo(other_point1);
+            Vector3d vector11 = this_point2.GetVectorTo(other_point2);
+
+            double angle00 = other_vector.GetAngleTo(vector00);
+            double angle01 = other_vector.GetAngleTo(vector01);
+
+            double angle10 = other_vector.GetAngleTo(vector10);
+            double angle11 = other_vector.GetAngleTo(vector11);
+
+            if((angle00 < Math.PI/2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
+            {
+                distance = this_point2.DistanceTo(other_point1);
+            }
+            else if((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
+            {
+                distance = this_point1.DistanceTo(other_point2);
+            }
+            else
+            {
+                distance = thisLine.Distance(otherLine);
+            }
+
+            return distance;
+        }
+
+        public static double DistanceToPoint(this Line thisLine, Point3d otherPoint)
+        {
+            double distance = 0.0;
+
+            Point3d closestPoint = thisLine.GetClosestPointTo(otherPoint, false);
+            distance = otherPoint.DistanceTo(closestPoint);
+
+            return distance;
         }
     }
 }
