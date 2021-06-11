@@ -2,11 +2,11 @@
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcLineFoot : ThIfcBuildingElement
+    public class ThCornice : ThIfcBuildingElement
     {
-        public static ThIfcLineFoot Create(Curve curve)
+        public static ThCornice Create(Curve curve)
         {
-            return new ThIfcLineFoot()
+            return new ThCornice()
             {
                 Outline = curve,
             };

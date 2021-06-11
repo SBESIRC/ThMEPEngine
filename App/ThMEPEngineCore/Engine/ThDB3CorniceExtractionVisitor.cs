@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
-using ThMEPEngineCore.CAD;
+﻿using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThWindowExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThDB3CorniceExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Polyline polyline)
             {
-                elements.AddRange(HandleCurve(polyline, matrix));
+                elements.AddRange(Handle(polyline, matrix));
             }
         }
 
@@ -25,16 +25,7 @@ namespace ThMEPEngineCore.Engine
                 elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
             }
         }
-        public override bool IsBuildElement(Entity entity)
-        {
-            if (entity.Hyperlinks.Count > 0)
-            {
-                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
-                return thPropertySet.IsWindow;
-            }
-            return false;
-        }
-        private List<ThRawIfcBuildingElementData> HandleCurve(Polyline polyline, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> Handle(Polyline polyline, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
@@ -45,6 +36,16 @@ namespace ThMEPEngineCore.Engine
                 });
             }
             return results;
+        }
+
+        public override bool IsBuildElement(Entity entity)
+        {
+            if (entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsCornice;
+            }
+            return false;
         }
     }
 }
