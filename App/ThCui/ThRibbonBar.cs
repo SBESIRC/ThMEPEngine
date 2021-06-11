@@ -149,13 +149,41 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("Water", "给排水");
             var row = panel.AddNewRibbonRow();
 
-            row.AddNewButton("喷头工具",
-                "天华喷头工具",
-                "THPL",
-                "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
-                "IDI_THCAD_THPLPT_SMALL",
-                "IDI_THCAD_THPLPT_LARGE",
-                RibbonButtonStyle.LargeWithText);
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("喷头工具",
+                    "天华喷头工具",
+                    "THPL",
+                    "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
+                    "IDI_THCAD_THPLPT_SMALL",
+                    "IDI_THCAD_THPLPT_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 地上雨水系统图
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上雨水系统图",
+                    "天华地上雨水系统图",
+                    "THYSXTT",
+                    "天华地上雨水系统图",
+                    "IDI_THCAD_THYSXTT_SMALL",
+                    "IDI_THCAD_THYSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 地上雨水系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上给水系统图",
+                    "天华地上给水系统图",
+                    "THJSXTT",
+                    "天华地上给水系统图",
+                    "IDI_THCAD_THJSXTT_SMALL",
+                    "IDI_THCAD_THJSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
         }
 
         private static void CreateInventoryPanel(RibbonTabSource tab)
