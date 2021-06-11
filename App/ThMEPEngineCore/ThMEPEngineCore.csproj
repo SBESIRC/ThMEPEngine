@@ -73,7 +73,7 @@
     <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
-    <Compile Include="Engine\ThParkingStallVisitor.cs" />
+    <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="GeojsonExtractor\Interface\IGroup.cs" />

@@ -28,7 +28,7 @@ namespace ThMEPWSS.FlushPoint.Data
             // 只看块名
             using (var engine = new ThParkingStallRecognitionEngine())
             {
-                var visitor = new ThParkingStallVisitor();
+                var visitor = new ThParkingStallExtractionVisitor();
                 visitor.CheckQualifiedBlockName = CheckBlockNameQualified;
                 visitor.CheckQualifiedLayer = (Entity e) => true;
                 engine.Visitor = visitor;
@@ -39,7 +39,7 @@ namespace ThMEPWSS.FlushPoint.Data
             // 只看图层
             using (var engine = new ThParkingStallRecognitionEngine())
             {
-                var visitor = new ThParkingStallVisitor();
+                var visitor = new ThParkingStallExtractionVisitor();
                 visitor.CheckQualifiedLayer = CheckLayerNameQualified;
                 visitor.CheckQualifiedBlockName = (Entity e) => true;
                 engine.Recognize(database, pts);
