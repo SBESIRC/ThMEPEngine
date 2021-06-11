@@ -19,8 +19,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <Label Content="楼层线间距"></Label>
-            <TextBox Width="100" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" Height="25" VerticalAlignment="Bottom">
-            </TextBox>
+            <TextBox Width="100" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" SpellCheck.IsEnabled="True"/>
             <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">

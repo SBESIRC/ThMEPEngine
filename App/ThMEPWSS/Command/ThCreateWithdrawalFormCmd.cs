@@ -45,21 +45,19 @@ namespace ThMEPWSS.Command
                 return path;
             }
         }
-        public static int ImportBlockCount = 0;
-
         WaterwellPumpParamsViewModel _vm;
         public ThCreateWithdrawalFormCmd(WaterwellPumpParamsViewModel vm)
         {
             _vm = vm;
             configInfo = vm.GetConfigInfo();
         }
+        public static bool BlockImported = false;
         public void ImportBlockFile()
         {
-            if (ImportBlockCount != 0)
+            if (BlockImported)
             {
                 return;
             }
-            ImportBlockCount++;
             //导入一个块
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -69,6 +67,7 @@ namespace ThMEPWSS.Command
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableHeader));
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableBody));
             }
+            BlockImported = true;
         }
         public List<ThWWaterWell> GetWaterWellEntityList(Tuple<Point3d, Point3d> input)
         {
@@ -112,6 +111,10 @@ namespace ThMEPWSS.Command
             ImportBlockFile();
             //获取选择区域
             var input = ThWGeUtils.SelectPoints();
+            if (input.Item1.IsEqualTo(input.Item2))
+            {
+                return;
+            }
             //获取集水井
             var water_well_entity_list = GetWaterWellEntityList(input);
             if (water_well_entity_list.IsNull())

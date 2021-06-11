@@ -43,8 +43,11 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
             set
             {
-                Config.WaterWellInfo.fMinacreage = value;
-                this.RaisePropertyChanged();
+                if (value <= 9.9 && value > 0)
+                {
+                    Config.WaterWellInfo.fMinacreage = value;
+                    this.RaisePropertyChanged();
+                }
             }
         }
         public string FloorLocation

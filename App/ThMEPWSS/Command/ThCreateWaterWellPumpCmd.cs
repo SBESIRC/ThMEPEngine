@@ -46,11 +46,6 @@ namespace ThMEPWSS.Command
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
-
-                    database.ModelSpace.Add(waterWell.OBB);
-                    waterWell.Outline.ColorIndex = 1;
-                    waterWell.Outline.SetDatabaseDefaults();
-
                     waterWell.Init();
                     waterWellList.Add(waterWell);
                 }
@@ -241,6 +236,11 @@ namespace ThMEPWSS.Command
                     else if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.BOXCHOICE)
                     {
                         var input = ThWGeUtils.SelectPoints();
+                        if(input.Item1.IsEqualTo(input.Item2))
+                        {
+                            return;
+                        }
+
                         //获取集水井
                         var water_well_list = GetWaterWellEntityList(input);
                         if (water_well_list.IsNull())

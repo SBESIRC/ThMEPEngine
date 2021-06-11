@@ -51,5 +51,57 @@ namespace TianHua.Plumbing.WPF.UI.UI
             ThCreateWithdrawalFormCmd cmd = new ThCreateWithdrawalFormCmd(ViewModel);
             cmd.Execute();
         }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox txtBox = sender as TextBox;
+
+            string strText = txtBox.Text;
+            if(strText.IsNullOrEmpty())
+            {
+                (sender as TextBox).Text = Convert.ToString(1.0);
+            }
+            else
+            {
+                double max = 9.9;
+                double min = 0.0;
+                double number = double.Parse(strText) ;
+                if (number < min)
+                    (sender as TextBox).Text = Convert.ToString(min);
+                else if (number > max)
+                    (sender as TextBox).Text = Convert.ToString(max);
+                else
+                    e.Handled = false;
+            }
+        }
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || (e.Key >= Key.D0 && e.Key <= Key.D9) || e.Key == Key.Decimal)
+            {
+                e.Handled = false;
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var str = ((TextBox)e.Source).Text.ToString();
+            if (string.IsNullOrEmpty(str))
+                return;
+            var charArrs = str.ToCharArray();
+            var newStr = "";
+            foreach (var item in charArrs)
+            {
+                if (item >= '0' && item <= '9' || item == '.')
+                {
+                    newStr += item;
+                }
+            }
+            ((TextBox)e.Source).Text = newStr;
+        }
     }
 }

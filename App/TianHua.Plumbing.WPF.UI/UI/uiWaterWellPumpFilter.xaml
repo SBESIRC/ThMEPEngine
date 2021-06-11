@@ -9,8 +9,8 @@
                     WindowStartupLocation="CenterOwner"
                     Title="集水井图块识别"
                     SizeToContent="Height"
-                    Width="200"
-                    Height="320"
+                    Width="150"
+                    Height="340"
              mc:Ignorable="d" >
     <Grid Margin="5,5,5,5">
         <Grid.RowDefinitions>
@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical" Grid.Row="0">
+        <StackPanel Margin="0,0,0,20" Orientation="Vertical" Grid.Row="0">
             <Grid>
                 <Label Content="图块名称过滤"></Label>
             </Grid>
@@ -39,9 +39,9 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2">
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Bottom">
-                <Button Name="btnOK" Content="确定" Width="75" Click="btnOK_Click" />
-                <Button Name="btnCancel" Content="取消" Width="75" Margin="10,0,0,0" Click="btnCancel_Click"/>
+            <StackPanel Orientation="Horizontal" Margin="6,5,0,0" VerticalAlignment="Bottom">
+                <Button Name="btnOK" Content="确定" Width="55" Click="btnOK_Click" />
+                <Button Name="btnCancel" Content="取消" Width="55" Margin="10,0,0,0" Click="btnCancel_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
