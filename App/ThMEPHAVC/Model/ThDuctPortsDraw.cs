@@ -831,9 +831,9 @@ namespace ThMEPHVAC.Model
         private void Get_side_port_insert_pos(Vector3d dir_vec, Point3d pos, double duct_width, out Point3d pL, out Point3d pR)
         {
             Vector3d vertical_left = Get_left_vertical_vec(dir_vec);
-            pL = pos - dir_vec * port_width * 0.5 + vertical_left * (duct_width * 0.5 + 100);
+            pL = pos - dir_vec * (500 - port_width * 0.5) + vertical_left * (duct_width * 0.5 + 100);
             Vector3d vertical_right = Get_right_vertical_vec(dir_vec);
-            pR = pos + dir_vec * port_width * 0.5 + vertical_right * (duct_width * 0.5 + 100);
+            pR = pos + dir_vec * (500 - port_width * 0.5) + vertical_right * (duct_width * 0.5 + 100);
         }
         private double Get_port_rotate_angle(Vector3d dir_vec)
         {
