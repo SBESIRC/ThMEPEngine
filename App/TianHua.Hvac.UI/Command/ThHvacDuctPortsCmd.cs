@@ -36,7 +36,12 @@ namespace TianHua.Hvac.UI.Command
                     return;
                 if (in_param.port_range.Contains("侧"))
                     in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-                var graph_res = new ThDuctPortsAnalysis(center_lines, start_point,  in_param);
+                var graph_res = new ThDuctPortsAnalysis(center_lines, start_point, in_param);
+                if (graph_res.merged_endlines.Count == 0)
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("选择错误起始点");
+                    return;
+                }
                 var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
                 var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
                 var painter = new ThDuctPortsDraw(in_param, judger.align_points);

@@ -68,6 +68,7 @@ namespace ThMEPHVAC.Model
     public class ThDuctPortsDraw
     {
         private int port_num;
+        private double main_height;
         private double air_volumn;
         private double elevation;
         private double port_width;
@@ -110,11 +111,13 @@ namespace ThMEPHVAC.Model
             port_num = in_param.port_num;
             air_volumn = in_param.air_volumn;
             ui_duct_size = in_param.in_duct_size;
+            s = ui_duct_size.Split('x');
+            main_height = Double.Parse(s[1]);
         }
         public void Draw(ThDuctPortsAnalysis anay_res, ThDuctPortsConstructor endlines)
         {
             have_main = anay_res.main_ducts.Count != 0;
-            Draw_endlines(endlines, anay_res.ui_duct_width);
+            Draw_endlines(endlines);
             Draw_mainlines(anay_res, anay_res.ui_duct_width);
             Draw_special_shape(anay_res.special_shapes_info);
             Draw_port_mark(endlines);
@@ -124,12 +127,13 @@ namespace ThMEPHVAC.Model
         {
             var last_seg = endlines.endline_segs[endlines.endline_segs.Count - 1];
             var ports = last_seg[last_seg.Count - 1].ports_position;
-            Point3d p = ports[0] + new Vector3d(500, 2000, 0);
+            Point3d p = ports[0] + new Vector3d(1500, 2000, 0);
+            string port_size = port_width.ToString() + 'x' + port_height.ToString();
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(100, 100 ,1), 0,
                           new Dictionary<string, string> { { "风口名称", port_name }, 
-                                                           { "尺寸", ui_duct_size }, 
+                                                           { "尺寸", port_size }, 
                                                            { "数量", port_num.ToString() }, 
                                                            { "风量", air_volumn.ToString() } });
             }
@@ -419,19 +423,19 @@ namespace ThMEPHVAC.Model
                 throw new NotImplementedException();
             }
         }
-        private void Draw_endlines(ThDuctPortsConstructor endlins, double main_height)
+        private void Draw_endlines(ThDuctPortsConstructor endlins)
         {
             string pre_duct_text_info = String.Empty;
             Draw_special_shape(endlins.endline_elbow);
             for (int i = 0; i < endlins.endline_segs.Count; ++i)
             {
                 var infos = endlins.endline_segs[i];
-                Draw_port_duct(infos, main_height, align_points[i], ref pre_duct_text_info);
+                Draw_port_duct(infos, align_points[i], ref pre_duct_text_info);
             }
         }
-        private void Draw_port_duct(List<Duct_ports_Info> infos, double main_height, Point2d wall_point, ref string pre_duct_text_info)
+        private void Draw_port_duct(List<Duct_ports_Info> infos, Point2d wall_point, ref string pre_duct_text_info)
         {
-            var seg_outlines = Get_endline_duct_info(infos, main_height, ref pre_duct_text_info, out List<DBText> duct_size_info);
+            var seg_outlines = Get_endline_duct_info(infos, ref pre_duct_text_info, out List<DBText> duct_size_info);
             var reducing = Get_endline_duct_reducing(seg_outlines.geo);
 
             Draw_lines(seg_outlines.geo, Matrix3d.Identity, geo_layer);
@@ -607,7 +611,6 @@ namespace ThMEPHVAC.Model
         }
 
         private Line_Info Get_endline_duct_info(List<Duct_ports_Info> infos,
-                                                double main_height,
                                                 ref string pre_duct_text_info,
                                                 out List<DBText> duct_size_info)
         {
@@ -620,7 +623,7 @@ namespace ThMEPHVAC.Model
                 var info = infos[i];
                 Get_line_pos_info(info.l, out double angle, out Point3d center_point);
                 Get_duct_geo_flg_centerline(info, geo, flg, center_line, angle, center_point);
-                DBText text = Create_duct_info(info.duct_size, main_height, !have_main && (i == 0));
+                DBText text = Create_duct_info(info.duct_size, !have_main && (i == 0));
                 Matrix3d mat = Get_side_text_info_trans_mat(angle, info.width, center_point, text, info.l);
                 Seperate_duct_size_elevation(text, mat, info.l, out DBText duct_size_text, out DBText elevation_size);
                 if (pre_duct_text_info != duct_size_text.TextString)
@@ -750,7 +753,7 @@ namespace ThMEPHVAC.Model
                                              ref string pre_duct_size_text)
         {
             Line l = new Line(info.Source.Position, info.Target.Position);
-            DBText text = Create_duct_info(ui_duct_size, main_height, true);
+            DBText text = Create_duct_info(ui_duct_size, true);
             Matrix3d mat = Get_main_text_info_trans_mat(angle, center_point, text);
             Vector3d dir_vec = Get_edge_direction(l);
             Vector3d vertical_vec = -Get_vertical_vec(dir_vec);
@@ -902,7 +905,7 @@ namespace ThMEPHVAC.Model
                 vertical_vec = Get_right_vertical_vec(dir_vec);
             return vertical_vec;
         }
-        private DBText Create_duct_info(string duct_size, double main_height, bool is_first)
+        private DBText Create_duct_info(string duct_size, bool is_first)
         {
             // 不处理main在树间的情况
             string[] s = duct_size.Split('x');

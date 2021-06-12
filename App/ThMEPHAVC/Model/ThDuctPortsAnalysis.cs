@@ -88,6 +88,9 @@ namespace ThMEPHVAC.Model
         {
             Init_param(center_lines_, in_param);
             Get_start_line(center_lines_, start_point_, out Point3d search_point);
+            if (!start_point_.IsEqualTo(start_line.StartPoint, point_tor) &&
+                !start_point_.IsEqualTo(start_line.EndPoint, point_tor))
+                return;
             Get_merged_endline(center_lines_, search_point, start_line);
             var dis_res = new ThDuctResourceDistribute(merged_endlines, in_param.port_num);
             dis_res.Distrib_total_air_volumn(merged_endlines, air_volumn, in_param.port_num);
@@ -181,11 +184,13 @@ namespace ThMEPHVAC.Model
             start_line = new Line();
             search_point = Point3d.Origin;
             foreach (Line l in center_lines_)
+            {
                 if (start_point.IsEqualTo(l.StartPoint, point_tor) || start_point.IsEqualTo(l.EndPoint, point_tor))
                 {
                     start_line = l;
                     search_point = start_point.IsEqualTo(l.StartPoint, point_tor) ? l.EndPoint : l.StartPoint;
                 }
+            }
         }
 
         private void Search_special_shape_info(Point3d search_point, Line current_line)
