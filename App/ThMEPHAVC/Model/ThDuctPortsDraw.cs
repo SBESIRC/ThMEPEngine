@@ -68,7 +68,6 @@ namespace ThMEPHVAC.Model
     public class ThDuctPortsDraw
     {
         private int port_num;
-        private double air_speed;
         private double air_volumn;
         private double elevation;
         private double port_width;
@@ -110,7 +109,6 @@ namespace ThMEPHVAC.Model
             align_points = align_points_;
             port_num = in_param.port_num;
             air_volumn = in_param.air_volumn;
-            air_speed = in_param.air_speed;
             ui_duct_size = in_param.in_duct_size;
         }
         public void Draw(ThDuctPortsAnalysis anay_res, ThDuctPortsConstructor endlines)
@@ -126,26 +124,18 @@ namespace ThMEPHVAC.Model
         {
             var last_seg = endlines.endline_segs[endlines.endline_segs.Count - 1];
             var ports = last_seg[last_seg.Count - 1].ports_position;
-            Point3d p = ports[ports.Count - 1];
+            Point3d p = ports[0] + new Vector3d(500, 2000, 0);
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(), 0,
-                          new Dictionary<string, string> { { "风口名称", "AH/D" }, { "尺寸", "600x300" }, { "数量", "16" }, { "风量", "20000" } });
-                Set_port_mark_dyn_block_properity(obj);
+                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(100, 100 ,1), 0,
+                          new Dictionary<string, string> { { "风口名称", port_name }, 
+                                                           { "尺寸", ui_duct_size }, 
+                                                           { "数量", port_num.ToString() }, 
+                                                           { "风量", air_volumn.ToString() } });
             }
-        }
-        private void Set_port_mark_dyn_block_properity(ObjectId obj)
-        {
-            var data = new ThBlockReferenceData(obj);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_NAME))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_NAME, port_name);
-            string size = port_height.ToString("0") + "x" + port_width.ToString("0");
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_SIZE))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_SIZE, size);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_NUM))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_NUM, port_num);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_AIRVOLUME))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_AIRVOLUME, air_volumn);
+            Line l = new Line(ports[0], p);
+            var line_set = new DBObjectCollection() { l };
+            Draw_lines(line_set, Matrix3d.Identity, port_mark_layer);
         }
         private void Set_layer()
         {
