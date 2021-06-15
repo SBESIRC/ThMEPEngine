@@ -5,6 +5,7 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -18,6 +19,10 @@ namespace ThMEPEngineCore.Temp
         public bool UseDb3Engine { get; set; }
         public bool GroupSwitch { get; set; }
         public bool IsolateSwitch { get; set; }
+        /// <summary>
+        /// 描述带弧的Polyline、MPolygon几何信息
+        /// </summary>
+        public bool DescribePolygonSwitch { get; set; }
 
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
@@ -29,6 +34,7 @@ namespace ThMEPEngineCore.Temp
         protected string IsolatePropertyName = "Isolated";
         protected string ElevationPropertyName = "Elevation";
         protected string StoreyBorderPropertyName = "StoreyBorder";
+        protected string PolygonInfoPropertyName = "PolygonInfo";
 
         public ThExtractorBase()
         {
@@ -36,6 +42,7 @@ namespace ThMEPEngineCore.Temp
             ElementLayer = "";
             GroupSwitch = false;
             IsolateSwitch = true;
+            DescribePolygonSwitch = false;
             GroupOwner = new Dictionary<Entity, List<string>>();
             Types = new List<System.Type>() { typeof(Polyline)};
         }
@@ -87,6 +94,15 @@ namespace ThMEPEngineCore.Temp
                 }
             }
             return false;
+        }
+        protected Polyline Tesslate(Polyline polyline,double length)
+        {
+            var simplifier = new ThElementSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH= length,
+            };
+            var objs = simplifier.Tessellate(new DBObjectCollection() { polyline });
+            return objs.Count > 0 ? objs[0] as Polyline : polyline.Clone() as Polyline;
         }
     }
 }

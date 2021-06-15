@@ -11,7 +11,7 @@ namespace ThMEPEngineCore.BuildRoom.Interface
         List<Entity> Doors { get; }
         List<Entity> Windows { get; }
         List<Entity> Railings { get; }
-        List<Entity> LineFoots { get; }
+        List<Entity> Cornices { get; }
 
         void Build(Database db, Point3dCollection pts);
     }

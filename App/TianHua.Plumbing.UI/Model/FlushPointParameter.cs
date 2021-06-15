@@ -7,10 +7,11 @@ namespace TianHua.Plumbing.UI.Model
         public FlushPointParameter()
         {
             areaFullLayoutOfAP = true;
+            onlyDrainageFaclityNearbyOfAP = false;
             parkingAreaOfPT = true;
             necessaryArrangeSpaceOfPT = true;
             protectRadius = 30.0;
-            plotScale = "1:1";
+            plotScale = "1:100";
         }
         public event PropertyChangedEventHandler PropertyChanged;
 

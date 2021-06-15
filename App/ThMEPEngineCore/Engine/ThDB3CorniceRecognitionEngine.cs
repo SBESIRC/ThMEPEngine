@@ -10,13 +10,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThLineFootExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3CorniceExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThLineFootExtractionVisitor()
+            var visitor = new ThDB3CorniceExtractionVisitor()
             {
-                LayerFilter = ThLineFootLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
@@ -24,11 +24,11 @@ namespace ThMEPEngineCore.Engine
             Results = visitor.Results;
         }
     }
-    public class ThLineFootRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3CorniceRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThLineFootExtractionEngine();
+            var engine = new ThDB3CorniceExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs.Cast<Curve>().ToList();
             }
-            curves.ForEach(o => Elements.Add(ThIfcLineFoot.Create(o)));
+            curves.ForEach(o => Elements.Add(ThCornice.Create(o)));
         }
     }
 }
