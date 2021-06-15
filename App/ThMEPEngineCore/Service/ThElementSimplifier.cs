@@ -63,6 +63,10 @@ namespace ThMEPEngineCore.Service
                 {
                     objs.Add(circle.Tessellate(TESSELLATE_ARC_LENGTH));
                 }
+                else if (c is Arc arc)
+                {
+                    objs.Add(arc.TessellateArcWithArc(TESSELLATE_ARC_LENGTH));
+                }
                 else
                 {
                     throw new NotSupportedException();
