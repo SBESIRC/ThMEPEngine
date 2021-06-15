@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcAnnotationElementData> Handle(DBText dbText)
         {
             var texts = new List<DBText>();
-            if (IsAnnotationElement(dbText) && CheckLayerValid(dbText))
+            if (base.IsAnnotationElement(dbText) && CheckLayerValid(dbText))
             {
                 var clone = dbText.Clone() as DBText;               
                 texts.Add(clone);
@@ -81,7 +81,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcAnnotationElementData> Handle(MText mText)
         {
             var texts = new List<MText>();
-            if (IsAnnotationElement(mText) && CheckLayerValid(mText))
+            if (base.IsAnnotationElement(mText) && CheckLayerValid(mText))
             {
                 var clone = mText.Clone() as MText;
                 texts.Add(clone);
