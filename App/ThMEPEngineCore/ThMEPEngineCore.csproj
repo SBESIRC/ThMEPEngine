@@ -450,6 +450,7 @@
     <Compile Include="Temp\ThExtractLineService.cs" />
     <Compile Include="Temp\ThExtractOuterOtherShearWallService.cs" />
     <Compile Include="Temp\ThExtractOuterOtherColumnService.cs" />
+    <Compile Include="Temp\ThExtractArcService.cs" />
     <Compile Include="Temp\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="Temp\ThOuterBoundaryExtractor.cs" />
     <Compile Include="Temp\ThDoorOpeningExtractor.cs" />

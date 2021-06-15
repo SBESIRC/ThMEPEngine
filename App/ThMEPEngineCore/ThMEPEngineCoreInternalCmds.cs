@@ -763,7 +763,7 @@ namespace ThMEPEngineCore
                     {
                         ColorIndex=1,
                         GroupSwitch=false,
-                        UseDb3Engine=false,
+                        UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
                     new ThArchitectureOutlineExtractor()

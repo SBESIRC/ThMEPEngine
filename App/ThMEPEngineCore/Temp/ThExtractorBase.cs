@@ -104,5 +104,14 @@ namespace ThMEPEngineCore.Temp
             var objs = simplifier.Tessellate(new DBObjectCollection() { polyline });
             return objs.Count > 0 ? objs[0] as Polyline : polyline.Clone() as Polyline;
         }
+        protected Polyline Tesslate(Arc arc, double length)
+        {
+            var simplifier = new ThElementSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH = length,
+            };
+            var objs = simplifier.Tessellate(new DBObjectCollection() { arc });
+            return objs.Count > 0 ? objs[0] as Polyline : arc.TessellateArcWithArc(arc.Length/10.0);
+        }
     }
 }

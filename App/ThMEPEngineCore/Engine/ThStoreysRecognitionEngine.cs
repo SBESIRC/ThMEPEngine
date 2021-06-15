@@ -17,7 +17,10 @@ namespace ThMEPEngineCore.Engine
                 {
                     acadDatabase.ModelSpace
                         .OfType<BlockReference>()
-                        .Where(b => b.GetEffectiveName() == "楼层框定" && (polygon[0].X - b.Position.X) * (polygon[2].X - b.Position.X) < 0 && (polygon[0].Y - b.Position.Y) * (polygon[2].Y - b.Position.Y) < 0)
+                        .Where(b => !b.BlockTableRecord.IsNull 
+                        && b.GetEffectiveName() == "楼层框定" 
+                        && (polygon[0].X - b.Position.X) * (polygon[2].X - b.Position.X) < 0 
+                        && (polygon[0].Y - b.Position.Y) * (polygon[2].Y - b.Position.Y) < 0)
                         .ForEach(b => Elements.Add(new ThStoreys(b.ObjectId)));
                 }
                 else
