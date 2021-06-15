@@ -55,7 +55,6 @@
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
-    <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
     <Compile Include="Command\ThFireControlSystemDiagramCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
@@ -71,25 +70,10 @@
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Common\Utils.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\BalconyCorridorEquPlatform.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\ClassifyEqumBlockByRoomSpace.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\FloorDrainConvert.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\RoomKitchenToiletLayout.cs" />
-    <Compile Include="DrainageSystemAG\DataEngine\EquipmentDataEngine.cs" />
-    <Compile Include="DrainageSystemAG\DataEngine\EquipmentDataEnginVisitor.cs" />
-    <Compile Include="DrainageSystemAG\DrainSysAGCommon.cs" />
-    <Compile Include="DrainageSystemAG\Models\DynBlockWidthLength.cs" />
-    <Compile Include="DrainageSystemAG\Models\EquipmentModels.cs" />
-    <Compile Include="DrainageSystemAG\Models\SetServicesModel.cs" />
-    <Compile Include="DrainageSystemAG\Models\TubeWellsRoomModel.cs" />
-    <Compile Include="DrainageSystemAG\Services\ClearLoadBlockServices.cs" />
-    <Compile Include="DrainageSystemAG\Services\CreateBlockService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
-    <Compile Include="Engine\ThRoomDataEngine.cs" />
-    <Compile Include="Engine\ThWallColumnsEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />
@@ -106,8 +90,6 @@
     <Compile Include="FlushPoint\Service\ThPointIdentificationService.cs" />
     <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
-    <Compile Include="Model\EnumDiameterScale.cs" />
-    <Compile Include="Model\RoomModel.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
@@ -261,25 +243,10 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\PointType.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
-    <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
-    <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />
-    <Compile Include="WaterWellPumpLayout\Engine\ThWWallRecognitionEngine.cs" />
-    <Compile Include="WaterWellPumpLayout\Interface\IWallEdgeData.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
-    <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />
-    <Compile Include="WaterWellPumpLayout\Engine\ThWWallRecognitionEngine.cs" />
-    <Compile Include="WaterWellPumpLayout\Interface\IWallEdgeData.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
@@ -328,9 +295,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="WaterWellPumpLayout\Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

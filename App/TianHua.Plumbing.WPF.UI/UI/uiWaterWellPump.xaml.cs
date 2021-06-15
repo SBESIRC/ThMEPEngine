@@ -23,15 +23,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class UiWaterWellPump : ThCustomWindow
     {
-        private static WaterwellPumpParamsViewModel ViewModel = null;
+        private WaterwellPumpParamsViewModel ViewModel = new WaterwellPumpParamsViewModel();
         public UiWaterWellPump()
         {
             InitializeComponent();
-            if(ViewModel == null)
-            {
-               ViewModel = new WaterwellPumpParamsViewModel();
-            }
-
             DataContext = ViewModel;
         }
 

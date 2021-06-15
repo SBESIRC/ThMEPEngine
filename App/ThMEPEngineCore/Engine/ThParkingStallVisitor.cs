@@ -8,11 +8,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThParkingStallExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThParkingStallVisitor : ThDistributionElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
-        public ThParkingStallExtractionVisitor()
+        public ThParkingStallVisitor()
         {
             CheckQualifiedLayer = base.CheckLayerValid;
             CheckQualifiedBlockName = (Entity entity) => true;

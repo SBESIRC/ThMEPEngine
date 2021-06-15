@@ -10,11 +10,11 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDB3SlabExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThSlabExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3SlabExtractionVisitor()
+            var visitor = new ThSlabExtractionVisitor()
             {
                 LayerFilter = ThSlabLayerManager.CurveXrefLayers(database),
             };
@@ -25,11 +25,11 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThDB3SlabRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThSlabRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3SlabExtractionEngine();
+            var engine = new ThSlabExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

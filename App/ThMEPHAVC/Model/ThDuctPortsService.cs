@@ -5,33 +5,10 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsService
     {
-        public static double Calc_duct_width(double air_vloume, double favorite_width, string scenario)
+        public static double Calc_duct_width(double air_vloume, double favorite_width, string scenario, ref string duct_size)
         {
             double width;
             double air_speed = Calc_air_speed(air_vloume, scenario);
-            if (air_speed < 1e-3)
-                throw new NotImplementedException();
-            var duct_info = new ThDuctParameter(air_vloume, air_speed);
-            if (Math.Abs(favorite_width) < 1e-3)
-                return Get_width(duct_info.DuctSizeInfor.RecommendOuterDuctSize);
-            else
-            {
-                foreach (var size in duct_info.DuctSizeInfor.DefaultDuctsSizeString)
-                {
-                    width = Get_width(size);
-                    if (Math.Abs(width - favorite_width) < 1e-3)
-                        return favorite_width;
-                }
-                width = Get_width(duct_info.DuctSizeInfor.RecommendOuterDuctSize);
-                if (width > favorite_width)
-                    width = favorite_width;
-                return width;
-            }
-        }
-        public static double Calc_duct_width(double air_vloume, double favorite_width, double in_speed, string scenario, ref string duct_size)
-        {
-            double width;
-            double air_speed = (Math.Abs(in_speed) < 1e-3) ? Calc_air_speed(air_vloume, scenario) : in_speed;
             if (air_speed < 1e-3)
                 throw new NotImplementedException();
             var duct_info = new ThDuctParameter(air_vloume, air_speed);

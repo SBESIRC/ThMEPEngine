@@ -10,11 +10,11 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDB3WindowExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThWindowExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3WindowExtractionVisitor()
+            var visitor = new ThWindowExtractionVisitor()
             {
                 LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
             };
@@ -25,11 +25,11 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThDB3WindowRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThWindowRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3WindowExtractionEngine();
+            var engine = new ThWindowExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

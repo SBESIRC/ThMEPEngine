@@ -18,7 +18,17 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
-    
+    public class Duct_port_param
+    {
+        public int port_num;
+        public double air_volumn;
+        public double elevation;
+        public string scale;
+        public string scenario;
+        public string port_size;
+        public string port_range;
+        public string in_duct_size;
+    }
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
         public void Dispose() { }
@@ -31,28 +41,32 @@ namespace TianHua.Hvac.UI.Command
                 if (center_lines.Count == 0)
                     return;
                 var start_point = Get_point_from_prompt("选择起点");
-                Get_duct_port_info(out ThDuctPortsParam in_param);
+                Get_duct_port_info(out Duct_port_param in_param);
                 if (in_param.scale == null)
                     return;
                 if (in_param.port_range.Contains("侧"))
                     in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-                var graph_res = new ThDuctPortsAnalysis(center_lines, start_point, in_param);
-                if (graph_res.merged_endlines.Count == 0)
-                {
-                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("选择错误起始点");
-                    return;
-                }
-                // construct graph
-                var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
+                var graph_res = new ThDuctPortsAnalysis(center_lines, 
+                                                        start_point, 
+                                                        in_param.scenario, 
+                                                        in_param.port_num, 
+                                                        in_param.air_volumn, 
+                                                        in_param.in_duct_size);
+                var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param.scenario);
                 var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
-                var painter = new ThDuctPortsDraw(in_param, judger.align_points);
+                var painter = new ThDuctPortsDraw(in_param.scenario, 
+                                                  in_param.port_range, 
+                                                  judger.align_points, 
+                                                  in_param.port_size, 
+                                                  in_param.scale, 
+                                                  in_param.elevation);
                 painter.Draw(graph_res, adjust_graph);
             }
         }
 
-        private void Get_duct_port_info(out ThDuctPortsParam in_param)
+        private void Get_duct_port_info(out Duct_port_param in_param)
         {
-            in_param = new ThDuctPortsParam();
+            in_param = new Duct_port_param();
             using (var dlg = new fmDuctPorts())
             {
                 if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
@@ -62,11 +76,9 @@ namespace TianHua.Hvac.UI.Command
                     in_param.scale = dlg.graph_scale;
                     in_param.elevation = dlg.elevation;
                     in_param.port_size = dlg.port_size;
-                    in_param.port_name = dlg.port_name;
                     in_param.air_volumn = dlg.air_volume;
                     in_param.port_range = dlg.port_range;
                     in_param.in_duct_size = dlg.duct_size;
-                    in_param.air_speed = dlg.air_speed;
                 }
                 else
                     return;

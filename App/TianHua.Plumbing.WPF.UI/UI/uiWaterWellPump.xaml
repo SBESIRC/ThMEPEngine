@@ -10,7 +10,7 @@
                     Title="集水井水泵"
                     SizeToContent="Height"
                     Width="160"
-                    Height="410"
+                    Height="400"
              mc:Ignorable="d" >
     <cus:ThCustomWindow.Resources>
         <x:Array x:Key="PNLists" Type ="sys:String">
@@ -104,11 +104,11 @@
                 <ComboBox Width="60" Margin="35,0,0,0" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" SelectedValue="{Binding PipeDN}"></ComboBox>
             </StackPanel>
         </StackPanel>
-        <StackPanel Orientation="Vertical" Grid.Row="2">
+        <StackPanel Orientation="Vertical" Grid.Row="2" Visibility="Collapsed">
             <Grid>
-                <Label Content="布置方式:"  Visibility="Collapsed"></Label>
+                <Label Content="布置方式:"></Label>
             </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center"  Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <RadioButton GroupName="ArrangeTypeGroup" Content="点选" Visibility="Collapsed" IsChecked="{Binding IsPickSelection}" />
                 <RadioButton Margin="15,0,0,0" GroupName="ArrangeTypeGroup" Content="框选" IsChecked="{Binding IsFrameSelection}"/>
             </StackPanel>

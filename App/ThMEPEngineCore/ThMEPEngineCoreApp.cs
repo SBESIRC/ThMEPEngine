@@ -375,7 +375,7 @@ namespace ThMEPEngineCore
         public void THExtractWindow()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var windowEngine = new ThDB3WindowRecognitionEngine())
+            using (var windowEngine = new ThWindowRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -658,7 +658,7 @@ namespace ThMEPEngineCore
         public void THExtractDoor()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var doorEngine = new ThDB3DoorRecognitionEngine())
+            using (var doorEngine = new ThDoorRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -736,7 +736,7 @@ namespace ThMEPEngineCore
         public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThDB3SlabRecognitionEngine())
+            using (var floorEngine = new ThSlabRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -776,11 +776,11 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractCornice", CommandFlags.Modal)]
-        public void THExtractCornice()
+        [CommandMethod("TIANHUACAD", "THExtractLineFoot", CommandFlags.Modal)]
+        public void THExtractLineFoot()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var lineFootRecognitionEngine = new ThDB3CorniceRecognitionEngine())
+            using (var lineFootRecognitionEngine = new ThLineFootRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

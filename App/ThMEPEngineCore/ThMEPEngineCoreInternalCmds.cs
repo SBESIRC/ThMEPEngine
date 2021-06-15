@@ -760,7 +760,7 @@ namespace ThMEPEngineCore
                 var extractors = new List<ThExtractorBase>()
                 {
                     new ThStoreyExtractor(){ColorIndex=1,},
-                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=false,},
+                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true,},
                     new ThOuterOtherColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
                     new ThOuterOtherShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
                     new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},

@@ -131,11 +131,5 @@
         public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "宽度或直径";
         public const string BLOCK_DYNAMIC_PORT_HEIGHT = "高度";
         public const string BLOCK_DYNAMIC_PORT_RANGE = "种类";
-
-        //风口标注动态块属性名
-        public const string BLOCK_DYNAMIC_PORT_NAME = "风口名称";
-        public const string BLOCK_DYNAMIC_PORT_SIZE = "尺寸";
-        public const string BLOCK_DYNAMIC_PORT_NUM = "数量";
-        public const string BLOCK_DYNAMIC_PORT_AIRVOLUME = "风量";
     }
 }
