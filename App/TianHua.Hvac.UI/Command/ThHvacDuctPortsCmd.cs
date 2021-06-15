@@ -42,6 +42,7 @@ namespace TianHua.Hvac.UI.Command
                     Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("选择错误起始点");
                     return;
                 }
+                // construct graph
                 var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
                 var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
                 var painter = new ThDuctPortsDraw(in_param, judger.align_points);
