@@ -18,6 +18,8 @@ using System.IO;
 using ThCADExtension;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.WaterWellPumpLayout.Interface;
+using ThMEPWSS.WaterWellPumpLayout.Service;
 
 namespace ThMEPWSS.Command
 {
@@ -46,6 +48,11 @@ namespace ThMEPWSS.Command
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
+
+                    database.ModelSpace.Add(waterWell.OBB);
+                    waterWell.Outline.ColorIndex = 1;
+                    waterWell.Outline.SetDatabaseDefaults();
+
                     waterWell.Init();
                     waterWellList.Add(waterWell);
                 }
@@ -68,48 +75,7 @@ namespace ThMEPWSS.Command
             }
             return deepWellPump;
         }
-        public List<Line> GetWallColumnEdges(Point3dCollection polygon)
-        {
-            var results = new List<Line>();
-            using (var acadDatabase = AcadDatabase.Active())
-            using (var columnEngine = new ThColumnRecognitionEngine())
-            using (var shearWallEngine = new ThShearWallRecognitionEngine())
-            using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
-            {
-                columnEngine.Recognize(acadDatabase.Database, polygon);
-                shearWallEngine.Recognize(acadDatabase.Database, polygon);
-                archWallEngine.Recognize(acadDatabase.Database, polygon);
-                results.AddRange(ToLines(columnEngine.Elements.Cast<ThIfcColumn>().Select(o => o.Outline).ToList()));
-                results.AddRange(ToLines(shearWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
-                results.AddRange(ToLines(archWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
-                return results;
-            }
-        }
-        private List<Line> ToLines(List<Entity> entities)
-        {
-            //要设置分割长度TesslateLength
-            var results = new List<Line>();
-            entities.ForEach(o =>
-            {
-                if(o is Polyline polyline)
-                {
-                    results.AddRange(polyline.ToLines());
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    results.AddRange(mPolygon.Loops().SelectMany(l => l.ToLines()));
-                }
-                else if(o is Circle circle)
-                {
-                    results.AddRange(circle.Tessellate(50.0).ToLines());
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            });
-            return results;
-        }
+
         public List<Line> GetWallColumnEdgesInRange(Tuple<Point3d, Point3d> input)
         {
             var range = new Point3dCollection();
@@ -117,20 +83,8 @@ namespace ThMEPWSS.Command
             range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
             range.Add(input.Item2);
             range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-            var allEdges = GetWallColumnEdges(range);
-            //var spatialIndex = new ThCADCoreNTSSpatialIndex(allEdges.ToCollection());
-            //var dbObjects = spatialIndex.SelectCrossingPolygon(range);
-
-            //var rst = new List<Line>();
-            //foreach(var obj in dbObjects)
-            //{ 
-            //    if(obj is Line)
-            //    {
-            //        rst.Add(obj as Line);
-            //    }
-            //}
-
-            return allEdges;
+            IWallEdgeData wallData = new ThWWallEdgeService();
+            return wallData.GetWallEdges(Active.Database,range);
         }
         public List<Point3d> GetParkSpacePointInRange(Tuple<Point3d, Point3d> input)
         {
@@ -198,25 +152,35 @@ namespace ThMEPWSS.Command
                 return path;
             }
         }
-        public static bool BlockImported = false;
+
         public void ImportBlockFile()
         {
-            if(BlockImported)
-            {
-                return;
-            }
             //导入一个块
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump));
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser));
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150));
-                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
-                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
-            }
+                if(blockDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump));
+                }
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser));
+                }
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150));
+                }
 
-            BlockImported = true;
+                if(acadDb.Layers.Contains("W-EQPM"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
+                }
+                if (acadDb.Layers.Contains("W-DRAI-EQPM"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
+                }
+            }
         }
         public void Execute()
         {

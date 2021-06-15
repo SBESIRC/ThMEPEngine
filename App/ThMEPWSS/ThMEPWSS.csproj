@@ -247,6 +247,13 @@
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
+    <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />
+    <Compile Include="WaterWellPumpLayout\Engine\ThWWallRecognitionEngine.cs" />
+    <Compile Include="WaterWellPumpLayout\Interface\IWallEdgeData.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
@@ -295,7 +302,9 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="WaterWellPumpLayout\Model\" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

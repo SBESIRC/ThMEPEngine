@@ -51,23 +51,27 @@ namespace ThMEPWSS.Command
             _vm = vm;
             configInfo = vm.GetConfigInfo();
         }
-        public static bool BlockImported = false;
         public void ImportBlockFile()
         {
-            if (BlockImported)
-            {
-                return;
-            }
             //导入一个块
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-NOTE"));
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableHeader));
-                acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableBody));
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableHeader))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableHeader));
+                }
+
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableBody))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableBody));
+                }
+                if(acadDb.Layers.Contains("W-NOTE"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-NOTE"));
+                }
             }
-            BlockImported = true;
         }
         public List<ThWWaterWell> GetWaterWellEntityList(Tuple<Point3d, Point3d> input)
         {
