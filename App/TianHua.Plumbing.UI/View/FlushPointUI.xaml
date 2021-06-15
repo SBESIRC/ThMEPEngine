@@ -116,7 +116,7 @@
                         <TextBox Grid.Column="0" Width="125" Name="tbProtectRadius" Style="{DynamicResource ValidationTextBoxStyle}"                                  
                          InputMethod.IsInputMethodEnabled="False" PreviewTextInput="tbProtectRadius_PreviewTextInput" 
                          PreviewKeyDown="tbProtectRadius_PreviewKeyDown" LostKeyboardFocus="tbProtectRadius_LostKeyboardFocus">
-                            <Binding Path="Parameter.ProtectRadius" Mode="OneWayToSource" UpdateSourceTrigger="PropertyChanged">
+                            <Binding Path="Parameter.ProtectRadius" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
                                     <validations:ProtectRadiusRule/>
                                 </Binding.ValidationRules>
@@ -195,9 +195,11 @@
                 <TextBlock Grid.Row="0" Text="布置位置：" 
                            Style="{StaticResource TextStyl2}" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
                 <RadioButton Grid.Row="1" Name="rbAreaFullLayout" Content="区域满布" GroupName="Layout Position" Margin="0,3"
-                         IsChecked="{Binding Parameter.AreaFullLayoutOfArrangePosition,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></RadioButton>
+                         IsChecked="{Binding Parameter.AreaFullLayoutOfArrangePosition,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">                    
+                </RadioButton>
                 <RadioButton Grid.Row="2" Name="rbNearbyDrainageFacility" Content="仅排水设施附近" GroupName="Layout Position"
-                         IsChecked="{Binding Parameter.OnlyDrainageFaclityNearbyOfArrangePosition,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="0,3"></RadioButton>
+                         IsChecked="{Binding Parameter.OnlyDrainageFaclityNearbyOfArrangePosition,Mode=TwoWay,
+                    UpdateSourceTrigger=PropertyChanged}" Margin="0,3"></RadioButton>
                 <Button Grid.Row="4" Grid.Column="0" Name="btnLayoutFlushPoint" Content="布置冲洗点位" 
                         Width="100" Height="20" HorizontalAlignment="Left" Margin="5,5"
                         Command="{Binding LayOutFlushPointCmd}"

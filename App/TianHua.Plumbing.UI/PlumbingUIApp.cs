@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using System.Windows;
 using TianHua.Plumbing.UI.View;
+using TianHua.Plumbing.UI.ViewModel;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.UI
@@ -9,11 +10,13 @@ namespace TianHua.Plumbing.UI
     {
         private fmSprinklerLayout SprinklerLayout { get; set; }
         private fmFloorDrain FmFloorDrain { get; set; }
-        private FlushPointUI FlushPointUI { get; set; }
+        public FlushPointUI FlushPointUI { get; set; }
+        private static FlushPointVM FlushPointVM { get; set; }
         public void Initialize()
         {
             FlushPointUI = null;
             SprinklerLayout = null;
+            FlushPointVM = new FlushPointVM();
         }
 
         public void Terminate()
@@ -47,11 +50,11 @@ namespace TianHua.Plumbing.UI
 
         public void THDXCX()
         {
-            if (FlushPointUI == null)
+            if(FlushPointUI != null && FlushPointUI.IsLoaded)
             {
-                FlushPointUI = new FlushPointUI();
+                return; 
             }
-
+            FlushPointUI = new FlushPointUI(FlushPointVM);
             FlushPointUI.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(FlushPointUI);
         }
