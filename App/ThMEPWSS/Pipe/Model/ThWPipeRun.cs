@@ -202,25 +202,39 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawingQueue.Enqueue(adb =>
             {
                 var fbk = DrawingTransaction.Cur.fbk;
-                var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
-                fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
+                if (fbk == null)
                 {
-                    DU.SetLayerAndColorIndex("W-BUSH", 256, br);
-
-                }, after: br =>
-                {
-                    if (br.IsDynamicBlock)
-                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
+                    DU.DrawBlockReference(blkName: "套管系统", basePt: basePt.OffsetXY(-450, 0), cb: br =>
+                    {
+                        DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+                        if (br.IsDynamicBlock)
                         {
-                            if (!prop.ReadOnly)
+                            br.ObjectId.SetDynBlockValue("可见性", "防水套管水平");
+                        }
+                    });
+                }
+                else
+                {
+                    var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
+                    fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
+                    {
+                        DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+
+                    }, after: br =>
+                    {
+                        if (br.IsDynamicBlock)
+                            foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
                             {
-                                if (d.TryGetValue(prop.PropertyName, out object value))
+                                if (!prop.ReadOnly)
                                 {
-                                    prop.Value = value;
+                                    if (d.TryGetValue(prop.PropertyName, out object value))
+                                    {
+                                        prop.Value = value;
+                                    }
                                 }
                             }
-                        }
-                });
+                    });
+                }
             });
         }
         public static void DrawFloorDrain(Point3d basePt)
@@ -228,6 +242,18 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawingQueue.Enqueue(adb =>
             {
                 var fbk = DrawingTransaction.Cur.fbk;
+                if (fbk == null)
+                {
+                    DU.DrawBlockReference(blkName: "地漏系统", basePt: basePt.OffsetY(-390), scale: 2, cb: br =>
+                    {
+                        DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br);
+                        if (br.IsDynamicBlock)
+                        {
+                            br.ObjectId.SetDynBlockValue("可见性", "普通地漏无存水弯");
+                        }
+                    });
+                    return;
+                }
                 var d = new Dictionary<string, object>() { { "可见性", "普通地漏无存水弯" }, };
                 fbk.InsertBlockReference(basePt.OffsetY(-390), "地漏系统", before: br =>
                 {
@@ -261,6 +287,7 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawingQueue.Enqueue(adb =>
             {
                 var fbk = DrawingTransaction.Cur.fbk;
+                if (fbk == null) return;
                 var d = new Dictionary<string, object>() { { "可见性", dn }, { "角度1", angle } };
                 fbk.InsertBlockReference(pt, "雨水管径100", before: br =>
                 {

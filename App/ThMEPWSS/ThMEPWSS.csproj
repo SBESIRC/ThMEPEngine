@@ -70,6 +70,7 @@
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
+    <Compile Include="Common\Model\SystemDiagramModels.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\BalconyCorridorEquPlatform.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\ClassifyEqumBlockByRoomSpace.cs" />
@@ -189,6 +190,7 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
+    <Compile Include="GroundDrainageSystem\Service\ThDrainageService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceNameService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceService.cs" />
@@ -326,8 +328,11 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Folder Include="WaterWellPumpLayout\Model\" />
+    <Folder Include="GroundDrainageSystem\Model\" />
+    <Folder Include="GroundDrainageSystem\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
