@@ -107,6 +107,7 @@
     <Compile Include="FlushPoint\Service\ThPointIdentificationService.cs" />
     <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
+    <Compile Include="GroundDrainageSystem\Service\ThDrainageService.cs" />
     <Compile Include="Model\EnumDiameterScale.cs" />
     <Compile Include="Model\RoomModel.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
@@ -190,7 +191,6 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
-    <Compile Include="GroundDrainageSystem\Service\ThDrainageService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceNameService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceService.cs" />
@@ -275,11 +275,6 @@
     <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
-    <Compile Include="WaterWellPumpLayout\Interface\IWallEdgeData.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
-    <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
@@ -328,11 +323,8 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Folder Include="WaterWellPumpLayout\Model\" />
-    <Folder Include="GroundDrainageSystem\Model\" />
-    <Folder Include="GroundDrainageSystem\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
