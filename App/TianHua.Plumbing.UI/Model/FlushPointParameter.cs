@@ -12,6 +12,7 @@ namespace TianHua.Plumbing.UI.Model
             necessaryArrangeSpaceOfPT = true;
             protectRadius = 30.0;
             plotScale = "1:100";
+            floorSign = "B1";
         }
         public event PropertyChangedEventHandler PropertyChanged;
 
