@@ -49,6 +49,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             ThCreateWaterWellPumpCmd cmd = new ThCreateWaterWellPumpCmd(ViewModel);
             cmd.Execute();
+
         }
 
         private void btnGenerTable_Click(object sender, RoutedEventArgs e)

@@ -128,7 +128,8 @@ namespace ThMEPWSS.Command
                 range.Add(input.Item2);
                 range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
 
-                var partSpace = acadDb.ModelSpace.OfType<BlockReference>().Where(o => o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150").ToList();
+                var partSpace = acadDb.ModelSpace.OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull && (o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150")).ToList();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
                 var dbObjects = spatialIndex.SelectCrossingPolygon(range);
 
@@ -189,6 +190,7 @@ namespace ThMEPWSS.Command
         {
             try
             {
+                ThMEPWSS.Common.Utils.FocusMainWindow();
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (var database = AcadDatabase.Active())
                 {

@@ -113,6 +113,7 @@ namespace ThMEPWSS.Command
         {
             try
             {
+                ThMEPWSS.Common.Utils.FocusMainWindow();
                 ImportBlockFile();
                 //获取选择区域
                 var input = ThWGeUtils.SelectPoints();

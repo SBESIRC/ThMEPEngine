@@ -273,6 +273,11 @@
     <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
+    <Compile Include="WaterWellPumpLayout\Interface\IWallEdgeData.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThDB3WallEdgeService.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
