@@ -1,11 +1,10 @@
 ﻿using System.Linq;
-using System.Collections.Generic;
-using ThCADExtension;
 using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -19,10 +18,7 @@ namespace ThMEPEngineCore.Temp
         public bool UseDb3Engine { get; set; }
         public bool GroupSwitch { get; set; }
         public bool IsolateSwitch { get; set; }
-        /// <summary>
-        /// 描述带弧的Polyline、MPolygon几何信息
-        /// </summary>
-        public bool DescribePolygonSwitch { get; set; }
+        public double TesslateLength { get; set; }
 
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
@@ -33,16 +29,15 @@ namespace ThMEPEngineCore.Temp
         protected string AreaOwnerPropertyName = "AreaId";
         protected string IsolatePropertyName = "Isolated";
         protected string ElevationPropertyName = "Elevation";
-        protected string StoreyBorderPropertyName = "StoreyBorder";
-        protected string PolygonInfoPropertyName = "PolygonInfo";
+        protected string StoreyBorderPropertyName = "StoreyBorder";  
 
         public ThExtractorBase()
         {
             Category = "";
             ElementLayer = "";
+            TesslateLength = 5;
             GroupSwitch = false;
-            IsolateSwitch = true;
-            DescribePolygonSwitch = false;
+            IsolateSwitch = true;       
             GroupOwner = new Dictionary<Entity, List<string>>();
             Types = new List<System.Type>() { typeof(Polyline)};
         }
@@ -94,24 +89,6 @@ namespace ThMEPEngineCore.Temp
                 }
             }
             return false;
-        }
-        protected Polyline Tesslate(Polyline polyline,double length)
-        {
-            var simplifier = new ThElementSimplifier()
-            {
-                TESSELLATE_ARC_LENGTH= length,
-            };
-            var objs = simplifier.Tessellate(new DBObjectCollection() { polyline });
-            return objs.Count > 0 ? objs[0] as Polyline : polyline.Clone() as Polyline;
-        }
-        protected Polyline Tesslate(Arc arc, double length)
-        {
-            var simplifier = new ThElementSimplifier()
-            {
-                TESSELLATE_ARC_LENGTH = length,
-            };
-            var objs = simplifier.Tessellate(new DBObjectCollection() { arc });
-            return objs.Count > 0 ? objs[0] as Polyline : arc.TessellateArcWithArc(arc.Length/10.0);
         }
     }
 }

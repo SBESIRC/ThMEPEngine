@@ -349,6 +349,7 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThTesslateService.cs" />
     <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
     <Compile Include="Service\ThElementSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
