@@ -24,8 +24,6 @@ using ThMEPWSS.Diagram.ViewModel;
 
 namespace ThMEPWSS
 {
-
-
     public partial class ThSystemDiagramCmds
     {
         [CommandMethod("TIANHUACAD", "TestExractCleanTools", CommandFlags.Modal)]

@@ -254,7 +254,7 @@
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />
-    <Compile Include="ThSystemDiagramCmds.cs" />
+    <Compile Include="ThSystemDiagramCmds.THYSXTT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Command\ThFireHydrantCmd.cs" />
@@ -276,7 +276,7 @@
     <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
     <Content Include="Uitl\todoList.txt" />
-    <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
+    <Compile Include="ThSystemDiagramCmds.THJSXTT.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />

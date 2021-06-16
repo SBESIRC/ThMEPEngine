@@ -36,7 +36,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// Tian Hua Create water suply system diagram
+        /// 给水系统图
         /// </summary>
         [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
@@ -49,7 +49,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// Tian Hua arrange pumps in water well
+        /// 集水井水泵布置	
         /// </summary>
         [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
         public void ThArrangePumpWithUI()
@@ -58,7 +58,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-
+        /// <summary>
+        /// 地上雨水系统图
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
@@ -74,6 +76,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new uiFireControlSystem();
             AcadApp.ShowModelessWindow(ui);
         }
+
+        /// <summary>
+        /// 地上标准层排水、雨水平面	
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
         public void ThDrainageSysAboveGround()
         {
