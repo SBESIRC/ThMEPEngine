@@ -440,6 +440,7 @@
     <Compile Include="Temp\IRead.cs" />
     <Compile Include="Temp\IShearWallData.cs" />
     <Compile Include="Temp\ThArchitectureOutlineExtractor.cs" />
+    <Compile Include="Temp\ThArchitectureOutlineInfo.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
     <Compile Include="Temp\ThBeamExtractor.cs" />
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
@@ -485,6 +486,7 @@
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFireHydrantResultParseService.cs" />
     <Compile Include="Temp\ThBigRoofExtractor.cs" />
+    <Compile Include="Temp\ThParseArchitectureOutlineIdService.cs" />
     <Compile Include="Temp\ThSmallRoofExtractor.cs" />
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />

@@ -12,14 +12,12 @@ namespace ThMEPEngineCore.Temp
     {
         public List<Entity> OuterShearWalls { get; set; }
         public List<Entity> OtherShearWalls { get; set; }
-        public int OuterColorIndex { get; set; }
         public int OtherColorIndex { get; set; }
         public ThExtractOuterOtherShearWallService()
         {
             OuterShearWalls = new List<Entity>();
             OtherShearWalls = new List<Entity>();
-            OuterColorIndex = 3;
-            OtherColorIndex = 256;
+            OtherColorIndex = 256; // 默认是Bylayer,除此之外都是外圈剪力墙
         }
 
         public override void Extract(Database db, Point3dCollection pts)
@@ -34,7 +32,7 @@ namespace ThMEPEngineCore.Temp
                     shearWalls = objs.Cast<Polyline>().ToList();
                 }
                 // 0 ->ByBlock,256->ByLayer
-                OuterShearWalls = shearWalls.Where(o => o.ColorIndex == OuterColorIndex).Select(o=>o.Clone() as Entity).ToList();
+                OuterShearWalls = shearWalls.Where(o => o.ColorIndex != OtherColorIndex).Select(o=>o.Clone() as Entity).ToList();
                 OtherShearWalls = shearWalls.Where(o => o.ColorIndex == OtherColorIndex).Select(o => o.Clone() as Entity).ToList();
             }
         }

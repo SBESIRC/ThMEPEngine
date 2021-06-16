@@ -14,7 +14,8 @@ namespace ThMEPEngineCore.Temp
     {   
         private List<ThTempSpace> Spaces { get; set; }
         public List<Entity> OuterColumns { get ; set ; }
-        public List<Entity> OtherColumns { get ; set ; }       
+        public List<Entity> OtherColumns { get ; set ; }    
+        private Dictionary<Entity, List<string>> BelongArchitectureIdDic { get; set; } 
 
         public ThOuterOtherColumnExtractor()
         {
@@ -24,6 +25,7 @@ namespace ThMEPEngineCore.Temp
             OuterColumns = new List<Entity>();
             OtherColumns = new List<Entity>(); 
             Category = BuiltInCategory.Column.ToString();
+            BelongArchitectureIdDic = new Dictionary<Entity, List<string>>();
         }
         public void Extract(Database database, Point3dCollection pts)
         {
@@ -33,9 +35,16 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IColumnData columnData = service;
-            OuterColumns = columnData.OuterColumns.Select(o=>ThTesslateService.Tesslate(o,TesslateLength)).ToList();
+            columnData.OuterColumns.ForEach(o =>
+            {
+                var tesslate = ThTesslateService.Tesslate(o, TesslateLength);
+                OuterColumns.Add(tesslate);
+                var archOutlineIds = ThParseArchitectureOutlineIdService.ParseBelongedArchitectureIds(o);
+                BelongArchitectureIdDic.Add(tesslate, archOutlineIds);
+            });
             OtherColumns = columnData.OtherColumns.Select(o => ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }
+        
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -44,6 +53,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName,"外圈柱");
+                geometry.Properties.Add(BelongedArchOutlineIdPropertyName, BuildString(BelongArchitectureIdDic, o));
                 if (IsolateSwitch)
                 {
                     var isolate = IsIsolate(Spaces, o);

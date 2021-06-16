@@ -29,7 +29,9 @@ namespace ThMEPEngineCore.Temp
         protected string AreaOwnerPropertyName = "AreaId";
         protected string IsolatePropertyName = "Isolated";
         protected string ElevationPropertyName = "Elevation";
-        protected string StoreyBorderPropertyName = "StoreyBorder";  
+        protected string StoreyBorderPropertyName = "StoreyBorder";
+        protected string ParentIdPropertyName = "ParentId";
+        protected string BelongedArchOutlineIdPropertyName = "BelongedArchOutlineId";
 
         public ThExtractorBase()
         {
