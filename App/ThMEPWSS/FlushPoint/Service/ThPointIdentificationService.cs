@@ -1,10 +1,12 @@
-﻿using NFox.Cad;
+﻿using AcHelper;
+using NFox.Cad;
 using System.Linq;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -15,30 +17,32 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             LayoutInfo = new WashPtLayoutInfo();
         }
-        public static void HighLightFarawayWashPoints()
+        public static void ShowOrHide(bool farwayDrainageFacility, bool closeDrainageFacility)
         {
-            var blks = LayoutInfo.GetFarawayBlks();
-            HighLight(blks);
+            if(farwayDrainageFacility == false && closeDrainageFacility == false)
+            {
+                UnHighLight();
+            }
+            else
+            {
+                var objs = new DBObjectCollection();
+                if(farwayDrainageFacility)
+                {
+                    LayoutInfo.GetFarawayBlks().Cast<BlockReference>().ForEach(o => objs.Add(o));
+                }
+                if(closeDrainageFacility)
+                {
+                    LayoutInfo.GetNearbyBlks().Cast<BlockReference>().ForEach(o => objs.Add(o));
+                }
+                HighLight(objs);
+            }
         }
-        public static void UnHighLightFarawayWashPoints()
-        {
-            var blks = LayoutInfo.GetFarawayBlks();
-            UnHighLight(blks);
-        }
-        public static void HighLightNearbyWashPoints()
-        {
-            var blks = LayoutInfo.GetNearbyBlks();
-            HighLight(blks);
-        }
-        public static void UnHighLightNearbyWashPoints()
-        {
-            var blks = LayoutInfo.GetNearbyBlks();
-            UnHighLight(blks);
-        }
+
         private static void HighLight(DBObjectCollection blks)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
+                var objIds = new List<ObjectId>();
                 var extents = ThAuxiliaryUtils.GetCurrentViewBound();
                 blks.Cast<BlockReference>().ForEach(o =>
                 {
@@ -51,15 +55,20 @@ namespace ThMEPWSS.FlushPoint.Service
                         extents.MinPoint.X, extents.MaxPoint.X, 
                         extents.MinPoint.Y, extents.MaxPoint.Y))
                         {
-                            o.Highlight();
+                            objIds.Add(o.ObjectId);
                         }
                     }
                 });
+                Active.Editor.PickFirstObjects(objIds.ToArray());
             }  
-        }
-        private static bool IsInActiveView(Point3d pt,double minX,double maxX,double minY,double maxY)
+        }        
+        private static void UnHighLight()
         {
-            if(pt.X>= minX && pt.X<=maxX &&
+            Active.Editor.PickFirstObjects(new ObjectId[0]);
+        }
+        private static bool IsInActiveView(Point3d pt, double minX, double maxX, double minY, double maxY)
+        {
+            if (pt.X >= minX && pt.X <= maxX &&
                pt.Y >= minY && pt.Y <= maxY)
             {
                 return true;
@@ -67,19 +76,6 @@ namespace ThMEPWSS.FlushPoint.Service
             else
             {
                 return false;
-            }
-        }
-        private static void UnHighLight(DBObjectCollection blks)
-        {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
-            {
-                blks.Cast<BlockReference>().ForEach(o =>
-                {
-                    if (!o.IsErased && !o.IsDisposed)
-                    {                        
-                        o.Unhighlight();                        
-                    }
-                });
             }
         }
     }

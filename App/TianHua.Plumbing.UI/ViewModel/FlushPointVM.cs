@@ -2,11 +2,11 @@
 using AcHelper;
 using AcHelper.Commands;
 using System.Windows.Input;
-using TianHua.Plumbing.UI.Command;
 using TianHua.Plumbing.UI.Model;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using ThMEPWSS.FlushPoint.Service;
+using TianHua.Plumbing.UI.Command;
+using System.Collections.ObjectModel;
 
 namespace TianHua.Plumbing.UI.ViewModel
 {
@@ -47,32 +47,12 @@ namespace TianHua.Plumbing.UI.ViewModel
 
         private void FarawayDrainageFacilityClicked(Object parameter)
         {
-            if (parameter is bool isChecked)
-            {
-                if(isChecked)
-                {
-                    ThPointIdentificationService.HighLightFarawayWashPoints();
-                }
-                else
-                {
-                    ThPointIdentificationService.UnHighLightFarawayWashPoints();
-                }
-            }
+            ThPointIdentificationService.ShowOrHide(Parameter.FarwayDrainageFacility, Parameter.CloseDrainageFacility);
         }
 
         private void NearbyDrainageFacilityClicked(Object parameter)
         {
-            if (parameter is bool isChecked)
-            {
-                if (isChecked)
-                {
-                    ThPointIdentificationService.HighLightNearbyWashPoints();
-                }
-                else
-                {
-                    ThPointIdentificationService.UnHighLightNearbyWashPoints();
-                }
-            }
+            ThPointIdentificationService.ShowOrHide(Parameter.FarwayDrainageFacility, Parameter.CloseDrainageFacility);
         }
 
         private void LayOutFlushPoint(Object parameter)
