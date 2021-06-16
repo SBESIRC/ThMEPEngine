@@ -13,7 +13,5 @@ namespace ThCADExtension
             points.Cast<Point3d>().ForEach(p => extents.AddPoint(p));
             return extents;
         }
-
-
     }
 }
