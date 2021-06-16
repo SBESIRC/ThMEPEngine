@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -56,15 +57,17 @@ namespace ThCADExtension
         /// <param name="pline"></param>
         /// <param name="pt"></param>
         /// <returns></returns>
-        public static bool IsPointInside(this Polyline pline, Point3d pt)
+        public static bool ContainsPoint(this Polyline pline, Point3d pt)
         {
             // https://forums.autodesk.com/t5/net/spatial-query-in-autocad-2010/m-p/5304221/highlight/true#M42039
-            using (MPolygon mpg = new MPolygon())
+            foreach (var region in RegionTools.CreateRegion(new Curve[] { pline }))
             {
-                double tolerance = Tolerance.Global.EqualPoint;
-                mpg.AppendLoopFromBoundary(pline, true, tolerance);
-                return mpg.IsPointInsideMPolygon(pt, tolerance).Count == 1;
+                if (region.ContainsPoint(pt))
+                {
+                    return true;
+                }
             }
+            return false;
         }
 
         /// <summary>
