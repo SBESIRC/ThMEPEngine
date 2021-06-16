@@ -5,6 +5,8 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -17,6 +19,7 @@ namespace ThMEPEngineCore.Temp
         public ThOuterOtherShearWallExtractor()
         {
             ElementLayer = "剪力墙";
+            TesslateLength = 20;
             Spaces = new List<ThTempSpace>();
             OuterShearWalls = new List<Entity>();
             OtherShearWalls = new List<Entity>(); 
@@ -30,8 +33,8 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IShearWallData shearWallData = service;
-            OuterShearWalls = shearWallData.OuterShearWalls;
-            OtherShearWalls = shearWallData.OtherShearWalls;
+            OuterShearWalls = shearWallData.OuterShearWalls.Select(o=>ThTesslateService.Tesslate(o,TesslateLength)).ToList();
+            OtherShearWalls = shearWallData.OtherShearWalls.Select(o =>ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -72,7 +75,7 @@ namespace ThMEPEngineCore.Temp
                 geos.Add(geometry);
             });
             return geos;
-        }
+        }        
 
         public void Print(Database database)
         {

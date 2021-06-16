@@ -5,6 +5,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -17,6 +18,7 @@ namespace ThMEPEngineCore.Temp
             Beams = new List<Polyline>();
             ElementLayer = "梁";
             UseDb3Engine = true;
+            TesslateLength = 10.0;
         }
         public void Extract(Database database, Point3dCollection pts)
         {
@@ -36,6 +38,7 @@ namespace ThMEPEngineCore.Temp
                 Beams = service.Polys;
             }
             Beams.ForEach(o => o.Closed = true);
+            Beams = Beams.Select(o => ThTesslateService.Tesslate(o, TesslateLength) as Polyline).ToList();
         }
         public List<ThGeometry> BuildGeometries()
         {

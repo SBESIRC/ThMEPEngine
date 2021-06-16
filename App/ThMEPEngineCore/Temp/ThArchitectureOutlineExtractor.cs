@@ -15,7 +15,6 @@ namespace ThMEPEngineCore.Temp
         /// 建筑轮廓图层
         /// </summary>
         public string ArchOutlineLayer { get; set; }
-        public double TesslateLength { get; set; }
         public ThArchitectureOutlineExtractor()
         {
             TesslateLength = 200.0;
@@ -30,7 +29,8 @@ namespace ThMEPEngineCore.Temp
                 ElementLayer = ArchOutlineLayer,
             };
             service.Extract(database, pts);
-            ArchOutlines.AddRange(service.Polys);
+
+            ArchOutlines = service.Polys.Select(o => ThTesslateService.Tesslate(o, TesslateLength) as Polyline).ToList();
         }
         
         public List<ThGeometry> BuildGeometries()
@@ -38,21 +38,14 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             ArchOutlines.ForEach(o =>
             {
-                var clone = Tesslate(o, TesslateLength);
                 var geometry = new ThGeometry();
-
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, "建筑轮廓");
                 if (GroupSwitch)
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
-                }
-                if(DescribePolygonSwitch)
-                {
-                    geometry.Properties.Add(PolygonInfoPropertyName, 
-                        ThPolylineSerializeService.Serialize(o));
-                }
-                geometry.Boundary = clone;
+                }                
+                geometry.Boundary = o;
                 geos.Add(geometry);
             });
             return geos;

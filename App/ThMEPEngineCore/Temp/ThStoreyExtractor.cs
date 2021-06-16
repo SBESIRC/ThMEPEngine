@@ -6,6 +6,7 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model.Common;
@@ -21,9 +22,10 @@ namespace ThMEPEngineCore.Temp
         private const string FloorTypePropertyName = "FloorType";
         public ThStoreyExtractor()
         {
+            UseDb3Engine = true;
             Storeys = new List<StoreyInfo>();
             Category = BuiltInCategory.StoreyBorder.ToString();
-            UseDb3Engine = true;
+            TesslateLength = 200.0;
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -38,6 +40,11 @@ namespace ThMEPEngineCore.Temp
             {
                 //
             }
+            Storeys.ForEach(o =>
+            {
+                var curve = ThTesslateService.Tesslate(o.Boundary, TesslateLength);
+                o.Boundary = curve as Polyline;
+            });
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -48,7 +55,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(FloorTypePropertyName, o.StoreyType);
                 geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);                
-                geometry.Properties.Add(IdPropertyName, o.Id);
+                geometry.Properties.Add(IdPropertyName, o.Id);                
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
@@ -84,7 +91,7 @@ namespace ThMEPEngineCore.Temp
     public class StoreyInfo
     {        
         public string Id { get; set; }
-        public Polyline Boundary { get; private set; }
+        public Polyline Boundary { get; set; }
         /// <summary>
         /// 楼层编号原始值
         /// </summary>

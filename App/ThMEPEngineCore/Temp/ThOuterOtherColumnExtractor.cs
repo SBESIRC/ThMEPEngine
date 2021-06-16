@@ -1,7 +1,9 @@
 ﻿using System;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -12,11 +14,12 @@ namespace ThMEPEngineCore.Temp
     {   
         private List<ThTempSpace> Spaces { get; set; }
         public List<Entity> OuterColumns { get ; set ; }
-        public List<Entity> OtherColumns { get ; set ; }
+        public List<Entity> OtherColumns { get ; set ; }       
 
         public ThOuterOtherColumnExtractor()
         {
             ElementLayer = "柱";
+            TesslateLength = 10.0;
             Spaces = new List<ThTempSpace>();
             OuterColumns = new List<Entity>();
             OtherColumns = new List<Entity>(); 
@@ -30,8 +33,8 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IColumnData columnData = service;
-            OuterColumns = columnData.OuterColumns;
-            OtherColumns = columnData.OtherColumns;
+            OuterColumns = columnData.OuterColumns.Select(o=>ThTesslateService.Tesslate(o,TesslateLength)).ToList();
+            OtherColumns = columnData.OtherColumns.Select(o => ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -100,7 +103,6 @@ namespace ThMEPEngineCore.Temp
                 {
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), otherColumnIds);
                 }
-
             }
         }
 
