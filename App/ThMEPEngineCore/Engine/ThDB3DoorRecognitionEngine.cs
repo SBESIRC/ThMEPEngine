@@ -9,11 +9,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDoorExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3DoorExtractionEngine : ThBuildingElementExtractionEngine
     {
         public List<string> DoorMarkLayerFilter { get; set; }
         public List<string> DoorStoneLayerFilter { get; set; }
-        public ThDoorExtractionEngine()
+        public ThDB3DoorExtractionEngine()
         {
             DoorMarkLayerFilter = new List<string>();
             DoorStoneLayerFilter = new List<string>();
@@ -21,11 +21,11 @@ namespace ThMEPEngineCore.Engine
         public override void Extract(Database database)
         {
             Init(database);
-            var doorMarkVisitor = new ThDoorMarkExtractionVisitor()
+            var doorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
             {
                 LayerFilter = this.DoorMarkLayerFilter,
             };
-            var doorStoneVisitor = new ThDoorStoneExtractionVisitor()
+            var doorStoneVisitor = new ThDB3DoorStoneExtractionVisitor()
             {
                 LayerFilter = this.DoorStoneLayerFilter,
             };
@@ -49,7 +49,7 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThDoorRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3DoorRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -65,7 +65,7 @@ namespace ThMEPEngineCore.Engine
             ThSpatialIndexCacheService.Instance.Build(database, polygon);
 
             // 识别门
-            var engine = new ThDoorExtractionEngine();
+            var engine = new ThDB3DoorExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

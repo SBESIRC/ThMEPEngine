@@ -166,7 +166,7 @@ namespace ThMEPEngineCore.CAD
                 if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
                     && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
                 {
-                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_FLOOR;
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_SLAB;
                     // && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_FLOOR
                 }
                 return false;
@@ -193,7 +193,7 @@ namespace ThMEPEngineCore.CAD
         /// <summary>
         /// 是否为线脚
         /// </summary>
-        public bool IsLineFoot
+        public bool IsCornice
         {
             get
             {

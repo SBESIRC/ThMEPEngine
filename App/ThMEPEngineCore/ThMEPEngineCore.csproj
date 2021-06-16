@@ -73,7 +73,7 @@
     <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
-    <Compile Include="Engine\ThParkingStallVisitor.cs" />
+    <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="GeojsonExtractor\Interface\IGroup.cs" />
@@ -158,8 +158,8 @@
     <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThDrainageWellExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageWellRecognitionEngine.cs" />
-    <Compile Include="Engine\ThLineFootExtractionVisitor.cs" />
-    <Compile Include="Engine\ThLineFootRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3CorniceExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3CorniceRecognitionEngine.cs" />
     <Compile Include="Engine\ThRailingExtractionVisitor.cs" />
     <Compile Include="Engine\ThRailingRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoomBuilderEngine.cs" />
@@ -180,7 +180,7 @@
     <Compile Include="Model\Common\ThPipeCommon.cs" />
     <Compile Include="Model\Common\ThStoreys.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
-    <Compile Include="Model\ThIfcLineFoot.cs" />
+    <Compile Include="Model\ThCornice.cs" />
     <Compile Include="Model\ThIfcOpening.cs" />
     <Compile Include="Model\ThIfcRailing.cs" />
     <Compile Include="Model\ThIfcSensor.cs" />
@@ -190,7 +190,7 @@
     <Compile Include="Service\ThContourRelationQueryService.cs" />
     <Compile Include="Service\ThDrainageFacilityCleanService.cs" />
     <Compile Include="Service\ThDrainageWellLayerManager.cs" />
-    <Compile Include="Service\ThLineFootLayerManager.cs" />
+    <Compile Include="Service\ThCorniceLayerManager.cs" />
     <Compile Include="Service\ThNTSMakeValidService.cs" />
     <Compile Include="Service\ThNTSSimplifyService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
@@ -200,15 +200,15 @@
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
-    <Compile Include="Engine\ThSlabExtractionVisitor.cs" />
-    <Compile Include="Engine\ThDoorMarkExtractionVisitor.cs" />
-    <Compile Include="Engine\ThSlabRecognitionEngine.cs" />
-    <Compile Include="Engine\ThDoorStoneExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3SlabExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3DoorMarkExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3SlabRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3DoorStoneExtractionVisitor.cs" />
     <Compile Include="Engine\ThColumnExtractionVisitor.cs" />
     <Compile Include="Engine\ThDistributionElementExtractionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThDistributionElementExtractor.cs" />
-    <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3DoorRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ArchWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
@@ -230,8 +230,8 @@
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementExtractionEngine.cs" />
-    <Compile Include="Engine\ThWindowExtractionVisitor.cs" />
-    <Compile Include="Engine\ThWindowRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3WindowExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3WindowRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThGeometryFeatureCollection.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
@@ -339,8 +339,6 @@
     <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
-    <Compile Include="Service\Hvac\ThHvacEditorExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacGeExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationService.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationManager.cs" />
@@ -452,6 +450,7 @@
     <Compile Include="Temp\ThExtractLineService.cs" />
     <Compile Include="Temp\ThExtractOuterOtherShearWallService.cs" />
     <Compile Include="Temp\ThExtractOuterOtherColumnService.cs" />
+    <Compile Include="Temp\ThExtractArcService.cs" />
     <Compile Include="Temp\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="Temp\ThOuterBoundaryExtractor.cs" />
     <Compile Include="Temp\ThDoorOpeningExtractor.cs" />
