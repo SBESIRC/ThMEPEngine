@@ -910,5 +910,28 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THExtractAXISLine", CommandFlags.Modal)]
+        public void THExtractAXISLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThAXISLineRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                engine.Elements.Select(o => o.Outline).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
+            }
+        }
     }
 }

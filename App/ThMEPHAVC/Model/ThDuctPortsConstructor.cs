@@ -364,7 +364,7 @@ namespace ThMEPHVAC.Model
         private void Shrink_tee_duct(ThDuctPortsAnalysis anay_res, Special_graph_Info info)
         {
             Tee_Type type = Get_tee_type(info.lines[1], info.lines[2]);
-            Seperate_tee_outter(info, out int branch_idx, out int other_idx);
+            Seperate_tee_outter(info, type, out int branch_idx, out int other_idx);
             Get_tee_port_shrink(info, type, branch_idx, other_idx,
                                 out double in_shrink, out double branch_shrink, out double other_shrink);
 
@@ -395,15 +395,13 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        private void Seperate_tee_outter(Special_graph_Info info, out int branch_idx, out int other_idx)
+        private void Seperate_tee_outter(Special_graph_Info info, Tee_Type type, out int branch_idx, out int other_idx)
         {
             Line i_line = info.lines[0];
             Line o1_line = info.lines[1];
-            Line o2_line = info.lines[2];
-            Vector3d o1_vec = o1_line.EndPoint - o1_line.StartPoint;
-            Vector3d o2_vec = o2_line.EndPoint - o2_line.StartPoint;
+            Vector3d o1_vec = (o1_line.EndPoint - o1_line.StartPoint).GetNormal();
             Vector3d in_vec = (i_line.EndPoint - i_line.StartPoint).GetNormal();
-            if (Is_vertical(o1_vec, o2_vec))
+            if (type == Tee_Type.BRANCH_VERTICAL_WITH_OTTER)
             {
                 if (Is_vertical(o1_vec, in_vec))
                 {

@@ -18,7 +18,6 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
-    
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
         public void Dispose() { }
@@ -30,6 +29,7 @@ namespace TianHua.Hvac.UI.Command
                 var center_lines = Get_lines_from_prompt("请选择中心线", false);
                 if (center_lines.Count == 0)
                     return;
+
                 var start_point = Get_point_from_prompt("选择起点");
                 Get_duct_port_info(out ThDuctPortsParam in_param);
                 if (in_param.scale == null)
@@ -45,7 +45,7 @@ namespace TianHua.Hvac.UI.Command
                 // construct graph
                 var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
                 var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
-                var painter = new ThDuctPortsDraw(in_param, judger.align_points);
+                var painter = new ThDuctPortsDraw(in_param, judger.dir_align_points, judger.ver_align_points);
                 painter.Draw(graph_res, adjust_graph);
             }
         }
