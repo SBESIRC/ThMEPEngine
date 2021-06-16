@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using TianHua.Plumbing.WPF.UI.ViewModels;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -7,14 +8,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         uiDrainageSystem uiDrainage;
         uiDrainageSystemSet uiSet;
+        private static ThFireHydrantVM FireHydrantVM;
         public void Initialize()
         {
-            return;
+            FireHydrantVM = new ThFireHydrantVM();
         }
 
         public void Terminate()
-        {
-            return;
+        {            
         }
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
@@ -84,6 +85,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void ThDrainageSysAboveGround()
         {
             var ui = new uiDrainageSysAboveGround();
+            AcadApp.ShowModelessWindow(ui);
+        }
+        [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
+        public void THXHSJH()
+        {
+            // FireHydrant protect radius check            
+            var ui = new FireHydrant(FireHydrantVM);
             AcadApp.ShowModelessWindow(ui);
         }
     }

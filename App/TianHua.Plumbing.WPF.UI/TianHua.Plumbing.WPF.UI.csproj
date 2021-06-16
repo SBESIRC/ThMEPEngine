@@ -83,8 +83,14 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ThFireExtinguisherMaxProtectDis.cs" />
+    <Compile Include="Model\ThFireHydrantModel.cs" />
     <Compile Include="PlumbingWPFUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ThFireTypeDataManager.cs" />
+    <Compile Include="UI\ThTipDialog.xaml.cs">
+      <DependentUpon>ThTipDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
     </Compile>
@@ -101,6 +107,9 @@
       <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\FireHydrant.xaml.cs">
+      <DependentUpon>FireHydrant.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiRainSystem.xaml.cs">
       <DependentUpon>uiRainSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -115,6 +124,7 @@
     <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
       <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ThFireHydrantVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -131,6 +141,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UI\ThTipDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -151,6 +165,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\FireHydrant.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiRainSystem.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
@@ -168,8 +186,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

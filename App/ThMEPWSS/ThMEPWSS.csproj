@@ -57,6 +57,7 @@
     <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
     <Compile Include="Command\ThFireControlSystemDiagramCmd.cs" />
+    <Compile Include="Command\ThHydrantProtectionRadiusCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
@@ -108,6 +109,13 @@
     <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="GroundDrainageSystem\Service\ThDrainageService.cs" />
+    <Compile Include="Hydrant\Data\ThHydrantExtractor.cs" />
+    <Compile Include="Hydrant\Engine\ThBlockElementExtractor.cs" />
+    <Compile Include="Hydrant\Engine\ThFireExtinguisherExtractionVisitor.cs" />
+    <Compile Include="Hydrant\Engine\ThHydrantExtractionVisitor.cs" />
+    <Compile Include="Hydrant\Engine\ThHydrantRecognitionEngine.cs" />
+    <Compile Include="Hydrant\Service\ThDivideRoomService.cs" />
+    <Compile Include="Hydrant\Service\ThQueryRoomProtectAreasService.cs" />
     <Compile Include="Model\EnumDiameterScale.cs" />
     <Compile Include="Model\RoomModel.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
@@ -250,6 +258,7 @@
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
+    <Compile Include="ThHydrantCmds.cs" />
     <Compile Include="ThLayoutFlushPointCmds.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
@@ -324,6 +333,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Hydrant\Model\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <Choose>
