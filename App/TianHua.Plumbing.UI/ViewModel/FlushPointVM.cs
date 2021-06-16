@@ -17,7 +17,7 @@ namespace TianHua.Plumbing.UI.ViewModel
         public FlushPointVM()
         {
             Parameter = new FlushPointParameter();
-            var plotScales = new List<string> {"1:50","1:100","1:150"};
+            var plotScales = new List<string> { "1:1","1:50","1:100","1:150"};
             PlotScales = new ObservableCollection<string>(plotScales);
         }
         

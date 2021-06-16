@@ -15,19 +15,9 @@ namespace ThMEPEngineCore.Engine
             {
                 if (polygon.Count > 0)
                 {
-                    // 用ABB 方式判断
-                    var minX = polygon.Cast<Point3d>().Select(o => o.X).Min();
-                    var maxX = polygon.Cast<Point3d>().Select(o => o.X).Max();
-
-                    var minY = polygon.Cast<Point3d>().Select(o => o.Y).Min();
-                    var maxY = polygon.Cast<Point3d>().Select(o => o.Y).Max();
-
                     acadDatabase.ModelSpace
                         .OfType<BlockReference>()
-                        .Where(b => !b.BlockTableRecord.IsNull 
-                        && b.GetEffectiveName() == "楼层框定" 
-                        && (b.Position.X > minX && b.Position.X < maxX)
-                        && (b.Position.Y > minY && b.Position.Y < maxY))
+                        .Where(b => b.GetEffectiveName() == "楼层框定" && (polygon[0].X - b.Position.X) * (polygon[2].X - b.Position.X) < 0 && (polygon[0].Y - b.Position.Y) * (polygon[2].Y - b.Position.Y) < 0)
                         .ForEach(b => Elements.Add(new ThStoreys(b.ObjectId)));
                 }
                 else

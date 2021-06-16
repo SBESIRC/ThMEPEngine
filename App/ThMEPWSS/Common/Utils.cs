@@ -56,7 +56,7 @@ namespace ThMEPWSS.Common
                 return Tuple.Create(leftDownPt, leftDownPt);
             }
 
-            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点\n", leftDownPt);
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
                 return Tuple.Create(leftDownPt, ptRightRes.Value);
@@ -65,16 +65,6 @@ namespace ThMEPWSS.Common
             {
                 return Tuple.Create(leftDownPt, leftDownPt);
             }
-        }
-
-        public static void FocusMainWindow()
-        {
-#if ACAD_ABOVE_2014
-            Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
-#endif
-            //var w = Autodesk.AutoCAD.ApplicationServices.Application.MainWindow;
-            //var mi = w.GetType().GetMethod("Focus");
-            //mi?.Invoke(w, null);
         }
     }
 }

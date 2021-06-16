@@ -1,19 +1,19 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using ThCADExtension;
+using System;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThElementSimplifier : ThBuildElementSimplifier
     {
-        public double OFFSET_DISTANCE { get; set; }
-        public double DISTANCE_TOLERANCE { get; set; }
-        public double TESSELLATE_ARC_LENGTH { get; set; }
+        protected double OFFSET_DISTANCE { get; set; }
+        protected double DISTANCE_TOLERANCE { get; set; }
+        protected double TESSELLATE_ARC_LENGTH { get; set; }
 
         public ThElementSimplifier()
         {
@@ -62,10 +62,6 @@ namespace ThMEPEngineCore.Service
                 else if (c is Circle circle)
                 {
                     objs.Add(circle.Tessellate(TESSELLATE_ARC_LENGTH));
-                }
-                else if (c is Arc arc)
-                {
-                    objs.Add(arc.TessellateArcWithArc(TESSELLATE_ARC_LENGTH));
                 }
                 else
                 {

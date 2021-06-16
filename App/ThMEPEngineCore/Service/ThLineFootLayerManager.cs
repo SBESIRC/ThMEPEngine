@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThCorniceLayerManager
+    public class ThLineFootLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.Service
             {
                 return acadDatabase.Layers
                     .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsCorniceLayer(o.Name))
+                    .Where(o => IsLineFootLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.Service
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
 
-        private static bool IsCorniceLayer(string name)
+        private static bool IsLineFootLayer(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 2)

@@ -74,11 +74,5 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new uiFireControlSystem();
             AcadApp.ShowModelessWindow(ui);
         }
-        [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
-        public void ThDrainageSysAboveGround()
-        {
-            var ui = new uiDrainageSysAboveGround();
-            AcadApp.ShowModelessWindow(ui);
-        }
     }
 }

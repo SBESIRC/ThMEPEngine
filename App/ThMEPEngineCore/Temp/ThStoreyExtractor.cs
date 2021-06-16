@@ -123,7 +123,9 @@ namespace ThMEPEngineCore.Temp
             var attributeDic = Storey.ObjectId.GetAttributesInBlockReference(true);
             foreach (var item in attributeDic)
             {
-                if (item.Key.Contains("编号"))  // 标准层编号、非标准层编号、大屋面、小面...
+                if (item.Key == "楼层编号" ||
+                    item.Key == "非标层编号" ||
+                    item.Key == "标准层编号")
                 {
                     return item.Value;
                 }

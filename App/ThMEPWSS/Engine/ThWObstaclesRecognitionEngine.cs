@@ -13,7 +13,7 @@ namespace ThMEPWSS.Engine
         {
             // 提取
             var extractor = new ThBuildingElementExtractor();
-            var windowVisitor = new ThDB3WindowExtractionVisitor()
+            var windowVisitor = new ThWindowExtractionVisitor()
             {
                 LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
             };
@@ -37,10 +37,10 @@ namespace ThMEPWSS.Engine
             extractor.Extract(database);
 
             // 识别
-            var doorEngine = new ThDB3DoorRecognitionEngine();
+            var doorEngine = new ThDoorRecognitionEngine();
             doorEngine.Recognize(database, polygon);
 
-            var windowEngine = new ThDB3WindowRecognitionEngine();
+            var windowEngine = new ThWindowRecognitionEngine();
             windowEngine.Recognize(windowVisitor.Results, polygon);
             var columnEngine = new ThColumnRecognitionEngine();
             columnEngine.Recognize(columnVisitor.Results, polygon);

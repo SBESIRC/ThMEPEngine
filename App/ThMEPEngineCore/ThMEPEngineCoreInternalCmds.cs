@@ -759,48 +759,12 @@ namespace ThMEPEngineCore
                 }
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThStoreyExtractor()
-                    {
-                        ColorIndex=1,
-                        GroupSwitch=false,
-                        UseDb3Engine=true,
-                        IsolateSwitch=false,
-                    },
-                    new ThArchitectureOutlineExtractor()
-                    { 
-                        ColorIndex=2,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThOuterOtherColumnExtractor()
-                    { 
-                        ColorIndex=3,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,                        
-                        IsolateSwitch=false
-                    },
-                    new ThOuterOtherShearWallExtractor()
-                    { 
-                        ColorIndex=4,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,                        
-                        IsolateSwitch=false
-                    },
-                    new ThBeamExtractor()
-                    { 
-                        ColorIndex =5,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThLightningReceivingBeltExtractor
-                    { 
-                        ColorIndex=6,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
+                    new ThStoreyExtractor(){ColorIndex=1,},
+                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true,},
+                    new ThOuterOtherColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
+                    new ThOuterOtherShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
+                    new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},
+                    new ThLightningReceivingBeltExtractor{ ColorIndex=6,GroupSwitch=true},
                 };
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);

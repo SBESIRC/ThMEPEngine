@@ -29,13 +29,9 @@ namespace ThMEPEngineCore.CAD
         /// <returns></returns>
         public static Polyline CreatePolyline(Point2dCollection pts, bool isClosed = true, double lineWidth = 0)
         {
-            Polyline polyline = new Polyline()
+            Polyline polyline = new Polyline();
+            if (pts.Count == 2)
             {
-                Closed= isClosed,
-            };
-            if (pts.Count == 2 && isClosed)
-            {
-                //如果要闭合，且画的是斜线,创建一个矩形
                 Point2d minPt = pts[0];
                 Point2d maxPt = pts[1];
                 Vector2d vec = minPt.GetVectorTo(maxPt);

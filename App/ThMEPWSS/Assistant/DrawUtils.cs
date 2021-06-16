@@ -52,16 +52,12 @@ namespace ThMEPWSS.Assistant
         public DrawingTransaction(AcadDatabase adb) : this()
         {
             this.adb = adb;
-        }
-        public DrawingTransaction(AcadDatabase adb, bool createFbk)
-        {
-            this.adb = adb;
-            if (createFbk) this.fbk = FastBlock.Create(adb);
+            this.fbk = FastBlock.Create(adb);
+            Cur = this;
         }
         public DrawingTransaction()
         {
             DrawUtils.DrawingQueue.Clear();
-            Cur = this;
         }
         public void Dispose()
         {
@@ -80,100 +76,6 @@ namespace ThMEPWSS.Assistant
             {
                 Cur = null;
             }
-        }
-    }
-    public class FastBlock
-    {
-        BlockTable bt;
-        BlockTableRecord btr;
-        AcadDatabase adb;
-        Database db;
-        Dictionary<string, ObjectId> d1 = new Dictionary<string, ObjectId>();
-        Dictionary<string, BlockTableRecord> d2 = new Dictionary<string, BlockTableRecord>();
-        Dictionary<BlockTableRecord, List<AttributeDefinition>> d3 = new Dictionary<BlockTableRecord, List<AttributeDefinition>>();
-        Dictionary<BlockTableRecord, Action<BlockReference, Dictionary<string, string>>> d4 = new Dictionary<BlockTableRecord, Action<BlockReference, Dictionary<string, string>>>();
-        private FastBlock() { }
-        public static FastBlock Create(AcadDatabase adb)
-        {
-            var o = new FastBlock();
-            var spaceId = adb.ModelSpace.ObjectId;
-            var db = spaceId.Database;
-            o.adb = adb;
-            o.db = db;
-            var bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
-            o.bt = bt;
-            o.btr = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
-            foreach (var blockName in adb.Blocks.Select(x => x.Name))
-            {
-                var btrId = bt[blockName];
-                var record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
-                o.d1[blockName] = btrId;
-                o.d2[blockName] = record;
-                if (record.HasAttributeDefinitions)
-                {
-                    var attrDefs = new List<AttributeDefinition>();
-                    foreach (ObjectId id in record)
-                    {
-                        if (id.GetObject(OpenMode.ForRead) is AttributeDefinition attr)
-                            attrDefs.Add(attr);
-                    }
-                    o.d3[record] = attrDefs;
-                    var attrDefKeys = attrDefs.Select(x => x.Tag.ToUpper()).ToList();
-                    o.d4[record] = (br, d) =>
-                    {
-                        for (int i = 0; i < attrDefs.Count; i++)
-                        {
-                            var k = attrDefKeys[i];
-                            var attrDef = attrDefs[i];
-                            if (d.TryGetValue(k, out string value))
-                            {
-                                var attr = CreateAttribute(db, br, attrDef);
-                                attr.TextString = value;
-                                AppendAttribute(db, br, attr);
-                            }
-                        }
-                    };
-                }
-            }
-            return o;
-        }
-        public bool HasBlock(string name) => d1.ContainsKey(name);
-        public BlockReference InsertBlockReference(Point3d position, string blockName,
-            Dictionary<string, string> attNameValue = null,
-            Action<BlockReference> before = null,
-            Action<BlockReference> after = null)
-        {
-            if (!d1.TryGetValue(blockName, out ObjectId id)) return null;
-            var br = new BlockReference(position, id);
-            before?.Invoke(br);
-            btr.AppendEntity(br);
-            if (attNameValue != null)
-            {
-                var record = d2[blockName];
-                d4[record](br, attNameValue);
-            }
-            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
-            after?.Invoke(br);
-            return br;
-        }
-        public static void AppendAttribute(Database db, BlockReference br, AttributeReference attribute)
-        {
-            //向块参照添加属性对象
-            br.AttributeCollection.AppendAttribute(attribute);
-            db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
-        }
-
-        public static AttributeReference CreateAttribute(Database db, BlockReference br, AttributeDefinition attDef)
-        {
-            //创建一个新的属性对象
-            AttributeReference attribute = new AttributeReference();
-            //从属性定义获得属性对象的对象特性
-            attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
-            //设置属性对象的其它特性
-            attribute.Position = attDef.Position.TransformBy(br.BlockTransform);
-            attribute.Rotation = attDef.Rotation;
-            attribute.AdjustAlignment(db);
-            return attribute;
         }
     }
     public static class DrawUtils
@@ -261,12 +163,6 @@ namespace ThMEPWSS.Assistant
                 ent.Layer = layer;
                 ent.ColorIndex = colorIndex;
             }
-        }
-        public static Circle DrawGeometryLazy(GCircle circle)
-        {
-            var c = new Circle() { Center = circle.Center.ToPoint3d(), Radius = circle.Radius };
-            DrawEntityLazy(c);
-            return c;
         }
         public static void DrawGeometryLazy(Geometry geo)
         {

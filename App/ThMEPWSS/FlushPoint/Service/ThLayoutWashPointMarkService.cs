@@ -44,7 +44,7 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.Height = textSize;
                 dbText.Layer = LayoutData.WaterSupplyMarkLayerName;
                 dbText.TextStyleId = acadDb.TextStyles.Element(LayoutData.WaterSupplyMarkStyle).Id;
-                dbText.WidthFactor = LayoutData.WaterSupplyMarkWidthFactor;
+
                 acadDb.ModelSpace.Add(firstLine);
                 acadDb.ModelSpace.Add(secondLine);
                 acadDb.ModelSpace.Add(dbText);
@@ -92,7 +92,6 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.Height = textSize;
                 dbText.Layer = LayoutData.WaterSupplyMarkLayerName;
                 dbText.TextStyleId = acadDb.TextStyles.Element(LayoutData.WaterSupplyMarkStyle).Id;
-                dbText.WidthFactor = LayoutData.WaterSupplyMarkWidthFactor;
                 return dbText;
             }
         }

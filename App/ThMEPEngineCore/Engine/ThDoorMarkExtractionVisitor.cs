@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Engine
         //
     }
 
-    public class ThDB3DoorMarkExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThDoorMarkExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {

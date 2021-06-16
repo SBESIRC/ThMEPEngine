@@ -85,20 +85,14 @@
   <ItemGroup>
     <Compile Include="PlumbingWPFUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
-      <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\uiDrainageSystem.xaml.cs">
       <DependentUpon>uiDrainageSystem.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
-      <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
       <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\uiFireControlSystem.xaml.cs">
-      <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
+    <Compile Include="UI\uiFireControlSystem.xaml.cs" >
+     <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\uiRainSystem.xaml.cs">
@@ -131,15 +125,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="UI\uiDrainageSystem.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\uiDrainageSysAboveGround.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

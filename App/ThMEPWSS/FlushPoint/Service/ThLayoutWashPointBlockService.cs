@@ -212,11 +212,6 @@ namespace ThMEPWSS.FlushPoint.Service
         /// 冲洗点位标注文字的图层名称
         /// </summary>
         public string WaterSupplyMarkStyle { get; set; }
-        /// <summary>
-        /// 冲洗点位标注文字的宽度因子
-        /// </summary>
-        public double WaterSupplyMarkWidthFactor { get; set; }
-
         public List<Point3d> WashPoints { get; set; }
         /// <summary>
         /// 冲洗点扩大搜索的范围(找到相邻的墙、柱子等)
@@ -252,7 +247,6 @@ namespace ThMEPWSS.FlushPoint.Service
             WashPointLayerName = "W-WSUP-EQPM";
             WaterSupplyMarkLayerName = "W-WSUP-NOTE";
             WaterSupplyMarkStyle = "TH-STYLE3";
-            WaterSupplyMarkWidthFactor = 0.7;
             PlotScale = "1:1";
             Walls = new List<Entity>();
             Columns = new List<Entity>();
