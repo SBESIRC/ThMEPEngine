@@ -21,7 +21,7 @@ namespace ThCADExtension
 
         public static bool Contains(this Extents3d extents, Point3d pt)
         {
-            return extents.ToRectangle().IsPointInside(pt);
+            return extents.ToRectangle().ContainsPoint(pt);
         }
 
         public static double Width(this Extents3d extents)
