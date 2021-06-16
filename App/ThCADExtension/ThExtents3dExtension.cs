@@ -1,20 +1,27 @@
-﻿using DotNetARX;
+﻿using System;
+using DotNetARX;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System;
+using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
 namespace ThCADExtension
 {
     public static class ThExtents3dExtension
     {
-        public static Polyline ToRectangle(this Extents3d extents)
+        public static AcPolygon ToRectangle(this Extents3d extents)
         {
-            var pline = new Polyline()
+            var pline = new AcPolygon()
             {
                 Closed = true,
             };
             pline.CreateRectangle(extents.MinPoint.ToPoint2d(), extents.MaxPoint.ToPoint2d());
             return pline;
+        }
+
+        public static bool Contains(this Extents3d extents, Point3d pt)
+        {
+            return extents.ToRectangle().IsPointInside(pt);
         }
 
         public static double Width(this Extents3d extents)

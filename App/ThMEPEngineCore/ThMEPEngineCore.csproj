@@ -299,7 +299,6 @@
     <Compile Include="Model\ThIfcArcBeam.cs" />
     <Compile Include="Model\ThIfcBeam.cs" />
     <Compile Include="Model\ThIfcBeamAnnotation.cs" />
-    <Compile Include="Model\ThIfcBeamComparer.cs" />
     <Compile Include="Model\ThIfcBuilding.cs" />
     <Compile Include="Model\ThIfcBuildingElement.cs" />
     <Compile Include="Model\ThIfcBuildingStorey.cs" />
