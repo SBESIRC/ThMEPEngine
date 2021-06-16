@@ -1,5 +1,4 @@
 ﻿using Linq2Acad;
-using System.Linq;
 using ThCADExtension;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
@@ -32,6 +31,11 @@ namespace ThMEPElectrical.BlockConvert
             return new ThBlockReferenceData(blkRef);
         }
 
+        public static ThBlockReferenceData GetBlockReference(this Database database, BlockReference blkRef)
+        {
+            return new ThBlockReferenceData(database, blkRef);
+        }
+
         /// <summary>
         /// 提取图纸中某个范围内所有的特点块的引用
         /// </summary>
@@ -39,17 +43,14 @@ namespace ThMEPElectrical.BlockConvert
         /// <param name="block"></param>
         /// <param name="extents"></param>
         /// <returns></returns>
-        public static ObjectIdCollection GetBlockReferences(this Database database, 
+        public static DBObjectCollection GetBlockReferences(this Database database, 
             ThBlockConvertBlock block, Extents3d extents)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var objs = new ObjectIdCollection();
+                var objs = new DBObjectCollection();
                 var name = (string)block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
-                var blkRefs = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(o => o.GetEffectiveName() == name);
-                foreach(var blkRef in blkRefs)
+                foreach(BlockReference blkRef in Extract(acadDatabase.Database, name))
                 {
                     Plane XYPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);
                     Matrix3d matrix = Matrix3d.Projection(XYPlane, XYPlane.Normal);
@@ -58,11 +59,65 @@ namespace ThMEPElectrical.BlockConvert
                         extents.MaxPoint.TransformBy(matrix));
                     if (blkRef.Position.TransformBy(matrix).IsInside(projectExtents))
                     {
-                        objs.Add(blkRef.ObjectId);
+                        objs.Add(blkRef);
                     }
                 }
                 return objs;
             }
+        }
+
+        private static List<BlockReference> Extract(Database database, string name)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                var results = new List<BlockReference>();
+                foreach (var ent in acadDatabase.ModelSpace)
+                {
+                    if (ent is BlockReference blkRef)
+                    {
+                        if (blkRef.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
+                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        results.AddRange(DoExtract(blkRef, mcs2wcs, name));
+                    }
+                }
+                return results;
+            }
+        }
+
+        private static List<BlockReference> DoExtract(BlockReference blockReference, Matrix3d matrix, string name)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
+            {
+                var results = new List<BlockReference>();
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);                
+                foreach (var objId in blockTableRecord)
+                {
+                    var dbObj = acadDatabase.Element<Entity>(objId);
+                    if (dbObj is BlockReference blockObj)
+                    {
+                        if (blockObj.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
+                        if (IsBlockReference(blockObj, name))
+                        {
+                            results.Add(blockObj.GetTransformedCopy(matrix) as BlockReference);
+                            continue;
+                        }
+                        var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                        results.AddRange(DoExtract(blockObj, mcs2wcs, name));
+                    }
+                }
+                return results;
+            }
+        }
+
+        private static bool IsBlockReference(BlockReference blockReference, string name)
+        {
+            return blockReference.GetEffectiveName() == name;
         }
     }
 }

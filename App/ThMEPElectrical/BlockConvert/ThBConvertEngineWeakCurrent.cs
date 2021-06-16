@@ -46,13 +46,32 @@ namespace ThMEPElectrical.BlockConvert
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 blockReference.TransformBy(srcBlockReference.BlockTransform);
+            }
+        }
+
+        public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            AdjustRotation(blkRef, srcBlockReference);
+            AdjustPosition(blkRef, srcBlockReference);
+        }
+
+        private void AdjustRotation(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 double rotation = srcBlockReference.Rotation;
-                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance && 
+                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
                     (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, blockReference.Position));
                 }
             }
+        }
+
+        private void AdjustPosition(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            //
         }
     }
 }
