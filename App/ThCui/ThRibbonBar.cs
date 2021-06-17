@@ -176,10 +176,10 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
                 var subRow = subPanel.AddNewRibbonRow();
-                row.AddNewButton("集水井布置",
-                    "天华集水井布置",
+                row.AddNewButton("潜水泵布置",
+                    "天华潜水泵布置",
                     "THSJSB",
-                    "天华集水井布置",
+                    "天华潜水泵布置",
                     "IDI_THCAD_THSJSB_SMALL",
                     "IDI_THCAD_THSJSB_LARGE",
                     RibbonButtonStyle.LargeWithText);

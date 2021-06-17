@@ -7,7 +7,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     WindowStartupLocation="CenterOwner"
-                    Title="集水井水泵"
+                    Title="潜水泵布置"
                     SizeToContent="Height"
                     Width="160"
                     Height="410"

@@ -50,7 +50,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// 集水井水泵布置	
+        /// 潜水泵布置
         /// </summary>
         [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
         public void ThArrangePumpWithUI()
