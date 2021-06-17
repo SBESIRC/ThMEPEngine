@@ -22,6 +22,7 @@ using ThMEPEngineCore.Model.Electrical;
 namespace ThMEPElectrical.SystemDiagram.Model
 {
     /// <summary>
+    /// THAFAS V1.0
     /// 自动火灾报警系统Model
     /// 一个系统图里首先分楼层
     /// 其次每个楼层分0/1/N个防火分区
@@ -183,6 +184,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
                 //初始化黄色外方块的图层信息和文字图层信息
                 InsertBlockService.InsertOuterBorderBlockLayer();
+                //开启联动关闭排烟风机信号线绘画权限
+                ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = true;
 
                 List<Entity> DrawEntitys = new List<Entity>();
                 Dictionary<Point3d, ThBlockModel> dicBlockPoints = new Dictionary<Point3d, ThBlockModel>();
@@ -282,7 +285,15 @@ namespace ThMEPElectrical.SystemDiagram.Model
             var NormalFireDistricts = allData.Where(f => f.FireDistrictNo != -1).ToList();
             allData.Where(f => f.FireDistrictNo == -1).ForEach(f =>
             {
-                NormalFireDistricts.FirstOrDefault(o => o.FireDistrictName == f.FireDistrictName).Data += f.Data;
+                var FindData = NormalFireDistricts.FirstOrDefault(o => o.FireDistrictName == f.FireDistrictName);
+                if (FindData.IsNull())
+                {
+                    NormalFireDistricts.Add(f);
+                }
+                else
+                {
+                    FindData.Data += f.Data;
+                }
             });
             return NormalFireDistricts;
         }
@@ -393,7 +404,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 // throw new exception
             }
             return BlockDataReturn;
-        }
-        
+        }      
     }
 }

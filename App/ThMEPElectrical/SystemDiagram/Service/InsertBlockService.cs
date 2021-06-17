@@ -120,7 +120,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
-                acadDatabase.Database.ImportBlockLayer(LayerName);
                 acadDatabase.Database.ImportBlock(BlockName);
                 try
                 {
@@ -131,6 +130,43 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 }
                 catch (Exception ex)
                 {
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入联动关闭排烟风机信号线
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="vector">偏移量</param>
+        public static void InsertSmokeExhaust(Vector3d vector)
+        {
+            //仅画一次
+            if (ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
+                    string BlockName = ThAutoFireAlarmSystemCommon.FixedPartSmokeExhaust;
+                    acadDatabase.Database.ImportBlock(BlockName);
+                    try
+                    {
+                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(3000*14+750, -450, 0).Add(offset), new Scale3d(), 0, false, null);
+                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                        var objs = new DBObjectCollection();
+                        blkref.Explode(objs);
+                        MLeader mLeader = objs[1] as MLeader;
+                        var a = mLeader.GetFirstVertex(1);
+                        mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector));
+                        var ba = mLeader.GetFirstVertex(1);
+                        blkref.Erase();
+                        ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = false;
+                        acadDatabase.ModelSpace.Add(objs[0] as MText);
+                        acadDatabase.ModelSpace.Add(mLeader);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
         }
@@ -203,7 +239,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), true);
             }
         }
     }

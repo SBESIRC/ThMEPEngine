@@ -24,14 +24,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 CanDraw = false;
             }
-            if(CanDraw)
+            if (CanDraw)
             {
                 //画起点框
                 #region 起点框
                 Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2250, OuterFrameLength * (FloorIndex - 1) + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2250, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 Result.Add(Startline1);
 
-                Line Startline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2250, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex , OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                Line Startline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2250, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 Result.Add(Startline2);
                 #endregion
 
@@ -46,7 +46,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 Result.Add(Endline1);
 
-                Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1)+1925, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
+                Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
                 Result.Add(Endline2);
 
                 Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * (FloorIndex - 1) + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
@@ -54,6 +54,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
                 InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Scale3d(100, 100, 100), Math.PI, new Dictionary<string, string>() { { "N", this.fireDistrict.Data.BlockData.BlockStatistics["防排抽烟机"].ToString() } });
                 #endregion
+
+                InsertBlockService.InsertSmokeExhaust(new Vector3d(0, OuterFrameLength * (FloorIndex - 1), 0));
             }
             //设置线型
             Result.ForEach(o =>

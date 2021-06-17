@@ -26,7 +26,7 @@ namespace ThMEPElectrical.Command
         {
             //throw new NotImplementedException();
         }
-        private static Tuple<Point3d, Point3d> SelectPoints()
+        private Tuple<Point3d, Point3d> SelectPoints()
         {
             var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
             Point3d leftDownPt = Point3d.Origin;
