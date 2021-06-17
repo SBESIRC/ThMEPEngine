@@ -63,30 +63,6 @@ namespace ThMEPWSS.Command
 #endif
         }
 
-        public void Test()
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var per = Active.Editor.GetEntity("\n选择一个范围框");
-                if (per.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var roomEntity = acadDb.Element<Entity>(per.ObjectId);
-
-                var psr = Active.Editor.GetSelection();
-                if (psr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var protectAreas = psr.Value.GetObjectIds().Cast<ObjectId>().Select(o => acadDb.Element<Polyline>(o)).ToList();
-
-                var service = new ThDivideRoomService(roomEntity, protectAreas);
-                service.Divide();
-                service.Print(acadDb.Database);
-            }
-        }
-
 #if ACAD2016
         private void BuildHydrantParam()
         {
