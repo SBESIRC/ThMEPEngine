@@ -215,7 +215,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             var results = SpatialIndex.SelectCrossingPolygon(Square);
             results.Remove(SourceEntity);
             results.Remove(TargetEntity);
-            acadDatabase.Database.AddToModelSpace(Square);
             if (results.Count == 0)
             {
                 return;
@@ -280,17 +279,19 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public Polyline Buffer(Entity entity)
         {
-            if(entity is BlockReference blk)
-            {
-                var btr = acadDatabase.Blocks.Element(blk.BlockTableRecord);
-                Polyline poly = btr.GeometricExtents().ToRectangle().GetTransformedCopy(blk.BlockTransform) as Polyline;
-                return poly.Buffer(ThAutoFireAlarmSystemCommon.ConnectionTolerance)[0] as Polyline;
-            }
-            if(entity is Line line)
+            if (entity is Line line)
             {
                 return line.Buffer(ThAutoFireAlarmSystemCommon.ConnectionTolerance);
             }
-            return null;
+            else if (entity is BlockReference blk)
+            {
+                Polyline poly = blk.ToOBB(blk.BlockTransform);
+                return poly.Buffer(ThAutoFireAlarmSystemCommon.ConnectionTolerance)[0] as Polyline;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 

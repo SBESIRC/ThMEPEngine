@@ -163,14 +163,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <summary>
         /// 画系统图
         /// </summary>
-        public void DrawSystemDiagram(Vector3d Offset)
+        public void DrawSystemDiagram(Vector3d Offset, Matrix3d ConversionMatrix)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
                 HostApplicationServices.WorkingDatabase = acadDatabase.Database;
 
                 //设置全局偏移量
-                InsertBlockService.SetOffset(Offset);
+                InsertBlockService.SetOffset(Offset, ConversionMatrix);
                 //初始化所有需要画的线并导入图层/线型等信息
                 ThWireCircuitConfig.HorizontalWireCircuits.ForEach(o =>
                 {
@@ -232,6 +232,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 foreach (Entity item in DrawEntitys)
                 {
                     item.Move(Offset);
+                    item.TransformBy(ConversionMatrix);
                     acadDatabase.ModelSpace.Add(item);
                 }
                 //画所有的外框线

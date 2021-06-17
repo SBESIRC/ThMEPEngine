@@ -16,10 +16,12 @@ namespace ThMEPElectrical.SystemDiagram.Service
     public static class InsertBlockService
     {
         public static Vector3d offset = new Vector3d();
+        public static Matrix3d conversionMatrix = new Matrix3d();
 
-        public static void SetOffset(Vector3d Toffset)
+        public static void SetOffset(Vector3d Toffset, Matrix3d ConversionMatrix)
         {
             offset = Toffset;
+            conversionMatrix = ConversionMatrix;
         }
 
         public static void InsertLineType(string LayerName,string LineType)
@@ -63,7 +65,9 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 {
                     for (int j = -1; j < ColNum; j++)
                     {
-                        acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0).Add(offset), new Scale3d(1), 0, false, null);
+                        var objId=acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0).Add(offset), new Scale3d(1), 0, false, null);
+                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                        blkref.TransformBy(conversionMatrix);
                     }
                 }
             }
@@ -96,11 +100,16 @@ namespace ThMEPElectrical.SystemDiagram.Service
                         {
                             var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(1), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
                             var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                            blkref.TransformBy(conversionMatrix);
                             blkref.ExplodeToOwnerSpace();
                             blkref.Erase();
                         }
                         else
-                            acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                        {
+                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                            var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                            blkref.TransformBy(conversionMatrix);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -125,6 +134,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 {
                     var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(-3000, 0, 0).Add(offset), new Scale3d(), 0, false, null);
                     var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
                     blkref.ExplodeToOwnerSpace();
                     blkref.Erase();
                 }
@@ -153,12 +163,11 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     {
                         var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(3000*14+750, -450, 0).Add(offset), new Scale3d(), 0, false, null);
                         var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                        blkref.TransformBy(conversionMatrix);
                         var objs = new DBObjectCollection();
                         blkref.Explode(objs);
                         MLeader mLeader = objs[1] as MLeader;
-                        var a = mLeader.GetFirstVertex(1);
-                        mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector));
-                        var ba = mLeader.GetFirstVertex(1);
+                        mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector.TransformBy(conversionMatrix)));
                         blkref.Erase();
                         ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = false;
                         acadDatabase.ModelSpace.Add(objs[0] as MText);
@@ -184,7 +193,9 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 string BlockName = ThAutoFireAlarmSystemCommon.CountBlockName;
                 try
                 {
-                    acadDatabase.Database.InsertBlock(LayerName, BlockName, position.Add(offset), scale, angle, true, attNameValues);
+                    var objId=acadDatabase.Database.InsertBlock(LayerName, BlockName, position.Add(offset), scale, angle, true, attNameValues);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
                 }
                 catch (Exception ex)
                 {

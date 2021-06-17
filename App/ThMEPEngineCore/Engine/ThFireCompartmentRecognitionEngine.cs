@@ -126,18 +126,15 @@ namespace ThMEPEngineCore.Engine
         }
         private Entity GetMpolygon(List<Polyline> polylines)
         {
-            var objs = new DBObjectCollection();
-
-            foreach (var obj in  polylines)
-            {
-                objs.Add(obj);
-            }
-
-            var mPolygon = objs.BuildArea();
+            var mPolygon = polylines.ToCollection().BuildArea();
             if (mPolygon.Count == 1 && mPolygon[0] is MPolygon)
+            {
                 return mPolygon[0] as MPolygon;
+            }
             else
-                throw new ArgumentException();//参数无效
+            {
+                throw new ArgumentException();
+            }
         }
     }
 }

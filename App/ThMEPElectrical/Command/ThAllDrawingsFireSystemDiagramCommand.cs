@@ -3,6 +3,7 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -102,7 +103,7 @@ namespace ThMEPElectrical.Command
             }
 
             //画系统图
-            diagram.DrawSystemDiagram(position.GetAsVector());
+            diagram.DrawSystemDiagram(position.GetAsVector(), Active.Editor.UCS2WCS());
         }
     }
 }
