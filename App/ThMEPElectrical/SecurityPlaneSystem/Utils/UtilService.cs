@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.LaneLine;
 
-namespace ThMEPElectrical.VideoMonitoringSystem.Utls
+namespace ThMEPElectrical.SecurityPlaneSystem.Utls
 {
     public static class UtilService
     {
@@ -107,6 +107,35 @@ namespace ThMEPElectrical.VideoMonitoringSystem.Utls
         {
             var closetPt = line.GetClosestPointTo(pt, false);
             return closetPt.DistanceTo(pt) < tol;
+        }
+
+        /// <summary>
+        /// 判断两个向量是否在容差范围内平行
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="otherDir"></param>
+        /// <param name="angle"></param>
+        /// <returns></returns>
+        public static bool IsParallelWithTolerance(this Vector3d dir, Vector3d otherDir, double angle)
+        {
+            if (dir.DotProduct(otherDir) < 0)
+            {
+                otherDir = -otherDir;
+            }
+
+            double dirAngle = dir.GetAngleTo(otherDir);
+            if (dirAngle > Math.PI)
+            {
+                dirAngle = Math.PI * 2 - dirAngle;
+            }
+
+            var checkAngele = dirAngle / Math.PI * 180;
+            if (checkAngele<= angle)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

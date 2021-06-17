@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.VideoMonitoringSystem.Model;
-using ThMEPElectrical.VideoMonitoringSystem.Utls;
+using ThMEPElectrical.SecurityPlaneSystem.Utls;
 using ThMEPEngineCore.Model;
 
-namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
+namespace ThMEPElectrical.StructureHandleService
 {
     public class GetLayoutStructureService
     {
@@ -37,14 +37,14 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 {
                     LayoutInfoModel layoutInfo = new LayoutInfoModel();
                     var roomPtInfo = GetDoorCenterPointOnRoom(room, nDoor);
-                    var poly = GetLayoutRange(roomPtInfo);
+                    var poly = GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2);
                     if (poly != null)
                     {
                         var nCols = GetNeedColumns(columns, room, poly);
                         var nWalls = GetNeedWalls(walls, room, poly);
                         layoutInfo.room = room;
-                        layoutInfo.doorCenterPoint = roomPtInfo.Key;
-                        layoutInfo.doorDir = roomPtInfo.Value;
+                        layoutInfo.doorCenterPoint = roomPtInfo.Item1;
+                        layoutInfo.doorDir = roomPtInfo.Item2;
                         layoutInfo.walls = nWalls;
                         layoutInfo.colums = nCols;
                         roomInfo.Add(layoutInfo);
@@ -61,16 +61,16 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        private Polyline GetLayoutRange(KeyValuePair<Point3d, Vector3d> roomPtInfo)
+        private Polyline GetLayoutRange(Point3d pt, Vector3d dir)
         {
             var rotateAngle = (angle / 2) * Math.PI / 180;
-            var dir1 = roomPtInfo.Value.RotateBy(rotateAngle, Vector3d.ZAxis);
-            var dir2 = roomPtInfo.Value.RotateBy(rotateAngle, -Vector3d.ZAxis);
+            var dir1 = dir.RotateBy(rotateAngle, Vector3d.ZAxis);
+            var dir2 = dir.RotateBy(rotateAngle, -Vector3d.ZAxis);
 
-            Circle circle = new Circle(roomPtInfo.Key, Vector3d.ZAxis, layoutRange);
+            Circle circle = new Circle(pt, Vector3d.ZAxis, layoutRange);
             var criclePoly = circle.Tessellate(length);
 
-            Ray ray = new Ray() { BasePoint = roomPtInfo.Key, UnitDir = dir1 };
+            Ray ray = new Ray() { BasePoint = pt, UnitDir = dir1 };
             Point3dCollection pts = new Point3dCollection();
             circle.IntersectWith(ray, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
             var pt1 = pts[0];
@@ -81,12 +81,12 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var pt2 = pts[0];
 
             var objCollection = criclePoly.GetAllLinesInPolyline();
-            objCollection.Add(new Line(roomPtInfo.Key, pt1));
-            objCollection.Add(new Line(roomPtInfo.Key, pt2));
+            objCollection.Add(new Line(pt, pt1));
+            objCollection.Add(new Line(pt, pt2));
             List<Polyline> polygons = objCollection.ToCollection().Polygons().Cast<Polyline>().ToList();
             var resPoly = polygons.OrderBy(x => x.Area).FirstOrDefault();
 
-            Circle blindCircle = new Circle(roomPtInfo.Key, Vector3d.ZAxis, blindArea);
+            Circle blindCircle = new Circle(pt, Vector3d.ZAxis, blindArea);
             var blindCriclePoly = blindCircle.Tessellate(length);
 
             return resPoly.Difference(blindCriclePoly)[0] as Polyline;
@@ -98,10 +98,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        private KeyValuePair<Point3d, Vector3d> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
+        public Tuple<Point3d, Vector3d, double> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
         {
             door = door.DPSimplify(1);
             var lines = door.GetAllLinesInPolyline().OrderByDescending(x => x.Length).ToList();
+            double doorLength = lines.First().Length;
             Point3d pt1 = new Point3d((lines[0].StartPoint.X + lines[0].EndPoint.X) / 2, (lines[0].StartPoint.Y + lines[0].EndPoint.Y) / 2, 0);
             Point3d pt2 = new Point3d((lines[1].StartPoint.X + lines[1].EndPoint.X) / 2, (lines[1].StartPoint.Y + lines[1].EndPoint.Y) / 2, 0);
             var roomPt = room.GetClosestPointTo(pt1, false);
@@ -110,7 +111,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var sp = roomPt.DistanceTo(pt2) > roomPt.DistanceTo(pt1) ? pt2 : pt1;
             var dir = (ep - sp).GetNormal();
 
-            return new KeyValuePair<Point3d, Vector3d>(roomPt, dir);
+            return Tuple.Create(roomPt, dir, doorLength);
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="doors"></param>
         /// <param name="room"></param>
         /// <returns></returns>
-        private List<Polyline> GetNeedDoors(List<Polyline> doors, Polyline room)
+        public List<Polyline> GetNeedDoors(List<Polyline> doors, Polyline room)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
             return thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
@@ -131,7 +132,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="columns"></param>
         /// <param name="room"></param>
         /// <returns></returns>
-        private List<Polyline> GetNeedColumns(List<Polyline> columns, Polyline room, Polyline range)
+        public List<Polyline> GetNeedColumns(List<Polyline> columns, Polyline room, Polyline range)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
             var roomColumns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
@@ -140,18 +141,98 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         }
 
         /// <summary>
+        /// 找到需要的房间内的柱
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<Polyline> GetNeedColumns(List<Polyline> columns, Polyline room)
+        {
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
+            var roomColumns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
+            return roomColumns.Cast<Polyline>().ToList();
+        }
+
+
+        /// <summary>
         /// 找到房间内需要的墙
         /// </summary>
         /// <param name="walls"></param>
         /// <param name="room"></param>
         /// <returns></returns>
-        private List<Polyline> GetNeedWalls(List<Polyline> walls, Polyline room, Polyline range)
+        public List<Polyline> GetNeedWalls(List<Polyline> walls, Polyline room, Polyline range)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
 
             needWalls = room.Intersection(needWalls);
             return range.Intersection(needWalls).Cast<Polyline>().ToList();
+        }
+
+        /// <summary>
+        /// 找到房间内需要的墙
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<Polyline> GetNeedWalls(List<Polyline> walls, Polyline room)
+        {
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
+            var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
+
+            return needWalls.Cast<Polyline>().ToList();
+        }
+
+        /// <summary>
+        /// 找到可能可以布置控制器的构建
+        /// </summary>
+        /// <param name="door"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        public List<Polyline> CalLayoutStruc(Polyline door, List<Polyline> columns, List<Polyline> walls)
+        {
+            var bufferDoor = door.Buffer(5)[0] as Polyline;
+            List<Polyline> structs = new List<Polyline>();
+            foreach (var column in columns)
+            {
+                if (column.Intersects(bufferDoor))
+                {
+                    structs.Add(column);
+                }
+            }
+
+            foreach (var wall in walls)
+            {
+                if (wall.Intersects(bufferDoor))
+                {
+                    structs.Add(wall);
+                }
+            }
+
+            return structs;
+        }
+
+        /// <summary>
+        /// 找到可能可以布置壁装探测器的构建
+        /// </summary>
+        /// <param name="circle"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        public List<Polyline> GetWallLayoutStruc(Polyline circle, List<Polyline> columns, List<Polyline> walls)
+        {
+            List<Polyline> structs = new List<Polyline>();
+            foreach (var column in columns)
+            {
+                if (column.Intersects(circle))
+                {
+                    structs.Add(column);
+                }
+            }
+
+            structs.AddRange(circle.Intersection(walls.ToCollection()).Cast<Polyline>().ToList());
+            return structs;
         }
     }
 }

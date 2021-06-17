@@ -138,20 +138,20 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
-                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
 
                 // 启动墙识别引擎
                 var ShearWallExtractEngine = new ThShearWallExtractionEngine();
                 ShearWallExtractEngine.Extract(acdb.Database);
-                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
