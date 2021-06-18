@@ -4,9 +4,9 @@ using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using AcHelper.Commands;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
@@ -44,24 +44,24 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    //加载块集合配置文件白名单
-                    ThBlockConfigModel.Init();
+                    //楼层
+                    StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
 
-                    //拿到全图所有防火分区
-                    FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
-
-                    //获取选择区域的所有所需块
+                    //图块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                     BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
 
-                    //获取选择区域的所有的楼层框线
-                    StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
+                    //防火分区
+                    FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
+
+                    //加载块集合配置文件白名单
+                    ThBlockConfigModel.Init();
 
                     //初始化楼层
                     var diagram = new ThAutoFireAlarmSystemModel();
                     var AddFloorss = diagram.InitStoreys(
-                        acadDatabase, 
-                        StoreysRecognitionEngine.Elements, 
+                        acadDatabase,
+                        StoreysRecognitionEngine.Elements,
                         FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
 
                     //获取块引擎附加信息

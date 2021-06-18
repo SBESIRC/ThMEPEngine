@@ -1,19 +1,16 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using AcHelper;
 using System.Linq;
-using ThCADExtension;
+using AcHelper.Commands;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model.Electrical;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.Command
 {
@@ -32,6 +29,13 @@ namespace ThMEPElectrical.Command
             //加载块集合配置文件白名单
             ThBlockConfigModel.Init();
 
+            //选择插入点
+            var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
+            if (ppr.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+            {
+                return;
+            }
+
             //加载所有已打开的文件
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
@@ -44,6 +48,10 @@ namespace ThMEPElectrical.Command
                     using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                     {
                         var points = new Point3dCollection();
+
+                        //获取选择区域的所有的楼层框线
+                        StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
+
                         //拿到全图所有防火分区
                         FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
 
@@ -51,11 +59,11 @@ namespace ThMEPElectrical.Command
                         BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                         BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
 
-                        //获取选择区域的所有的楼层框线
-                        StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
-
                         //初始化楼层
-                        var AddFloorss = diagram.InitStoreys(acadDatabase, StoreysRecognitionEngine.Elements, FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
+                        var AddFloorss = diagram.InitStoreys(
+                            acadDatabase,
+                            StoreysRecognitionEngine.Elements,
+                            FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
 
                         //获取块引擎附加信息
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();
@@ -67,15 +75,14 @@ namespace ThMEPElectrical.Command
                             var FloorBlockInfo = diagram.GetFloorBlockInfo(floor.FloorBoundary);
                             //在这里可以加OrderBy
                             floor.FireDistricts.ForEach(fireDistrict =>
+                            {
+                                fireDistrict.Data = new DataSummary()
                                 {
-                                    fireDistrict.Data = new DataSummary()
-                                    {
-                                        BlockData = diagram.FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary, floor.FloorName == "JF")
-                                    };
-                                    fireDistrict.DrawFireDistrict = fireDistrict.Data.BlockData.BlockStatistics.Values.Count(v => v > 0) > 0;
-                                });
+                                    BlockData = diagram.FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary, floor.FloorName == "JF")
+                                };
+                                fireDistrict.DrawFireDistrict = fireDistrict.Data.BlockData.BlockStatistics.Values.Count(v => v > 0) > 0;
+                            });
                             int Max_FireDistrictNo = 1;
-                            //Max_FireDistrictNo = floor.FireDistricts.OrderByDescending(f=>f.FireDistrictNo).FirstOrDefault().FireDistrictNo+1;
                             var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
                             Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
                             string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
@@ -91,19 +98,11 @@ namespace ThMEPElectrical.Command
 
                         //把楼层信息添加到系统图中
                         diagram.floors.AddRange(AddFloorss);
-                    }                    
+                    }
                 }
             }
-
-            var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
-            var position = Point3d.Origin;
-            if (ppr.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-            {
-                position = ppr.Value;
-            }
-
             //画系统图
-            diagram.DrawSystemDiagram(position.GetAsVector(), Active.Editor.UCS2WCS());
+            diagram.DrawSystemDiagram(ppr.Value.GetAsVector(), Active.Editor.UCS2WCS());
         }
     }
 }
