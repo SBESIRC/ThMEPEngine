@@ -175,12 +175,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ThWireCircuitConfig.HorizontalWireCircuits.ForEach(o =>
                 {
                     o.InitCircuitConnection();
-                    InsertBlockService.InsertLineType(o.CircuitLayer, o.CircuitLayerLinetype);
+                    InsertBlockService.InsertCircuitLayerAndLineType(o.CircuitLayer, o.CircuitLayerLinetype);
                 });
                 ThWireCircuitConfig.VerticalWireCircuits.ForEach(o =>
                 {
                     o.InitCircuitConnection();
-                    InsertBlockService.InsertLineType(o.CircuitLayer, o.CircuitLayerLinetype);
+                    InsertBlockService.InsertCircuitLayerAndLineType(o.CircuitLayer, o.CircuitLayerLinetype);
                 });
                 //初始化系统图需要的图层/线型等信息
                 InsertBlockService.InsertDiagramLayerAndStyle();
@@ -254,7 +254,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
                 HostApplicationServices.WorkingDatabase = db;
-                InsertBlockService.ImportFireDistrict(db);
+                InsertBlockService.ImportFireDistrictLayerAndStyle(db);
                 var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
                 List<Entity> DrawEntitys = new List<Entity>();
                 addFloorss.ForEach(f =>

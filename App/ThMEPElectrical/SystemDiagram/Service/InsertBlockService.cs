@@ -4,11 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPElectrical.CAD;
 using ThMEPElectrical.SystemDiagram.Model;
 
 namespace ThMEPElectrical.SystemDiagram.Service
@@ -24,38 +20,34 @@ namespace ThMEPElectrical.SystemDiagram.Service
             conversionMatrix = ConversionMatrix;
         }
 
-        public static void InsertLineType(string LayerName,string LineType)
+        public static void InsertCircuitLayerAndLineType(string layer, string linetype)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                using (AcadDatabase currentDb = AcadDatabase.Use(acadDatabase.Database))
-                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-                {
-                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayerName), false);
-                    currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineType),false);
-                }
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
+                acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(linetype), false);
             }
         }
 
         public static void InsertDiagramLayerAndStyle()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                string LayerName = ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer;
-                acadDatabase.Database.ImportBlockLayer(LayerName);
-                string CountLayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
-                acadDatabase.Database.ImportBlockLayer(CountLayerName);
-                acadDatabase.Database.ImportTextStyle("TH-STYLE3");
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.CountBlockByLayer), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer), false);
             }
         }
 
-        public static void ImportFireDistrict(Database database)
+        public static void ImportFireDistrictLayerAndStyle(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                string LayerName = ThAutoFireAlarmSystemCommon.FireDistrictByLayer;
-                acadDatabase.Database.ImportBlockLayer(LayerName);
-                acadDatabase.Database.ImportTextStyle("TH-STYLE1");
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.FireDistrictByLayer), false);
             }
 
         }
@@ -64,13 +56,12 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer;
-                //acadDatabase.Database.ImportBlockLayer(LayerName);
                 acadDatabase.Database.ImportBlock(ThAutoFireAlarmSystemCommon.OuterBorderBlockName);
                 for (int i = 0; i < RowNum; i++)
                 {
                     for (int j = -1; j < ColNum; j++)
                     {
-                        var objId=acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0).Add(offset), new Scale3d(1), 0, false, null);
+                        var objId = acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0).Add(offset), new Scale3d(1), 0, false, null);
                         var blkref = acadDatabase.Element<BlockReference>(objId, true);
                         blkref.TransformBy(conversionMatrix);
                     }
@@ -89,7 +80,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.BlockByLayer;
-                acadDatabase.Database.ImportBlockLayer(LayerName);
+                acadDatabase.Database.ImportLayer(LayerName);
                 foreach (var BlockInfo in dicBlockPoints)
                 {
                     try
@@ -156,7 +147,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="vector">偏移量</param>
         public static void InsertSmokeExhaust(Vector3d vector)
         {
-            //仅画一次
             if (ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust)
             {
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -166,7 +156,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     acadDatabase.Database.ImportBlock(BlockName);
                     try
                     {
-                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(3000*14+750, -450, 0).Add(offset), new Scale3d(), 0, false, null);
+                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(3000 * 14 + 750, -450, 0).Add(offset), new Scale3d(), 0, false, null);
                         var blkref = acadDatabase.Element<BlockReference>(objId, true);
                         blkref.TransformBy(conversionMatrix);
                         var objs = new DBObjectCollection();
@@ -194,18 +184,17 @@ namespace ThMEPElectrical.SystemDiagram.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
-                string BlockName = ThAutoFireAlarmSystemCommon.CountBlockName;
-                try
-                {
-                    var objId=acadDatabase.Database.InsertBlock(LayerName, BlockName, position.Add(offset), scale, angle, true, attNameValues);
-                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                    blkref.TransformBy(conversionMatrix);
-                }
-                catch (Exception ex)
-                {
-
-                }
+                var objId = acadDatabase.Database.InsertBlock(
+                    ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                    ThAutoFireAlarmSystemCommon.CountBlockName,
+                    Point3d.Origin,
+                    scale,
+                    angle,
+                    true,
+                    attNameValues);
+                var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                blkref.Position = position.Add(offset);
+                blkref.TransformBy(conversionMatrix);
             }
         }
 
@@ -235,7 +224,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="database"></param>
         /// <param name="name"></param>
         /// <param name="layer"></param>
-        private static void ImportBlockLayer(this Database database, string layer)
+        private static void ImportLayer(this Database database, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -250,27 +239,12 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="database"></param>
         /// <param name="name"></param>
         /// <param name="layer"></param>
-        private static void ImportBlock(this Database database, string name)
+        private static void ImportBlock(this Database database, string block)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), true);
-            }
-        }
-
-
-        /// <summary>
-        /// 导入文字样式
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="textStyles"></param>
-        private static void ImportTextStyle(this Database database, string textStyles)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(textStyles), false);
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(block), false);
             }
         }
     }
