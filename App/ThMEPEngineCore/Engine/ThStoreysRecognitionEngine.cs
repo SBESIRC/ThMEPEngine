@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     var envelope = polygon.Envelope();
                     
-                    blkrefs.Where(o => envelope.IsPointIn(o.Position))
+                    blkrefs.Where(o => envelope.ToExtents2d().IsPointIn(o.Position.ToPoint2D()))
                         .ForEach(b => Elements.Add(new ThStoreys(b.ObjectId)));
                 }
                 else

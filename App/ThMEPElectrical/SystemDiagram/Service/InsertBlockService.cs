@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
             }
         }
 
-        public static void InsertOuterBorderBlockLayer()
+        public static void InsertDiagramLayerAndStyle()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -45,15 +45,20 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 acadDatabase.Database.ImportBlockLayer(LayerName);
                 string CountLayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
                 acadDatabase.Database.ImportBlockLayer(CountLayerName);
+                acadDatabase.Database.ImportTextStyle("TH-STYLE3");
             }
         }
 
-        public static void InsertFireDistrictByLayer(AcadDatabase acadDatabase)
+        public static void ImportFireDistrict(Database database)
         {
-            string LayerName = ThAutoFireAlarmSystemCommon.FireDistrictByLayer;
-            acadDatabase.Database.ImportBlockLayer(LayerName);
-        }
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                string LayerName = ThAutoFireAlarmSystemCommon.FireDistrictByLayer;
+                acadDatabase.Database.ImportBlockLayer(LayerName);
+                acadDatabase.Database.ImportTextStyle("TH-STYLE1");
+            }
 
+        }
         public static void InsertOuterBorderBlock(int RowNum, int ColNum)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -251,6 +256,21 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), true);
+            }
+        }
+
+
+        /// <summary>
+        /// 导入文字样式
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="textStyles"></param>
+        private static void ImportTextStyle(this Database database, string textStyles)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(textStyles), false);
             }
         }
     }
