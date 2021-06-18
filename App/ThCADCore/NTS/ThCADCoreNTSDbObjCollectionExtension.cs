@@ -97,5 +97,11 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
+
+        public static Point3d GetCentroid(this DBObjectCollection curves)
+        {
+            var hull = ConvexHull.Create(curves.ToMultiLineString());
+            return Centroid.GetCentroid(hull).ToAcGePoint3d();
+        }
     }
 }
