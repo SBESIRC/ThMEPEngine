@@ -86,6 +86,21 @@
     <Compile Include="DrainageSystemAG\Models\TubeWellsRoomModel.cs" />
     <Compile Include="DrainageSystemAG\Services\ClearLoadBlockServices.cs" />
     <Compile Include="DrainageSystemAG\Services\CreateBlockService.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\IAreaId.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRegionExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThToilateGJson.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDeserializeGJson.cs" />
+    <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
+    <Compile Include="DrainageSystemDiagram\Assistant\CleanDebugDrawing.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRoomExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\DrainageSDCommon.cs" />
+    <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
+    <Compile Include="DrainageSystemDiagram\Engine\ThConnectToilateEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDColdWaterSupplyStartExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThIfcSanitaryTerminalToilate.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolSupplyPt.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJson.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
@@ -336,6 +351,10 @@
     <Folder Include="Hydrant\Model\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ThSystemDiagramCmds.THPSDYT.cs" />
+  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
