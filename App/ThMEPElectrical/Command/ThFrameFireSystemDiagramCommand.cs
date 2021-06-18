@@ -46,10 +46,17 @@ namespace ThMEPElectrical.Command
 
                     //楼层
                     StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
-
+                    if (StoreysRecognitionEngine.Elements.Count == 0)
+                    {
+                        return;
+                    }
                     //图块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                     BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
+                    if (BlockReferenceEngine.Elements.Count == 0)
+                    {
+                        return;
+                    }
 
                     //防火分区
                     FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
