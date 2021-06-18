@@ -1,27 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-
-
+﻿#if ACAD2016
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using Linq2Acad;
+using System.IO;
 using Dreambuild.AutoCAD;
-
-using CLI;
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.GeojsonExtractor;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
-
-
-
+using ThMEPEngineCore.GeojsonExtractor;
+using CLI;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -60,7 +45,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //解析分组，更新点位信息
             var tGJList = ThDrainageSDDeserializeGJson.getGroupPt(groupOutput);
             var subLink = ThDrainageSDExchangeThGeom.updateToilateModel(tGJList, toilateList);
-            DrawUtils.ShowGeometry(subLink, "l0subLink", 231,30);
+            DrawUtils.ShowGeometry(subLink, "l0subLink", 231, 30);
 
             //////找主线
             var forBranchJson = ThDrainageSDExchangeThGeom.buildGeometry(archiExtractor, toilateList, true);
@@ -75,7 +60,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var branchList = ThDrainageSDDeserializeGJson.getBranchLineList(branchOutput);
 
             DrawUtils.ShowGeometry(branchList, "l0branchList", 230, 35);
-
         }
 
 
@@ -110,3 +94,4 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
     }
 }
+#endif

@@ -24,6 +24,7 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
+#if ACAD2016
         [CommandMethod("TIANHUACAD", "THRouteMainPipeNew", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
@@ -105,9 +106,8 @@ namespace ThMEPWSS
             }
 
             ThConnectToilateEngine.ThConnectEngine(archiExtractor, terminalList);
-
-
         }
+#endif
 
         private static Polyline selectFrame()
         {

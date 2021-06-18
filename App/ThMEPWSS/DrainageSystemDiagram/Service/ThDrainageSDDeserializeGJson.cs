@@ -1,30 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-
-using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
-using CLI;
-
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.IO;
-
-
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
