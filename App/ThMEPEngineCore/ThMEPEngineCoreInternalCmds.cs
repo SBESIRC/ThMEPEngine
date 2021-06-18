@@ -10,6 +10,11 @@ using DotNetARX;
 using ThMEPEngineCore.IO;
 using System.Text;
 using System.Linq;
+using ThMEPEngineCore.Temp;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
 
 
 #if ACAD2016
@@ -752,6 +757,7 @@ namespace ThMEPEngineCore
                 }
             }
         }
+#endif
         [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
         public void THLPDCDemoTest()
         {
@@ -781,35 +787,35 @@ namespace ThMEPEngineCore
                         IsolateSwitch=false,
                     },
                     new ThArchitectureOutlineExtractor()
-                    { 
+                    {
                         ColorIndex=2,
                         GroupSwitch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
                     new ThOuterOtherColumnExtractor()
-                    { 
+                    {
                         ColorIndex=3,
                         GroupSwitch=true,
-                        UseDb3Engine=false,                        
+                        UseDb3Engine=false,
                         IsolateSwitch=false
                     },
                     new ThOuterOtherShearWallExtractor()
-                    { 
+                    {
                         ColorIndex=4,
                         GroupSwitch=true,
-                        UseDb3Engine=false,                        
+                        UseDb3Engine=false,
                         IsolateSwitch=false
                     },
                     new ThBeamExtractor()
-                    { 
+                    {
                         ColorIndex =5,
                         GroupSwitch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
                     new ThLightningReceivingBeltExtractor
-                    { 
+                    {
                         ColorIndex=6,
                         GroupSwitch=true,
                         UseDb3Engine=false,
@@ -823,8 +829,6 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
-#endif
-
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
         {
