@@ -22,7 +22,8 @@ namespace ThMEPEngineCore.Engine
                 if (polygon.Count > 0)
                 {
                     var envelope = polygon.Envelope();
-                    blkrefs.Where(o => envelope.Contains(o.Position))
+                    
+                    blkrefs.Where(o => envelope.IsPointIn(o.Position))
                         .ForEach(b => Elements.Add(new ThStoreys(b.ObjectId)));
                 }
                 else
