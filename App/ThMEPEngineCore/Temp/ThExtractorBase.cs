@@ -62,11 +62,11 @@ namespace ThMEPEngineCore.Temp
             return pt.X + "," + pt.Y + "," + pt.Z;
         }
 
-        protected virtual string BuildString(Dictionary<Entity, List<string>> owners, Entity curve)
+        protected virtual string BuildString(Dictionary<Entity, List<string>> owners, Entity curve,string linkChar=";")
         {
             if (owners.ContainsKey(curve))
             {
-                return string.Join(";", owners[curve]);
+                return string.Join(linkChar, owners[curve]);
             }
             return "";
         }

@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName,"外圈柱");
-                geometry.Properties.Add(BelongedArchOutlineIdPropertyName, BuildString(BelongArchitectureIdDic, o));
+                geometry.Properties.Add(BelongedArchOutlineIdPropertyName, BuildString(BelongArchitectureIdDic, o,","));
                 if (IsolateSwitch)
                 {
                     var isolate = IsIsolate(Spaces, o);
