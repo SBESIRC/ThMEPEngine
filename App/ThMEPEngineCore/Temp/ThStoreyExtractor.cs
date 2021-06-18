@@ -20,6 +20,7 @@ namespace ThMEPEngineCore.Temp
         public List<StoreyInfo> Storeys { get; private set; }
         private const string FloorNumberPropertyName = "FloorNumber";
         private const string FloorTypePropertyName = "FloorType";
+        private const string BasePointPropertyName = "BasePoint";
         public ThStoreyExtractor()
         {
             UseDb3Engine = true;
@@ -55,7 +56,8 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(FloorTypePropertyName, o.StoreyType);
                 geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);                
-                geometry.Properties.Add(IdPropertyName, o.Id);                
+                geometry.Properties.Add(IdPropertyName, o.Id);
+                geometry.Properties.Add(BasePointPropertyName, o.BasePoint);
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
@@ -109,6 +111,8 @@ namespace ThMEPEngineCore.Temp
         /// </summary>
         public string StoreyType { get; private set; }
 
+        public string BasePoint { get; private set; }
+
         private ThStoreys Storey { get; set; }
 
         public StoreyInfo(ThStoreys storey)
@@ -123,7 +127,8 @@ namespace ThMEPEngineCore.Temp
             OriginFloorNumber = GetFloorNumber();
             StoreyType = Storey.StoreyTypeString;
             StoreyNumber = ParseStoreyNumber();
-            Boundary = GetBoundary(); 
+            Boundary = GetBoundary();
+            BasePoint = GetBasePoint();
         }
         private string GetFloorNumber()
         {
@@ -207,6 +212,26 @@ namespace ThMEPEngineCore.Temp
             {
                 var br = acadDb.Element<BlockReference>(Storey.ObjectId);
                 return br.ToOBB(br.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
+            }
+        }
+        private string GetBasePoint()
+        {
+            using (var acadDb = AcadDatabase.Use(Storey.ObjectId.Database))
+            {
+                var br = acadDb.Element<BlockReference>(Storey.ObjectId);
+                double xOffset = 0.0,yOffset = 0.0;
+                foreach(DynamicBlockReferenceProperty item in br.DynamicBlockReferencePropertyCollection)
+                {
+                    if(item.PropertyName.Trim() == "基点X" || item.PropertyName.Trim() == "基点 X")
+                    {
+                        xOffset = (double)item.Value;
+                    }
+                    if(item.PropertyName.Trim() == "基点Y" || item.PropertyName.Trim() == "基点 Y")
+                    {
+                        yOffset = (double)item.Value;
+                    }
+                }
+                return (br.Position.X + xOffset).ToString() + "," +(br.Position.Y + yOffset).ToString();
             }
         }
     }
