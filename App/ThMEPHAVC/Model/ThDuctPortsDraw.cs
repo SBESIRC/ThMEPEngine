@@ -120,7 +120,7 @@ namespace ThMEPHVAC.Model
         {
             have_main = anay_res.main_ducts.Count != 0;
             Draw_endlines(endlines);
-            Draw_mainlines(anay_res, anay_res.ui_duct_width);
+            Draw_mainlines(anay_res);
             Draw_special_shape(anay_res.special_shapes_info);
             Draw_port_mark(endlines);
         }
@@ -539,7 +539,7 @@ namespace ThMEPHVAC.Model
 
         private void Insert_out_wall_point(List<Duct_ports_Info> infos, Point3d wall_p)
         {
-            if (infos.Count > 0)
+            if (infos.Count > 0 && infos[0].ports_position.Count > 0)
             {
                 var first_info = infos[0];
                 var first_pos = first_info.ports_position[0];
@@ -628,7 +628,7 @@ namespace ThMEPHVAC.Model
                     XLine1Point = p1,
                     XLine2Point = p2,
                     DimensionText = "",
-                    DimLinePoint = Get_mid_point(p1, p2) + vertical_vec * 1200,
+                    DimLinePoint = Get_mid_point(p1, p2) + vertical_vec * 2000,
                     ColorIndex = 256,
                     DimensionStyle = id,
                     LayerId = layerId
@@ -769,7 +769,7 @@ namespace ThMEPHVAC.Model
             }
             return new Line_Info(geo, flg, center_line);
         }
-        private void Draw_mainlines(ThDuctPortsAnalysis anay_res, double main_height)
+        private void Draw_mainlines(ThDuctPortsAnalysis anay_res)
         {
             string pre_duct_size_text = String.Empty;
             foreach (var info in anay_res.main_ducts)
@@ -892,19 +892,6 @@ namespace ThMEPHVAC.Model
             Point3d new_tar_point = tar_point - dir_vec * edge.TargetShrink;
             return new Line(new_src_point, new_tar_point);
         }
-        private void Draw_lines(DBObjectCollection lines, Matrix3d trans_mat, string str_layer)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                foreach (Curve obj in lines)
-                {
-                    acadDatabase.ModelSpace.Add(obj);
-                    obj.SetDatabaseDefaults();
-                    obj.Layer = str_layer;
-                    obj.TransformBy(trans_mat);
-                }
-            }
-        }
         private Vector3d Get_left_vertical_vec(Vector3d dir_vec)
         {
             return new Vector3d(-dir_vec.Y, dir_vec.X, 0);
@@ -991,6 +978,31 @@ namespace ThMEPHVAC.Model
             else if (scale == "1:50")
                 h = 150;
             return h;
+        }
+        public static void Draw_lines(DBObjectCollection lines, Matrix3d trans_mat, string str_layer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (Curve obj in lines)
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                    obj.Layer = str_layer;
+                    obj.TransformBy(trans_mat);
+                }
+            }
+        }
+        public static void Remove_ids(ObjectId[] objectIds)
+        {
+            foreach (var id in objectIds)
+                id.Erase();
+        }
+        public static string Get_cur_layer(ObjectIdCollection colle)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                return colle.Cast<ObjectId>().Select(id => acadDatabase.Element<Entity>(id)).Select(e => e.Layer).FirstOrDefault();
+            }
         }
     }
 }
