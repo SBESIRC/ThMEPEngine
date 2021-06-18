@@ -1,7 +1,10 @@
 ﻿using System;
-using AcHelper.Commands;
-using ThMEPEngineCore.GeojsonExtractor;
 using NFox.Cad;
+using AcHelper.Commands;
+using GeometryExtensions;
+using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.GeojsonExtractor;
 
 #if ACAD2016
 using CLI;
@@ -33,19 +36,30 @@ namespace ThMEPWSS.Command
 #if ACAD2016
             using (var acadDb = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个范围框");
-                if (per.Status != PromptStatus.OK)
+                var prompts = new List<string> { "请框选一个范围" };
+                var frame = new Polyline();
+                using (var pc = new PointCollector(PointCollector.Shape.Window, prompts))
+                {
+                    try
+                    {
+                        pc.Collect();
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                    Point3dCollection winCorners = new Point3dCollection();
+                    var leftDownPt = pc.CollectedPoints[0].TransformBy(Active.Editor.UCS2WCS());
+                    var rightCornerPt = pc.CollectedPoints[1].TransformBy(Active.Editor.UCS2WCS());
+                    winCorners.Add(leftDownPt);
+                    winCorners.Add(rightCornerPt);
+                    frame = ThDrawTool.CreatePolyline(winCorners, true);
+                }                
+                var pts = frame.Vertices();
+                if(pts.Count==0)
                 {
                     return;
                 }
-                var entity = acadDb.Element<Entity>(per.ObjectId);
-                if (!(entity is Polyline))
-                {
-                    return;
-                }
-                var nFrame = ThMEPFrameService.Normalize(entity as Polyline);
-                var pts = nFrame.VerticesEx(100.0);
-
                 //收集数据
                 var roomExtractor = new ThRoomExtractor() { ColorIndex = 6};
                 roomExtractor.Extract(acadDb.Database, pts);

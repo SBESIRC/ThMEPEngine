@@ -375,7 +375,7 @@ namespace ThMEPEngineCore
         public void THExtractWindow()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var windowEngine = new ThWindowRecognitionEngine())
+            using (var windowEngine = new ThDB3WindowRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -658,7 +658,7 @@ namespace ThMEPEngineCore
         public void THExtractDoor()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var doorEngine = new ThDoorRecognitionEngine())
+            using (var doorEngine = new ThDB3DoorRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -736,7 +736,7 @@ namespace ThMEPEngineCore
         public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThSlabRecognitionEngine())
+            using (var floorEngine = new ThDB3SlabRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -776,11 +776,11 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractLineFoot", CommandFlags.Modal)]
-        public void THExtractLineFoot()
+        [CommandMethod("TIANHUACAD", "THExtractCornice", CommandFlags.Modal)]
+        public void THExtractCornice()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var lineFootRecognitionEngine = new ThLineFootRecognitionEngine())
+            using (var lineFootRecognitionEngine = new ThDB3CorniceRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -908,6 +908,29 @@ namespace ThMEPEngineCore
                         GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageDitchIds);
                     }
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractAXISLine", CommandFlags.Modal)]
+        public void THExtractAXISLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThAXISLineRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                engine.Elements.Select(o => o.Outline).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
             }
         }
     }

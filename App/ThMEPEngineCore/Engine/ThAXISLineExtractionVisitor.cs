@@ -43,7 +43,11 @@ namespace ThMEPEngineCore.Engine
 
         public override bool CheckLayerValid(Entity entity)
         {
-            return entity.Layer.Contains("-AXIS-AXIS");
+            var layer = entity.Layer;
+            return layer.Contains("AXIS") && 
+                !layer.Contains("CRCL") && 
+                !layer.Contains("NUMB") &&
+                !layer.Contains("DIMS");
         }
 
         private List<ThRawIfcBuildingElementData> HandleLine(Line line, Matrix3d matrix)

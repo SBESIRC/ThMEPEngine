@@ -3069,7 +3069,7 @@ new Point2d(maxX, minY)
             var range = Dbg.TrySelectRange();
             if (range == null) return;
             if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
-            ThRainSystemService.ImportElementsFromStdDwg();
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
             using (var tr = new DrawingTransaction(adb))
@@ -3112,7 +3112,6 @@ new Point2d(maxX, minY)
                     if (sv.RainSystemDiagram == null) sv.CreateRainSystemDiagram();
                     DU.Dispose();
                     sv.RainSystemDiagram.Draw(basePt);
-                    ThRainSystemService.ImportElementsFromStdDwg();
                     DU.Draw(adb);
                     Dbg.PrintText(sv.DrawingDatas.ToCadJson());
                 }
@@ -3127,11 +3126,11 @@ new Point2d(maxX, minY)
             Dbg.FocusMainWindow();
             if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
             DU.Dispose();
-            ThRainSystemService.ImportElementsFromStdDwg();
             if (commandContext == null) return;
             if (commandContext.StoreyContext == null) return;
             if (commandContext.range == null) return;
             if (commandContext.StoreyContext.thStoreysDatas == null) return;
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
             using (var tr = new DrawingTransaction(adb))
@@ -3320,13 +3319,13 @@ new Point2d(maxX, minY)
                 }
             }
         }
-        public static void ImportElementsFromStdDwg()
+        public static bool ImportElementsFromStdDwg()
         {
             var file = ThCADCommon.WSSDwgPath();
             if (!File.Exists(file))
             {
                 MessageBox.Show($"\"{file}\"不存在");
-                return;
+                return false;
             }
             {
                 using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -3368,6 +3367,7 @@ new Point2d(maxX, minY)
                     }
                 }
             }
+            return true;
         }
         public List<Entity> SideWaterBuckets = new List<Entity>();
         public void InitCache()

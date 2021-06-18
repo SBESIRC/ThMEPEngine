@@ -9,6 +9,7 @@ using System;
 using DotNetARX;
 using ThMEPEngineCore.IO;
 using System.Text;
+using System.Linq;
 
 
 #if ACAD2016
@@ -610,6 +611,9 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THROUTEMAINPIPE", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
+            //todo: find all water suply points, and draw them in the drawing
+            //
+
             //Water Supply Detail Drawing (给排水大样图)
 
             string geojsonContent = string.Empty;
@@ -639,13 +643,15 @@ namespace ThMEPEngineCore
                     extractEngine.Accept(extractors);
                     extractEngine.Extract(acadDatabase.Database, pts);
 
-                    var toiletGroupDic = new Dictionary<Entity, string>();
-                    foreach (var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
-                    {
-                        toiletGroupDic.Add(item.Key, item.Value);
-                    }
+                    var areaGroupDic = new Dictionary<Entity, string>();
 
-                    extractEngine.Group(toiletGroupDic);
+                    var areaPolylineToIdDic = (extractors[4] as ThToiletGroupExtractor).ToiletGroupId;
+                    var areaPolyline = areaPolylineToIdDic.Keys.First();
+                    var areaId = areaPolylineToIdDic[areaPolyline];
+
+                    areaGroupDic.Add(areaPolyline, areaId);
+
+                    extractEngine.Group(areaGroupDic);
                     //geojsonContent = Active.Document.Name;
                     //geojsonContent = extractEngine.OutputGeo(Active.Document.Name);
                     geojsonContent = extractEngine.OutputGeo();
@@ -660,9 +666,7 @@ namespace ThMEPEngineCore
                 //string inputFile = inputFileName;
                 //string inputGeoJson = File.ReadAllText(inputFile);
 
-                var revisedContent = geojsonContent.Replace("WaterStartPoint","WaterSupplyStartPoint");
-
-                var groupedContent = SystemDiagramMethods.ProcessGrouping(revisedContent);
+                var groupedContent = SystemDiagramMethods.ProcessGrouping(geojsonContent);
 
                 var serializer = GeoJsonSerializer.Create();
                 var revisedContent2 = string.Empty;
@@ -686,7 +690,6 @@ namespace ThMEPEngineCore
                             var revisedPt = pt + dirVector;
                             f.Geometry.Coordinates[0].X = revisedPt.X;
                             f.Geometry.Coordinates[0].Y = revisedPt.Y;
-                            //f.Attributes["Direction"] = new double[2] { 1000.0,0.0};
                             var linePts = new List<Point3d>();
                             linePts.Add(pt);
                             linePts.Add(revisedPt);
@@ -759,12 +762,48 @@ namespace ThMEPEngineCore
                 }
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThStoreyExtractor(){ColorIndex=1,},
-                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true,},
-                    new ThOuterOtherColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
-                    new ThOuterOtherShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
-                    new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},
-                    new ThLightningReceivingBeltExtractor{ ColorIndex=6,GroupSwitch=true},
+                    new ThStoreyExtractor()
+                    {
+                        ColorIndex=1,
+                        GroupSwitch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThArchitectureOutlineExtractor()
+                    { 
+                        ColorIndex=2,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThOuterOtherColumnExtractor()
+                    { 
+                        ColorIndex=3,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,                        
+                        IsolateSwitch=false
+                    },
+                    new ThOuterOtherShearWallExtractor()
+                    { 
+                        ColorIndex=4,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,                        
+                        IsolateSwitch=false
+                    },
+                    new ThBeamExtractor()
+                    { 
+                        ColorIndex =5,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThLightningReceivingBeltExtractor
+                    { 
+                        ColorIndex=6,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
                 };
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);

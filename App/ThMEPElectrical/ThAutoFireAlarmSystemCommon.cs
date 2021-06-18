@@ -33,7 +33,10 @@ namespace ThMEPElectrical
         public static readonly string SystemDiagramChartHeader3 = "楼层或防火分区火灾自动报警设备";
         public static readonly string FixedPartContainsFireRoom = "系统图固定部分（含消控室）";
         public static readonly string FixedPartExcludingFireRoom = "系统图固定部分（不含消控室）";
+        public static readonly string FixedPartSmokeExhaust = "联动关闭排烟风机信号线";
 
+        //
+        public static bool CanDrawFixedPartSmokeExhaust = false;
         //配置
         public static readonly List<string> AlarmControlWireCircuitBlocks = new List<string>() { 
             "手动火灾报警按钮(带消防电话插座)", 
@@ -58,5 +61,11 @@ namespace ThMEPElectrical
             "喷淋泵", 
             "消防水池"
         };
+
+
+
+        //按回路区分部分
+        //连接点允许误差
+        public static readonly int ConnectionTolerance = 25;
     }
 }

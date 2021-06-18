@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using System.Collections.Generic;
-using ThCADExtension;
 using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -18,6 +18,7 @@ namespace ThMEPEngineCore.Temp
         public bool UseDb3Engine { get; set; }
         public bool GroupSwitch { get; set; }
         public bool IsolateSwitch { get; set; }
+        public double TesslateLength { get; set; }
 
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
@@ -29,13 +30,16 @@ namespace ThMEPEngineCore.Temp
         protected string IsolatePropertyName = "Isolated";
         protected string ElevationPropertyName = "Elevation";
         protected string StoreyBorderPropertyName = "StoreyBorder";
+        protected string ParentIdPropertyName = "ParentId";
+        protected string BelongedArchOutlineIdPropertyName = "BelongedArchOutlineId";
 
         public ThExtractorBase()
         {
             Category = "";
             ElementLayer = "";
+            TesslateLength = 5;
             GroupSwitch = false;
-            IsolateSwitch = true;
+            IsolateSwitch = true;       
             GroupOwner = new Dictionary<Entity, List<string>>();
             Types = new List<System.Type>() { typeof(Polyline)};
         }

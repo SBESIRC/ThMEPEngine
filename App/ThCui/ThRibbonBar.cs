@@ -163,6 +163,30 @@ namespace TianHua.AutoCAD.ThCui
 
             {
                 var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("冲洗点位",
+                    "天华冲洗点位",
+                    "THDXCX",
+                    "天华冲洗点位",
+                    "IDI_THCAD_THDXCX_SMALL",
+                    "IDI_THCAD_THDXCX_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("潜水泵布置",
+                    "天华潜水泵布置",
+                    "THSJSB",
+                    "天华潜水泵布置",
+                    "IDI_THCAD_THSJSB_SMALL",
+                    "IDI_THCAD_THSJSB_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
 
                 // 地上雨水系统图
                 var subRow = subPanel.AddNewRibbonRow();
@@ -183,6 +207,18 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSXTT_SMALL",
                     "IDI_THCAD_THJSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("消火栓",
+                    "天华消火栓",
+                    "THXHSJH",
+                    "天华消火栓",
+                    "IDI_THCAD_THXHSJH_SMALL",
+                    "IDI_THCAD_THXHSJH_LARGE",
+                    RibbonButtonStyle.LargeWithText);
             }
         }
 

@@ -3,6 +3,7 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -38,9 +39,9 @@ namespace ThMEPElectrical.Command
                 using (DocumentLock docLock = doc.LockDocument())
                 using (var acadDatabase = Linq2Acad.AcadDatabase.Use(doc.Database))
                 {
-                    using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                     using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
                     using (var FireCompartmentEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter = FireCompartmentParameter.LayerNames })//防火分区引擎
+                    using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                     {
                         var points = new Point3dCollection();
                         //拿到全图所有防火分区
@@ -102,7 +103,7 @@ namespace ThMEPElectrical.Command
             }
 
             //画系统图
-            diagram.DrawSystemDiagram(position.GetAsVector());
+            diagram.DrawSystemDiagram(position.GetAsVector(), Active.Editor.UCS2WCS());
         }
     }
 }

@@ -27,5 +27,23 @@ namespace ThMEPElectrical
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThIASystem", CommandFlags.Modal)]
+        public void ThIntrusionAlarmSystem()
+        {
+            using (var cmd = new ThIntrusionAlarmSystemCommand())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThIAHSystem", CommandFlags.Modal)]
+        public void ThIntrusionAlarmHositingSystem()
+        {
+            using (var cmd = new ThIntrusionAlarmSystemHositingCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

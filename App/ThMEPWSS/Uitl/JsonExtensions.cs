@@ -137,7 +137,7 @@ namespace ThMEPWSS.CADExtensionsNs
         }
         public static LinearRing ToLinearRing(this GRect r)
         {
-            return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
+            return new LinearRing(Pipe.Service.GeoNTSConvertion.ConvertToCoordinateArray(r));
         }
         public static LineString ToLineString(this IList<Point3d> pts)
         {
@@ -152,6 +152,11 @@ namespace ThMEPWSS.CADExtensionsNs
         public static Polygon ToPolygon(this GRect r)
         {
             return new Polygon(r.ToLinearRing());
+        }
+        public static List<Geometry> ToGeometryList(this IEnumerable<Geometry> source) => source.ToList();
+        public static Polygon ToCirclePolygon(this GCircle circle,int numPoints=6)
+        {
+            return Pipe.Service.GeometryFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints);
         }
         public static LineString ToLineString(this GLineSegment seg)
         {

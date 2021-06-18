@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -51,18 +52,22 @@ namespace ThCADExtension
         }
 
         /// <summary>
-        /// 多段线包围盒
+        /// 点在多边形内判断
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="pline"></param>
+        /// <param name="pt"></param>
         /// <returns></returns>
-        public static Polyline BoundBlock(this Polyline polyline)
+        public static bool ContainsPoint(this Polyline pline, Point3d pt)
         {
-#if ACAD_ABOVE_2012
-            // https://forums.autodesk.com/t5/objectarx/boundblock-function-of-acgecurve2d-in-acge-lib-error/td-p/9971906
-            return polyline.GetGeCurve().BoundBlock.ToPolyline();
-#else
-            throw new NotSupportedException();
-#endif
+            // https://forums.autodesk.com/t5/net/spatial-query-in-autocad-2010/m-p/5304221/highlight/true#M42039
+            foreach (var region in RegionTools.CreateRegion(new Curve[] { pline }))
+            {
+                if (region.ContainsPoint(pt))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

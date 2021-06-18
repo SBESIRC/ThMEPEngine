@@ -84,7 +84,7 @@ namespace ThMEPEngineCore.Engine
             var walls = Buffer(roomData.Walls, BufferLength);
             var windows = Buffer(roomData.Windows, BufferLength);
             var doors  = Buffer(roomData.Doors, BufferLength);
-            var lineFoots = Buffer(roomData.LineFoots,BufferLength);
+            var lineFoots = Buffer(roomData.Cornices,BufferLength);
             //var railings = Buffer(roomData.Railings, BufferLength);
             boundaryEnts.AddRange(roomData.Columns);
             boundaryEnts.AddRange(walls);
