@@ -51,6 +51,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
             FloorBoundary = GetBlockOBB(acadDatabase.Database, FloofBlockReference, FloofBlockReference.BlockTransform);
             var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
             var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
+            //foreach (Entity item in FindFireCompartmentsEntity)
+            //{
+            //    item.ColorIndex = 2;
+            //    acadDatabase.ModelSpace.Add(item);
+            //}
             if (FindFireCompartmentsEntity.Count > 0)
             {
                 FindFireCompartments.ForEach(o =>

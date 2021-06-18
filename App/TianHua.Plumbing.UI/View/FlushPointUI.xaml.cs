@@ -6,13 +6,17 @@ namespace TianHua.Plumbing.UI.View
 {
     public partial class FlushPointUI : Window
     {
-        private FlushPointVM FlushVM { get; set; }
-        
-        public FlushPointUI(FlushPointVM flushVM)
+        public FlushPointVM FlushVM
+        {
+            get;
+        }
+
+        public FlushPointUI()
         {
             InitializeComponent();
-            FlushVM = flushVM;
+            FlushVM = new FlushPointVM();
             this.DataContext = FlushVM;
+            this.tbProtectRadius.Text = "30";
         }
 
         private void tbProtectRadius_PreviewTextInput(object sender, TextCompositionEventArgs e)

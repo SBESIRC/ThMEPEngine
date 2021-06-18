@@ -34,12 +34,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override bool IsDistributionElement(Entity entity)
         {
-            return !(entity as BlockReference).Name.Contains('$');
+            return true;
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            if (IsDistributionElement(blkref) && CheckLayerValid(blkref))
+            if(IsDistributionElement(blkref))
             {
                 var dic = blkref.Id.GetAttributesInBlockReferenceEx();
                 var info = new ElementInfo()
@@ -70,7 +70,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         public override bool CheckLayerValid(Entity curve)
         {
-            return curve.Layer.Contains("E-");
+            return true;
         }
     }
     public class ElementInfo

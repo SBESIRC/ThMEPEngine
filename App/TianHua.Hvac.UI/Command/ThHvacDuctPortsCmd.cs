@@ -15,98 +15,91 @@ using ThMEPHVAC.Model;
 using Autodesk.AutoCAD.Geometry;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
+
 namespace TianHua.Hvac.UI.Command
 {
+    public class Duct_port_param
+    {
+        public int port_num;
+        public double air_volumn;
+        public double elevation;
+        public string scale;
+        public string scenario;
+        public string port_size;
+        public string port_range;
+        public string in_duct_size;
+    }
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
-        private static readonly ThDuctPortsParam in_param = new ThDuctPortsParam();
         public void Dispose() { }
 
         public void Execute()
         {
-            Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines);
-            Get_exclude_line("请选择不布置风口的线", out DBObjectCollection exclude_line);
-            Get_duct_port_info();
-            if (in_param.scale == null)
-                return;
-            if (in_param.port_range.Contains("侧"))
-                in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-            var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, start_point, in_param);
-            if (graph_res.merged_endlines.Count == 0)
-            {
-                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("选择错误起始点");
-                return;
-            }
-            var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
-            var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
-            var painter = new ThDuctPortsDraw(in_param, judger.dir_align_points, judger.ver_align_points);
-            painter.Draw(graph_res, adjust_graph);
-        }
-        private void Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines)
-        {
             using (var db = AcadDatabase.Active())
             {
-                start_point = Get_point_from_prompt("选择起点");
-                center_lines = Get_center_line("请选择中心线", out string layer);
+                var center_lines = Get_lines_from_prompt("请选择中心线", false);
                 if (center_lines.Count == 0)
                     return;
-                ThDuctPortsDraw.Draw_lines(center_lines, Matrix3d.Identity, layer);
+                var start_point = Get_point_from_prompt("选择起点");
+                Get_duct_port_info(out Duct_port_param in_param);
+                if (in_param.scale == null)
+                    return;
+                if (in_param.port_range.Contains("侧"))
+                    in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
+                var graph_res = new ThDuctPortsAnalysis(center_lines, 
+                                                        start_point, 
+                                                        in_param.scenario, 
+                                                        in_param.port_num, 
+                                                        in_param.air_volumn, 
+                                                        in_param.in_duct_size);
+                var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param.scenario);
+                var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
+                var painter = new ThDuctPortsDraw(in_param.scenario, 
+                                                  in_param.port_range, 
+                                                  judger.align_points, 
+                                                  in_param.port_size, 
+                                                  in_param.scale, 
+                                                  in_param.elevation);
+                painter.Draw(graph_res, adjust_graph);
             }
         }
-        private void Get_duct_port_info()
+
+        private void Get_duct_port_info(out Duct_port_param in_param)
         {
-            var dlg = new fmDuctPorts(in_param);
-            if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+            in_param = new Duct_port_param();
+            using (var dlg = new fmDuctPorts())
             {
-                in_param.port_num = dlg.port_num;
-                in_param.scenario = dlg.scenario;
-                in_param.scale = dlg.graph_scale;
-                in_param.elevation = dlg.elevation;
-                in_param.port_size = dlg.port_size;
-                in_param.port_name = dlg.port_name;
-                in_param.air_volumn = dlg.air_volume;
-                in_param.port_range = dlg.port_range;
-                in_param.in_duct_size = dlg.duct_size;
-                in_param.air_speed = dlg.air_speed;
-            }
-        }
-        private void Get_exclude_line(string prompt, out DBObjectCollection exclude_line)
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                PromptSelectionOptions options = new PromptSelectionOptions()
+                if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
                 {
-                    AllowDuplicates = false,
-                    MessageForAdding = prompt,
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var result = Active.Editor.GetSelection(options);
-                exclude_line = new DBObjectCollection();
-                if (result.Status == PromptStatus.OK)
-                {
-                    var objIds = result.Value.GetObjectIds();
-                    exclude_line = objIds.Cast<ObjectId>().Select(o => o.GetDBObject()).ToCollection();
+                    in_param.port_num = dlg.port_num;
+                    in_param.scenario = dlg.scenario;
+                    in_param.scale = dlg.graph_scale;
+                    in_param.elevation = dlg.elevation;
+                    in_param.port_size = dlg.port_size;
+                    in_param.air_volumn = dlg.air_volume;
+                    in_param.port_range = dlg.port_range;
+                    in_param.in_duct_size = dlg.duct_size;
                 }
+                else
+                    return;
             }
         }
-        private DBObjectCollection Get_center_line(string prompt, out string layer)
+
+        private DBObjectCollection Get_lines_from_prompt(string prompt, bool only_able)
         {
-            layer = "0";
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
                 MessageForAdding = prompt,
                 RejectObjectsOnLockedLayers = true,
+                SingleOnly = only_able
             };
             var result = Active.Editor.GetSelection(options);
+
             if (result.Status == PromptStatus.OK)
             {
-                var objIds = result.Value.GetObjectIds();
-                var coll = objIds.ToObjectIdCollection();
-                layer = ThDuctPortsDraw.Get_cur_layer(coll);
-                var lines = Pre_proc(coll);
-                ThDuctPortsDraw.Remove_ids(objIds);
-                return lines;
+                var objIds = result.Value.GetObjectIds().ToObjectIdCollection();
+                return Pre_proc(objIds, only_able);
             }
             else
             {
@@ -118,9 +111,11 @@ namespace TianHua.Hvac.UI.Command
             var startRes = Active.Editor.GetPoint(prompt);
             return new Point3d (startRes.Value.X, startRes.Value.Y, 0);
         }
-        private DBObjectCollection Pre_proc(ObjectIdCollection objs)
+        private DBObjectCollection Pre_proc(ObjectIdCollection objs, bool is_start)
         {
             var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject()).ToCollection();
+            if (is_start)
+                return lines;
             var service = new ThLaneLineCleanService();
             var res = ThLaneLineEngine.Explode(service.Clean(lines));
             var extendLines = new DBObjectCollection();

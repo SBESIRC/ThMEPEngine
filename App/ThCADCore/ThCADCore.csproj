@@ -49,7 +49,6 @@
     <Compile Include="NTS\ThCADCoreNTSMPolygonExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSOperation.cs" />
     <Compile Include="NTS\ThCADCoreNTSOrdinates.cs" />
-    <Compile Include="NTS\ThCADCoreNTSPoint3dCollectionExtensions.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolylineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSFixedPrecision.cs" />

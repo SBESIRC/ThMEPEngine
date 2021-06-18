@@ -1,118 +1,111 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctResourceDistribute
     {
-        public ThDuctResourceDistribute(List<Merged_endline_Info> merged_endlines, double air_volumn, int port_num)
+        private int[] total_dis_port_res { get; set; }
+        private List<int>[] sub_dis_port_res { get; set; }
+        public ThDuctResourceDistribute(List<Merged_endline_Info> merged_endlines, int port_num)
         {
-            Statistic_endline_info(merged_endlines, out double total_len, out int total_seg_num);
-            Distrib_port_num(merged_endlines, total_len, total_seg_num, port_num);
-            Distrib_total_air_volumn(merged_endlines, air_volumn, port_num);
-            Set_duct_in_air_volume(merged_endlines);
+            Distrib_total_ports(merged_endlines, port_num);
+            Distrib_sub_ports(merged_endlines);
         }
-
-        private void Set_duct_in_air_volume(List<Merged_endline_Info> merged_endlines)
+        public void Distrib_total_air_volumn(List<Merged_endline_Info> merged_endlines, double air_volumn, int ports_num)
         {
-            foreach (var info in merged_endlines)
+            double average_air_volumn = (double)air_volumn / ports_num;
+            for (int i = 0; i < total_dis_port_res.Length; ++i)
             {
-                double pre_air_volume = 0;
-                foreach (var edge in info.segments)
+                double pre_air_volumn = 0;
+                var info = merged_endlines[i];
+                int segment_num = sub_dis_port_res[i].Count;
+                for (int j = 0; j < segment_num; ++j)
                 {
-                    int seg_port_num = edge.ports.Count;
-                    if (seg_port_num > 0)
+                    Endline_Info endlines = info.segments[j];
+                    int ports_count = sub_dis_port_res[i][j];
+                    endlines.ports = new List<Port_Info>();
+                    for (int k = 0; k < ports_count; ++k)
                     {
-                        edge.direct_edge.AirVolume = edge.ports[seg_port_num - 1].air_vloume;
-                        pre_air_volume = edge.direct_edge.AirVolume;
+                        // port list中的air_volumn是递增的
+                        endlines.ports.Add(new Port_Info());
+                        endlines.ports[k].air_vloume = (k + 1) * average_air_volumn + pre_air_volumn;
                     }
-                    else
-                        edge.direct_edge.AirVolume = pre_air_volume;
+                    pre_air_volumn = endlines.ports[ports_count - 1].air_vloume;
                 }
             }
         }
-
+        private void Distrib_total_ports(List<Merged_endline_Info> merged_endlines, int ports_num)
+        {
+            total_dis_port_res = new int[merged_endlines.Count];
+            Statistic_endline_info(merged_endlines, out double total_len, out int total_seg_num);
+            // 从总数中减去endsegment的数量是为了保证每个segment至少分到一个ports
+            int remain_ports_num = ports_num - total_seg_num;
+            Do_distribute_total_ports(merged_endlines, total_len, remain_ports_num);
+        }
         private void Statistic_endline_info(List<Merged_endline_Info> merged_endlines, out double total_len, out int total_seg_num)
         {
             total_len = 0;
             total_seg_num = 0;
             foreach (var info in merged_endlines)
             {
-                foreach (var edge in info.segments)
-                {
-                    if (edge.distrib_enable)
-                    {
-                        total_len += edge.direct_edge.EdgeLength;
-                        total_seg_num++;
-                    }
-                }
+                total_len += info.total_len;
+                total_seg_num += info.segments.Count;
             }
         }
-        public void Distrib_total_air_volumn(List<Merged_endline_Info> merged_endlines, double air_volumn, int ports_num)
+        private void Do_distribute_total_ports(List<Merged_endline_Info> merged_endlines, double total_endline_len, int ports_num)
         {
-            double average_air_volume = (double)air_volumn / ports_num;
-            foreach (var info in merged_endlines)
+            int sum = 0;
+            int max_idx = 0;
+            int max_port_num = 0;
+            for (int i = 0; i < merged_endlines.Count; ++i)
             {
-                double cur_air_volume = 0;
-                foreach (var edge in info.segments)
+                int dis_port_num = (int)((merged_endlines[i].total_len / total_endline_len) * ports_num);
+                sum += dis_port_num;
+                total_dis_port_res[i] = (dis_port_num == 0) ? 0 : dis_port_num;
+                if (max_port_num < dis_port_num)
                 {
-                    foreach (var port in edge.ports)
-                    {
-                        cur_air_volume += average_air_volume;
-                        port.air_vloume = cur_air_volume;
-                    }
+                    max_port_num = dis_port_num;
+                    max_idx = i;
                 }
             }
+            // 将剩余的port分配到最长的endline上
+            if (ports_num - sum > 0)
+                total_dis_port_res[max_idx] += (ports_num - sum);
         }
-        private void Distrib_port_num( List<Merged_endline_Info> merged_endlines,
-                                       double total_len,
-                                       int total_seg_num,
-                                       int dis_port_num)
+
+        private void Distrib_sub_ports(List<Merged_endline_Info> merged_endlines)
         {
-            int have_dis_port_num = 0;
-            Distrib_sub_port(merged_endlines, total_len, dis_port_num, ref have_dis_port_num);
-            if (have_dis_port_num > dis_port_num)
-                Remove_remind_port(merged_endlines, dis_port_num, have_dis_port_num);
-        }
-        private void Distrib_sub_port( List<Merged_endline_Info> merged_endlines,
-                                       double total_len,
-                                       int port_num,
-                                       ref int have_dis_port_num)
-        {
-            foreach (var info in merged_endlines)
+            int endline_num = merged_endlines.Count;
+            sub_dis_port_res = new List<int>[endline_num];
+
+            for (int i = 0; i < endline_num; ++i)
             {
-                foreach (var edge in info.segments)
-                {
-                    if (edge.distrib_enable)
-                    {
-                        int dis_port = (int)(edge.direct_edge.EdgeLength / total_len * port_num);
-                        for (int i = 0; i <= dis_port; ++i)
-                        {
-                            edge.ports.Add(new Port_Info());
-                            have_dis_port_num++;
-                        }
-                    }
-                }
+                sub_dis_port_res[i] = new List<int>();
+                Do_distribute_sub_ports(merged_endlines, i);
             }
         }
-        private void Remove_remind_port(List<Merged_endline_Info> merged_endlines,
-                                        int dis_port_num, 
-                                        int have_dis_port_num)
+        private void Do_distribute_sub_ports(List<Merged_endline_Info> merged_endlines, int nth_merged_endline)
         {
-            int num = have_dis_port_num - dis_port_num;
-            foreach (var info in merged_endlines)
+            int sum = 0;
+            int max_idx = 0;
+            int max_port_num = 0;
+            int ports_num = total_dis_port_res[nth_merged_endline];
+            Merged_endline_Info info = merged_endlines[nth_merged_endline];
+            for (int i = 0; i < info.segments.Count; ++i)
             {
-                foreach (var edge in info.segments)
+                double cur_line_len = info.segments[i].direct_edge.EdgeLength;
+                int dis_port_num = (int)(cur_line_len / info.total_len * ports_num);
+                //保证每个segment至少分到一个ports
+                sub_dis_port_res[nth_merged_endline].Add(dis_port_num + 1);
+                sum += dis_port_num;
+                if (max_port_num < dis_port_num)
                 {
-                    if (edge.distrib_enable && edge.ports.Count > 1)
-                    {
-                        edge.ports.RemoveAt(edge.ports.Count - 1);
-                        --num;
-                    }
-                    if (num == 0)
-                        return;
+                    max_idx = i;
+                    max_port_num = dis_port_num;
                 }
             }
+            if (ports_num - sum > 0)
+                sub_dis_port_res[nth_merged_endline][max_idx] += (ports_num - sum);
         }
     }
 }

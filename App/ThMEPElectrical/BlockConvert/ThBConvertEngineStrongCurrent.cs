@@ -56,11 +56,6 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
-        {
-            //
-        }
-
         private void FillProperties(ThBlockReferenceData target, ThBlockReferenceData source)
         {
             // 负载编号：“设备符号"&"-"&"楼层-编号”

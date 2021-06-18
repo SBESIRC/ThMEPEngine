@@ -146,12 +146,12 @@ namespace ThMEPElectrical.Command
                         {
                             var block = rule.Transformation.Item1;
                             var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
-                            foreach (BlockReference blkRef in xrefDb.Database.GetBlockReferences(block, extents))
+                            foreach (ObjectId blkRef in xrefDb.Database.GetBlockReferences(block, extents))
                             {
                                 try
                                 {
                                     // 根据块引用的“块名”，匹配转换后的块定义的信息
-                                    var blockReference = xrefDb.Database.GetBlockReference(blkRef);
+                                    var blockReference = blkRef.Database.GetBlockReference(blkRef);
 
                                     // 获取转换后的块信息
                                     ThBlockConvertBlock transformedBlock = null;
@@ -217,9 +217,6 @@ namespace ThMEPElectrical.Command
 
                                     // 将新插入的块引用调整到源块引用所在的位置
                                     engine.TransformBy(objId, blockReference);
-
-                                    // 微调
-                                    engine.Adjust(objId, blockReference);
 
                                     // 将源块引用的属性“刷”到新的块引用
                                     engine.MatchProperties(objId, blockReference);

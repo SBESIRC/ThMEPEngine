@@ -90,8 +90,6 @@
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
-    <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
-    <Compile Include="Command\ThIntrusionAlarmSystemHositingCommand.cs" />
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
@@ -161,33 +159,16 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutWallMountingDetectorService.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutMonitoringService.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutHositingDetectorService.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutServicve.cs" />
-    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\LayoutModel.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\CommonService.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
-    <Compile Include="SecurityPlaneSystem\Utils\CheckUtils.cs" />
-    <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
-    <Compile Include="SystemDiagram\Engine\ThControlCircuitRecognitionEngine.cs" />
-    <Compile Include="SystemDiagram\Engine\ThControlCircuitVisitor.cs" />
-    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionEngine.cs" />
-    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionVistor.cs" />
-    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractor.cs" />
-    <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
-    <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockNumStatistics.cs" />
-    <Compile Include="SystemDiagram\Model\ThControlCircuitAlarmSystemModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFireDistrictModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
-    <Compile Include="SystemDiagram\Model\ThWireCircuitGraphModel.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThConnect280FireDamperWireCircuit.cs" />
@@ -202,7 +183,7 @@
     <Compile Include="SystemDiagram\Model\WireCircuit\ThTextWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
-    <Compile Include="SystemDiagram\Service\ControlCircuitService.cs" />
+    <Compile Include="SystemDiagram\Service\CalHolesService.cs" />
     <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
@@ -218,9 +199,9 @@
     <Compile Include="ThSecurityPlaneCmds.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\LayoutService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
-    <Compile Include="SecurityPlaneSystem\Utils\UtilService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Utils\UtilService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
-    <Compile Include="SecurityPlaneSystem\StructureHandleService\GetLayoutStructureService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\GetLayoutStructureService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +227,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SecurityPlaneSystem\AccessControlSystem\" />
+    <Folder Include="SecurityPlaneSystem\IntrusionAlarmSystem\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -292,8 +273,5 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,15 +12,14 @@ namespace ThMEPEngineCore.Temp
     {
         public List<Entity> OuterColumns { get; set; }
         public List<Entity> OtherColumns { get; set; }
-        /// <summary>
-        /// 其他柱颜色
-        /// </summary>
+        public int OuterColorIndex { get; set; }
         public int OtherColorIndex { get; set; }
         public ThExtractOuterOtherColumnService()
         {
             OuterColumns = new List<Entity>();
             OtherColumns = new List<Entity>();
-            OtherColorIndex = 256; // 默认是Bylayer,除此以外都是外圈柱
+            OuterColorIndex = 3;
+            OtherColorIndex = 256;
         }
 
         public override void Extract(Database db, Point3dCollection pts)
@@ -35,7 +34,7 @@ namespace ThMEPEngineCore.Temp
                     columns = objs.Cast<Polyline>().ToList();
                 }
                 // 0 ->ByBlock,256->ByLayer
-                OuterColumns = columns.Where(o => o.ColorIndex != OtherColorIndex).Select(o => o.Clone() as Entity).ToList();
+                OuterColumns = columns.Where(o => o.ColorIndex == OuterColorIndex).Select(o => o.Clone() as Entity).ToList();
                 OtherColumns = columns.Where(o => o.ColorIndex == OtherColorIndex).Select(o => o.Clone() as Entity).ToList();
             }
         }

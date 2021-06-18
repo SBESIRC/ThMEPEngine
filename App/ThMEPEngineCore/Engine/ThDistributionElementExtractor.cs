@@ -52,10 +52,7 @@ namespace ThMEPEngineCore.Engine
                     {
                         Visitors.ForEach(v =>
                         {
-                            if (!e.BlockTableRecord.IsNull)
-                            {
-                                v.Results.AddRange(DoExtract(e, v));
-                            }
+                            v.Results.AddRange(DoExtract(e, v));
                         });
                     });
             }

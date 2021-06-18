@@ -23,15 +23,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
-                if (AreaData.Data.BlockData.BlockStatistics["灭火系统流量开关"] > 0)
+                if(AreaData.Data.BlockData.BlockStatistics["灭火系统流量开关"] >0)
                 {
                     PressureSwitchMaxFloor = FloorNum + 1;
-                    Result.AddRange(DrawFirePumpStartLine(currentIndex, FloorNum));
+                    Result.AddRange(DrawFirePumpStartLine(currentIndex,FloorNum));
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0)
                 {
                     FireHydrantPumpMaxFloor = FloorNum + 1;
-                    Result.AddRange(DrawFireHydrantPumpLine(currentIndex, FloorNum));
+                    Result.AddRange(DrawFireHydrantPumpLine(currentIndex,FloorNum));
                 }
             }
             //都存在，才画
@@ -46,11 +46,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     o.Layer = this.CircuitLayer;
                     o.ColorIndex = this.CircuitColorIndex;
                 });
-            }
-            else
-                Result = new List<Entity>();
-            if (FireHydrantPumpMaxFloor > 0)
-            {
+
                 Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * FireHydrantPumpMaxFloor - 1900, 0))
                 {
                     Linetype = "ByLayer",
@@ -59,6 +55,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 };
                 Result.Add(Endline2);
             }
+            else
+                Result = new List<Entity>();
             return Result;
         }
 

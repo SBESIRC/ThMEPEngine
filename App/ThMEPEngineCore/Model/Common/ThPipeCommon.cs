@@ -222,7 +222,6 @@
         public const string STOREY_BLOCK_NAME = "楼层框定";
         public const string STOREY_DYNAMIC_PROPERTY_TYPE = "楼层类型";
         public const string STOREY_ATTRIBUTE_VALUE_NUMBER = "楼层编号";
-        public const string STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER = "非标层编号";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR = "大屋面";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR = "小屋面";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR = "标准层";

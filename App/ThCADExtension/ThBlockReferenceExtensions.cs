@@ -1,7 +1,6 @@
 ﻿using Linq2Acad;
-using System.Linq;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Internal;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -31,7 +30,7 @@ namespace ThCADExtension
                 options.SetRejectMessage("\nMust be a block reference: ");
                 options.AddAllowedClass(typeof(BlockReference), true);
 
-                Autodesk.AutoCAD.Internal.Utils.PostCommandPrompt();
+                Utils.PostCommandPrompt();
                 PromptEntityResult result = editor.GetEntity(options);  //select a block reference in the drawing.
 
                 if (result.Status == PromptStatus.OK)
@@ -87,7 +86,7 @@ namespace ThCADExtension
                 }
             }
             AcadApp.UpdateScreen();
-            Autodesk.AutoCAD.Internal.Utils.PostCommandPrompt();
+            Utils.PostCommandPrompt();
         }
 
         // MatchProperties
@@ -152,17 +151,6 @@ namespace ThCADExtension
                 rectangle.TransformBy(ecs2Wcs);
                 return rectangle;
             }
-        }
-
-        public static Extents3d GeometricExtentsIgnoreAttribute(this BlockReference br)
-        {
-            var entitySet = new DBObjectCollection();
-            br.Explode(entitySet);
-            var extents = new Extents3d();
-            entitySet.Cast<Entity>()
-                .Where(o => !(o is AttributeDefinition))
-                .ForEach(o => extents.AddExtents(o.GeometricExtents));
-            return extents;
         }
 
         // mimic the Burst command

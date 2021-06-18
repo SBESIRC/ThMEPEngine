@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             if(UseDb3Engine)
             {
-                using (var doorEngine = new ThDB3DoorRecognitionEngine())
+                using (var doorEngine = new ThDoorRecognitionEngine())
                 {
                     doorEngine.Recognize(database, pts);
                     Doors = doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();

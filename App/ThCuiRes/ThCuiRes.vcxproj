@@ -253,12 +253,6 @@
     <Image Include="Images\THJSXTT_dark_large.ico" />
     <Image Include="Images\THPSXTT_dark_small.ico" />    
     <Image Include="Images\THPSXTT_dark_large.ico" />
-    <Image Include="Images\THXHSJH_dark_small.ico" />    
-    <Image Include="Images\THXHSJH_dark_large.ico" />
-    <Image Include="Images\THSJSB_dark_small.ico" />    
-    <Image Include="Images\THSJSB_dark_large.ico" />
-    <Image Include="Images\THDXCX_dark_small.ico" />    
-    <Image Include="Images\THDXCX_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

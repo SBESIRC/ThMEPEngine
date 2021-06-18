@@ -1,5 +1,4 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using TianHua.Plumbing.WPF.UI.ViewModels;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -8,14 +7,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         uiDrainageSystem uiDrainage;
         uiDrainageSystemSet uiSet;
-        private static ThFireHydrantVM FireHydrantVM;
         public void Initialize()
         {
-            FireHydrantVM = new ThFireHydrantVM();
+            return;
         }
 
         public void Terminate()
-        {            
+        {
+            return;
         }
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
@@ -37,7 +36,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// 给水系统图
+        /// Tian Hua Create water suply system diagram
         /// </summary>
         [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
@@ -50,7 +49,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// 潜水泵布置
+        /// Tian Hua arrange pumps in water well
         /// </summary>
         [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
         public void ThArrangePumpWithUI()
@@ -59,9 +58,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-        /// <summary>
-        /// 地上雨水系统图
-        /// </summary>
+
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
@@ -75,23 +72,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void ThCreateFireControlSystemDiagram()
         {
             var ui = new uiFireControlSystem();
-            AcadApp.ShowModelessWindow(ui);
-        }
-
-        /// <summary>
-        /// 地上标准层排水、雨水平面	
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
-        public void ThDrainageSysAboveGround()
-        {
-            var ui = new uiDrainageSysAboveGround();
-            AcadApp.ShowModelessWindow(ui);
-        }
-        [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
-        public void THXHSJH()
-        {
-            // FireHydrant protect radius check            
-            var ui = new FireHydrant(FireHydrantVM);
             AcadApp.ShowModelessWindow(ui);
         }
     }

@@ -369,8 +369,8 @@ namespace TianHua.FanSelection.UI.CAD
                     .Where(o => o.ObjectId.IsModel(dataModel.ID));
                 if (blockReferences.Any())
                 {
-                    Active.Editor.ZoomToObjects(blockReferences.ToArray(), 2.0);
-                    Active.Editor.PickFirstObjects(blockReferences.Select(o => o.ObjectId).ToArray());
+                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);
+                    Active.Editor.PickFirstModels(blockReferences.Select(o => o.ObjectId).ToArray());
                 }
             }
         }

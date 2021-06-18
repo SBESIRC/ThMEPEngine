@@ -1,9 +1,7 @@
 ﻿using System;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,18 +12,15 @@ namespace ThMEPEngineCore.Temp
     {   
         private List<ThTempSpace> Spaces { get; set; }
         public List<Entity> OuterColumns { get ; set ; }
-        public List<Entity> OtherColumns { get ; set ; }    
-        private Dictionary<Entity, List<string>> BelongArchitectureIdDic { get; set; } 
+        public List<Entity> OtherColumns { get ; set ; }
 
         public ThOuterOtherColumnExtractor()
         {
             ElementLayer = "柱";
-            TesslateLength = 10.0;
             Spaces = new List<ThTempSpace>();
             OuterColumns = new List<Entity>();
             OtherColumns = new List<Entity>(); 
             Category = BuiltInCategory.Column.ToString();
-            BelongArchitectureIdDic = new Dictionary<Entity, List<string>>();
         }
         public void Extract(Database database, Point3dCollection pts)
         {
@@ -35,16 +30,9 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IColumnData columnData = service;
-            columnData.OuterColumns.ForEach(o =>
-            {
-                var tesslate = ThTesslateService.Tesslate(o, TesslateLength);
-                OuterColumns.Add(tesslate);
-                var archOutlineIds = ThParseArchitectureOutlineIdService.ParseBelongedArchitectureIds(o);
-                BelongArchitectureIdDic.Add(tesslate, archOutlineIds);
-            });
-            OtherColumns = columnData.OtherColumns.Select(o => ThTesslateService.Tesslate(o, TesslateLength)).ToList();
+            OuterColumns = columnData.OuterColumns;
+            OtherColumns = columnData.OtherColumns;
         }
-        
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -53,7 +41,6 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName,"外圈柱");
-                geometry.Properties.Add(BelongedArchOutlineIdPropertyName, BuildString(BelongArchitectureIdDic, o));
                 if (IsolateSwitch)
                 {
                     var isolate = IsIsolate(Spaces, o);
@@ -113,6 +100,7 @@ namespace ThMEPEngineCore.Temp
                 {
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), otherColumnIds);
                 }
+
             }
         }
 

@@ -18,7 +18,7 @@ namespace ThMEPEngineCore.Temp
         {
             ToiletGroups = new List<Polyline>();
             ToiletGroupId = new Dictionary<Polyline, string>();
-            Category = "Area";
+            Category = "Region";
             ElementLayer = "卫生间分组";
         }
 

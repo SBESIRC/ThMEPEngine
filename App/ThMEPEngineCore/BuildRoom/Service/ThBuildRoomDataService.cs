@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.BuildRoom.Service
         public List<Entity> Doors { get; private set; }
         public List<Entity> Windows { get; private set; }
         public List<Entity> Railings { get; private set; }
-        public List<Entity> Cornices { get; private set; }
+        public List<Entity> LineFoots { get; private set; }
 
         public bool SelfBuildData { get; set; }
         public ThBuildRoomDataService()
@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.BuildRoom.Service
             Doors = new List<Entity>();
             Windows = new List<Entity>();
             Railings = new List<Entity>();
-            Cornices = new List<Entity>();
+            LineFoots = new List<Entity>();
         }
 
         public void Build(Database db, Point3dCollection pts)
@@ -44,7 +44,8 @@ namespace ThMEPEngineCore.BuildRoom.Service
                 ObtainWalls(db, pts);
                 ObtainWindows(db, pts);
                 ObtainDoors(db, pts);
-                ObtainCornices(db, pts);
+                //ObtainRailings(db, pts);
+                ObtainLineFoots(db, pts);
             }
         }
 
@@ -83,7 +84,7 @@ namespace ThMEPEngineCore.BuildRoom.Service
         }
         private void ObtainWindows(Database db, Point3dCollection pts)
         {
-            using (var engine = new ThDB3WindowRecognitionEngine())
+            using (var engine = new ThWindowRecognitionEngine())
             {
                 engine.Recognize(db, pts);
                 Windows = engine.Elements.Select(o=>o.Outline).ToList();
@@ -91,7 +92,7 @@ namespace ThMEPEngineCore.BuildRoom.Service
         }
         private void ObtainDoors(Database db, Point3dCollection pts)
         {
-            using (var engine = new ThDB3DoorRecognitionEngine())
+            using (var engine = new ThDoorRecognitionEngine())
             {
                 engine.Recognize(db, pts);
                 Doors = engine.Elements.Select(o=>o.Outline).ToList();
@@ -105,9 +106,9 @@ namespace ThMEPEngineCore.BuildRoom.Service
                 Railings = engine.Elements.Select(o => o.Outline).ToList();
             }
         }
-        private void ObtainCornices(Database db, Point3dCollection pts)
+        private void ObtainLineFoots(Database db, Point3dCollection pts)
         {
-            using (var engine = new ThDB3CorniceRecognitionEngine())
+            using (var engine = new ThLineFootRecognitionEngine())
             {
                 engine.Recognize(db, pts);
                 Railings = engine.Elements.Select(o => o.Outline).ToList();

@@ -1,7 +1,7 @@
 ﻿using System;
-using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 
 namespace ThMEPHVAC.Model
 {
@@ -292,17 +292,8 @@ namespace ThMEPHVAC.Model
                                                      new Line(Point3d.Origin, Get_mid_point(endline3))};
             if (Math.Abs(floor_left.Y - floor_right.Y) > 1e-3)
             {
-                Line supplement = new Line();
-                if (r_width > l_width)
-                {
-                    Point3d aux_p = new Point3d(floor_left.X, floor_right.Y, 0);
-                    supplement = new Line(floor_left, aux_p);
-                }
-                else
-                {
-                    Point3d aux_p = new Point3d(floor_right.X, floor_left.Y, 0);
-                    supplement = new Line(floor_right, aux_p);
-                }
+                Point3d aux_p = new Point3d(floor_right.X, floor_left.Y, 0);
+                Line supplement = new Line(floor_right, aux_p);
                 var outline = new DBObjectCollection() { left_inner_arc,
                                                          right_inner_arc,
                                                          left_inner_arc_v_extend,

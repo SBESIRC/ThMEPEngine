@@ -5,7 +5,6 @@ using Linq2Acad;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
-using ThCADExtension;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -48,7 +47,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }                                           
                 if (blockReferences.Any())
                 {
-                    Active.Editor.ZoomToObjects(blockReferences.ToArray(), 2.0);                               
+                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);                               
                 }
             }
         }
@@ -61,7 +60,7 @@ namespace ThMEPWSS.Pipe.Engine
                     .OfType<BlockReference>()
                     .Where(o => o.GetBlockName().Contains(blockName))
                     .Select(o => o.ObjectId);
-                Active.Editor.PickFirstObjects(objIds.ToArray());
+                Active.Editor.PickFirstModels(objIds.ToArray());
             }
         }
     }

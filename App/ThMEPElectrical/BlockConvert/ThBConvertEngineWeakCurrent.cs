@@ -1,7 +1,6 @@
 ﻿using System;
 using Linq2Acad;
 using DotNetARX;
-using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -34,7 +33,9 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var block = acadDatabase.Element<Entity>(blkRef, true);
+                var block = acadDatabase.Element<Entity>(blkRef);
+
+                // 图层
                 block.LayerId = ThBConvertDbUtils.BlockLayer(ThBConvertCommon.LAYER_BLOCK_WEAKCURRENT, 3);
             }
         }
@@ -45,42 +46,11 @@ namespace ThMEPElectrical.BlockConvert
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 blockReference.TransformBy(srcBlockReference.BlockTransform);
-            }
-        }
-
-        public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
-        {
-            AdjustRotation(blkRef, srcBlockReference);
-            AdjustPosition(blkRef, srcBlockReference);
-        }
-
-        private void AdjustRotation(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 double rotation = srcBlockReference.Rotation;
-                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
+                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance && 
                     (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, blockReference.Position));
-                }
-            }
-        }
-
-        private void AdjustPosition(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
-        {
-            // 当图块的基点与其中图元的OBB内部或边界上时，目标块基点与源块基点相同
-            // 当图块的基点在其中图元的OBB外部时，目标块基点选择源块图元OBB的几何中心
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef);
-                var blockReferenceOBB = blockReference.GetBlockReferenceOBB(blockReference.BlockTransform);
-                if (!blockReferenceOBB.ContainsPoint(blockReference.Position))
-                {
-                    var centroid = blockReferenceOBB.GetCentroidPoint();
-                    var offset = centroid.GetVectorTo(blockReference.Position);
-                    blockReference.TransformBy(Matrix3d.Displacement(offset));
                 }
             }
         }

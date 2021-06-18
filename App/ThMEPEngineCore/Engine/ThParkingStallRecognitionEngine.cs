@@ -13,10 +13,10 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThParkingStallExtractionEngine : ThDistributionElementExtractionEngine
     {
-        public ThParkingStallExtractionVisitor Visitor { get; set; }
+        public ThParkingStallVisitor Visitor { get; set; }
         public ThParkingStallExtractionEngine()
         {
-            Visitor = new ThParkingStallExtractionVisitor();
+            Visitor = new ThParkingStallVisitor();
         }
         public override void Extract(Database database)
         {
@@ -44,10 +44,10 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThParkingStallRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public ThParkingStallExtractionVisitor Visitor { get; set; }
+        public ThParkingStallVisitor Visitor { get; set; }
         public ThParkingStallRecognitionEngine()
         {
-            Visitor = new ThParkingStallExtractionVisitor();
+            Visitor = new ThParkingStallVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {            

@@ -27,15 +27,5 @@ namespace ThCADExtension
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
         }
-        public ThBlockReferenceData(Database database, BlockReference blockRef)
-        {
-            HostDatabase = database;
-            BlockLayer = blockRef.Layer;
-            Position = blockRef.Position;
-            Rotation = blockRef.Rotation;
-            EffectiveName = blockRef.GetBlockName();
-            BlockTransform = blockRef.BlockTransform;
-            CustomProperties = blockRef.DynamicBlockReferencePropertyCollection;
-        }
     }
 }
