@@ -66,12 +66,6 @@ namespace ThMEPEngineCore.Algorithm
             }
             else
             {
-                using (AcadDatabase db = AcadDatabase.Active())
-                {
-
-                    db.ModelSpace.Add(shell);
-                    holes.ForEach(o => db.ModelSpace.Add(o));
-                }
                 return new Polyline();
             }
         }
