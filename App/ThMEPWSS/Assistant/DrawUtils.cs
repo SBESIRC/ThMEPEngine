@@ -268,9 +268,11 @@ namespace ThMEPWSS.Assistant
             DrawEntityLazy(c);
             return c;
         }
-        public static void DrawGeometryLazy(Geometry geo)
+        public static void DrawGeometryLazy(Geometry geo, Action<List<Entity>> cb = null)
         {
-            DrawEntitiesLazy(geo.ToDbObjects().OfType<Entity>().ToList());
+            var ents = geo.ToDbObjects().OfType<Entity>().ToList();
+            cb?.Invoke(ents);
+            DrawEntitiesLazy(ents);
         }
         public static void DrawEntityLazy(Entity ent)
         {
@@ -450,6 +452,29 @@ namespace ThMEPWSS.Assistant
         {
             return DrawRectLazy(leftButtom, new Point3d(leftButtom.X + width, leftButtom.Y - height, leftButtom.Z));
         }
+        public static void DrawGVectorLazy(GVector gv, Action<Entity> cb = null)
+        {
+            DrawingQueue.Enqueue(adb =>
+            {
+                if (gv.Vector.Length > 0)
+                {
+                    //var e = new Leader();
+                    //e.HasArrowHead = true;
+                    //var v = gv.Vector.Length / 2;
+                    //if (v > 200) v = 200;
+                    //e.Dimasz = v;
+                    //e.AppendVertex((gv.EndPoint).ToPoint3d());
+                    //e.AppendVertex(gv.StartPoint.ToPoint3d());
+                    //cb?.Invoke(e);
+                    //DrawEntityLazy(e);
+
+                    DrawLineLazy(gv.StartPoint, gv.EndPoint);
+                    var v = gv.Vector.Length / 4;
+                    if (v > 200) v = 200;
+                    DrawCircleLazy(gv.EndPoint.ToPoint3d(), v);
+                }
+            });
+        }
         public static Line DrawLineSegmentLazy(GLineSegment seg)
         {
             return DrawLineLazy(seg.StartPoint, seg.EndPoint);
@@ -505,6 +530,10 @@ namespace ThMEPWSS.Assistant
             var center = GetMidPoint(p1, p2);
             var radius = GeoAlgorithm.Distance(p1, p2) / 2;
             return DrawCircleLazy(center, radius);
+        }
+        public static Circle DrawCircleLazy(Point2d center, double radius)
+        {
+            return DrawCircleLazy(center.ToPoint3d(), radius);
         }
         public static Circle DrawCircleLazy(Point3d center, double radius)
         {
@@ -604,6 +633,10 @@ namespace ThMEPWSS.Assistant
         {
             var r = GeoAlgorithm.GetBoundaryRect(t);
             return DrawLineLazy(r.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r.RightButtom.OffsetXY(extH, -extV).ToPoint3d());
+        }
+        public static DBText DrawTextLazy(string text, Point2d position)
+        {
+            return DrawTextLazy(text, position.ToPoint3d());
         }
         public static DBText DrawTextLazy(string text, Point3d position)
         {

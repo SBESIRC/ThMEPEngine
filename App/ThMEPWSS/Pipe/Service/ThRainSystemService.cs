@@ -1331,7 +1331,7 @@ new Point2d(maxX, minY)
             List<GRect> condensePipes => geoData.CondensePipes;
             List<GRect> floorDrains => geoData.FloorDrains;
             List<GRect> waterWells => geoData.WaterWells;
-            List<string> waterWellDNs => geoData.WaterWellLabels;
+            List<string> waterWellLabels => geoData.WaterWellLabels;
             List<GRect> waterPortSymbols => geoData.WaterPortSymbols;
             List<GRect> waterPort13s => geoData.WaterPort13s;
             List<GRect> wrappingPipes => geoData.WrappingPipes;
@@ -1577,7 +1577,7 @@ new Point2d(maxX, minY)
                 var ents = new List<BlockReference>();
                 ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.Name.Contains("雨水井编号")));
                 waterWells.AddRange(ents.Select(e => e.Bounds.ToGRect()));
-                waterWellDNs.AddRange(ents.Select(e => e.GetAttributesStrValue("-") ?? ""));
+                waterWellLabels.AddRange(ents.Select(e => e.GetAttributesStrValue("-") ?? ""));
             }
             public void CollectWaterPortSymbols()
             {
@@ -3065,6 +3065,7 @@ new Point2d(maxX, minY)
         }
         public static void DrawRainSystemDiagram2()
         {
+            if (commandContext != null) return;
             Dbg.FocusMainWindow();
             var range = Dbg.TrySelectRange();
             if (range == null) return;

@@ -116,9 +116,692 @@ namespace ThMEPWSS.DebugNs
             return pt.X >= minX && pt.X <= maxX && pt.Y >= minY && pt.Y <= maxY;
         }
     }
+    public static class CloneHelper
+    {
+        public static readonly MethodInfo ObjectMemberwiseCloneMethodInfo = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
+        public static readonly MethodInfo CopyListMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyList));
+        public static readonly MethodInfo CopyHashSetMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyHashSet));
+        public static readonly MethodInfo CopyQueueMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyQueue));
+        public static readonly MethodInfo CopyStackMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyStack));
+        public static readonly MethodInfo CopyObservableCollectionMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyObservableCollection));
+        public static readonly MethodInfo CopyArrayMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyArray));
+        public static readonly MethodInfo CopyDictionaryMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyDictionary));
+        public static readonly MethodInfo CopySortedDictionaryMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopySortedDictionary));
+        public static readonly MethodInfo CopySortedListMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopySortedList));
+        public static object GetDefaultValue(Type type)
+        {
+            return type.IsClass ? null : Activator.CreateInstance(type);
+        }
+        public static List<T> CopyList<T>(List<T> src) => new List<T>(src);
+        public static HashSet<T> CopyHashSet<T>(HashSet<T> src) => new HashSet<T>(src);
+        public static Queue<T> CopyQueue<T>(Queue<T> src) => new Queue<T>(src);
+        public static Stack<T> CopyStack<T>(Stack<T> src) => new Stack<T>(src);
+        public static System.Collections.ObjectModel.ObservableCollection<T> CopyObservableCollection<T>(System.Collections.ObjectModel.ObservableCollection<T> src) => new System.Collections.ObjectModel.ObservableCollection<T>(src);
+        public static T[] CopyArray<T>(T[] src)
+        {
+            var dst = new T[src.Length];
+            Array.Copy(src, dst, src.Length);
+            return dst;
+        }
+        public static Dictionary<K, V> CopyDictionary<K, V>(Dictionary<K, V> src) => new Dictionary<K, V>(src);
+        public static SortedDictionary<K, V> CopySortedDictionary<K, V>(SortedDictionary<K, V> src) => new SortedDictionary<K, V>(src);
+        public static SortedList<K, V> CopySortedList<K, V>(SortedList<K, V> src) => new SortedList<K, V>(src);
+        public static Func<T, T> MemberwiseCloneF<T>()
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            if (typeof(T).IsValueType) return Expression.Lambda<Func<T, T>>(Expression.Block(pe), pe).Compile();
+            return Expression.Lambda<Func<T, T>>(Expression.Block(Expression.Convert(Expression.Call(pe, CloneHelper.ObjectMemberwiseCloneMethodInfo), typeof(T))), pe).Compile();
+        }
+
+        public static Action<T, T> CopyFieldsMemberwiseF<T>()
+        {
+            var src = Expression.Parameter(typeof(T), "src");
+            var dst = Expression.Parameter(typeof(T), "dst");
+            return Expression.Lambda<Action<T, T>>(Expression.Block(typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Select(fi => Expression.Assign(Expression.Field(dst, fi), Expression.Field(src, fi)))), src, dst).Compile();
+        }
+
+        public static Action<T, T> CopyCollectionFieldsF<T>()
+        {
+            var src = Expression.Parameter(typeof(T), "src");
+            var dst = Expression.Parameter(typeof(T), "dst");
+            var exprs = new List<Expression>();
+            foreach (var fi in typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                var mi = TryGetCollectionCloneMethodInfo(fi.FieldType);
+                if (mi != null)
+                {
+                    exprs.Add(Expression.Assign(Expression.Field(dst, fi), Expression.Call(null, mi, Expression.Field(src, fi))));
+                }
+            }
+            return Expression.Lambda<Action<T, T>>(Expression.Block(exprs), src, dst).Compile();
+        }
+        public static MethodInfo TryGetCollectionCloneMethodInfo(Type type)
+        {
+            if (type.IsArray)
+            {
+                var itemType = type.GetElementType();
+                return CopyArrayMethodInfo.MakeGenericMethod(itemType);
+            }
+            if (type.IsGenericType)
+            {
+                var gtypes = type.GetGenericArguments();
+                if (gtypes.Length == 1)
+                {
+                    var itemType = gtypes[0];
+                    var gtypeDef = type.GetGenericTypeDefinition();
+                    if (gtypeDef == typeof(List<>))
+                    {
+                        return CopyListMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(System.Collections.ObjectModel.ObservableCollection<>))
+                    {
+                        return CopyObservableCollectionMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(HashSet<>))
+                    {
+                        return CopyHashSetMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(Queue<>))
+                    {
+                        return CopyQueueMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(Stack<>))
+                    {
+                        return CopyStackMethodInfo.MakeGenericMethod(itemType);
+                    }
+                }
+                else if (gtypes.Length == 2)
+                {
+                    var gtypeDef = type.GetGenericTypeDefinition();
+                    if (gtypeDef == typeof(Dictionary<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopyDictionaryMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                    if (gtypeDef == typeof(SortedDictionary<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopySortedDictionaryMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                    if (gtypeDef == typeof(SortedList<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopySortedListMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                }
+            }
+            return null;
+        }
+    }
+    public class ReturnBlockBuilder
+    {
+        public LabelTarget returnTarget;
+        public LabelExpression returnLabel;
+        public List<Expression> expressions { get; } = new List<Expression>();
+        public ReturnBlockBuilder(Type type, object dftValue)
+        {
+            returnTarget = Expression.Label(type);
+            returnLabel = Expression.Label(returnTarget, Expression.Constant(dftValue, type));
+        }
+        public ReturnBlockBuilder(Type type) : this(type, CloneHelper.GetDefaultValue(type)) { }
+        public BlockExpression BuildBlockExpression()
+        {
+            try
+            {
+                expressions.Add(returnLabel);
+                return Expression.Block(expressions);
+            }
+            finally
+            {
+                expressions.Clear();
+            }
+        }
+        public void AddReturnExpression(Expression expr)
+        {
+            expressions.Add(Expression.Return(returnTarget, expr));
+        }
+    }
+    public static class ExpTree
+    {
+        public static Action<object, V> AssignPropertyOrFieldF<V>(Type type, PropertyInfo pi)
+        {
+            var pe = Expression.Parameter(typeof(object), "v1");
+            var peV = Expression.Parameter(typeof(V), "v2");
+            return Expression.Lambda<Action<object, V>>(Expression.Block(Expression.Assign(Expression.Property(Expression.Convert(pe, type), pi), peV)), pe, peV).Compile();
+        }
+        public static Action<object, V> AssignPropertyOrFieldF<V>(Type type, FieldInfo fi)
+        {
+            var pe = Expression.Parameter(typeof(object), "v1");
+            var peV = Expression.Parameter(typeof(V), "v2");
+            return Expression.Lambda<Action<object, V>>(Expression.Block(Expression.Assign(Expression.Field(Expression.Convert(pe, type), fi), peV)), pe, peV).Compile();
+        }
+        public static Action<object, V> AssignPropertyOrFieldF<V>(Type type, string name)
+        {
+            var pe = Expression.Parameter(typeof(object), "v1");
+            var peV = Expression.Parameter(typeof(V), "v2");
+            return Expression.Lambda<Action<object, V>>(Expression.Block(Expression.Assign(Expression.PropertyOrField(Expression.Convert(pe, type), name), peV)), pe, peV).Compile();
+        }
+        public static Func<object, V> PropertyOrFieldF<V>(Type type, PropertyInfo pi)
+        {
+            var pe = Expression.Parameter(typeof(object), "value");
+            return Expression.Lambda<Func<object, V>>(Expression.Block(Expression.Property(Expression.Convert(pe, type), pi)), pe).Compile();
+        }
+        public static Func<object, V> PropertyOrFieldF<V>(Type type, FieldInfo fi)
+        {
+            var pe = Expression.Parameter(typeof(object), "value");
+            return Expression.Lambda<Func<object, V>>(Expression.Block(Expression.Field(Expression.Convert(pe, type), fi)), pe).Compile();
+        }
+        public static Func<object, V> PropertyOrFieldF<V>(Type type, string name)
+        {
+            var pe = Expression.Parameter(typeof(object), "value");
+            return Expression.Lambda<Func<object, V>>(Expression.Block(Expression.PropertyOrField(Expression.Convert(pe, type), name)), pe).Compile();
+        }
+        public static Func<T, V> PropertyOrFieldF<T, V>(PropertyInfo pi)
+        {
+            var pe = Expression.Parameter(typeof(T), "value");
+            return Expression.Lambda<Func<T, V>>(Expression.Block(Expression.Property(pe, pi)), pe).Compile();
+        }
+        public static Func<T, V> PropertyOrFieldF<T, V>(FieldInfo fi)
+        {
+            var pe = Expression.Parameter(typeof(T), "value");
+            return Expression.Lambda<Func<T, V>>(Expression.Block(Expression.Field(pe, fi)), pe).Compile();
+        }
+        public static Func<T, V> PropertyOrFieldF<T, V>(string name)
+        {
+            var pe = Expression.Parameter(typeof(T), "value");
+            return Expression.Lambda<Func<T, V>>(Expression.Block(Expression.PropertyOrField(pe, name)), pe).Compile();
+        }
+        public static Action A(MethodInfo mi)
+        {
+            return Expression.Lambda<Action>(Expression.Block(Expression.Call(null, mi))).Compile();
+        }
+        public static Action<T0> A<T0>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            return Expression.Lambda<Action<T0>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+        }
+        public static Action<T0, T1> A<T0, T1>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            return Expression.Lambda<Action<T0, T1>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+        }
+        public static Action<T0, T1, T2> A<T0, T1, T2>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            return Expression.Lambda<Action<T0, T1, T2>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+        }
+        public static Action<T0, T1, T2, T3> A<T0, T1, T2, T3>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            return Expression.Lambda<Action<T0, T1, T2, T3>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3)), pe0, pe1, pe2, pe3).Compile();
+        }
+        public static Action<T0, T1, T2, T3, T4> A<T0, T1, T2, T3, T4>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            return Expression.Lambda<Action<T0, T1, T2, T3, T4>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4)), pe0, pe1, pe2, pe3, pe4).Compile();
+        }
+        public static Action<T0, T1, T2, T3, T4, T5> A<T0, T1, T2, T3, T4, T5>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            return Expression.Lambda<Action<T0, T1, T2, T3, T4, T5>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4, pe5)), pe0, pe1, pe2, pe3, pe4, pe5).Compile();
+        }
+        public static Action<T0, T1, T2, T3, T4, T5, T6> A<T0, T1, T2, T3, T4, T5, T6>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            return Expression.Lambda<Action<T0, T1, T2, T3, T4, T5, T6>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6)), pe0, pe1, pe2, pe3, pe4, pe5, pe6).Compile();
+        }
+        public static Action<T0, T1, T2, T3, T4, T5, T6, T7> A<T0, T1, T2, T3, T4, T5, T6, T7>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            var pe7 = Expression.Parameter(typeof(T7), "v7");
+            return Expression.Lambda<Action<T0, T1, T2, T3, T4, T5, T6, T7>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7)), pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7).Compile();
+        }
+        public static Func<T0> F<T0>(MethodInfo mi)
+        {
+            return Expression.Lambda<Func<T0>>(Expression.Block(Expression.Call(null, mi))).Compile();
+        }
+        public static Func<T0, T1> F<T0, T1>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            return Expression.Lambda<Func<T0, T1>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+        }
+        public static Func<T0, T1, T2> F<T0, T1, T2>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            return Expression.Lambda<Func<T0, T1, T2>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+        }
+        public static Func<T0, T1, T2, T3> F<T0, T1, T2, T3>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            return Expression.Lambda<Func<T0, T1, T2, T3>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4> F<T0, T1, T2, T3, T4>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3)), pe0, pe1, pe2, pe3).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5> F<T0, T1, T2, T3, T4, T5>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4)), pe0, pe1, pe2, pe3, pe4).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5, T6> F<T0, T1, T2, T3, T4, T5, T6>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5, T6>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4, pe5)), pe0, pe1, pe2, pe3, pe4, pe5).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5, T6, T7> F<T0, T1, T2, T3, T4, T5, T6, T7>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5, T6, T7>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6)), pe0, pe1, pe2, pe3, pe4, pe5, pe6).Compile();
+        }
+        public static Action<T> InstA<T>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            return Expression.Lambda<Action<T>>(Expression.Block(Expression.Call(pe, mi)), pe).Compile();
+        }
+        public static Action<T, T0> InstA<T, T0>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            return Expression.Lambda<Action<T, T0>>(Expression.Block(Expression.Call(pe, mi, pe0)), pe, pe0).Compile();
+        }
+        public static Action<T, T0, T1> InstA<T, T0, T1>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            return Expression.Lambda<Action<T, T0, T1>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1)), pe, pe0, pe1).Compile();
+        }
+        public static Action<T, T0, T1, T2> InstA<T, T0, T1, T2>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            return Expression.Lambda<Action<T, T0, T1, T2>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2)), pe, pe0, pe1, pe2).Compile();
+        }
+        public static Action<T, T0, T1, T2, T3> InstA<T, T0, T1, T2, T3>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            return Expression.Lambda<Action<T, T0, T1, T2, T3>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3)), pe, pe0, pe1, pe2, pe3).Compile();
+        }
+        public static Action<T, T0, T1, T2, T3, T4> InstA<T, T0, T1, T2, T3, T4>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            return Expression.Lambda<Action<T, T0, T1, T2, T3, T4>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4)), pe, pe0, pe1, pe2, pe3, pe4).Compile();
+        }
+        public static Action<T, T0, T1, T2, T3, T4, T5> InstA<T, T0, T1, T2, T3, T4, T5>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            return Expression.Lambda<Action<T, T0, T1, T2, T3, T4, T5>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5)), pe, pe0, pe1, pe2, pe3, pe4, pe5).Compile();
+        }
+        public static Action<T, T0, T1, T2, T3, T4, T5, T6> InstA<T, T0, T1, T2, T3, T4, T5, T6>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            return Expression.Lambda<Action<T, T0, T1, T2, T3, T4, T5, T6>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6)), pe, pe0, pe1, pe2, pe3, pe4, pe5, pe6).Compile();
+        }
+        public static Action<T, T0, T1, T2, T3, T4, T5, T6, T7> InstA<T, T0, T1, T2, T3, T4, T5, T6, T7>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            var pe7 = Expression.Parameter(typeof(T7), "v7");
+            return Expression.Lambda<Action<T, T0, T1, T2, T3, T4, T5, T6, T7>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7)), pe, pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7).Compile();
+        }
+        public static Func<T> InstF<T>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            return Expression.Lambda<Func<T>>(Expression.Block(Expression.Call(pe, mi)), pe).Compile();
+        }
+        public static Func<T, T0> InstF<T, T0>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            return Expression.Lambda<Func<T, T0>>(Expression.Block(Expression.Call(pe, mi, pe0)), pe, pe0).Compile();
+        }
+        public static Func<T, T0, T1> InstF<T, T0, T1>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            return Expression.Lambda<Func<T, T0, T1>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1)), pe, pe0, pe1).Compile();
+        }
+        public static Func<T, T0, T1, T2> InstF<T, T0, T1, T2>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            return Expression.Lambda<Func<T, T0, T1, T2>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2)), pe, pe0, pe1, pe2).Compile();
+        }
+        public static Func<T, T0, T1, T2, T3> InstF<T, T0, T1, T2, T3>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            return Expression.Lambda<Func<T, T0, T1, T2, T3>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3)), pe, pe0, pe1, pe2, pe3).Compile();
+        }
+        public static Func<T, T0, T1, T2, T3, T4> InstF<T, T0, T1, T2, T3, T4>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            return Expression.Lambda<Func<T, T0, T1, T2, T3, T4>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4)), pe, pe0, pe1, pe2, pe3, pe4).Compile();
+        }
+        public static Func<T, T0, T1, T2, T3, T4, T5> InstF<T, T0, T1, T2, T3, T4, T5>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            return Expression.Lambda<Func<T, T0, T1, T2, T3, T4, T5>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5)), pe, pe0, pe1, pe2, pe3, pe4, pe5).Compile();
+        }
+        public static Func<T, T0, T1, T2, T3, T4, T5, T6> InstF<T, T0, T1, T2, T3, T4, T5, T6>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            return Expression.Lambda<Func<T, T0, T1, T2, T3, T4, T5, T6>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6)), pe, pe0, pe1, pe2, pe3, pe4, pe5, pe6).Compile();
+        }
+        public static Func<T, T0, T1, T2, T3, T4, T5, T6, T7> InstF<T, T0, T1, T2, T3, T4, T5, T6, T7>(MethodInfo mi)
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            var pe7 = Expression.Parameter(typeof(T7), "v7");
+            return Expression.Lambda<Func<T, T0, T1, T2, T3, T4, T5, T6, T7>>(Expression.Block(Expression.Call(pe, mi, pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7)), pe, pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7).Compile();
+        }
+        public static Func<T> NewF<T>()
+        {
+            return Expression.Lambda<Func<T>>(Expression.Block(Expression.New(typeof(T)))).Compile();
+        }
+
+        public static Func<T0> NewF<T, T0>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            return Expression.Lambda<Func<T0>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0) }), pe0)), pe0).Compile();
+        }
+        public static Func<T0, T1> NewF<T, T0, T1>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            return Expression.Lambda<Func<T0, T1>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1) }), pe0, pe1)), pe0, pe1).Compile();
+        }
+        public static Func<T0, T1, T2> NewF<T, T0, T1, T2>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            return Expression.Lambda<Func<T0, T1, T2>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2) }), pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+        }
+        public static Func<T0, T1, T2, T3> NewF<T, T0, T1, T2, T3>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            return Expression.Lambda<Func<T0, T1, T2, T3>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2), typeof(T3) }), pe0, pe1, pe2, pe3)), pe0, pe1, pe2, pe3).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4> NewF<T, T0, T1, T2, T3, T4>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4) }), pe0, pe1, pe2, pe3, pe4)), pe0, pe1, pe2, pe3, pe4).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5> NewF<T, T0, T1, T2, T3, T4, T5>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) }), pe0, pe1, pe2, pe3, pe4, pe5)), pe0, pe1, pe2, pe3, pe4, pe5).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5, T6> NewF<T, T0, T1, T2, T3, T4, T5, T6>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5, T6>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6) }), pe0, pe1, pe2, pe3, pe4, pe5, pe6)), pe0, pe1, pe2, pe3, pe4, pe5, pe6).Compile();
+        }
+        public static Func<T0, T1, T2, T3, T4, T5, T6, T7> NewF<T, T0, T1, T2, T3, T4, T5, T6, T7>(MethodInfo mi)
+        {
+            var pe0 = Expression.Parameter(typeof(T0), "v0");
+            var pe1 = Expression.Parameter(typeof(T1), "v1");
+            var pe2 = Expression.Parameter(typeof(T2), "v2");
+            var pe3 = Expression.Parameter(typeof(T3), "v3");
+            var pe4 = Expression.Parameter(typeof(T4), "v4");
+            var pe5 = Expression.Parameter(typeof(T5), "v5");
+            var pe6 = Expression.Parameter(typeof(T6), "v6");
+            var pe7 = Expression.Parameter(typeof(T7), "v7");
+            return Expression.Lambda<Func<T0, T1, T2, T3, T4, T5, T6, T7>>(Expression.Block(Expression.New(typeof(T).GetConstructor(new Type[] { typeof(T0), typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7) }), pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7)), pe0, pe1, pe2, pe3, pe4, pe5, pe6, pe7).Compile();
+        }
+
+    }
     [Feng]
     public class Sankaku1
     {
+        static string ReadString()
+        {
+            var rst = AcHelper.Active.Editor.GetString("\n输入立管编号");
+            if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return null;
+            return rst.StringResult;
+        }
+        [Feng("👀")]
+        public static void qus5uz()
+        {
+            Util1.FindText();
+        }
+        [Feng("❌")]
+        public static void qus63i()
+        {
+            Dbg.DeleteTestGeometries();
+        }
+        [Feng("DrawDrainageSystemDiagram2")]
+        public static void qus6ak()
+        {
+            DrainageService.DrawDrainageSystemDiagram2();
+        }
+        [Feng("保存geoData")]
+        public static void qutpmu()
+        {
+            var geoData = DrainageService.CollectGeoData();
+            var file = @"D:\DATA\temp\" + DateTime.Now.Ticks + ".json";
+            File.WriteAllText(file, geoData.ToCadJson());
+            Dbg.PrintLine(file);
+        }
+        [Feng("直接从geoData生成")]
+        public static void qutpt9()
+        {
+            var file = @"D:\DATA\temp\637595412925029309.json";
+            var geoData = File.ReadAllText(file).FromCadJson<DrainageGeoData>();
+            DrainageService.TestDrawingDatasCreation(geoData);
+        }
+        [Feng("quw3jg")]
+        public static void quw3jg()
+        {
+
+        }
+        [Feng("quw29k")]
+        public static void quw29k()
+        {
+
+        }
+
+        public static List<Point2d> GetAlivePointsByNTS(List<Point2d> points, double radius)
+        {
+            var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToList();
+            var flags = new bool[pts.Count];
+            for (int i = 0; i < pts.Count; i++)
+            {
+                if (!flags[i])
+                {
+                    for (int j = 0; j < pts.Count; j++)
+                    {
+                        if (!flags[j])
+                        {
+                            if (i != j)
+                            {
+                                if (pts[i].Intersects(pts[j]))
+                                {
+                                    flags[i] = true;
+                                    flags[j] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            IEnumerable<Point2d> f()
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (!flags[i])
+                    {
+                        yield return points[i];
+                    }
+                }
+            }
+            var q = f();
+            return q.ToList();
+        }
+
+
+        public static void quu77p()
+        {
+            var file = @"D:\DATA\temp\637595412925029309.json";
+            var geoData = File.ReadAllText(file).FromCadJson<DrainageGeoData>();
+            {
+                for (int i = 0; i < geoData.DLines.Count; i++)
+                {
+                    geoData.DLines[i] = geoData.DLines[i].Extend(5);
+                }
+            }
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var cadData = DrainageCadData.Create(geoData);
+                var killer = GeometryFac.CreateGeometryEx(cadData.VerticalPipes.Concat(cadData.WaterPorts).Concat(cadData.FloorDrains).ToList());
+                var maxDis = 8000;
+                var angleTolleranceDegree = 1;
+                var lines = geoData.DLines.Where(x => x.Length > 0).Distinct().ToList();
+                geoData.DLines.AddRange(GeometryFac.AutoConn(lines, killer, maxDis, angleTolleranceDegree));
+                DrainageService.DrawGeoData(geoData);
+            }
+        }
+
+
+
         [Feng("水管井")]
         public static void quqgdc()
         {
@@ -181,6 +864,46 @@ namespace ThMEPWSS.DebugNs
                 }
             }
         }
+        [Feng("在交点处打碎")]
+        public static void quqqrp()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var seg1 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                var seg2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                var geo = seg1.ToLineString().Union(seg2.ToLineString());//MultiLineString
+                var segs = geo.ToDbCollection().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).ToList();
+
+                FengDbgTesting.AddLazyAction("", adb =>
+                {
+                    foreach (var seg in segs)
+                    {
+                        DU.DrawLineSegmentLazy(seg);
+                    }
+                });
+            }
+        }
+        [Feng("qurx6s")]
+        public static void qurx6s()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var circle = Dbg.SelectEntity<Circle>(adb);
+                //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6));
+                DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6, false));
+                //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(36));
+            }
+        }
         [Feng("quqdxf")]
         public static void quqdxf()
         {
@@ -241,7 +964,7 @@ namespace ThMEPWSS.DebugNs
                 var e1 = Dbg.SelectEntity<Line>(adb);
                 var e2 = Dbg.SelectEntity<Circle>(adb);
                 var g1 = e1.ToGLineSegment().ToLineString();
-                var g2 = e2.ToGCircle().ToCirclePolygon();
+                var g2 = e2.ToGCircle().ToCirclePolygon(36);
                 var g3 = g1.Difference(g2);
                 FengDbgTesting.AddLazyAction("", _adb =>
                 {
@@ -319,13 +1042,14 @@ namespace ThMEPWSS.DebugNs
                 {
                     e.AppendVertex(Dbg.SelectPoint());
                 }
-                e.Layer = "H-DIMS-DUCT";
-                e.Dimasz = 1;
-                e.Dimtxt = 1;
-                e.SetDimstyleData(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100"));
+                //e.Layer = "H-DIMS-DUCT";
+                e.Dimasz = 200;
+                //e.Dimtxt = 1000;
+                //e.SetDimstyleData(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100"));
+
                 //Dbg.PrintLine(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100").ObjectId.ToString());
                 //e.SetDatabaseDefaults(db);
-                //DU.DrawEntityLazy(e);
+                DU.DrawEntityLazy(e);
 
             }
         }
@@ -407,49 +1131,7 @@ namespace ThMEPWSS.DebugNs
         static _nzm nzm => Dbg.nzm;
 
 
-        [Feng("collector codegen")]
-        public static void quj6bh()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                foreach (var e in Dbg.SelectEntities(adb).OfType<Entity>())
-                {
-                    if (ThRainSystemService.IsTianZhengElement(e))
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<Entity>().Where( x=>x.Layer=={e.Layer.ToJson()} && ThRainSystemService.IsTianZhengElement(x))");
-                    }
-                    else if (e is Line)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<Line>().Where( x=>x.Layer=={e.Layer.ToJson()})");
-                    }
-                    else if (e is Polyline)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<Polyline>().Where( x=>x.Layer=={e.Layer.ToJson()})");
-                    }
-                    else if (e is Circle)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<Circle>().Where( x=>x.Layer=={e.Layer.ToJson()})");
-                    }
-                    else if (e is DBText)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<DBText>().Where( x=>x.Layer=={e.Layer.ToJson()})");
-                    }
-                    else if (e is MText)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<MText>().Where( x=>x.Layer=={e.Layer.ToJson()})");
-                    }
-                    else if (e is BlockReference br)
-                    {
-                        Dbg.PrintLine($"adb.ModelSpace.OfType<BlockReference>().Where( x=>x.Layer=={e.Layer.ToJson()}) && x.ObjectId.IsValid && x.GetEffectiveName()=={br.GetEffectiveName().ToJson()})");
-                    }
-                }
 
-            }
-        }
         [Feng("ToObb")]
         public static void quiwqs()
         {
@@ -1750,6 +2432,30 @@ namespace ThMEPWSS.DebugNs
                 DU.DrawRectLazy(ct.Boundary);
             }
             //Dbg.PrintLine(texts.Select(x => x.Text).ToJson());
+        }
+        [Feng("💰准备打开多张图纸")]
+        public static void qtjr2w()
+        {
+            var files = Util1.getFiles();
+            for (int i = 0; i < files.Length; i++)
+            {
+                string file = files[i];
+                AddButton((i + 1) + " " + Path.GetFileName(file), () =>
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+                });
+            }
+            AddButton("地上给水排水平面图模板_20210125", () =>
+            {
+                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\地上给水排水平面图模板_20210125.dwg";
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+            });
+            AddButton("绘图说明_20210326", () =>
+            {
+                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\8#_210429\8#\设计区\绘图说明_20210326（反馈）.dwg";
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+            });
+
         }
         [Feng("💰准备打开多张图纸2")]
         public static void quhakv()

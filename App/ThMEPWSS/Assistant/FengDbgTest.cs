@@ -114,11 +114,16 @@ namespace ThMEPWSS.DebugNs
                         AddButtons2(t);
                     }
                 }
-                AddButtons2(typeof(quj50y));
-                AddButtons2(typeof(quin3c));
+
                 AddButtons2(typeof(DrainageTest));
                 AddButtons2(typeof(Sankaku));
-                AddButtons2(typeof(FengDbgTesting));
+
+                if (false)
+                {
+                    AddButtons2(typeof(quj50y));
+                    AddButtons2(typeof(quin3c));
+                    AddButtons2(typeof(FengDbgTesting));
+                }
             }
             public static void AddButtons2(Type targetType)
             {
@@ -493,6 +498,51 @@ namespace ThMEPWSS.DebugNs
             if (!isDebugging) return;
             ((Action<string>)ctx["setText"])(text);
         }
+        public class TextBoxWriter : System.IO.TextWriter
+        {
+            //重载string那个方法没用的
+            StringBuilder sb = new StringBuilder(8192);
+            bool r;
+            public override void Write(char value)
+            {
+                //Dbg.PrintLine(value.ToJson());
+                if (value == '\r')
+                {
+                    r = true;
+                    return;
+                }
+                if (value == '\n')
+                {
+                    if (r)
+                    {
+                        var s = sb.ToString();
+                        if (s.Length > 100 || s.Contains('\n'))
+                        {
+                            Dbg.PrintText(s);
+                        }
+                        else
+                        {
+                            Dbg.PrintLine(s);
+                        }
+                        r = false;
+                        sb.Clear();
+                        return;
+                    }
+                    else
+                    {
+                        sb.Append(value);
+                        return;
+                    }
+                }
+                r = false;
+                sb.Append(value);
+            }
+            public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;
+        }
+        static ThDebugTool()
+        {
+            Console.SetOut(new TextBoxWriter());
+        }
         const double DEFAULT_WIDTH = 100;
         public static void ShowLine(Line line, double width = DEFAULT_WIDTH)
         {
@@ -584,6 +634,10 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     adb.ModelSpace.Add(line);
                 }
             });
+        }
+        public static void ShowWhere(Geometry geo, double delta = DEFAULT_DELTA)
+        {
+            ShowWhere(geo.ToGRect(), delta);
         }
         public static void ShowWhere(GRect r, double delta = DEFAULT_DELTA)
         {
@@ -3914,6 +3968,48 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
+            public static void CollectorCodegen()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    foreach (var e in Dbg.SelectEntities(adb).OfType<Entity>())
+                    {
+                        if (ThRainSystemService.IsTianZhengElement(e))
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<Entity>().Where( e=>e.Layer=={e.Layer.ToJson()} && ThRainSystemService.IsTianZhengElement(x))");
+                        }
+                        else if (e is Line)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<Line>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                        }
+                        else if (e is Polyline)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<Polyline>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                        }
+                        else if (e is Circle)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<Circle>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                        }
+                        else if (e is DBText)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<DBText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                        }
+                        else if (e is MText)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<MText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                        }
+                        else if (e is BlockReference br)
+                        {
+                            Dbg.PrintLine($"adb.ModelSpace.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()}) && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()})");
+                        }
+                    }
+
+                }
+            }
             public static void BlockReferenceToDataItemToJson()
             {
                 Dbg.FocusMainWindow();
@@ -9521,6 +9617,11 @@ E:\thepa_workingSpace\任务资料\任务2\210517\武汉二七滨江商务区南
             {
                 types.Add(typeof(GRect));
                 types.Add(typeof(GLineSegment));
+                types.Add(typeof(GVector));
+                types.Add(typeof(Point2d));
+                types.Add(typeof(Point3d));
+                types.Add(typeof(Vector2d));
+                types.Add(typeof(Vector3d));
             }
             public override bool CanConvert(Type objectType)
             {
@@ -9542,32 +9643,95 @@ E:\thepa_workingSpace\任务资料\任务2\210517\武汉二七滨江商务区南
                     return new GLineSegment(new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>()),
                         new Point2d(ja[2].ToObject<double>(), ja[3].ToObject<double>()));
                 }
+                if (typeof(GVector) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new GVector(new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>()), new Vector2d(ja[2].ToObject<double>(), ja[3].ToObject<double>()));
+                }
+                if (typeof(Point2d) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+                }
+                if (typeof(Point3d) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new Point3d(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>());
+                }
+                if (typeof(Vector2d) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+                }
+                if (typeof(Vector3d) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new Point3d(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>());
+                }
                 throw new NotSupportedException();
-            }
-            string tojson(Point2d pt)
-            {
-                var json = (new Dictionary<string, object>() { { "type", nameof(Point2d) }, { "values", new double[] { pt.X, pt.Y } } }).ToJson();
-                return json;
-            }
-            Point2d toPoint2d(string json)
-            {
-                var jo = JsonConvert.DeserializeObject<JObject>(json);
-                var ja = (JArray)jo["values"];
-                return new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
             }
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
-                if (value is GRect r)
                 {
-                    var json = (new Dictionary<string, object>() { { "type", nameof(GRect) }, { "values", new double[] { r.MinX, r.MinY, r.MaxX, r.MaxY } } }).ToJson();
-                    writer.WriteRawValue(json);
-                    return;
+                    if (value is GRect r)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(GRect) }, { "values", new double[] { r.MinX, r.MinY, r.MaxX, r.MaxY } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
                 }
-                if (value is GLineSegment seg)
                 {
-                    var json = (new Dictionary<string, object>() { { "type", nameof(GLineSegment) }, { "values", new double[] { seg.StartPoint.X, seg.StartPoint.Y, seg.EndPoint.X, seg.EndPoint.Y } } }).ToJson();
-                    writer.WriteRawValue(json);
-                    return;
+                    if (value is GLineSegment seg)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(GLineSegment) }, { "values", new double[] { seg.StartPoint.X, seg.StartPoint.Y, seg.EndPoint.X, seg.EndPoint.Y } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is GVector vec)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(GVector) }, { "values", new double[] { vec.StartPoint.X, vec.StartPoint.Y, vec.Vector.X, vec.Vector.Y } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is Point2d pt)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(Point2d) }, { "values", new double[] { pt.X, pt.Y } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is Point3d pt)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(Point3d) }, { "values", new double[] { pt.X, pt.Y, pt.Z } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is Vector2d vec)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(Vector2d) }, { "values", new double[] { vec.X, vec.Y } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is Vector3d vec)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(Vector3d) }, { "values", new double[] { vec.X, vec.Y, vec.Z } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
                 }
                 throw new NotSupportedException();
             }
@@ -13153,30 +13317,7 @@ namespace ThMEPWSS.DebugNs
             }
             return false;
         }
-        [Feng("💰准备打开多张图纸")]
-        public static void qtjr2w()
-        {
-            var files = Util1.getFiles();
-            for (int i = 0; i < files.Length; i++)
-            {
-                string file = files[i];
-                AddButton((i + 1) + " " + Path.GetFileName(file), () =>
-                {
-                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
-                });
-            }
-            AddButton("地上给水排水平面图模板_20210125", () =>
-            {
-                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\地上给水排水平面图模板_20210125.dwg";
-                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
-            });
-            AddButton("绘图说明_20210326", () =>
-            {
-                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\8#_210429\8#\设计区\绘图说明_20210326（反馈）.dwg";
-                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
-            });
 
-        }
         [Feng("GetLayers")]
         public static void xx()
         {

@@ -37,15 +37,46 @@ namespace ThMEPWSS.JsonExtensionsNs
                 yield return kv.Value;
             }
         }
-        public static List<T> ToList<T>(this IList<T> source, IList<int> lis)
+        public static List<T> ToList<T>(this IEnumerable<int> lis, IList<T> source, bool reverse = false)
         {
+            if (reverse)
+            {
+                IList<int> lst = (lis as IList<int>) ?? lis.ToList();
+                return Enumerable.Range(0, source.Count).Where(i => !lst.Contains(i)).Select(i => source[i]).ToList();
+            }
             return lis.Select(li => source[li]).ToList();
         }
-        public static IEnumerable<int> SelectInts<T>(this IList<T> source, IList<T> std)
+        public static List<T> ToList<T>(this bool[] flags,IList<T> std,bool inverse)
         {
-            for (int i = 0; i < source.Count; i++)
+            var ret = new List<T>(std.Count);
+            if (inverse)
             {
-                yield return std.IndexOf(source[i]);
+                for (int i = 0; i < std.Count; i++)
+                {
+                    if (!flags[i])
+                    {
+                        ret.Add(std[i]);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < std.Count; i++)
+                {
+                    if (flags[i])
+                    {
+                        ret.Add(std[i]);
+                    }
+                }
+            }
+            return ret;
+        }
+        public static IEnumerable<int> SelectInts<T>(this IEnumerable<T> source, IList<T> std)
+        {
+            IList<T> lst = (source as IList<T>) ?? source.ToList();
+            for (int i = 0; i < lst.Count; i++)
+            {
+                yield return std.IndexOf(lst[i]);
             }
         }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
@@ -54,6 +85,10 @@ namespace ThMEPWSS.JsonExtensionsNs
             {
                 if (f(source[i])) yield return i;
             }
+        }
+        public static string JoinN(this IEnumerable<string> strs)
+        {
+            return strs.JoinWith("\n");
         }
         public static string JoinWith(this IEnumerable<string> strs, string s)
         {
@@ -130,6 +165,7 @@ namespace ThMEPWSS.CADExtensionsNs
 {
     public static class CADExtensions
     {
+        public static Point2d GetCenter(this Geometry geo) => geo.ToGRect().Center;
         public static GRect ToGRect(this Geometry geo)
         {
             var env = geo.EnvelopeInternal;
@@ -149,14 +185,26 @@ namespace ThMEPWSS.CADExtensionsNs
             var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
         }
+        public static GCircle ToGCircle(this GRect r, bool larger)
+        {
+            return larger ? new GCircle(r.Center, r.OuterRadius) : new GCircle(r.Center, r.InnerRadius);
+        }
+        public static GRect ToGRect(this Point2d pt, double ext)
+        {
+            return GRect.Create(pt, ext);
+        }
+        public static GCircle ToGCircle(this Point2d pt, double radius)
+        {
+            return new GCircle(pt, radius);
+        }
         public static Polygon ToPolygon(this GRect r)
         {
             return new Polygon(r.ToLinearRing());
         }
         public static List<Geometry> ToGeometryList(this IEnumerable<Geometry> source) => source.ToList();
-        public static Polygon ToCirclePolygon(this GCircle circle,int numPoints=6)
+        public static Polygon ToCirclePolygon(this GCircle circle, int numPoints, bool larger = true)
         {
-            return Pipe.Service.GeometryFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints);
+            return Pipe.Service.GeometryFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
         }
         public static LineString ToLineString(this GLineSegment seg)
         {
@@ -341,11 +389,11 @@ namespace ThMEPWSS.CADExtensionsNs
             double angle10 = other_vector.GetAngleTo(vector10);
             double angle11 = other_vector.GetAngleTo(vector11);
 
-            if((angle00 < Math.PI/2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
+            if ((angle00 < Math.PI / 2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
             {
                 distance = this_point2.DistanceTo(other_point1);
             }
-            else if((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
+            else if ((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
             {
                 distance = this_point1.DistanceTo(other_point2);
             }

@@ -20,6 +20,8 @@ using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.ApplicationServices;
 using Linq2Acad;
 using ThCADExtension;
+using ThMEPWSS.Uitl.ExtensionsNs;
+
 namespace ThMEPWSS.Uitl
 {
     public class SPoint
@@ -512,6 +514,44 @@ namespace ThMEPWSS.Uitl
     {
         public GRect Boundary;
         public string Text;
+    }
+    public struct GVector
+    {
+        public bool IsNull => Equals(this, default(GVector));
+        public bool IsValid => Length > 0;
+        public Point2d StartPoint;
+        public Vector2d Vector;
+        public Point2d EndPoint => StartPoint + Vector;
+        public double Length => Vector.Length;
+        public GVector(Point2d startPoint, Vector2d vector)
+        {
+            StartPoint = startPoint;
+            Vector = vector;
+        }
+        public static GVector Create(Point2d startPoint, Vector2d vec, double len)
+        {
+            if (vec.Length > 0) return new GVector(startPoint, vec.GetNormal() * len);
+            else return new GVector(startPoint, default);
+        }
+        public GVector Scale(double ratio)
+        {
+            if (!IsValid) return this;
+            return new GVector(StartPoint, Vector * ratio);
+        }
+        public GVector Extend(double ext)
+        {
+            if (!IsValid) return this;
+            return new GVector(StartPoint, Vector + Vector.GetNormal() * ext);
+        }
+        public GVector OffsetXY(double dx, double dy)
+        {
+            return new GVector(StartPoint.OffsetXY(dx, dy), Vector);
+        }
+        public GVector Create(double len)
+        {
+            if (!IsValid) return this;
+            return new GVector(StartPoint, Vector.GetNormal() * len);
+        }
     }
     public struct GRect
     {
