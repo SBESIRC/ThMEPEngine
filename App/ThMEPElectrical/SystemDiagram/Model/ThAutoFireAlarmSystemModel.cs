@@ -192,6 +192,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 int RowIndex = 1;//方格层数
                 var AllData = GetFireDistrictsInfo();
                 AllData = DelDuplicateFireDistricts(AllData);
+                DealingDuplicateBlocks(ref AllData);
                 foreach (var fireDistrict in AllData)
                 {
                     //初始化横线
@@ -297,6 +298,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             return NormalFireDistricts;
+        }
+        private void DealingDuplicateBlocks(ref List<ThFireDistrictModel> allData)
+        {
+            allData.ForEach(o =>
+            {
+                if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
+                    o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
+            });
         }
 
         /// <summary>
