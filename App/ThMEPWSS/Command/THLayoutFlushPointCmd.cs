@@ -122,6 +122,7 @@ namespace ThMEPWSS.Command
                 {
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
+                    Rooms = roomExtractor.Rooms.Select(o=>o.Boundary).ToList(),
                     WashPointBlkName = "给水角阀平面",
                     WashPointLayerName= "W-WSUP-EQPM",
                     WashPoints= layOutPts,

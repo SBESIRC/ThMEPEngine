@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using System;
+using Linq2Acad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
@@ -8,16 +9,22 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using System.Text.RegularExpressions;
-using System;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
     public class ThLayoutWashPointBlockService
     {
         private WashPointLayoutData LayoutData { get; set; }
+        /// <summary>
+        /// 墙、柱索引
+        /// </summary>
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+        /// <summary>
+        /// 房间索引
+        /// </summary>
+        private ThCADCoreNTSSpatialIndex RoomSpatialIndex { get; set; }
         public ThLayoutWashPointBlockService(WashPointLayoutData layOutData)
         {
             LayoutData = layOutData;        
@@ -64,6 +71,9 @@ namespace ThMEPWSS.FlushPoint.Service
             LayoutData.Walls.ForEach(o => objs.Add(o));
             LayoutData.Columns.ForEach(o => objs.Add(o));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var roomObjs = new DBObjectCollection();
+            LayoutData.Rooms.ForEach(o=>roomObjs.Add(o));
+            RoomSpatialIndex = new ThCADCoreNTSSpatialIndex(roomObjs);
         }
         private Vector3d CalculateDirection(Point3d pt)
         {
@@ -71,7 +81,20 @@ namespace ThMEPWSS.FlushPoint.Service
             var objs = SpatialIndex.SelectCrossingPolygon(square);
             if(objs.Count==0)
             {
-                return Vector3d.XAxis;
+                var rooms = RoomSpatialIndex.SelectCrossingPolygon(square);
+                if(rooms.Count>0)
+                {
+                    var obj = GetClosestObj(rooms, pt);
+                    var edge = GetPropertyEdge(obj, pt);
+                    var leftVec = edge.LineDirection().GetPerpendicularVector().GetNormal();
+                    var rightVec = leftVec.Negate();
+                    var pt1 = pt + leftVec.MultiplyBy(LayoutData.PtRange + 1);
+                    return IsContains(obj, pt1) ? leftVec : rightVec;
+                }
+                else
+                {
+                    return Vector3d.XAxis;
+                }                
             }
             else
             {
@@ -199,6 +222,7 @@ namespace ThMEPWSS.FlushPoint.Service
     {
         public List<Entity> Walls { get; set; }
         public List<Entity> Columns { get; set; }
+        public List<Entity> Rooms { get; set; }
         public string WashPointBlkName { get; set; }
         /// <summary>
         /// 冲洗点位块的图层名称
@@ -254,7 +278,8 @@ namespace ThMEPWSS.FlushPoint.Service
             WaterSupplyMarkStyle = "TH-STYLE3";
             WaterSupplyMarkWidthFactor = 0.7;
             PlotScale = "1:1";
-            Walls = new List<Entity>();
+            Walls = new List<Entity>();            
+            Rooms = new List<Entity>();
             Columns = new List<Entity>();
             WashPoints = new List<Point3d>();
             FloorSign = ThFlushPointParameterService.Instance.FlushPointParameter.FloorSign;
