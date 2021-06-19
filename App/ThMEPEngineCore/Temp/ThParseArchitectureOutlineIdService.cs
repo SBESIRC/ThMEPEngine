@@ -20,7 +20,8 @@ namespace ThMEPEngineCore.Temp
             }
             else if (colorIndex >= 100 && colorIndex <= 255)
             {
-                ids.Add((colorIndex / 10).ToString());
+                ids.Add((colorIndex / 100).ToString());
+                ids.Add(((colorIndex % 100)/10).ToString());
                 ids.Add((colorIndex % 10).ToString());
             }
             return ids;
