@@ -1252,7 +1252,7 @@ new Point2d(maxX, minY)
             var bds = geoData.Labels.Select(x => x.Boundary).ToList();
             var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
             var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-            var f1 = GeometryFac.CreateGRectContainsSelector(lineHGs);
+            var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
             foreach (var bd in bds)
             {
                 var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1500, 250);
@@ -1261,7 +1261,7 @@ new Point2d(maxX, minY)
                     e.ColorIndex = 2;
                 }
                 var _lineHGs = f1(g);
-                var f2 = GeometryFac.NearestNeighbourGeometryF(_lineHGs);
+                var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                 var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                 var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
                 if (geo == null) continue;

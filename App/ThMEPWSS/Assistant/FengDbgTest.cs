@@ -107,13 +107,8 @@ namespace ThMEPWSS.DebugNs
             }
             private static void qt8f54()
             {
-                {
-                    var t = typeof(Sankaku1);
-                    if (t.GetCustomAttribute<FengAttribute>() != null)
-                    {
-                        AddButtons2(t);
-                    }
-                }
+                AddButtons3(typeof(Sankaku2));
+                AddButtons3(typeof(Sankaku1));
 
                 AddButtons2(typeof(DrainageTest));
                 AddButtons2(typeof(Sankaku));
@@ -125,6 +120,15 @@ namespace ThMEPWSS.DebugNs
                     AddButtons2(typeof(FengDbgTesting));
                 }
             }
+
+            private static void AddButtons3(Type t)
+            {
+                if (t.GetCustomAttribute<FengAttribute>() != null)
+                {
+                    AddButtons2(t);
+                }
+            }
+
             public static void AddButtons2(Type targetType)
             {
                 var attrType = ((Assembly)ctx["currentAsm"]).GetType(typeof(FengAttribute).FullName);
@@ -13671,7 +13675,7 @@ namespace ThMEPWSS.DebugNs
         public static IEnumerable<GLineSegment> GetSegsToConnect(List<GLineSegment> lines, List<GRect> rects, double extends, double bufSize = 2.5, double radius = 10)
         {
             if (extends <= 0) throw new ArgumentException();
-            var h = GeometryFac.LineGrouppingHelper.Create(lines);
+            var h = GeoFac.LineGrouppingHelper.Create(lines);
             h.InitPointGeos(radius);
             h.DoGroupingByPoint();
             h.CalcAlonePoints();
@@ -13687,7 +13691,7 @@ namespace ThMEPWSS.DebugNs
                 var newSegs = extSegs.Where(seg => seg.IsHorizontal(5)).Distinct().ToList();
                 var geos = newSegs.Select(seg => seg.Buffer(bufSize)).ToList();
 
-                foreach (var g in GeometryFac.GroupGeometries(geos).Where(g => g.Count == 2))
+                foreach (var g in GeoFac.GroupGeometries(geos).Where(g => g.Count == 2))
                 {
                     var geo1 = g[0];
                     var geo2 = g[1];
@@ -13718,7 +13722,7 @@ namespace ThMEPWSS.DebugNs
                 var newSegs = extSegs.Where(seg => seg.IsVertical(5)).Distinct().ToList();
                 var geos = newSegs.Select(seg => seg.Buffer(bufSize)).ToList();
 
-                var gs = GeometryFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
+                var gs = GeoFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
                 //foreach (var g in gs)
                 //{
                 //    //if (g.Count > 2)
@@ -13819,7 +13823,7 @@ namespace ThMEPWSS.DebugNs
                     .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e))
                     .SelectMany(e => e.ExplodeToDBObjectCollection().OfType<Line>())
                     .Select(e => e.ToGLineSegment()).ToList();
-                var h = GeometryFac.LineGrouppingHelper.Create(segs);
+                var h = GeoFac.LineGrouppingHelper.Create(segs);
                 h.InitPointGeos(10);
                 h.DoGroupingByPoint();
                 h.CalcAlonePoints();
@@ -13907,7 +13911,7 @@ namespace ThMEPWSS.DebugNs
                         //});
                     }
                     {
-                        var gs = GeometryFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
+                        var gs = GeoFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
                         foreach (var g in gs)
                         {
                             var geo1 = g[0];
@@ -14330,7 +14334,7 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
                 var segs = adb.ModelSpace.OfType<Line>().Where(e => e.Layer == "W-RAIN-PIPE").Select(e => e.ToGLineSegment()).ToList();
-                var h = GeometryFac.LineGrouppingHelper.Create(segs);
+                var h = GeoFac.LineGrouppingHelper.Create(segs);
                 h.InitPointGeos(10);
                 h.DoGroupingByPoint();
                 h.CalcAlonePoints();
@@ -14399,7 +14403,7 @@ namespace ThMEPWSS.DebugNs
                         //});
                     }
                     {
-                        var gs = GeometryFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
+                        var gs = GeoFac.GroupGeometries(geos).Where(g => g.Count == 2).ToList();
                         foreach (var g in gs)
                         {
                             var geo1 = g[0];
@@ -14834,12 +14838,12 @@ namespace ThMEPWSS.DebugNs
                                     var bds = data.Labels.Select(pl => geoData.Labels[cadDataMain.Labels.IndexOf(pl)]).Select(x => x.Boundary).ToList();
                                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                                    var f1 = GeometryFac.CreateGRectContainsSelector(lineHGs);
+                                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
                                     foreach (var bd in bds)
                                     {
                                         var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1000, 250);
                                         var _lineHGs = f1(g);
-                                        var f2 = GeometryFac.NearestNeighbourGeometryF(_lineHGs);
+                                        var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
                                         if (geo == null) continue;
@@ -14908,7 +14912,7 @@ namespace ThMEPWSS.DebugNs
                     var bds = geoData.Labels.Select(x => x.Boundary).ToList();
                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                    var f1 = GeometryFac.CreateGRectContainsSelector(lineHGs);
+                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
                     DU.Dispose();
                     var disList = new List<double>();
                     foreach (var bd in bds)
@@ -14919,7 +14923,7 @@ namespace ThMEPWSS.DebugNs
                             e.ColorIndex = 2;
                         }
                         var _lineHGs = f1(g);
-                        var f2 = GeometryFac.NearestNeighbourGeometryF(_lineHGs);
+                        var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
                         if (geo == null) continue;

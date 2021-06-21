@@ -685,6 +685,770 @@ namespace ThMEPWSS.DebugNs
 
     }
     [Feng]
+    public class Sankaku2
+    {
+
+        [Feng("qv17do")]
+        public static void qv17do()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                var dg = new DrainageSystemDiagram();
+                dg.Draw(basePt);
+            }
+        }
+
+
+
+        [Feng("排出方式连线")]
+        public static void qv1735()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                {
+                    //480 1080 
+                    {
+                        var bsPt = Dbg.SelectPoint();
+                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2000, -121) };
+                        var segs = points.CreateGLineSegments(bsPt);
+                        DU.DrawLineSegmentsLazy(segs);
+                    }
+                    {
+                        var bsPt = Dbg.SelectPoint();
+                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-5300, -121) };
+                        var segs = points.CreateGLineSegments(bsPt);
+                        DU.DrawLineSegmentsLazy(segs);
+                    }
+                    {
+                        var bsPt = Dbg.SelectPoint();
+                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -1379), new Point2d(-121, -1500), new Point2d(-5900, -1500) };
+                        var segs = points.CreateGLineSegments(bsPt);
+                        DU.DrawLineSegmentsLazy(segs);
+                    }
+                }
+            }
+        }
+        [Feng("立管检查口")]
+        public static void qv17o4()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                //left
+                DU.DrawBlockReference(blkName: "立管检查口", basePt: bsPt,
+               cb: br =>
+               {
+                   br.ScaleFactors = new Scale3d(-1, 1, 1);
+                   br.Layer = "W-DRAI-EQPM";
+               });
+                //right
+                DU.DrawBlockReference(blkName: "立管检查口", basePt: bsPt,
+               cb: br =>
+               {
+                   br.Layer = "W-DRAI-EQPM";
+               });
+            }
+
+        }
+        [Feng("污废合流井编号")]
+        public static void qv16xv()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
+               scale: 0.5,
+               props: new Dictionary<string, string>() { { "-", "666" } },
+               cb: br =>
+               {
+                   br.Layer = "W-DRAI-EQPM";
+               });
+            }
+        }
+        [Feng("阳台支管块")]
+        public static void qv16vz()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                DU.DrawBlockReference("阳台支管块", bsPt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(270);
+                });
+            }
+        }
+        [Feng("套管系统")]
+        public static void qv16k0()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                DU.DrawBlockReference("套管系统", bsPt, br =>
+                {
+                    br.Layer = "W-BUSH";
+                });
+            }
+        }
+        [Feng("地漏系统1")]
+        public static void qv1o5m()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                //left
+                DU.DrawBlockReference("地漏系统1", bsPt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                    }
+                });
+                //right
+                DU.DrawBlockReference("地漏系统1", bsPt,
+                    br =>
+                    {
+                        br.Layer = "W-DRAI-EQPM";
+                        br.ScaleFactors = new Scale3d(-2, 2, 2);
+                        if (br.IsDynamicBlock)
+                        {
+                            br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                        }
+                    });
+            }
+        }
+        [Feng("S型存水弯")]
+        public static void qv1mr0()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                //left
+                DU.DrawBlockReference("S型存水弯", bsPt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "板上S弯");
+                    }
+                });
+                //right
+                DU.DrawBlockReference("S型存水弯", bsPt,
+                    br =>
+                    {
+                        br.Layer = "W-DRAI-EQPM";
+                        br.ScaleFactors = new Scale3d(-2, 2, 2);
+                        if (br.IsDynamicBlock)
+                        {
+                            br.ObjectId.SetDynBlockValue("可见性", "板上S弯");
+                        }
+                    });
+            }
+        }
+        [Feng("洗涤盆排水")]
+        public static void qv15o8()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                Dbg.ShowXLabel(bsPt);
+                //left
+                DU.DrawBlockReference("洗涤盆排水", bsPt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                    }
+                });
+                //right
+                DU.DrawBlockReference("双格洗涤盆排水", bsPt,
+                    br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(-2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                    }
+                });
+            }
+        }
+        [Feng("清扫口系统")]
+        public static void qv15je()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                //left
+                DU.DrawBlockReference("清扫口系统", bsPt, scale: 2, cb: br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(90);
+                });
+                //right
+                DU.DrawBlockReference("清扫口系统", bsPt, scale: 2, cb: br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(90 + 180);
+                });
+            }
+        }
+        [Feng("翻转测试")]
+        public static void qv147n()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                {
+                    var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-1379, -121), new Point2d(-1500, -241) };
+                    {
+                        var segs = points.CreateGLineSegments(bsPt);
+                        DU.DrawLineSegmentsLazy(segs);
+                    }
+                    {
+                        var m = Matrix2dFac.YAxisMirroring;
+                        var segs = points.CreateGLineSegments(bsPt, m);
+                        DU.DrawLineSegmentsLazy(segs);
+                    }
+                }
+
+            }
+        }
+        [Feng("雨水管径100")]
+        public static void quev3n()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt:Dbg.SelectPoint(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "可见性", /*Dr.GetFloorDrainDN()*/"DN25" }, { "角度1", "90" } });
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                //{
+                //    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                //});
+
+                //DU.DrawBlockReference(blkName: "雨水管径100",scale:.5, basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                DU.DrawBlockReference(blkName: "雨水管径100", scale: 1, basePt: Dbg.SelectPoint().OffsetX(600), layer: "W-NOTE", cb: br =>
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                    //br.ObjectId.SetDynBlockValue("角度1", Math.PI / 2);
+                    br.ObjectId.SetDynBlockValue("角度1", Math.PI);
+                });
+            }
+
+        }
+        [Feng("画标高")]
+        public static void NewMethod6()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var pt = Dbg.SelectPoint();
+                ThRainSystemService.ImportElementsFromStdDwg();
+                DU.DrawBlockReference(blkName: "标高", basePt: pt, layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", "666" } });
+            }
+        }
+        [Feng("画系统图草稿1")]
+        public static void qu600o()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var OFFSET_X = 2500.0;
+                var SPAN_X = 5500.0;
+                var HEIGHT = 1800.0;
+                var COUNT = 20;
+                var basePt = Dbg.SelectPoint();
+                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+                for (int i = 0; i < storeys.Count; i++)
+                {
+                    var storey = storeys[i];
+                    var bsPt1 = basePt.OffsetY(HEIGHT * i);
+                    DrainageSystemDiagram.DrawStoreyLine(storey, bsPt1, lineLen);
+                    for (int j = 0; j < COUNT; j++)
+                    {
+                        var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+
+                        if (j == 0)
+                        {
+                            Dr.DrawCheckPoint(bsPt2);
+                        }
+                        else if (j == 1)
+                        {
+                            DU.DrawBlockReference("清扫口系统", bsPt2.OffsetY(HEIGHT - 300), scale: 2, cb: br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                br.Rotation = GeoAlgorithm.AngleFromDegree(90);
+                            });
+                        }
+                        else if (j == 2)
+                        {
+                            DU.DrawBlockReference("洗涤盆排水", bsPt2.OffsetXY(-1000, HEIGHT - 1720 - 80 + 200), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                if (br.IsDynamicBlock)
+                                {
+                                    br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                                }
+                            });
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, 200), bsPt2.OffsetXY(0, 200));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 3)
+                        {
+                            Dr.DrawFloorDrain(bsPt2.OffsetX(180 - 1000));
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, -550), bsPt2.OffsetXY(0, -550));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 4)
+                        {
+                            DU.DrawBlockReference("阳台支管块", bsPt2.OffsetXY(-328257, 35827), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                br.Rotation = GeoAlgorithm.AngleFromDegree(270);
+                            });
+                        }
+                        else if (j == 5)
+                        {
+                            var line = DU.DrawLineLazy(bsPt2.OffsetXY(-200, HEIGHT - 550), bsPt2.OffsetXY(200, HEIGHT - 550));
+                            line.Layer = "W-DRAI-NOTE";
+                            line.ColorIndex = 256;
+                        }
+                    }
+                }
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var x = basePt.X + OFFSET_X + (j + 1) * SPAN_X;
+                    var y1 = basePt.Y;
+                    var y2 = y1 + HEIGHT * (storeys.Count - 1);
+                    {
+                        var line = DU.DrawLineLazy(x, y1, x, y2);
+                        line.Layer = "W-RAIN-PIPE";
+                        line.ColorIndex = 256;
+                    }
+                }
+
+                {
+                    var bsPt = basePt.OffsetY(-1000);
+                    DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-RAIN-EQPM";
+                   });
+                }
+                {
+                    var bsPt = basePt.OffsetXY(500, -1000);
+                    DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-DRAI-EQPM";
+                   });
+                }
+            }
+        }
+        [Feng("画系统图草稿2")]
+        public static void qu5x6k()
+        {
+            NewMethod5();
+        }
+        [Feng("画各种形状1")]
+        public static void qu5xo6()
+        {
+            var i = 0;
+            Action fs = null;
+            fs += () => Dbg.FocusMainWindow();
+            void f(Point2d[] points)
+            {
+                FengDbgTesting.AddLazyAction((++i).ToString(), adb =>
+                {
+                    var basePt = Dbg.SelectPoint().ToPoint2d();
+                    DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-RAIN-PIPE"; });
+                });
+                fs += () =>
+                {
+
+                    using (Dbg.DocumentLock)
+                    using (var adb = AcadDatabase.Active())
+                    using (var tr = new DrawingTransaction(adb))
+                    {
+                        Dbg.BuildAndSetCurrentLayer(adb.Database);
+
+                        var basePt = Dbg.SelectPoint().ToPoint2d();
+                        DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-RAIN-PIPE"; });
+                    }
+                    //Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
+                };
+            }
+            {
+                FengDbgTesting.AddButton("全画", () => fs?.Invoke());
+            }
+
+            {
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-100, 100), new Point2d(-1200, 100) };
+                f(points);
+            }
+            {
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-120, -120), new Point2d(-1380, -120), new Point2d(-1500, -240) };
+                f(points);
+            }
+            {
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, -200), new Point2d(-1800, -200) };
+                f(points);
+            }
+            {
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(150, 150) };
+                f(points);
+            }
+        }
+        [Feng("画各种图块1")]
+        public static void qu60i7()
+        {
+            FengDbgTesting.AddLazyAction("通气帽系统", adb =>
+            {
+
+            });
+        }
+        [Feng("画各种形状2")]
+        public static void qu5x6f()
+        {
+            FengDbgTesting.AddLazyAction("1", adb =>
+            {
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 500), new Point2d(-79, 621), new Point2d(1029, 621), new Point2d(1150, 741), new Point2d(1150, 1021) };
+                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
+            });
+            FengDbgTesting.AddLazyAction("2", adb =>
+            {
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-1379, -121), new Point2d(-1500, -241) };
+                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
+            });
+            FengDbgTesting.AddLazyAction("3", adb =>
+            {
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-3879, -121), new Point2d(-4000, -241) };
+                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
+            });
+            FengDbgTesting.AddLazyAction("4", adb =>
+            {
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(1779, 0), new Point2d(1900, 121), new Point2d(1900, 700) };
+                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
+            });
+            FengDbgTesting.AddLazyAction("5", adb =>
+            {
+                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2500, -121) };
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
+            });
+            FengDbgTesting.AddLazyAction("6", adb => { });
+            FengDbgTesting.AddLazyAction("7", adb => { });
+            FengDbgTesting.AddLazyAction("8", adb => { });
+        }
+        [Feng("根据点收集点数据")]
+        public static void qv1dze()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var points = new List<Point3d>();
+                while (Dbg.TrySelectPoint(out Point3d pt))
+                {
+                    points.Add(pt);
+                }
+                var v = points[0].ToVector3d();
+                for (int i = 0; i < points.Count; i++)
+                {
+                    points[i] = points[i] - v;
+                }
+                Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
+            }
+        }
+        [Feng("根据线收集点数据")]
+        public static void qu5x68()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var lines = Dbg.SelectEntities(adb).OfType<Line>().ToList();
+                if (lines.Count > 0)
+                {
+                    //var points = new List<Point2d>();
+                    //points.Add(lines[0].StartPoint.ToPoint2d());
+                    //points.Add(lines[0].EndPoint.ToPoint2d());
+                    //for (int i = 1; i < lines.Count; i++)
+                    //{
+                    //    points.Add(lines[i].EndPoint.ToPoint2d());
+                    //}
+                    //Dbg.PrintLine(basePt.ToPoint2d().ToCadJson());
+                    //Dbg.PrintLine(points.ToCadJson());
+                    var points = new List<Point2d>() { Point2d.Origin };
+                    var curPt = basePt;
+                    foreach (var line in lines)
+                    {
+                        var p1 = line.StartPoint.ToPoint2d();
+                        var p2 = line.EndPoint.ToPoint2d();
+                        if (p1.GetDistanceTo(curPt) < 1)
+                        {
+                            points.Add((p2 - basePt).ToPoint2d());
+                            curPt = p2;
+                        }
+                        else if (p2.GetDistanceTo(curPt) < 1)
+                        {
+                            points.Add((p1 - basePt).ToPoint2d());
+                            curPt = p1;
+                        }
+                        else
+                        {
+                            Dbg.PrintLine("err");
+                            return;
+                        }
+                    }
+                    //Dbg.PrintLine(points.Select(p=>p.ToLongPoint2d()).ToCadJson());
+                    Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
+                }
+
+            }
+        }
+        private static void NewMethod5()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var OFFSET_X = 2500.0;
+                var SPAN_X = 5500.0;
+                var HEIGHT = 1800.0;
+                var COUNT = 20;
+                var basePt = Dbg.SelectPoint();
+                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+                for (int i = 0; i < storeys.Count; i++)
+                {
+                    var storey = storeys[i];
+                    var bsPt1 = basePt.OffsetY(HEIGHT * i);
+                    DrainageSystemDiagram.DrawStoreyLine(storey, bsPt1, lineLen);
+                    for (int j = 0; j < COUNT; j++)
+                    {
+                        var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+
+                        if (j == 0)
+                        {
+                            Dr.DrawCheckPoint(bsPt2);
+                        }
+                        else if (j == 1)
+                        {
+                            DU.DrawBlockReference("清扫口系统", bsPt2.OffsetY(HEIGHT - 300), scale: 2, cb: br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                br.Rotation = GeoAlgorithm.AngleFromDegree(90);
+                            });
+                        }
+                        else if (j == 2)
+                        {
+                            DU.DrawBlockReference("洗涤盆排水", bsPt2.OffsetXY(-1000, HEIGHT - 1720 - 80 + 200), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                if (br.IsDynamicBlock)
+                                {
+                                    br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                                }
+                            });
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, 200), bsPt2.OffsetXY(0, 200));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 3)
+                        {
+                            Dr.DrawFloorDrain(bsPt2.OffsetX(180 - 1000));
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, -550), bsPt2.OffsetXY(0, -550));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 4)
+                        {
+                            DU.DrawBlockReference("阳台支管块", bsPt2.OffsetXY(-328257, 35827), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                br.Rotation = GeoAlgorithm.AngleFromDegree(270);
+                            });
+                        }
+                        else if (j == 5)
+                        {
+                            var line = DU.DrawLineLazy(bsPt2.OffsetXY(-200, HEIGHT - 550), bsPt2.OffsetXY(200, HEIGHT - 550));
+                            line.Layer = "W-DRAI-NOTE";
+                            line.ColorIndex = 256;
+                        }
+                    }
+                }
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var x = basePt.X + OFFSET_X + (j + 1) * SPAN_X;
+                    var y1 = basePt.Y;
+                    var y2 = y1 + HEIGHT * (storeys.Count - 1);
+                    {
+                        var line = DU.DrawLineLazy(x, y1, x, y2);
+                        line.Layer = "W-DRAI-DOME-PIPE";
+                        line.ColorIndex = 256;
+                    }
+                    {
+                        var line = DU.DrawLineLazy(x + 300, y1, x + 300, y2);
+                        line.Layer = "W-DRAI-VENT-PIPE";
+                        line.ColorIndex = 256;
+                    }
+                }
+
+                {
+                    var bsPt = basePt.OffsetY(-1000);
+                    DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-RAIN-EQPM";
+                   });
+                }
+                {
+                    var bsPt = basePt.OffsetXY(500, -1000);
+                    DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-DRAI-EQPM";
+                   });
+                }
+            }
+        }
+
+        private static void NewMethod4()
+        {
+            var OFFSET_X = 2500;
+            var SPAN_X = 5500;
+            var HEIGHT = 1800;
+            var COUNT = 20;
+            var basePt = Dbg.SelectPoint();
+            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+            for (int i = 0; i < storeys.Count; i++)
+            {
+                var storey = storeys[i];
+                var bsPt1 = basePt.OffsetY(HEIGHT * i);
+                DrainageSystemDiagram.DrawStoreyLine(storey, bsPt1, lineLen);
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+                    Dbg.ShowXLabel(bsPt2);
+                }
+            }
+        }
+
+
+
+    }
+    [Feng]
     public class Sankaku1
     {
         static string ReadString()
@@ -791,11 +1555,11 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
                 var cadData = DrainageCadData.Create(geoData);
-                var killer = GeometryFac.CreateGeometryEx(cadData.VerticalPipes.Concat(cadData.WaterPorts).Concat(cadData.FloorDrains).ToList());
+                var killer = GeoFac.CreateGeometryEx(cadData.VerticalPipes.Concat(cadData.WaterPorts).Concat(cadData.FloorDrains).ToList());
                 var maxDis = 8000;
                 var angleTolleranceDegree = 1;
                 var lines = geoData.DLines.Where(x => x.Length > 0).Distinct().ToList();
-                geoData.DLines.AddRange(GeometryFac.AutoConn(lines, killer, maxDis, angleTolleranceDegree));
+                geoData.DLines.AddRange(GeoFac.AutoConn(lines, killer, maxDis, angleTolleranceDegree));
                 DrainageService.DrawGeoData(geoData);
             }
         }
@@ -838,13 +1602,13 @@ namespace ThMEPWSS.DebugNs
                 var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
                 var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
                 var ls = lines.Select(x => x.ToLineString()).ToList();
-                var gs = GeometryFac.GroupGeometries(ToGeometries(cs, ls));
+                var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
                 var _gs = new List<List<Geometry>>();
                 foreach (var g in gs)
                 {
                     var _circles = g.Where(x => cs.Contains(x)).ToList();
                     var _lines = g.Where(x => ls.Contains(x)).ToList();
-                    var segs = GeometryFac.CreateGeometry(_lines).Difference(GeometryFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                    var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
                     var lst = new List<Geometry>();
                     lst.AddRange(_circles);
                     lst.AddRange(segs.Select(x => x.Extend(.1).ToLineString()));//延长一点点！
@@ -857,7 +1621,7 @@ namespace ThMEPWSS.DebugNs
                     {
                         var lst = g.ToList();
                         lst.Remove(c);
-                        var f = GeometryFac.CreateGeometrySelector(lst);
+                        var f = GeoFac.CreateGeometrySelector(lst);
                         Dbg.PrintLine(f(c).Count);//OK,如果有地漏是串联的，那么这里会等于2，否则等于1
                     }
 
@@ -918,13 +1682,13 @@ namespace ThMEPWSS.DebugNs
                 var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
                 var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
                 var ls = lines.Select(x => x.ToLineString()).ToList();
-                var gs = GeometryFac.GroupGeometries(ToGeometries(cs, ls));
+                var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
                 //Dbg.PrintLine(gs.Count);
                 foreach (var g in gs)
                 {
                     var _circles = g.Where(x => cs.Contains(x)).ToList();
                     var _lines = g.Where(x => ls.Contains(x)).ToList();
-                    var segs = GeometryFac.CreateGeometry(_lines).Difference(GeometryFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                    var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
                     FengDbgTesting.AddLazyAction("", adb =>
                     {
                         foreach (var c in _circles)
@@ -1012,7 +1776,7 @@ namespace ThMEPWSS.DebugNs
                     DU.DrawLineSegmentLazy(e);
                 }
                 var nothing = nameof(FengDbgTesting.GetSegsToConnect);
-                var h = GeometryFac.LineGrouppingHelper.Create(lines);
+                var h = GeoFac.LineGrouppingHelper.Create(lines);
                 h.InitPointGeos(radius: 2.5);
                 h.DoGroupingByPoint();
                 h.CalcAlonePoints();
@@ -1111,6 +1875,8 @@ namespace ThMEPWSS.DebugNs
             Dbg.PrintLine(nzm.AesEncrypt("xxx", nzm.GetMd5String(nzm.EncodeUtf8("xxx"))));
         }
     }
+
+
     public class Sankaku
     {
         [Feng("🔴一些工具")]
@@ -1413,469 +2179,6 @@ namespace ThMEPWSS.DebugNs
         }
 
 
-
-        [Feng("雨水管径100")]
-        public static void quev3n()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                //DU.DrawBlockReference(blkName: "雨水管径100", basePt:Dbg.SelectPoint(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "可见性", /*Dr.GetFloorDrainDN()*/"DN25" }, { "角度1", "90" } });
-                //DU.DrawBlockReference(blkName: "雨水管径100", basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
-                //{
-                //    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
-                //});
-
-                //DU.DrawBlockReference(blkName: "雨水管径100",scale:.5, basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
-                DU.DrawBlockReference(blkName: "雨水管径100", scale: 1, basePt: Dbg.SelectPoint().OffsetX(600), layer: "W-NOTE", cb: br =>
-                {
-                    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
-                    //br.ObjectId.SetDynBlockValue("角度1", Math.PI / 2);
-                    br.ObjectId.SetDynBlockValue("角度1", Math.PI);
-                });
-            }
-
-        }
-        [Feng("画标高")]
-        public static void NewMethod6()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var pt = Dbg.SelectPoint();
-                ThRainSystemService.ImportElementsFromStdDwg();
-                DU.DrawBlockReference(blkName: "标高", basePt: pt, layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", "666" } });
-            }
-        }
-        [Feng("画系统图草稿1")]
-        public static void qu600o()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var OFFSET_X = 2500.0;
-                var SPAN_X = 5500.0;
-                var HEIGHT = 1800.0;
-                var COUNT = 20;
-                var basePt = Dbg.SelectPoint();
-                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-                for (int i = 0; i < storeys.Count; i++)
-                {
-                    var storey = storeys[i];
-                    var bsPt1 = basePt.OffsetY(HEIGHT * i);
-                    DrawStoreyLine(storey, bsPt1, lineLen);
-                    for (int j = 0; j < COUNT; j++)
-                    {
-                        var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
-
-                        if (j == 0)
-                        {
-                            Dr.DrawCheckPoint(bsPt2);
-                        }
-                        else if (j == 1)
-                        {
-                            DU.DrawBlockReference("清扫口系统", bsPt2.OffsetY(HEIGHT - 300), scale: 2, cb: br =>
-                            {
-                                br.Layer = "W-DRAI-EQPM";
-                                br.Rotation = GeoAlgorithm.AngleFromDegree(90);
-                            });
-                        }
-                        else if (j == 2)
-                        {
-                            DU.DrawBlockReference("洗涤盆排水", bsPt2.OffsetXY(-1000, HEIGHT - 1720 - 80 + 200), br =>
-                            {
-                                br.Layer = "W-DRAI-EQPM";
-                                if (br.IsDynamicBlock)
-                                {
-                                    br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
-                                }
-                            });
-                            {
-                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, 200), bsPt2.OffsetXY(0, 200));
-                                line.Layer = "W-DRAI-DOME-PIPE";
-                                line.ColorIndex = 256;
-                            }
-                        }
-                        else if (j == 3)
-                        {
-                            Dr.DrawFloorDrain(bsPt2.OffsetX(180 - 1000));
-                            {
-                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, -550), bsPt2.OffsetXY(0, -550));
-                                line.Layer = "W-DRAI-DOME-PIPE";
-                                line.ColorIndex = 256;
-                            }
-                        }
-                        else if (j == 4)
-                        {
-                            DU.DrawBlockReference("阳台支管块", bsPt2.OffsetXY(-328257, 35827), br =>
-                            {
-                                br.Layer = "W-DRAI-EQPM";
-                                br.Rotation = GeoAlgorithm.AngleFromDegree(270);
-                            });
-                        }
-                        else if (j == 5)
-                        {
-                            var line = DU.DrawLineLazy(bsPt2.OffsetXY(-200, HEIGHT - 550), bsPt2.OffsetXY(200, HEIGHT - 550));
-                            line.Layer = "W-DRAI-NOTE";
-                            line.ColorIndex = 256;
-                        }
-                    }
-                }
-                for (int j = 0; j < COUNT; j++)
-                {
-                    var x = basePt.X + OFFSET_X + (j + 1) * SPAN_X;
-                    var y1 = basePt.Y;
-                    var y2 = y1 + HEIGHT * (storeys.Count - 1);
-                    {
-                        var line = DU.DrawLineLazy(x, y1, x, y2);
-                        line.Layer = "W-RAIN-PIPE";
-                        line.ColorIndex = 256;
-                    }
-                }
-
-                {
-                    var bsPt = basePt.OffsetY(-1000);
-                    DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: bsPt,
-                   scale: 0.5,
-                   props: new Dictionary<string, string>() { { "-", "666" } },
-                   cb: br =>
-                   {
-                       br.Layer = "W-RAIN-EQPM";
-                   });
-                }
-                {
-                    var bsPt = basePt.OffsetXY(500, -1000);
-                    DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
-                   scale: 0.5,
-                   props: new Dictionary<string, string>() { { "-", "666" } },
-                   cb: br =>
-                   {
-                       br.Layer = "W-DRAI-EQPM";
-                   });
-                }
-            }
-        }
-        [Feng("画系统图草稿2")]
-        public static void qu5x6k()
-        {
-            NewMethod5();
-        }
-        [Feng("画各种形状1")]
-        public static void qu5xo6()
-        {
-            var i = 0;
-            Action fs = null;
-            fs += () => Dbg.FocusMainWindow();
-            void f(Point2d[] points)
-            {
-                FengDbgTesting.AddLazyAction((++i).ToString(), adb =>
-                {
-                    var basePt = Dbg.SelectPoint().ToPoint2d();
-                    DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-RAIN-PIPE"; });
-                });
-                fs += () =>
-                {
-
-                    using (Dbg.DocumentLock)
-                    using (var adb = AcadDatabase.Active())
-                    using (var tr = new DrawingTransaction(adb))
-                    {
-                        Dbg.BuildAndSetCurrentLayer(adb.Database);
-
-                        var basePt = Dbg.SelectPoint().ToPoint2d();
-                        DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-RAIN-PIPE"; });
-                    }
-                    //Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
-                };
-            }
-            {
-                FengDbgTesting.AddButton("全画", () => fs?.Invoke());
-            }
-
-            {
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-100, 100), new Point2d(-1200, 100) };
-                f(points);
-            }
-            {
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-120, -120), new Point2d(-1380, -120), new Point2d(-1500, -240) };
-                f(points);
-            }
-            {
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, -200), new Point2d(-1800, -200) };
-                f(points);
-            }
-            {
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(150, 150) };
-                f(points);
-            }
-        }
-        [Feng("画各种图块1")]
-        public static void qu60i7()
-        {
-            FengDbgTesting.AddLazyAction("通气帽系统", adb =>
-            {
-
-            });
-        }
-        [Feng("画各种形状2")]
-        public static void qu5x6f()
-        {
-            FengDbgTesting.AddLazyAction("1", adb =>
-            {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 500), new Point2d(-79, 621), new Point2d(1029, 621), new Point2d(1150, 741), new Point2d(1150, 1021) };
-                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
-            });
-            FengDbgTesting.AddLazyAction("2", adb =>
-            {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-1379, -121), new Point2d(-1500, -241) };
-                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
-            });
-            FengDbgTesting.AddLazyAction("3", adb =>
-            {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-3879, -121), new Point2d(-4000, -241) };
-                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
-            });
-            FengDbgTesting.AddLazyAction("4", adb =>
-            {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(1779, 0), new Point2d(1900, 121), new Point2d(1900, 700) };
-                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
-            });
-            FengDbgTesting.AddLazyAction("5", adb =>
-            {
-                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2500, -121) };
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                DU.DrawLinesLazy(points.Select(p => p + basePt.ToVector2d()).ToArray()).ForEach(e => { e.ColorIndex = 256; e.Layer = "W-DRAI-DOME-PIPE"; });
-            });
-            FengDbgTesting.AddLazyAction("6", adb => { });
-            FengDbgTesting.AddLazyAction("7", adb => { });
-            FengDbgTesting.AddLazyAction("8", adb => { });
-        }
-        [Feng("收集点数据")]
-        public static void qu5x68()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                var lines = Dbg.SelectEntities(adb).OfType<Line>().ToList();
-                if (lines.Count > 0)
-                {
-                    //var points = new List<Point2d>();
-                    //points.Add(lines[0].StartPoint.ToPoint2d());
-                    //points.Add(lines[0].EndPoint.ToPoint2d());
-                    //for (int i = 1; i < lines.Count; i++)
-                    //{
-                    //    points.Add(lines[i].EndPoint.ToPoint2d());
-                    //}
-                    //Dbg.PrintLine(basePt.ToPoint2d().ToCadJson());
-                    //Dbg.PrintLine(points.ToCadJson());
-                    var points = new List<Point2d>() { Point2d.Origin };
-                    var curPt = basePt;
-                    foreach (var line in lines)
-                    {
-                        var p1 = line.StartPoint.ToPoint2d();
-                        var p2 = line.EndPoint.ToPoint2d();
-                        if (p1.GetDistanceTo(curPt) < 1)
-                        {
-                            points.Add((p2 - basePt).ToPoint2d());
-                            curPt = p2;
-                        }
-                        else if (p2.GetDistanceTo(curPt) < 1)
-                        {
-                            points.Add((p1 - basePt).ToPoint2d());
-                            curPt = p1;
-                        }
-                        else
-                        {
-                            Dbg.PrintLine("err");
-                            return;
-                        }
-                    }
-                    //Dbg.PrintLine(points.Select(p=>p.ToLongPoint2d()).ToCadJson());
-                    Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
-                }
-
-            }
-        }
-        private static void NewMethod5()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var OFFSET_X = 2500.0;
-                var SPAN_X = 5500.0;
-                var HEIGHT = 1800.0;
-                var COUNT = 20;
-                var basePt = Dbg.SelectPoint();
-                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-                for (int i = 0; i < storeys.Count; i++)
-                {
-                    var storey = storeys[i];
-                    var bsPt1 = basePt.OffsetY(HEIGHT * i);
-                    DrawStoreyLine(storey, bsPt1, lineLen);
-                    for (int j = 0; j < COUNT; j++)
-                    {
-                        var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
-
-                        if (j == 0)
-                        {
-                            Dr.DrawCheckPoint(bsPt2);
-                        }
-                        else if (j == 1)
-                        {
-                            DU.DrawBlockReference("清扫口系统", bsPt2.OffsetY(HEIGHT - 300), scale: 2, cb: br =>
-                              {
-                                  br.Layer = "W-DRAI-EQPM";
-                                  br.Rotation = GeoAlgorithm.AngleFromDegree(90);
-                              });
-                        }
-                        else if (j == 2)
-                        {
-                            DU.DrawBlockReference("洗涤盆排水", bsPt2.OffsetXY(-1000, HEIGHT - 1720 - 80 + 200), br =>
-                            {
-                                br.Layer = "W-DRAI-EQPM";
-                                if (br.IsDynamicBlock)
-                                {
-                                    br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
-                                }
-                            });
-                            {
-                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, 200), bsPt2.OffsetXY(0, 200));
-                                line.Layer = "W-DRAI-DOME-PIPE";
-                                line.ColorIndex = 256;
-                            }
-                        }
-                        else if (j == 3)
-                        {
-                            Dr.DrawFloorDrain(bsPt2.OffsetX(180 - 1000));
-                            {
-                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, -550), bsPt2.OffsetXY(0, -550));
-                                line.Layer = "W-DRAI-DOME-PIPE";
-                                line.ColorIndex = 256;
-                            }
-                        }
-                        else if (j == 4)
-                        {
-                            DU.DrawBlockReference("阳台支管块", bsPt2.OffsetXY(-328257, 35827), br =>
-                            {
-                                br.Layer = "W-DRAI-EQPM";
-                                br.Rotation = GeoAlgorithm.AngleFromDegree(270);
-                            });
-                        }
-                        else if (j == 5)
-                        {
-                            var line = DU.DrawLineLazy(bsPt2.OffsetXY(-200, HEIGHT - 550), bsPt2.OffsetXY(200, HEIGHT - 550));
-                            line.Layer = "W-DRAI-NOTE";
-                            line.ColorIndex = 256;
-                        }
-                    }
-                }
-                for (int j = 0; j < COUNT; j++)
-                {
-                    var x = basePt.X + OFFSET_X + (j + 1) * SPAN_X;
-                    var y1 = basePt.Y;
-                    var y2 = y1 + HEIGHT * (storeys.Count - 1);
-                    {
-                        var line = DU.DrawLineLazy(x, y1, x, y2);
-                        line.Layer = "W-DRAI-DOME-PIPE";
-                        line.ColorIndex = 256;
-                    }
-                    {
-                        var line = DU.DrawLineLazy(x + 300, y1, x + 300, y2);
-                        line.Layer = "W-DRAI-VENT-PIPE";
-                        line.ColorIndex = 256;
-                    }
-                }
-
-                {
-                    var bsPt = basePt.OffsetY(-1000);
-                    DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: bsPt,
-                   scale: 0.5,
-                   props: new Dictionary<string, string>() { { "-", "666" } },
-                   cb: br =>
-                   {
-                       br.Layer = "W-RAIN-EQPM";
-                   });
-                }
-                {
-                    var bsPt = basePt.OffsetXY(500, -1000);
-                    DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
-                   scale: 0.5,
-                   props: new Dictionary<string, string>() { { "-", "666" } },
-                   cb: br =>
-                   {
-                       br.Layer = "W-DRAI-EQPM";
-                   });
-                }
-            }
-        }
-
-        private static void NewMethod4()
-        {
-            var OFFSET_X = 2500;
-            var SPAN_X = 5500;
-            var HEIGHT = 1800;
-            var COUNT = 20;
-            var basePt = Dbg.SelectPoint();
-            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-            for (int i = 0; i < storeys.Count; i++)
-            {
-                var storey = storeys[i];
-                var bsPt1 = basePt.OffsetY(HEIGHT * i);
-                DrawStoreyLine(storey, bsPt1, lineLen);
-                for (int j = 0; j < COUNT; j++)
-                {
-                    var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
-                    Dbg.ShowXLabel(bsPt2);
-                }
-            }
-        }
-
-        public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
-        {
-            {
-                var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
-                var dbt = DU.DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
-                Dr.SetLabelStylesForWNote(line, dbt);
-            }
-            if (label == "RF")
-            {
-                var line = DU.DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0));
-                var dbt = DU.DrawTextLazy("建筑完成面", ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
-                Dr.SetLabelStylesForWNote(line, dbt);
-            }
-        }
-
-        public static void jjj()
-        {
-
-        }
         //雨水斗对位研究
         private static void NewMethod2()
         {
@@ -2175,7 +2478,7 @@ namespace ThMEPWSS.DebugNs
             var r = "{'type':'GRect','values':[521552.78763576248,867324.05193330813,533133.08130046073,876100.43981294858]}".FromCadJson<GRect>();
             var segs = loadsegs();
             var dlines = segs.Select(x => x.ToLineString()).ToGeometryList();
-            var f = GeometryFac.CreateGRectContainsSelector(dlines);
+            var f = GeoFac.CreateGRectContainsSelector(dlines);
             var list = f(r);
             var ext = new Extents3d();
             foreach (var dline in list)
@@ -2557,8 +2860,8 @@ $@"{root}\09_长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg",
                 var bds = texts.Select(x => x.Boundary).Concat(mtexts.Select(x => x.Boundary)).Distinct().ToList();
                 var geos = bds.Where(x => x.IsValid).Select(x => x.ToPolygon()).Cast<Geometry>().ToList();
                 Dbg.PrintLine(geos.Count);
-                var geo = GeometryFac.CreateGeometry(geos);
-                var f = GeometryFac.CreateGeometrySelector(geos);
+                var geo = GeoFac.CreateGeometry(geos);
+                var f = GeoFac.CreateGeometrySelector(geos);
                 var results = f(_geo);
                 Dbg.PrintLine(results.Count);
             }

@@ -91,7 +91,7 @@ pt,
       };
         }
     }
-    public static class GeometryFac
+    public static class GeoFac
     {
         static readonly NetTopologySuite.Index.Strtree.GeometryItemDistance itemDist = new NetTopologySuite.Index.Strtree.GeometryItemDistance();
         public static List<Point2d> GetAlivePoints(List<GLineSegment> segs, double radius)
@@ -137,7 +137,7 @@ pt,
             var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
             var list = lines.Where(x => x.IsHorizontal(5)).Select(x => x.ToLineString()).ToGeometryList();
             list.Add(killer);
-            return points.Except(GeometryFac.CreateGeometrySelector(pts)(GeometryFac.CreateGeometry(list)).SelectInts(pts).ToList(points)).ToList();
+            return points.Except(GeoFac.CreateGeometrySelector(pts)(GeoFac.CreateGeometry(list)).Select(pts).ToList(points)).ToList();
         }
         public static Func<Point3d, Geometry> NearestNeighbourPoint3dF(List<Geometry> geos)
         {
@@ -446,7 +446,7 @@ pt,
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geomList);
         }
-        public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeometryFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
+        public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
         public static Geometry CreateGeometry(params Geometry[] geos)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geos);
@@ -591,7 +591,7 @@ pt,
             {
                 var _pts = pts.Select(pt => pt.ToNTSPoint()).Cast<Geometry>().ToList();
                 var ptsf = CreateGeometrySelector(_pts);
-                pts = ptsf(killer).SelectInts(_pts).ToList(pts, reverse: true);
+                pts = ptsf(killer).Select(_pts).ToList(pts, reverse: true);
             }
             var gvs = new List<GVector>(pts.Count);
             var hs = new HashSet<Point2d>(pts);
@@ -762,7 +762,7 @@ pt,
         {
             var lst = new List<DrainageCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeometryFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -868,7 +868,7 @@ pt,
         {
             var lst = new List<RainSystemCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeometryFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -1485,10 +1485,10 @@ pt,
         }
         public static void TestDrawingDatasCreation(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas)
         {
-            Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeometryFac.CreateGeometrySelector;
-            Func<IEnumerable<Geometry>, Geometry> G = GeometryFac.CreateGeometry;
-            Func<List<Geometry>, List<List<Geometry>>> GG = GeometryFac.GroupGeometries;
-            static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(lst => GeometryFac.CreateGeometry(lst)).ToList();
+            Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateGeometrySelector;
+            Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
+            Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
+            static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(lst => GeoFac.CreateGeometry(lst)).ToList();
             FengDbgTesting.AddLazyAction("画骨架", adb =>
             {
                 foreach (var s in geoData.Storeys)
@@ -1580,8 +1580,8 @@ pt,
                         var maxDis = 8000;
                         var angleTolleranceDegree = 1;
                         var waterPortCvt = DrainageCadData.ConvertWaterPortsLargerF();
-                        var lines = GeometryFac.AutoConn(item.DLines.Where(x => x.Length > 0).Distinct().ToList().SelectInts(cadDataMain.DLines).ToList(geoData.DLines).ToList(),
-                            GeometryFac.CreateGeometryEx(item.VerticalPipes.Concat(item.FloorDrains).Concat(item.WaterPorts.SelectInts(cadDataMain.WaterPorts).ToList(geoData.WaterPorts).Select(waterPortCvt)).ToList()),
+                        var lines = GeoFac.AutoConn(item.DLines.Where(x => x.Length > 0).Distinct().ToList().Select(cadDataMain.DLines).ToList(geoData.DLines).ToList(),
+                            GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.FloorDrains).Concat(item.WaterPorts.Select(cadDataMain.WaterPorts).ToList(geoData.WaterPorts).Select(waterPortCvt)).ToList()),
                             maxDis, angleTolleranceDegree).ToList();
                         geoData.DLines.AddRange(lines);
                         var dlineCvt = DrainageCadData.ConvertDLinesF();
@@ -1611,10 +1611,10 @@ pt,
                             if (lst.Count == 1)
                             {
                                 var labelline = lst[0];
-                                if (f(GeometryFac.CreateGeometry(label, labelline)).Count == 0)
+                                if (f(GeoFac.CreateGeometry(label, labelline)).Count == 0)
                                 {
                                     var lines = ExplodeGLineSegments(labelline);
-                                    var points = GeometryFac.GetLabelLineEndPoints(lines, label);
+                                    var points = GeoFac.GetLabelLineEndPoints(lines, label);
                                     if (points.Count == 1)
                                     {
                                         var pt = points[0];
@@ -1767,7 +1767,7 @@ pt,
                                 {
                                     var labelline = lst[0];
                                     var lines = ExplodeGLineSegments(labelline);
-                                    var points = GeometryFac.GetLabelLineEndPoints(lines, label);
+                                    var points = GeoFac.GetLabelLineEndPoints(lines, label);
                                     if (points.Count == 1)
                                     {
                                         var pipes = F(item.VerticalPipes.Except(lbDict.Keys).ToList())(points[0].ToNTSPoint());
@@ -1948,15 +1948,15 @@ pt,
                             //再处理没直接连接的
                             var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
                             var radius = 10;
-                            var f5 = GeometryFac.NearestNeighbourPoint3dF(item.WaterPorts);
+                            var f5 = GeoFac.NearestNeighbourPoint3dF(item.WaterPorts);
                             foreach (var dlinesGeo in dlinesGeos)
                             {
                                 var segs = ExplodeGLineSegments(dlinesGeo);
-                                var pts = GeometryFac.GetAlivePoints(segs.Distinct().ToList(), radius: radius);
+                                var pts = GeoFac.GetAlivePoints(segs.Distinct().ToList(), radius: radius);
                                 {
                                     var _pts = pts.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
-                                    var killer = GeometryFac.CreateGeometryEx(item.VerticalPipes.Concat(item.WaterPorts).Concat(item.CleaningPorts).Concat(item.FloorDrains).Distinct().ToList());
-                                    pts = pts.Except(F(_pts)(killer).SelectInts(_pts).ToList(pts)).ToList();
+                                    var killer = GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.WaterPorts).Concat(item.CleaningPorts).Concat(item.FloorDrains).Distinct().ToList());
+                                    pts = pts.Except(F(_pts)(killer).Select(_pts).ToList(pts)).ToList();
                                 }
                                 foreach (var pt in pts)
                                 {
@@ -2033,7 +2033,7 @@ pt,
         {
             var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-空间框线").Select(x => x.ToNTSPolygon()).Cast<Geometry>().ToList();
             var names = adb.ModelSpace.OfType<MText>().Where(x => x.Layer == "AI-空间名称").Select(x => new CText() { Text = x.Text, Boundary = x.Bounds.ToGRect() }).ToList();
-            var f = GeometryFac.CreateGeometrySelector(ranges);
+            var f = GeoFac.CreateGeometrySelector(ranges);
             var list = new List<KeyValuePair<string, Geometry>>(names.Count);
             foreach (var name in names)
             {
@@ -2067,7 +2067,7 @@ pt,
             //1）	FL的500范围内有厨房空间，或
             //2）	以FL圆心为起点，以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的任意一个结束点在厨房空间内
             //且以FL圆心为起点，以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的任意所有结束点不在没有名称的空间或不在阳台空间内。
-            var kitchensGeo = GeometryFac.CreateGeometry(kitchens);
+            var kitchensGeo = GeoFac.CreateGeometry(kitchens);
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
@@ -2079,19 +2079,19 @@ pt,
                 }
                 bool test1()
                 {
-                    return kitchensGeo.Intersects(GeometryFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36));
+                    return kitchensGeo.Intersects(GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36));
                 }
                 bool test2()
                 {
                     endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeometryFac.CreateGeometry(endpoints);
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints);
                     return kitchensGeo.Intersects(endpointsGeo);
                 }
                 bool test3()
                 {
                     endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeometryFac.CreateGeometry(endpoints);
-                    return endpointsGeo.Intersects(GeometryFac.CreateGeometry(ToList(nonames, balconies)));
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints);
+                    return endpointsGeo.Intersects(GeoFac.CreateGeometry(ToList(nonames, balconies)));
                 }
                 if ((test1() || test2()) && test3())
                 {
@@ -2103,10 +2103,10 @@ pt,
         //找出负担地漏下水点的FL
         public static HashSet<Geometry> GetFLsWhereSupportingFloorDrainUnderWaterPoint(List<Geometry> FLs, List<Geometry> kitchens, List<Geometry> floorDrains, List<Geometry> washMachines)
         {
-            var f = GeometryFac.CreateGeometrySelector(ToList(floorDrains, washMachines));
+            var f = GeoFac.CreateGeometrySelector(ToList(floorDrains, washMachines));
             var hs = new HashSet<Geometry>();
             {
-                var flsf = GeometryFac.CreateGeometrySelector(FLs);
+                var flsf = GeoFac.CreateGeometrySelector(FLs);
                 foreach (var kitchen in kitchens)
                 {
                     var lst = flsf(kitchen);
@@ -2135,7 +2135,7 @@ pt,
             //1）	以FL圆心为起点，以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的任意一个结束点在没有名称的空间或在阳台空间内。且
             //2）	FL的500范围内没有厨房空间，且
             //3）	以FL圆心为起点，以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的所有结束点不在在厨房空间内
-            var kitchensGeo = GeometryFac.CreateGeometry(kitchens);
+            var kitchensGeo = GeoFac.CreateGeometry(kitchens);
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
@@ -2148,17 +2148,17 @@ pt,
                 bool test1()
                 {
                     endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeometryFac.CreateGeometry(endpoints);
-                    return endpointsGeo.Intersects(GeometryFac.CreateGeometry(ToList(nonames, balconies)));
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints);
+                    return endpointsGeo.Intersects(GeoFac.CreateGeometry(ToList(nonames, balconies)));
                 }
                 bool test2()
                 {
-                    return !GeometryFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36).Intersects(kitchensGeo);
+                    return !GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36).Intersects(kitchensGeo);
                 }
                 bool test3()
                 {
                     endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeometryFac.CreateGeometry(endpoints);
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints);
                     return !kitchensGeo.Intersects(endpointsGeo);
                 }
                 if (test1() && test2() && test3())
@@ -2174,7 +2174,7 @@ pt,
             //-	判断方法
             //1)	FL的500范围内有厨房空间，且
             //2)	以FL圆心为起点，以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的任意一个结束点在没有名称的空间或在阳台空间内。
-            var kitchensGeo = GeometryFac.CreateGeometry(kitchens);
+            var kitchensGeo = GeoFac.CreateGeometry(kitchens);
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
@@ -2186,13 +2186,13 @@ pt,
                 }
                 bool test1()
                 {
-                    return !GeometryFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36).Intersects(kitchensGeo);
+                    return !GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 500, 36).Intersects(kitchensGeo);
                 }
                 bool test2()
                 {
                     endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeometryFac.CreateGeometry(endpoints);
-                    return endpointsGeo.Intersects(GeometryFac.CreateGeometry(ToList(nonames, balconies)));
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints);
+                    return endpointsGeo.Intersects(GeoFac.CreateGeometry(ToList(nonames, balconies)));
                 }
                 if (test1() && test2())
                 {
@@ -2204,7 +2204,484 @@ pt,
     }
     public class DrainageSystemDiagram
     {
+        public static readonly Point2d[] LONG_TRANSLATOR_POINTS = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-1379, -121), new Point2d(-1500, -241) };
+        public static readonly Point2d[] SHORT_TRANSLATOR_POINTS = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121) };
+        public static double LONG_TRANSLATOR_HEIGHT1 = 780;
+        public static double CHECKPOINT_OFFSET_Y = 580;
+        public static readonly Point2d[] LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 500), new Point2d(-79, 621), new Point2d(1029, 621), new Point2d(1150, 741), new Point2d(1150, 1021) };
+        public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
+        {
+            {
+                var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                var dbt = DU.DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                Dr.SetLabelStylesForWNote(line, dbt);
+            }
+            if (label == "RF")
+            {
+                var line = DU.DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0));
+                var dbt = DU.DrawTextLazy("建筑完成面", ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                Dr.SetLabelStylesForWNote(line, dbt);
+            }
+        }
+        public void Draw(Point3d basePoint)
+        {
+            var OFFSET_X = 2500.0;
+            var SPAN_X = 5500.0;
+            var HEIGHT = 1800.0;
+            var COUNT = 20;
 
+            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+            for (int i = 0; i < storeys.Count; i++)
+            {
+                var storey = storeys[i];
+                var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                DrawStoreyLine(storey, bsPt1, lineLen);
+            }
+            var outputStartPointOffsets = new Vector2d[COUNT];
+            {
+                var start = storeys.Count - 1;
+                var end = 0;
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var v = default(Vector2d);
+                    for (int i = start; i >= end; i--)
+                    {
+                        var storey = storeys[i];
+                        var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                        {
+                            var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X) + v.ToVector3d();
+                            if (i != start)
+                            {
+                                //long translator left
+                                if (storey == "3F")
+                                {
+                                    var lastPt = NewMethod4(HEIGHT, ref v, basePt);
+
+                                    {
+                                        var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
+                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.CreateGLineSegments(startPoint.ToPoint3d());
+                                        var lines = DU.DrawLineSegmentsLazy(segs);
+                                        lines.ForEach(line => SetDomePipeLineStyle(line));
+                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), true);
+                                    }
+                                }
+                                else if (storey == "10F")
+                                {
+                                    var lastPt = NewMethod4(HEIGHT, ref v, basePt);
+                                    var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300).OffsetY(221);
+                                    var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 679), new Point2d(-321, 800), new Point2d(-1110, 800), new Point2d(-2380, 800) };
+                                    var p0 = points.Last().TransformBy(startPoint);
+                                    var p1 = p0.OffsetX(-180);
+                                    var p2 = p1.OffsetX(-1000);
+                                    {
+                                        DrawFloorDrain(p0.ToPoint3d(), true);
+                                        DrawFloorDrain(p2.ToPoint3d(), true);
+                                        DrawSWaterStoringCurve(points[4].TransformBy(startPoint).ToPoint3d(), true);
+                                    }
+
+                                    var segs = points.CreateGLineSegments(startPoint.ToPoint3d());
+                                    var lines = DU.DrawLineSegmentsLazy(segs);
+                                    lines.ForEach(line => SetDomePipeLineStyle(line));
+                                    var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                                    SetDomePipeLineStyle(line);
+                                }
+                                //short translator left
+                                else if (storey == "4F")
+                                {
+                                    var points = SHORT_TRANSLATOR_POINTS;
+                                    NewMethod1(HEIGHT, ref v, basePt, points);
+                                    DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
+                                }
+                                //long and short translator left
+                                else if (storey == "5F")
+                                {
+                                    var height1 = LONG_TRANSLATOR_HEIGHT1;
+                                    var points1 = LONG_TRANSLATOR_POINTS;
+                                    var points2 = SHORT_TRANSLATOR_POINTS;
+                                    var lastPt1 = points1.Last();
+                                    NewMethod2(HEIGHT, ref v, basePt, points1, points2, height1);
+                                    DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), true);
+                                }
+                                //long translator right
+                                else if (storey == "7F")
+                                {
+                                    var lastPt = NewMethod5(HEIGHT, ref v, basePt);
+
+                                    {
+                                        var pt = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
+                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.GetYAxisMirror().CreateGLineSegments(pt.ToPoint3d());
+                                        var lines = DU.DrawLineSegmentsLazy(segs);
+                                        lines.ForEach(line => SetDomePipeLineStyle(line));
+                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), false);
+                                    }
+                                }
+                                //short translator right
+                                else if (storey == "8F")
+                                {
+                                    var points = SHORT_TRANSLATOR_POINTS.GetYAxisMirror();
+                                    NewMethod1(HEIGHT, ref v, basePt, points);
+                                    DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), false);
+                                }
+                                //long and short translator right
+                                else if (storey == "9F")
+                                {
+                                    var points1 = LONG_TRANSLATOR_POINTS.GetYAxisMirror();
+                                    var points2 = SHORT_TRANSLATOR_POINTS.GetYAxisMirror();
+                                    NewMethod3(HEIGHT, ref v, basePt, points1, points2);
+                                    var lastPt1 = points1.Last();
+                                    var height1 = LONG_TRANSLATOR_HEIGHT1;
+                                    DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), false);
+                                }
+                                else
+                                {
+                                    var line = DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetY(HEIGHT)));
+                                    SetDomePipeLineStyle(line);
+                                    DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
+                                }
+                            }
+                        }
+                    }
+                    outputStartPointOffsets[j] = v;
+                }
+            }
+            for (int j = 0; j < COUNT; j++)
+            {
+                for (int i = 0; i < storeys.Count; i++)
+                {
+                    var storey = storeys[i];
+                    var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                    {
+                        if (storey == "1F")
+                        {
+                            var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X) + outputStartPointOffsets[j].ToVector3d();
+                            var height = 480;
+                            var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2000, -121) };
+                            var segs = points.CreateGLineSegments(basePt.OffsetY(-height));
+                            var lines = DU.DrawLineSegmentsLazy(segs);
+                            lines.ForEach(line => SetDomePipeLineStyle(line));
+                            var line = DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetY(-height)));
+                            SetDomePipeLineStyle(line);
+                            DrawDirtyWaterWell(points.Last().TransformBy(basePt).ToPoint3d().OffsetY(-height));
+                        }
+                    }
+                }
+            }
+
+            if (false)
+            {
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var start = storeys.IndexOf("31F");
+                    var end = storeys.IndexOf("3F");
+                    for (int i = start; i >= end; i--)
+                    {
+                        var s = storeys[i];
+                        var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                        {
+                            var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+                            if (i == start)
+                            {
+                                var points = new Point2d[] { new Point2d(0, 0), new Point2d(300, -300), new Point2d(300, -600) };
+                                var segs = points.CreateGLineSegments(basePt.OffsetY(600));
+                                var lines = DU.DrawLineSegmentsLazy(segs);
+                                lines.ForEach(line => SetDomePipeLineStyle(line));
+                            }
+                            else if (i == end)
+                            {
+                                var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -900), new Point2d(-300, -1200) };
+                                var segs = points.CreateGLineSegments(basePt.OffsetXY(300, HEIGHT));
+                                var lines = DU.DrawLineSegmentsLazy(segs);
+                                lines.ForEach(line => SetDomePipeLineStyle(line));
+                            }
+                            else
+                            {
+                                var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -900), new Point2d(-300, -1200) };
+                                var segs = points.CreateGLineSegments(basePt.OffsetXY(300, HEIGHT));
+                                var lines = DU.DrawLineSegmentsLazy(segs);
+                                lines.ForEach(line => SetDomePipeLineStyle(line));
+                                var line = DU.DrawLineSegmentLazy(new GLineSegment(points[1].TransformBy(basePt.OffsetXY(300, HEIGHT)), basePt.OffsetX(300).ToPoint2d()));
+                                SetDomePipeLineStyle(line);
+                            }
+                        }
+                    }
+                }
+
+            }
+            for (int j = 0; j < COUNT; j++)
+            {
+                var x = basePoint.X + OFFSET_X + (j + 1) * SPAN_X;
+                var y1 = basePoint.Y;
+                var y2 = y1 + HEIGHT * (storeys.Count - 1);
+                //{
+                //    var line = DU.DrawLineLazy(x, y1, x, y2);
+                //    SetDomePipeLineStyle(line);
+                //}
+                //{
+                //    var line = DU.DrawLineLazy(x + 300, y1, x + 300, y2);
+                //    SetVentPipeLineStyle(line);
+                //}
+            }
+
+
+            {
+                // var bsPt = basePoint.OffsetXY(500, -1000);
+                // DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
+                //scale: 0.5,
+                //props: new Dictionary<string, string>() { { "-", "666" } },
+                //cb: br =>
+                //{
+                //    br.Layer = "W-DRAI-EQPM";
+                //});
+            }
+        }
+
+        private static Point2d NewMethod5(double HEIGHT, ref Vector2d v, Point3d basePt)
+        {
+            var points = LONG_TRANSLATOR_POINTS.GetYAxisMirror();
+            NewMethod(HEIGHT, ref v, basePt, points);
+            var lastPt = points.Last();
+            DrawPipeCheckPoint(basePt.OffsetXY(lastPt.X, HEIGHT - LONG_TRANSLATOR_HEIGHT1 + lastPt.Y - CHECKPOINT_OFFSET_Y), false);
+            return lastPt;
+        }
+
+        private static Point2d NewMethod4(double HEIGHT, ref Vector2d v, Point3d basePt)
+        {
+            var points = LONG_TRANSLATOR_POINTS;
+            NewMethod(HEIGHT, ref v, basePt, points);
+            var lastPt = points.Last();
+            DrawPipeCheckPoint(basePt.OffsetXY(lastPt.X, HEIGHT - LONG_TRANSLATOR_HEIGHT1 + lastPt.Y - CHECKPOINT_OFFSET_Y), true);
+            return lastPt;
+        }
+        public static void DrawFloorDrain(Point3d basePt, bool leftOrRight)
+        {
+            if (leftOrRight)
+            {
+                DU.DrawBlockReference("地漏系统1", basePt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                    }
+                });
+            }
+            else
+            {
+                DU.DrawBlockReference("地漏系统1", basePt,
+               br =>
+               {
+                   br.Layer = "W-DRAI-EQPM";
+                   br.ScaleFactors = new Scale3d(-2, 2, 2);
+                   if (br.IsDynamicBlock)
+                   {
+                       br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                   }
+               });
+            }
+
+        }
+        public static void DrawSWaterStoringCurve(Point3d basePt, bool leftOrRight)
+        {
+            if (leftOrRight)
+            {
+                DU.DrawBlockReference("S型存水弯", basePt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "板上S弯");
+                    }
+                });
+            }
+            else
+            {
+                DU.DrawBlockReference("S型存水弯", basePt,
+                   br =>
+                   {
+                       br.Layer = "W-DRAI-EQPM";
+                       br.ScaleFactors = new Scale3d(-2, 2, 2);
+                       if (br.IsDynamicBlock)
+                       {
+                           br.ObjectId.SetDynBlockValue("可见性", "板上S弯");
+                       }
+                   });
+            }
+        }
+        public static void DrawCleaningPort(Point3d basePt, bool leftOrRight)
+        {
+            if (leftOrRight)
+            {
+                DU.DrawBlockReference("清扫口系统", basePt, scale: 2, cb: br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(90);
+                });
+            }
+            else
+            {
+                DU.DrawBlockReference("清扫口系统", basePt, scale: 2, cb: br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(90 + 180);
+                });
+            }
+        }
+        public static void DrawPipeCheckPoint(Point3d basePt, bool leftOrRight)
+        {
+            DU.DrawBlockReference(blkName: "立管检查口", basePt: basePt,
+cb: br =>
+{
+    if (leftOrRight)
+    {
+        br.ScaleFactors = new Scale3d(-1, 1, 1);
+    }
+    br.Layer = "W-DRAI-EQPM";
+});
+        }
+
+        private static void NewMethod2(double HEIGHT, ref Vector2d vec, Point3d basePt, Point2d[] points1, Point2d[] points2, double height1)
+        {
+
+            var lastPt1 = points1.Last();
+            var lastPt2 = points2.Last();
+            {
+                var segs = points1.CreateGLineSegments(basePt.OffsetY(HEIGHT - height1));
+                var lines = DU.DrawLineSegmentsLazy(segs);
+                lines.ForEach(line => SetDomePipeLineStyle(line));
+            }
+
+            {
+                var p1 = basePt.OffsetXY(lastPt1.X, -lastPt2.Y);
+                var p2 = p1.OffsetY(HEIGHT - height1 + lastPt1.Y + lastPt2.Y);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            {
+                var p1 = basePt.OffsetY(HEIGHT - height1);
+                var p2 = basePt.OffsetY(HEIGHT);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            {
+                var v = new Vector2d(lastPt1.X, 0);
+                vec += v;
+                basePt += v.ToVector3d();
+            }
+            {
+                var height2 = HEIGHT + lastPt2.Y;
+                var segs = points2.CreateGLineSegments(basePt.OffsetY(HEIGHT - height2));
+                var lines = DU.DrawLineSegmentsLazy(segs);
+                lines.ForEach(line => SetDomePipeLineStyle(line));
+            }
+            {
+                var v = new Vector2d(lastPt2.X, 0);
+                vec += v;
+                basePt += v.ToVector3d();
+            }
+        }
+        private static void NewMethod3(double HEIGHT, ref Vector2d vec, Point3d basePt, Point2d[] points1, Point2d[] points2)
+        {
+            var height1 = LONG_TRANSLATOR_HEIGHT1;
+            var lastPt1 = points1.Last();
+            var lastPt2 = points2.Last();
+            {
+                var segs = points1.CreateGLineSegments(basePt.OffsetY(HEIGHT - height1));
+                var lines = DU.DrawLineSegmentsLazy(segs);
+                lines.ForEach(line => SetDomePipeLineStyle(line));
+            }
+
+            {
+                var p1 = basePt.OffsetXY(lastPt1.X, -lastPt2.Y);
+                var p2 = p1.OffsetY(HEIGHT - height1 + lastPt1.Y + lastPt2.Y);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            {
+                var p1 = basePt.OffsetY(HEIGHT - height1);
+                var p2 = basePt.OffsetY(HEIGHT);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            {
+                var v = new Vector2d(lastPt1.X, 0);
+                vec += v;
+                basePt += v.ToVector3d();
+            }
+            {
+                var height2 = HEIGHT + lastPt2.Y;
+                var segs = points2.CreateGLineSegments(basePt.OffsetY(HEIGHT - height2));
+                var lines = DU.DrawLineSegmentsLazy(segs);
+                lines.ForEach(line => SetDomePipeLineStyle(line));
+            }
+            {
+                var v = new Vector2d(lastPt2.X, 0);
+                vec += v;
+                basePt += v.ToVector3d();
+            }
+        }
+        private static void NewMethod1(double HEIGHT, ref Vector2d v, Point3d basePt, Point2d[] points)
+        {
+            var lastPt = points.Last();
+            var height = HEIGHT + lastPt.Y;
+            var segs = points.CreateGLineSegments(basePt.OffsetY(HEIGHT - height));
+            var lines = DU.DrawLineSegmentsLazy(segs);
+            lines.ForEach(line => SetDomePipeLineStyle(line));
+            {
+                var p1 = basePt.OffsetY(HEIGHT - height);
+                var p2 = basePt.OffsetY(HEIGHT);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+                v += new Vector2d(lastPt.X, 0);
+            }
+        }
+
+        private static void NewMethod(double HEIGHT, ref Vector2d v, Point3d basePt, Point2d[] points)
+        {
+            var lastPt = points.Last();
+            var height = LONG_TRANSLATOR_HEIGHT1;
+            var segs = points.CreateGLineSegments(basePt.OffsetY(HEIGHT - height));
+            var lines = DU.DrawLineSegmentsLazy(segs);
+            lines.ForEach(line => SetDomePipeLineStyle(line));
+
+            {
+                var p1 = basePt.OffsetX(points.Last().X);
+                var p2 = p1.OffsetY(HEIGHT - height + lastPt.Y);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            {
+                var p1 = basePt.OffsetY(HEIGHT - height);
+                var p2 = basePt.OffsetY(HEIGHT);
+                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                SetDomePipeLineStyle(line);
+            }
+            v += new Vector2d(lastPt.X, 0);
+        }
+
+        public static void DrawDirtyWaterWell(Point3d basePt)
+        {
+            DU.DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-200),
+            scale: 0.5,
+            props: new Dictionary<string, string>() { { "-", "666" } },
+            cb: br =>
+            {
+                br.Layer = "W-DRAI-EQPM";
+            });
+        }
+        private static void SetVentPipeLineStyle(Line line)
+        {
+            line.Layer = "W-DRAI-VENT-PIPE";
+            line.ColorIndex = 256;
+        }
+
+        private static void SetDomePipeLineStyle(Line line)
+        {
+            line.Layer = "W-DRAI-DOME-PIPE";
+            line.ColorIndex = 256;
+        }
     }
     public class ThDrainageService
     {
@@ -2215,7 +2692,7 @@ pt,
             var bds = geoData.Labels.Select(x => x.Boundary).ToList();
             var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
             var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-            var f1 = GeometryFac.CreateGRectContainsSelector(lineHGs);
+            var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
             foreach (var bd in bds)
             {
                 var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1500, 250);
@@ -2224,7 +2701,7 @@ pt,
                     e.ColorIndex = 2;
                 }
                 var _lineHGs = f1(g);
-                var f2 = GeometryFac.NearestNeighbourGeometryF(_lineHGs);
+                var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                 var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                 var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
                 if (geo == null) continue;
@@ -2274,10 +2751,10 @@ pt,
             bool test3()
             {
                 if (FLs.Count == 0 || toilets.Count == 0) return false;
-                var toiletsGeo = GeometryFac.CreateGeometry(toilets);
+                var toiletsGeo = GeoFac.CreateGeometry(toilets);
                 foreach (var fl in FLs)
                 {
-                    if (GeometryFac.CreateCirclePolygon(fl.GetCenter(), 300, 36).Intersects(toiletsGeo)) return true;
+                    if (GeoFac.CreateCirclePolygon(fl.GetCenter(), 300, 36).Intersects(toiletsGeo)) return true;
                 }
                 return false;
             }
@@ -2327,8 +2804,8 @@ pt,
                     foreach (var fl in FLs)
                     {
                         _tls ??= TLs.Except(tls).ToList();
-                        var f = GeometryFac.CreateGeometrySelector(_tls);
-                        var range = GeometryFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 300, 36);
+                        var f = GeoFac.CreateGeometrySelector(_tls);
+                        var range = GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 300, 36);
                         var lst = f(range);
                         if (lst.Count > 0)
                         {
@@ -2356,7 +2833,7 @@ pt,
                             rooms.Add(kv.Value);
                         }
                     }
-                    return GeometryFac.CreateGeometrySelector(FLs)(GeometryFac.CreateGeometry(rooms));
+                    return GeoFac.CreateGeometrySelector(FLs)(GeoFac.CreateGeometry(rooms));
                 }
                 public static List<ToiletGrouper> DoGroup(List<Geometry> PLs, List<Geometry> TLs, List<Geometry> DLs)
                 {
@@ -2365,12 +2842,12 @@ pt,
                     foreach (var pl in PLs)
                     {
                         hs.Add(pl);
-                        var range = GeometryFac.CreateCirclePolygon(pl.GetCenter().ToPoint3d(), 300, 12);
+                        var range = GeoFac.CreateCirclePolygon(pl.GetCenter().ToPoint3d(), 300, 12);
                         //在每一根PL的每一层300范围内找TL
-                        var tls = GeometryFac.CreateGeometrySelector(TLs.Except(hs).ToList())(range);
+                        var tls = GeoFac.CreateGeometrySelector(TLs.Except(hs).ToList())(range);
                         hs.AddRange(tls);
                         //在每一根PL的每一层300范围内找DL
-                        var dls = GeometryFac.CreateGeometrySelector(DLs.Except(hs).ToList())(range);
+                        var dls = GeoFac.CreateGeometrySelector(DLs.Except(hs).ToList())(range);
                         hs.AddRange(dls);
                         var o = new ToiletGrouper();
                         list.Add(o);
@@ -2900,7 +3377,7 @@ namespace ThMEPWSS.DebugNs
                     //凭空生成一个雨水口
                     if (false)
                     {
-                        var f = GeometryFac.CreateGeometrySelector(item.LabelLines);
+                        var f = GeoFac.CreateGeometrySelector(item.LabelLines);
                         foreach (var lb in item.Labels)
                         {
                             var j = cadDataMain.Labels.IndexOf(lb);
@@ -2941,7 +3418,7 @@ namespace ThMEPWSS.DebugNs
 
 
                     {
-                        var gs = GeometryFac.GroupGeometries(item.LabelLines).Where(g => g.Count >= 3).ToList();
+                        var gs = GeoFac.GroupGeometries(item.LabelLines).Where(g => g.Count >= 3).ToList();
 
                         //凭空生成一个雨水口
                         {
@@ -2956,7 +3433,7 @@ namespace ThMEPWSS.DebugNs
                                     labels.Add(lb);
                                 }
                             }
-                            var f = GeometryFac.CreateGeometrySelector(item.LabelLines);
+                            var f = GeoFac.CreateGeometrySelector(item.LabelLines);
                             foreach (var lb in labels)
                             {
                                 var _lines = f(GRect.Create(lb.GetCenter(), 100).ToPolygon());
@@ -2966,14 +3443,14 @@ namespace ThMEPWSS.DebugNs
                                     var g = gs.FirstOrDefault(g => g.Contains(firstLine));
                                     if (g != null)
                                     {
-                                        var segs = g.SelectInts(cadDataMain.LabelLines).ToList().Select(geoData.LabelLines).ToList();
-                                        var h = GeometryFac.LineGrouppingHelper.Create(segs);
+                                        var segs = g.Select(cadDataMain.LabelLines).ToList().Select(geoData.LabelLines).ToList();
+                                        var h = GeoFac.LineGrouppingHelper.Create(segs);
                                         h.InitPointGeos(radius: 10);
                                         h.DoGroupingByPoint();
                                         h.CalcAlonePoints();
                                         var pointGeos = h.AlonePoints;
                                         {
-                                            var hLabelLines = item.LabelLines.SelectInts(cadDataMain.LabelLines).ToList().Select(geoData.LabelLines).Where(seg => seg.IsHorizontal(5)).ToList();
+                                            var hLabelLines = item.LabelLines.Select(cadDataMain.LabelLines).ToList().Select(geoData.LabelLines).Where(seg => seg.IsHorizontal(5)).ToList();
                                             var lst = item.Labels.Distinct().ToList();
                                             lst.Remove(lb);
                                             lst.AddRange(hLabelLines.Select(seg => seg.Buffer(10)));
@@ -2982,8 +3459,8 @@ namespace ThMEPWSS.DebugNs
                                             lst.AddRange(item.WaterPort13s);
                                             lst.AddRange(item.WaterWells);
                                             lst.AddRange(item.WaterPortSymbols);
-                                            var _geo = GeometryFac.CreateGeometry(lst.Distinct().ToArray());
-                                            pointGeos = pointGeos.Except(GeometryFac.CreateGeometrySelector(pointGeos)(_geo)).Distinct().ToList();
+                                            var _geo = GeoFac.CreateGeometry(lst.Distinct().ToArray());
+                                            pointGeos = pointGeos.Except(GeoFac.CreateGeometrySelector(pointGeos)(_geo)).Distinct().ToList();
                                         }
                                         foreach (var geo in pointGeos)
                                         {
@@ -3002,10 +3479,10 @@ namespace ThMEPWSS.DebugNs
                         if (false)
                         {
                             //修复屋面雨水斗，后面继续补上相关信息
-                            var f1 = GeometryFac.CreateGeometrySelector(item.VerticalPipes);
-                            var lbLinesGroups = GeometryFac.GroupGeometries(item.LabelLines).Select(g => GeometryFac.CreateGeometry(g.ToArray())).ToList();
-                            var f2 = GeometryFac.CreateGeometrySelector(lbLinesGroups);
-                            var f3 = GeometryFac.CreateGeometrySelector(item.WLines);
+                            var f1 = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                            var lbLinesGroups = GeoFac.GroupGeometries(item.LabelLines).Select(g => GeoFac.CreateGeometry(g.ToArray())).ToList();
+                            var f2 = GeoFac.CreateGeometrySelector(lbLinesGroups);
+                            var f3 = GeoFac.CreateGeometrySelector(item.WLines);
                             foreach (var lb in item.Labels)
                             {
                                 var ct = geoData.Labels[cadDataMain.Labels.IndexOf(lb)];
@@ -3046,8 +3523,8 @@ namespace ThMEPWSS.DebugNs
                     e.ColorIndex = 1;
                 }
 
-                var labelLinesGroup = GeometryFac.GroupGeometries(item.LabelLines);
-                var lbsGeosFilter = GeometryFac.CreateGeometrySelector(labelLinesGroup.Select(lbs => GeometryFac.CreateGeometry(lbs)).ToList());
+                var labelLinesGroup = GeoFac.GroupGeometries(item.LabelLines);
+                var lbsGeosFilter = GeoFac.CreateGeometrySelector(labelLinesGroup.Select(lbs => GeoFac.CreateGeometry(lbs)).ToList());
                 foreach (var pl in item.Labels)
                 {
                     var j = cadDataMain.Labels.IndexOf(pl);
@@ -3125,7 +3602,7 @@ namespace ThMEPWSS.DebugNs
                 var shortTranslatorLabels = new HashSet<string>();
 
                 {
-                    var gbkf = GeometryFac.CreateGeometrySelector(item.GravityWaterBuckets);
+                    var gbkf = GeoFac.CreateGeometrySelector(item.GravityWaterBuckets);
                     foreach (var lb in item.Labels)
                     {
                         var j = cadDataMain.Labels.IndexOf(lb);
@@ -3155,7 +3632,7 @@ namespace ThMEPWSS.DebugNs
                         foreach (var labelLines in labelLinesGroup)
                         {
                             var lst = ToList(labelLines, labels, pipes);
-                            var gs = GeometryFac.GroupGeometries(lst);
+                            var gs = GeoFac.GroupGeometries(lst);
                             foreach (var g in gs)
                             {
                                 var _pipes = g.Where(pl => pipes.Contains(pl)).ToList();
@@ -3198,7 +3675,7 @@ namespace ThMEPWSS.DebugNs
                         foreach (var labelLines in labelLinesGroup)
                         {
                             var lst = ToList(labelLines, labels, pipes);
-                            var gs = GeometryFac.GroupGeometries(lst);
+                            var gs = GeoFac.GroupGeometries(lst);
                             foreach (var g in gs)
                             {
                                 var _pipes = g.Where(pl => pipes.Contains(pl)).ToList();
@@ -3240,7 +3717,7 @@ namespace ThMEPWSS.DebugNs
                         var pipes = item.VerticalPipes.Except(ok_ents).ToList();
                         foreach (var labelLines in labelLinesGroup)
                         {
-                            var gs = GeometryFac.GroupGeometries(ToList(labelLines, labels, pipes));
+                            var gs = GeoFac.GroupGeometries(ToList(labelLines, labels, pipes));
                             foreach (var g in gs)
                             {
                                 //{
@@ -3298,7 +3775,7 @@ namespace ThMEPWSS.DebugNs
                         var pipes = item.VerticalPipes.Except(ok_ents).ToList();
                         foreach (var labelLines in labelLinesGroup)
                         {
-                            var gs = GeometryFac.GroupGeometries(ToList(labelLines, labels, pipes));
+                            var gs = GeoFac.GroupGeometries(ToList(labelLines, labels, pipes));
                             foreach (var g in gs)
                             {
                                 if (!g.Any(pl => labelLines.Contains(pl))) continue;
@@ -3334,7 +3811,7 @@ namespace ThMEPWSS.DebugNs
                 }
                 List<List<Geometry>> wLinesGroups;
                 {
-                    var gs = GeometryFac.GroupGeometries(item.WLines);
+                    var gs = GeoFac.GroupGeometries(item.WLines);
                     wLinesGroups = gs;
 
                     //var wlines = item.WLines;
@@ -3389,7 +3866,7 @@ namespace ThMEPWSS.DebugNs
                 {
                     foreach (var wlines in wLinesGroups)
                     {
-                        var gs = GeometryFac.GroupGeometries(ToList(wlines, item.VerticalPipes));
+                        var gs = GeoFac.GroupGeometries(ToList(wlines, item.VerticalPipes));
                         foreach (var g in gs)
                         {
                             var _pipes = g.Where(pl => item.VerticalPipes.Contains(pl)).ToList();
@@ -3407,7 +3884,7 @@ namespace ThMEPWSS.DebugNs
                                 {
                                     var lst = ToList(_wlines);
                                     lst.Add(pipe);
-                                    var _gs = GeometryFac.GroupGeometries(lst);
+                                    var _gs = GeoFac.GroupGeometries(lst);
                                     foreach (var _g in _gs)
                                     {
                                         if (!_g.Contains(pipe)) continue;
@@ -3427,7 +3904,7 @@ namespace ThMEPWSS.DebugNs
                                         var lst = ToList(_wlines);
                                         lst.Add(pp1);
                                         lst.Add(pp2);
-                                        var _gs = GeometryFac.GroupGeometries(lst).Where(_g => _g.Count == 3 && _g.Contains(pp1) && _g.Contains(pp2)).ToList();
+                                        var _gs = GeoFac.GroupGeometries(lst).Where(_g => _g.Count == 3 && _g.Contains(pp1) && _g.Contains(pp2)).ToList();
                                         foreach (var _g in _gs)
                                         {
                                             var __wlines = _g.Where(pl => _wlines.Contains(pl)).ToList();
@@ -3456,7 +3933,7 @@ namespace ThMEPWSS.DebugNs
                     {
                         var lst = ToList(item.VerticalPipes);
                         lst.Add(wline);
-                        var gs = GeometryFac.GroupGeometries(lst);
+                        var gs = GeoFac.GroupGeometries(lst);
                         foreach (var g in gs)
                         {
                             if (!g.Contains(wline)) continue;
@@ -3560,7 +4037,7 @@ namespace ThMEPWSS.DebugNs
                     //foreach (var group in wLinesGroups)
                     {
                         //var gs =GeometryFac.GroupGeometries(ToList(group, item.VerticalPipes, item.FloorDrains));
-                        var gs = GeometryFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.FloorDrains));
+                        var gs = GeoFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.FloorDrains));
                         foreach (var g in gs)
                         {
                             var pps = g.Where(pl => item.VerticalPipes.Contains(pl)).ToList();
@@ -3569,7 +4046,7 @@ namespace ThMEPWSS.DebugNs
                             //var wrappingPipes = g.Where(pl => item.WrappingPipes.Contains(pl)).ToList();
                             var wrappingPipes = new List<Geometry>();
                             {
-                                var f = GeometryFac.CreateGeometrySelector(item.WrappingPipes);
+                                var f = GeoFac.CreateGeometrySelector(item.WrappingPipes);
                                 foreach (var wline in wlines)
                                 {
                                     wrappingPipes.AddRange(f(wline));
@@ -3596,7 +4073,7 @@ namespace ThMEPWSS.DebugNs
                                     {
                                         var lst = ToList(wlines, fds);
                                         lst.Add(pp);
-                                        var _gs = GeometryFac.GroupGeometries(lst);
+                                        var _gs = GeoFac.GroupGeometries(lst);
                                         foreach (var _g in _gs)
                                         {
                                             if (!_g.Contains(pp)) continue;
@@ -3605,7 +4082,7 @@ namespace ThMEPWSS.DebugNs
                                             if (!AllNotEmpty(_fds, _wlines)) continue;
                                             {
                                                 //pipe和wline不相交的情况，跳过
-                                                var f = GeometryFac.CreateGeometrySelector(_wlines);
+                                                var f = GeoFac.CreateGeometrySelector(_wlines);
                                                 if (f(pp).Count == 0) continue;
                                             }
                                             foreach (var fd in _fds)
@@ -3615,7 +4092,7 @@ namespace ThMEPWSS.DebugNs
                                             {
                                                 //套管还要在wline上才行
                                                 var _wrappingPipes = new List<Geometry>();
-                                                var f = GeometryFac.CreateGeometrySelector(wrappingPipes);
+                                                var f = GeoFac.CreateGeometrySelector(wrappingPipes);
                                                 foreach (var wline in _wlines)
                                                 {
                                                     _wrappingPipes.AddRange(f(wline));
@@ -3632,7 +4109,7 @@ namespace ThMEPWSS.DebugNs
                                     {
                                         var lst = ToList(wlines, fds, wrappingPipes);
                                         lst.Add(pp);
-                                        var _gs = GeometryFac.GroupGeometries(lst);
+                                        var _gs = GeoFac.GroupGeometries(lst);
                                         foreach (var _g in _gs)
                                         {
                                             var _fds = g.Where(pl => fds.Contains(pl)).ToList();
@@ -3642,7 +4119,7 @@ namespace ThMEPWSS.DebugNs
                                             if (!AllNotEmpty(_fds, _wlines, _pps)) continue;
                                             {
                                                 //pipe和wline不相交的情况，跳过
-                                                var f = GeometryFac.CreateGeometrySelector(_wlines);
+                                                var f = GeoFac.CreateGeometrySelector(_wlines);
                                                 if (f(pp).Count == 0) continue;
                                             }
                                             foreach (var fd in _fds)
@@ -3651,7 +4128,7 @@ namespace ThMEPWSS.DebugNs
                                             }
                                             {
                                                 //套管还要在wline上才行
-                                                var __gs = GeometryFac.GroupGeometries(ToList(_wrappingPipes, _wlines));
+                                                var __gs = GeoFac.GroupGeometries(ToList(_wrappingPipes, _wlines));
                                                 foreach (var __g in __gs)
                                                 {
                                                     var __wlines = __g.Where(pl => _wlines.Contains(pl)).ToList();
@@ -3755,8 +4232,8 @@ namespace ThMEPWSS.DebugNs
                     //当地漏和立管非常靠近的情况下，有的设计师会不画横管，导致程序识别时只找到了立管。
                     //处理方式：
                     //若地漏没有连接任何横管，则在地漏圆心500的范围内找没有连接任何地漏的最近的NL或Y2L，认为两者相连。
-                    var gs = GeometryFac.GroupGeometries(ToList(item.FloorDrains, item.WLines));
-                    var f = GeometryFac.CreateGeometrySelector(item.VerticalPipes);
+                    var gs = GeoFac.GroupGeometries(ToList(item.FloorDrains, item.WLines));
+                    var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
                     foreach (var g in gs)
                     {
                         if (g.Count == 1)
@@ -3766,7 +4243,7 @@ namespace ThMEPWSS.DebugNs
                             {
                                 var fd = _x;
                                 var center = fd.GetCenter().ToPoint3d();
-                                var range = GeometryFac.CreateCirclePolygon(center, 500, 6);
+                                var range = GeoFac.CreateCirclePolygon(center, 500, 6);
                                 var pipes = f(range).Where(pipe =>
                                 {
                                     lbDict.TryGetValue(pipe, out string label);
@@ -3779,7 +4256,7 @@ namespace ThMEPWSS.DebugNs
                                     }
                                     return false;
                                 }).ToList();
-                                var pipe = GeometryFac.NearestNeighbourPoint3dF(pipes)(center);
+                                var pipe = GeoFac.NearestNeighbourPoint3dF(pipes)(center);
                                 if (pipe != null)
                                 {
                                     lbDict.TryGetValue(pipe, out string label);
@@ -3814,7 +4291,7 @@ namespace ThMEPWSS.DebugNs
                     //foreach (var group in wLinesGroups)
                     {
                         //var gs =GeometryFac.GroupGeometries(ToList(group, item.VerticalPipes, item.CondensePipes));
-                        var gs = GeometryFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.CondensePipes));
+                        var gs = GeoFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.CondensePipes));
                         foreach (var g in gs)
                         {
                             var pps = g.Where(pl => item.VerticalPipes.Contains(pl)).ToList();
@@ -3875,7 +4352,7 @@ namespace ThMEPWSS.DebugNs
                 var brokenCondensePipes = new List<List<Geometry>>();
                 {
                     var bkCondensePipeLines = brokenCondensePipeLines.Select(seg => seg.Buffer(10)).ToList();
-                    var gs = GeometryFac.GroupGeometries(ToList(item.CondensePipes, bkCondensePipeLines));
+                    var gs = GeoFac.GroupGeometries(ToList(item.CondensePipes, bkCondensePipeLines));
                     foreach (var g in gs)
                     {
                         var cps = g.Where(pl => item.CondensePipes.Contains(pl)).ToList();
@@ -3945,17 +4422,17 @@ namespace ThMEPWSS.DebugNs
                     }
                     var wlinesGeo = new List<Geometry>();
                     {
-                        var gs = GeometryFac.GroupGeometries(item_WLines);
+                        var gs = GeoFac.GroupGeometries(item_WLines);
                         foreach (var g in gs)
                         {
-                            wlinesGeo.Add(GeometryFac.CreateGeometry(g.ToArray()));
+                            wlinesGeo.Add(GeoFac.CreateGeometry(g.ToArray()));
                         }
                     }
-                    var filtWLines = GeometryFac.CreateGeometrySelector(wlinesGeo);
+                    var filtWLines = GeoFac.CreateGeometrySelector(wlinesGeo);
                     {
-                        var f1 = GeometryFac.CreateGeometrySelector(item_WrappingPipes);
-                        var f2 = GeometryFac.CreateGeometrySelector(item_WaterPortSymbols);
-                        var gs = GeometryFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, item_WaterPortSymbols));
+                        var f1 = GeoFac.CreateGeometrySelector(item_WrappingPipes);
+                        var f2 = GeoFac.CreateGeometrySelector(item_WaterPortSymbols);
+                        var gs = GeoFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, item_WaterPortSymbols));
                         foreach (var g in gs)
                         {
                             var pps = g.Where(pl => item_VerticalPipes.Contains(pl)).ToList();
@@ -3972,7 +4449,7 @@ namespace ThMEPWSS.DebugNs
                                     var lst = new List<Geometry>();
                                     lst.Add(pp);
                                     lst.AddRange(wlines);
-                                    var geo = GeometryFac.CreateGeometry(lst.ToArray());
+                                    var geo = GeoFac.CreateGeometry(lst.ToArray());
                                     var wp = f1(geo).FirstOrDefault();
                                     if (wp != null)
                                     {
@@ -4015,7 +4492,7 @@ namespace ThMEPWSS.DebugNs
                         var pipeLabelToWaterWellLabels = new List<KeyValuePair<string, string>>();
                         var ok_wells = new HashSet<Geometry>();
                         {
-                            var gs = GeometryFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, item_WaterWells));
+                            var gs = GeoFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, item_WaterWells));
                             foreach (var g in gs)
                             {
                                 var pps = g.Where(pl => item_VerticalPipes.Contains(pl)).ToList();
@@ -4062,7 +4539,7 @@ namespace ThMEPWSS.DebugNs
                                                     var lst = ToList(wlines);
                                                     lst.Add(wp);
                                                     lst.Add(pp);
-                                                    var _gs = GeometryFac.GroupGeometries(lst);
+                                                    var _gs = GeoFac.GroupGeometries(lst);
                                                     foreach (var _g in _gs)
                                                     {
                                                         if (!_g.Contains(wp)) continue;
@@ -4090,7 +4567,7 @@ namespace ThMEPWSS.DebugNs
                                 gwells[k] = GRect.Create(gwells[k].Center, 1500);
                             }
                             var shadowWells = gwells.Select(r => r.ToLinearRing()).Cast<Geometry>().ToList();
-                            var gs = GeometryFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, shadowWells, item.WaterPort13s));
+                            var gs = GeoFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, shadowWells, item.WaterPort13s));
                             foreach (var g in gs)
                             {
                                 var pps = g.Where(pl => item_VerticalPipes.Contains(pl)).ToList();
@@ -4148,7 +4625,7 @@ namespace ThMEPWSS.DebugNs
                                                     var lst = ToList(wlines);
                                                     lst.Add(wp);
                                                     lst.Add(pp);
-                                                    var _gs = GeometryFac.GroupGeometries(lst);
+                                                    var _gs = GeoFac.GroupGeometries(lst);
                                                     foreach (var _g in _gs)
                                                     {
                                                         if (!_g.Contains(wp)) continue;
@@ -4171,8 +4648,8 @@ namespace ThMEPWSS.DebugNs
                         drData.PipeLabelToWaterWellLabels.AddRange(pipeLabelToWaterWellLabels);
                     }
                     {
-                        var f1 = GeometryFac.CreateGeometrySelector(item_WrappingPipes);
-                        var f3 = GeometryFac.CreateGeometrySelector(item_WaterPortSymbols);
+                        var f1 = GeoFac.CreateGeometrySelector(item_WrappingPipes);
+                        var f3 = GeoFac.CreateGeometrySelector(item_WaterPortSymbols);
                         foreach (var pipe in item_VerticalPipes)
                         {
                             lbDict.TryGetValue(pipe, out string label);
@@ -4200,7 +4677,7 @@ namespace ThMEPWSS.DebugNs
                                 }
                             }
                         }
-                        var f2 = GeometryFac.CreateGeometrySelector(item.WaterPort13s);
+                        var f2 = GeoFac.CreateGeometrySelector(item.WaterPort13s);
                         foreach (var pipe in item_VerticalPipes)
                         {
                             void f()
@@ -4242,14 +4719,14 @@ namespace ThMEPWSS.DebugNs
                     void f5(List<GLineSegment> segs)
                     {
                         var _wlines1 = wlines1.Select(seg => seg.Buffer(10)).ToList();
-                        var f1 = GeometryFac.CreateGeometrySelector(_wlines1);
+                        var f1 = GeoFac.CreateGeometrySelector(_wlines1);
                         var _wlines2 = segs.Select(seg => seg.Extend(-20).Buffer(10)).ToList();
                         var _wlines3 = segs.Select(seg => seg.Extend(.1).Buffer(10)).ToList();
-                        var f2 = GeometryFac.CreateGeometrySelector(_wlines2);
+                        var f2 = GeoFac.CreateGeometrySelector(_wlines2);
                         var _rs = item.WaterWells.Concat(item.WrappingPipes).Concat(item.WaterPortSymbols).Concat(item.VerticalPipes).Distinct().ToArray();
-                        var __wlines2 = _wlines2.Except(f2(GeometryFac.CreateGeometry(_rs))).Distinct().ToList();
-                        var __wlines3 = __wlines2.SelectInts(_wlines2).ToList().Select(_wlines3).ToList();
-                        var wlines = _wlines1.Except(f1(GeometryFac.CreateGeometry(__wlines2.ToArray()))).Concat(__wlines3).Distinct().ToList();
+                        var __wlines2 = _wlines2.Except(f2(GeoFac.CreateGeometry(_rs))).Distinct().ToList();
+                        var __wlines3 = __wlines2.Select(_wlines2).ToList().Select(_wlines3).ToList();
+                        var wlines = _wlines1.Except(f1(GeoFac.CreateGeometry(__wlines2.ToArray()))).Concat(__wlines3).Distinct().ToList();
 
                         //FengDbgTesting.AddLazyAction("看看自动连接OK不", adb =>
                         //{
@@ -4282,7 +4759,7 @@ namespace ThMEPWSS.DebugNs
                         f5(segs);
                     }
                     {
-                        var segs = item.WLinesAddition.SelectInts(cadDataMain.WLinesAddition).ToList().Select(geoData.WLinesAddition).ToList();
+                        var segs = item.WLinesAddition.Select(cadDataMain.WLinesAddition).ToList().Select(geoData.WLinesAddition).ToList();
                         ok = true;
                         f5(segs);
                     }
@@ -4309,7 +4786,7 @@ namespace ThMEPWSS.DebugNs
 
                 var gravityWaterBucketTranslatorLabels = new List<string>();
                 {
-                    var gs = GeometryFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.GravityWaterBuckets));
+                    var gs = GeoFac.GroupGeometries(ToList(item.WLines, item.VerticalPipes, item.GravityWaterBuckets));
                     foreach (var g in gs)
                     {
                         var pps = g.Where(pl => item.VerticalPipes.Contains(pl)).ToList();
@@ -4342,7 +4819,7 @@ namespace ThMEPWSS.DebugNs
                         var lst = item.LabelLines.ToList();
                         lst.Add(label);
                         lst.AddRange(item.GravityWaterBuckets);
-                        var gs = GeometryFac.GroupGeometries(lst);
+                        var gs = GeoFac.GroupGeometries(lst);
                         foreach (var g in gs)
                         {
                             if (!g.Contains(label)) continue;
@@ -4397,8 +4874,8 @@ namespace ThMEPWSS.DebugNs
 
                 }
                 {
-                    var f1 = GeometryFac.CreateGeometrySelector(item.WLines);
-                    var f2 = GeometryFac.CreateGeometrySelector(lbDict.Keys.ToList());
+                    var f1 = GeoFac.CreateGeometrySelector(item.WLines);
+                    var f2 = GeoFac.CreateGeometrySelector(lbDict.Keys.ToList());
                     foreach (var kv in lbDict)
                     {
                         var m = ThRainSystemService.TestGravityLabelConnected(kv.Value);

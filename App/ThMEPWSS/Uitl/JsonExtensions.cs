@@ -46,7 +46,7 @@ namespace ThMEPWSS.JsonExtensionsNs
             }
             return lis.Select(li => source[li]).ToList();
         }
-        public static List<T> ToList<T>(this bool[] flags,IList<T> std,bool inverse)
+        public static List<T> ToList<T>(this bool[] flags, IList<T> std, bool inverse)
         {
             var ret = new List<T>(std.Count);
             if (inverse)
@@ -71,12 +71,22 @@ namespace ThMEPWSS.JsonExtensionsNs
             }
             return ret;
         }
-        public static IEnumerable<int> SelectInts<T>(this IEnumerable<T> source, IList<T> std)
+        public static IEnumerable<int> Select<T>(this IEnumerable<T> source, List<T> std, bool fast = false)
         {
             IList<T> lst = (source as IList<T>) ?? source.ToList();
-            for (int i = 0; i < lst.Count; i++)
+            if (fast)
             {
-                yield return std.IndexOf(lst[i]);
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    yield return std.BinarySearch(lst[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    yield return std.IndexOf(lst[i]);
+                }
             }
         }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
@@ -189,6 +199,14 @@ namespace ThMEPWSS.CADExtensionsNs
         {
             return larger ? new GCircle(r.Center, r.OuterRadius) : new GCircle(r.Center, r.InnerRadius);
         }
+        public static Point2d TransformBy(this Point2d pt, Point2d basePt)
+        {
+            return pt + basePt.ToVector2d();
+        }
+        public static Point2d TransformBy(this Point2d pt, Point3d basePt)
+        {
+            return pt + basePt.ToPoint2d().ToVector2d();
+        }
         public static GRect ToGRect(this Point2d pt, double ext)
         {
             return GRect.Create(pt, ext);
@@ -204,7 +222,7 @@ namespace ThMEPWSS.CADExtensionsNs
         public static List<Geometry> ToGeometryList(this IEnumerable<Geometry> source) => source.ToList();
         public static Polygon ToCirclePolygon(this GCircle circle, int numPoints, bool larger = true)
         {
-            return Pipe.Service.GeometryFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
+            return Pipe.Service.GeoFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
         }
         public static LineString ToLineString(this GLineSegment seg)
         {

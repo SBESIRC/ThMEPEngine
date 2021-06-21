@@ -924,6 +924,14 @@ namespace ThMEPWSS.Uitl
                 yield return m;
             }
         }
+        public static IEnumerable<T> YieldAfter<T>(this IEnumerable<T> souce, T item)
+        {
+            foreach (var m in souce)
+            {
+                yield return m;
+            }
+            yield return item;
+        }
         public static Action Once(Action f)
         {
             bool ok = false;
@@ -993,9 +1001,60 @@ namespace ThMEPWSS.Uitl
             }
         }
     }
+    public static class Matrix2dFac
+    {
+        public static Matrix2d XAxisMirroring = Matrix2d.Mirroring(new Line2d(new Point2d(0, 0), new Point2d(1, 0)));
+        public static Matrix2d YAxisMirroring = Matrix2d.Mirroring(new Line2d(new Point2d(0, 0), new Point2d(0, 1)));
+    }
     public static class EntityFactory
     {
-        public static Polyline CreatePolyline(Point3dCollection pts)
+        public static Point2d[] MoveXY(this Point2d[] points, double dx, double dy)
+        {
+            var m = Matrix2d.Displacement(new Vector2d(dx, dy));
+            return points.Select(x => x.TransformBy(m)).ToArray();
+        }
+        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points, Point3d basePt, Matrix2d matrix2D)
+        {
+            if (points.Length <= 1) return new List<GLineSegment>();
+            points = points.Select(pt => pt.TransformBy(matrix2D)).ToArray();
+            return CreateGLineSegments(points, basePt);
+        }
+        public static Point2d[] GetYAxisMirror(this Point2d[] points)
+        {
+            return points.Select(pt => new Point2d(-pt.X, pt.Y)).ToArray();
+        }
+        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points, Point3d basePt)
+        {
+            if (points.Length <= 1) return new List<GLineSegment>();
+            var segs = new List<GLineSegment>(points.Length - 1);
+            var vec = basePt.ToPoint2d() - points[0];
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                segs.Add(new GLineSegment(points[i] + vec, points[i + 1] + vec));
+            }
+            return segs;
+        }
+        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points)
+        {
+            if (points.Length <= 1) return new List<GLineSegment>();
+            var segs = new List<GLineSegment>(points.Length - 1);
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                segs.Add(new GLineSegment(points[i], points[i + 1]));
+            }
+            return segs;
+        }
+        public static List<GLineSegment> CreateGLineSegments(this List<Point2d> points)
+        {
+            if (points.Count <= 1) return new List<GLineSegment>();
+            var segs = new List<GLineSegment>(points.Count - 1);
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                segs.Add(new GLineSegment(points[i], points[i + 1]));
+            }
+            return segs;
+        }
+        public static Polyline CreatePolyline(this Point3dCollection pts)
         {
             var pl = new Polyline();
             for (int i = 0; i < pts.Count; i++)
@@ -1004,7 +1063,7 @@ namespace ThMEPWSS.Uitl
             }
             return pl;
         }
-        public static Polyline CreatePolyline(IList<Point3d> pts)
+        public static Polyline CreatePolyline(this IList<Point3d> pts)
         {
             var pl = new Polyline();
             for (int i = 0; i < pts.Count; i++)

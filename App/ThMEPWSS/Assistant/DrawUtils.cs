@@ -235,10 +235,8 @@ namespace ThMEPWSS.Assistant
         public static void Draw()
         {
             if (DrawingQueue.Count == 0) return;
-            using (var adb = AcadDatabase.Active())
-            {
-                Draw(adb);
-            }
+            using var adb = AcadDatabase.Active();
+            Draw(adb);
         }
         public static void Draw(AcadDatabase adb)
         {
@@ -478,6 +476,18 @@ namespace ThMEPWSS.Assistant
         public static Line DrawLineSegmentLazy(GLineSegment seg)
         {
             return DrawLineLazy(seg.StartPoint, seg.EndPoint);
+        }
+        public static List<Line> DrawLineSegmentsLazy(IEnumerable<GLineSegment> segs)
+        {
+            var lines = segs.Select(seg=> new Line() { StartPoint = seg.StartPoint.ToPoint3d(), EndPoint = seg.EndPoint.ToPoint3d() }).ToList();
+            DrawingQueue.Enqueue(adb =>
+            {
+                foreach (var line in lines)
+                {
+                    adb.ModelSpace.Add(line);
+                }
+            });
+            return lines;
         }
         public static Polyline DrawLineSegmentLazy(GLineSegment seg, double width)
         {
