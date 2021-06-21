@@ -38,6 +38,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false);
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.CountBlockByLayer), false);
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer), false);
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThAutoFireAlarmSystemCommon.CountBlockName), false);
             }
         }
 

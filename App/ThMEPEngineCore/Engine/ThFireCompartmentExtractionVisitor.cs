@@ -1,11 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
@@ -30,13 +26,13 @@ namespace ThMEPEngineCore.Engine
             //处理外参DoXClip的
             throw new NotImplementedException();
         }
+
         public override bool IsSpatialElement(Entity entity)
         {
-            //认为长度>10 才可能是防火分区
-            if(entity is Polyline polyline)
+            if (entity is Polyline polyline)
             {
-                if (polyline.Length > 10)
-                    return true;
+                // 过滤掉面积不大于5平方米的区域
+                return polyline.Area > 5E+6;
             }
             return false;
         }
@@ -47,7 +43,10 @@ namespace ThMEPEngineCore.Engine
             if (IsSpatialElement(polyline) && CheckLayerValid(polyline))
             {
                 var newFrame = ThMEPFrameService.NormalizeEx(polyline);
-                results.Add(CreateSpatialElementData(newFrame, ""));
+                if(IsSpatialElement(newFrame))
+                {
+                    results.Add(CreateSpatialElementData(newFrame, ""));
+                }
             }
             return results;
         }

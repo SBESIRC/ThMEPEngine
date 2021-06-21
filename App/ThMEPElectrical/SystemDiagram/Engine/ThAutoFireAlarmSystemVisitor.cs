@@ -10,6 +10,7 @@ using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using DotNetARX;
+using Linq2Acad;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -39,7 +40,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            if (IsDistributionElement(blkref) && CheckLayerValid(blkref))
+            if (IsDistributionElement(blkref) && CheckLayerValid(blkref) && IsDistributeElementBlock(blkref))
             {
                 var dic = blkref.Id.GetAttributesInBlockReferenceEx();
                 var info = new ElementInfo()
@@ -71,6 +72,15 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         public override bool CheckLayerValid(Entity curve)
         {
             return curve.Layer.Contains("E-");
+        }
+        
+        private bool IsDistributeElementBlock(BlockReference blkref)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkref.Database))
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(blkref.BlockTableRecord);
+                return base.IsBuildElementBlock(blockTableRecord);
+            }
         }
     }
     public class ElementInfo
