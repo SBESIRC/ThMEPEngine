@@ -67,8 +67,7 @@ namespace ThMEPWSS.Command
                     ThCheckExpressionControlService.CheckExpressionLayer);
                 printService.Print(regionCheckService.CheckResults);
             }
-        }
 #endif
+        }
     }
-
 }

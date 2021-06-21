@@ -1,4 +1,5 @@
-﻿using CLI;
+﻿#if ACAD2016
+using CLI;
 using System.Linq;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
@@ -111,3 +112,4 @@ namespace ThMEPWSS.Hydrant.Service
         }
     }
 }
+#endif
