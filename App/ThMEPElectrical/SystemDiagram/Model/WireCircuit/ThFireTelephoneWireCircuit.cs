@@ -49,6 +49,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 #region 起点框
                 Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex , OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 Result.Add(Startline1);
+                Result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + Offset)));
                 #endregion
                 CurrentIndex++;
                 while (CurrentIndex < EndIndexBlock)
@@ -75,6 +76,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 #region 起点框
                 Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 Result.Add(Startline1);
+                Result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + Offset)));
                 #endregion
                 CurrentIndex++;
                 while (CurrentIndex < EndIndexBlock)

@@ -25,6 +25,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             Result.Add(Startline1);
             Line Startline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1), 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * FloorIndex, 0));
             Result.Add(Startline2);
+            Result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + Offset)));
             #endregion
 
             CurrentIndex++;
