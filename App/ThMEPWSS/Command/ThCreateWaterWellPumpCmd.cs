@@ -50,16 +50,16 @@ namespace ThMEPWSS.Command
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
-                    var clone = waterWell.OBB.Clone() as Entity;
-                    objIds.Add(database.ModelSpace.Add(clone));
-                    clone.ColorIndex = 7;
+                    //var clone = waterWell.OBB.Clone() as Entity;
+                    //objIds.Add(database.ModelSpace.Add(clone));
+                    //clone.ColorIndex = 7;
                     waterWell.Init();
                     waterWellList.Add(waterWell);
                 }
-                if(objIds.Count>0)
-                {
-                    GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
-                }                
+                //if(objIds.Count>0)
+                //{
+                //    GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
+                //}                
             }
             return waterWellList;
         }
@@ -79,7 +79,6 @@ namespace ThMEPWSS.Command
             }
             return deepWellPump;
         }
-
         public List<Line> GetWallColumnEdgesInRange(Tuple<Point3d, Point3d> input)
         {
             var range = new Point3dCollection();
@@ -130,7 +129,7 @@ namespace ThMEPWSS.Command
 
                 var partSpace = acadDb.ModelSpace.OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull && (o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150")).ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection()); 
                 var dbObjects = spatialIndex.SelectCrossingPolygon(range);
 
                 var rst = new List<BlockReference>();
@@ -157,7 +156,6 @@ namespace ThMEPWSS.Command
                 return path;
             }
         }
-
         public void ImportBlockFile()
         {
             //导入一个块
@@ -221,17 +219,17 @@ namespace ThMEPWSS.Command
                         //获取墙
                         List<Line> wallLine = GetWallColumnEdgesInRange(input);
 
-                        var objIds = new ObjectIdCollection();
-                        wallLine.ForEach(o =>
-                        {
-                            var clone = o.Clone() as Line;
-                            objIds.Add(database.ModelSpace.Add(clone));
-                            clone.ColorIndex = 1;
-                        });
-                        if(objIds.Count>0)
-                        {
-                            GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
-                        }
+                        //var objIds = new ObjectIdCollection();
+                        //wallLine.ForEach(o =>
+                        //{
+                        //    var clone = o.Clone() as Line;
+                        //    objIds.Add(database.ModelSpace.Add(clone));
+                        //    clone.ColorIndex = 1;
+                        //});
+                        //if(objIds.Count>0)
+                        //{
+                        //    GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
+                        //}
 
                         //获取车位
                         List<Point3d> parkPoint = GetParkSpacePointInRange(input);

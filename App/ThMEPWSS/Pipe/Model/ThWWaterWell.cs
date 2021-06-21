@@ -36,7 +36,7 @@ namespace ThMEPWSS.Pipe.Model
         public List<Line> WallLines = null;//墙线
         public List<Point3d> ParkSpacePoint { set; get; }
         public List<BlockReference> PipeList { set; get; }
-    private ThWDeepWellPump DeepWellPump = null;//潜水泵
+        private ThWDeepWellPump DeepWellPump = null;//潜水泵
         public Polyline OBB { get; set; }
         public ThWWaterWell()
         {
@@ -207,14 +207,19 @@ namespace ThMEPWSS.Pipe.Model
                 default:
                     break;
             }
+            double fontHeight = 525;
             string riserName = WaterWellBlockNames.LocationRiser;
             switch (configInfo.PumpInfo.strMapScale)
             {
                 case "1:50":
+                    fontHeight = 175;
+                    break;
                 case "1:100":
+                    fontHeight = 350;
                     riserName = WaterWellBlockNames.LocationRiser;
                     break;
                 case "1:150":
+                    fontHeight = 525;
                     riserName = WaterWellBlockNames.LocationRiser150;
                     break;
                 default:
@@ -230,6 +235,7 @@ namespace ThMEPWSS.Pipe.Model
             DeepWellPump = ThWDeepWellPump.Create("W-EQPM", WaterWellBlockNames.DeepWaterPump, pumpName, position,new Scale3d(1,1,1), angele);
             DeepWellPump.SetPumpCount(configInfo.PumpInfo.PumpsNumber);
             DeepWellPump.SetPumpSpace(space);
+            DeepWellPump.SetFontHeight(fontHeight);
 
             Tuple<int, int> sideLine = WaterWellEdge[side];
             Point3d point1 = WaterWellVertex[sideLine.Item1];
