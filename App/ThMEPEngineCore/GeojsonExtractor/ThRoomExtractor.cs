@@ -22,12 +22,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public ThRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
-            TESSELLATE_ARC_LENGTH = 50.0;
-#if DEBUG
-            Category = BuiltInCategory.Space.ToString();
-#else
+            TESSELLATE_ARC_LENGTH = 50.0;            
+            RoomMarkLayerFilter = new List<string>();
+            RoomBoundaryLayerFilter = new List<string>();
             Category = BuiltInCategory.Room.ToString();
-#endif
         }
         public override List<ThGeometry> BuildGeometries()
         {

@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return patterns[0] == "AI" && patterns[1] == "空间名称";
+            return patterns[0] == "AI" && patterns[1] == "房间名称";
         }
     }
 }
