@@ -29,7 +29,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
         public static int FireBroadcastingCount = 20;
 
         /// <summary>
-        /// 底部固定部分:1.包含消防室 2.不含消防室
+        /// 底部固定部分:1.包含消防室 2.不含消防室 3.仅绘制计数模块
         /// </summary>
         public static int FixedPartType = 1;
 

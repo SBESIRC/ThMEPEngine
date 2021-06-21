@@ -241,7 +241,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 //画所有的块
                 InsertBlockService.InsertSpecifyBlock(dicBlockPoints);
                 //画底部固定部分
-                InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FixedPartContainsFireRoom : ThAutoFireAlarmSystemCommon.FixedPartExcludingFireRoom);
+                if (FireCompartmentParameter.FixedPartType != 3)
+                {
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FixedPartContainsFireRoom : ThAutoFireAlarmSystemCommon.FixedPartExcludingFireRoom);
+                }
             }
         }
 

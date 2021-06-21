@@ -29,7 +29,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public int commondType = 1;
 
         /// <summary>
-        /// 底部固定部分:1.包含消防室 2.不含消防室
+        /// 底部固定部分:1.包含消防室 2.不含消防室 3.仅绘制计数模块
         /// </summary>
         private int PublicSectionType = 1;
 
@@ -81,7 +81,13 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                     commondType = 2;
                 else
                     commondType = 3;
-                PublicSectionType = IncludingFireRoom.IsChecked.Value ? 1 : 2;
+                if (IncludingFireRoom.IsChecked.Value)
+                    PublicSectionType = 1;
+                else if (ExcludingFireRoom.IsChecked.Value)
+                    PublicSectionType = 2;
+                else
+                    PublicSectionType = 3;
+
                 DiagramGenerationType = DistinguishByFireCompartment.IsChecked.Value ? 1 : 2;
 
                 FireCompartmentParameter.LayerNames = SelectLayers;
