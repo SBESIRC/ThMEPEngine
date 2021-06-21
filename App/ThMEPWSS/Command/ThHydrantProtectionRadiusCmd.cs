@@ -1,15 +1,18 @@
 ﻿using System;
+using AcHelper.Commands;
+using ThMEPWSS.Diagram.ViewModel;
+
+#if ACAD2016
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using AcHelper.Commands;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.Hydrant.Service;
 using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.Diagram.ViewModel;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+#endif
 
 namespace ThMEPWSS.Command
 {
@@ -20,9 +23,9 @@ namespace ThMEPWSS.Command
         {
         }
 
+#if ACAD2016
         public void Execute()
         {
-#if ACAD2016
             using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
@@ -67,7 +70,12 @@ namespace ThMEPWSS.Command
                     ThCheckExpressionControlService.CheckExpressionLayer);
                 printService.Print(regionCheckService.CheckResults);
             }
-#endif
         }
+#else
+        public void Execute()
+        {
+
+        }
+#endif
     }
 }

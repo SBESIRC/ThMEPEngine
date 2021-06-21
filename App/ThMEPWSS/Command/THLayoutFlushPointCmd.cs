@@ -1,14 +1,10 @@
 ﻿using System;
 using NFox.Cad;
 using AcHelper.Commands;
-using GeometryExtensions;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.GeojsonExtractor;
 
 #if ACAD2016
 using CLI;
-using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
@@ -19,7 +15,6 @@ using ThMEPWSS.FlushPoint.Data;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using ThMEPWSS.FlushPoint.Service;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 #endif
 
@@ -31,21 +26,21 @@ namespace ThMEPWSS.Command
         {
         }
 
+#if ACAD2016
         public void Execute()
         {
-#if ACAD2016
             using (var acadDb = AcadDatabase.Active())
             {
                 var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
                     PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                if(frame.Area<1e-4)
+                if (frame.Area < 1e-4)
                 {
                     return;
-                }                
+                }
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
                 //收集数据
-                var roomExtractor = new ThRoomExtractor() { ColorIndex = 6};
+                var roomExtractor = new ThRoomExtractor() { ColorIndex = 6 };
                 roomExtractor.Extract(acadDb.Database, pts);
                 var parkingStallExtractor = new ThParkingStallExtractor();
                 parkingStallExtractor.Extract(acadDb.Database, pts);
@@ -106,12 +101,12 @@ namespace ThMEPWSS.Command
                 {
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
-                    Rooms = roomExtractor.Rooms.Select(o=>o.Boundary).ToList(),
+                    Rooms = roomExtractor.Rooms.Select(o => o.Boundary).ToList(),
                     WashPointBlkName = "给水角阀平面",
-                    WashPointLayerName= "W-WSUP-EQPM",
-                    WashPoints= layOutPts,
-                    Db= acadDb.Database,
-                    PtRange=10.0,                   
+                    WashPointLayerName = "W-WSUP-EQPM",
+                    WashPoints = layOutPts,
+                    Db = acadDb.Database,
+                    PtRange = 10.0,
                 };
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
                 layoutInfo.LayoutBlock = layoutService.Layout();
@@ -122,10 +117,7 @@ namespace ThMEPWSS.Command
                 //点位标识的操作通过以下保存的结果与UI交互操作
                 ThPointIdentificationService.LayoutInfo = layoutInfo;
             }
-#endif
         }
-
-#if ACAD2016
         private ThWashParam BuildWashParam()
         {
             var washPara = new ThWashParam();
@@ -147,6 +139,10 @@ namespace ThMEPWSS.Command
             washPara.extend_park = ThFlushPointParameterService.Instance.
                 FlushPointParameter.ParkingAreaPointsOfArrangeStrategy;
             return washPara;
+        }
+#else
+        public void Execute()
+        {
         }
 #endif
     }
