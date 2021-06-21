@@ -108,7 +108,6 @@
     <Compile Include="Engine\ThRoomDataEngine.cs" />
     <Compile Include="Engine\ThWallColumnsEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
-    <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThObstacleExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThParkingStallExtractor.cs" />
