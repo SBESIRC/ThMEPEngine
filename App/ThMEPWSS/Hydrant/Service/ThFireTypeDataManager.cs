@@ -1,11 +1,8 @@
-﻿using System;
+﻿using ThMEPWSS.Hydrant.Model;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TianHua.Plumbing.WPF.UI.Model;
 
-namespace TianHua.Plumbing.WPF.UI.Service
+namespace ThMEPWSS.Hydrant.Service
 {
     public class ThFireTypeDataManager
     {
@@ -15,7 +12,7 @@ namespace TianHua.Plumbing.WPF.UI.Service
         public ThFireTypeDataManager()
         {
             DangerLevels = new List<string> { "严重危险级", "中危险级", "轻危险级" };
-            FireTypes = new List<string> { "A类火灾", "B类火灾", "C类火灾", "D类火灾", "E类火灾"};
+            FireTypes = new List<string> { "A类火灾", "B类火灾", "C类火灾"};
             Build();
         }
 
@@ -49,6 +46,22 @@ namespace TianHua.Plumbing.WPF.UI.Service
 
             Datas.Add(new ThFireExtinguisherMaxProtectDis { FireType = "C类火灾", DangerLevel = "轻危险级", Name = "手提式灭火器", Distance = 15 });
             Datas.Add(new ThFireExtinguisherMaxProtectDis { FireType = "C类火灾", DangerLevel = "轻危险级", Name = "推车式灭火器", Distance = 30 });
+        }
+        /// <summary>
+        /// 查询最大保护距离
+        /// </summary>
+        /// <param name="dangerLevel">危险等级</param>
+        /// <param name="fireType">火灾种类</param>
+        /// <param name="name">灭火器名称</param>
+        /// <returns></returns>
+        public double Query(string fireType, string dangerLevel,string name)
+        {
+            var results = Datas.Where(o => o.FireType == fireType && o.DangerLevel == dangerLevel && o.Name == name);
+            if(results.Count() >0 )
+            {
+                return results.First().Distance;
+            }
+            return 0.0;
         }
     }
 }

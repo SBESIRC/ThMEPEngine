@@ -124,13 +124,29 @@
     <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="GroundDrainageSystem\Service\ThDrainageService.cs" />
-    <Compile Include="Hydrant\Data\ThHydrantExtractor.cs" />
+    <Compile Include="Hydrant\Data\ThExternalSpaceExtractor.cs" />
+    <Compile Include="Hydrant\Data\ThFireExtinguisherExtractor.cs" />
+    <Compile Include="Hydrant\Data\ThFireHydrantExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThBlockElementExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThFireExtinguisherExtractionVisitor.cs" />
-    <Compile Include="Hydrant\Engine\ThHydrantExtractionVisitor.cs" />
-    <Compile Include="Hydrant\Engine\ThHydrantRecognitionEngine.cs" />
+    <Compile Include="Hydrant\Engine\ThFireHydrantExtractionVisitor.cs" />
+    <Compile Include="Hydrant\Engine\ThFireExtinguisherRecognitionEngine.cs" />
+    <Compile Include="Hydrant\Engine\ThFireHydrantRecognitionEngine.cs" />
+    <Compile Include="Hydrant\Model\ThFireExtinguisherMaxProtectDis.cs" />
+    <Compile Include="Hydrant\Model\ThFireHydrantModel.cs" />
+    <Compile Include="Hydrant\Service\ICheck.cs" />
+    <Compile Include="Hydrant\Service\ThCheckExpressionControlService.cs" />
+    <Compile Include="Hydrant\Service\ThCheckFireExtinguisherService.cs" />
+    <Compile Include="Hydrant\Service\ThCheckFireHydrantService.cs" />
+    <Compile Include="Hydrant\Service\ThCheckRegionService.cs" />
     <Compile Include="Hydrant\Service\ThDivideRoomService.cs" />
-    <Compile Include="Hydrant\Service\ThQueryRoomProtectAreasService.cs" />
+    <Compile Include="Hydrant\Service\ThFireTypeDataManager.cs" />
+    <Compile Include="Hydrant\Service\ThHydrantExtractLayerManager.cs" />
+    <Compile Include="Hydrant\Service\ThHydrantPrintService.cs" />
+    <Compile Include="Hydrant\Service\ThHydrantResultParseService.cs" />
+    <Compile Include="Hydrant\Service\ThJudgeRoomPrivacyService.cs" />
+    <Compile Include="Hydrant\Service\ThQueryArchitectureOutlineService.cs" />
+    <Compile Include="Hydrant\Service\ThSimilarityDuplicateRemoveService.cs" />
     <Compile Include="Model\EnumDiameterScale.cs" />
     <Compile Include="Model\RoomModel.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
@@ -273,7 +289,6 @@
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
-    <Compile Include="ThHydrantCmds.cs" />
     <Compile Include="ThLayoutFlushPointCmds.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
@@ -291,6 +306,7 @@
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />
     <Compile Include="WaterWellPumpLayout\Engine\ThWWallRecognitionEngine.cs" />
@@ -348,7 +364,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Hydrant\Model\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>

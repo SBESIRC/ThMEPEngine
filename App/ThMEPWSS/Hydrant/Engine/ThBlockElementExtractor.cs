@@ -59,23 +59,26 @@ namespace ThMEPWSS.Hydrant.Engine
 
         public void ExtractFromMS(Database database)
         {
+            // 获取本地块，不考虑外参块
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .ForEach(e =>
                     {
-                        //不要从外部参照提取
-                        var blockTableRecord = acadDatabase.Blocks.Element(e.BlockTableRecord);
-                        if (blockTableRecord.IsFromExternalReference)
+                        if(e.BlockTableRecord.IsValid)
                         {
-                            Visitors.ForEach(v =>
+                            var blockTableRecord = acadDatabase.Blocks.Element(e.BlockTableRecord);
+                            if (!blockTableRecord.IsFromExternalReference)
                             {
-                                if (v.CheckLayerValid(e) && v.IsDistributionElement(e))
+                                Visitors.ForEach(v =>
                                 {
-                                    v.DoExtract(v.Results, e, Matrix3d.Identity);
-                                }
-                            });
+                                    if (v.CheckLayerValid(e) && v.IsDistributionElement(e))
+                                    {
+                                        v.DoExtract(v.Results, e, Matrix3d.Identity);
+                                    }
+                                });
+                            }
                         }
                     });
             }

@@ -1,4 +1,4 @@
-﻿namespace TianHua.Plumbing.WPF.UI.Model
+﻿namespace ThMEPWSS.Hydrant.Model
 {
     public class ThFireExtinguisherMaxProtectDis
     {

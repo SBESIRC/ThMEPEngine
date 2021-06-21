@@ -1,13 +1,11 @@
-﻿using System;
-using DotNetARX;
-using Linq2Acad;
+﻿using DotNetARX;
 using System.Linq;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
@@ -32,23 +30,42 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if(IsolateSwitch)
-                {
-                    var isolate = isolateColumns.Contains(o);
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
-                }                
+                var isolate = isolateColumns.Contains(o);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
                 geometry.Boundary = o;
-                geos.Add(geometry);
+                if (IsolateSwitch) // 表示只传入孤立的柱
+                {
+                    if(isolate)
+                    {
+                        geos.Add(geometry);
+                    }
+                }                
+                else
+                {
+                    geos.Add(geometry);
+                }                
             });
             return geos;
         }
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            using (var columnEngine = new ThColumnRecognitionEngine())
+            if (UseDb3Engine)
             {
-                columnEngine.Recognize(database, pts);
-                Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToList();
+                using (var columnEngine = new ThColumnRecognitionEngine())
+                {
+                    columnEngine.Recognize(database, pts);
+                    Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToList();
+                }
+            }
+            else
+            {
+                var instance = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Columns = instance.Polys;
             }
         }
         public override void SetRooms(List<ThIfcRoom> rooms)

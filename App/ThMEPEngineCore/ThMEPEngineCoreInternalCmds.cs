@@ -365,11 +365,10 @@ namespace ThMEPEngineCore
                     //通过停车区域的Space来制造阻挡物                    
                     new ThArchitectureWallExtractor {UseDb3Engine=true,ColorIndex=2},  // ArchitectureWall
                     new ThShearWallExtractor{UseDb3Engine=false,ColorIndex=3,ElementLayer = "Wall"},  // ShearWall
-                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=4,ElementLayer="Column"}, // Column
+                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=4,ElementLayer="柱"}, // Column
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
-                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
-                    new ThOuterBoundaryExtractor{ ColorIndex=8,ElementLayer="AI-OuterBoundary"}, //外墙边界
+                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)                    
                     new ThExternalSpaceExtractor{ ColorIndex=9,ElementLayer="AI-OuterBoundary"},
                 };
                 extractEngine.Accept(extractors);

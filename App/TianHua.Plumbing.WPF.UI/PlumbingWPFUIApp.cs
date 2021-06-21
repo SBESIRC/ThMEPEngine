@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using TianHua.Plumbing.WPF.UI.ViewModels;
+using ThMEPWSS.Command;
+using ThMEPWSS.Diagram.ViewModel;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -8,14 +9,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         uiDrainageSystem uiDrainage;
         uiDrainageSystemSet uiSet;
-        private static ThFireHydrantVM FireHydrantVM;
+        FireHydrant uiFireHydrant;
         public void Initialize()
         {
-            FireHydrantVM = new ThFireHydrantVM();
+            uiFireHydrant = null;
+            if (ThHydrantProtectionRadiusCmd.FireHydrantVM==null)
+            {
+                ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
+            }
         }
 
         public void Terminate()
-        {            
+        {
+            uiFireHydrant = null;
         }
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
@@ -90,9 +96,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
         public void THXHSJH()
         {
-            // FireHydrant protect radius check            
-            var ui = new FireHydrant(FireHydrantVM);
-            AcadApp.ShowModelessWindow(ui);
+            // FireHydrant protect radius check  
+            if (uiFireHydrant != null && uiFireHydrant.IsLoaded)
+                return;
+            uiFireHydrant = new FireHydrant(ThHydrantProtectionRadiusCmd.FireHydrantVM);
+            uiFireHydrant.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiFireHydrant);
         }
     }
 }

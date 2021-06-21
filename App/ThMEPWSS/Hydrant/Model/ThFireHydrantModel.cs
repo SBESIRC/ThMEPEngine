@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace TianHua.Plumbing.WPF.UI.Model
+namespace ThMEPWSS.Hydrant.Model
 {
     public class ThFireHydrantModel : INotifyPropertyChanged
     {
@@ -205,7 +205,7 @@ namespace TianHua.Plumbing.WPF.UI.Model
 
         private double calculationLength;
         /// <summary>
-        /// 最大距离保护-> 计算值长度
+        /// 最大保护距离-> 计算值长度
         /// </summary>
         public double CalculationLength
         {
@@ -222,7 +222,7 @@ namespace TianHua.Plumbing.WPF.UI.Model
 
         private double selfLength;
         /// <summary>
-        /// 最大距离保护-> 自定义长度
+        /// 最大保护距离-> 自定义长度
         /// </summary>
         public double SelfLength
         {
@@ -262,6 +262,74 @@ namespace TianHua.Plumbing.WPF.UI.Model
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        /// <summary>
+        /// 灭火器最大保护距离
+        /// </summary>
+        public double FireExtinguisherMaxProtectDis
+        {
+            get
+            {
+                if(isCalculation)
+                {
+                    return CalculationLength;
+                }
+                else
+                {
+                    return SelfLength;
+                }
+            }
+        }
+        /// <summary>
+        /// 水柱长度
+        /// </summary>
+        public double WaterColumnLength
+        {
+            get
+            {
+                return IsTenMetres ? 10 : 13;
+            }
+        }
+
+        private double k3 = 0.8;
+        /// <summary>
+        /// 水龙带能够走到的范围
+        /// </summary>
+        public double FireHoseWalkRange
+        {
+            get
+            {
+                return k3 * HoseLength;
+            }
+        }
+        /// <summary>
+        /// 范围上的点朝 360°喷射水柱的范围
+        /// </summary>
+
+        public double SprayWaterColumnRange
+        {
+            get
+            {
+                return 0.71 * WaterColumnLength;
+            }
+        }
+        /// <summary>
+        /// 获取保护强度
+        /// </summary>
+        public bool GetProtectStrength
+        {
+            // true->单股，false->双股
+            get
+            {
+                if(checkFireHydrant)
+                {
+                    return IsSingleStrands ? true : false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
     }

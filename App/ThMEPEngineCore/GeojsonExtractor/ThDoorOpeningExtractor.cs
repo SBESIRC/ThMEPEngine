@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -47,12 +48,12 @@ namespace ThMEPEngineCore.GeojsonExtractor
             }
             else
             {
-                var instance = new ThMEPEngineCore.Temp.ThExtractDoorOpeningService()
+                var instance = new ThExtractPolylineService()
                 {
-                    ElementLayer = "门",
+                    ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Doors = instance.Openings;
+                Doors = instance.Polys;
             }
         }
 

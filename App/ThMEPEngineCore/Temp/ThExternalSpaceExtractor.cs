@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -46,6 +47,10 @@ namespace ThMEPEngineCore.Temp
             service.OuterBoundaries.ForEach(o =>
             {
                 var objs = o.GetOffsetCurves(OffsetDis);
+                if(objs.Count == 0)
+                {
+                    objs = o.Buffer(OffsetDis);
+                }
                 if(objs.Count>0)
                 {
                     var shell = objs.Cast<Polyline>().OrderByDescending(e => e.Area).First();

@@ -10,18 +10,20 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Engine
 {
-    public class ThHydrantExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThFireHydrantExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> BlkNames { get; set; }
         public Func<string, List<string>, bool> JudgeBlkNameExisted {get;set;}
+        public Func<Entity, bool> JudgeLayerExisted { get; set; }
         /// <summary>
         /// 获取块中心的小方块
         /// </summary>
         public bool BuildCenterSquare { get; set; }
-        public ThHydrantExtractionVisitor()
+        public ThFireHydrantExtractionVisitor()
         {
             BuildCenterSquare = true;
             JudgeBlkNameExisted = IsExisted;
+            JudgeLayerExisted = CheckLayerIsExisted;
             BlkNames = new List<string>() { "室内消火栓平面" };            
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -98,6 +100,10 @@ namespace ThMEPWSS.Engine
             }
         }
         public override bool CheckLayerValid(Entity curve)
+        {
+            return JudgeLayerExisted(curve);
+        }
+        private bool CheckLayerIsExisted(Entity curve)
         {
             return true;
         }

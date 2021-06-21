@@ -1,30 +1,21 @@
 ﻿using System;
-using AcHelper.Commands;
-using ThMEPEngineCore.GeojsonExtractor;
-using NFox.Cad;
-using ThMEPWSS.Hydrant.Service;
-
-#if ACAD2016
-using CLI;
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using ThMEPWSS.FlushPoint;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.FlushPoint.Data;
+using AcHelper.Commands;
+using ThMEPEngineCore.CAD;
+using ThMEPWSS.Hydrant.Service;
 using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.Diagram.ViewModel;
 using System.Collections.Generic;
-using ThMEPWSS.FlushPoint.Service;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-#endif
 
 namespace ThMEPWSS.Command
 {
     public class ThHydrantProtectionRadiusCmd : IAcadCommand, IDisposable
     {
+        public static ThFireHydrantVM FireHydrantVM { get; set; }
         public void Dispose()
         {
         }
@@ -32,42 +23,52 @@ namespace ThMEPWSS.Command
         public void Execute()
         {
 #if ACAD2016
+            using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个范围框");
-                if (per.Status != PromptStatus.OK)
+                var frame = ThWindowInteraction.GetPolyline(PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                if (frame.Area <= 1e-4)
                 {
                     return;
                 }
-                var entity = acadDb.Element<Entity>(per.ObjectId);
-                if (!(entity is Polyline))
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var pts = nFrame.Vertices();
+
+                ICheck checkService = null;
+                if (FireHydrantVM.Parameter.CheckFireHydrant)
                 {
-                    return;
+                    checkService = new ThCheckFireHydrantService(FireHydrantVM);
                 }
-                var nFrame = ThMEPFrameService.Normalize(entity as Polyline);
-                var pts = nFrame.VerticesEx(100.0);
-
-                //收集数据(建筑墙、剪力墙、柱子、门扇[暂时不支持]、门洞、设备、外部空间提取)
-                var extractors = new List<ThExtractorBase>()
+                else
                 {
-                    new ThArchitectureExtractor(){ ColorIndex=1,IsolateSwitch=true},
-                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
-                    new ThColumnExtractor(){ ColorIndex=3,IsolateSwitch=true},
-                    new ThDoorOpeningExtractor(){ ColorIndex=4},
-                };
-                extractors.ForEach(o => o.Extract(acadDb.Database, pts));
+                    checkService = new ThCheckFireExtinguisherService(FireHydrantVM);
+                }
+                checkService.Check(acadDb.Database, pts);
 
-                var geos = new List<ThGeometry>();
-                extractors.ForEach(o => geos.AddRange(o.BuildGeometries()));
-            }
+#if DEBUG
+                // 打印倪同学的保护区域(后续删除)
+                checkService.Covers
+                    .Select(o => o.Clone() as Entity)
+                    .ToList()
+                    .CreateGroup(acadDb.Database, 5);
 #endif
-        }
+                // 校核
+                var regionCheckService = new ThCheckRegionService()
+                {
+                    Covers = checkService.Covers,
+                    Rooms = checkService.Rooms,
+                    IsSingleStrands = FireHydrantVM.Parameter.GetProtectStrength,
+                };
+                regionCheckService.Check();
 
-#if ACAD2016
-        private void BuildHydrantParam()
-        {
-            
+                //输出
+                var printService = new ThHydrantPrintService(
+                    acadDb.Database,
+                    ThCheckExpressionControlService.CheckExpressionLayer);
+                printService.Print(regionCheckService.CheckResults);
+            }
         }
 #endif
     }
+
 }

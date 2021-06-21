@@ -46,7 +46,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <TextBlock Text="保护强度："></TextBlock>
-                    <cus:ImageButton Name="ibProtectStrengthTip" Margin="50,0" Command="{Binding ProtectionStrengthCmd}"></cus:ImageButton>
+                    <cus:ImageButton Name="ibProtectStrengthTip" Margin="50,0" Click="ibProtectStrengthTip_Click"></cus:ImageButton>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5">
                     <RadioButton x:Name="rbDoubleStrands" Content="双股" GroupName="StrandGroup" IsThreeState="False"
@@ -65,7 +65,7 @@
                 </StackPanel>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5">
                     <TextBlock Text="水柱长度："></TextBlock>
-                    <cus:ImageButton Margin="50,0" Name="ibWaterColumnLengthTip" Command="{Binding WaterColumnLengthCmd}"></cus:ImageButton>
+                    <cus:ImageButton Margin="50,0" Name="ibWaterColumnLengthTip" Click="ibWaterColumnLengthTip_Click"></cus:ImageButton>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,5">
                     <RadioButton x:Name="rbTenMetres" Content="10米" GroupName="WaterColunmLength" IsThreeState="False"
@@ -105,17 +105,17 @@
                                  IsChecked="{Binding Parameter.IsCalculation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                  Checked="rbCalculation_Checked" Unchecked="rbCalculation_Unchecked">
                     </RadioButton>
-                    <TextBox x:Name="tbCalculationValue" Width="50" Margin="20,0" Text="{Binding Parameter.CalculationLength,
-                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <TextBlock Margin="-15,0" Text="米"></TextBlock>
+                    <TextBox x:Name="tbCalculationValue" Width="50" Margin="20,0" Visibility="Hidden"
+                             Text="{Binding Parameter.CalculationLength,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBlock Margin="-15,0" Text="米" Visibility="Hidden"></TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Row="7" Margin="0,3" Orientation="Horizontal">
                     <RadioButton x:Name="rbSelf" Content="自定义" GroupName="MaximumProtectGroup" IsThreeState="False"
                                  IsChecked="{Binding Parameter.IsSelf,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                  Checked="rbSelf_Checked" Unchecked="rbSelf_Unchecked">
                     </RadioButton>
-                    <TextBox x:Name="tbSelfValue" Width="50" Margin="20,0" Text="{Binding Parameter.SelfLength,
-                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox x:Name="tbSelfValue" Width="50" Margin="20,0" 
+                             Text="{Binding Parameter.SelfLength,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBlock Margin="-15,0" Text="米"></TextBlock>
                 </StackPanel>
             </Grid>
@@ -128,7 +128,8 @@
                 </Grid.RowDefinitions>
                 <CheckBox Grid.Row="0" x:Name="chkShowResult" Content="显示校核结果" IsThreeState="False"
                           IsChecked="{Binding Parameter.IsShowCheckResult,
-                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          Checked="chkShowResult_Checked" Unchecked="chkShowResult_Unchecked"></CheckBox>
                 <Button Grid.Row="1" Margin="0,0,10,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
                         Width="50" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
             </Grid>

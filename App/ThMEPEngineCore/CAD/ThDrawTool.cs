@@ -39,6 +39,10 @@ namespace ThMEPEngineCore.CAD
                 Point2d minPt = pts[0];
                 Point2d maxPt = pts[1];
                 Vector2d vec = minPt.GetVectorTo(maxPt);
+                if(vec.Length<1e-4)
+                {
+                    return polyline;
+                }
                 if (vec.IsParallelTo(Vector2d.XAxis) || vec.IsParallelTo(Vector2d.YAxis))
                 {
                     isClosed = false;

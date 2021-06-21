@@ -14,6 +14,7 @@ namespace ThMEPWSS.Hydrant.Engine
     public class ThFireExtinguisherExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> BlkNames { get; set; }
+        public Func<Entity, bool> JudgeLayerExisted { get; set; }
         public Func<string, List<string>, bool> JudgeBlkNameExisted { get; set; }
         /// <summary>
         /// 获取块中心的小方块
@@ -22,7 +23,8 @@ namespace ThMEPWSS.Hydrant.Engine
         public ThFireExtinguisherExtractionVisitor()
         {
             BuildCenterSquare = true;
-            JudgeBlkNameExisted = IsExisted;
+            JudgeBlkNameExisted = CheckBlkNameIsExisted;
+            JudgeLayerExisted = CheckLayerIsExisted;
             BlkNames = new List<string>() { "手提式灭火器","推车式灭火器" };
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -77,7 +79,7 @@ namespace ThMEPWSS.Hydrant.Engine
         }
 
 
-        private bool IsExisted(string blkName, List<string> blkNames)
+        private bool CheckBlkNameIsExisted(string blkName, List<string> blkNames)
         {
             return blkNames.Where(o => blkName.ToUpper().Contains(o.ToUpper())).Any();
         }
@@ -98,6 +100,10 @@ namespace ThMEPWSS.Hydrant.Engine
             }
         }
         public override bool CheckLayerValid(Entity curve)
+        {
+            return JudgeLayerExisted(curve);
+        }
+        private bool CheckLayerIsExisted(Entity curve)
         {
             return true;
         }

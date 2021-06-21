@@ -10,44 +10,52 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
-    public class ThHydrantExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThFireHydrantExtractionEngine : ThDistributionElementExtractionEngine
     {
+        private ThFireHydrantExtractionVisitor Visitor { get; set; }
+        public ThFireHydrantExtractionEngine(ThFireHydrantExtractionVisitor visitor)
+        {
+            Visitor = visitor;
+        }
         public override void Extract(Database database)
         {
-            var visitor = new ThHydrantExtractionVisitor();
             var service = new ThBlockElementExtractor()
             {
                 FindExternalReference = false,
             };
-            service.Accept(visitor);
+            service.Accept(Visitor);
             service.Extract(database);
-            Results.AddRange(visitor.Results);
+            Results.AddRange(Visitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThHydrantExtractionVisitor();
             var service = new ThBlockElementExtractor()
             {
                 FindExternalReference = false,
             };
-            service.Accept(visitor);
+            service.Accept(Visitor);
             service.ExtractFromMS(database);
-            Results.AddRange(visitor.Results);
+            Results.AddRange(Visitor.Results);
         }
     }
-    public class ThHydrantRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThFireHydrantRecognitionEngine : ThDistributionElementRecognitionEngine
     {
+        private ThFireHydrantExtractionVisitor Visitor { get; set; }
+        public ThFireHydrantRecognitionEngine(ThFireHydrantExtractionVisitor visitor)
+        {
+            Visitor = visitor;
+        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var extractEngine = new ThHydrantExtractionEngine();
+            var extractEngine = new ThFireHydrantExtractionEngine(Visitor);
             extractEngine.Extract(database);
             Recognize(extractEngine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var extractEngine = new ThHydrantExtractionEngine();
+            var extractEngine = new ThFireHydrantExtractionEngine(Visitor);
             extractEngine.ExtractFromMS(database);
             Recognize(extractEngine.Results, polygon);
         }

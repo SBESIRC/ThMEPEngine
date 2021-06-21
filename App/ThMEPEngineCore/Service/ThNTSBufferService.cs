@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Service
             var objs = polyline.Buffer(length);
             if (objs.Count > 0)
             {
-                return objs[0] as Polyline;
+                return objs.Cast<Polyline>().OrderByDescending(o=>o.Area).First();
             }
             else
             {

@@ -1,22 +1,33 @@
 ﻿using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Service;
+
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
-    public class ThRoomExtractor : ThExtractorBase,IPrint
-    {        
-        public List<ThIfcRoom> Rooms { get; private set; } 
+    public class ThRoomExtractor : ThExtractorBase, IPrint
+    {
+        public List<ThIfcRoom> Rooms { get; private set; }
+        public IRoomPrivacy iRoomPrivacy { get; set; }
+        public List<string> RoomBoundaryLayerFilter { get; set; }
+        public List<string> RoomMarkLayerFilter { get; set; }
+        public double TESSELLATE_ARC_LENGTH { get; set; }
         public ThRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
-            Category = BuiltInCategory.Room.ToString();      
+            TESSELLATE_ARC_LENGTH = 50.0;
+#if DEBUG
+            Category = BuiltInCategory.Space.ToString();
+#else
+            Category = BuiltInCategory.Room.ToString();
+#endif
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -25,7 +36,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if(!o.Tags.Contains(o.Name))
+                if (!o.Tags.Contains(o.Name))
                 {
                     o.Tags.Add(o.Name);
                 }
@@ -40,42 +51,62 @@ namespace ThMEPEngineCore.GeojsonExtractor
             });
             return geos;
         }
-
-        private Privacy CheckPrivate(ThIfcRoom room)
-        {
-            if(room.Tags.Where(o => o.Contains("私立")).Count() > 0)
-            {
-                return Privacy.Private;
-            }
-            if (room.Tags.Where(o => o.Contains("公共")).Count() > 0)
-            {
-                return Privacy.Public;
-            }
-            return Privacy.Unknown;
-        }
-
         public override void Extract(Database database, Point3dCollection pts)
         {
-            using (var roomEngine = new ThRoomBuilderEngine())
+            if(UseDb3Engine)
             {
-                Rooms =roomEngine.BuildFromMS(database, pts);                
-                Clean();
-            }            
-        }
-        private void Clean()
-        {
-            for(int i =0;i<Rooms.Count;i++)
-            {
-                if(Rooms[i].Boundary is Polyline polyline)
+                using (var roomEngine = new ThRoomBuilderEngine())
                 {
-                    Rooms[i].Boundary = ThMEPFrameService.Normalize(polyline);
+                    roomEngine.RoomBoundaryLayerFilter = this.RoomBoundaryLayerFilter;
+                    roomEngine.RoomMarkLayerFilter = this.RoomMarkLayerFilter;
+                    Rooms = roomEngine.BuildFromMS(database, pts);
+                    Clean();                    
                 }
             }
-        }      
- 
+            else
+            {
+                //TODO
+            }
+        }
+        private void Clean()
+        {            
+            using (var instance = new ThCADCoreNTSArcTessellationLength(TESSELLATE_ARC_LENGTH))
+            {
+                var simplifier = new ThElementSimplifier()
+                {
+                    TESSELLATE_ARC_LENGTH = TESSELLATE_ARC_LENGTH,
+                };
+                for (int i = 0; i < Rooms.Count; i++)
+                {
+                    if (Rooms[i].Boundary is Polyline polyline)
+                    {
+                        var objs = new DBObjectCollection();
+                        objs.Add(polyline);
+                        simplifier.Tessellate(objs);
+                        objs = simplifier.MakeValid(objs);
+                        objs = simplifier.Normalize(objs);
+                        Rooms[i].Boundary = objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+                    }
+                    else if (Rooms[i].Boundary is MPolygon mPolygon)
+                    {
+                        var polygon = mPolygon.ToNTSPolygon(); 
+                        Rooms[i].Boundary = polygon.ToDbMPolygon();
+                    }
+                }
+            }  
+        }
+
         public void Print(Database database)
         {
-            Rooms.Select(o => o.Boundary).Cast<Entity>().ToList().CreateGroup(database,ColorIndex);
+            Rooms.Select(o => o.Boundary).Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+        }
+        private Privacy CheckPrivate(ThIfcRoom room)
+        {
+            if(iRoomPrivacy !=null)
+            {
+                return iRoomPrivacy.Judge(room);
+            }
+            return Privacy.Unknown;
         }
     }
 }
