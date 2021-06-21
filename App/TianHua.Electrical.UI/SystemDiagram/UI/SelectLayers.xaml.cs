@@ -43,13 +43,12 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public SelectLayers()
         {
             InitializeComponent();
-            if (null == viewModel)
-                viewModel = new DrainageLayerViewModel()
-                {
-                    ShortCircuitIsolatorTxt = FireCompartmentParameter.ShortCircuitIsolatorCount,
-                    FireBroadcastingTxt = FireCompartmentParameter.FireBroadcastingCount,
-                    ControlBusCountTXT = FireCompartmentParameter.ControlBusCount
-                };
+            viewModel = new DrainageLayerViewModel()
+            {
+                ShortCircuitIsolatorTxt = FireCompartmentParameter.ShortCircuitIsolatorCount,
+                FireBroadcastingTxt = FireCompartmentParameter.FireBroadcastingCount,
+                ControlBusCountTXT = FireCompartmentParameter.ControlBusCount
+            };
             this.DataContext = viewModel;
         }
 
