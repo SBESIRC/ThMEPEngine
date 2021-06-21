@@ -1,7 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -268,7 +270,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         //画防火分区名字
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
-                            DrawEntitys.Add(new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, ColorIndex = 2, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id });
+                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint.TransformBy(Active.Editor.WCS2UCS()), AlignmentPoint = fireDistrict.TextPoint.TransformBy(Active.Editor.WCS2UCS()), ColorIndex = 1, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
+                            newDBText.TransformBy(Active.Editor.UCS2WCS());
+                            DrawEntitys.Add(newDBText);
                         }
                     });
                 });
