@@ -53,20 +53,28 @@ namespace ThCADExtension
 
         public static Extents3d GetBlockGeometryExtents(this ObjectId id)
         {
-            BlockReference bref = id.GetObject(OpenMode.ForRead) as BlockReference;
-            if (bref != null && bref.Bounds != null)//如果是块参照
+            try
+            {
+                var bref = id.GetObject(OpenMode.ForRead) as BlockReference;
                 return bref.GeometryExtentsBestFit();
-            else
+            }
+            catch
+            {
                 return new Extents3d();
+            }
         }
 
         public static Extents3d GetBlockGeometryExtents(this ObjectId id, Matrix3d parentTransform)
         {
-            BlockReference bref = id.GetObject(OpenMode.ForRead) as BlockReference;
-            if (bref != null && bref.Bounds != null)//如果是块参照
+            try
+            {
+                var bref = id.GetObject(OpenMode.ForRead) as BlockReference;
                 return bref.GeometryExtentsBestFit(parentTransform);
-            else
+            }
+            catch
+            {
                 return new Extents3d();
+            }
         }
     }
 }
