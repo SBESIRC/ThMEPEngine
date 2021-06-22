@@ -608,7 +608,10 @@ pt,
             }
             bool f(GVector gv1, GVector gv2)
             {
-                if (gv1.StartPoint.GetDistanceTo(gv2.StartPoint) > maxDis) return false;
+                var dis1 = gv1.StartPoint.GetDistanceTo(gv2.StartPoint);
+                if (dis1 > maxDis) return false;
+                var dis2 = gv1.EndPoint.GetDistanceTo(gv2.EndPoint);
+                if (dis1 < dis2) return false;
                 if (!gv1.Vector.GetAngleTo(gv2.Vector).AngleToDegree().EqualsTo(180, angleTolleranceDegree)) return false;
                 if ((gv1.StartPoint - gv2.StartPoint).GetAngleTo(gv1.Vector).AngleToDegree().EqualsTo(180, angleTolleranceDegree)) return true;
                 return false;
@@ -2223,11 +2226,88 @@ pt,
                 Dr.SetLabelStylesForWNote(line, dbt);
             }
         }
+        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = 0, j = 0;
+            for (int k = 0; k < num; k++)
+            {
+                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, 0);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = 0;
+                }
+            }
+        }
+        public static void DrawWashBasin(Point3d basePt, bool leftOrRight)
+        {
+            if (leftOrRight)
+            {
+                DU.DrawBlockReference("洗涤盆排水", basePt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                    }
+                });
+            }
+            else
+            {
+                DU.DrawBlockReference("洗涤盆排水", basePt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(-2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                    }
+                });
+            }
+        }
+        public static void DrawDoubleWashBasins(Point3d basePt, bool leftOrRight)
+        {
+            basePt = basePt.OffsetY(300);
+            if (leftOrRight)
+            {
+                DU.DrawBlockReference("双格洗涤盆排水", basePt,
+                  br =>
+                  {
+                      br.Layer = "W-DRAI-EQPM";
+                      br.ScaleFactors = new Scale3d(2, 2, 2);
+                      if (br.IsDynamicBlock)
+                      {
+                          br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                      }
+                  });
+            }
+            else
+            {
+                DU.DrawBlockReference("双格洗涤盆排水", basePt,
+                  br =>
+                  {
+                      br.Layer = "W-DRAI-EQPM";
+                      br.ScaleFactors = new Scale3d(-2, 2, 2);
+                      if (br.IsDynamicBlock)
+                      {
+                          br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                      }
+                  });
+            }
+        }
         public void Draw(Point3d basePoint)
+        {
+            draw1(basePoint);
+        }
+
+        public static void draw1(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
             var HEIGHT = 1800.0;
+            //var HEIGHT = 5000.0;
             var COUNT = 20;
 
             var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
@@ -2239,6 +2319,7 @@ pt,
                 DrawStoreyLine(storey, bsPt1, lineLen);
             }
             var outputStartPointOffsets = new Vector2d[COUNT];
+
             {
                 var start = storeys.Count - 1;
                 var end = 0;
@@ -2260,31 +2341,84 @@ pt,
 
                                     {
                                         var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
-                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.CreateGLineSegments(startPoint.ToPoint3d());
-                                        var lines = DU.DrawLineSegmentsLazy(segs);
-                                        lines.ForEach(line => SetDomePipeLineStyle(line));
-                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), true);
+                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.ToGLineSegments(startPoint.ToPoint3d());
+                                        DrawDomePipes(segs);
+                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), true, 2);
                                     }
+
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
+                                }
+                                else if (storey == "12F")
+                                {
+                                    {
+                                        var lastPt = NewMethod4(HEIGHT, ref v, basePt);
+                                        var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300).OffsetY(221 - 90);
+                                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 679), new Point2d(-321, 800), new Point2d(-1110, 800), new Point2d(-2380, 800) };
+                                        var p0 = points.Last().TransformBy(startPoint);
+                                        var p1 = p0.OffsetX(-180);
+                                        var p2 = p1.OffsetX(-1000);
+                                        {
+                                            DrawFloorDrain(p0.ToPoint3d(), true);
+                                            DrawFloorDrain(p2.ToPoint3d(), true);
+                                            var p3 = points[4].TransformBy(startPoint).ToPoint3d();
+                                            var p4 = p3.OffsetXY(-90, 90);
+                                            DrawDomePipes(new GLineSegment(p3, p4));
+                                            DrawWashBasin(p4, true);
+                                        }
+
+                                        var segs = points.ToGLineSegments(startPoint.ToPoint3d());
+                                        DrawDomePipes(segs);
+                                        DrawDomePipes(new GLineSegment(p1, p2));
+                                    }
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
+                                }
+                                else if (storey == "11F")
+                                {
+                                    {
+                                        var lastPt = NewMethod4(HEIGHT, ref v, basePt);
+                                        var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300).OffsetY(221 - 90);
+                                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 679), new Point2d(-321, 800), new Point2d(-1110, 800), new Point2d(-2380, 800) };
+                                        var p0 = points.Last().TransformBy(startPoint);
+                                        var p1 = p0.OffsetX(-180);
+                                        var p2 = p1.OffsetX(-1000);
+                                        {
+                                            DrawFloorDrain(p0.ToPoint3d(), true);
+                                            DrawFloorDrain(p2.ToPoint3d(), true);
+                                            var p3 = points[4].TransformBy(startPoint).ToPoint3d();
+                                            var p4 = p3.OffsetXY(-90, 90);
+                                            DrawDomePipes(new GLineSegment(p3, p4));
+                                            DrawDoubleWashBasins(p4, true);
+                                        }
+
+                                        var segs = points.ToGLineSegments(startPoint.ToPoint3d());
+                                        DrawDomePipes(segs);
+                                        DrawDomePipes(new GLineSegment(p1, p2));
+                                    }
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 else if (storey == "10F")
                                 {
-                                    var lastPt = NewMethod4(HEIGHT, ref v, basePt);
-                                    var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300).OffsetY(221);
-                                    var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 679), new Point2d(-321, 800), new Point2d(-1110, 800), new Point2d(-2380, 800) };
-                                    var p0 = points.Last().TransformBy(startPoint);
-                                    var p1 = p0.OffsetX(-180);
-                                    var p2 = p1.OffsetX(-1000);
                                     {
-                                        DrawFloorDrain(p0.ToPoint3d(), true);
-                                        DrawFloorDrain(p2.ToPoint3d(), true);
-                                        DrawSWaterStoringCurve(points[4].TransformBy(startPoint).ToPoint3d(), true);
-                                    }
+                                        var lastPt = NewMethod4(HEIGHT, ref v, basePt);
+                                        var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300).OffsetY(221 - 90);
+                                        var points = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 679), new Point2d(-321, 800), new Point2d(-1110, 800), new Point2d(-2380, 800) };
+                                        var p0 = points.Last().TransformBy(startPoint);
+                                        var p1 = p0.OffsetX(-180);
+                                        var p2 = p1.OffsetX(-1000);
+                                        {
+                                            DrawFloorDrain(p0.ToPoint3d(), true);
+                                            DrawFloorDrain(p2.ToPoint3d(), true);
+                                            var p3 = points[4].TransformBy(startPoint).ToPoint3d();
+                                            var p4 = p3.OffsetXY(-90, 90);
+                                            DrawDomePipes(new GLineSegment(p3, p4));
+                                            DrawSWaterStoringCurve(p4, true);
+                                        }
 
-                                    var segs = points.CreateGLineSegments(startPoint.ToPoint3d());
-                                    var lines = DU.DrawLineSegmentsLazy(segs);
-                                    lines.ForEach(line => SetDomePipeLineStyle(line));
-                                    var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
-                                    SetDomePipeLineStyle(line);
+                                        var segs = points.ToGLineSegments(startPoint.ToPoint3d());
+                                        DrawDomePipes(segs);
+                                        DrawDomePipes(new GLineSegment(p1, p2));
+                                    }
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 //short translator left
                                 else if (storey == "4F")
@@ -2292,6 +2426,7 @@ pt,
                                     var points = SHORT_TRANSLATOR_POINTS;
                                     NewMethod1(HEIGHT, ref v, basePt, points);
                                     DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 //long and short translator left
                                 else if (storey == "5F")
@@ -2302,6 +2437,7 @@ pt,
                                     var lastPt1 = points1.Last();
                                     NewMethod2(HEIGHT, ref v, basePt, points1, points2, height1);
                                     DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), true);
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 //long translator right
                                 else if (storey == "7F")
@@ -2310,11 +2446,11 @@ pt,
 
                                     {
                                         var pt = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
-                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.GetYAxisMirror().CreateGLineSegments(pt.ToPoint3d());
-                                        var lines = DU.DrawLineSegmentsLazy(segs);
-                                        lines.ForEach(line => SetDomePipeLineStyle(line));
-                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), false);
+                                        var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.GetYAxisMirror().ToGLineSegments(pt.ToPoint3d());
+                                        DrawDomePipes(segs);
+                                        DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), false, 2);
                                     }
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 //short translator right
                                 else if (storey == "8F")
@@ -2322,6 +2458,7 @@ pt,
                                     var points = SHORT_TRANSLATOR_POINTS.GetYAxisMirror();
                                     NewMethod1(HEIGHT, ref v, basePt, points);
                                     DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), false);
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 //long and short translator right
                                 else if (storey == "9F")
@@ -2332,12 +2469,13 @@ pt,
                                     var lastPt1 = points1.Last();
                                     var height1 = LONG_TRANSLATOR_HEIGHT1;
                                     DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), false);
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                                 else
                                 {
-                                    var line = DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetY(HEIGHT)));
-                                    SetDomePipeLineStyle(line);
+                                    DrawDomePipes(new GLineSegment(basePt, basePt.OffsetY(HEIGHT)));
                                     DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
+                                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
                                 }
                             }
                         }
@@ -2345,6 +2483,7 @@ pt,
                     outputStartPointOffsets[j] = v;
                 }
             }
+
             for (int j = 0; j < COUNT; j++)
             {
                 for (int i = 0; i < storeys.Count; i++)
@@ -2355,14 +2494,107 @@ pt,
                         if (storey == "1F")
                         {
                             var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X) + outputStartPointOffsets[j].ToVector3d();
-                            var height = 480;
-                            var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2000, -121) };
-                            var segs = points.CreateGLineSegments(basePt.OffsetY(-height));
-                            var lines = DU.DrawLineSegmentsLazy(segs);
-                            lines.ForEach(line => SetDomePipeLineStyle(line));
-                            var line = DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetY(-height)));
-                            SetDomePipeLineStyle(line);
-                            DrawDirtyWaterWell(points.Last().TransformBy(basePt).ToPoint3d().OffsetY(-height));
+                            if (DateTime.Now != DateTime.MinValue)
+                            {
+                                var vecs = new List<Vector2d> { new Vector2d(0, -479), new Vector2d(-121, -121), new Vector2d(-1579, 0), new Vector2d(-300, 0) };
+                                {
+                                    var segs = vecs.ToGLineSegments(basePt);
+                                    DrawDomePipes(segs);
+                                    DrawDirtyWaterWell(segs.Last().EndPoint.OffsetX(-400).ToPoint3d(), "666");
+                                    DrawCleaningPort(segs[1].EndPoint.ToPoint3d(), false, 1);
+                                    DrawWrappingPipe(segs[2].EndPoint.ToPoint3d());
+                                }
+                                if (j == 1)
+                                {
+                                    var bsPt = vecs.GetLastPoint(basePt).OffsetY(-600);
+                                    var vecs2 = new List<Vector2d> { new Vector2d(2379, 0), new Vector2d(121, 121), new Vector2d(0, 569) };
+                                    {
+                                        var segs = vecs2.ToGLineSegments(bsPt);
+                                        DrawDomePipes(segs);
+                                    }
+                                    {
+                                        var vecs3 = new List<Vector2d> { new Vector2d(121, 121), new Vector2d(789, 0), new Vector2d(1270, 0), new Vector2d(180, 0), new Vector2d(1090, 0) };
+                                        {
+                                            var segs = vecs3.ToGLineSegments(vecs2.GetLastPoint(bsPt));
+                                            {
+                                                var _segs = segs.ToList();
+                                                _segs.RemoveAt(3);
+                                                DrawDomePipes(_segs);
+                                            }
+                                            {
+                                                var p1 = segs[1].EndPoint;
+                                                var p2 = p1.OffsetXY(90, 90);
+                                                DrawDomePipes(new GLineSegment(p1, p2));
+                                                DrawSWaterStoringCurve(p2.ToPoint3d(), false);
+                                                var p3 = segs[2].EndPoint;
+                                                var p4 = segs[4].EndPoint;
+                                                DrawFloorDrain(p3.ToPoint3d(), false);
+                                                DrawFloorDrain(p4.ToPoint3d(), false);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (j == 4)
+                                {
+                                    var bsPt = vecs.GetLastPoint(basePt).OffsetY(-600);
+                                    var vecs1 = new List<Vector2d> { new Vector2d(2120, 0), new Vector2d(406, 406), new Vector2d(404, 404), new Vector2d(879, 0), new Vector2d(1180, 0) };
+                                    var vecs2 = new List<Vector2d> { new Vector2d(3150, 0), new Vector2d(404, 404), new Vector2d(1270, 0), new Vector2d(180, 0), new Vector2d(1090, 0) };
+                                    var segs1 = vecs1.ToGLineSegments(bsPt);
+                                    DrawDomePipes(segs1);
+                                    var segs2 = vecs2.ToGLineSegments(segs1[1].EndPoint);
+                                    {
+                                        var _segs2 = segs2.ToList();
+                                        _segs2.RemoveAt(3);
+                                        DrawDomePipes(_segs2);
+                                    }
+                                    {
+                                        var p1 = segs1[3].EndPoint;
+                                        var p2 = p1.OffsetXY(90, 90);
+                                        DrawDomePipes(new GLineSegment(p1, p2));
+                                        DrawDoubleWashBasins(p2.ToPoint3d(), false);
+                                    }
+
+                                    DrawFloorDrain(segs1[4].EndPoint.ToPoint3d(), false);
+
+                                    {
+                                        var p1 = segs2[1].EndPoint;
+                                        var p2 = p1.OffsetXY(90, 90);
+                                        DrawDomePipes(new GLineSegment(p1, p2));
+                                        DrawSWaterStoringCurve(p2.ToPoint3d(), false);
+                                    }
+                                    DrawFloorDrain(segs2[2].EndPoint.ToPoint3d(), false);
+                                    DrawFloorDrain(segs2[4].EndPoint.ToPoint3d(), false);
+                                }
+                                else if (j == 6)
+                                {
+                                    {
+                                        var bsPt = vecs.GetLastPoint(basePt).OffsetY(-600);
+                                        var vecs1 = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(4879, 0), new Vector2d(121, 121), new Vector2d(0, 1079) };
+                                        var segs = vecs1.ToGLineSegments(bsPt);
+                                        DrawDomePipes(segs);
+                                        DrawWrappingPipe(segs[0].EndPoint.ToPoint3d());
+                                        DrawCleaningPort(segs[1].EndPoint.ToPoint3d(), false, 1);
+                                    }
+                                    {
+                                        var bsPt = vecs.GetLastPoint(basePt).OffsetY(-600 - 600);
+                                        var vecs2 = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(5479, 0), new Vector2d(121, 121), new Vector2d(0, 1379) };
+                                        var segs = vecs2.ToGLineSegments(bsPt);
+                                        DrawDomePipes(segs);
+                                        DrawWrappingPipe(segs[0].EndPoint.ToPoint3d());
+                                        DrawCleaningPort(segs[1].EndPoint.ToPoint3d(), false, 1);
+                                        DrawCleaningPort(segs[3].EndPoint.ToPoint3d(), false, 2);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var height = 480;
+                                var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2000, -121) };
+                                var segs = points.ToGLineSegments(basePt.OffsetY(-height));
+                                DrawDomePipes(segs);
+                                DrawDomePipes(new GLineSegment(basePt, basePt.OffsetY(-height)));
+                                DrawDirtyWaterWell(points.Last().TransformBy(basePt).ToPoint3d().OffsetY(-height), "666");
+                            }
                         }
                     }
                 }
@@ -2383,25 +2615,21 @@ pt,
                             if (i == start)
                             {
                                 var points = new Point2d[] { new Point2d(0, 0), new Point2d(300, -300), new Point2d(300, -600) };
-                                var segs = points.CreateGLineSegments(basePt.OffsetY(600));
-                                var lines = DU.DrawLineSegmentsLazy(segs);
-                                lines.ForEach(line => SetDomePipeLineStyle(line));
+                                var segs = points.ToGLineSegments(basePt.OffsetY(600));
+                                DrawDomePipes(segs);
                             }
                             else if (i == end)
                             {
                                 var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -900), new Point2d(-300, -1200) };
-                                var segs = points.CreateGLineSegments(basePt.OffsetXY(300, HEIGHT));
-                                var lines = DU.DrawLineSegmentsLazy(segs);
-                                lines.ForEach(line => SetDomePipeLineStyle(line));
+                                var segs = points.ToGLineSegments(basePt.OffsetXY(300, HEIGHT));
+                                DrawDomePipes(segs);
                             }
                             else
                             {
                                 var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -900), new Point2d(-300, -1200) };
-                                var segs = points.CreateGLineSegments(basePt.OffsetXY(300, HEIGHT));
-                                var lines = DU.DrawLineSegmentsLazy(segs);
-                                lines.ForEach(line => SetDomePipeLineStyle(line));
-                                var line = DU.DrawLineSegmentLazy(new GLineSegment(points[1].TransformBy(basePt.OffsetXY(300, HEIGHT)), basePt.OffsetX(300).ToPoint2d()));
-                                SetDomePipeLineStyle(line);
+                                var segs = points.ToGLineSegments(basePt.OffsetXY(300, HEIGHT));
+                                DrawDomePipes(segs);
+                                DrawDomePipes(new GLineSegment(points[1].TransformBy(basePt.OffsetXY(300, HEIGHT)), basePt.OffsetX(300).ToPoint2d()));
                             }
                         }
                     }
@@ -2434,6 +2662,38 @@ pt,
                 //    br.Layer = "W-DRAI-EQPM";
                 //});
             }
+        }
+
+        private static void DrawDomePipes(params GLineSegment[] segs)
+        {
+            DrawDomePipes((IEnumerable<GLineSegment>)segs);
+        }
+        private static void DrawDomePipes(IEnumerable<GLineSegment> segs)
+        {
+            var lines = DU.DrawLineSegmentsLazy(segs);
+            lines.ForEach(line => SetDomePipeLineStyle(line));
+        }
+
+        private static void DrawWrappingPipe(Point3d basePt)
+        {
+            DU.DrawBlockReference("套管系统", basePt, br =>
+            {
+                br.Layer = "W-BUSH";
+            });
+        }
+
+        private static void DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
+        {
+            var h = HEIGHT * .7;
+            if (HEIGHT - h > LONG_TRANSLATOR_HEIGHT1)
+            {
+                h = HEIGHT - LONG_TRANSLATOR_HEIGHT1 + 150;
+            }
+            var p1 = basePt.OffsetY(h);
+            var p2 = p1.OffsetX(-200);
+            var p3 = p1.OffsetX(200);
+            var line = DU.DrawLineLazy(p2, p3);
+            line.Layer = "W-DRAI-NOTE";
         }
 
         private static Point2d NewMethod5(double HEIGHT, ref Vector2d v, Point3d basePt)
@@ -2510,11 +2770,11 @@ pt,
                    });
             }
         }
-        public static void DrawCleaningPort(Point3d basePt, bool leftOrRight)
+        public static void DrawCleaningPort(Point3d basePt, bool leftOrRight, double scale)
         {
             if (leftOrRight)
             {
-                DU.DrawBlockReference("清扫口系统", basePt, scale: 2, cb: br =>
+                DU.DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.Rotation = GeoAlgorithm.AngleFromDegree(90);
@@ -2522,7 +2782,7 @@ pt,
             }
             else
             {
-                DU.DrawBlockReference("清扫口系统", basePt, scale: 2, cb: br =>
+                DU.DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.Rotation = GeoAlgorithm.AngleFromDegree(90 + 180);
@@ -2548,7 +2808,7 @@ cb: br =>
             var lastPt1 = points1.Last();
             var lastPt2 = points2.Last();
             {
-                var segs = points1.CreateGLineSegments(basePt.OffsetY(HEIGHT - height1));
+                var segs = points1.ToGLineSegments(basePt.OffsetY(HEIGHT - height1));
                 var lines = DU.DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
@@ -2572,9 +2832,8 @@ cb: br =>
             }
             {
                 var height2 = HEIGHT + lastPt2.Y;
-                var segs = points2.CreateGLineSegments(basePt.OffsetY(HEIGHT - height2));
-                var lines = DU.DrawLineSegmentsLazy(segs);
-                lines.ForEach(line => SetDomePipeLineStyle(line));
+                var segs = points2.ToGLineSegments(basePt.OffsetY(HEIGHT - height2));
+                DrawDomePipes(segs);
             }
             {
                 var v = new Vector2d(lastPt2.X, 0);
@@ -2588,7 +2847,7 @@ cb: br =>
             var lastPt1 = points1.Last();
             var lastPt2 = points2.Last();
             {
-                var segs = points1.CreateGLineSegments(basePt.OffsetY(HEIGHT - height1));
+                var segs = points1.ToGLineSegments(basePt.OffsetY(HEIGHT - height1));
                 var lines = DU.DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
@@ -2612,7 +2871,7 @@ cb: br =>
             }
             {
                 var height2 = HEIGHT + lastPt2.Y;
-                var segs = points2.CreateGLineSegments(basePt.OffsetY(HEIGHT - height2));
+                var segs = points2.ToGLineSegments(basePt.OffsetY(HEIGHT - height2));
                 var lines = DU.DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
@@ -2626,7 +2885,7 @@ cb: br =>
         {
             var lastPt = points.Last();
             var height = HEIGHT + lastPt.Y;
-            var segs = points.CreateGLineSegments(basePt.OffsetY(HEIGHT - height));
+            var segs = points.ToGLineSegments(basePt.OffsetY(HEIGHT - height));
             var lines = DU.DrawLineSegmentsLazy(segs);
             lines.ForEach(line => SetDomePipeLineStyle(line));
             {
@@ -2642,7 +2901,7 @@ cb: br =>
         {
             var lastPt = points.Last();
             var height = LONG_TRANSLATOR_HEIGHT1;
-            var segs = points.CreateGLineSegments(basePt.OffsetY(HEIGHT - height));
+            var segs = points.ToGLineSegments(basePt.OffsetY(HEIGHT - height));
             var lines = DU.DrawLineSegmentsLazy(segs);
             lines.ForEach(line => SetDomePipeLineStyle(line));
 
@@ -2661,11 +2920,10 @@ cb: br =>
             v += new Vector2d(lastPt.X, 0);
         }
 
-        public static void DrawDirtyWaterWell(Point3d basePt)
+        public static void DrawDirtyWaterWell(Point3d basePt, string value)
         {
-            DU.DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-200),
-            scale: 0.5,
-            props: new Dictionary<string, string>() { { "-", "666" } },
+            DU.DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-400),
+            props: new Dictionary<string, string>() { { "-", value } },
             cb: br =>
             {
                 br.Layer = "W-DRAI-EQPM";

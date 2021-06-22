@@ -699,8 +699,15 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
                 var basePt = Dbg.SelectPoint();
-                var dg = new DrainageSystemDiagram();
-                dg.Draw(basePt);
+                if (false)
+                {
+                    var dg = new DrainageSystemDiagram();
+                    dg.Draw(basePt);
+                }
+                else
+                {
+                    DrainageSystemDiagram.draw1(basePt);
+                }
             }
         }
 
@@ -721,19 +728,19 @@ namespace ThMEPWSS.DebugNs
                     {
                         var bsPt = Dbg.SelectPoint();
                         var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-2000, -121) };
-                        var segs = points.CreateGLineSegments(bsPt);
+                        var segs = points.ToGLineSegments(bsPt);
                         DU.DrawLineSegmentsLazy(segs);
                     }
                     {
                         var bsPt = Dbg.SelectPoint();
                         var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-5300, -121) };
-                        var segs = points.CreateGLineSegments(bsPt);
+                        var segs = points.ToGLineSegments(bsPt);
                         DU.DrawLineSegmentsLazy(segs);
                     }
                     {
                         var bsPt = Dbg.SelectPoint();
                         var points = new Point2d[] { new Point2d(0, 0), new Point2d(0, -1379), new Point2d(-121, -1500), new Point2d(-5900, -1500) };
-                        var segs = points.CreateGLineSegments(bsPt);
+                        var segs = points.ToGLineSegments(bsPt);
                         DU.DrawLineSegmentsLazy(segs);
                     }
                 }
@@ -969,12 +976,12 @@ namespace ThMEPWSS.DebugNs
                 {
                     var points = new Point2d[] { new Point2d(0, 0), new Point2d(-121, -121), new Point2d(-1379, -121), new Point2d(-1500, -241) };
                     {
-                        var segs = points.CreateGLineSegments(bsPt);
+                        var segs = points.ToGLineSegments(bsPt);
                         DU.DrawLineSegmentsLazy(segs);
                     }
                     {
                         var m = Matrix2dFac.YAxisMirroring;
-                        var segs = points.CreateGLineSegments(bsPt, m);
+                        var segs = points.ToGLineSegments(bsPt, m);
                         DU.DrawLineSegmentsLazy(segs);
                     }
                 }
@@ -1233,6 +1240,23 @@ namespace ThMEPWSS.DebugNs
             FengDbgTesting.AddLazyAction("6", adb => { });
             FengDbgTesting.AddLazyAction("7", adb => { });
             FengDbgTesting.AddLazyAction("8", adb => { });
+        }
+        [Feng("根据点收集向量数据")]
+        public static void qv31xj()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var points = new List<Point3d>();
+                while (Dbg.TrySelectPoint(out Point3d pt))
+                {
+                    points.Add(pt);
+                }
+                var vecs=points.Select(p=>p.ToPoint2d()).ToArray().ToVector2ds();
+                Dbg.PrintLine($"var vecs=new List<Vector2d>{{{vecs.Select(v => $"new Vector2d({Convert.ToInt64(v.X)},{Convert.ToInt64(v.Y)})").JoinWith(",")}}};");
+            }
         }
         [Feng("根据点收集点数据")]
         public static void qv1dze()

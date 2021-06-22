@@ -1008,22 +1008,81 @@ namespace ThMEPWSS.Uitl
     }
     public static class EntityFactory
     {
+        public static Point2d GetLastPoint(this IEnumerable<Vector2d> vector2Ds, Point3d basePt) => vector2Ds.GetLastPoint(basePt.ToPoint2D());
+        public static Point2d GetLastPoint(this IEnumerable<Vector2d> vector2Ds, Point2d basePt)
+        {
+            var p1 = basePt;
+            Point2d p2 = p1;
+            foreach (var vec in vector2Ds)
+            {
+                p2 = p1 + vec;
+                p1 = p2;
+            }
+            return p2;
+        }
+        public static List<Point2d> ToPoint2ds(this List<Vector2d> vector2Ds, Point2d basePt)
+        {
+            var p1 = basePt;
+            Point2d p2;
+            var points = new List<Point2d>(vector2Ds.Count + 1) { p1 };
+            foreach (var vec in vector2Ds)
+            {
+                p2 = p1 + vec;
+                points.Add(p2);
+                p1 = p2;
+            }
+            return points;
+        }
+        public static List<GLineSegment> ToGLineSegments(this List<Vector2d> vector2Ds, Point3d basePt) => vector2Ds.ToGLineSegments(basePt.ToPoint2D());
+        public static List<GLineSegment> ToGLineSegments(this List<Vector2d> vector2Ds, Point2d basePt)
+        {
+            var p1 = basePt;
+            Point2d p2;
+            var segs = new List<GLineSegment>(vector2Ds.Count);
+            foreach (var vec in vector2Ds)
+            {
+                p2 = p1 + vec;
+                segs.Add(new GLineSegment(p1, p2));
+                p1 = p2;
+            }
+            return segs;
+        }
+        public static List<Vector3d> ToVector3ds(this Point3d[] points)
+        {
+            if (points.Length <= 1) return new List<Vector3d>();
+            var vecs = new List<Vector3d>(points.Length - 1);
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                vecs.Add(points[i + 1] - points[i]);
+            }
+            return vecs;
+        }
+        public static List<Vector2d> ToVector2ds(this Point2d[] points)
+        {
+            if (points.Length <= 1) return new List<Vector2d>();
+            var vecs = new List<Vector2d>(points.Length - 1);
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                vecs.Add(points[i + 1] - points[i]);
+            }
+            return vecs;
+        }
         public static Point2d[] MoveXY(this Point2d[] points, double dx, double dy)
         {
             var m = Matrix2d.Displacement(new Vector2d(dx, dy));
             return points.Select(x => x.TransformBy(m)).ToArray();
         }
-        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points, Point3d basePt, Matrix2d matrix2D)
+        public static List<GLineSegment> ToGLineSegments(this Point2d[] points, Point3d basePt, Matrix2d matrix2D)
         {
             if (points.Length <= 1) return new List<GLineSegment>();
             points = points.Select(pt => pt.TransformBy(matrix2D)).ToArray();
-            return CreateGLineSegments(points, basePt);
+            return ToGLineSegments(points, basePt);
         }
         public static Point2d[] GetYAxisMirror(this Point2d[] points)
         {
             return points.Select(pt => new Point2d(-pt.X, pt.Y)).ToArray();
         }
-        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points, Point3d basePt)
+        public static List<GLineSegment> ToGLineSegments(this Point2d[] points, Point3d basePt)
         {
             if (points.Length <= 1) return new List<GLineSegment>();
             var segs = new List<GLineSegment>(points.Length - 1);
@@ -1034,7 +1093,7 @@ namespace ThMEPWSS.Uitl
             }
             return segs;
         }
-        public static List<GLineSegment> CreateGLineSegments(this Point2d[] points)
+        public static List<GLineSegment> ToGLineSegments(this Point2d[] points)
         {
             if (points.Length <= 1) return new List<GLineSegment>();
             var segs = new List<GLineSegment>(points.Length - 1);
@@ -1044,7 +1103,7 @@ namespace ThMEPWSS.Uitl
             }
             return segs;
         }
-        public static List<GLineSegment> CreateGLineSegments(this List<Point2d> points)
+        public static List<GLineSegment> ToGLineSegments(this List<Point2d> points)
         {
             if (points.Count <= 1) return new List<GLineSegment>();
             var segs = new List<GLineSegment>(points.Count - 1);

@@ -113,6 +113,7 @@ namespace ThMEPWSS.DebugNs
                 AddButtons2(typeof(DrainageTest));
                 AddButtons2(typeof(Sankaku));
 
+                  
                 if (false)
                 {
                     AddButtons2(typeof(quj50y));
@@ -15176,7 +15177,7 @@ namespace ThMEPWSS.DebugNs
         [Feng("🔴TestThWRainSystemDiagram_Load")]
         public static void TestThWRainSystemDiagram_Load()
         {
-            ThRainSystemService.ImportElementsFromStdDwg();
+            //ThRainSystemService.ImportElementsFromStdDwg();
             ThWRainSystemDiagramTest.Test1();
         }
         [Feng("🔴cad win")]

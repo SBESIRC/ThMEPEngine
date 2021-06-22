@@ -846,10 +846,12 @@ namespace ThMEPWSS.Pipe.Model
             var outputs = g.Select(p => p.OutputType).ToList();
             var pipeIds = g.Select(p => p.VerticalPipeId).ToList();
             var _basePt = ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X);
-            var basePt = _basePt.OffsetY(-700);
+            var basePt = _basePt.OffsetY(-700 - 400 - 400);
             double y = basePt.Y;
-            var points = GetBasePoints(basePt, 2, outputs.Count, 400, 400).ToList();
+            var points = GetBasePoints(basePt.OffsetXY(-800, -400), 2, outputs.Count, 800, 800).ToList();
             var k = 0;
+            var count = 0;
+            Point3d pt2 = default;
             for (int j = 0; j < outputs.Count; ++j)
             {
                 var bsPt = points[k++];
@@ -909,6 +911,8 @@ namespace ThMEPWSS.Pipe.Model
                         }
                         Dr.DrawWaterWell(bsPt, output.Label);
                         drawedLabels.Add(output.Label);
+                        count++;
+                        pt2 = bsPt;
                         break;
                     case RainOutputTypeEnum.RainPort:
                         //Dr.DrawRainPort(pt.OffsetY(y));
@@ -936,6 +940,14 @@ namespace ThMEPWSS.Pipe.Model
             {
                 DrawUtils.DrawTextLazy(pipeIds[j], 300, basePt.ReplaceY(y - 2000));
                 y -= 300;
+            }
+            if (count == 1)
+            {
+                var p1 = pt2.OffsetXY(400, 400);
+                var p2 = p1.OffsetX(400);
+                var line = DrawUtils.DrawLineLazy(p1, p2);
+                line.Layer = "W-RAIN-PIPE";
+                line.ColorIndex = 256;
             }
             //DrawUtils.DrawTextLazy(xx, 300, basePt.ReplaceY(y - 2000));
         }
