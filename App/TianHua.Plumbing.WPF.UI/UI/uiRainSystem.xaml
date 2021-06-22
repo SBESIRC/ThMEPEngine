@@ -7,7 +7,7 @@
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     Title="地上雨水系统图"
                     SizeToContent="WidthAndHeight"
-                    Height="350"
+                    Height="500"
              mc:Ignorable="d">
     <Grid  Margin="5">
         <Grid.RowDefinitions>
