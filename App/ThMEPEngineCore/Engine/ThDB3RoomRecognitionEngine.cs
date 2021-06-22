@@ -13,21 +13,12 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThDB3RoomExtractionEngine : ThSpatialElementExtractionEngine
     {
-        public List<string> LayerFilter { get; set; }
         public ThDB3RoomExtractionEngine()
         {
-            LayerFilter = new List<string>();
         }
         public override void Extract(Database database)
         {
-            if(this.LayerFilter.Count==0)
-            {
-                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database);
-            }
-            var visitor = new ThDB3RoomExtractionVisitor()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var visitor = new ThDB3RoomExtractionVisitor();
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
@@ -36,14 +27,7 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            if (this.LayerFilter.Count == 0)
-            {
-                LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database);
-            }
-            var visitor = new ThDB3RoomExtractionVisitor()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var visitor = new ThDB3RoomExtractionVisitor();
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);
@@ -52,27 +36,20 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThDB3RoomRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public List<string> LayerFilter { get; set; }
         public ThDB3RoomRecognitionEngine()
         {
-            LayerFilter = new List<string>();
+            //
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3RoomExtractionEngine()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var engine = new ThDB3RoomExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3RoomExtractionEngine()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var engine = new ThDB3RoomExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }

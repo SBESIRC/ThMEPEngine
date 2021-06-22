@@ -33,8 +33,6 @@
         public const string CondensateRiserBlockName_2 = "W-pipe-3";                            //冷凝水立管图块名称-2
         public const string WaterPipeWellBlockName = "A-hole-5";                                //水管径留洞图块名称
         public const string FlueShaftBlockName = "A-hole-4";                                    //烟道留洞图块名称
-        public const string RoomSpaceLineLayoutName = "AI-空间框线";                            //房间框线的图层名称
-        public const string RoomSpaceTextLayoutName = "AI-空间名称";                            //房间名称的图层名称
 
 
         public const string FloorDrainBlockName = "地漏平面";                                   //地漏块名称--生成时用

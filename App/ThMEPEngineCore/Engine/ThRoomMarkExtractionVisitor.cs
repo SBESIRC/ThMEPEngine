@@ -20,6 +20,10 @@ namespace ThMEPEngineCore.Engine
             {
                 elements.AddRange(Handle(mText, matrix));
             }
+            else if (ThMEPTCHService.IsTCHText(dbObj))
+            {
+                elements.AddRange(HandleTCHText(dbObj, matrix));
+            }
         }
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj)
         {
@@ -31,8 +35,11 @@ namespace ThMEPEngineCore.Engine
             {
                 elements.AddRange(Handle(mText));
             }
+            else if (ThMEPTCHService.IsTCHText(dbObj))
+            {
+                elements.AddRange(HandleTCHText(dbObj));
+            }
         }
-
 
         public override void DoXClip(List<ThRawIfcAnnotationElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
@@ -58,7 +65,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcAnnotationElementData> Handle(DBText dbText)
         {
             var texts = new List<DBText>();
-            if (base.IsAnnotationElement(dbText) && CheckLayerValid(dbText))
+            if (IsAnnotationElement(dbText) && CheckLayerValid(dbText))
             {
                 var clone = dbText.Clone() as DBText;               
                 texts.Add(clone);
@@ -81,10 +88,31 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcAnnotationElementData> Handle(MText mText)
         {
             var texts = new List<MText>();
-            if (base.IsAnnotationElement(mText) && CheckLayerValid(mText))
+            if (IsAnnotationElement(mText) && CheckLayerValid(mText))
             {
                 var clone = mText.Clone() as MText;
                 texts.Add(clone);
+            }
+            return texts.Select(o => CreateAnnotationElementData(o)).ToList();
+        }
+
+        private List<ThRawIfcAnnotationElementData> HandleTCHText(Entity entity, Matrix3d matrix)
+        {
+            var texts = new List<DBText>();
+            if (IsAnnotationElement(entity) && CheckLayerValid(entity))
+            {
+                texts.AddRange(entity.ExplodeTCHText().Cast<DBText>());
+            }
+            texts.ForEach(o => o.TransformBy(matrix));
+            return texts.Select(o => CreateAnnotationElementData(o)).ToList();
+        }
+
+        private List<ThRawIfcAnnotationElementData> HandleTCHText(Entity entity)
+        {
+            var texts = new List<DBText>();
+            if (IsAnnotationElement(entity) && CheckLayerValid(entity))
+            {
+                texts.AddRange(entity.ExplodeTCHText().Cast<DBText>());
             }
             return texts.Select(o => CreateAnnotationElementData(o)).ToList();
         }
@@ -120,15 +148,6 @@ namespace ThMEPEngineCore.Engine
             {
                 throw new NotSupportedException();
             }
-        }
-        public override bool IsAnnotationElement(Entity entity)
-        {
-            if(entity.Hyperlinks.Count > 0)
-            {
-                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
-                return thPropertySet.IsDoor;
-            }
-            return false;
         }
     }
 }

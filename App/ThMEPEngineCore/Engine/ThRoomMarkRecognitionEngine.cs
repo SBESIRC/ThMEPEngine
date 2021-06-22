@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
@@ -12,36 +13,25 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
     {
-        public List<string> LayerFilter { get; set; }
         public ThRoomMarkExtractionEngine()
         {
-            LayerFilter = new List<string>();
         }
         public override void Extract(Database database)
         {
-            if(LayerFilter.Count==0)
-            {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database);
-            }
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = this.LayerFilter,
+                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
         }
-
         public override void ExtractFromMS(Database database)
         {
-            if (LayerFilter.Count == 0)
-            {
-                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database);
-            }
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = this.LayerFilter,
+                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -51,28 +41,21 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
-        public List<string> LayerFilter { get; set; }
         public ThRoomMarkRecognitionEngine()
         {
-            LayerFilter = new List<string>();
+            //
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var engine = new ThRoomMarkExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine()
-            {
-                LayerFilter = this.LayerFilter,
-            };
+            var engine = new ThRoomMarkExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }        
@@ -100,20 +83,18 @@ namespace ThMEPEngineCore.Engine
         }
         private string GetContent(object data)
         {
-            string text = "";
             if (data is DBText dbText)
             {
-                text = dbText.TextString;
+                return dbText.TextString;
             }
             else if (data is MText mText)
             {
-                text = mText.Text;
+                return mText.Text;
             }
-            else if (data is string str)
+            else
             {
-                text = str;
+                throw new NotSupportedException();
             }
-            return text;
         }
     }
 }

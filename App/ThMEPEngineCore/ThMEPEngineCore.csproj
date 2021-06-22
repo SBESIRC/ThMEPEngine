@@ -75,6 +75,8 @@
     <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
+    <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="GeojsonExtractor\Interface\IArchitectureOutlineData.cs" />

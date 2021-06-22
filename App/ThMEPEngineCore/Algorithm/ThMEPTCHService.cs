@@ -1,4 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADExtension;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -12,6 +15,32 @@ namespace ThMEPEngineCore.Algorithm
         public static bool IsTCHElement(this Entity entity)
         {
             return entity.GetRXClass().DxfName.ToUpper().StartsWith("TCH");
+        }
+
+        /// <summary>
+        /// 是否是天正单行文字
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHText(this Entity entity)
+        {
+            return entity.GetRXClass().DxfName == ThCADCommon.DxfName_TCH_Text;
+        }
+
+        /// <summary>
+        /// 炸天正单行文字为CAD单行文字
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static DBObjectCollection ExplodeTCHText(this Entity entity)
+        {
+            var results = new DBObjectCollection();
+            if (IsTCHText(entity))
+            {
+                entity.Explode(results);
+                return results.Cast<Entity>().Where(o => o is DBText).ToCollection();
+            }
+            return results;
         }
 
         /// <summary>

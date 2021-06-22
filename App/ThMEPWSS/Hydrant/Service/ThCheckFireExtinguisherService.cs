@@ -95,8 +95,6 @@ namespace ThMEPWSS.Hydrant.Service
                     new ThRoomExtractor()
                     {
                         UseDb3Engine=true,
-                        RoomBoundaryLayerFilter= new List<string>{ AiLayerManager.RoomBoundaryLayer },
-                        RoomMarkLayerFilter = new List<string>{ AiLayerManager .RoomMarkLayer},
                     },
                 };
             extractors.ForEach(o => o.Extract(db, pts));

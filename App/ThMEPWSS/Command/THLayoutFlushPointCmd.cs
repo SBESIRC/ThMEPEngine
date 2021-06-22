@@ -48,8 +48,6 @@ namespace ThMEPWSS.Command
                 var roomExtractor = new ThRoomExtractor()
                 {
                     ColorIndex = 6,
-                    RoomMarkLayerFilter = new List<string> { "AI-房间名称" },
-                    RoomBoundaryLayerFilter = new List<string> { "AI-房间框线" },
                 };
                 roomExtractor.Extract(acadDb.Database, pts);
                 var parkingStallExtractor = new ThParkingStallExtractor();

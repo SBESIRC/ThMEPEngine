@@ -2661,11 +2661,7 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
                 var range = Dbg.SelectRange();
-                var roomBuilder = new ThRoomBuilderEngine()
-                {
-                    RoomBoundaryLayerFilter = new List<string> { "AI-空间框线" },
-                    RoomMarkLayerFilter = new List<string> { "AI-空间名称" },
-                };
+                var roomBuilder = new ThRoomBuilderEngine();
                 var rooms = roomBuilder.BuildFromMS(db, range);
 
                 foreach (var room in rooms)

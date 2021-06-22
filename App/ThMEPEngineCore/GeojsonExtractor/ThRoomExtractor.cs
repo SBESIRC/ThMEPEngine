@@ -16,15 +16,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
     {
         public List<ThIfcRoom> Rooms { get; private set; }
         public IRoomPrivacy iRoomPrivacy { get; set; }
-        public List<string> RoomBoundaryLayerFilter { get; set; }
-        public List<string> RoomMarkLayerFilter { get; set; }
         public double TESSELLATE_ARC_LENGTH { get; set; }
         public ThRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
             TESSELLATE_ARC_LENGTH = 50.0;            
-            RoomMarkLayerFilter = new List<string>();
-            RoomBoundaryLayerFilter = new List<string>();
             Category = BuiltInCategory.Room.ToString();
         }
         public override List<ThGeometry> BuildGeometries()
@@ -55,8 +51,6 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {
                 using (var roomEngine = new ThRoomBuilderEngine())
                 {
-                    roomEngine.RoomBoundaryLayerFilter = this.RoomBoundaryLayerFilter;
-                    roomEngine.RoomMarkLayerFilter = this.RoomMarkLayerFilter;
                     Rooms = roomEngine.BuildFromMS(database, pts);
                     Clean();                    
                 }

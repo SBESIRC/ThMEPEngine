@@ -75,17 +75,11 @@ namespace ThMEPElectrical.StructureHandleService
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomEngine = new ThDB3RoomExtractionEngine()
-                {
-                    LayerFilter = new List<string> { "AI-房间框线" },
-                };
+                var roomEngine = new ThDB3RoomExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
                 //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var markEngine = new ThDB3RoomExtractionEngine()
-                {
-                    LayerFilter = new List<string> { "AI-房间名称" },
-                };
+                var markEngine = new ThDB3RoomExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
                 //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 

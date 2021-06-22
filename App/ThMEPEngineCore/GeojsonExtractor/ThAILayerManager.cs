@@ -11,8 +11,6 @@
         public string DoorOpeningLayer { get; set; }
         public string OuterBoundaryLayer { get; set; }
         public string ArchtectureOutlineLayer { get; set; }
-        public string RoomBoundaryLayer { get; set; }
-        public string RoomMarkLayer { get; set; }
         public ThAILayerManager()
         {
             ShearWallLayer = "AI-Wall";
@@ -24,8 +22,6 @@
             DoorOpeningLayer = "AI-DoorOpening";
             OuterBoundaryLayer = "AI-OuterBoundary";
             ArchtectureOutlineLayer = "AI-ArchtectureOutline";
-            RoomBoundaryLayer = "AI-空间框线"; 
-            RoomMarkLayer = "AI-空间名称";  
         }
     }
 }

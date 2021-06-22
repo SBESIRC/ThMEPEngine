@@ -128,11 +128,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
 
                     var AreaNums = 0;
-                    var roomBuilder = new ThRoomBuilderEngine()
-                    {
-                        RoomBoundaryLayerFilter = new List<string> { "AI-空间框线" },
-                        RoomMarkLayerFilter = new List<string> { "AI-空间名称" },
-                    };
+                    var roomBuilder = new ThRoomBuilderEngine();
                     var rooms = roomBuilder.BuildFromMS(acadDatabase.Database, SelectedArea);
                     if (rooms.Count != 0)
                     {
