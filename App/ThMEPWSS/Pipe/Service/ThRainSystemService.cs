@@ -63,7 +63,7 @@ namespace ThUtilExtensionsNs
         }
         //public static string GetCustomPropertiyStrValue(this Entity e, string key)
         //{
-            
+
         //    if (!(e is BlockReference)) return null;
         //    var d = e.ToDataItem().CustomProperties.ToDict();
         //    d.TryGetValue(key, out object o);
@@ -3640,7 +3640,7 @@ new Point2d(maxX, minY)
         public void CollectWaterWells()
         {
             WaterWells.AddRange(adb.ModelSpace.OfType<BlockReference>().Where(x => x.Name.Contains("雨水井编号")));
-            WaterWells.ForEach(e => WaterWellDNs[e] = e.GetAttributesStrValue("-"));
+            WaterWells.ForEach(e => WaterWellDNs[e] = (e as BlockReference)?.GetAttributesStrValue("-") ?? "");
             foreach (var e in WaterWells)
             {
                 if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);

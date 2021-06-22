@@ -684,6 +684,7 @@ namespace ThMEPWSS.DebugNs
         }
 
     }
+
     [Feng]
     public class Sankaku2
     {

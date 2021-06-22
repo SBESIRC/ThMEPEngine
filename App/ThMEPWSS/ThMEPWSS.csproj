@@ -252,6 +252,9 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
+    <Compile Include="Pipe\Service\ThDrainagePipeSystemService.cs" />
+    <Compile Include="Pipe\Service\ThDrainageService.cs" />
+    <Compile Include="Pipe\Service\ThDrainageSystemDiagram.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceNameService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceService.cs" />
@@ -260,6 +263,7 @@
     <Compile Include="Pipe\Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Pipe\Service\ThInsertStoreyFrameService.cs" />
     <Compile Include="Pipe\Service\ThRainPipeLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThRainPipeSystemService.cs" />
     <Compile Include="Pipe\Service\ThRainSystemService.cs" />
     <Compile Include="Pipe\Service\ThReadStoreyInformationService.cs" />
     <Compile Include="Pipe\Service\ThRoofRainPipeLayerManager.cs" />
