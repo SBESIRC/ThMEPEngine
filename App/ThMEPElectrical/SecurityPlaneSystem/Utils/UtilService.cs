@@ -137,5 +137,37 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
 
             return false;
         }
+
+        /// <summary>
+        /// 找到一个点在车道线上的投影点
+        /// </summary>
+        /// <param name="lane"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
+        public static Point3d GetProjectPtOnLane(List<Line> lane, Point3d pt)
+        {
+            return lane.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).First();
+        }
+
+        /// <summary>
+        /// 根据某个方向排序点
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static List<Point3d> OrderPoints(List<Point3d> pts, Vector3d dir)
+        {
+            var xDir = dir;
+            var yDir = Vector3d.ZAxis.CrossProduct(xDir);
+            var zDir = Vector3d.ZAxis;
+            Matrix3d matrix = new Matrix3d(new double[]{
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0});
+
+            var orderPts = pts.Select(x => x.TransformBy(matrix)).ToList();
+            return orderPts;
+        }
     }
 }
