@@ -687,9 +687,8 @@ namespace ThMEPWSS.DebugNs
     [Feng]
     public class Sankaku2
     {
-
-        [Feng("qv17do")]
-        public static void qv17do()
+        [Feng("draw1")]
+        public static void qv3hyp()
         {
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
@@ -710,8 +709,70 @@ namespace ThMEPWSS.DebugNs
                 }
             }
         }
-
-
+        [Feng("draw2")]
+        public static void qv17do()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                if (false)
+                {
+                    var dg = new DrainageSystemDiagram();
+                    dg.Draw(basePt);
+                }
+                else
+                {
+                    DrainageSystemDiagram.draw2(basePt);
+                }
+            }
+        }
+        [Feng("draw3")]
+        public static void qv3kmp()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw3(basePt.ToPoint2d());
+            }
+        }
+        [Feng("draw4")]
+        public static void qv3kmq()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw4(basePt.ToPoint2d());
+            }
+        }
+        [Feng("draw5")]
+        public static void qv3kmr()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw5(basePt.ToPoint2d());
+            }
+        }
 
         [Feng("排出方式连线")]
         public static void qv1735()

@@ -1082,6 +1082,10 @@ namespace ThMEPWSS.Uitl
         {
             return points.Select(pt => new Point2d(-pt.X, pt.Y)).ToArray();
         }
+        public static List<Vector2d> GetYAxisMirror(this List<Vector2d> vecs)
+        {
+            return vecs.Select(v => new Vector2d(-v.X, v.Y)).ToList();
+        }
         public static List<GLineSegment> ToGLineSegments(this Point2d[] points, Point3d basePt)
         {
             if (points.Length <= 1) return new List<GLineSegment>();

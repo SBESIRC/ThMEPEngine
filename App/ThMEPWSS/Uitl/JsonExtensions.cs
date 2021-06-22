@@ -11,6 +11,7 @@ using System.Linq;
 using NetTopologySuite.Geometries;
 using ThMEPWSS.DebugNs;
 using ThCADCore.NTS;
+using DotNetARX;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
@@ -296,16 +297,17 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return arr;
         }
-        public static string GetCustomPropertyStrValue(this Entity e, string key)
+        public static string GetCustomPropertyStrValue(this BlockReference e, string key)
         {
-            var d = ToDict(e.ToDataItem().CustomProperties);
+            if (!e.ObjectId.IsValid) return null;
+            var d = ToDict(e.ObjectId.GetDynProperties());
             d.TryGetValue(key, out object o);
             return o?.ToString();
         }
-        public static string GetAttributesStrValue(this Entity e, string key)
+        public static string GetAttributesStrValue(this BlockReference br, string key)
         {
-            if (!(e is BlockReference)) return null;
-            var d = e.ToDataItem().Attributes;
+            if (!br.ObjectId.IsValid) return null;
+            var d = br.ObjectId.GetAttributesInBlockReference();
             d.TryGetValue(key, out string ret);
             return ret;
         }

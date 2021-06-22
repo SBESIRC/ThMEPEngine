@@ -34,10 +34,6 @@ namespace ThUtilExtensionsNs
             if (!br.ObjectId.IsValid) return null;
             return DotNetARX.BlockTools.GetBlockName(br.ObjectId.GetObject(OpenMode.ForRead) as BlockReference);
         }
-        public static ThBlockReferenceData ToDataItem(this Entity ent)
-        {
-            return new ThBlockReferenceData(ent.ObjectId);
-        }
         public static DBObjectCollection ExplodeToDBObjectCollection(this Entity ent)
         {
             var entitySet = new DBObjectCollection();
@@ -65,13 +61,14 @@ namespace ThUtilExtensionsNs
             }
             return arr;
         }
-        public static string GetCustomPropertiyStrValue(this Entity e, string key)
-        {
-            if (!(e is BlockReference)) return null;
-            var d = e.ToDataItem().CustomProperties.ToDict();
-            d.TryGetValue(key, out object o);
-            return o?.ToString();
-        }
+        //public static string GetCustomPropertiyStrValue(this Entity e, string key)
+        //{
+            
+        //    if (!(e is BlockReference)) return null;
+        //    var d = e.ToDataItem().CustomProperties.ToDict();
+        //    d.TryGetValue(key, out object o);
+        //    return o?.ToString();
+        //}
         public static Dictionary<string, object> ToDict(this DynamicBlockReferencePropertyCollection colle)
         {
             var ret = new Dictionary<string, object>();
@@ -1095,7 +1092,7 @@ new Point2d(maxX, minY)
                 var blockNameOfVerticalPipe = "带定位立管";
                 if (adb.ModelSpace.OfType<BlockReference>()
                 .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-                .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == blockNameOfVerticalPipe)
+                .Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == blockNameOfVerticalPipe)
                 .Count() > 5)
                 {
                     return 150;
@@ -1420,7 +1417,7 @@ new Point2d(maxX, minY)
                     var pps = new List<Entity>();
                     pps.AddRange(entities.OfType<BlockReference>()
                     .Where(x => x.Layer == "W-RAIN-EQPM")
-                    .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == "带定位立管"));
+                    .Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == "带定位立管"));
                     static GRect getRealBoundaryForPipe(Entity ent)
                     {
                         var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
@@ -1473,13 +1470,13 @@ new Point2d(maxX, minY)
                 {
                     var pps = new List<Entity>();
                     pps.AddRange(entities.OfType<BlockReference>()
-                    .Where(x => x.ObjectId.IsValid ? x.Layer == "W-RAIN-EQPM" && x.ToDataItem().EffectiveName == "$LIGUAN" : x.Layer == "W-RAIN-EQPM")
+                    .Where(x => x.ObjectId.IsValid ? x.Layer == "W-RAIN-EQPM" && x.GetEffectiveName() == "$LIGUAN" : x.Layer == "W-RAIN-EQPM")
                     );
                     pps.AddRange(entities.OfType<BlockReference>()
                     .Where(e =>
                     {
                         return e.ObjectId.IsValid && (e.Layer == "W-RAIN-PIPE-RISR" || e.Layer == "W-DRAI-NOTE")
-    && !e.ToDataItem().EffectiveName.Contains("井");
+    && !e.GetEffectiveName().Contains("井");
                     }));
                     foreach (var pp in pps)
                     {
@@ -1568,7 +1565,7 @@ new Point2d(maxX, minY)
             public void CollectFloorDrains()
             {
                 var ents = new List<Entity>();
-                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("地漏")));
+                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("地漏")));
                 ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR"));
                 floorDrains.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
             }
@@ -1589,13 +1586,13 @@ new Point2d(maxX, minY)
             public void CollectWaterPort13s()
             {
                 var ents = new List<Entity>();
-                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                 waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
             }
             public void CollectWrappingPipes()
             {
                 var ents = new List<Entity>();
-                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                 wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()).Where(r => r.Width < 1000 && r.Height < 1000));
             }
             public void CollectStoreys(Point3dCollection range)
@@ -1679,7 +1676,7 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ToDataItem().EffectiveName.Contains("地漏")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.GetEffectiveName().Contains("地漏")));
                             floorDrains.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -1691,7 +1688,7 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()).Where(r => r.Width < 1000 && r.Height < 1000));
                         }
                         {
@@ -1709,7 +1706,7 @@ new Point2d(maxX, minY)
                             var blockNameOfVerticalPipe = "带定位立管";
                             pps.AddRange(entities.OfType<BlockReference>()
                             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-                            .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
+                            .Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == blockNameOfVerticalPipe));
                             static GRect getRealBoundaryForPipe(Entity ent)
                             {
                                 var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
@@ -1826,7 +1823,7 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -1868,7 +1865,7 @@ new Point2d(maxX, minY)
                         {
                             var pps = new List<Entity>();
                             pps.AddRange(entities.OfType<BlockReference>()
-                            .Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName == "$LIGUAN" : x.Layer == "W-RAIN-EQPM")
+                            .Where(x => x.ObjectId.IsValid ? x.GetEffectiveName() == "$LIGUAN" : x.Layer == "W-RAIN-EQPM")
                             );
                             foreach (var pp in pps)
                             {
@@ -1948,12 +1945,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2086,12 +2083,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR" || x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("地漏")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR" || x.ObjectId.IsValid && x.GetEffectiveName().Contains("地漏")));
                             floorDrains.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2196,12 +2193,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2212,7 +2209,7 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("地漏") : x.Layer == "W-DRAI-FLDR"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("地漏") : x.Layer == "W-DRAI-FLDR"));
                             floorDrains.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2322,7 +2319,7 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("地漏") : x.Layer == "W-DRAI-FLDR"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("地漏") : x.Layer == "W-DRAI-FLDR"));
                             floorDrains.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2444,12 +2441,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2571,12 +2568,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2620,7 +2617,7 @@ new Point2d(maxX, minY)
                             .Where(e =>
                             {
                                 return e.ObjectId.IsValid && (e.Layer == "W-RAIN-PIPE-RISR" || e.Layer == "W-DRAI-NOTE")
-    && !e.ToDataItem().EffectiveName.Contains("井");
+    && !e.GetEffectiveName().Contains("井");
                             }));
                             static GRect getRealBoundaryForPipe(Entity ent)
                             {
@@ -2703,12 +2700,12 @@ new Point2d(maxX, minY)
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName.Contains("雨水口")));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName().Contains("雨水口")));
                             waterPort13s.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
                             var ents = new List<Entity>();
-                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                             wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                         }
                         {
@@ -2936,7 +2933,7 @@ new Point2d(maxX, minY)
                     }
                     {
                         var ents = new List<Entity>();
-                        ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ToDataItem().EffectiveName.Contains("地漏")));
+                        ents.AddRange(entities.OfType<BlockReference>().Where(x => x.GetEffectiveName().Contains("地漏")));
                         floorDrains.AddRange(ents.Select(e => e.Bounds.ToGRect()));
                     }
                     {
@@ -2948,7 +2945,7 @@ new Point2d(maxX, minY)
                     }
                     {
                         var ents = new List<Entity>();
-                        ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.ToDataItem().EffectiveName.Contains("套管") : x.Layer == "W-BUSH"));
+                        ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == "W-BUSH" && x.GetEffectiveName().Contains("套管") : x.Layer == "W-BUSH"));
                         wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()).Where(r => r.Width < 1000 && r.Height < 1000));
                     }
                     {
@@ -2966,7 +2963,7 @@ new Point2d(maxX, minY)
                         var blockNameOfVerticalPipe = "带定位立管";
                         pps.AddRange(entities.OfType<BlockReference>()
                         .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-                        .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
+                        .Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == blockNameOfVerticalPipe));
                         static GRect getRealBoundaryForPipe(Entity ent)
                         {
                             var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
@@ -3213,7 +3210,7 @@ new Point2d(maxX, minY)
         public ThGravityService thGravityService;
         public static bool IsTianZhengElement(Entity ent)
         {
-            return IsTianZhengElement(ent.GetType());
+            return ThMEPEngineCore.Algorithm.ThMEPTCHService.IsTCHElement(ent);
         }
         private static bool IsTianZhengElement(Type type)
         {
@@ -3395,7 +3392,7 @@ new Point2d(maxX, minY)
         }
         public void CollectSideWaterBuckets()
         {
-            SideWaterBuckets.AddRange(EnumerateEntities<BlockReference>().Where(x => x.Name == "CYSD" || x.ToDataItem().EffectiveName == "CYSD"));
+            SideWaterBuckets.AddRange(EnumerateEntities<BlockReference>().Where(x => x.Name == "CYSD" || x.GetEffectiveName() == "CYSD"));
         }
         public List<Entity> FloorDrains = new List<Entity>();
         public void CollectFloorDrains()
@@ -3413,7 +3410,7 @@ new Point2d(maxX, minY)
                     }
                     else
                     {
-                        return x.ToDataItem().EffectiveName.Contains(strFloorDrain);
+                        return x.GetEffectiveName().Contains(strFloorDrain);
                     }
                 }
                 );
@@ -3970,7 +3967,7 @@ new Point2d(maxX, minY)
             var blockNameOfVerticalPipe = "套管";
             WrappingPipes.AddRange(adb.ModelSpace.OfType<BlockReference>()
             .Where(x => x.Layer == "W-BUSH")
-            .Where(x => x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
+            .Where(x => x.GetEffectiveName() == blockNameOfVerticalPipe));
             foreach (var e in WrappingPipes)
             {
                 if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
@@ -4964,7 +4961,7 @@ new Point2d(maxX, minY)
                 var label = (dbText as DBText)?.TextString;
                 if (label != null)
                 {
-                    var dnText = (pipeEnt.ObjectId.IsValid ? pipeEnt.GetCustomPropertiyStrValue(dnProp) : null) ?? "DN100";
+                    var dnText =/* (pipeEnt.ObjectId.IsValid ? pipeEnt.GetCustomPropertiyStrValue(dnProp) : null) ?? */"DN100";
                     VerticalPipeLabelToDNDict[label] = dnText;
                     VerticalPipeToLabelDict[pipeEnt] = label;
                 }
@@ -5039,7 +5036,7 @@ new Point2d(maxX, minY)
                 var blockNameOfVerticalPipe = "带定位立管";
                 pipes.AddRange(adb.ModelSpace.OfType<BlockReference>()
                 .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-                .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
+                .Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == blockNameOfVerticalPipe));
                 static GRect getRealBoundaryForPipe(Entity ent)
                 {
                     var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();

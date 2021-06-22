@@ -644,6 +644,7 @@ namespace ThMEPWSS.Assistant
             var r = GeoAlgorithm.GetBoundaryRect(t);
             return DrawLineLazy(r.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r.RightButtom.OffsetXY(extH, -extV).ToPoint3d());
         }
+        public static DBText DrawTextLazy(string text, double height, Point2d position) => DrawTextLazy(text, height, position.ToPoint3d());
         public static DBText DrawTextLazy(string text, Point2d position)
         {
             return DrawTextLazy(text, position.ToPoint3d());
