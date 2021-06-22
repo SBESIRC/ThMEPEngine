@@ -9,33 +9,39 @@ namespace ThCADExtension
     {
         public double Rotation { get; set; }
         public Point3d Position { get; set; }
-        public List<string> Texts { get; set; }
-        public string EffectiveName { get; set; }
+        public Extents3d Extents { get; set; }
         public string BlockLayer { get; set; }
-        public Database HostDatabase { get; set; }
+        public string EffectiveName { get; set; }
+        public Database Database { get; set; }
         public Matrix3d BlockTransform { get; set; }
+        public Matrix3d BlockTransformToHostDwg { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
         public DynamicBlockReferencePropertyCollection CustomProperties { get; set; }
         public ThBlockReferenceData(ObjectId blockRef)
         {
-            HostDatabase = blockRef.Database;
+            Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
-            EffectiveName = blockRef.GetBlockName();
             BlockLayer = blockRef.GetBlockLayer();
+            EffectiveName = blockRef.GetBlockName();
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
+            BlockTransformToHostDwg = blockRef.GetBlockTransform();
+            Extents = blockRef.GetBlockGeometryExtents();
         }
-        public ThBlockReferenceData(Database database, BlockReference blockRef)
+        public ThBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
         {
-            HostDatabase = database;
-            BlockLayer = blockRef.Layer;
-            Position = blockRef.Position;
-            Rotation = blockRef.Rotation;
+            Database = blockRef.Database;
+            Position = blockRef.GetBlockPosition();
+            Rotation = blockRef.GetBlockRotation();
+            BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            BlockTransform = blockRef.BlockTransform;
-            CustomProperties = blockRef.DynamicBlockReferencePropertyCollection;
+            CustomProperties = blockRef.GetDynProperties();
+            BlockTransform = blockRef.GetBlockTransform();
+            Attributes = blockRef.GetAttributesInBlockReference();
+            BlockTransformToHostDwg = blockRef.GetBlockTransform().PreMultiplyBy(transfrom);
+            Extents = blockRef.GetBlockGeometryExtents(transfrom);
         }
     }
 }

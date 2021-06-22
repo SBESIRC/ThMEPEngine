@@ -199,6 +199,13 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "火灾自动报警系统图.dwg");
         }
 
+
+        // 电气提资转换图块
+        public static string BlockConvertDwgPath()
+        {
+            return Path.Combine(SupportPath(), "天华提电气块转换配置表.dwg");
+        }
+
         // 运行时根目录
         private static string RootPath()
         {

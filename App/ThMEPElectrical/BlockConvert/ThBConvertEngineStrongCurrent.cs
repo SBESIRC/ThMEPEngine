@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using System;
+using Linq2Acad;
 using DotNetARX;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
@@ -34,15 +35,22 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var block = acadDatabase.Element<Entity>(blkRef);
-
-                // 图层
+                var block = acadDatabase.Element<Entity>(blkRef, true);
                 block.LayerId = ThBConvertDbUtils.BlockLayer(ThBConvertCommon.LAYER_BLOCK_STRONGCURRENT, 2);
+            }
+        }
 
-                // 颜色
+        public override void SetVisibilityState(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
                 if (ThBConvertUtils.IsFirePower(srcBlockReference))
                 {
-                    block.ColorIndex = 1;
+                    blkRef.SetDynBlockValue("可见性", ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY);
+                }
+                else
+                {
+                    blkRef.SetDynBlockValue("可见性", ThBConvertCommon.PROPERTY_NON_FIRE_POWER_SUPPLY);
                 }
             }
         }
@@ -52,7 +60,7 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.BlockTransform);
+                blockReference.TransformBy(srcBlockReference.BlockTransformToHostDwg);
             }
         }
 

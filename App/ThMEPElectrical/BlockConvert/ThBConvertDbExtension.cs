@@ -2,6 +2,7 @@
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -33,11 +34,6 @@ namespace ThMEPElectrical.BlockConvert
             return new ThBlockReferenceData(blkRef);
         }
 
-        public static ThBlockReferenceData GetBlockReference(this Database database, BlockReference blkRef)
-        {
-            return new ThBlockReferenceData(database, blkRef);
-        }
-
         /// <summary>
         /// 提取图纸中某个范围内所有的特点块的引用
         /// </summary>
@@ -52,7 +48,7 @@ namespace ThMEPElectrical.BlockConvert
             {
                 var objs = new DBObjectCollection();
                 var name = (string)block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
-                foreach(BlockReference blkRef in Extract(acadDatabase.Database, name))
+                foreach(BlockReference blkRef in ExtractBlockReference(acadDatabase.Database, name))
                 {
                     Plane XYPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);
                     Matrix3d matrix = Matrix3d.Projection(XYPlane, XYPlane.Normal);
@@ -87,51 +83,49 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        private static List<BlockReference> Extract(Database database, string name)
+        private static List<BlockReference> ExtractBlockReference(Database database, string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var results = new List<BlockReference>();
-                foreach (var ent in acadDatabase.ModelSpace)
-                {
-                    if (ent is BlockReference blkRef)
+                acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
+                    .ForEach(o =>
                     {
-                        if (blkRef.BlockTableRecord.IsNull)
+                        var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        if (IsBlockReference(o, name))
                         {
-                            continue;
+                            results.Add(o.GetTransformedCopy(mcs2wcs) as BlockReference);
+                        }else
+                        {
+                            results.AddRange(DoExtractBlockReference(o, mcs2wcs, name));
                         }
-                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        results.AddRange(DoExtract(blkRef, mcs2wcs, name));
-                    }
-                }
+                    });
                 return results;
             }
         }
 
-        private static List<BlockReference> DoExtract(BlockReference blockReference, Matrix3d matrix, string name)
+        private static List<BlockReference> DoExtractBlockReference(BlockReference blockReference, Matrix3d matrix, string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
                 var results = new List<BlockReference>();
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);                
-                foreach (var objId in blockTableRecord)
-                {
-                    var dbObj = acadDatabase.Element<Entity>(objId);
-                    if (dbObj is BlockReference blockObj)
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                blockTableRecord.GetEntities<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
+                    .ForEach(o =>
                     {
-                        if (blockObj.BlockTableRecord.IsNull)
+                        if (IsBlockReference(o, name))
                         {
-                            continue;
+                            results.Add(o.GetTransformedCopy(matrix) as BlockReference);
                         }
-                        if (IsBlockReference(blockObj, name))
+                        else
                         {
-                            results.Add(blockObj.GetTransformedCopy(matrix) as BlockReference);
-                            continue;
+                            var mcs2wcs = o.BlockTransform.PreMultiplyBy(matrix);
+                            results.AddRange(DoExtractBlockReference(o, mcs2wcs, name));
                         }
-                        var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                        results.AddRange(DoExtract(blockObj, mcs2wcs, name));
-                    }
-                }
+                    });
                 return results;
             }
         }

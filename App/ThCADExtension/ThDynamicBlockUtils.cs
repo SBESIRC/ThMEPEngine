@@ -13,7 +13,7 @@ namespace ThCADExtension
         //  https://adndevblog.typepad.com/autocad/2012/05/accessing-visible-entities-in-a-dynamic-block.html
         public static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(this ThBlockReferenceData blockReference)
         {
-            return DynablockVisibilityStates(blockReference.HostDatabase, blockReference.EffectiveName);
+            return DynablockVisibilityStates(blockReference.Database, blockReference.EffectiveName);
         }
         private static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(Database database, string blockName)
         {
@@ -82,7 +82,7 @@ namespace ThCADExtension
         public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
         {
             var visibility = blockReference.CurrentVisibilityStateValue();
-            return VisibleEntities(blockReference.HostDatabase, blockReference.EffectiveName, visibility);
+            return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
         }
 
         /// <summary>

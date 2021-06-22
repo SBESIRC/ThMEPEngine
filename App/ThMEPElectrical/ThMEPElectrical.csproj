@@ -35,6 +35,8 @@
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertDiffEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
+    <Compile Include="BlockConvert\ThBConvertElementExtractionEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />

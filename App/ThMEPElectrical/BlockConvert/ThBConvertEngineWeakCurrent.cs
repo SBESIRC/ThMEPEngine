@@ -39,12 +39,17 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
+        public override void SetVisibilityState(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            //
+        }
+
         public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.BlockTransform);
+                blockReference.TransformBy(srcBlockReference.BlockTransformToHostDwg);
             }
         }
 

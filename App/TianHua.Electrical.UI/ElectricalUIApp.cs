@@ -123,7 +123,7 @@ namespace TianHua.Electrical.UI
 
         private string BlockDwgPath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
+            return ThCADCommon.BlockConvertDwgPath();
         }
 
         [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]

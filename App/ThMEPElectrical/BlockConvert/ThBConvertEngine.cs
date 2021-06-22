@@ -32,6 +32,13 @@ namespace ThMEPElectrical.BlockConvert
         public abstract void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
 
         /// <summary>
+        /// 设置动态块可见性
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockReference"></param>
+        public abstract void SetVisibilityState(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+
+        /// <summary>
         /// 设置属性信息
         /// </summary>
         /// <param name="blkRef"></param>

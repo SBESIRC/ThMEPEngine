@@ -9179,7 +9179,7 @@ namespace ThMEPWSS.DebugNs
         //  https://adndevblog.typepad.com/autocad/2012/05/accessing-visible-entities-in-a-dynamic-block.html
         public static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(this ThBlockReferenceData blockReference)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
                 var groups = new Dictionary<string, ObjectIdCollection>();
                 var btr = acadDatabase.Blocks.ElementOrDefault(blockReference.EffectiveName);
