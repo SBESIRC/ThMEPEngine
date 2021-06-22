@@ -89,9 +89,7 @@
     <Compile Include="UI\FireHydrant.xaml.cs">
       <DependentUpon>FireHydrant.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\FlushPointUI.xaml.cs">
-      <DependentUpon>FlushPointUI.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="UI\FlushPointUI.xaml.cs" />
     <Compile Include="UI\ThTipDialog.xaml.cs">
       <DependentUpon>ThTipDialog.xaml</DependentUpon>
     </Compile>
