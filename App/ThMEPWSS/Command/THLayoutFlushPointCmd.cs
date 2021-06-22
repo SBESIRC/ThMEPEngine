@@ -1,5 +1,6 @@
 ﻿using System;
 using NFox.Cad;
+using AcHelper;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
 using ThMEPWSS.FlushPoint.Model;
@@ -32,6 +33,7 @@ namespace ThMEPWSS.Command
 #if ACAD2016
         public void Execute()
         {
+            using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
                 var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
@@ -43,11 +45,11 @@ namespace ThMEPWSS.Command
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
                 //收集数据
-                var roomExtractor = new ThRoomExtractor() 
+                var roomExtractor = new ThRoomExtractor()
                 {
                     ColorIndex = 6,
                     RoomMarkLayerFilter = new List<string> { "AI-房间名称" },
-                    RoomBoundaryLayerFilter =new List<string> { "AI-房间框线"},
+                    RoomBoundaryLayerFilter = new List<string> { "AI-房间框线" },
                 };
                 roomExtractor.Extract(acadDb.Database, pts);
                 var parkingStallExtractor = new ThParkingStallExtractor();
