@@ -81,11 +81,15 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
+                    // 获取目标图块名
                     var srcNames = new List<String>();
                     manager.Rules.Where(o => o.Mode == Mode).ForEach(o =>
                     {
-                        srcNames.Add(o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string);
+                        var block = o.Transformation.Item1;
+                        srcNames.Add(block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
                     });
+
+                    // 从图纸中提取目标图块
                     var rEngine = new ThBConvertElementExtractionEngine()
                     {
                         NameFilter = srcNames,

@@ -71,18 +71,6 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
-            // 忽略图纸空间和匿名块
-            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
-            {
-                return false;
-            }
-
-            // 忽略不可“炸开”的块
-            if (!blockTableRecord.Explodable)
-            {
-                return false;
-            }
-
             return true;
         }
     }

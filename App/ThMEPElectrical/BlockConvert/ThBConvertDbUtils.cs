@@ -1,6 +1,5 @@
 ﻿using Linq2Acad;
 using DotNetARX;
-using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
