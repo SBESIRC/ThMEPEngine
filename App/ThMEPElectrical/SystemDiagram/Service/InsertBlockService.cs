@@ -1,10 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
+﻿using DotNetARX;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 
 namespace ThMEPElectrical.SystemDiagram.Service
@@ -84,33 +83,26 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 acadDatabase.Database.ImportLayer(LayerName);
                 foreach (var BlockInfo in dicBlockPoints)
                 {
-                    try
+                    string BlockName = BlockInfo.Value.BlockName;
+                    if (!ImportBlockSet.Contains(BlockName))
                     {
-                        string BlockName = BlockInfo.Value.BlockName;
-                        if (!ImportBlockSet.Contains(BlockName))
-                        {
-                            acadDatabase.Database.ImportBlock(BlockName);
-                            ImportBlockSet.Add(BlockName);
-                        }
-                        //消火栓泵直接启动信号线 和 喷淋泵直接启动信号线 比较特殊，无需扩大100倍
-                        if (BlockName.Contains("直接启动信号线"))
-                        {
-                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(1), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
-                            var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                            blkref.TransformBy(conversionMatrix);
-                            blkref.ExplodeToOwnerSpace();
-                            blkref.Erase();
-                        }
-                        else
-                        {
-                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
-                            var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                            blkref.TransformBy(conversionMatrix);
-                        }
+                        acadDatabase.Database.ImportBlock(BlockName);
+                        ImportBlockSet.Add(BlockName);
                     }
-                    catch (Exception ex)
+                    //消火栓泵直接启动信号线 和 喷淋泵直接启动信号线 比较特殊，无需扩大100倍
+                    if (BlockName.Contains("直接启动信号线"))
                     {
-
+                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(1), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                        blkref.TransformBy(conversionMatrix);
+                        blkref.ExplodeToOwnerSpace();
+                        blkref.Erase();
+                    }
+                    else
+                    {
+                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                        blkref.TransformBy(conversionMatrix);
                     }
                 }
             }
@@ -125,19 +117,19 @@ namespace ThMEPElectrical.SystemDiagram.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
                 acadDatabase.Database.ImportBlock(BlockName);
-                try
-                {
-                    var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(-3000, 0, 0).Add(offset), new Scale3d(), 0, false, null);
-                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                    blkref.TransformBy(conversionMatrix);
-                    blkref.ExplodeToOwnerSpace();
-                    blkref.Erase();
-                }
-                catch (Exception ex)
-                {
-                }
+                var objId = acadDatabase.Database.InsertBlock(
+                    ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                    BlockName,
+                    new Point3d(-3000, 0, 0).Add(offset),
+                    new Scale3d(),
+                    0,
+                    false,
+                    null);
+                var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                blkref.TransformBy(conversionMatrix);
+                blkref.ExplodeToOwnerSpace();
+                blkref.Erase();
             }
         }
 
@@ -152,26 +144,26 @@ namespace ThMEPElectrical.SystemDiagram.Service
             {
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
-                    string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
                     string BlockName = ThAutoFireAlarmSystemCommon.FixedPartSmokeExhaust;
                     acadDatabase.Database.ImportBlock(BlockName);
-                    try
-                    {
-                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(3000 * 14 + 750, -450, 0).Add(offset), new Scale3d(), 0, false, null);
-                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                        blkref.TransformBy(conversionMatrix);
-                        var objs = new DBObjectCollection();
-                        blkref.Explode(objs);
-                        MLeader mLeader = objs[1] as MLeader;
-                        mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector.TransformBy(conversionMatrix)));
-                        blkref.Erase();
-                        ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = false;
-                        acadDatabase.ModelSpace.Add(objs[0] as MText);
-                        acadDatabase.ModelSpace.Add(mLeader);
-                    }
-                    catch
-                    {
-                    }
+                    var objId = acadDatabase.Database.InsertBlock(
+                        ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                        BlockName,
+                        new Point3d(3000 * 14 + 750, -450, 0).Add(offset),
+                        new Scale3d(),
+                        0,
+                        false,
+                        null);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
+                    var objs = new DBObjectCollection();
+                    blkref.Explode(objs);
+                    blkref.Erase();
+                    MLeader mLeader = objs[1] as MLeader;
+                    mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector.TransformBy(conversionMatrix)));
+                    acadDatabase.ModelSpace.Add(objs[0] as MText);
+                    acadDatabase.ModelSpace.Add(mLeader);
+                    ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = false;
                 }
             }
         }
@@ -188,13 +180,12 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 var objId = acadDatabase.Database.InsertBlock(
                     ThAutoFireAlarmSystemCommon.CountBlockByLayer,
                     ThAutoFireAlarmSystemCommon.CountBlockName,
-                    Point3d.Origin,
+                    position.Add(offset),
                     scale,
                     angle,
                     true,
                     attNameValues);
                 var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                blkref.Position = position.Add(offset);
                 blkref.TransformBy(conversionMatrix);
             }
         }
