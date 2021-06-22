@@ -1,6 +1,6 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using ThMEPWSS.Command;
-using ThMEPWSS.Diagram.ViewModel;
+﻿using ThMEPWSS.Command;
+using ThMEPWSS.ViewModel;
+using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -10,18 +10,23 @@ namespace TianHua.Plumbing.WPF.UI.UI
         uiDrainageSystem uiDrainage;
         uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
+        FlushPointUI uiFlushPoint;
         public void Initialize()
         {
             uiFireHydrant = null;
+            uiFlushPoint = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM==null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
+            }
+            if (THLayoutFlushPointCmd.FlushPointVM == null)
+            {
+                THLayoutFlushPointCmd.FlushPointVM = new ThFlushPointVM();
             }
         }
 
         public void Terminate()
         {
-            uiFireHydrant = null;
         }
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
@@ -93,14 +98,25 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new uiDrainageSysAboveGround();
             AcadApp.ShowModelessWindow(ui);
         }
+
+        [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]
+
+        public void THDXCX()
+        {
+            if (uiFlushPoint != null && uiFlushPoint.IsLoaded)
+            {
+                return;
+            }
+            uiFlushPoint = new FlushPointUI(THLayoutFlushPointCmd.FlushPointVM);
+            AcadApp.ShowModelessWindow(uiFlushPoint);
+        }
+
         [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
         public void THXHSJH()
         {
-            // FireHydrant protect radius check  
             if (uiFireHydrant != null && uiFireHydrant.IsLoaded)
                 return;
             uiFireHydrant = new FireHydrant(ThHydrantProtectionRadiusCmd.FireHydrantVM);
-            uiFireHydrant.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiFireHydrant);
         }
     }

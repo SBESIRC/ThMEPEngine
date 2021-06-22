@@ -115,7 +115,6 @@
     <Compile Include="FlushPoint\Service\ThCollectingWellNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThDrainageDitchNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThFilterWashPointsService.cs" />
-    <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
     <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
     <Compile Include="FlushPoint\Service\ThLayoutWashPointMarkService.cs" />
     <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
@@ -328,6 +327,7 @@
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\ThFlushPointVM.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />

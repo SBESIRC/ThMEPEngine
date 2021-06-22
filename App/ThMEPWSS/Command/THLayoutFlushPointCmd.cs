@@ -1,6 +1,8 @@
 ﻿using System;
 using NFox.Cad;
 using AcHelper.Commands;
+using ThMEPWSS.ViewModel;
+using ThMEPWSS.FlushPoint.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 
 #if ACAD2016
@@ -22,6 +24,7 @@ namespace ThMEPWSS.Command
 {
     public class THLayoutFlushPointCmd : IAcadCommand, IDisposable
     {
+        public static ThFlushPointVM FlushPointVM { get; set; }
         public void Dispose()
         {
         }
@@ -90,8 +93,7 @@ namespace ThMEPWSS.Command
                 var layoutInfo = filterService.LayoutInfo; //用于保存插入块的结果、靠近/远离排水设施的点 
 
                 var layOutPts = washPoints; //区域满布
-                if (ThFlushPointParameterService.Instance.FlushPointParameter.
-                        OnlyDrainageFaclityNearbyOfArrangePosition)
+                if (FlushPointVM.Parameter.ArrangePosition == ArrangePositionOps.OnlyDrainageFacility)
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
                 }
@@ -127,22 +129,17 @@ namespace ThMEPWSS.Command
         {
             var washPara = new ThWashParam();
             // 保护半径
-            washPara.R = (int)ThFlushPointParameterService.Instance.FlushPointParameter.ProtectRadius;
+            washPara.R = (int)FlushPointVM.Parameter.ProtectRadius;
             // 建筑空间（隔油池、水泵房、垃圾房等）
-            washPara.protect_arch = ThFlushPointParameterService.Instance.
-                FlushPointParameter.NecessaryArrangeSpaceOfProtectTarget;
+            washPara.protect_arch = FlushPointVM.Parameter.NecessaryArrangeSpaceOfProtectTarget;
             // 停车区域
-            washPara.protect_park = ThFlushPointParameterService.Instance.
-                FlushPointParameter.ParkingAreaOfProtectTarget;
+            washPara.protect_park = FlushPointVM.Parameter.ParkingAreaOfProtectTarget;
             // 其它空间
-            washPara.protect_other = ThFlushPointParameterService.Instance.
-                FlushPointParameter.OtherSpaceOfProtectTarget;
+            washPara.protect_other = FlushPointVM.Parameter.OtherSpaceOfProtectTarget;
             // 必布空间的点位可以保护停车区域和其他空间
-            washPara.extend_arch = ThFlushPointParameterService.Instance.
-                FlushPointParameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
+            washPara.extend_arch = FlushPointVM.Parameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
             // 停车区域的点位可以保护其他空间
-            washPara.extend_park = ThFlushPointParameterService.Instance.
-                FlushPointParameter.ParkingAreaPointsOfArrangeStrategy;
+            washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
             return washPara;
         }
 #else

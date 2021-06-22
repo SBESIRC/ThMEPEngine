@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Controls;
 
-namespace TianHua.Plumbing.UI.Validation
+namespace TianHua.Plumbing.WPF.UI.Validations
 {
     public class ProtectRadiusRule : ValidationRule
     {         

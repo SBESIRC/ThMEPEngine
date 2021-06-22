@@ -1,4 +1,4 @@
-﻿using ThMEPWSS.Diagram.ViewModel;
+﻿using ThMEPWSS.ViewModel;
 using ThControlLibraryWPF.CustomControl;
 
 namespace TianHua.Plumbing.WPF.UI.UI

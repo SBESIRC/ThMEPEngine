@@ -1,6 +1,6 @@
 ﻿using System;
 using AcHelper.Commands;
-using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.ViewModel;
 
 #if ACAD2016
 using AcHelper;

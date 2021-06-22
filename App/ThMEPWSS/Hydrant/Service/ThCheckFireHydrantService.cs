@@ -2,11 +2,11 @@
 using CLI;
 using System.Linq;
 using ThMEPEngineCore.IO;
+using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Data;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPWSS.Diagram.ViewModel;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;

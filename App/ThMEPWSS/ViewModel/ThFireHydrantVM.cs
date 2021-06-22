@@ -6,7 +6,7 @@ using ThMEPWSS.Hydrant.Service;
 using GalaSoft.MvvmLight.Command;
 using System.Collections.ObjectModel;
 
-namespace ThMEPWSS.Diagram.ViewModel
+namespace ThMEPWSS.ViewModel
 {
     public class ThFireHydrantVM
     {       

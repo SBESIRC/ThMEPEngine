@@ -5,6 +5,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore;
+using ThMEPWSS.Command;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
@@ -282,8 +283,8 @@ namespace ThMEPWSS.FlushPoint.Service
             Rooms = new List<Entity>();
             Columns = new List<Entity>();
             WashPoints = new List<Point3d>();
-            FloorSign = ThFlushPointParameterService.Instance.FlushPointParameter.FloorSign;
-            PlotScale = ThFlushPointParameterService.Instance.FlushPointParameter.PlotScale;
+            FloorSign = THLayoutFlushPointCmd.FlushPointVM.Parameter.FloorSign;
+            PlotScale = THLayoutFlushPointCmd.FlushPointVM.Parameter.PlotScale;
         }
         public bool IsValid
         {

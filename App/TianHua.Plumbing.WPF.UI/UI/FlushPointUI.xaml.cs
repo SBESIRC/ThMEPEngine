@@ -1,14 +1,15 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using TianHua.Plumbing.UI.ViewModel;
+using ThMEPWSS.ViewModel;
+using TianHua.Plumbing.WPF.UI.Validations;
 
-namespace TianHua.Plumbing.UI.View
+namespace TianHua.Plumbing.WPF.UI.UI
 {
     public partial class FlushPointUI : Window
     {
-        private FlushPointVM FlushVM { get; set; }
+        private ThFlushPointVM FlushVM { get; set; }
         
-        public FlushPointUI(FlushPointVM flushVM)
+        public FlushPointUI(ThFlushPointVM flushVM)
         {
             InitializeComponent();
             FlushVM = flushVM;
@@ -47,7 +48,7 @@ namespace TianHua.Plumbing.UI.View
         private void tbProtectRadius_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             var tb = sender as System.Windows.Controls.TextBox;
-            if(!new TianHua.Plumbing.UI.Validation.ProtectRadiusRule().Validate(tb.Text))
+            if(!new ProtectRadiusRule().Validate(tb.Text))
             {
                 double value = 0.0;
                 if (double.TryParse(tb.Text, out value))
