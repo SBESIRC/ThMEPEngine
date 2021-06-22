@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm.DijkstraAlgorithm;
 using ThMEPEngineCore.Model;
 
@@ -21,14 +22,15 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         public List<KeyValuePair<Point3d, Vector3d>> Layout(List<Line> lanes, List<Polyline> doors, List<ThIfcRoom> rooms)
         {
             List<KeyValuePair<Point3d, Vector3d>> resLayout = new List<KeyValuePair<Point3d, Vector3d>>();
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService(); 
             foreach (var thRoom in rooms)
             {
                 var room = thRoom.Boundary as Polyline;
                 //获取需要的构建信息
                 var bufferRoom = room.Buffer(tol)[0] as Polyline;
-                var needDoors = GetNeedDoors(doors, bufferRoom);
+                var needDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
                 var doorPts = needDoors.Select(x => x.GetRectangleCenterPt()).ToList();
-                var nLanes = GetNeedLanes(lanes, room);
+                var nLanes = getLayoutStructureService.GetNeedLanes(lanes, room);
 
                 //计算延申线（用于计算最短路径）
                 var extendLines = CreateExtendLines(doorPts, nLanes);
@@ -159,31 +161,6 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             }
 
             return extendLines;
-        }
-
-        /// <summary>
-        /// 找到需要的与房间相交的门
-        /// </summary>
-        /// <param name="doors"></param>
-        /// <param name="room"></param>
-        /// <returns></returns>
-        private List<Polyline> GetNeedDoors(List<Polyline> doors, Polyline room)
-        {
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
-            return thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
-        }
-
-        /// <summary>
-        /// 获取空间内的车道线或者中心线
-        /// </summary>
-        /// <param name="lanes"></param>
-        /// <param name="room"></param>
-        /// <returns></returns>
-        private List<Line> GetNeedLanes(List<Line> lanes, Polyline room)
-        {
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(lanes.ToCollection());
-            var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
-            return needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
         }
     }
 }
