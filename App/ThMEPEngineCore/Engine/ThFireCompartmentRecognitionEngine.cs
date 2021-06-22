@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -99,21 +100,16 @@ namespace ThMEPEngineCore.Engine
         private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)
         {
             frames = frames.OrderByDescending(x => x.Area).ToList();
-
             Dictionary<Polyline, List<Polyline>> holeDic = new Dictionary<Polyline, List<Polyline>>(); //外包框和洞口
             while (frames.Count > 0)
             {
                 var firFrame = frames[0];
                 frames.Remove(firFrame);
-                //firFrame = firFrame.DPSimplify(1);
-
                 var bufferFrames = firFrame.Buffer(1)[0] as Polyline;
                 var holes = frames.Where(x => bufferFrames.Contains(x)).ToList();
-                frames.RemoveAll(x => holes.Contains(x));
                 if (holes.Count > 0)
                     holeDic.Add(firFrame, holes);
             }
-
             return holeDic;
         }
 
@@ -126,14 +122,25 @@ namespace ThMEPEngineCore.Engine
         }
         private Entity GetMpolygon(List<Polyline> polylines)
         {
-            var mPolygon = polylines.ToCollection().BuildArea();
-            if (mPolygon.Count == 1 && mPolygon[0] is MPolygon)
+            if (polylines.Count == 1)
+                return polylines[0];
+            //var mPolygon = polylines.ToCollection().BuildArea();
+            var rGeometry = polylines[0].ToNTSPolygon().Difference(polylines.Skip(1).ToCollection().UnionGeometries());
+            if (rGeometry is Polygon polygon)
             {
-                return mPolygon[0] as MPolygon;
+                var newEntity = polygon.ToDbEntity();
+                return newEntity;
             }
             else
             {
-                throw new ArgumentException();
+                //说明有边相邻，产生了杂边，需要剔除杂边
+                var diffobjs = rGeometry.ToDbCollection();
+                var samePolys = diffobjs.Cast<Polyline>()
+                    .Select(x => x.Buffer(-1))
+                    .Where(x => x.Count > 0)
+                    .Select(x => x[0] as Polyline)
+                    .Select(x => x.Buffer(1)[0] as Polyline);
+                return GetMpolygon(samePolys.ToList());
             }
         }
     }
