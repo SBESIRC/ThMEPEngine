@@ -14,8 +14,15 @@ namespace ThMEPHVAC.Model
     };
     public class Port_Info
     {
-        public double air_vloume { get; set; }
-    }
+        public double air_volume;
+        public Point3d position;
+        public Port_Info() { }
+        public Port_Info(double air_volume_, Point3d position_)
+        {
+            air_volume = air_volume_;
+            position = position_;
+        }
+    };
     public class Endline_Info
     {
         public bool distrib_enable;
@@ -30,14 +37,12 @@ namespace ThMEPHVAC.Model
     };
     public class Merged_endline_Info
     {
-        public double total_len;
-        public double in_port_width;
+        public string in_size_info;
         public List<Endline_Info> segments;
-        public Merged_endline_Info(double total_len_, List<Endline_Info> segments_, double in_port_width_)
+        public Merged_endline_Info(List<Endline_Info> segments_, string in_size_info_)
         {
             segments = segments_;
-            total_len = total_len_;
-            in_port_width = in_port_width_;
+            in_size_info = in_size_info_;
         }
     };
     public class Special_graph_Info 
@@ -71,9 +76,8 @@ namespace ThMEPHVAC.Model
         public List<Special_graph_Info> special_shapes_info { get; set; }
 
         // 用于内部传参
-        private string scenario;
+        private string ui_duct_size;
         private Line start_line;
-        private double len_count;
         private double in_speed;
         private double air_volumn;
         private Tolerance point_tor;
@@ -109,9 +113,23 @@ namespace ThMEPHVAC.Model
             Get_merged_endline_in_port_width(center_lines_, search_point, start_line);
             Reset_flag();
             Search_special_shape_info(search_point, start_line);
-            
         }
-        
+        private void Init_param(DBObjectCollection center_lines_, ThDuctPortsParam in_param)
+        {
+            ui_duct_size = in_param.in_duct_size;
+            air_volumn = in_param.air_volumn;
+            endline_enable = false;
+            line_set = new HashSet<Line>();
+            endline_in_air_volume = new Queue<double>();
+            main_ducts = new List<ThDuctEdge<ThDuctVertex>>();
+            merged_endlines = new List<Merged_endline_Info>();
+            special_shapes_info = new List<Special_graph_Info>();
+            spatial_index = new ThCADCoreNTSSpatialIndex(center_lines_);
+            point_tor = new Tolerance(1.5, 1.5);
+            in_speed = in_param.air_speed;
+            string[] s = in_param.in_duct_size.Split('x');
+            ui_duct_width = double.Parse(s[0]);
+        }
         private void Remove_endline_end_seg(DBObjectCollection center_lines_)
         {
             foreach (var info in merged_endlines)
@@ -195,7 +213,7 @@ namespace ThMEPHVAC.Model
         private void Get_merged_endline_in_port_width(DBObjectCollection center_lines_, Point3d search_point, Line start_line)
         {
             if (center_lines_.Count == 1)
-                merged_endlines[0].in_port_width = ui_duct_width;
+                merged_endlines[0].in_size_info = ui_duct_size;
             else
                 Set_merged_endline_in_port_width(search_point, start_line);
         }
@@ -208,30 +226,12 @@ namespace ThMEPHVAC.Model
                 List<Endline_Info> list = new List<Endline_Info>();
                 ThDuctEdge<ThDuctVertex> edge = new ThDuctEdge<ThDuctVertex>(new ThDuctVertex(l.StartPoint), new ThDuctVertex(l.EndPoint));
                 list.Add(new Endline_Info(edge));
-                Merged_endline_Info info = new Merged_endline_Info(l.Length, list, ui_duct_width);
+                var info = new Merged_endline_Info(list, ui_duct_size);
                 merged_endlines.Add(info);
             }
             else
                 Count_endline_len(search_point, start_line);
         }
-        private void Init_param(DBObjectCollection center_lines_, ThDuctPortsParam in_param)
-        {
-            len_count = 0;
-            scenario = in_param.scenario;
-            air_volumn = in_param.air_volumn;
-            endline_enable = false;
-            line_set = new HashSet<Line>();
-            endline_in_air_volume = new Queue<double>();
-            main_ducts = new List<ThDuctEdge<ThDuctVertex>>();
-            merged_endlines = new List<Merged_endline_Info>();
-            special_shapes_info = new List<Special_graph_Info>();
-            spatial_index = new ThCADCoreNTSSpatialIndex(center_lines_);
-            point_tor = new Tolerance(1.5, 1.5);
-            in_speed = in_param.air_speed;
-            string[] s = in_param.in_duct_size.Split('x');
-            ui_duct_width = double.Parse(s[0]);
-        }
-        
         private void Get_start_line(DBObjectCollection center_lines_, Point3d start_point, out Point3d search_point)
         {
             start_line = new Line();
@@ -301,30 +301,30 @@ namespace ThMEPHVAC.Model
         }
         private void Record_shape_parameter(Point3d center_point, Line in_line, DBObjectCollection out_lines)
         {
+            string duct_size = ui_duct_size;
             List<Line> lines = new List<Line>();
             List<double> shape_port_widths = new List<double>();
             Point3d tar_point = center_point.IsEqualTo(in_line.StartPoint, point_tor) ? in_line.EndPoint : in_line.StartPoint;
             lines.Add(new Line(center_point, tar_point));
-            shape_port_widths.Add(Get_special_shape_port_width(in_line, ui_duct_width));
+            shape_port_widths.Add(Get_special_shape_port_width(in_line, ref duct_size));
             is_first = false;
-            double in_width = shape_port_widths[0];
             foreach (Line l in out_lines)
             {
-                shape_port_widths.Add(Get_special_shape_port_width(l, in_width));
+                string size = duct_size;
+                shape_port_widths.Add(Get_special_shape_port_width(l, ref size));
                 tar_point = center_point.IsEqualTo(l.StartPoint, point_tor) ? l.EndPoint : l.StartPoint;
                 lines.Add(new Line(center_point, tar_point));
             }
             special_shapes_info.Add(new Special_graph_Info(lines, shape_port_widths));
         }
-        private double Get_special_shape_port_width(Line current_line, double width_limit)
+        private double Get_special_shape_port_width(Line current_line, ref string duct_size)
         {
-            string duct_size = string.Empty;
             var seg = Search_endline(current_line);
             if (seg != null)
             {
                 var speed = (main_ducts.Count == 0) ? in_speed : 0;
                 return ((main_ducts.Count == 0) && is_first) ? ui_duct_width : 
-                         ThDuctPortsService.Calc_duct_width(Get_endline_air_volume(seg), width_limit, speed, scenario, ref duct_size);
+                         ThDuctPortsService.Calc_duct_width(is_first, speed, Get_endline_air_volume(seg), ref duct_size);
             }
             else
                 return ui_duct_width;
@@ -350,7 +350,7 @@ namespace ThMEPHVAC.Model
             }
             foreach (Line l in res)
             {
-                double width = ui_duct_width;
+                string size_info = ui_duct_size;
                 Point3d step_p = search_point.IsEqualTo(l.StartPoint, point_tor) ? l.EndPoint : l.StartPoint;
                 Set_merged_endline_in_port_width(step_p, l);
                 if (endline_enable)
@@ -358,8 +358,8 @@ namespace ThMEPHVAC.Model
                     if (res.Count > 1)
                     {
                         var merged_endline_idx = Search_endline_idx(l);
-                        width = ThDuctPortsService.Calc_duct_width(endline_in_air_volume.Dequeue(), width, scenario);
-                        merged_endlines[merged_endline_idx.i].in_port_width = width;
+                        ThDuctPortsService.Calc_duct_width(false, 0, endline_in_air_volume.Dequeue(), ref size_info);
+                        merged_endlines[merged_endline_idx.i].in_size_info = size_info;
                         endline_enable = false;
                     }
                 }
@@ -372,7 +372,7 @@ namespace ThMEPHVAC.Model
             var res = Detect_cross_line(search_point, current_line);
             if (res.Count == 0)
             {
-                Record_endline_info(res, current_line, search_point);
+                Record_endline_info(current_line, search_point);
                 return;
             }
 
@@ -391,12 +391,13 @@ namespace ThMEPHVAC.Model
             res.Remove(current_line);
             return res;
         }
-        private void Record_endline_info(DBObjectCollection res, Line current_line, Point3d search_point)
+        private void Record_endline_info(Line current_line, Point3d search_point)
         {
             endline_enable = true;
-            lines_ptr = new List<Endline_Info>();
-            lines_ptr.Add(new Endline_Info(Create_directed_edge_by_line(current_line, search_point, 0, 0, 0)));
-            len_count = current_line.Length;
+            lines_ptr = new List<Endline_Info>
+            {
+                new Endline_Info(Create_directed_edge_by_line(current_line, search_point, 0, 0, 0))
+            };
             line_set.Add(current_line);
         }
         private void Record_merged_endline_info(DBObjectCollection res, Line current_line, Point3d search_point)
@@ -406,12 +407,10 @@ namespace ThMEPHVAC.Model
                 if (res.Count == 1)
                 {
                     lines_ptr.Add(new Endline_Info(Create_directed_edge_by_line(current_line, search_point, 0, 0, 0)));
-                    len_count += current_line.Length;
                 }
                 if (res.Count > 1 || Is_same_line(start_line, current_line))
                 {
-                    merged_endlines.Add(new Merged_endline_Info(len_count, lines_ptr, ui_duct_width));
-                    len_count = 0;
+                    merged_endlines.Add(new Merged_endline_Info(lines_ptr, ui_duct_size));
                     endline_enable = false;
                 }
             }
@@ -421,10 +420,12 @@ namespace ThMEPHVAC.Model
             var source_point = end_point.IsEqualTo(l.StartPoint, point_tor) ? l.EndPoint : l.StartPoint;
             ThDuctVertex source = new ThDuctVertex(source_point);
             ThDuctVertex target = new ThDuctVertex(end_point);
-            var edge = new ThDuctEdge<ThDuctVertex>(source, target);
-            edge.SourceShrink = src_shrink;
-            edge.TargetShrink = tar_shrink;
-            edge.AirVolume = air_volumn;
+            var edge = new ThDuctEdge<ThDuctVertex>(source, target)
+            {
+                SourceShrink = src_shrink,
+                TargetShrink = tar_shrink,
+                AirVolume = air_volumn
+            };
             return edge;
         }
         private bool Is_exclude(ThDuctEdge<ThDuctVertex> edge, DBObjectCollection exclude_lines)
@@ -476,7 +477,7 @@ namespace ThMEPHVAC.Model
             if (info.ports.Count == 0)
                 return info.direct_edge.AirVolume;
             else
-                return info.ports[info.ports.Count - 1].air_vloume;
+                return info.ports[info.ports.Count - 1].air_volume;
         }
     }
 }

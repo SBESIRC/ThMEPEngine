@@ -179,7 +179,7 @@ namespace TianHua.Hvac.UI
 
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
-            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed));
+            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed), true);
 
             Model.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
             Model.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);

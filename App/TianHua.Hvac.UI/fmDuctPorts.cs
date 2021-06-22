@@ -110,7 +110,7 @@ namespace TianHua.Hvac.UI
         {
             if (Math.Abs(air_speed) < 1e-3 || Math.Abs(air_volume) < 1e-3)
                 return;
-            var Duct = new ThDuctParameter(air_volume, air_speed);
+            var Duct = new ThDuctParameter(air_volume, air_speed, true);
             listBox1.Items.Clear();
             foreach (var duct_size in Duct.DuctSizeInfor.DefaultDuctsSizeString)
                 listBox1.Items.Add(duct_size);

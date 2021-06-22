@@ -418,7 +418,7 @@ namespace TianHua.Hvac.UI.Command
         private fmBypass Create_bypass_diag(ThDbModelFan DbFanModel, string airVloume)
         {
             var air_volume = DbFanModel.LowFanVolume == 0 ? DbFanModel.FanVolume : DbFanModel.LowFanVolume;
-            ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
+            ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario), true);
             var ductModel = new DuctSpecModel()
             {
                 AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario),
@@ -440,7 +440,7 @@ namespace TianHua.Hvac.UI.Command
         private fmDuctSpec Create_duct_diag(ThDbModelFan DbFanModel)
         {
             var air_volume = DbFanModel.LowFanVolume == 0 ? DbFanModel.FanVolume : DbFanModel.LowFanVolume;
-            ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
+            ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario), true);
             var ductModel = new DuctSpecModel()
             {
                 AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario),

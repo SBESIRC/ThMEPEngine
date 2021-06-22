@@ -23,7 +23,7 @@ namespace ThMEPHVAC.Model
                     int seg_port_num = edge.ports.Count;
                     if (seg_port_num > 0)
                     {
-                        edge.direct_edge.AirVolume = edge.ports[seg_port_num - 1].air_vloume;
+                        edge.direct_edge.AirVolume = edge.ports[seg_port_num - 1].air_volume;
                         pre_air_volume = edge.direct_edge.AirVolume;
                     }
                     else
@@ -59,7 +59,7 @@ namespace ThMEPHVAC.Model
                     foreach (var port in edge.ports)
                     {
                         cur_air_volume += average_air_volume;
-                        port.air_vloume = cur_air_volume;
+                        port.air_volume = cur_air_volume;
                     }
                 }
             }

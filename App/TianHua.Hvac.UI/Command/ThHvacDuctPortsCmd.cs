@@ -25,6 +25,8 @@ namespace TianHua.Hvac.UI.Command
         public void Execute()
         {
             Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines);
+            if (center_lines.Count == 0)
+                return;
             Get_exclude_line("请选择不布置风口的线", out DBObjectCollection exclude_line);
             Get_duct_port_info();
             if (in_param.scale == null)
@@ -38,6 +40,7 @@ namespace TianHua.Hvac.UI.Command
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
+
             var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
             var painter = new ThDuctPortsDraw(in_param, judger.dir_align_points, judger.ver_align_points);
             painter.Draw(graph_res, adjust_graph);

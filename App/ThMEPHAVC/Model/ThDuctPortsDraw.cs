@@ -78,16 +78,19 @@ namespace ThMEPHVAC.Model
         private string geo_layer;
         private string flg_layer;
         private string port_layer;
+        private string valve_layer;
         private string center_layer;
         private string duct_size_layer;
         private string dimension_layer;
         private string port_mark_layer;
         private string scale;
         private string port_name;
+        private string valve_name;
         private string block_name;
         private string port_mark_name;
         private string duct_size_style;
         private string ui_duct_size;
+        private string valve_visibility;
         private List<Point2d> duct_dir_align_points;
         private List<Point2d> duct_ver_align_points;
         private bool have_main;
@@ -99,6 +102,8 @@ namespace ThMEPHVAC.Model
             block_name = "风口-AI研究中心";
             port_mark_name = "风口标注";
             duct_size_style = "HT-STYLE3";
+            valve_name = "风阀";
+            valve_visibility = "多叶调节风阀";
             Set_layer();
             Import_Layer_Block();
             elevation = in_param.elevation;
@@ -123,31 +128,32 @@ namespace ThMEPHVAC.Model
             Draw_mainlines(anay_res);
             Draw_special_shape(anay_res.special_shapes_info);
             Draw_port_mark(endlines);
+            Insert_valve(anay_res.merged_endlines.Count, endlines);
         }
 
         private void Draw_port_mark(ThDuctPortsConstructor endlines)
         {
             var last_seg = endlines.endline_segs[endlines.endline_segs.Count - 1];
-            var ports = last_seg[last_seg.Count - 1].ports_position;
-            Point3d p = ports[0] + new Vector3d(1500, 2000, 0);
+            var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
+            Point3d p = ports[ports.Count - 1].position + new Vector3d(1500, 2000, 0);
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
             double h = Get_text_heigt();
             double scale = h * 2 / 3;
+            double single_port_volume = air_volumn / port_num;
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(scale, scale, 1), 0,
                           new Dictionary<string, string> { { "风口名称", port_name }, 
                                                            { "尺寸", port_size }, 
                                                            { "数量", port_num.ToString() }, 
-                                                           { "风量", air_volumn.ToString() } });
+                                                           { "风量", air_volumn.ToString() + "/" + single_port_volume.ToString("0.")} });
             }
-            Insert_leader(ports[0], p);
+            Insert_leader(ports[ports.Count - 1].position, p);
         }
 
         private void Insert_leader(Point3d srt_p, Point3d end_p)
         {
-            Leader leader = new Leader();
-            leader.HasArrowHead = true;
+            Leader leader = new Leader { HasArrowHead = true };
             leader.AppendVertex(srt_p);
             leader.AppendVertex(end_p);
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -168,6 +174,7 @@ namespace ThMEPHVAC.Model
                     flg_layer = "H-DAPP-DAPP";
                     port_layer = "H-DAPP-DGRIL";
                     center_layer = "H-DUCT-DUAL-MID";
+                    valve_layer = "H-DAPP-DDAMP";
                     duct_size_layer = "H-DIMS-DUAL";
                     dimension_layer = "H-DIMS-DUAL";
                     port_mark_layer = "H-DIMS-DUAL";
@@ -179,6 +186,7 @@ namespace ThMEPHVAC.Model
                     flg_layer = "H-DAPP-FAPP";
                     port_layer = "H-DAPP-FGRIL";
                     center_layer = "H-DUCT-FIRE-MID";
+                    valve_layer = "H-DAPP-FDAMP";
                     duct_size_layer = "H-DIMS-FIRE";
                     dimension_layer = "H-DIMS-FIRE";
                     port_mark_layer = "H-DIMS-FIRE";
@@ -195,6 +203,7 @@ namespace ThMEPHVAC.Model
                     flg_layer = "H-DAPP-AAPP";
                     port_layer = "H-DAPP-GRIL";
                     center_layer = "H-DUCT-VENT-MID";
+                    valve_layer = "H-DAPP-DAMP";
                     duct_size_layer = "H-DIMS-DUCT";
                     dimension_layer = "H-DIMS-DUCT";
                     port_mark_layer = "H-DIMS-DUCT";
@@ -209,12 +218,14 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(geo_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(flg_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(port_layer));
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(valve_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(center_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(duct_size_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(dimension_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(port_mark_layer));
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(port_mark_name), false);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(block_name), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(valve_name), false);
             }
         }
         private void Draw_special_shape(List<Special_graph_Info> special_shapes_info)
@@ -294,7 +305,6 @@ namespace ThMEPHVAC.Model
             Draw_lines(tee.flg, mat, flg_layer);
             Draw_lines(tee.center_line, mat, center_layer);
         }
-
         private Tee_Info Get_tee_info(Special_graph_Info info, out Tee_Type type)
         {
             bool is_flip;
@@ -391,7 +401,6 @@ namespace ThMEPHVAC.Model
                 mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
             return mat;
         }
-
         private static Elbow_Info Get_elbow_info(Special_graph_Info info)
         {
             Line in_line = info.lines[0];
@@ -447,7 +456,7 @@ namespace ThMEPHVAC.Model
             for (int i = 0; i < endlins.endline_segs.Count; ++i)
             {
                 var infos = endlins.endline_segs[i];
-                Draw_port_duct(infos, duct_dir_align_points[i], duct_ver_align_points[i], ref pre_duct_text_info);
+                Draw_port_duct(infos.segs, duct_dir_align_points[i], duct_ver_align_points[i], ref pre_duct_text_info);
             }
         }
         private void Draw_port_duct(List<Duct_ports_Info> infos, 
@@ -477,27 +486,33 @@ namespace ThMEPHVAC.Model
             Insert_ver_dimension(infos, ver_wall_point);
             Insert_dir_dimension(infos, dir_wall_point);
         }
-
         private void Insert_ver_dimension(List<Duct_ports_Info> infos, Point2d ver_wall_point)
         {
             using (AcadDatabase db = AcadDatabase.Active())
             {
-                var layerId = db.Layers.ElementOrDefault(dimension_layer).ObjectId;
                 if (infos.Count > 0)
                 {
-                    var info = infos[0];
-                    Vector3d dir_vec = Get_edge_direction(info.l);
-                    var positions = info.ports_position;
-                    if (positions.Count > 0)
+                    var port_info = infos[infos.Count - 1].ports_info;
+                    if (port_info.Count > 0)
                     {
-                        var dim = Create_align_dim(new Point3d(ver_wall_point.X, ver_wall_point.Y, 0), positions[0], dir_vec, layerId);
-                        db.ModelSpace.Add(dim);
-                        dim.SetDatabaseDefaults();
+                        var p = port_info[port_info.Count - 1].position;
+                        var layerId = db.Layers.ElementOrDefault(dimension_layer).ObjectId;
+                        if (infos.Count > 0)
+                        {
+                            var info = infos[0];
+                            Vector3d dir_vec = Get_edge_direction(info.l);
+                            var positions = info.ports_info;
+                            if (positions.Count > 0)
+                            {
+                                var dim = Create_align_dim(new Point3d(ver_wall_point.X, ver_wall_point.Y, 0), p, dir_vec, layerId);
+                                db.ModelSpace.Add(dim);
+                                dim.SetDatabaseDefaults();
+                            }
+                        }
                     }
-                }
+                } 
             }
         }
-
         private void Insert_dir_dimension(List<Duct_ports_Info> infos, Point2d dir_wall_point)
         {
             using (AcadDatabase db = AcadDatabase.Active())
@@ -509,13 +524,17 @@ namespace ThMEPHVAC.Model
                     var info = infos[i];
                     Vector3d dir_vec = Get_edge_direction(info.l);
                     Vector3d vertical_vec = Get_dimension_vertical_vec(dir_vec);
-                    for (int j = 0; j < info.ports_position.Count - 1; ++j)
+                    for (int j = 0; j < info.ports_info.Count - 1; ++j)
                     {
-                        var dim = Create_align_dim(info.ports_position[j], info.ports_position[j + 1], vertical_vec, layerId);
-                        db.ModelSpace.Add(dim);
-                        dim.SetDatabaseDefaults();
+                        if (info.ports_info[j].air_volume > 0 &&
+                            info.ports_info[j + 1].air_volume > 0)
+                        {
+                            var dim = Create_align_dim(info.ports_info[j].position, info.ports_info[j + 1].position, vertical_vec, layerId);
+                            db.ModelSpace.Add(dim);
+                            dim.SetDatabaseDefaults();
+                        }
                     }
-                    Draw_gap_dimension(infos, i, vertical_vec, layerId, db);
+                    Draw_gap_dimension(infos, i, vertical_vec, dir_wall_point, layerId, db);
                 }
             }
         }
@@ -539,44 +558,44 @@ namespace ThMEPHVAC.Model
 
         private void Insert_out_wall_point(List<Duct_ports_Info> infos, Point3d wall_p)
         {
-            if (infos.Count > 0 && infos[0].ports_position.Count > 0)
+            if (infos.Count > 0 && infos[0].ports_info.Count > 0)
             {
                 var first_info = infos[0];
-                var first_pos = first_info.ports_position[0];
+                var first_pos = first_info.ports_info[0];
                 var last_info = infos[infos.Count - 1];
-                if (last_info.ports_position.Count > 0)
+                if (last_info.ports_info.Count > 0)
                 {
-                    var last_pos = last_info.ports_position[last_info.ports_position.Count - 1];
-                    if (wall_p.DistanceTo(last_pos) < wall_p.DistanceTo(first_pos))
-                        last_info.ports_position.Insert(last_info.ports_position.Count, wall_p);
+                    var last_pos = last_info.ports_info[last_info.ports_info.Count - 1];
+                    if (wall_p.DistanceTo(last_pos.position) < wall_p.DistanceTo(first_pos.position))
+                        last_info.ports_info.Insert(last_info.ports_info.Count, new Port_Info(0, wall_p));
                     else
-                        first_info.ports_position.Insert(0, wall_p);
+                        first_info.ports_info.Insert(0, new Port_Info(0, wall_p));
                 }
                 else
-                    first_info.ports_position.Insert(0, wall_p);
+                    first_info.ports_info.Insert(0, new Port_Info(0, wall_p));
             }
         }
 
         private void Insert_wall_point(Duct_ports_Info info, Point3d wall_p, int min_idx)
         {
-            if (info.ports_position.Count > 0)
+            if (info.ports_info.Count > 0)
             {
-                Point3d min_p = info.ports_position[min_idx];
+                Point3d min_p = info.ports_info[min_idx].position;
                 Vector3d dir1 = (wall_p - min_p).GetNormal();
                 Vector3d dir2 = Get_edge_direction(info.l);
                 if (Math.Abs(dir1.DotProduct(dir2) - 1) < 1e-3)
-                    info.ports_position.Insert(min_idx, wall_p);
+                    info.ports_info.Insert(min_idx, new Port_Info(0, wall_p));
                 else
-                    info.ports_position.Insert(min_idx + 1, wall_p);
+                    info.ports_info.Insert(min_idx + 1, new Port_Info(0, wall_p));
             }
         }
         private void Search_nearest_point(Duct_ports_Info info, Point3d wall_p, out int min_idx)
         {
             min_idx = 0;
             double min_dis = Double.MaxValue;
-            for (int i = 0; i < info.ports_position.Count; ++i)
+            for (int i = 0; i < info.ports_info.Count; ++i)
             {
-                double cur_dis = wall_p.DistanceTo(info.ports_position[i]);
+                double cur_dis = wall_p.DistanceTo(info.ports_info[i].position);
                 if (cur_dis < min_dis)
                 {
                     min_dis = cur_dis;
@@ -591,27 +610,35 @@ namespace ThMEPHVAC.Model
             Vector3d v2 = (p - p2).GetNormal();
             return Math.Abs(v1.GetAngleTo(v2)) > 1e-3;
         }
-        private void Draw_gap_dimension(List<Duct_ports_Info> infos, int idx, Vector3d vertical_vec, ObjectId layerId, AcadDatabase acadDatabase)
+        private void Draw_gap_dimension(List<Duct_ports_Info> infos, 
+                                        int idx, 
+                                        Vector3d vertical_vec, 
+                                        Point2d dir_wall_point, 
+                                        ObjectId layerId, 
+                                        AcadDatabase acadDatabase)
         {
             if (idx < infos.Count - 1)
             {
                 var info = infos[idx];
                 var next_info = infos[idx + 1];
-                if (next_info.ports_position.Count > 0)
+                if (next_info.ports_info.Count > 0)
                 {
-                    Point3d nearest_p = Search_nearest_point(info, next_info, out Point3d next_p);
+                    Point3d nearest_p = Search_nearest_point(info, next_info, dir_wall_point, out Point3d next_p);
                     var dim = Create_align_dim(nearest_p, next_p, vertical_vec, layerId);
                     acadDatabase.ModelSpace.Add(dim);
                     dim.SetDatabaseDefaults();
                 }
             }
         }
-        private Point3d Search_nearest_point(Duct_ports_Info info, Duct_ports_Info next_info, out Point3d next_p)
+        private Point3d Search_nearest_point(Duct_ports_Info info, Duct_ports_Info next_info, Point2d dir_wall_point, out Point3d next_p)
         {
-            next_p = next_info.ports_position[next_info.ports_position.Count - 1];
-            Point3d p1 = info.ports_position[0];
-            Point3d p2 = info.ports_position[info.ports_position.Count - 1];
-            return (next_p.DistanceTo(p1) < next_p.DistanceTo(p2)) ? p1 : p2;
+            next_p = next_info.ports_info[0].position;
+            Point3d wall_point = new Point3d(dir_wall_point.X, dir_wall_point.Y, 0);
+            Point3d last_p = info.ports_info[info.ports_info.Count - 1].position;
+            if (Is_between_points(wall_point, next_p, last_p))
+                return wall_point;
+            else
+                return last_p;
         }
         private AlignedDimension Create_align_dim(Point3d p1, Point3d p2, Vector3d vertical_vec, ObjectId layerId)
         {
@@ -832,17 +859,17 @@ namespace ThMEPHVAC.Model
                 {
                     Vector3d dir_vec = Get_edge_direction(info.l);
                     double angle = Get_port_rotate_angle(dir_vec);
-                    foreach (var pos in info.ports_position)
+                    foreach (var pos in info.ports_info)
                     {
                         if (port_range.Contains("下"))
                         {
-                            Point3d p = Get_down_port_insert_pos(dir_vec, pos);
+                            Point3d p = Get_down_port_insert_pos(dir_vec, pos.position);
                             var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_layer, block_name, p, new Scale3d(), angle);
                             Set_port_dyn_block_properity(obj);
                         }
                         else
                         {
-                            Get_side_port_insert_pos(dir_vec, pos, info.width, out Point3d pL, out Point3d pR);
+                            Get_side_port_insert_pos(dir_vec, pos.position, info.width, out Point3d pL, out Point3d pR);
                             var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_layer, block_name, pL, new Scale3d(), angle + Math.PI * 0.5);
                             Set_port_dyn_block_properity(obj);
                             obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_layer, block_name, pR, new Scale3d(), angle - Math.PI * 0.5);
@@ -1003,6 +1030,45 @@ namespace ThMEPHVAC.Model
             {
                 return colle.Cast<ObjectId>().Select(id => acadDatabase.Element<Entity>(id)).Select(e => e.Layer).FirstOrDefault();
             }
+        }
+        private void Insert_valve(int count, ThDuctPortsConstructor endlines)
+        {
+            if (count == 1)
+                return;
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var endline in endlines.endline_segs)
+                {
+                    if (endline.is_in)
+                    {
+                        double width = endline.segs[0].width;
+                        Vector3d dir_vec = Get_edge_direction(endline.segs[0].l);
+                        Vector3d vertical_r = Get_right_vertical_vec(dir_vec);
+                        double angle = dir_vec.GetAngleTo(-Vector3d.YAxis);
+                        double cross_z = dir_vec.CrossProduct(-Vector3d.YAxis).Z;
+                        if (Math.Abs(cross_z) < 1e-3)
+                            cross_z = 0;
+                        if (cross_z > 0 && Math.Abs(cross_z) > 1e-3)
+                            angle += Math.PI;
+                        double text_angle = (angle > 0 || angle < Math.PI) ? angle - Math.PI : angle;
+                        Point3d tar_p = endline.segs[0].start_point + vertical_r * width * 0.5;
+                        var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(valve_layer, valve_name, tar_p, new Scale3d(), angle);
+                        Set_valve_dyn_block_properity(obj, width, 250, text_angle);
+                    }
+                }
+            }
+        }
+        private void Set_valve_dyn_block_properity(ObjectId obj, double width, double height, double text_angle)
+        {
+            var data = new ThBlockReferenceData(obj);
+            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY))
+                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY, valve_visibility);
+            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA))
+                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA, width);
+            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT))
+                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT, height);
+            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE))
+                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE, text_angle);
         }
     }
 }

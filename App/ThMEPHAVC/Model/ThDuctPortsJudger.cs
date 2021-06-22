@@ -20,8 +20,7 @@ namespace ThMEPHVAC.Model
         private List<Line> crossing_v_grid_set; 
         private List<Line> crossing_h_grid_set;
         private ThCADCoreNTSSpatialIndex grid_spatial_index;
-        
-        public ThDuctPortsJudger(List<Merged_endline_Info> endline, List<List<Duct_ports_Info>> endline_segs)
+        public ThDuctPortsJudger(List<Merged_endline_Info> endline, List<Endline_seg_Info> endline_segs)
         {
             align_limit = 500;
             dir_align_points = new List<Point2d>();
@@ -39,19 +38,77 @@ namespace ThMEPHVAC.Model
                 Seperate_v_and_h_grid(grid_lines, v_grid_set, h_grid_set);
                 Get_crossing_grid(endline);
                 Adjust_port_by_wall(endline_segs);
+                Adjust_end_endline_width(endline_segs);
             }
         }
 
-        private void Adjust_port_by_wall(List<List<Duct_ports_Info>> endline_segs)
+        private void Adjust_end_endline_width(List<Endline_seg_Info> endline_segs)
+        {
+            foreach (var merged_endline in endline_segs)
+            {
+                var sizes = Less_duct_size(4000, merged_endline.segs);
+                Modify_sizes(sizes);
+                Set_sizes(4000, sizes, merged_endline.segs);
+            }
+        }
+
+        private void Set_sizes(double threshold, List<string> sizes, List<Duct_ports_Info> merged_endline)
+        {
+            int count = 0;
+            foreach (var duct_info in merged_endline)
+            {
+                foreach (var port_info in duct_info.ports_info)
+                {
+                    if (port_info.air_volume <= threshold)
+                    {
+                        duct_info.duct_size = sizes[count++];
+                        string[] s = duct_info.duct_size.Split('x');
+                        duct_info.width = Double.Parse(s[0]);
+                    }
+                }
+            }
+        }
+
+        private void Modify_sizes(List<string> sizes)
+        {
+            for (int i = 0; i < sizes.Count - 1; ++i)
+            {
+                if (sizes[i] != sizes[i + 1])
+                {
+                    for (int j = i + 1; j < sizes.Count; ++j)
+                    {
+                        sizes[j] = sizes[i + 1];
+                    }
+                    break;
+                }
+            }
+        }
+
+        private List<string> Less_duct_size(double threshold, List<Duct_ports_Info> merged_endline)
+        {
+            List<string> sizes = new List<string>();
+            foreach (var duct_info in merged_endline)
+            {
+                foreach (var port_info in duct_info.ports_info)
+                {
+                    if (port_info.air_volume <= threshold)
+                    {
+                        sizes.Add(duct_info.duct_size);
+                    }
+                }
+            }
+            return sizes;
+        }
+        private void Adjust_port_by_wall(List<Endline_seg_Info> endline_segs)
         {
             if (v_grid_set.Count == 0 && h_grid_set.Count == 0)
                 return;
             foreach (var merged_endline in endline_segs)
             {
-                var dir_align_point = Search_align_port(merged_endline, out Point2d dir_wall_point, crossing_h_grid_set, crossing_v_grid_set);
-                Update_port_pos(dir_align_point, merged_endline);
+                var dir_align_point = Search_align_port(merged_endline.segs, out Point2d dir_wall_point, crossing_h_grid_set, crossing_v_grid_set);
+                Update_port_pos(dir_align_point, merged_endline.segs);
                 dir_align_points.Add(dir_wall_point);
-                Search_align_port(merged_endline, out Point2d ver_wall_point, crossing_v_grid_set, crossing_h_grid_set);
+                Search_align_port(merged_endline.segs, out Point2d ver_wall_point, crossing_v_grid_set, crossing_h_grid_set);
                 ver_align_points.Add(ver_wall_point);
             }
         }
@@ -64,14 +121,14 @@ namespace ThMEPHVAC.Model
             Point3d align_base_point = new Point3d(align_point.X, align_point.Y, 0);
             foreach (var port_seg in merged_endline)
             {
-                for (int i = 0; i < port_seg.ports_position.Count; ++i)
+                for (int i = 0; i < port_seg.ports_info.Count; ++i)
                 {
-                    Point3d pos = port_seg.ports_position[i];
+                    Point3d pos = port_seg.ports_info[i].position;
                     double dis = align_base_point.DistanceTo(pos);
                     Vector3d dir_vec = (pos - align_base_point).GetNormal();
                     
                     double align_dis = (dis < 100) ? 0 : Align_distance(dis, 100);
-                    port_seg.ports_position[i] = align_base_point + dir_vec * align_dis;
+                    port_seg.ports_info[i].position = align_base_point + dir_vec * align_dis;
                 }
             }
         }
@@ -88,12 +145,12 @@ namespace ThMEPHVAC.Model
                 Vector3d dir_vec = Get_edge_direction(port_seg.l);
                 if (Is_vertical(dir_vec))
                 {
-                    double cur_min_dis = Do_search_align_port(port_seg.ports_position, grid_set1, out Point2d position, out Point2d wall_p);
+                    double cur_min_dis = Do_search_align_port(port_seg.ports_info, grid_set1, out Point2d position, out Point2d wall_p);
                     Update_align_wall_info(cur_min_dis, ref min_dis, position, ref align_point, wall_p, ref wall_point);
                 }
                 else
                 {
-                    double cur_min_dis = Do_search_align_port(port_seg.ports_position, grid_set2, out Point2d position, out Point2d wall_p);
+                    double cur_min_dis = Do_search_align_port(port_seg.ports_info, grid_set2, out Point2d position, out Point2d wall_p);
                     Update_align_wall_info(cur_min_dis, ref min_dis, position, ref align_point, wall_p, ref wall_point);
                 }
             }
@@ -106,14 +163,14 @@ namespace ThMEPHVAC.Model
                                             Point2d wall_p,
                                             ref Point2d wall_point)
         {
-            if (cur_min_dis >= align_limit && min_dis > cur_min_dis)
+            if (cur_min_dis >= align_limit && min_dis >= cur_min_dis)
             {
                 min_dis = cur_min_dis;
                 align_point = position;
                 wall_point = wall_p;
             }
         }
-        private double Do_search_align_port(List<Point3d> ports_position, 
+        private double Do_search_align_port( List<Port_Info> ports_info, 
                                              List<Line> crossing_grid_set,
                                              out Point2d position,
                                              out Point2d wall_point)
@@ -123,12 +180,12 @@ namespace ThMEPHVAC.Model
             Line align_wall = new Line();
             foreach (Line l in crossing_grid_set)
             {
-                foreach (Point3d p in ports_position)
+                foreach (var info in ports_info)
                 {
-                    double cur_dis = Align_distance(Point_to_line(p.ToPoint2D(), l), 100);
-                    if (cur_dis >= align_limit &&  cur_dis < min_dis)
+                    double cur_dis = Align_distance(Point_to_line(info.position.ToPoint2D(), l), 100);
+                    if (cur_dis >= align_limit &&  cur_dis <= min_dis)
                     {
-                        min_p = p.ToPoint2D();
+                        min_p = info.position.ToPoint2D();
                         min_dis = cur_dis;
                         align_wall = l;
                     }
@@ -295,26 +352,26 @@ namespace ThMEPHVAC.Model
             }
             return polygon;
         }
-        public static void Inner_shrink(List<List<Duct_ports_Info>> endline_segs)
+        public static void Inner_shrink(List<Endline_seg_Info> endline_segs)
         {
             foreach (var endline in endline_segs)
             {
-                foreach (var seg in endline)
+                foreach (var seg in endline.segs)
                 {
                     Vector3d dir_vec = Get_edge_direction(seg.l);
-                    int port_num = seg.ports_position.Count;
+                    int port_num = seg.ports_info.Count;
                     if (port_num > 1)
                     {
                         double real_step = Math.Ceiling(seg.l.Length / 100) * 100.0 / port_num;
                         Point3d cur_p = seg.start_point + dir_vec * (0.5 * real_step);
-                        for (int i = port_num - 1; i >= 0; --i)
+                        for (int i = 0; i < port_num; ++i)
                         {
-                            seg.ports_position[i] = cur_p;
+                            seg.ports_info[i].position = cur_p;
                             cur_p += real_step * dir_vec;
                         }
                     }
                     else if (port_num == 1)
-                        seg.ports_position[0] = Get_mid_point(seg.l);
+                        seg.ports_info[0].position = Get_mid_point(seg.l);
                 }
             }
         }
