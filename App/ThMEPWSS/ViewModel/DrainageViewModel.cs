@@ -43,6 +43,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         {
             dynamicRadioButtons?.Clear();
             FloorListDatas = new List<string>();
+            ThMEPWSS.Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {

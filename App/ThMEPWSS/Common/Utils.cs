@@ -17,6 +17,7 @@ namespace ThMEPWSS.Common
     {
         public static void CreateFloorFraming()
         {
+            ThMEPWSS.Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
