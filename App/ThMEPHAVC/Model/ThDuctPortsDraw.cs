@@ -158,7 +158,7 @@ namespace ThMEPHVAC.Model
                           new Dictionary<string, string> { { "风口名称", port_name }, 
                                                            { "尺寸", port_size }, 
                                                            { "数量", port_num.ToString() }, 
-                                                           { "风量", air_volumn.ToString() + "/" + single_port_volume.ToString("0.")} });
+                                                           { "风量", single_port_volume.ToString("0.")} });
             }
             Insert_leader(Get_mark_base_point(ports), p);
         }
