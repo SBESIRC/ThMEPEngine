@@ -29,6 +29,11 @@ namespace TianHua.Hvac.UI.Command
             if (center_lines.Count == 0)
                 return;
             Get_exclude_line("请选择不布置风口的线", out DBObjectCollection exclude_line);
+            if (exclude_line.Count >= center_lines.Count)
+            {
+                Prompt_msg("没有选择要布置风口的管段");
+                return;
+            }
             Get_duct_port_info();
             if (in_param.scale == null)
                 return;
@@ -37,14 +42,17 @@ namespace TianHua.Hvac.UI.Command
             var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, start_point, in_param);
             if (graph_res.merged_endlines.Count == 0)
             {
-                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage("选择错误起始点");
+                Prompt_msg("选择错误起始点");
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
-
             var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
             var painter = new ThDuctPortsDraw(in_param, judger.dir_align_points, judger.ver_align_points);
             painter.Draw(graph_res, adjust_graph);
+        }
+        private void Prompt_msg(string message)
+        {
+            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(message);
         }
         private void Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines)
         {
