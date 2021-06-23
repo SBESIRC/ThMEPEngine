@@ -534,8 +534,8 @@ namespace ThMEPEngineCore
                     //geojsonContent = extractEngine.OutputGeo(Active.Document.Name);
                     geojsonContent = extractEngine.OutputGeo();
 
-                    string path = @"D:\project\2.drainage\jsonSample\1-1.input.geojson";
-                    File.WriteAllText(path, geojsonContent);
+                    //string path = @"D:\project\2.drainage\jsonSample\1-1.input.geojson";
+                    //File.WriteAllText(path, geojsonContent);
                
                 }
             }
@@ -550,8 +550,8 @@ namespace ThMEPEngineCore
 
                 var groupedContent = SystemDiagramMethods.ProcessGrouping(geojsonContent);
 
-                string outputFile = @"D:\project\2.drainage\jsonSample\1-2.output.geojson";
-                File.WriteAllText(outputFile, geojsonContent);
+                //string outputFile = @"D:\project\2.drainage\jsonSample\1-2.output.geojson";
+                //File.WriteAllText(outputFile, geojsonContent);
 
                 var serializer = GeoJsonSerializer.Create();
                 var revisedContent2 = string.Empty;
@@ -596,13 +596,13 @@ namespace ThMEPEngineCore
                     }
                 }
 
-                string path2 = @"D:\project\2.drainage\jsonSample\1-3.input.geojson";
-                File.WriteAllText(path2, revisedContent2);
+                //string path2 = @"D:\project\2.drainage\jsonSample\1-3.input.geojson";
+                //File.WriteAllText(path2, revisedContent2);
 
                 var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent2);
 
-                string path3 = @"D:\project\2.drainage\jsonSample\1-4.output.geojson";
-                File.WriteAllText(path3, output);
+                //string path3 = @"D:\project\2.drainage\jsonSample\1-4.output.geojson";
+                //File.WriteAllText(path3, output);
 
                 using (var stringReader = new StringReader(output))
                 using (var jsonReader = new JsonTextReader(stringReader))
