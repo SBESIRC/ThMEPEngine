@@ -69,7 +69,7 @@ namespace ThMEPElectrical.Command
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();
 
                         //填充块数量到防火分区
-                        diagram.SetGlobalBlockInfo(datas);
+                        diagram.SetGlobalBlockInfo(acadDatabase.Database,datas);
                         AddFloorss.ForEach(floor =>
                         {
                             var FloorBlockInfo = diagram.GetFloorBlockInfo(floor.FloorBoundary);

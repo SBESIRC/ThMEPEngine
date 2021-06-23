@@ -185,6 +185,7 @@
     <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionVistor.cs" />
     <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractor.cs" />
     <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
+    <Compile Include="SystemDiagram\Extension\ThBlockDBExtension.cs" />
     <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />

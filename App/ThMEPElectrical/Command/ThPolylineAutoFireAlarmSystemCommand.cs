@@ -55,7 +55,7 @@ namespace ThMEPElectrical.Command
                 var diagram = new ThAutoFireAlarmSystemModel();
                 //获取块引擎附加信息
                 var datas = BlockReferenceEngine.QueryAllOriginDatas();
-                diagram.SetGlobalBlockInfo(datas);
+                diagram.SetGlobalBlockInfo(acadDatabase.Database,datas);
                 //添加一个楼层信息
                 diagram.floors.Add(new ThFloorModel()
                 {

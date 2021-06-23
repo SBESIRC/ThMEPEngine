@@ -85,6 +85,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 else
                 {
                     this.FireDistrictNo = -1;//该防火分区不属于本楼层，打个标记
+                    if (FireDistrictInfo[0] == "*")
+                        this.FireDistrictNo = -2;//是本系统手动生成的防火分区，需提示用户
                 }
                 this.FireDistrictName = FireDistrict.Number;
             }

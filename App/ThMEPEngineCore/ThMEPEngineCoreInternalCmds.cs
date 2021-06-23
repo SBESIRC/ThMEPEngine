@@ -25,11 +25,6 @@ using Dreambuild.AutoCAD;
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using ThCADExtension;
-using ThMEPEngineCore.Temp;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 #endif
 
 namespace ThMEPEngineCore

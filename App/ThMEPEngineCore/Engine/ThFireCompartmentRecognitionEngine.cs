@@ -7,9 +7,9 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
-using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -112,7 +112,6 @@ namespace ThMEPEngineCore.Engine
             }
             return holeDic;
         }
-
         private Entity GetMpolygon(KeyValuePair<Polyline, List<Polyline>> keyValuePair)
         {
             List<Polyline> polylines = new List<Polyline>();

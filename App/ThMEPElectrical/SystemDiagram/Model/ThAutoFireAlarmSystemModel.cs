@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SystemDiagram.Engine;
+using ThMEPElectrical.SystemDiagram.Extension;
 using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPEngineCore.Engine;
@@ -36,7 +37,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             floors = new List<ThFloorModel>();
         }
-        private Dictionary<Entity, List<KeyValuePair<string, string>>> GlobleBlockAttInfo;
+        private Dictionary<Entity, List<KeyValuePair<string, string>>> GlobleBlockAttInfoDic;
+        private Dictionary< Entity, DBPoint> GlobleCenterPointDic;
+
         private List<ThIfcDistributionFlowElement> GlobalBlockInfo;
         private ThCADCoreNTSSpatialIndex GlobalBlockInfoSpatialIndex;
         private List<ThIfcDistributionFlowElement> FloorBlockInfo;
@@ -46,11 +49,17 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 设置全局块空间索引
         /// </summary>
         /// <param name="elements"></param>
-        public void SetGlobalBlockInfo(Dictionary<Entity, List<KeyValuePair<string, string>>> elements)
+        public void SetGlobalBlockInfo(Database database, Dictionary<Entity, List<KeyValuePair<string, string>>> elements)
         {
-            GlobleBlockAttInfo = elements;
-            GlobalBlockInfo = elements.Select(o => new ThIfcDistributionFlowElement() { Outline = o.Key }).ToList();
-            var dbObjs = elements.Select(o => o.Key).ToCollection();
+            GlobleBlockAttInfoDic = elements;
+            GlobalBlockInfo = new List<ThIfcDistributionFlowElement>();
+            GlobleCenterPointDic = new Dictionary<Entity, DBPoint>();
+            elements.ForEach(o =>
+            {
+                GlobalBlockInfo.Add(new ThIfcDistributionFlowElement() { Outline = o.Key });
+                GlobleCenterPointDic.Add(o.Key, (o.Key as BlockReference).GetBlockReferenceOBBCenter(database));
+            });
+            var dbObjs = GlobleCenterPointDic.Select(o => o.Value).ToCollection();
             GlobalBlockInfoSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
 
@@ -61,7 +70,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private void SetFloorBlockInfo(List<ThIfcDistributionFlowElement> elements)
         {
             FloorBlockInfo = elements;
-            var dbObjs = elements.Select(o => o.Outline).ToCollection();
+            var dbObjs = elements.Select(o => GlobleCenterPointDic[o.Outline]).ToCollection();
             FloorBlockInfoSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
 
@@ -80,7 +89,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <returns></returns>
         public List<ThFloorModel> GetFloorInfo()
         {
-            return this.floors;//.OrderBy(x => { x.FireDistricts.OrderBy(y => y.FireDistrictName); return x.FloorNumber; }).SelectMany(o => o.FireDistricts).ToList();
+            return this.floors;
         }
 
         /// <summary>
@@ -259,7 +268,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
-                HostApplicationServices.WorkingDatabase = db;
+                var blkrefs = acadDatabase.ModelSpace
+               .OfType<BlockReference>()
+               .FirstOrDefault(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "楼层框定");
+                if (blkrefs.IsNull())
+                    return;
                 InsertBlockService.ImportFireDistrictLayerAndStyle(db);
                 var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
                 List<Entity> DrawEntitys = new List<Entity>();
@@ -270,12 +283,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         //画防火分区名字
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
-                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint.TransformBy(Active.Editor.WCS2UCS()), AlignmentPoint = fireDistrict.TextPoint.TransformBy(Active.Editor.WCS2UCS()), ColorIndex = 1, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
-                            newDBText.TransformBy(Active.Editor.UCS2WCS());
+                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, ColorIndex = 1, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
+                            newDBText.Rotation = blkrefs.Rotation;//.TransformBy(matrix);
                             DrawEntitys.Add(newDBText);
                         }
                     });
                 });
+                HostApplicationServices.WorkingDatabase = db;
+
                 foreach (Entity item in DrawEntitys)
                 {
                     acadDatabase.ModelSpace.Add(item);
@@ -334,7 +349,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public List<ThIfcDistributionFlowElement> GetFloorBlockInfo(Polyline polygon)
         {
             var dbObjs = GlobalBlockInfoSpatialIndex.SelectCrossingPolygon(polygon);
-            var value = GlobalBlockInfo.Where(o => dbObjs.Contains(o.Outline)).ToList();
+            var value = GlobalBlockInfo.Where(o => dbObjs.Contains(GlobleCenterPointDic[o.Outline])).ToList();
             SetFloorBlockInfo(value);
             return value;
         }
@@ -350,7 +365,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             if (polygon is Polyline || polygon is MPolygon)
             {
                 var dbObjs = FloorBlockInfoSpatialIndex.SelectCrossingPolygon(polygon);
-                var Data = FloorBlockInfo.Where(o => dbObjs.Contains(o.Outline)).ToList();
+                var Data = FloorBlockInfo.Where(o => dbObjs.Contains(GlobleCenterPointDic[o.Outline])).ToList();
 
                 //这个地方感觉可以优化速率，有时间在好好搞一下
                 ThBlockConfigModel.BlockConfig.ForEach(o =>
@@ -364,7 +379,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             }
                         case StatisticType.Attributes:
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (GlobleBlockAttInfo.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
                                 break;
                             }
                         case StatisticType.RelyOthers:
