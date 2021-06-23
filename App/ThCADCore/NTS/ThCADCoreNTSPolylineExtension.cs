@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.LinearReferencing;
+using NetTopologySuite.Operation.Distance;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -9,6 +10,15 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolylineExtension
     {
+        public static Line NearestSegment(this Polyline polygon, Point3d pt)
+        {
+            var geometry = polygon.ToNTSLineString();
+            var reference = new LocationIndexedLine(geometry);
+            var coordinates = DistanceOp.NearestPoints(geometry, pt.ToNTSPoint());
+            var location = reference.IndexOf(coordinates[0]);
+            return location.GetSegment(geometry).ToDbLine();
+        }
+
         public static Circle MinimumBoundingCircle(this Polyline polyline)
         {
             var mbc = new MinimumBoundingCircle(polyline.ToNTSLineString());
@@ -57,36 +67,6 @@ namespace ThCADCore.NTS
         {
             var convexHull = new ConvexHull(polyline.ToNTSLineString());
             var geometry = convexHull.GetConvexHull();
-            if (geometry is Polygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        public static Polyline ConvexHull(this List<Point3d> srcPts)
-        {
-            var coordinates = new List<Coordinate>();
-            srcPts.ForEach(e => coordinates.Add(e.ToNTSCoordinate()));
-
-            var convexHull = new ConvexHull(coordinates.ToArray(), ThCADCoreNTSService.Instance.GeometryFactory);
-            var geometry = convexHull.GetConvexHull();
-            if (geometry is Polygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        public static Polyline GetOctagonalEnvelope(this Polyline polyline)
-        {
-            var geometry = OctagonalEnvelope.GetOctagonalEnvelope(polyline.ToNTSLineString());
             if (geometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();

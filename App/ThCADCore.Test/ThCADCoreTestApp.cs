@@ -101,38 +101,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThEnvelope", CommandFlags.Modal)]
-        public void ThEnvelope()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                acadDatabase.ModelSpace.Add(pline.GetOctagonalEnvelope());
-            }
-        }
-
-        private List<Point2d> Vertices(Polyline poly)
-        {
-            var points = new List<Point2d>();
-            poly.Vertices().Cast<Point3d>().ForEach(o => points.Add(o.ToPoint2D()));
-            return points;
-        }
-
-        private List<List<Point2d>> Vertices(DBObjectCollection holes)
-        {
-            var points = new List<List<Point2d>>();
-            holes.Cast<Polyline>().ForEach(o => points.Add(Vertices(o)));
-            return points;
-        }
-
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
         public void ThOutline()
         {
