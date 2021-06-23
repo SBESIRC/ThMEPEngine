@@ -149,16 +149,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 }
                                 if (sobj.Storeys.Count > 1)
                                 {
-                                    for (int i = sobj.Storeys[0]; i <= sobj.Storeys[1]; i++)
+                                    sobj.Storeys.ForEach(floor =>
                                     {
                                         ThFloorModel NewFloor = new ThFloorModel
                                         {
-                                            FloorName = i + "F",
-                                            FloorNumber = i
+                                            FloorName = floor + "F",
+                                            FloorNumber = floor
                                         };
                                         NewFloor.InitFloors(adb, blk, fireCompartments, spatialIndex);
                                         Floors.Add(NewFloor);
-                                    }
+                                    });
                                 }
                             }
                             break;
