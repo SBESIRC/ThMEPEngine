@@ -31,7 +31,9 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             new ThFirePumpStartVerticalWireCircuit(),
             new ThFireWaterTankLevelVerticalWireCircuit(),
             new ThFireControlRoomVerticalWireCircuit(),
-            new ThSprinklerPumpStartSignalWireCircuit()
+            new ThSprinklerPumpStartSignalVerticalWireCircuit(),
+            new ThAlarmControlVerticalWireCircuit(),
+            new ThBroadcastVerticalWireCircuit()
         };
     }
 }

@@ -45,6 +45,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     o.Layer = this.CircuitLayer;
                     o.ColorIndex = this.CircuitColorIndex;
                 });
+
+                //画手动控制线路模块
+                if (FireCompartmentParameter.FixedPartType != 3)
+                {
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.ManualControlCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.ManualControlCircuitModuleExcludingFireRoom);
+
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (16 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SmokeMachineCount.ToString() } });
+                }
             }
             else
                 Result = new List<Entity>();

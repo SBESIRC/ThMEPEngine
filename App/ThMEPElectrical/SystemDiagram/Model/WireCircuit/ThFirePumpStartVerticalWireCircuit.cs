@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 {
@@ -19,6 +20,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             List<Entity> Result = new List<Entity>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
             int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
+            int FireHydrantPumpCount = 0;//消火栓泵个数
+            int SprayPumpCount = 0;//喷淋泵个数
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
@@ -30,8 +33,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0)
                 {
+                    FireHydrantPumpCount += AreaData.Data.BlockData.BlockStatistics["消火栓泵"];
                     FireHydrantPumpMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFireHydrantPumpLine(currentIndex, FloorNum));
+                }
+                if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
+                {
+                    SprayPumpCount += AreaData.Data.BlockData.BlockStatistics["喷淋泵"];
                 }
             }
             //都存在，才画
@@ -58,6 +66,17 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     ColorIndex = 4
                 };
                 Result.Add(Endline2);
+            }
+            if (FireHydrantPumpCount > 0 & SprayPumpCount > 0)
+            {
+                //画液位信号线路模块
+                if (FireCompartmentParameter.FixedPartType != 3)
+                {
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
+
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
+                }
             }
             return Result;
         }

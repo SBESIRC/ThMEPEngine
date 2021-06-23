@@ -32,7 +32,13 @@ namespace ThMEPElectrical
         public static readonly string SystemDiagramChartHeader2 = "楼层或防火分区分线箱";
         public static readonly string SystemDiagramChartHeader3 = "楼层或防火分区火灾自动报警设备";
         public static readonly string FixedPartContainsFireRoom = "系统图固定部分（含消控室）";
+        public static readonly string ManualControlCircuitModuleContainsFireRoom = "手动控制线路模块（含消控室）";
+        public static readonly string FirePumpRoomCircuitModuleContainsFireRoom = "消防水泵房线路模块（含消控室）";
+        public static readonly string LiquidLevelSignalCircuitModuleContainsFireRoom = "液位信号线路模块（含消控室）";
         public static readonly string FixedPartExcludingFireRoom = "系统图固定部分（不含消控室）";
+        public static readonly string ManualControlCircuitModuleExcludingFireRoom = "手动控制线路模块（不含消控室）";
+        public static readonly string FirePumpRoomCircuitModuleExcludingFireRoom = "消防水泵房线路模块（不含消控室）";
+        public static readonly string LiquidLevelSignalCircuitModuleExcludingFireRoom = "液位信号线路模块（不含消控室）";
         public static readonly string FixedPartSmokeExhaust = "联动关闭排烟风机信号线";
 
         //
