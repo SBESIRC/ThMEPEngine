@@ -203,7 +203,7 @@ namespace ThCADExtension
         // 电气提资转换图块
         public static string BlockConvertDwgPath()
         {
-            return Path.Combine(SupportPath(), "天华提电气块转换配置表.dwg");
+            return Path.Combine(SupportPath(), "提电气块转换配置表.dwg");
         }
 
         // 运行时根目录

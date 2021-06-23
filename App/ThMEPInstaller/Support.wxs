@@ -30,8 +30,8 @@
       <Component Id="CMP_Autoloader_PackageContents_Support_Block_EvacuationLight" Guid="{50401006-C41B-40C3-A0D2-6111794E616A}" Win64="yes">
         <File Id="FILE_Autoloader_PackageContents_Support_Block_EvacuationLight" Source="$(var.AutoloaderContentsPath)\Support\疏散指示灯图块.dwg" KeyPath="yes" />
       </Component>
-      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
-        <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{929F2B38-CF52-47B0-B4CE-209121205824}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\提电气块转换配置表.dwg" KeyPath="yes" />
       </Component>
       <Component Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" Guid="{3F30BE8F-A8F1-41A4-ABD5-735D23DB7F0F}" Win64="yes">
         <File Id="FILE_Autoloader_PackageContents_Support_Block_AFAS" Source="$(var.AutoloaderContentsPath)\Support\火灾自动报警系统图.dwg" KeyPath="yes" />
