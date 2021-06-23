@@ -98,14 +98,17 @@ namespace ThMEPHVAC.Model
                                List<Point2d> duct_dir_align_points_,
                                List<Point2d> duct_ver_align_points_)
         {
-            scenario = in_param.scenario;
-            block_name = "风口-AI研究中心";
-            port_mark_name = "风口标注";
-            duct_size_style = "HT-STYLE3";
-            valve_name = "风阀";
-            valve_visibility = "多叶调节风阀";
+            Param_init(in_param);
             Set_layer();
             Import_Layer_Block();
+            Pre_proc_layer();
+            duct_dir_align_points = duct_dir_align_points_;
+            duct_ver_align_points = duct_ver_align_points_;
+            
+        }
+        private void Param_init(ThDuctPortsParam in_param)
+        {
+            scenario = in_param.scenario;
             elevation = in_param.elevation;
             string[] s = in_param.port_size.Split('x');
             port_width = Double.Parse(s[0]);
@@ -113,13 +116,16 @@ namespace ThMEPHVAC.Model
             scale = in_param.scale;
             port_name = in_param.port_name;
             port_range = in_param.port_range;
-            duct_dir_align_points = duct_dir_align_points_;
-            duct_ver_align_points = duct_ver_align_points_;
             port_num = in_param.port_num;
             air_volumn = in_param.air_volumn;
             ui_duct_size = in_param.in_duct_size;
             s = ui_duct_size.Split('x');
             main_height = Double.Parse(s[1]);
+            block_name = "风口-AI研究中心";
+            port_mark_name = "风口标注";
+            duct_size_style = "HT-STYLE3";
+            valve_name = "风阀";
+            valve_visibility = "多叶调节风阀";
         }
         public void Draw(ThDuctPortsAnalysis anay_res, ThDuctPortsConstructor endlines)
         {
@@ -133,9 +139,15 @@ namespace ThMEPHVAC.Model
 
         private void Draw_port_mark(ThDuctPortsConstructor endlines)
         {
+            if (endlines.endline_segs.Count == 0)
+                return;
             var last_seg = endlines.endline_segs[endlines.endline_segs.Count - 1];
+            if (last_seg.segs.Count == 0)
+                return;
             var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
-            Point3d p = ports[ports.Count - 1].position + new Vector3d(1500, 2000, 0);
+            if (ports.Count < 2)
+                return;
+            Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0);
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
             double h = Get_text_heigt();
             double scale = h * 2 / 3;
@@ -148,9 +160,35 @@ namespace ThMEPHVAC.Model
                                                            { "数量", port_num.ToString() }, 
                                                            { "风量", air_volumn.ToString() + "/" + single_port_volume.ToString("0.")} });
             }
-            Insert_leader(ports[ports.Count - 1].position, p);
+            Insert_leader(Get_mark_base_point(ports), p);
         }
-
+        private Point3d Get_mark_base_point(List<Port_Info> ports)
+        {
+            if (ports[ports.Count - 1].air_volume > 1)
+                return ports[ports.Count - 1].position;
+            else
+                return ports[ports.Count - 2].position;
+        }
+        private void Pre_proc_layer()
+        {
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                Get_cur_layer(db, geo_layer);
+                Get_cur_layer(db, flg_layer);
+                Get_cur_layer(db, port_layer);
+                Get_cur_layer(db, valve_layer);
+                Get_cur_layer(db, center_layer);
+                Get_cur_layer(db, duct_size_layer);
+                Get_cur_layer(db, dimension_layer);
+                Get_cur_layer(db, port_mark_layer);
+            }
+        }
+        private void Get_cur_layer(AcadDatabase db, string layer_name)
+        {
+            db.Database.UnFrozenLayer(layer_name);
+            db.Database.UnLockLayer(layer_name);
+            db.Database.UnOffLayer(layer_name);
+        }
         private void Insert_leader(Point3d srt_p, Point3d end_p)
         {
             Leader leader = new Leader { HasArrowHead = true };
@@ -161,6 +199,8 @@ namespace ThMEPHVAC.Model
                 acadDatabase.ModelSpace.Add(leader);
                 leader.SetDatabaseDefaults();
                 leader.Layer = port_mark_layer;
+                leader.ColorIndex = (int)ColorIndex.BYLAYER;
+                leader.Linetype = "ByLayer";
             }
         }
 
@@ -260,6 +300,8 @@ namespace ThMEPHVAC.Model
             double outter_width = info.every_port_width[outter_vec_idx];
             double collinear_width = info.every_port_width[collinear_idx];
             double rotate_angle = in_vec.GetAngleTo(-Vector3d.YAxis);
+            if (in_vec.CrossProduct(-Vector3d.YAxis).Z < 0)
+                rotate_angle += Math.PI;
             bool is_flip = false;
             if (Math.Abs(inner_width - outter_width) > 1e-3)
             {
@@ -451,10 +493,10 @@ namespace ThMEPHVAC.Model
         }
         private void Draw_endlines(ThDuctPortsConstructor endlins)
         {
-            string pre_duct_text_info = String.Empty;
             Draw_special_shape(endlins.endline_elbow);
             for (int i = 0; i < endlins.endline_segs.Count; ++i)
             {
+                string pre_duct_text_info = String.Empty;
                 var infos = endlins.endline_segs[i];
                 Draw_port_duct(infos.segs, duct_dir_align_points[i], duct_ver_align_points[i], ref pre_duct_text_info);
             }
@@ -583,10 +625,11 @@ namespace ThMEPHVAC.Model
                 Point3d min_p = info.ports_info[min_idx].position;
                 Vector3d dir1 = (wall_p - min_p).GetNormal();
                 Vector3d dir2 = Get_edge_direction(info.l);
+                // 插入的墙点的风量设为1与变径处的0风量做区分
                 if (Math.Abs(dir1.DotProduct(dir2) - 1) < 1e-3)
-                    info.ports_info.Insert(min_idx, new Port_Info(0, wall_p));
+                    info.ports_info.Insert(min_idx, new Port_Info(1, wall_p));
                 else
-                    info.ports_info.Insert(min_idx + 1, new Port_Info(0, wall_p));
+                    info.ports_info.Insert(min_idx + 1, new Port_Info(1, wall_p));
             }
         }
         private void Search_nearest_point(Duct_ports_Info info, Point3d wall_p, out int min_idx)
@@ -658,7 +701,8 @@ namespace ThMEPHVAC.Model
                     DimLinePoint = Get_mid_point(p1, p2) + vertical_vec * 2000,
                     ColorIndex = 256,
                     DimensionStyle = id,
-                    LayerId = layerId
+                    LayerId = layerId,
+                    Linetype = "ByLayer"
                 };
             }
         }
@@ -671,6 +715,8 @@ namespace ThMEPHVAC.Model
                     acadDatabase.ModelSpace.Add(info);
                     info.SetDatabaseDefaults();
                     info.Layer = duct_size_layer;
+                    info.ColorIndex = (int)ColorIndex.BYLAYER;
+                    info.Linetype = "ByLayer";
                 }
             }
         }
@@ -1015,6 +1061,8 @@ namespace ThMEPHVAC.Model
                     acadDatabase.ModelSpace.Add(obj);
                     obj.SetDatabaseDefaults();
                     obj.Layer = str_layer;
+                    obj.ColorIndex = (int)ColorIndex.BYLAYER;
+                    obj.Linetype = "ByLayer";
                     obj.TransformBy(trans_mat);
                 }
             }

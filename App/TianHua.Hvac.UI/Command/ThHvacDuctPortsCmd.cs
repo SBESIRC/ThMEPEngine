@@ -14,6 +14,7 @@ using ThMEPEngineCore.Service;
 using ThMEPHVAC.Model;
 using Autodesk.AutoCAD.Geometry;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using Autodesk.AutoCAD.Runtime;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -50,7 +51,19 @@ namespace TianHua.Hvac.UI.Command
             using (var db = AcadDatabase.Active())
             {
                 start_point = Get_point_from_prompt("选择起点");
-                center_lines = Get_center_line("请选择中心线", out string layer);
+                if (start_point.DistanceTo(Point3d.Origin) < 1e-3)
+                {
+                    center_lines = new DBObjectCollection();
+                    return;
+                }
+
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var sf = ThSelectionFilterTool.Build(dxfNames);
+                center_lines = Get_center_line("请选择中心线", out string layer, sf);
                 if (center_lines.Count == 0)
                     return;
                 ThDuctPortsDraw.Draw_lines(center_lines, Matrix3d.Identity, layer);
@@ -92,7 +105,7 @@ namespace TianHua.Hvac.UI.Command
                 }
             }
         }
-        private DBObjectCollection Get_center_line(string prompt, out string layer)
+        private DBObjectCollection Get_center_line(string prompt, out string layer, SelectionFilter sf)
         {
             layer = "0";
             PromptSelectionOptions options = new PromptSelectionOptions()
@@ -101,7 +114,7 @@ namespace TianHua.Hvac.UI.Command
                 MessageForAdding = prompt,
                 RejectObjectsOnLockedLayers = true,
             };
-            var result = Active.Editor.GetSelection(options);
+            var result = Active.Editor.GetSelection(options, sf);
             if (result.Status == PromptStatus.OK)
             {
                 var objIds = result.Value.GetObjectIds();
