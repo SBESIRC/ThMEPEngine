@@ -187,20 +187,11 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         private bool IsContains(DBObject obj, Point3d pt)
         {
-            if (obj is Polyline polyline)
+            if (obj is Entity entity)
             {
-                var polygon = polyline.ToNTSPolygon();
-                return polyline.IsContains(pt) && !polygon.OnBoundary(pt);
+                return entity.IsContains(pt);
             }
-            else if (obj is MPolygon mPolygon)
-            {
-                var polygon = mPolygon.ToNTSPolygon();
-                return mPolygon.IsContains(pt) && !polygon.OnBoundary(pt);
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
         private Dictionary<Point3d,BlockReference> InsertBlock(Dictionary<Point3d,Vector3d> ptDic)
         {
