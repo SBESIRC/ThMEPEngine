@@ -13,9 +13,9 @@ namespace ThCADExtension
             return extents;
         }
 
-        // https://adndevblog.typepad.com/autocad/2012/05/redefining-a-block.html
         public static void RedefineBlockTableRecord(this BlockTableRecord btr, List<Entity> entities)
         {
+            // https://adndevblog.typepad.com/autocad/2012/05/redefining-a-block.html
             using (var acadDatabase = AcadDatabase.Use(btr.Database))
             {
                 foreach (var objId in btr)
@@ -24,6 +24,28 @@ namespace ThCADExtension
                 }
                 entities.ForEach(o => btr.AppendEntity(o));
                 entities.ForEach(o => acadDatabase.AddNewlyCreatedDBObject(o));
+            }
+        }
+
+        public static void FixWipeOutDrawOrder(this BlockTableRecord btr)
+        {
+            // https://www.keanw.com/2013/05/fixing-autocad-drawings-exported-by-smartsketch-using-net.html
+            using (var acadDatabase = AcadDatabase.Use(btr.Database))
+            {
+                var wipeouts = new ObjectIdCollection();
+                foreach (ObjectId objId in btr)
+                {
+                    var entity = acadDatabase.Element<Entity>(objId);
+                    if (entity is Wipeout)
+                    {
+                        wipeouts.Add(entity.ObjectId);
+                    }
+                }
+                if (wipeouts.Count > 0)
+                {
+                    var drawOrder = acadDatabase.Element<DrawOrderTable>(btr.DrawOrderTableId, true);
+                    drawOrder.MoveToBottom(wipeouts);
+                }
             }
         }
 
