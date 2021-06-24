@@ -51,13 +51,21 @@ namespace ThMEPElectrical.Command
 
                         //获取选择区域的所有的楼层框线
                         StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
-
-                        //拿到全图所有防火分区
-                        FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
+                        if (StoreysRecognitionEngine.Elements.Count == 0)
+                        {
+                            continue;
+                        }
 
                         //获取选择区域的所有所需块
                         BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                         BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
+                        if (BlockReferenceEngine.Elements.Count == 0)
+                        {
+                            continue;
+                        }
+
+                        //拿到全图所有防火分区
+                        FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
 
                         //初始化楼层
                         var AddFloorss = diagram.InitStoreys(
