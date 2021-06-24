@@ -675,27 +675,6 @@ namespace ThMEPEngineCore
                 });
             }
         }
-        [CommandMethod("TIANHUACAD", "THExtractRoom", CommandFlags.Modal)]
-        public void THExtractRoom()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var roomEngine = new ThDB3RoomRecognitionEngine())
-            {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                roomEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                roomEngine.Elements.Cast<ThIfcRoom>().ForEach(o =>
-                {
-                    o.Boundary.ColorIndex = 5;
-                    o.Boundary.SetDatabaseDefaults();
-                    acadDatabase.ModelSpace.Add(o.Boundary);
-                });
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THPICKROOM", CommandFlags.Modal)]
         public void ThPickRoom()

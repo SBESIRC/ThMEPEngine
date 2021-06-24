@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NFox.Cad;
 using DotNetARX;
 using ThCADCore.NTS;
@@ -11,14 +12,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDB3RoomExtractionEngine : ThSpatialElementExtractionEngine
+    public class ThDB3RoomOutlineExtractionEngine : ThSpatialElementExtractionEngine
     {
-        public ThDB3RoomExtractionEngine()
-        {
-        }
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3RoomExtractionVisitor();
+            var visitor = new ThDB3RoomOutlineExtractionVisitor();
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
@@ -27,31 +25,21 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThDB3RoomExtractionVisitor();
-            var extractor = new ThSpatialElementExtractor();
-            extractor.Accept(visitor);
-            extractor.ExtractFromMS(database);
-            Results.AddRange(visitor.Results);
+            throw new NotSupportedException();
         }
     }
-    public class ThDB3RoomRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThDB3RoomOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public ThDB3RoomRecognitionEngine()
-        {
-            //
-        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3RoomExtractionEngine();
+            var engine = new ThDB3RoomOutlineExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDB3RoomExtractionEngine();
-            engine.ExtractFromMS(database);
-            Recognize(engine.Results, polygon);
+            throw new NotSupportedException();
         }
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)

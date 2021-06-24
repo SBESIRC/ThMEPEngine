@@ -3,46 +3,47 @@ using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
+    public class ThDB3RoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
     {
-        public override void ExtractFromMS(Database database)
+        public override void Extract(Database database)
         {
-            var visitor = new ThRoomMarkExtractionVisitor
+            var visitor = new ThDB3RoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
+                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
-            extractor.ExtractFromMS(database);
+            extractor.Extract(database);
             Results = visitor.Results;
         }
 
-        public override void Extract(Database database)
+        public override void ExtractFromMS(Database database)
         {
             throw new NotSupportedException();
         }
     }
-    public class ThRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
+
+    public class ThDB3RoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
-        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        public override void Recognize(Database database, Point3dCollection polygon)
         {
             var engine = new ThRoomMarkExtractionEngine();
-            engine.ExtractFromMS(database);
+            engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
             throw new NotSupportedException();
-        }       
+        }
 
         public override void Recognize(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon)
         {
