@@ -34,7 +34,8 @@ namespace TianHua.Hvac.UI.Command
                 Prompt_msg("没有选择要布置风口的管段");
                 return;
             }
-            Get_duct_port_info();
+            if (!Get_duct_port_info())
+                return;
             if (in_param.scale == null)
                 return;
             if (in_param.port_range.Contains("侧"))
@@ -77,7 +78,7 @@ namespace TianHua.Hvac.UI.Command
                 ThDuctPortsDraw.Draw_lines(center_lines, Matrix3d.Identity, layer);
             }
         }
-        private void Get_duct_port_info()
+        private bool Get_duct_port_info()
         {
             var dlg = new fmDuctPorts(in_param);
             if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
@@ -92,7 +93,9 @@ namespace TianHua.Hvac.UI.Command
                 in_param.port_range = dlg.port_range;
                 in_param.in_duct_size = dlg.duct_size;
                 in_param.air_speed = dlg.air_speed;
+                return true;
             }
+            return false;
         }
         private void Get_exclude_line(string prompt, out DBObjectCollection exclude_line)
         {

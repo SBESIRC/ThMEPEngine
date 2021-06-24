@@ -586,7 +586,9 @@ namespace ThMEPHVAC.Model
             Point3d wall_p = new Point3d(wall_point.X, wall_point.Y, 0);
             foreach (var info in infos)
             {
-                if (Is_between_points(wall_p, info.l.StartPoint, info.l.EndPoint))
+                Point3d srt_port = (info.ports_info.Count > 0) ? info.ports_info[0].position : info.l.StartPoint;
+                Point3d end_port = (info.ports_info.Count > 0) ? info.ports_info[info.ports_info.Count - 1].position : info.l.EndPoint;
+                if (Is_between_points(wall_p, srt_port, end_port))
                 {
                     had_insert = true;
                     Search_nearest_point(info, wall_p, out int min_idx);
@@ -625,8 +627,9 @@ namespace ThMEPHVAC.Model
                 Point3d min_p = info.ports_info[min_idx].position;
                 Vector3d dir1 = (wall_p - min_p).GetNormal();
                 Vector3d dir2 = Get_edge_direction(info.l);
+                
                 // 插入的墙点的风量设为1与变径处的0风量做区分
-                if (Math.Abs(dir1.DotProduct(dir2) - 1) < 1e-3)
+                if (dir1 != dir2)
                     info.ports_info.Insert(min_idx, new Port_Info(1, wall_p));
                 else
                     info.ports_info.Insert(min_idx + 1, new Port_Info(1, wall_p));
