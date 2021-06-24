@@ -29,6 +29,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public int FloorNumber { get; set; }
 
         /// <summary>
+        /// 是否是多楼层
+        /// </summary>
+        public bool IsMultiFloor { get; set; } = false;
+
+        /// <summary>
+        /// 多楼层名称
+        /// </summary>
+        public string MulitFloorName { get; set; }
+
+        /// <summary>
         /// 防火分区信息
         /// </summary>
         public List<ThFireDistrictModel> FireDistricts { get; set; }
@@ -37,6 +47,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 楼层PolyLine
         /// </summary>
         public Polyline FloorBoundary { get; set; }
+        
         public ThFloorModel()
         {
             FireDistricts = new List<ThFireDistrictModel>();
