@@ -24,8 +24,8 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
+        [CommandMethod("TIANHUACAD", "THWDYTGS", CommandFlags.Modal)]
 #if ACAD2016
-        [CommandMethod("TIANHUACAD", "THRouteMainPipeNew", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
             //取框线
@@ -51,26 +51,13 @@ namespace ThMEPWSS
                 terminalList = drainageExtractor.SanTmnList;
             }
 
-            foreach (var item in terminalList)
+            terminalList.ForEach(toilate => toilate.SupplyCool.ForEach(pt =>
             {
-                var temp = item.SupplyCool;
-                if (temp != Point3d.Origin)
-                {
-                    DrawUtils.ShowGeometry(temp, "l0supplyPt", 4, 25, 40, "S");
-                }
+                var color = toilate.SupplyCool.IndexOf(pt) == 0 ? 4 : 2;
 
-                temp = item.SupplyCoolSec;
-                if (temp != Point3d.Origin)
-                {
-                    DrawUtils.ShowGeometry(temp, "l0supplyPt", 2, 25, 40, "S");
-                }
-            }
+                DrawUtils.ShowGeometry(pt, "l0supplyPt", (short)color, 25, 40, "S");
+            }));
 
-            var bDebug = false;
-            if (bDebug == true)
-            {
-                return;
-            }
 
             //取房间,建筑，给水点
             List<Polyline> roomBoundary = new List<Polyline>();
@@ -93,9 +80,9 @@ namespace ThMEPWSS
                 //archiExtractor.ForEach(o => o.SetRooms(roomExtractor.Rooms));
                 archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
 
-                var areaId = ThDrainageSDExchangeThGeom.getAreaId(archiExtractor);
+                var areaId = ThDrainageSDToGJsonService.getAreaId(archiExtractor);
                 archiExtractor.ForEach(o =>
-                { 
+                {
                     if (o is IAreaId needAreaID)
                     {
                         needAreaID.setAreaId(areaId);

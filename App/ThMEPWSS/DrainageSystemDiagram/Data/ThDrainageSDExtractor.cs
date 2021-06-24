@@ -217,5 +217,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return true;
         }
 
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            return true;
+        }
+
     }
 }

@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageSDDeserializeGJson
+    public class ThDrainageSDDeserializeGJsonService
     {
         public static List<ThToilateGJson> getGroupPt(string GeoJsonString)
         {

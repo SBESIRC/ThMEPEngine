@@ -40,7 +40,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             ToiletGroups = new List<Polyline>();
             ToiletGroupId = new Dictionary<Polyline, string>();
             Region = new List<ThRawIfcBuildingElementData>();
-            Category = "Region";
+            Category = "Area";
             ElementLayer = "卫生间分组";
         }
 

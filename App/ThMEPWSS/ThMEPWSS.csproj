@@ -88,8 +88,14 @@
     <Compile Include="DrainageSystemAG\Services\CreateBlockService.cs" />
     <Compile Include="DrainageSystemDiagram\Data\IAreaId.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRegionExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDGroupColdSupplyPtEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThToilateGJson.cs" />
-    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDeserializeGJson.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThToilateRoom.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCommonService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDConnectSubService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDeserializeGJsonService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDRoomService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDColdPtProcessService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="DrainageSystemDiagram\Assistant\CleanDebugDrawing.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
@@ -99,8 +105,8 @@
     <Compile Include="DrainageSystemDiagram\Engine\ThConnectToilateEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDColdWaterSupplyStartExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThIfcSanitaryTerminalToilate.cs" />
-    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolSupplyPt.cs" />
-    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJson.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDFindColdPtService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJsonService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
@@ -393,7 +399,7 @@
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ThSystemDiagramCmds.THPSDYT.cs" />
+    <Compile Include="ThSystemDiagramCmds.THWDYTGS.cs" />
   </ItemGroup>
   <ItemGroup />
   <Choose>

@@ -16,28 +16,31 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThIfcSanitaryTerminalToilate : ThIfcSanitaryTerminal
     {
         public string Type { get; set; }
-        public Point3d SupplyCool { get; set; }
-        public Point3d SupplyCoolOnWall { get; set; }
-        public Point3d SupplyCoolOnBranch { get; set; }
+        public List<Point3d> SupplyCool { get; set; }
+        public List<Point3d> SupplyCoolOnWall { get; set; }
+        public List<Point3d> SupplyCoolOnBranch { get; set; }
+
         public Point3d SupplyWarm { get; set; }
-        public Point3d SupplyCoolSec { get; set; }
-        public Point3d SupplyCoolSecOnWall { get; set; }
-        public Point3d SupplyCoolSecOnBranch { get; set; }
+
         public Point3d SupplyWarmSec { get; set; }
         public Point3d Sewage { get; set; }
         public Point3d SewageSec { get; set; }
         public Polyline Boundary { get; set; }
-        public Vector3d Dir { get;  set; }
+        public Vector3d Dir { get; set; }
         public Point3d BasePt { get; private set; }
 
         public string GroupId { get; set; }
         public string AreaId { get; set; }
 
-
         public ThIfcSanitaryTerminalToilate(Entity geometry, string blkName)
         {
             Outline = geometry;
             Type = blkName;
+            SupplyCool = new List<Point3d>();
+            SupplyCoolOnWall = new List<Point3d>();
+            SupplyCoolOnBranch = new List<Point3d>();
+            GroupId = "";
+            AreaId = "";
             setInfo();
         }
 
@@ -48,19 +51,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
             Boundary = blk.ToOBB(blk.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
             Boundary = turnBoundary(Boundary);
             BasePt = Boundary.GetPoint3dAt(1);
-            //Dir = (Boundary.GetPoint3dAt(2) - BasePt).GetNormal();
             Dir = (Boundary.GetPoint3dAt(0) - BasePt).GetNormal();
-            SupplyCool = CalculateSupplyCoolPoint();
+
+            SupplyCool.AddRange(CalculateSupplyCoolPoint());
+            SupplyCool.AddRange(CalculateSupplyCoolSecPoint());
+
             SupplyWarm = CalculateSupplyWarmPoint();
-            SupplyCoolSec = CalculateSupplyCoolSecPoint();
             SupplyWarmSec = CalculateSupplyWarmSecPoint();
             Sewage = CalculateSewagePoint();
             SewageSec = CalculateSewageSecPoint();
 
         }
 
-        private Point3d CalculateSupplyCoolPoint()
+        private List<Point3d> CalculateSupplyCoolPoint()
         {
+            List<Point3d> returnPt = new List<Point3d>();
             Point3d pt = new Point3d();
 
             switch (Type)
@@ -118,11 +123,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             }
 
-            return pt;
+            if (pt!= Point3d.Origin )
+            {
+                returnPt.Add(pt);
+            }
+
+            return returnPt;
 
         }
-
-
 
         private Point3d getSupplyPtByCenter(double dalta)
         {
@@ -130,11 +138,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             Point3d leftPt = BasePt;
             Point3d rightPt = outline.GetPoint3dAt(2);
 
-            Point3d rightPt2 = outline.GetPoint3dAt(3);
-
-            DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
+            //Point3d rightPt2 = outline.GetPoint3dAt(3);
+            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
 
             Point3d cenPt = new Point3d((leftPt.X + rightPt.X) / 2, (leftPt.Y + rightPt.Y) / 2, 0);
 
@@ -148,21 +155,16 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-
         private Point3d getSupplyPtByLeftTop(double dalta)
         {
             Polyline outline = this.Boundary;
             Point3d leftPt = BasePt;
             Point3d rightPt = outline.GetPoint3dAt(2);
 
-
-            Point3d rightPt2 = outline.GetPoint3dAt(3);
-
-            DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
-
-
+            //Point3d rightPt2 = outline.GetPoint3dAt(3);
+            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -180,12 +182,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             Point3d leftPt = BasePt;
             Point3d rightPt = outline.GetPoint3dAt(2);
 
-            Point3d rightPt2 = outline.GetPoint3dAt(3);
-
-            DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
-
+            //Point3d rightPt2 = outline.GetPoint3dAt(3);
+            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -206,13 +206,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             Point3d leftPt = BasePt;
             Point3d rightPt = outline.GetPoint3dAt(2);
 
-            Point3d rightPt2 = outline.GetPoint3dAt(3);
-
-            DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
-
-
+            //Point3d rightPt2 = outline.GetPoint3dAt(3);
+            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -251,7 +248,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 for (int i = 0; i < boundary.NumberOfVertices; i++)
                 {
-                    boundaryNew.SetPointAt(i, boundary.GetPoint3dAt((i + turn) % boundary.NumberOfVertices).ToPoint2D ());
+                    boundaryNew.SetPointAt(i, boundary.GetPoint3dAt((i + turn) % boundary.NumberOfVertices).ToPoint2D());
                 }
             }
 
@@ -267,8 +264,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        public Point3d CalculateSupplyCoolSecPoint()
+        private List<Point3d> CalculateSupplyCoolSecPoint()
         {
+            List<Point3d> returnPt = new List<Point3d>();
             Point3d pt = new Point3d();
 
             switch (Type)
@@ -282,11 +280,16 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     break;
             }
 
-            return pt;
+            if (pt!= Point3d.Origin )
+            {
+                returnPt.Add(pt);
+            }
+
+            return returnPt;
 
         }
 
-        public Point3d CalculateSupplyWarmSecPoint()
+        private Point3d CalculateSupplyWarmSecPoint()
         {
             Point3d pt = new Point3d();
 
@@ -296,14 +299,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return pt;
 
         }
-        public Point3d CalculateSewagePoint()
+        private Point3d CalculateSewagePoint()
         {
             Point3d pt = new Point3d();
 
             return pt;
 
         }
-        public Point3d CalculateSewageSecPoint()
+        private Point3d CalculateSewageSecPoint()
         {
             Point3d pt = new Point3d();
 

@@ -122,6 +122,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 sq.Closed = true;
                 clone = sq;
             }
+            else if (symbol == "T")
+            {
+            
+            }
             else
             {
                 clone = new Circle(pt, new Vector3d(0, 0, 1), r);
