@@ -413,29 +413,65 @@ pt,
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geos);
         }
-        public static List<List<Geometry>> GroupGeometries(List<Geometry> geos)
+        public static List<List<Geometry>> GroupGeometriesEx(List<Geometry> linesGeos, List<Geometry> items)
         {
+            if (linesGeos.Count == 0 || items.Count == 0) return new List<List<Geometry>>();
+            IEnumerable<KeyValuePair<Geometry, Geometry>> f()
+            {
+                linesGeos = linesGeos.Distinct().ToList();
+                items = items.Distinct().ToList();
+                var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+                foreach (var geo in items) engine.Insert(geo.EnvelopeInternal, geo);
+                foreach (var linesGeo in linesGeos)
+                {
+                    var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(linesGeo);
+                    foreach (var polygon in engine.Query(linesGeo.EnvelopeInternal).Where(item => gf.Intersects(item)))
+                    {
+                        yield return new KeyValuePair<Geometry, Geometry>(linesGeo, polygon);
+                    }
+                }
+            }
             var geosGroup = new List<List<Geometry>>();
-            GroupGeometries(geos, geosGroup);
-            return geosGroup;
-        }
-        public static void GroupGeometries(List<Geometry> geos, List<List<Geometry>> geosGroup)
-        {
-            if (geos.Count == 0) return;
-            var pairs = _GroupGeometriesToKVIndex(geos).ToArray();
-            var dict = new ListDict<int>();
-            var h = new BFSHelper()
+            var dict = new ListDict<Geometry>();
+            var pairs = f().ToArray();
+            var h = new BFSHelper2<Geometry>()
             {
                 Pairs = pairs,
-                TotalCount = geos.Count,
-                Callback = (g, i) => dict.Add(g.root, i),
+                Items = linesGeos.Concat(items).ToArray(),
+                Callback = (bfs, item) => dict.Add(bfs.root, item),
             };
             h.BFS();
             dict.ForEach((_i, l) =>
             {
-                geosGroup.Add(l.Select(i => geos[i]).ToList());
+                geosGroup.Add(l);
             });
+            return geosGroup;
         }
+        public static List<List<Geometry>> GroupGeometries(List<Geometry> geos)
+        {
+            static void GroupGeometries(List<Geometry> geos, List<List<Geometry>> geosGroup)
+            {
+                if (geos.Count == 0) return;
+                var pairs = _GroupGeometriesToKVIndex(geos).ToArray();
+                var dict = new ListDict<int>();
+                var h = new BFSHelper()
+                {
+                    Pairs = pairs,
+                    TotalCount = geos.Count,
+                    Callback = (g, i) => dict.Add(g.root, i),
+                };
+                h.BFS();
+                dict.ForEach((_i, l) =>
+                {
+                    geosGroup.Add(l.Select(i => geos[i]).ToList());
+                });
+            }
+
+            var geosGroup = new List<List<Geometry>>();
+            GroupGeometries(geos, geosGroup);
+            return geosGroup;
+        }
+
         public static Geometry ToNTSGeometry(GLineSegment seg, double radius)
         {
             var points1 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.StartPoint, radius));

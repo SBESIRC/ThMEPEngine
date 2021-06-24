@@ -467,6 +467,14 @@ namespace ThMEPWSS.DebugNs
             File.WriteAllText(file, obj.ToCadJson());
             Dbg.PrintLine(file);
         }
+        public static void UnHighLight(IEnumerable<Entity> ents)
+        {
+            HighlightHelper.UnHighLight(ents);
+        }
+        public static void HighLight(IEnumerable<Entity> ents)
+        {
+            HighlightHelper.HighLight(ents);
+        }
         public static void ShowString(string str)
         {
             if (!isDebugging) return;
@@ -782,6 +790,14 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         public static T SelectEntity<T>(AcadDatabase adb) where T : DBObject
         {
             return ThDebugDrawer.GetEntity<T>(adb);
+        }
+        public static T TrySelectEntity<T>(AcadDatabase adb) where T : DBObject
+        {
+            var ed = Active.Editor;
+            var opt = new PromptEntityOptions("请选择");
+            var ret = ed.GetEntity(opt);
+            if (ret.Status != PromptStatus.OK) return null;
+            return adb.Element<T>(ret.ObjectId);
         }
         public static DBObjectCollection SelectEntities(AcadDatabase adb)
         {
@@ -3992,48 +4008,53 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
-            public static void CollectorCodegen()
+            public static void CollectEntitiesCodegen()
             {
                 Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
-                    foreach (var e in Dbg.SelectEntities(adb).OfType<Entity>())
+                    while (true)
                     {
-                        if (ThRainSystemService.IsTianZhengElement(e))
+                        var e = Dbg.TrySelectEntity<Entity>(adb);
+                        if (e == null) break;
                         {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<Entity>().Where( e=>e.Layer=={e.Layer.ToJson()} && ThRainSystemService.IsTianZhengElement(x))");
-                        }
-                        else if (e is Line)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<Line>().Where( e=>e.Layer=={e.Layer.ToJson()})");
-                        }
-                        else if (e is Polyline)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<Polyline>().Where( e=>e.Layer=={e.Layer.ToJson()})");
-                        }
-                        else if (e is Circle)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<Circle>().Where( e=>e.Layer=={e.Layer.ToJson()})");
-                        }
-                        else if (e is DBText)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<DBText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
-                        }
-                        else if (e is MText)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<MText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
-                        }
-                        else if (e is BlockReference br)
-                        {
-                            Dbg.PrintLine($"adb.ModelSpace.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()}) && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()})");
+                            NewMethod3(e);
                         }
                     }
-
                 }
             }
+            private static void NewMethod3(Entity e)
+            {
+                if (ThRainSystemService.IsTianZhengElement(e))
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<Entity>().Where( e=>e.Layer=={e.Layer.ToJson()} && ThRainSystemService.IsTianZhengElement(x))");
+                }
+                else if (e is Line)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<Line>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                }
+                else if (e is Polyline)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<Polyline>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                }
+                else if (e is Circle)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<Circle>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                }
+                else if (e is DBText)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<DBText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                }
+                else if (e is MText)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<MText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                }
+                else if (e is BlockReference br)
+                {
+                    Dbg.PrintLine($"adb.ModelSpace.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()}) && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()})");
+                }
+            }
+
             public static void BlockReferenceToDataItemToJson()
             {
                 Dbg.FocusMainWindow();
@@ -9265,13 +9286,13 @@ namespace ThMEPWSS.DebugNs
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
+        public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference, string propName = "可见性1")
         {
             var objs = new ObjectIdCollection();
             var visibilityStates = DynablockVisibilityStates(blockReference);
             var properties = blockReference.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
-                .Where(o => o.PropertyName == "可见性1");
+                .Where(o => o.PropertyName == propName);
             foreach (var property in properties)
             {
                 visibilityStates.Where(o => o.Key == property.Value as string)

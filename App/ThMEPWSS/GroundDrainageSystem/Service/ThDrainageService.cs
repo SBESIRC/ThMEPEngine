@@ -701,14 +701,14 @@
                     //关联地漏
                     {
                         var dict = new Dictionary<string, int>();
-                        var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
-                        var gs = GeoFac.GroupGeometries(dlinesGeos.Concat(item.FloorDrains).ToList());
+                        var pipesf = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                        var gs = GeoFac.GroupGeometriesEx(dlinesGeos, item.FloorDrains);
                         foreach (var g in gs)
                         {
                             var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
                             var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
                             if (!AllNotEmpty(fds, dlines)) continue;
-                            var pipes = f(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
+                            var pipes = pipesf(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
                             foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
                             {
                                 dict[lb] = fds.Count;
@@ -717,7 +717,21 @@
                         sb.AppendLine("地漏：" + dict.ToJson());
                     }
 
-
+                    //关联清扫口
+                    {
+                        var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                        var hs = new HashSet<string>();
+                        var gs = GeoFac.GroupGeometries(dlinesGeos.Concat(item.CleaningPorts).ToList());
+                        foreach (var g in gs)
+                        {
+                            var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
+                            var ports = g.Where(pl => item.CleaningPorts.Contains(pl)).ToList();
+                            if (!AllNotEmpty(ports, dlines)) continue;
+                            var pipes = f(GeoFac.CreateGeometry(ports.Concat(dlines).ToList()));
+                            hs.AddRange(pipes.Select(getLabel).Where(lb => lb != null));
+                        }
+                        sb.AppendLine("清扫口：" + hs.ToJson());
+                    }
 
 
                     //排出方式

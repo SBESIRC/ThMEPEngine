@@ -101,7 +101,7 @@
         }
         public void CollectLabelLines()
         {
-            static bool f(string layer) => layer == "W-DRAI-EQPM";
+            static bool f(string layer) => layer is "W-DRAI-EQPM" or "W-DRAI-NOTE";
             foreach (var e in entities.OfType<Line>().Where(e => f(e.Layer) && e.Length > 0))
             {
                 labelLines.Add(e.ToGLineSegment());

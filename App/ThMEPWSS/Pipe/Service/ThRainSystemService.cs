@@ -469,6 +469,10 @@ new Point2d(maxX, minY)
             //return this.GetHashCode() - other.GetHashCode();
             return this._id - other._id;
         }
+        public override int GetHashCode()
+        {
+            return _id;
+        }
     }
     public class BFSHelper2<T> where T : class
     {
@@ -708,6 +712,19 @@ new Point2d(maxX, minY)
     }
     public class ListDict<K, V>
     {
+        public Dictionary<K, int> ToCountDict(bool preserveZero = false)
+        {
+            var d = new Dictionary<K, int>();
+            foreach (var kv in dict)
+            {
+                var lst = kv.Value.Distinct().ToList();
+                if (lst.Count > 0 || (lst.Count == 0 && preserveZero))
+                {
+                    d[kv.Key] = lst.Count;
+                }
+            }
+            return d;
+        }
         Dictionary<K, List<V>> dict = new Dictionary<K, List<V>>();
         public void Add(K item, IEnumerable<V> items)
         {

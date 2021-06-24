@@ -688,6 +688,60 @@ namespace ThMEPWSS.DebugNs
     [Feng]
     public class Sankaku2
     {
+        [Feng("qv7011")]
+        public static void qv7011()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var br = Dbg.SelectEntity<BlockReference>(adb);
+                var basePt = br.Bounds.Value.MinPoint;
+                var targetPt = Dbg.SelectPoint();
+                var blkData = new ThBlockReferenceData(br.ObjectId);
+                var ids = Util1.VisibleEntities(blkData, "可见性");
+                //Console.WriteLine(ids.Count);
+                foreach (ObjectId id in ids)
+                {
+                    var e = adb.Element<Entity>(id);
+                    //Console.WriteLine(e.GetType().ToString());
+                    var ltr = adb.Layers.Element(e.Layer);
+                    if (Util1.IsVisibleLayer(ltr))
+                    {
+                        var ee = e.GetTransformedCopy(blkData.BlockTransform);
+                        if (ee is Circle circle)
+                        {
+                            var circle1 = new Circle(circle.Center, Autodesk.AutoCAD.Geometry.Vector3d.ZAxis, circle.Radius);
+                            circle1.ColorIndex = 3;
+                            circle1.TransformBy(Matrix3d.Displacement(targetPt - basePt));
+                            circle1.SetDatabaseDefaults();
+                            adb.ModelSpace.Add(circle1);
+                        }
+                        else if (ee is Line line)
+                        {
+                            var line1 = new Line() { StartPoint = line.StartPoint, EndPoint = line.EndPoint };
+                            line1.ColorIndex = 3;
+                            line1.TransformBy(Matrix3d.Displacement(targetPt - basePt));
+                            line1.SetDatabaseDefaults();
+                            adb.ModelSpace.Add(line1);
+                        }
+                    }
+                }
+            }
+        }
+        [Feng("UnHighLightAll")]
+        public static void qv6znz()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            {
+                HighlightHelper.UnHighLight(adb.ModelSpace.OfType<Entity>());
+            }
+        }
         [Feng("draw1")]
         public static void qv3hyp()
         {
@@ -1589,17 +1643,11 @@ namespace ThMEPWSS.DebugNs
             DrainageService.TestDrawingDatasCreation(geoData);
         }
 
-
-
-        [Feng("quw3jg")]
-        public static void quw3jg()
+        [Feng("从图纸提取geoData")]
+        public static void qv6yoh()
         {
-
-        }
-        [Feng("quw29k")]
-        public static void quw29k()
-        {
-
+            var geoData = DrainageService.CollectGeoData();
+            DrainageService.TestDrawingDatasCreation(geoData);
         }
 
         public static List<Point2d> GetAlivePointsByNTS(List<Point2d> points, double radius)
