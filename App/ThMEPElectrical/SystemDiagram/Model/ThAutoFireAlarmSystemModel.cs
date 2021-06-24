@@ -154,7 +154,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                         ThFloorModel NewFloor = new ThFloorModel
                                         {
                                             FloorName = floor + "F",
-                                            FloorNumber = floor
+                                            FloorNumber = floor,
+                                            IsMultiFloor = true,
+                                            MulitFloorName = sobj.StoreyNumber
                                         };
                                         NewFloor.InitFloors(adb, blk, fireCompartments, spatialIndex);
                                         Floors.Add(NewFloor);
