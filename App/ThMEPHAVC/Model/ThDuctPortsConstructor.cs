@@ -277,7 +277,10 @@ namespace ThMEPHVAC.Model
         {
             string duct_size = duct_size_info;
             foreach (var port_info in cur_info.ports)
+            {
                 Get_duct_width(is_first, port_info.air_volume, ref duct_size);
+                is_first = false;
+            }
             return duct_size;
         }
         private void Get_pre_and_next_duct_angle(Endline_Info cur_info,
