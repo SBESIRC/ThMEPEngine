@@ -1,5 +1,7 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPWSS.Command;
+using ThMEPWSS.HydrantConnectPipe.Command;
+
 namespace ThMEPWSS
 {
     class ThWaterwellPumpCmds
@@ -15,6 +17,13 @@ namespace ThMEPWSS
                 cmd.Execute();
             }
         }
-
+        [CommandMethod("TIANHUACAD", "THDXXHS", CommandFlags.Modal)]
+        public void HydrantConnectPipe()
+        {
+            using (var cmd = new ThHydrantConnectPipeCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
