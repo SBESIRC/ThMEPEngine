@@ -100,7 +100,7 @@
     <Compile Include="GeojsonExtractor\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
-    <Compile Include="Model\Electrical\ThFireCompartment.cs" />
+    <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
