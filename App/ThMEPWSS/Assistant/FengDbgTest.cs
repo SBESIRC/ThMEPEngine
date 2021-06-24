@@ -79,6 +79,7 @@ namespace ThMEPWSS.DebugNs
             }
             public static void AddButton(string name, Action f)
             {
+                if (!Dbg.isDebugging) return;
                 ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
                 {
                     try
@@ -113,10 +114,10 @@ namespace ThMEPWSS.DebugNs
                 AddButtons2(typeof(DrainageTest));
                 AddButtons2(typeof(Sankaku));
 
-                  
-                    AddButtons2(typeof(FengDbgTesting));
+
                 if (false)
                 {
+                    AddButtons2(typeof(FengDbgTesting));
                     AddButtons2(typeof(quj50y));
                     AddButtons2(typeof(quin3c));
                 }
@@ -448,6 +449,24 @@ namespace ThMEPWSS.DebugNs
         public static Editor Editor => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
         public static Document MdiActiveDocument => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
         public static Dictionary<string, object> ctx => ThDebugClass.ctx;
+        public static T LoadFromJsonFile<T>(string file)
+        {
+            return File.ReadAllText(file).FromCadJson<T>();
+        }
+        public static void AddButton(string name, Action f)
+        {
+            FengDbgTesting.AddButton(name, f);
+        }
+        public static void AddLazyAction(string name, Action<AcadDatabase> f)
+        {
+            FengDbgTesting.AddLazyAction(name, f);
+        }
+        public static void SaveToJsonFile(object obj)
+        {
+            var file = @"D:\DATA\temp\" + DateTime.Now.Ticks + ".json";
+            File.WriteAllText(file, obj.ToCadJson());
+            Dbg.PrintLine(file);
+        }
         public static void ShowString(string str)
         {
             if (!isDebugging) return;

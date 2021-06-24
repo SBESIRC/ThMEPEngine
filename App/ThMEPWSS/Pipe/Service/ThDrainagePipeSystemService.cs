@@ -229,4 +229,165 @@
             floorDrains.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
         }
     }
+    public partial class DrainageSystemDiagram
+    {
+        private static void setValues(List<ThwPipeLineGroup> groups)
+        {
+            setValues1(groups);
+            var r = groups[2].PL.PipeRuns[8];
+            r.HasLongTranslator = true;
+            r.HasCleaningPort = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r = groups[2].PL.PipeRuns[9];
+            r.BranchInfo = new BranchInfo() { FirstLeftRun = true };
+            r = groups[2].PL.PipeRuns[10];
+            r.BranchInfo = new BranchInfo() { FirstRightRun = true };
+            r = groups[2].PL.PipeRuns[11];
+            r.BranchInfo = new BranchInfo() { LastLeftRun = true };
+            r = groups[2].PL.PipeRuns[12];
+            r.BranchInfo = new BranchInfo() { LastRightRun = true };
+            r = groups[2].PL.PipeRuns[13];
+            r.BranchInfo = new BranchInfo() { MiddleLeftRun = true };
+            r = groups[2].PL.PipeRuns[14];
+            r.BranchInfo = new BranchInfo() { MiddleRightRun = true };
+            r = groups[2].PL.PipeRuns[15];
+            r.BranchInfo = new BranchInfo() { BlueToLeftFirst = true };
+            r = groups[2].PL.PipeRuns[16];
+            r.BranchInfo = new BranchInfo() { BlueToLeftLast = true };
+            r = groups[2].PL.PipeRuns[17];
+            r.BranchInfo = new BranchInfo() { BlueToLeftMiddle = true };
+            r = groups[2].PL.PipeRuns[18];
+            r.BranchInfo = new BranchInfo() { BlueToRightFirst = true };
+            r = groups[2].PL.PipeRuns[19];
+            r.BranchInfo = new BranchInfo() { BlueToRightLast = true };
+            r = groups[2].PL.PipeRuns[20];
+            r.BranchInfo = new BranchInfo() { BlueToRightMiddle = true };
+            r = groups[2].PL.PipeRuns[21];
+            r.BranchInfo = new BranchInfo() { HasLongTranslatorToLeft = true };
+            r = groups[2].PL.PipeRuns[22];
+            r.BranchInfo = new BranchInfo() { HasLongTranslatorToRight = true };
+        }
+
+        private static void setValues1(List<ThwPipeLineGroup> groups)
+        {
+            var r = groups[1].PL.PipeRuns[7];
+            r.HasLongTranslator = true;
+            r.HasCleaningPort = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r = groups[1].PL.PipeRuns[8];
+            r.HasCleaningPort = true;
+            r = groups[1].PL.PipeRuns[9];
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[10];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[11];
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 1,
+                HasSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[12];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 1,
+                HasSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[13];
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 1,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[14];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 1,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[15];
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[16];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[17];
+            r.RightHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[18];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = false;
+            r.RightHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[19];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.RightHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[20];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = false;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[21];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = false;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r.RightHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r = groups[1].PL.PipeRuns[22];
+            r.HasLongTranslator = true;
+            r.IsLongTranslatorToLeftOrRight = true;
+            r.LeftHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+            r.RightHanging = new Hanging()
+            {
+                FloorDrainsCount = 2,
+                HasDoubleSCurve = true,
+            };
+        }
+    }
 }

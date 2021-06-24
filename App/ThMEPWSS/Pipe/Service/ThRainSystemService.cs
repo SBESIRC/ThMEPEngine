@@ -449,7 +449,7 @@ new Point2d(maxX, minY)
         }
     }
     #endregion
-    public class Ref<T>
+    public class Ref<T> : IComparable<Ref<T>>
     {
         public T Value;
         public Ref(T value)
@@ -457,6 +457,18 @@ new Point2d(maxX, minY)
             this.Value = value;
         }
         public Ref() { }
+        readonly int _id = _NewId();
+        static int _tk = int.MinValue;
+        static int _NewId()
+        {
+            return ++_tk;
+        }
+        //public Guid Guid = Guid.NewGuid();
+        public int CompareTo(Ref<T> other)
+        {
+            //return this.GetHashCode() - other.GetHashCode();
+            return this._id - other._id;
+        }
     }
     public class BFSHelper2<T> where T : class
     {

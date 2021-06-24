@@ -55,13 +55,15 @@
 
 
 
-  
+
     public class DrainageDrawingData
     {
+        public List<string> VerticalPipeLabels;
         public List<string> LongTranslatorLabels;
         public List<string> ShortTranslatorLabels;
         public void Init()
         {
+            VerticalPipeLabels ??= new List<string>();
             LongTranslatorLabels ??= new List<string>();
             ShortTranslatorLabels ??= new List<string>();
         }
@@ -357,6 +359,7 @@
                     var e = DU.DrawRectLazy(s).ColorIndex = 1;
                 }
                 var sb = new StringBuilder(8192);
+                var drDatas = new List<DrainageDrawingData>();
                 for (int storeyI = 0; storeyI < cadDatas.Count; storeyI++)
                 {
                     sb.AppendLine($"===框{storeyI}===");
@@ -471,237 +474,253 @@
                     }
 
 
-
+                    //标注立管
                     {
-                        //通过引线进行标注
-                        var ok_ents = new HashSet<Geometry>();
-                        for (int i = 0; i < 3; i++)
                         {
-                            //先处理最简单的case
-                            var ok = false;
-                            var labelsf = F(item.Labels.Except(ok_ents).ToList());
-                            var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
-                            foreach (var labelLinesGeo in labelLinesGeos)
-                            {
-                                var labels = labelsf(labelLinesGeo);
-                                var pipes = pipesf(labelLinesGeo);
-                                if (labels.Count == 1 && pipes.Count == 1)
-                                {
-                                    var lb = labels[0];
-                                    var pp = pipes[0];
-                                    var label = geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "";
-                                    if (ThDrainageService.IsWantedLabelText(label))
-                                    {
-                                        lbDict[pp] = label;
-                                        ok_ents.Add(pp);
-                                        ok_ents.Add(lb);
-                                        ok = true;
-                                    }
-                                    else if (ThDrainageService.IsNotedLabel(label))
-                                    {
-                                        notedPipesDict[pp] = label;
-                                        ok_ents.Add(lb);
-                                        ok = true;
-                                    }
-                                }
-                            }
-                            if (!ok) break;
-                        }
-
-                        for (int i = 0; i < 3; i++)
-                        {
-                            //再处理多个一起串的case
-                            var ok = false;
-                            var labelsf = F(item.Labels.Except(ok_ents).ToList());
-                            var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
-                            foreach (var labelLinesGeo in labelLinesGeos)
-                            {
-                                var labels = labelsf(labelLinesGeo);
-                                var pipes = pipesf(labelLinesGeo);
-                                if (labels.Count == pipes.Count && labels.Count > 0)
-                                {
-                                    var labelsTxts = labels.Select(lb => geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "").ToList();
-                                    if (labelsTxts.All(txt => ThDrainageService.IsWantedLabelText(txt)))
-                                    {
-                                        pipes = ThRainSystemService.SortGeometrysBy2DSpacePosition(pipes).ToList();
-                                        labels = ThRainSystemService.SortGeometrysBy2DSpacePosition(labels).ToList();
-                                        for (int k = 0; k < pipes.Count; k++)
-                                        {
-                                            var pp = pipes[k];
-                                            var lb = labels[k];
-                                            var j = cadDataMain.Labels.IndexOf(lb);
-                                            var m = geoData.Labels[j];
-                                            var label = m.Text;
-                                            lbDict[pp] = label;
-                                        }
-                                        //OK，识别成功
-                                        ok_ents.AddRange(pipes);
-                                        ok_ents.AddRange(labels);
-                                        ok = true;
-                                    }
-                                }
-                            }
-                            if (!ok) break;
-                        }
-
-                        {
-                            //对付擦边球case
-                            foreach (var label in item.Labels.Except(ok_ents).ToList())
-                            {
-                                var lb = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text ?? "";
-                                if (!ThDrainageService.IsWantedLabelText(lb)) continue;
-                                var lst = labellinesf(label);
-                                if (lst.Count == 1)
-                                {
-                                    var labelline = lst[0];
-                                    var lines = ExplodeGLineSegments(labelline);
-                                    var points = GeoFac.GetLabelLineEndPoints(lines, label);
-                                    if (points.Count == 1)
-                                    {
-                                        var pipes = F(item.VerticalPipes.Except(lbDict.Keys).ToList())(points[0].ToNTSPoint());
-                                        if (pipes.Count == 1)
-                                        {
-                                            var pp = pipes[0];
-                                            lbDict[pp] = lb;
-                                            ok_ents.Add(pp);
-                                            ok_ents.Add(label);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    (List<Geometry>, List<Geometry>) getPipes()
-                    {
-                        var pipes1 = new List<Geometry>(lbDict.Count);
-                        var pipes2 = new List<Geometry>(lbDict.Count);
-                        foreach (var pipe in item.VerticalPipes) if (lbDict.ContainsKey(pipe)) pipes1.Add(pipe); else pipes2.Add(pipe);
-                        return (pipes1, pipes2);
-                    }
-                    {
-                        //识别转管，顺便进行标注
-
-                        bool recognise1()
-                        {
-                            var ok = false;
+                            //通过引线进行标注
+                            var ok_ents = new HashSet<Geometry>();
                             for (int i = 0; i < 3; i++)
                             {
-                                var (pipes1, pipes2) = getPipes();
-                                var pipes1f = F(pipes1);
-                                var pipes2f = F(pipes2);
-                                foreach (var dlinesGeo in dlinesGeos)
+                                //先处理最简单的case
+                                var ok = false;
+                                var labelsf = F(item.Labels.Except(ok_ents).ToList());
+                                var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
+                                foreach (var labelLinesGeo in labelLinesGeos)
                                 {
-                                    var lst1 = pipes1f(dlinesGeo);
-                                    var lst2 = pipes2f(dlinesGeo);
-                                    if (lst1.Count == 1 && lst2.Count > 0)
+                                    var labels = labelsf(labelLinesGeo);
+                                    var pipes = pipesf(labelLinesGeo);
+                                    if (labels.Count == 1 && pipes.Count == 1)
                                     {
-                                        var pp1 = lst1[0];
-                                        var label = lbDict[pp1];
-                                        var c = pp1.GetCenter();
-                                        foreach (var pp2 in lst2)
+                                        var lb = labels[0];
+                                        var pp = pipes[0];
+                                        var label = geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "";
+                                        if (ThDrainageService.IsWantedLabelText(label))
                                         {
-                                            var dis = c.GetDistanceTo(pp2.GetCenter());
-                                            if (10 < dis && dis <= MAX_SHORTTRANSLATOR_DISTANCE)
+                                            lbDict[pp] = label;
+                                            ok_ents.Add(pp);
+                                            ok_ents.Add(lb);
+                                            ok = true;
+                                        }
+                                        else if (ThDrainageService.IsNotedLabel(label))
+                                        {
+                                            notedPipesDict[pp] = label;
+                                            ok_ents.Add(lb);
+                                            ok = true;
+                                        }
+                                    }
+                                }
+                                if (!ok) break;
+                            }
+
+                            for (int i = 0; i < 3; i++)
+                            {
+                                //再处理多个一起串的case
+                                var ok = false;
+                                var labelsf = F(item.Labels.Except(ok_ents).ToList());
+                                var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
+                                foreach (var labelLinesGeo in labelLinesGeos)
+                                {
+                                    var labels = labelsf(labelLinesGeo);
+                                    var pipes = pipesf(labelLinesGeo);
+                                    if (labels.Count == pipes.Count && labels.Count > 0)
+                                    {
+                                        var labelsTxts = labels.Select(lb => geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "").ToList();
+                                        if (labelsTxts.All(txt => ThDrainageService.IsWantedLabelText(txt)))
+                                        {
+                                            pipes = ThRainSystemService.SortGeometrysBy2DSpacePosition(pipes).ToList();
+                                            labels = ThRainSystemService.SortGeometrysBy2DSpacePosition(labels).ToList();
+                                            for (int k = 0; k < pipes.Count; k++)
                                             {
-                                                //通气立管没有乙字弯
-                                                if (!label.StartsWith("TL"))
+                                                var pp = pipes[k];
+                                                var lb = labels[k];
+                                                var j = cadDataMain.Labels.IndexOf(lb);
+                                                var m = geoData.Labels[j];
+                                                var label = m.Text;
+                                                lbDict[pp] = label;
+                                            }
+                                            //OK，识别成功
+                                            ok_ents.AddRange(pipes);
+                                            ok_ents.AddRange(labels);
+                                            ok = true;
+                                        }
+                                    }
+                                }
+                                if (!ok) break;
+                            }
+
+                            {
+                                //对付擦边球case
+                                foreach (var label in item.Labels.Except(ok_ents).ToList())
+                                {
+                                    var lb = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text ?? "";
+                                    if (!ThDrainageService.IsWantedLabelText(lb)) continue;
+                                    var lst = labellinesf(label);
+                                    if (lst.Count == 1)
+                                    {
+                                        var labelline = lst[0];
+                                        var lines = ExplodeGLineSegments(labelline);
+                                        var points = GeoFac.GetLabelLineEndPoints(lines, label);
+                                        if (points.Count == 1)
+                                        {
+                                            var pipes = F(item.VerticalPipes.Except(lbDict.Keys).ToList())(points[0].ToNTSPoint());
+                                            if (pipes.Count == 1)
+                                            {
+                                                var pp = pipes[0];
+                                                lbDict[pp] = lb;
+                                                ok_ents.Add(pp);
+                                                ok_ents.Add(label);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        (List<Geometry>, List<Geometry>) getPipes()
+                        {
+                            var pipes1 = new List<Geometry>(lbDict.Count);
+                            var pipes2 = new List<Geometry>(lbDict.Count);
+                            foreach (var pipe in item.VerticalPipes) if (lbDict.ContainsKey(pipe)) pipes1.Add(pipe); else pipes2.Add(pipe);
+                            return (pipes1, pipes2);
+                        }
+                        {
+                            //识别转管，顺便进行标注
+
+                            bool recognise1()
+                            {
+                                var ok = false;
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    var (pipes1, pipes2) = getPipes();
+                                    var pipes1f = F(pipes1);
+                                    var pipes2f = F(pipes2);
+                                    foreach (var dlinesGeo in dlinesGeos)
+                                    {
+                                        var lst1 = pipes1f(dlinesGeo);
+                                        var lst2 = pipes2f(dlinesGeo);
+                                        if (lst1.Count == 1 && lst2.Count > 0)
+                                        {
+                                            var pp1 = lst1[0];
+                                            var label = lbDict[pp1];
+                                            var c = pp1.GetCenter();
+                                            foreach (var pp2 in lst2)
+                                            {
+                                                var dis = c.GetDistanceTo(pp2.GetCenter());
+                                                if (10 < dis && dis <= MAX_SHORTTRANSLATOR_DISTANCE)
                                                 {
-                                                    shortTranslatorLabels.Add(label);
+                                                    //通气立管没有乙字弯
+                                                    if (!label.StartsWith("TL"))
+                                                    {
+                                                        shortTranslatorLabels.Add(label);
+                                                        lbDict[pp2] = label;
+                                                        ok = true;
+                                                    }
+                                                }
+                                                else if (dis > MAX_SHORTTRANSLATOR_DISTANCE)
+                                                {
+                                                    longTranslatorLabels.Add(label);
                                                     lbDict[pp2] = label;
                                                     ok = true;
                                                 }
                                             }
-                                            else if (dis > MAX_SHORTTRANSLATOR_DISTANCE)
-                                            {
-                                                longTranslatorLabels.Add(label);
-                                                lbDict[pp2] = label;
-                                                ok = true;
-                                            }
                                         }
                                     }
+                                    if (!ok) break;
                                 }
-                                if (!ok) break;
+                                return ok;
                             }
-                            return ok;
-                        }
-                        bool recognise2()
-                        {
-                            var ok = false;
+                            bool recognise2()
+                            {
+                                var ok = false;
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    var (pipes1, pipes2) = getPipes();
+                                    var pipes1f = F(pipes1);
+                                    foreach (var pp2 in pipes2)
+                                    {
+                                        var pps1 = pipes1f(pp2.ToGRect().Expand(5).ToGCircle(false).ToCirclePolygon(6));
+                                        var fs = new List<Action>();
+                                        foreach (var pp1 in pps1)
+                                        {
+                                            var label = lbDict[pp1];
+                                            //通气立管没有乙字弯
+                                            if (!label.StartsWith("TL"))
+                                            {
+                                                if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > 1)
+                                                {
+                                                    fs.Add(() =>
+                                                    {
+                                                        shortTranslatorLabels.Add(label);
+                                                        lbDict[pp2] = label;
+                                                        ok = true;
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        if (fs.Count == 1) fs[0]();
+                                    }
+                                    if (!ok) break;
+                                }
+                                return ok;
+                            }
                             for (int i = 0; i < 3; i++)
                             {
-                                var (pipes1, pipes2) = getPipes();
-                                var pipes1f = F(pipes1);
-                                foreach (var pp2 in pipes2)
-                                {
-                                    var pps1 = pipes1f(pp2.ToGRect().Expand(5).ToGCircle(false).ToCirclePolygon(6));
-                                    var fs = new List<Action>();
-                                    foreach (var pp1 in pps1)
-                                    {
-                                        var label = lbDict[pp1];
-                                        //通气立管没有乙字弯
-                                        if (!label.StartsWith("TL"))
-                                        {
-                                            if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > 1)
-                                            {
-                                                fs.Add(() =>
-                                                {
-                                                    shortTranslatorLabels.Add(label);
-                                                    lbDict[pp2] = label;
-                                                    ok = true;
-                                                });
-                                            }
-                                        }
-                                    }
-                                    if (fs.Count == 1) fs[0]();
-                                }
-                                if (!ok) break;
+                                if (!(recognise1() && recognise2())) break;
                             }
-                            return ok;
                         }
-                        for (int i = 0; i < 3; i++)
                         {
-                            if (!(recognise1() && recognise2())) break;
-                        }
-                    }
-                    {
-                        var pipes1f = F(lbDict.Where(kv => kv.Value.StartsWith("TL")).Select(kv => kv.Key).ToList());
-                        var pipes2f = F(item.VerticalPipes.Where(p => !lbDict.ContainsKey(p)).ToList());
-                        foreach (var vlinesGeo in vlinesGeos)
-                        {
-                            var lst = pipes1f(vlinesGeo);
-                            if (lst.Count == 1)
+                            var pipes1f = F(lbDict.Where(kv => kv.Value.StartsWith("TL")).Select(kv => kv.Key).ToList());
+                            var pipes2f = F(item.VerticalPipes.Where(p => !lbDict.ContainsKey(p)).ToList());
+                            foreach (var vlinesGeo in vlinesGeos)
                             {
-                                var pp1 = lst[0];
-                                lst = pipes2f(vlinesGeo);
+                                var lst = pipes1f(vlinesGeo);
                                 if (lst.Count == 1)
                                 {
-                                    var pp2 = lst[0];
-                                    if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > MAX_SHORTTRANSLATOR_DISTANCE)
+                                    var pp1 = lst[0];
+                                    lst = pipes2f(vlinesGeo);
+                                    if (lst.Count == 1)
                                     {
-                                        var label = lbDict[pp1];
-                                        longTranslatorLabels.Add(label);
-                                        lbDict[pp2] = label;
+                                        var pp2 = lst[0];
+                                        if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > MAX_SHORTTRANSLATOR_DISTANCE)
+                                        {
+                                            var label = lbDict[pp1];
+                                            longTranslatorLabels.Add(label);
+                                            lbDict[pp2] = label;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-
-                    //“仅31F顶层板下设置乙字弯”的处理（😉不处理）
-
-                    //标出所有的立管编号（看看识别成功了没）
-                    foreach (var pp in item.VerticalPipes)
+                    string getLabel(Geometry pipe)
                     {
-                        lbDict.TryGetValue(pp, out string label);
-                        if (label != null)
+                        lbDict.TryGetValue(pipe, out string label);
+                        return label;
+                    }
+
+                    //关联地漏
+                    {
+                        var dict = new Dictionary<string, int>();
+                        var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                        var gs = GeoFac.GroupGeometries(dlinesGeos.Concat(item.FloorDrains).ToList());
+                        foreach (var g in gs)
                         {
-                            DU.DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
+                            var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
+                            var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
+                            if (!AllNotEmpty(fds, dlines)) continue;
+                            var pipes = f(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
+                            foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
+                            {
+                                dict[lb] = fds.Count;
+                            }
                         }
+                        sb.AppendLine("地漏：" + dict.ToJson());
                     }
 
 
 
+
+                    //排出方式
                     {
                         //获取排出编号
 
@@ -784,6 +803,20 @@
 
                     }
 
+                    //“仅31F顶层板下设置乙字弯”的处理（😉不处理）
+                    //标出所有的立管编号（看看识别成功了没）
+                    foreach (var pp in item.VerticalPipes)
+                    {
+                        lbDict.TryGetValue(pp, out string label);
+                        if (label != null)
+                        {
+                            DU.DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
+                        }
+                    }
+                    {
+                        sb.AppendLine("立管：" + lbDict.Values.Distinct().OrderBy(x => x).ToJson());
+                        drData.VerticalPipeLabels.AddRange(lbDict.Values.Distinct());
+                    }
                     {
                         var _longTranslatorLabels = longTranslatorLabels.Distinct().ToList();
                         _longTranslatorLabels.Sort();
@@ -797,10 +830,11 @@
                         sb.AppendLine("短转管:" + _shortTranslatorLabels.JoinWith(","));
                         drData.ShortTranslatorLabels.AddRange(_shortTranslatorLabels);
                     }
-
-
+                    drDatas.Add(drData);
                 }
                 Dbg.PrintText(sb.ToString());
+                Dbg.AddButton("Dbg.PrintText(drDatas.ToJson());", () => { Dbg.PrintText(drDatas.ToJson()); });
+                Dbg.AddButton("Dbg.SaveToJsonFile(drDatas);", () => { Dbg.SaveToJsonFile(drDatas); });
             });
         }
         const double MAX_SHORTTRANSLATOR_DISTANCE = 150;
@@ -1011,6 +1045,20 @@
                 Dr.SetLabelStylesForWNote(line, dbt);
             }
         }
+        public static IEnumerable<Point2d> GetBasePoints(Point2d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = 0, j = 0;
+            for (int k = 0; k < num; k++)
+            {
+                yield return new Point2d(basePoint.X + i * width, basePoint.Y - j * height);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = 0;
+                }
+            }
+        }
         public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
         {
             int i = 0, j = 0;
@@ -1086,7 +1134,7 @@
         {
             draw1(basePoint);
         }
-       
+
         public class ThwPipeRun
         {
             public string Storey;
@@ -1103,8 +1151,26 @@
             public Hanging LeftHanging;
             public Hanging RightHanging;
             public bool HasCleaningPort;
+            public BranchInfo BranchInfo;
         }
-
+        public class BranchInfo
+        {
+            public bool FirstLeftRun;
+            public bool MiddleLeftRun;
+            public bool LastLeftRun;
+            public bool FirstRightRun;
+            public bool MiddleRightRun;
+            public bool LastRightRun;
+            public bool BlueToLeftFirst;
+            public bool BlueToLeftMiddle;
+            public bool BlueToLeftLast;
+            public bool BlueToRightFirst;
+            public bool BlueToRightMiddle;
+            public bool BlueToRightLast;
+            public bool HasLongTranslatorToLeft;
+            public bool HasLongTranslatorToRight;
+            public bool IsLast;
+        }
         public class Hanging
         {
             public bool IsLeftOrRight;
@@ -1120,14 +1186,19 @@
         public class ThwOutput
         {
             public int LinesCount = 1;
-            public List<string> PortValues;
+            public List<string> DirtyWaterWellValues;
+            public bool HasVerticalLine2;
             public bool HasWrappingPipe1;
             public bool HasWrappingPipe2;
             public bool HasWrappingPipe3;
+            public string DN1;
+            public string DN2;
+            public string DN3;
             public bool HasCleaningPort1;
             public bool HasCleaningPort2;
             public bool HasCleaningPort3;
             public bool HasLargeCleaningPort;
+            public int HangingCount = 0;
             public Hanging Hanging1;
             public Hanging Hanging2;
         }
@@ -1138,6 +1209,7 @@
             public bool? IsLeftOrMiddleOrRight;
             public double AiringValue;
             public List<ThwPipeRun> PipeRuns;
+            public ThwOutput Output;
         }
         public class ThwPipeLineGroup
         {
@@ -1158,15 +1230,19 @@
                     return s;
                 }
             }
+
         }
-    
+
         public class PipeRunLocationInfo
         {
             public Point2d BasePoint;
             public Point2d StartPoint;
             public Point2d EndPoint;
+            public List<Vector2d> Vector2ds;
+            public List<GLineSegment> Segs;
+            public List<GLineSegment> DisplaySegs;
         }
-      
+
         public static void SetLabelStylesForDraiNote(params Entity[] ents)
         {
             foreach (var e in ents)
@@ -1189,6 +1265,15 @@
             var lines = DU.DrawLineSegmentsLazy(segs);
             lines.ForEach(line => SetDomePipeLineStyle(line));
         }
+        private static void DrawBluePipes(IEnumerable<GLineSegment> segs)
+        {
+            var lines = DU.DrawLineSegmentsLazy(segs);
+            lines.ForEach(line =>
+            {
+                line.Layer = "W-RAIN-PIPE";
+                line.ColorIndex = 256;
+            });
+        }
         private static void DrawDraiNoteLines(IEnumerable<GLineSegment> segs)
         {
             var lines = DU.DrawLineSegmentsLazy(segs);
@@ -1198,7 +1283,10 @@
                 line.ColorIndex = 256;
             });
         }
-
+        private static void DrawWrappingPipe(Point2d basePt)
+        {
+            DrawWrappingPipe(basePt.ToPoint3d());
+        }
         private static void DrawWrappingPipe(Point3d basePt)
         {
             DU.DrawBlockReference("套管系统", basePt, br =>
@@ -1444,7 +1532,10 @@ cb: br =>
             }
             v += new Vector2d(lastPt.X, 0);
         }
-
+        public static void DrawDirtyWaterWell(Point2d basePt, string value)
+        {
+            DrawDirtyWaterWell(basePt.ToPoint3d(), value);
+        }
         public static void DrawDirtyWaterWell(Point3d basePt, string value)
         {
             DU.DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-400),

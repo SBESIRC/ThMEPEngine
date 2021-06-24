@@ -730,6 +730,10 @@ namespace ThMEPWSS.Uitl
             }
             return Math.Max(StartPoint.GetDistanceTo(point), EndPoint.GetDistanceTo(point));
         }
+        public Vector2d ToVector2d()
+        {
+            return EndPoint - StartPoint;
+        }
     }
     public struct GLine
     {

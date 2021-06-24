@@ -760,6 +760,20 @@ namespace ThMEPWSS.DebugNs
                 DrainageSystemDiagram.draw4(basePt.ToPoint2d());
             }
         }
+        [Feng("draw6")]
+        public static void qv5a5e()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw6(basePt.ToPoint2d());
+            }
+        }
         [Feng("draw5")]
         public static void qv3kmr()
         {
@@ -1316,7 +1330,7 @@ namespace ThMEPWSS.DebugNs
                 {
                     points.Add(pt);
                 }
-                var vecs=points.Select(p=>p.ToPoint2d()).ToArray().ToVector2ds();
+                var vecs = points.Select(p => p.ToPoint2d()).ToArray().ToVector2ds();
                 Dbg.PrintLine($"var vecs=new List<Vector2d>{{{vecs.Select(v => $"new Vector2d({Convert.ToInt64(v.X)},{Convert.ToInt64(v.Y)})").JoinWith(",")}}};");
             }
         }
@@ -1562,17 +1576,21 @@ namespace ThMEPWSS.DebugNs
         public static void qutpmu()
         {
             var geoData = DrainageService.CollectGeoData();
-            var file = @"D:\DATA\temp\" + DateTime.Now.Ticks + ".json";
-            File.WriteAllText(file, geoData.ToCadJson());
-            Dbg.PrintLine(file);
+            Dbg.SaveToJsonFile(geoData);
         }
+
+
+
         [Feng("直接从geoData生成")]
         public static void qutpt9()
         {
             var file = @"D:\DATA\temp\637595412925029309.json";
-            var geoData = File.ReadAllText(file).FromCadJson<DrainageGeoData>();
+            var geoData = Dbg.LoadFromJsonFile<DrainageGeoData>(file);
             DrainageService.TestDrawingDatasCreation(geoData);
         }
+
+
+
         [Feng("quw3jg")]
         public static void quw3jg()
         {

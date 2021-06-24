@@ -90,6 +90,10 @@ namespace ThMEPWSS.JsonExtensionsNs
                 }
             }
         }
+        public static T Last<T>(this IList<T> source,int index)
+        {
+            return source[source.Count - index];
+        }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
             for (int i = 0; i < source.Count; i++)
