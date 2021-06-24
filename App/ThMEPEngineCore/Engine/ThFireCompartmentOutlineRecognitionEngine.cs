@@ -31,6 +31,18 @@ namespace ThMEPEngineCore.Engine
             Results = visitor.Results;
         }
 
+        public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
+        {
+            var visitor = new ThFireCompartmentOutlineExtractionVisitor()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database, dbObjs);
+            Results = visitor.Results;
+        }
+
         public override void Extract(Database database)
         {
             throw new NotSupportedException();
@@ -55,6 +67,16 @@ namespace ThMEPEngineCore.Engine
             };
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
+        }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            var engine = new ThFireCompartmentOutlineExtractionEngine()
+            {
+                LayerFilter = LayerFilter,
+            };
+            engine.ExtractFromMS(database, dbObjs);
+            Recognize(engine.Results, new Point3dCollection());
         }
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)

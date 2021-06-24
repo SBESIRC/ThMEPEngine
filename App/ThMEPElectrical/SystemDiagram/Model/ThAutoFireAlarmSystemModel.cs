@@ -173,6 +173,25 @@ namespace ThMEPElectrical.SystemDiagram.Model
             return Floors;
         }
 
+
+        /// <summary>
+        /// 初始化一栋楼
+        /// </summary>
+        /// <param name="storeys"></param>
+        public List<ThFloorModel> InitStoreys(AcadDatabase adb, Polyline storyBoundary, List<ThFireCompartment> fireCompartments)
+        {
+            List<ThFloorModel> Floors = new List<ThFloorModel>();
+            var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(fireCompartments.Select(e => e.Boundary).ToCollection());
+            ThFloorModel NewFloor = new ThFloorModel
+            {
+                FloorName = "*",
+                FloorNumber = 0
+            };
+            NewFloor.InitFloors(adb, storyBoundary, fireCompartments, spatialIndex);
+            Floors.Add(NewFloor);
+            return Floors;
+        }
+
         /// <summary>
         /// 画系统图
         /// </summary>

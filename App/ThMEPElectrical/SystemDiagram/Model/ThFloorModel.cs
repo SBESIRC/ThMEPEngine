@@ -82,6 +82,26 @@ namespace ThMEPElectrical.SystemDiagram.Model
             }
         }
 
+        /// <summary>
+        /// 初始化楼层
+        /// </summary>
+        /// <param name="storeys"></param>
+        public void InitFloors(AcadDatabase acadDatabase, Polyline floorBoundary, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            FloorBoundary = floorBoundary;
+            var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
+            var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
+            if (FindFireCompartmentsEntity.Count == fireCompartments.Count)
+            {
+                FindFireCompartments.ForEach(o =>
+                {
+                    ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
+                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    this.FireDistricts.Add(NewFireDistrict);
+                });
+            }
+        }
+
         private Polyline GetBlockOBB(Database database, BlockReference blockObj, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))

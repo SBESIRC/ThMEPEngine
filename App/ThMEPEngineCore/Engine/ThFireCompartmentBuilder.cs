@@ -43,16 +43,16 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThFireCompartment> BuildFromMS(Database db, ObjectIdCollection objs)
         {
-            List<Polyline> FireCompartmentGeometry = new List<Polyline>();
-            using (AcadDatabase acad = AcadDatabase.Use(db))
+            var outlineEngine = new ThFireCompartmentOutlineRecognitionEngine()
             {
-                foreach (ObjectId obj in objs)
-                {
-                    FireCompartmentGeometry.Add(acad.Element<Polyline>(obj));
-                }
-
-            }
-            var markEngine = new ThFireCompartmentMarkRecognitionEngine();
+                LayerFilter = this.LayerFilter,
+            };
+            outlineEngine.RecognizeMS(db, objs);
+            var FireCompartmentGeometry = outlineEngine.Elements.Cast<ThIfcRoom>().ToList();
+            var markEngine = new ThFireCompartmentMarkRecognitionEngine()
+            {
+                LayerFilter = this.LayerFilter
+            };
             markEngine.RecognizeMS(db, new Point3dCollection());
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             return Build(FireCompartmentGeometry, marks);
@@ -61,16 +61,12 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThFireCompartment> Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
         {
-            return Build(rooms.Select(o => o.Boundary as Polyline).ToList(), marks);
-        }
-
-        public List<ThFireCompartment> Build(List<Polyline> polylines, List<ThIfcTextNote> marks)
-        {
-            if (polylines.Count == 0)
+            if (rooms.Count == 0)
                 return new List<ThFireCompartment>();
+            List<Polyline> choisemark = new List<Polyline>();
             var dbDbTextObjs = marks.Select(o => o.Geometry).ToCollection();
             ThCADCoreNTSSpatialIndex DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
-            List<Polyline> FireCompartmentData = polylines;
+            List<Polyline> FireCompartmentData = rooms.Select(o => o.Boundary as Polyline).ToList();
             var Holes = CalHoles(FireCompartmentData);
             var ThFireCompartments = FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o => o.Key == x)) : x }).ToList();
             foreach (var FireCompartment in ThFireCompartments)
@@ -78,12 +74,16 @@ namespace ThMEPEngineCore.Engine
                 var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
                 if (objs.Count > 0)
                 {
-                    FireCompartment.Number = marks.First(o => objs.Contains(o.Geometry)).Text;
+                    var mark = marks.First(o => objs.Contains(o.Geometry) & !choisemark.Contains(o.Geometry));
+                    if (!mark.IsNull())
+                    {
+                        choisemark.Add(mark.Geometry);
+                        FireCompartment.Number = mark.Text;
+                    }
                 }
             }
             return ThFireCompartments;
         }
-
         private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)
         {
             frames = frames.OrderByDescending(x => x.Area).ToList();

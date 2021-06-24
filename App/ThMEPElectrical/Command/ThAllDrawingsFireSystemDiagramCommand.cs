@@ -11,6 +11,7 @@ using ThMEPEngineCore.Model.Electrical;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
+using Linq2Acad;
 
 namespace ThMEPElectrical.Command
 {
@@ -69,6 +70,11 @@ namespace ThMEPElectrical.Command
                             LayerFilter = FireCompartmentParameter.LayerNames,
                         };
                         var compartments = builder.BuildFromMS(acadDatabase.Database, points);
+                        if (compartments.Count(o => o.Number.Contains("*")) > 0)
+                        {
+                            Active.Editor.WriteLine($"\n检测到{doc.Name}图纸有未正确命名的防火分区，请先手动命名");
+                            return;
+                        }
 
                         //初始化楼层
                         var AddFloorss = diagram.InitStoreys(

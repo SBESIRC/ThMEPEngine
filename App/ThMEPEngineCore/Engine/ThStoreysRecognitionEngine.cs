@@ -42,5 +42,10 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotSupportedException();
         }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

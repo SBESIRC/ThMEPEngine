@@ -63,7 +63,11 @@ namespace ThMEPElectrical.Command
                         LayerFilter = FireCompartmentParameter.LayerNames,
                     };
                     var compartments = builder.BuildFromMS(acadDatabase.Database, points);
-
+                    if (compartments.Count(o => o.Number.Contains("*")) > 0)
+                    {
+                        Active.Editor.WriteLine("\n检测到有未正确命名的防火分区，请先手动命名");
+                        return;
+                    }
                     //加载块集合配置文件白名单
                     ThBlockConfigModel.Init();
 

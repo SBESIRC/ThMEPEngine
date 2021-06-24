@@ -113,5 +113,10 @@ namespace ThMEPEngineCore.Engine
                 }
             });
         }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

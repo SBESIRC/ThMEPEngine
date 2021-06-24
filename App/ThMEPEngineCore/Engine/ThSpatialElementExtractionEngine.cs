@@ -21,5 +21,7 @@ namespace ThMEPEngineCore.Engine
         public abstract void Extract(Database database);
 
         public abstract void ExtractFromMS(Database database);
+
+        public abstract void ExtractFromMS(Database database, ObjectIdCollection dbObjs);
     }
 }

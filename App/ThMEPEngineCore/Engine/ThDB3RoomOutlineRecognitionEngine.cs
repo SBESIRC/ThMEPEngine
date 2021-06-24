@@ -27,6 +27,11 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotSupportedException();
         }
+
+        public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class ThDB3RoomOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
@@ -74,6 +79,11 @@ namespace ThMEPEngineCore.Engine
                     Elements.Add(room);
                 }
             });
+        }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

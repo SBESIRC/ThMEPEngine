@@ -58,6 +58,21 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach(ObjectId objId in dbObjs)
+                {
+                    var e = acadDatabase.Element<Entity>(objId);
+                    Visitors.ForEach(v =>
+                    {
+                        v.Results.AddRange(DoExtract(e, v));
+                    });
+                }
+            }
+        }
+
         private List<ThRawIfcSpatialElementData> DoExtract(Entity e, ThSpatialElementExtractionVisitor visitor)
         {
             var results = new List<ThRawIfcSpatialElementData>();
