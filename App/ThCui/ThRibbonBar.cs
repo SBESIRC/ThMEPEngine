@@ -43,13 +43,22 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 风机选型
+            // 机房平面
             row.AddNewButton("机房平面",
                 "天华机房平面",
                 "THFJF",
                 "基于风机图块与风管中心线，自动生成风管、风阀、开洞等元素。",
                 "IDI_THCAD_THFJF_SMALL",
                 "IDI_THCAD_THFJF_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 地库风平面
+            row.AddNewButton("地库风平面",
+                "天华地库风平面",
+                "THDKFPM",
+                "天华地库风平面",
+                "IDI_THCAD_THDKFPM_SMALL",
+                "IDI_THCAD_THDKFPM_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
         private static void CreateElectricPanel(RibbonTabSource tab)
