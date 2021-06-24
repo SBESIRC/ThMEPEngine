@@ -44,7 +44,6 @@ namespace ThMEPElectrical.Command
                 using (var acadDatabase = Linq2Acad.AcadDatabase.Use(doc.Database))
                 {
                     using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
-                    using (var FireCompartmentEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter = FireCompartmentParameter.LayerNames })//防火分区引擎
                     using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                     {
                         var points = new Point3dCollection();
@@ -65,13 +64,17 @@ namespace ThMEPElectrical.Command
                         }
 
                         //拿到全图所有防火分区
-                        FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
+                        var builder = new ThFireCompartmentBuilder()
+                        {
+                            LayerFilter = FireCompartmentParameter.LayerNames,
+                        };
+                        var compartments = builder.BuildFromMS(acadDatabase.Database, points);
 
                         //初始化楼层
                         var AddFloorss = diagram.InitStoreys(
                             acadDatabase,
                             StoreysRecognitionEngine.Elements,
-                            FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
+                            compartments);
 
                         //获取块引擎附加信息
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();

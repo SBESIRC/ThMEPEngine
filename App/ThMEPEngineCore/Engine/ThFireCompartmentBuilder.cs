@@ -1,100 +1,87 @@
-﻿using NFox.Cad;
-using DotNetARX;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Geometries;
+using NFox.Cad;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
+using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThFireCompartmentExtractionEngine : ThSpatialElementExtractionEngine
+    public class ThFireCompartmentBuilder
     {
         public List<string> LayerFilter { get; set; }
-        public ThFireCompartmentExtractionEngine()
-        {
-            LayerFilter = new List<string>();
-        }
-        public override void Extract(Database database)
-        {
-            throw new NotImplementedException();
-        }
-        public override void ExtractFromMS(Database database)
-        {
-            //获取防火分区边框访问者
-            var visitor = new ThFireCompartmentExtractionVisitor()
-            {
-                LayerFilter = this.LayerFilter,
-            };
-            //获取防火分区编号访问者
-            var visitorDbText = new ThFireCompartmentNameExtractionVisitor()
-            {
-                LayerFilter = this.LayerFilter,
-            };
 
-            var extractor = new ThSpatialElementExtractor();
-            extractor.Accept(visitor);
-            extractor.Accept(visitorDbText);
-            extractor.ExtractFromMS(database);
-            Results = visitor.Results;
-            Results.AddRange(visitorDbText.Results);
-        }
-    }
-
-
-    public class ThFireCompartmentRecognitionEngine : ThSpatialElementRecognitionEngine
-    {
-        public List<string> LayerFilter { get; set; }
-        public ThFireCompartmentRecognitionEngine()
+        public ThFireCompartmentBuilder()
         {
             LayerFilter = new List<string>();
         }
 
-        public override void Recognize(Database database, Point3dCollection polygon)
+        //
+        public List<ThFireCompartment> BuildFromMS(Database db, Point3dCollection pts)
         {
-            throw new NotImplementedException();
-        }
-
-        public override void RecognizeMS(Database database, Point3dCollection polygon)
-        {
-            var engine = new ThFireCompartmentExtractionEngine()
+            var outlineEngine = new ThFireCompartmentOutlineRecognitionEngine()
             {
                 LayerFilter = this.LayerFilter,
             };
-            engine.ExtractFromMS(database);
-            Recognize(engine.Results, polygon);
+            outlineEngine.RecognizeMS(db, pts);
+            var FireCompartmentGeometry = outlineEngine.Elements.Cast<ThIfcRoom>().ToList();
+            var markEngine = new ThFireCompartmentMarkRecognitionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            markEngine.RecognizeMS(db, pts);
+            var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+            return Build(FireCompartmentGeometry, marks);
         }
 
-        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        public List<ThFireCompartment> BuildFromMS(Database db, ObjectIdCollection objs)
         {
-            var dbPolylineObjs = datas.Where(o => o.Geometry is Polyline).Select(o => o.Geometry).ToCollection();
-            var dbDbTextObjs = datas.Where(o => o.Geometry is DBText || o.Geometry is MText).Select(o => o.Geometry).ToCollection();
-            ThCADCoreNTSSpatialIndex DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
-            if (polygon.Count > 0)
+            List<Polyline> FireCompartmentGeometry = new List<Polyline>();
+            using (AcadDatabase acad = AcadDatabase.Use(db))
             {
-                var PolyLinespatialIndex = new ThCADCoreNTSSpatialIndex(dbPolylineObjs);
-                //DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
-                dbPolylineObjs = PolyLinespatialIndex.SelectCrossingPolygon(polygon);
+                foreach (ObjectId obj in objs)
+                {
+                    FireCompartmentGeometry.Add(acad.Element<Polyline>(obj));
+                }
+
             }
-            datas = datas.Where(o => dbPolylineObjs.Contains(o.Geometry)).ToList();
-            List<Polyline> FireCompartmentData = datas.Select(x => x.Geometry as Polyline).ToList();
+            var markEngine = new ThFireCompartmentMarkRecognitionEngine();
+            markEngine.RecognizeMS(db, new Point3dCollection());
+            var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+            return Build(FireCompartmentGeometry, marks);
+        }
+
+
+        public List<ThFireCompartment> Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
+        {
+            return Build(rooms.Select(o => o.Boundary as Polyline).ToList(), marks);
+        }
+
+        public List<ThFireCompartment> Build(List<Polyline> polylines, List<ThIfcTextNote> marks)
+        {
+            if (polylines.Count == 0)
+                return new List<ThFireCompartment>();
+            var dbDbTextObjs = marks.Select(o => o.Geometry).ToCollection();
+            ThCADCoreNTSSpatialIndex DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
+            List<Polyline> FireCompartmentData = polylines;
             var Holes = CalHoles(FireCompartmentData);
-            // 通过获取的OriginData 分类
             var ThFireCompartments = FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o => o.Key == x)) : x }).ToList();
             foreach (var FireCompartment in ThFireCompartments)
             {
                 var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
-                if(objs.Count>0)
+                if (objs.Count > 0)
                 {
-                    FireCompartment.Number = objs[0] is DBText dBText ? dBText.TextString : (objs[0] as MText).Contents;
+                    FireCompartment.Number = marks.First(o => objs.Contains(o.Geometry)).Text;
                 }
             }
-            Elements.AddRange(ThFireCompartments);
+            return ThFireCompartments;
         }
 
         private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)
@@ -123,7 +110,6 @@ namespace ThMEPEngineCore.Engine
         {
             if (polylines.Count == 1)
                 return polylines[0];
-            //var mPolygon = polylines.ToCollection().BuildArea();
             var rGeometry = polylines[0].ToNTSPolygon().Difference(polylines.Skip(1).ToCollection().UnionGeometries());
             if (rGeometry is Polygon polygon)
             {

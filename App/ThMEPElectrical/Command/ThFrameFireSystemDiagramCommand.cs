@@ -28,7 +28,6 @@ namespace ThMEPElectrical.Command
             {
                 using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                 using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
-                using (var FireCompartmentEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter = FireCompartmentParameter.LayerNames })//防火分区引擎
                 {
                     //选择区域
                     var points = SelectFrame();
@@ -59,7 +58,11 @@ namespace ThMEPElectrical.Command
                     }
 
                     //防火分区
-                    FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
+                    var builder = new ThFireCompartmentBuilder()
+                    {
+                        LayerFilter = FireCompartmentParameter.LayerNames,
+                    };
+                    var compartments = builder.BuildFromMS(acadDatabase.Database, points);
 
                     //加载块集合配置文件白名单
                     ThBlockConfigModel.Init();
@@ -69,7 +72,7 @@ namespace ThMEPElectrical.Command
                     var AddFloorss = diagram.InitStoreys(
                         acadDatabase,
                         StoreysRecognitionEngine.Elements,
-                        FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
+                        compartments);
 
                     //获取块引擎附加信息
                     var datas = BlockReferenceEngine.QueryAllOriginDatas();

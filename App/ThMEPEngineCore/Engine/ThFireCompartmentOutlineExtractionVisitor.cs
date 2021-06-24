@@ -6,7 +6,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    class ThFireCompartmentExtractionVisitor : ThSpatialElementExtractionVisitor
+    class ThFireCompartmentOutlineExtractionVisitor : ThSpatialElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix)
         {

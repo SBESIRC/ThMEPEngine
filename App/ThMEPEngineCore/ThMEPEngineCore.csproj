@@ -71,9 +71,11 @@
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
-    <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
-    <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
-    <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFireCompartmentBuilder.cs" />
+    <Compile Include="Engine\ThFireCompartmentMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFireCompartmentOutlineExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFireCompartmentMarkExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFireCompartmentOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
