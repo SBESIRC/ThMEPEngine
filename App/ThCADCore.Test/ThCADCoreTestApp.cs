@@ -903,39 +903,5 @@ namespace ThCADCore.Test
                 acadDatabase.ModelSpace.Add(circle);
             }
         }
-
-        [CommandMethod("TIANHUACAD", "ThGetFireCompartment", CommandFlags.Modal)]
-        public void ThGetFireCompartment()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var dataEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter=new List<string>() {"AD-AREA-DIVD" } })
-            {
-                Tuple<Point3d, Point3d> input=null;
-                var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
-                Point3d leftDownPt = Point3d.Origin;
-                if (ptLeftRes.Status == PromptStatus.OK)
-                {
-                    leftDownPt = ptLeftRes.Value;
-                }
-
-                var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
-                if (ptRightRes.Status == PromptStatus.OK)
-                {
-                    input= Tuple.Create(leftDownPt, ptRightRes.Value);
-                }
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-
-                dataEngine.RecognizeMS(acadDatabase.Database, range);
-                foreach (var item in dataEngine.Elements.Cast<ThFireCompartment>().ToList())
-                {
-                    item.Boundary.ColorIndex = 2;
-                    acadDatabase.ModelSpace.Add(item.Boundary);
-                }
-            }
-        }
     }
 }
