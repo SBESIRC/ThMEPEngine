@@ -346,7 +346,6 @@
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Model\ThIfcWindow.cs" />
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
-    <Compile Include="Model\ThIfcZone.cs" />
     <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
