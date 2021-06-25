@@ -89,17 +89,7 @@ namespace ThMEPEngineCore.Model.Common
         {
             get
             {
-                if(Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER))
-                {
-                    return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
-                }
-
-                if(Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER))
-                {
-                    return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER];
-                }
-
-                return string.Empty;
+                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
             }
         }
         public string StoreyTypeString => (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);

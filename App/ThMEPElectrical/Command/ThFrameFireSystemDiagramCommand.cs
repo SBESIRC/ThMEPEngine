@@ -27,7 +27,7 @@ namespace ThMEPElectrical.Command
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
-                using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
+                using (var StoreysRecognitionEngine = new ThEStoreysRecognitionEngine())//楼层引擎
                 {
                     //选择区域
                     var points = SelectFrame();

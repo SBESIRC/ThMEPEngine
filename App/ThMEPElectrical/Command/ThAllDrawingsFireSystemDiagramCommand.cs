@@ -44,7 +44,7 @@ namespace ThMEPElectrical.Command
                 using (DocumentLock docLock = doc.LockDocument())
                 using (var acadDatabase = Linq2Acad.AcadDatabase.Use(doc.Database))
                 {
-                    using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
+                    using (var StoreysRecognitionEngine = new ThEStoreysRecognitionEngine())//楼层引擎
                     using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                     {
                         var points = new Point3dCollection();
