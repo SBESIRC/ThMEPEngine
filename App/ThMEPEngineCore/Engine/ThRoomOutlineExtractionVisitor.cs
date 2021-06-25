@@ -32,7 +32,10 @@ namespace ThMEPEngineCore.Engine
             if (IsSpatialElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone() as Polyline;
-                results.Add(CreateSpatialElementData(clone, ""));
+                if(clone!=null)
+                {
+                    results.Add(CreateSpatialElementData(clone, ""));
+                }                
             }
             return results;
         }

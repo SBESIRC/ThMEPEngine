@@ -9,7 +9,6 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcHelper;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -21,7 +20,7 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> ProtectAreas { get; set; }
         private double zeroLength = 1e-4;
         private double PolygonBufferLength = 5.0;
-        private double RoomBufferLength = 0.5;
+        private double RoomBufferLength = 5.0;
         /// <summary>
         /// 房间轮廓被保护区域分割后的子区域所对应的保护区域
         /// Key->房间原始轮廓，Value->房间被分割的区域，及每个区域所受的保护区域
@@ -136,33 +135,27 @@ namespace ThMEPWSS.Hydrant.Service
             lines = spatialIndex.Geometries.Values.ToCollection();
 
             // 合并
-            //lines = Merge(lines); //暂时不用，后期寻找替代方法
+            lines = Merge(lines); 
 
-            // 延长
-            if (ExtendLength <= 0)
-            {
-                ExtendLength = 1.0;
-            }
+            // 延长            
             lines = lines.Cast<Line>().Select(o => o.ExtendLine(ExtendLength)).ToCollection();
             return lines;
         }
         private DBObjectCollection Merge(DBObjectCollection lines)
         {
-            lines = ClearZeroLines(lines, this.zeroLength);
-            var old_extend_distance = ThLaneLineEngine.extend_distance;
-            var old_collinear_gap_distance = ThLaneLineEngine.collinear_gap_distance;
-            ThLaneLineEngine.extend_distance = 2.0;
-            ThLaneLineEngine.collinear_gap_distance = 1.0;
             var results = new DBObjectCollection();
-            try
-            {                
-                results = ThLaneLineMergeExtension.Merge(lines);                
-            }
-            finally
-            {
-                ThLaneLineEngine.extend_distance = old_extend_distance;
-                ThLaneLineEngine.collinear_gap_distance = old_collinear_gap_distance;
-            }
+            lines = ClearZeroLines(lines, this.zeroLength);
+            lines.LineMerge().Cast<Curve>().ForEach(o =>
+                {
+                    if(o is Line line)
+                    {
+                        results.Add(line);
+                    }
+                    else if(o is Polyline polyline)
+                    {
+                        polyline.ToLines().ForEach(l=> results.Add(l));
+                    }
+                });
             return ClearZeroLines(results, this.zeroLength);
         }
         private List<Line> ToLines(Entity entity)
