@@ -152,6 +152,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THYJZMLX_SMALL",
             "IDI_THCAD_THYJZMLX_LARGE",
             RibbonButtonStyle.LargeWithText);
+
+            // 火灾自动报警系统图
+            row.AddNewButton("火灾报警系统",
+            "天华火灾报警系统",
+            "THHZXT",
+            "天华火灾报警系统",
+            "IDI_THCAD_THHZXT_SMALL",
+            "IDI_THCAD_THHZXT_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
