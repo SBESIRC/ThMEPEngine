@@ -688,6 +688,65 @@ namespace ThMEPWSS.DebugNs
     [Feng]
     public class Sankaku2
     {
+        [Feng("😋qv8z4i")]
+        public static void qv8z4i()
+        {
+            var names = new string[]
+            {
+                nameof(ThDrainageSystemServiceGeoCollector.CollectVerticalPipes),
+                nameof(DrainageSystemDiagram.draw8),
+                nameof(DrainageService.TestDrawingDatasCreation),
+            };
+        }
+        [Feng("draw8")]
+        public static void qv8ttl()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw8(drDatas, basePt.ToPoint2d());
+            }
+        }
+        [Feng("draw7")]
+        public static void qv8lf8()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
+                var basePt = Dbg.SelectPoint();
+                DrainageSystemDiagram.draw7(drDatas, basePt.ToPoint2d());
+            }
+        }
+        [Feng("qv744d")]
+        public static void qv744d()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var e = Dbg.SelectEntity<Entity>(adb);
+                Console.WriteLine(e.GetRXClass().DxfName.ToUpper());
+                Console.WriteLine(e.Bounds.ToGRect().ToCadJson());
+                Console.WriteLine(e.Bounds.ToGRect().Width);
+                Dbg.ShowXLabel(e.Bounds.ToGRect().Center);
+                Console.WriteLine(e.Bounds.ToGRect().Height);
+                Console.WriteLine(GeoAlgorithm.GetBoundaryRect(e.ExplodeToDBObjectCollection().OfType<Entity>().ToArray()).Width);
+            }
+        }
         [Feng("qv7011")]
         public static void qv7011()
         {
@@ -962,7 +1021,77 @@ namespace ThMEPWSS.DebugNs
                 });
             }
         }
-        [Feng("地漏系统1")]
+        [Feng("P型存水弯")]
+        public static void qv77sl()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                //left
+                {
+                    var v = new Vector3d(383875.8169, -250561.9571, 0);
+                    DU.DrawBlockReference("P型存水弯", bsPt - v, br =>
+                    {
+                        br.Layer = "W-DRAI-EQPM";
+                        br.ScaleFactors = new Scale3d(2, 2, 2);
+                        if (br.IsDynamicBlock)
+                        {
+                            br.ObjectId.SetDynBlockValue("可见性", "板上P弯");
+                        }
+                    });
+                }
+                //right
+                {
+                    var v = new Vector3d(-383875.8169, -250561.9571, 0);
+                    DU.DrawBlockReference("P型存水弯", bsPt - v, br =>
+                    {
+                        br.Layer = "W-DRAI-EQPM";
+                        br.ScaleFactors = new Scale3d(-2, 2, 2);
+                        if (br.IsDynamicBlock)
+                        {
+                            br.ObjectId.SetDynBlockValue("可见性", "板上P弯");
+                        }
+                    });
+                }
+            }
+        }
+        [Feng("P型存水弯test")]
+        public static void qv7791()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                //哇，这玩意基点太远了
+                //left
+                DU.DrawBlockReference("P型存水弯", bsPt, br =>
+                {
+                    br.Layer = "W-DRAI-EQPM";
+                    br.ScaleFactors = new Scale3d(2, 2, 2);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue("可见性", "板上P弯");
+                    }
+                });
+                Dbg.AddButton("获取修正量", () =>
+                {
+                    var pt = Dbg.SelectPoint();
+                    //Console.WriteLine((pt - bsPt).ToCadJson());
+                    var v = pt - bsPt;
+                    Console.WriteLine($"new Vector3d({v.X},{v.Y},0)");
+                });
+            }
+        }
+        [Feng("地漏系统")]
         public static void qv1o5m()
         {
             Dbg.FocusMainWindow();
@@ -975,7 +1104,7 @@ namespace ThMEPWSS.DebugNs
                 var bsPt = Dbg.SelectPoint();
                 Dbg.ShowXLabel(bsPt);
                 //left
-                DU.DrawBlockReference("地漏系统1", bsPt, br =>
+                DU.DrawBlockReference("地漏系统", bsPt, br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.ScaleFactors = new Scale3d(2, 2, 2);
@@ -985,7 +1114,7 @@ namespace ThMEPWSS.DebugNs
                     }
                 });
                 //right
-                DU.DrawBlockReference("地漏系统1", bsPt,
+                DU.DrawBlockReference("地漏系统", bsPt,
                     br =>
                     {
                         br.Layer = "W-DRAI-EQPM";

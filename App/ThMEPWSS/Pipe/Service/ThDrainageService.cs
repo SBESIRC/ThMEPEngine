@@ -651,6 +651,7 @@ pt,
         public List<Geometry> DLines;
         public List<Geometry> VLines;
         public List<Geometry> VerticalPipes;
+        public List<Geometry> WrappingPipes;
         public List<Geometry> FloorDrains;
         public List<Geometry> WaterPorts;
         public List<Geometry> WashingMachines;
@@ -663,6 +664,7 @@ pt,
             DLines ??= new List<Geometry>();
             VLines ??= new List<Geometry>();
             VerticalPipes ??= new List<Geometry>();
+            WrappingPipes??= new List<Geometry>();
             FloorDrains ??= new List<Geometry>();
             WaterPorts ??= new List<Geometry>();
             WashingMachines ??= new List<Geometry>();
@@ -680,6 +682,7 @@ pt,
             else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
             o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
             o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
+            o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
             if (false) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
             else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
             o.FloorDrains.AddRange(data.FloorDrains.Select(ConvertFloorDrainsF()));
@@ -687,6 +690,11 @@ pt,
             o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
             o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
             return o;
+        }
+
+        private static Func<GRect, Polygon> ConvertWrappingPipesF()
+        {
+            return x => x.ToPolygon();
         }
 
         private static Func<GLineSegment, Geometry> NewMethod(int bfSize)
@@ -753,6 +761,7 @@ pt,
             ret.AddRange(DLines);
             ret.AddRange(VLines);
             ret.AddRange(VerticalPipes);
+            ret.AddRange(WrappingPipes);
             ret.AddRange(FloorDrains);
             ret.AddRange(WaterPorts);
             ret.AddRange(WashingMachines);
@@ -774,6 +783,7 @@ pt,
                 o.DLines.AddRange(objs.Where(x => this.DLines.Contains(x)));
                 o.VLines.AddRange(objs.Where(x => this.VLines.Contains(x)));
                 o.VerticalPipes.AddRange(objs.Where(x => this.VerticalPipes.Contains(x)));
+                o.WrappingPipes.AddRange(objs.Where(x => this.WrappingPipes.Contains(x)));
                 o.FloorDrains.AddRange(objs.Where(x => this.FloorDrains.Contains(x)));
                 o.WaterPorts.AddRange(objs.Where(x => this.WaterPorts.Contains(x)));
                 o.WashingMachines.AddRange(objs.Where(x => this.WashingMachines.Contains(x)));
@@ -906,6 +916,7 @@ pt,
         public List<GLineSegment> DLines;//排水立管专用转管
         public List<GLineSegment> VLines;//通气立管专用转管
         public List<GRect> VerticalPipes;
+        public List<GRect> WrappingPipes;
         public List<GRect> FloorDrains;
         public List<GRect> WaterPorts;
         public List<string> WaterPortLabels;
@@ -919,6 +930,7 @@ pt,
             DLines ??= new List<GLineSegment>();
             VLines ??= new List<GLineSegment>();
             VerticalPipes ??= new List<GRect>();
+            WrappingPipes ??= new List<GRect>();
             FloorDrains ??= new List<GRect>();
             WaterPorts ??= new List<GRect>();
             WaterPortLabels ??= new List<string>();
@@ -933,6 +945,7 @@ pt,
             DLines = DLines.Where(x => x.Length > 0).Distinct().ToList();
             VLines = VLines.Where(x => x.Length > 0).Distinct().ToList();
             VerticalPipes = VerticalPipes.Where(x => x.IsValid).Distinct().ToList();
+            WrappingPipes = WrappingPipes.Where(x => x.IsValid).Distinct().ToList();
             FloorDrains = FloorDrains.Where(x => x.IsValid).Distinct().ToList();
             WaterPorts = WaterPorts.Where(x => x.IsValid).Distinct().ToList();
             WashingMachines = WashingMachines.Where(x => x.IsValid).Distinct().ToList();

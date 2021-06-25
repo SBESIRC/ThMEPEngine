@@ -463,10 +463,8 @@ new Point2d(maxX, minY)
         {
             return ++_tk;
         }
-        //public Guid Guid = Guid.NewGuid();
         public int CompareTo(Ref<T> other)
         {
-            //return this.GetHashCode() - other.GetHashCode();
             return this._id - other._id;
         }
         public override int GetHashCode()

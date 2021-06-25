@@ -506,6 +506,10 @@ namespace ThMEPWSS.DebugNs
             if (ctx["currentLogWindow"] == null) return;
             ((Action<string>)ctx["addtext"])(string.Join("\n", lines));
         }
+        public static void Log(object obj)
+        {
+            ((Action<string>)Dbg.ctx["thape_logger"])(obj.ToCadJson());
+        }
         public static void NewLogWindow()
         {
             if (!isDebugging) return;
@@ -4025,33 +4029,35 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             }
             private static void NewMethod3(Entity e)
             {
+                //var source = "adb.ModelSpace";
+                var source = "entities";
                 if (ThRainSystemService.IsTianZhengElement(e))
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<Entity>().Where( e=>e.Layer=={e.Layer.ToJson()} && ThRainSystemService.IsTianZhengElement(x))");
+                    Dbg.PrintLine($"{source}.OfType<Entity>().Where( e=>e.Layer=={e.Layer.ToJson()} && e.GetRXClass().DxfName.ToUpper()=={e.GetRXClass().DxfName.ToUpper().ToJson()})");
                 }
                 else if (e is Line)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<Line>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<Line>().Where( e=>e.Layer=={e.Layer.ToJson()})");
                 }
                 else if (e is Polyline)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<Polyline>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<Polyline>().Where( e=>e.Layer=={e.Layer.ToJson()})");
                 }
                 else if (e is Circle)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<Circle>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<Circle>().Where( e=>e.Layer=={e.Layer.ToJson()})");
                 }
                 else if (e is DBText)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<DBText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<DBText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
                 }
                 else if (e is MText)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<MText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<MText>().Where( e=>e.Layer=={e.Layer.ToJson()})");
                 }
                 else if (e is BlockReference br)
                 {
-                    Dbg.PrintLine($"adb.ModelSpace.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()}) && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()})");
+                    Dbg.PrintLine($"{source}.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()} && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()}) ");
                 }
             }
 

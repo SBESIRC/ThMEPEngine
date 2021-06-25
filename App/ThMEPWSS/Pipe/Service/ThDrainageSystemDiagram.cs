@@ -2,56 +2,19 @@
 
 namespace ThMEPWSS.Pipe.Service
 {
-    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
     using System;
     using System.Linq;
-    using System.Text;
-    using System.Reflection;
     using System.Collections.Generic;
-    using System.Windows.Forms;
     using ThMEPWSS.JsonExtensionsNs;
     using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
     using DU = ThMEPWSS.Assistant.DrawUtils;
-    using Autodesk.AutoCAD.EditorInput;
-    using AcHelper;
     using Autodesk.AutoCAD.Geometry;
-    using Linq2Acad;
-    using ThMEPWSS.Pipe.Model;
-    using ThMEPWSS.Pipe.Engine;
-    using Autodesk.AutoCAD.DatabaseServices;
-    using System.Diagnostics;
-    using Autodesk.AutoCAD.ApplicationServices;
     using Dreambuild.AutoCAD;
-    using DotNetARX;
-    using Autodesk.AutoCAD.Internal;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
-    using ThMEPWSS.Uitl.DebugNs;
     using ThMEPWSS.Uitl.ExtensionsNs;
-    using ThMEPWSS.Assistant;
-    using ThMEPWSS.Pipe.Service;
-    using NFox.Cad;
-    using ThCADCore.NTS;
-    using Autodesk.AutoCAD.Colors;
-    using System.Runtime.Remoting;
-    using System.IO;
-    using Autodesk.AutoCAD.Runtime;
-    using ThMEPWSS.Pipe;
-    using Newtonsoft.Json;
-    using System.Text.RegularExpressions;
-    using ThCADExtension;
-    using System.Collections;
-    using ThCADCore.NTS.IO;
-    using Newtonsoft.Json.Linq;
-    using ThMEPEngineCore.Engine;
-    using NetTopologySuite.Geometries;
-    using NetTopologySuite.Operation.Linemerge;
-    using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
-    using Microsoft.CSharp;
-    using System.CodeDom.Compiler;
-    using System.Linq.Expressions;
-    using ThMEPEngineCore.Algorithm;
     using ThMEPWSS.DebugNs;
+    using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
 
     public partial class DrainageSystemDiagram
     {
@@ -659,6 +622,12 @@ namespace ThMEPWSS.Pipe.Service
                 groups[1].DL = groups[1].PL;
             }
 
+            NewMethod6(basePoint, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, storeys, groups);
+
+        }
+
+        public static void NewMethod6(Point2d basePoint, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, List<string> storeys, List<ThwPipeLineGroup> groups)
+        {
             var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
             for (int i = 0; i < storeys.Count; i++)
             {
@@ -689,7 +658,7 @@ namespace ThMEPWSS.Pipe.Service
                     var tdx = 0.0;
                     for (int i = start; i >= end; i--)
                     {
-                        var run = thwPipeLine.PipeRuns[i];
+                        var run = thwPipeLine.PipeRuns.TryGet(i);
                         if (run == null) continue;
 
                         var storey = storeys[i];
@@ -811,12 +780,46 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     for (int i = start; i >= end; i--)
                     {
-                        var run = thwPipeLine.PipeRuns[i];
+                        var run = thwPipeLine.PipeRuns.TryGet(i);
                         var output = thwPipeLine.Output;
                         var storey = storeys[i];
                         if (run == null) continue;
 
                         var info = arr[i];
+                        {
+                            if (storey == "1F")
+                            {
+                                var basePt = info.EndPoint;
+                                //o.HasVerticalLine2 = false;
+                                //o.HasWrappingPipe1 = true;
+                                //o.HasWrappingPipe2 = false;
+                                //o.HasWrappingPipe3 = true;
+                                //o.HasCleaningPort1 = true;
+                                //o.HasCleaningPort2 = true;
+                                //o.HasCleaningPort3 = true;
+                                //o.HasLargeCleaningPort = false;
+                                ////o.HangingCount = 1;
+                                //o.HangingCount = 2;
+                                //o.Hanging1 = new Hanging() { FloorDrainsCount = 1, HasDoubleSCurve = true };
+                                //o.Hanging2 = new Hanging() { FloorDrainsCount = 2, HasDoubleSCurve = true };
+                                //drawOutputs(basePt, 3600, o);
+                                drawOutputs(basePt, 3600, thwPipeLine.Output);
+                            }
+                        }
+                        {
+                            if (i == end)
+                            {
+                                var dy = -3000;
+                                foreach (var comment in thwPipeLine.Comments)
+                                {
+                                    if (!string.IsNullOrEmpty(comment))
+                                    {
+                                        DU.DrawTextLazy(comment,350, info.EndPoint.OffsetY(dy));
+                                    }
+                                    dy -= 350;
+                                }
+                            }
+                        }
                         void handleHanging(Hanging hanging, bool isLeftOrRight)
                         {
                             if (run.HasLongTranslator)
@@ -851,6 +854,10 @@ namespace ThMEPWSS.Pipe.Service
                                     else if (hanging.FloorDrainsCount == 1)
                                     {
                                         _segs = segs.Take(5).ToList();
+                                    }
+                                    else if (hanging.FloorDrainsCount == 0)
+                                    {
+                                        _segs = segs.Take(4).ToList();
                                     }
                                     DrawDomePipes(_segs);
                                 }
@@ -891,6 +898,10 @@ namespace ThMEPWSS.Pipe.Service
                                     {
                                         _segs.RemoveAt(4);
                                         _segs.RemoveAt(3);
+                                    }
+                                    if (hanging.FloorDrainsCount == 0)
+                                    {
+                                        _segs = _segs.Take(2).ToList();
                                     }
                                     DrawDomePipes(_segs);
                                 }
@@ -1165,10 +1176,6 @@ namespace ThMEPWSS.Pipe.Service
 
 
             }
-
-
-
-
         }
 
         private static void DrawNoteText(string text, Point2d pt)
