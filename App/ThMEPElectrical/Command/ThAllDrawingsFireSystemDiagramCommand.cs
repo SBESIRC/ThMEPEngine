@@ -12,6 +12,7 @@ using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.Command
 {
@@ -76,39 +77,17 @@ namespace ThMEPElectrical.Command
                             return;
                         }
 
-                        //初始化楼层
-                        var AddFloorss = diagram.InitStoreys(
-                            acadDatabase,
-                            StoreysRecognitionEngine.Elements,
-                            compartments);
-
                         //获取块引擎附加信息
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();
 
                         //填充块数量到防火分区
                         diagram.SetGlobalBlockInfo(acadDatabase.Database,datas);
-                        AddFloorss.ForEach(floor =>
-                        {
-                            var FloorBlockInfo = diagram.GetFloorBlockInfo(floor.FloorBoundary);
-                            //在这里可以加OrderBy
-                            floor.FireDistricts.ForEach(fireDistrict =>
-                            {
-                                fireDistrict.Data = new DataSummary()
-                                {
-                                    BlockData = diagram.FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary, floor.FloorName == "JF")
-                                };
-                                fireDistrict.DrawFireDistrict = fireDistrict.Data.BlockData.BlockStatistics.Values.Count(v => v > 0) > 3;
-                            });
-                            int Max_FireDistrictNo = 1;
-                            var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
-                            Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
-                            string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
-                            floor.FireDistricts.Where(f => f.DrawFireDistrict && f.DrawFireDistrictNameText).ToList().ForEach(o =>
-                            {
-                                o.FireDistrictNo = ++Max_FireDistrictNo;
-                                o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
-                            });
-                        });
+
+                        //初始化楼层
+                        var AddFloorss = diagram.InitStoreys(
+                            acadDatabase,
+                            StoreysRecognitionEngine.Elements,
+                            compartments);
 
                         //绘画该图纸的防火分区编号
                         diagram.DrawFireCompartmentNum(acadDatabase.Database, AddFloorss);

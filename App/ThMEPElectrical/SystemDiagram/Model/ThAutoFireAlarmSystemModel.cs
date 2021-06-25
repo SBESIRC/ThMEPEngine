@@ -100,16 +100,15 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             List<ThFloorModel> Floors = new List<ThFloorModel>();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(fireCompartments.Select(e => e.Boundary).ToCollection());
+            //初始化楼层
             foreach (var s in storeys)
             {
-                if (s is ThStoreys sobj)
+                if (s is ThEStoreys sobj)
                 {
                     var blk = adb.Element<BlockReference>(sobj.ObjectId);
-                    //var pts = blk.GeometricExtents.ToRectangle().Vertices();
-
                     switch (sobj.StoreyType)
                     {
-                        case StoreyType.LargeRoof:
+                        case EStoreyType.LargeRoof:
                             {
                                 //大屋面 如果没有小屋面 大屋面就是顶楼
                                 ThFloorModel NewFloor = new ThFloorModel
@@ -121,7 +120,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 Floors.Add(NewFloor);
                                 break;
                             }
-                        case StoreyType.SmallRoof:
+                        case EStoreyType.SmallRoof:
                             {
                                 //小屋面，一般意味着顶楼
                                 ThFloorModel NewFloor = new ThFloorModel
@@ -133,9 +132,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 Floors.Add(NewFloor);
                                 break;
                             }
-                        case StoreyType.StandardStorey:
-                        case StoreyType.NonStandardStorey:
-                            //标准层或者非标层
+                        case EStoreyType.StandardStorey:
+                        case EStoreyType.NonStandardStorey:
+                        case EStoreyType.RefugeStorey:
+                        case EStoreyType.PodiumRoof:
                             {
                                 if (sobj.Storeys.Count == 1)
                                 {
@@ -149,28 +149,73 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 }
                                 if (sobj.Storeys.Count > 1)
                                 {
-                                    sobj.Storeys.ForEach(floor =>
+                                    ThFloorModel NewFloor = new ThFloorModel
                                     {
-                                        ThFloorModel NewFloor = new ThFloorModel
-                                        {
-                                            FloorName = floor + "F",
-                                            FloorNumber = floor,
-                                            IsMultiFloor = true,
-                                            MulitFloorName = sobj.StoreyNumber
-                                        };
-                                        NewFloor.InitFloors(adb, blk, fireCompartments, spatialIndex);
-                                        Floors.Add(NewFloor);
-                                    });
+                                        FloorName = sobj.Storeys[0] + "F",
+                                        FloorNumber = sobj.Storeys[0],
+                                        IsMultiFloor = true,
+                                        MulitFloorName = sobj.Storeys
+                                    };
+                                    NewFloor.InitFloors(adb, blk, fireCompartments, spatialIndex);
+                                    Floors.Add(NewFloor);
                                 }
                             }
                             break;
-                        case StoreyType.Unknown:
+                        case EStoreyType.Unknown:
                         default:
                             break;
                     }
                 }
             }
-            return Floors;
+            //统计楼层内防火分区计数
+            Floors.ForEach(floor =>
+            {
+                var FloorBlockInfo = GetFloorBlockInfo(floor.FloorBoundary);
+                floor.FireDistricts.ForEach(fireDistrict =>
+                {
+                    fireDistrict.Data = new DataSummary()
+                    {
+                        BlockData = FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary, floor.FloorName == "JF")
+                    };
+                    fireDistrict.DrawFireDistrict = fireDistrict.Data.BlockData.BlockStatistics.Values.Count(v => v > 0) > 3;
+                });
+                int Max_FireDistrictNo = 1;
+                var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
+                Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
+                string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
+                floor.FireDistricts.Where(f => f.DrawFireDistrict && f.DrawFireDistrictNameText).ToList().ForEach(o =>
+                {
+                    o.FireDistrictNo = ++Max_FireDistrictNo;
+                    o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
+                });
+            });
+            //分解复数楼层
+            Floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
+            {
+                floor.MulitFloorName.ForEach(o =>
+                {
+                    var newfloor = new ThFloorModel();
+                    newfloor.IsMultiFloor = false;
+                    newfloor.FloorName = o + "F";
+                    newfloor.FloorNumber = o;
+                    floor.FireDistricts.ForEach(x =>
+                    {
+                        var names = x.FireDistrictName.Split('-');
+                        names[0] = newfloor.FloorName;
+                        newfloor.FireDistricts.Add(new ThFireDistrictModel()
+                        {
+                            FireDistrictName = string.Join("-", names),
+                            DrawFireDistrict = x.DrawFireDistrict,
+                            DrawFireDistrictNameText = newfloor.FloorNumber == floor.MulitFloorName[0] ? x.DrawFireDistrictNameText : false,
+                            TextPoint = x.TextPoint,
+                            Data = x.Data,
+                            FireDistrictNo = x.FireDistrictNo
+                        });
+                    });
+                    Floors.Add(newfloor);
+                });
+            });
+            return Floors.Where(o=>!o.IsMultiFloor).ToList();
         }
 
 

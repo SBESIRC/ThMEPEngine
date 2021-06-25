@@ -36,7 +36,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <summary>
         /// 多楼层名称
         /// </summary>
-        public string MulitFloorName { get; set; }
+        public List<int> MulitFloorName { get; set; }
 
         /// <summary>
         /// 防火分区信息
