@@ -20,7 +20,8 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> RoomOutlines { get; set; } //可能是洞（只支持一个Shell的洞）
         private List<Entity> ProtectAreas { get; set; }
         private double zeroLength = 1e-4;
-        private double PolygonInnerBufferLength = 5.0;
+        private double PolygonBufferLength = 5.0;
+        private double RoomBufferLength = 0.5;
         /// <summary>
         /// 房间轮廓被保护区域分割后的子区域所对应的保护区域
         /// Key->房间原始轮廓，Value->房间被分割的区域，及每个区域所受的保护区域
@@ -36,9 +37,9 @@ namespace ThMEPWSS.Hydrant.Service
             Results = new Dictionary<Entity, Dictionary<Entity, List<Entity>>>();
         }
         public void Divide()
-        {    
+        {   
             // 前处理（打散、去重、合并、延长）
-            var objs = Preprocess(); // 返回一堆直线
+            var objs = Preprocess(); // 返回一堆直线 
             var polygons = objs.Polygons(); //重新分割区域
 
             // 去重
@@ -48,7 +49,7 @@ namespace ThMEPWSS.Hydrant.Service
             polygons = duplicateRemoveService.Results.ToCollection();
 
             //对分割的Polygons进行内缩,用于判断哪些区域属于房间
-            var polygonBufferDic = BufferPolygon(polygons.Cast<Entity>().ToList()); 
+            var polygonBufferDic = BufferPolygon(polygons.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength); 
             var spatialIndex = new ThCADCoreNTSSpatialIndex(polygonBufferDic.Keys.ToCollection());
             RoomOutlines.ForEach(o =>
             {
@@ -73,7 +74,7 @@ namespace ThMEPWSS.Hydrant.Service
         {
             return polygons.Where(o => roomOutline.IsContains(o)).ToList();
         }
-        private Dictionary<Entity, Entity> BufferPolygon(List<Entity> polygons)
+        private Dictionary<Entity, Entity> BufferPolygon(List<Entity> polygons,double length)
         {
             var result = new Dictionary<Entity, Entity>();            
             var bufferService = new ThNTSBufferService();
@@ -81,7 +82,7 @@ namespace ThMEPWSS.Hydrant.Service
             {
                 if(o is Polyline polyline)
                 {
-                    var bufferEnt = bufferService.Buffer(o, -1.0 * PolygonInnerBufferLength);
+                    var bufferEnt = bufferService.Buffer(o, length);
                     if (bufferEnt != null)
                     {
                         result.Add(bufferEnt, o);
@@ -89,7 +90,7 @@ namespace ThMEPWSS.Hydrant.Service
                 }
                 else if(o is MPolygon mPolygon)
                 {
-                    var bufferEnt = bufferService.Buffer(o, -1.0 * PolygonInnerBufferLength);
+                    var bufferEnt = bufferService.Buffer(o, length);
                     if (bufferEnt != null)
                     {
                         result.Add(bufferEnt, o);
@@ -100,9 +101,11 @@ namespace ThMEPWSS.Hydrant.Service
         }
         private DBObjectCollection Preprocess()
         {           
+            // 内缩房间轮廓线，便于分割
+            var roomOutlines = BufferPolygon(RoomOutlines, -1.0 * RoomBufferLength);
             // 转成多段线,且已打散
             var polys = new List<Polyline>();
-            RoomOutlines.ForEach(o => polys.AddRange(ToPolylines(o)));
+            roomOutlines.Keys.ForEach(o => polys.AddRange(ToPolylines(o)));
             ProtectAreas.ForEach(o => polys.AddRange(ToPolylines(o)));
 
             var simplifer = new ThElementSimplifier();
@@ -133,7 +136,7 @@ namespace ThMEPWSS.Hydrant.Service
             lines = spatialIndex.Geometries.Values.ToCollection();
 
             // 合并
-            lines = Merge(lines);
+            //lines = Merge(lines); //暂时不用，后期寻找替代方法
 
             // 延长
             if (ExtendLength <= 0)
@@ -153,8 +156,7 @@ namespace ThMEPWSS.Hydrant.Service
             var results = new DBObjectCollection();
             try
             {                
-                results = ThLaneLineMergeExtension.Merge(lines);
-                results = results.Cast<Line>().Where(o => o.Length > ThLaneLineEngine.extend_distance).ToCollection();
+                results = ThLaneLineMergeExtension.Merge(lines);                
             }
             finally
             {

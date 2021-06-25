@@ -5,84 +5,50 @@ namespace ThMEPWSS.Hydrant.Model
     public class ThFireHydrantModel : INotifyPropertyChanged
     {
         public ThFireHydrantModel()
-        {            
-            checkFireHydrant = true;
-            isDoubleStrands = true;
+        {
             hoseLength = 25.0;
-            isTenMetres = true;
-            isShowCheckResult = true;
-            isCalculation = true;
-            dangerLevel = "中危险级";
+            selfLength = 15.0;            
             fireType = "A类火灾";
-            calculationLength = 25.0;
-            selfLength = 15.0;
+            dangerLevel = "中危险级";
+            isShowCheckResult = true;
+            checkObjectOption = CheckObjectOps.FireHydrant;
+            protectStrengthOption = ProtectStrengthOps.DoubleStrand;            
+            waterColumnLengthOption = WaterColumnLengthOps.TenMeters;
+            maxProtectDisOption = MaxProtectDisOps.Calculation; 
         }
-        private bool checkFireHydrant;
+        private CheckObjectOps checkObjectOption;
         /// <summary>
         /// 校核对象->消火栓
         /// </summary>
-        public bool CheckFireHydrant 
+        public CheckObjectOps CheckObjectOption
         {
             get
             {
-                return checkFireHydrant;
+                return checkObjectOption;
             }
             set
             {
-                checkFireHydrant = value;
-                RaisePropertyChanged("CheckFireHydrant");
+                checkObjectOption = value;
+                RaisePropertyChanged("CheckObjectOption");
             }
         }
-        private bool checkFireExtinguisher;
-        /// <summary>
-        /// 校核对象->灭火器
-        /// </summary>
-        public bool CheckFireExtinguisher
-        {
-            get
-            {
-                return checkFireExtinguisher;
-            }
-            set
-            {
-                checkFireExtinguisher = value;
-                RaisePropertyChanged("CheckFireExtinguisher");
-            }
-        }
-
-        private bool isDoubleStrands;
+        
+        private ProtectStrengthOps protectStrengthOption;
         /// <summary>
         /// 保护强度->双股
         /// </summary>
-        public bool IsDoubleStrands
+        public ProtectStrengthOps ProtectStrengthOption
         {
             get
             {
-                return isDoubleStrands;
+                return protectStrengthOption;
             }
             set
             {
-                isDoubleStrands = value;
-                RaisePropertyChanged("IsDoubleStrands");
+                protectStrengthOption = value;
+                RaisePropertyChanged("ProtectStrengthOption");
             }
-        }
-
-        private bool isSingleStrands;
-        /// <summary>
-        /// 保护强度->单股
-        /// </summary>
-        public bool IsSingleStrands
-        {
-            get
-            {
-                return isSingleStrands;
-            }
-            set
-            {
-                isSingleStrands = value;
-                RaisePropertyChanged("IsSingleStrands");
-            }
-        }
+        }       
 
         private double hoseLength;
         /// <summary>
@@ -101,37 +67,17 @@ namespace ThMEPWSS.Hydrant.Model
             }
         }
 
-        private bool isTenMetres;
-        /// <summary>
-        /// 10米
-        /// </summary>
-        public bool IsTenMetres
+        private WaterColumnLengthOps waterColumnLengthOption;
+        public WaterColumnLengthOps WaterColumnLengthOption
         {
             get
             {
-                return isTenMetres;
+                return waterColumnLengthOption;
             }
             set
             {
-                isTenMetres = value;
-                RaisePropertyChanged("IsTenMetres");
-            }
-        }
-
-        private bool isThirteenMetres;
-        /// <summary>
-        /// 13米
-        /// </summary>
-        public bool IsThirteenMetres
-        {
-            get
-            {
-                return isThirteenMetres;
-            }
-            set
-            {
-                isThirteenMetres = value;
-                RaisePropertyChanged("IsThirteenMetres");
+                waterColumnLengthOption = value;
+                RaisePropertyChanged("WaterColumnLengthOption");
             }
         }
 
@@ -169,56 +115,22 @@ namespace ThMEPWSS.Hydrant.Model
             }
         }
 
-        private bool isCalculation;
+        private MaxProtectDisOps maxProtectDisOption; 
         /// <summary>
         /// 最大距离保护-> 计算值选项
         /// </summary>
-        public bool IsCalculation
+        public MaxProtectDisOps MaxProtectDisOption
         {
             get
             {
-                return isCalculation;
+                return maxProtectDisOption;
             }
             set
             {
-                isCalculation = value;
-                RaisePropertyChanged("IsCalculation");
+                maxProtectDisOption = value;
+                RaisePropertyChanged("MaxProtectDisOption");
             }
-        }
-
-        private bool isSelf;
-        /// <summary>
-        /// 最大距离保护-> 自定义选项
-        /// </summary>
-        public bool IsSelf
-        {
-            get
-            {
-                return isSelf;
-            }
-            set
-            {
-                isSelf = value;
-                RaisePropertyChanged("IsSelf");
-            }
-        }
-
-        private double calculationLength;
-        /// <summary>
-        /// 最大保护距离-> 计算值长度
-        /// </summary>
-        public double CalculationLength
-        {
-            get
-            {
-                return calculationLength;
-            }
-            set
-            {
-                calculationLength = value;
-                RaisePropertyChanged("CalculationLength");
-            }
-        }
+        }        
 
         private double selfLength;
         /// <summary>
@@ -264,23 +176,7 @@ namespace ThMEPWSS.Hydrant.Model
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        /// <summary>
-        /// 灭火器最大保护距离
-        /// </summary>
-        public double FireExtinguisherMaxProtectDis
-        {
-            get
-            {
-                if(isCalculation)
-                {
-                    return CalculationLength;
-                }
-                else
-                {
-                    return SelfLength;
-                }
-            }
-        }
+
         /// <summary>
         /// 水柱长度
         /// </summary>
@@ -288,7 +184,7 @@ namespace ThMEPWSS.Hydrant.Model
         {
             get
             {
-                return IsTenMetres ? 10 : 13;
+                return WaterColumnLengthOption == WaterColumnLengthOps.TenMeters ? 10 : 13;
             }
         }
 
@@ -322,9 +218,9 @@ namespace ThMEPWSS.Hydrant.Model
             // true->单股，false->双股
             get
             {
-                if(checkFireHydrant)
+                if(checkObjectOption == CheckObjectOps.FireHydrant)
                 {
-                    return IsSingleStrands ? true : false;
+                    return protectStrengthOption == ProtectStrengthOps.SingleStrand ? true : false;
                 }
                 else
                 {
@@ -332,5 +228,37 @@ namespace ThMEPWSS.Hydrant.Model
                 }
             }
         }
+    }
+    /// <summary>
+    /// 检查对象
+    /// </summary>
+    public enum CheckObjectOps
+    {
+        FireHydrant = 0,
+        FireExtinguisher = 1,
+    }
+    /// <summary>
+    /// 最大保护距离
+    /// </summary>
+    public enum MaxProtectDisOps
+    {
+        Calculation = 0,
+        Custom = 1,
+    }
+    /// <summary>
+    /// 保护强度
+    /// </summary>
+    public enum ProtectStrengthOps
+    {
+        DoubleStrand = 0,
+        SingleStrand = 1,
+    }
+    /// <summary>
+    /// 水柱长度
+    /// </summary>
+    public enum WaterColumnLengthOps
+    {
+        TenMeters = 0,
+        ThirteenMeters =1,
     }
 }

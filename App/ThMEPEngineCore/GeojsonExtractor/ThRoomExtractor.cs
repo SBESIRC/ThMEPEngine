@@ -3,12 +3,11 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Service;
-
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -77,7 +76,14 @@ namespace ThMEPEngineCore.GeojsonExtractor
                         simplifier.Tessellate(objs);
                         objs = simplifier.MakeValid(objs);
                         objs = simplifier.Normalize(objs);
-                        Rooms[i].Boundary = objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+                        if(objs.Count>0)
+                        {
+                            Rooms[i].Boundary = objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+                        }
+                        else
+                        {
+
+                        }
                     }
                     else if (Rooms[i].Boundary is MPolygon mPolygon)
                     {

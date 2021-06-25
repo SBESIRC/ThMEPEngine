@@ -36,7 +36,11 @@ namespace ThMEPWSS.Hydrant.Service
         }
         public void Check()
         {
-            var divideService  = new ThDivideRoomService(Rooms.Select(o => o.Boundary).ToList(), Covers);
+            if (Covers.Count == 0 || Rooms.Count == 0)
+            {
+                return;
+            }
+            var divideService = new ThDivideRoomService(Rooms.Select(o => o.Boundary).ToList(), Covers);
             divideService.Divide();
             divideService.Results.ForEach(o =>
             {

@@ -12,7 +12,7 @@ namespace ThMEPWSS.Hydrant.Data
 {
     public class ThFireExtinguisherExtractor : ThExtractorBase, IPrint
     {
-        private List<DBPoint> FireExtinguishers { get; set; }
+        public List<DBPoint> FireExtinguishers { get; set; }
         private ThFireExtinguisherExtractionVisitor Vistor { get; set; }
         public ThFireExtinguisherExtractor(ThFireExtinguisherExtractionVisitor visitor)
         {

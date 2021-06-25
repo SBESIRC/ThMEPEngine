@@ -1,5 +1,8 @@
 ﻿using ThMEPWSS.ViewModel;
+using System.Windows.Media;
+using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
+using TianHua.Plumbing.WPF.UI.Validations;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -102,6 +105,59 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void chkShowResult_Unchecked(object sender, System.Windows.RoutedEventArgs e)
         {
             FireHydrantVM.CloseCheckExpress();
+        }
+
+        private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            double value;
+            if (!double.TryParse(e.Text, out value))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+                e.Handled = true;
+        }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            var tb = sender as System.Windows.Controls.TextBox;
+            if (tb.Name == "tbFireHose")
+            {
+                if (new HoseLengthRule().Validate(tb.Text))
+                {
+                    tb.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                }
+                else
+                {
+                    tb.Background = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+                }
+                FireHydrantVM.Parameter.HoseLength = ParseString(tb.Text);
+            }
+            else if(tb.Name == "tbSelfValue")
+            {
+                if (new SelfLengthRule().Validate(tb.Text))
+                {
+                    tb.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                }
+                else
+                {
+                    tb.Background = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+                }
+                FireHydrantVM.Parameter.SelfLength = ParseString(tb.Text);
+            }
+        }
+        private double ParseString(string content)
+        {
+            double value = 0.0;
+            if (double.TryParse(content, out value))
+            {
+               return value;
+            }
+            return value;
         }
     }
 }

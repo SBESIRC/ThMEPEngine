@@ -40,21 +40,27 @@ namespace ThMEPWSS.ViewModel
                 {
                     hydrantCmd.Execute();
                 }
-            }            
+            }                 
         }
         private bool CheckParameter()
         {
-            if(Parameter.HoseLength>=100 || Parameter.HoseLength<=0)
+            if(Parameter.CheckObjectOption == CheckObjectOps.FireHydrant)
             {
-                return false;
-            }
-            if(Parameter.IsSelf)
-            {
-                if (Parameter.SelfLength >= 100 || Parameter.SelfLength <= 0)
+                if (Parameter.HoseLength >= 100 || Parameter.HoseLength <= 0)
                 {
                     return false;
                 }
             }
+            if(Parameter.CheckObjectOption == CheckObjectOps.FireExtinguisher)
+            {
+                if (Parameter.MaxProtectDisOption == MaxProtectDisOps.Custom)
+                {
+                    if (Parameter.SelfLength >= 100 || Parameter.SelfLength <= 0)
+                    {
+                        return false;
+                    }
+                }
+            }            
             return true;
         }
 
@@ -69,6 +75,21 @@ namespace ThMEPWSS.ViewModel
             ThCheckExpressionControlService.CloseCheckExpression();
             SetFocusToDwgView();
         }  
+
+        public double QueryMaxProtectDistance(string fireExtinguisherName)
+        {
+            if (Parameter.MaxProtectDisOption == MaxProtectDisOps.Calculation)
+            {
+                return FireTypeDataManager.Query(
+                Parameter.FireType,
+                Parameter.DangerLevel,
+                fireExtinguisherName);
+            }
+            else
+            {
+                return Parameter.SelfLength;
+            }
+        }
         
         private void SetFocusToDwgView()
         {

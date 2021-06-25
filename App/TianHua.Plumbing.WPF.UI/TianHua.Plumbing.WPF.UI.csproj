@@ -83,13 +83,19 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
+    <Compile Include="Converter\ProtectStrengthOpsBooleanConverter.cs" />
+    <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />
+    <Compile Include="Converter\CheckObjectOpsBooleanConverter.cs" />
     <Compile Include="Converter\ArrangePositionBooleanConverter.cs" />
     <Compile Include="PlumbingWPFUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\FireHydrant.xaml.cs">
       <DependentUpon>FireHydrant.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\FlushPointUI.xaml.cs" />
+    <Compile Include="UI\FlushPointUI.xaml.cs">
+      <DependentUpon>FlushPointUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ThTipDialog.xaml.cs">
       <DependentUpon>ThTipDialog.xaml</DependentUpon>
     </Compile>
@@ -123,6 +129,10 @@
     <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
       <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Validations\SelfLengthRule.cs" />
+    <Compile Include="Validations\HoseLengthRule.cs" />
+    <Compile Include="Validations\NumberRangeInfo.cs" />
+    <Compile Include="Validations\NumberRangeRule.cs" />
     <Compile Include="Validations\ProtectRadiusRule.cs" />
   </ItemGroup>
   <ItemGroup>

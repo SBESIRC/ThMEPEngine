@@ -1,8 +1,10 @@
 ﻿#if ACAD2016
 using CLI;
+using System;
 using System.Linq;
 using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Data;
 using ThMEPWSS.Hydrant.Engine;
@@ -22,18 +24,19 @@ namespace ThMEPWSS.Hydrant.Service
         private ThFireHydrantVM FireHydrantVM { get; set; }
         public List<ThIfcRoom> Rooms { get; set; }
         public List<Entity> Covers { get; set; }
-
+        public List<Tuple<Entity, List<Point3d>>> CoverPoints { get; set; }
         public List<string> FireExtinguisherBlkNames { get; set; }
 
         private ThAILayerManager AiLayerManager { get; set; }
 
         public ThCheckFireExtinguisherService(ThFireHydrantVM fireHydrantVM)
         {
-            Rooms = new List<ThIfcRoom>();
-            Covers = new List<Entity>();
+            Rooms = new List<ThIfcRoom>();            
             FireHydrantVM = fireHydrantVM;
-            FireExtinguisherBlkNames = new List<string>() { "手提式灭火器", "推车式灭火器" };
+            Covers = new List<Entity>();
+            CoverPoints = new List<Tuple<Entity, List<Point3d>>>();
             AiLayerManager = ThHydrantExtractLayerManager.Config();
+            FireExtinguisherBlkNames = new List<string>() { "手提式灭火器", "推车式灭火器" };
         }
 
         public void Check(Database db, Point3dCollection pts)
@@ -49,14 +52,20 @@ namespace ThMEPWSS.Hydrant.Service
             {
                 var newExtractors = new List<ThExtractorBase>();
                 extractors.ForEach(o => newExtractors.Add(o));
-                newExtractors.Add(ExtractFireExtinguisher(db, pts, o));
-                string geoContent = OutPutGeojson(newExtractors);
-                var context = BuildHydrantParam(o);
-                var hydrant = new ThHydrantEngineMgd();
-                var regions = hydrant.Validate(geoContent, context);
-                var polygons = ThHydrantResultParseService.Parse(regions);
-                Covers.AddRange(ThHydrantResultParseService.ToDbEntities(polygons));
-            });
+                var extinguisherExtractor = ExtractFireExtinguisher(db, pts, o);
+                if (extinguisherExtractor.FireExtinguishers.Count>0)
+                {
+                    newExtractors.Add(extinguisherExtractor);
+                    string geoContent = OutPutGeojson(newExtractors);
+                    var context = BuildHydrantParam(o);
+                    var hydrant = new ThHydrantEngineMgd();
+                    var regions = hydrant.Validate(geoContent, context);
+                    var coverPair = ThHydrantResultParseService.Parse(regions);
+                    var points = ThHydrantResultParseService.ParsePoints(regions);
+                    Covers.AddRange(coverPair.Item2);
+                    coverPair.Item1.ForEach(o => CoverPoints.Add(Tuple.Create(o, ContainsPts(o, points))));
+                }
+            });            
         }
 
         public List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
@@ -112,7 +121,7 @@ namespace ThMEPWSS.Hydrant.Service
             return extrator;
         }
 
-        public string OutPutGeojson(List<ThExtractorBase> extractors)
+        private string OutPutGeojson(List<ThExtractorBase> extractors)
         {
             //用于孤立判断
             extractors.ForEach(o => o.SetRooms(Rooms));
@@ -124,14 +133,31 @@ namespace ThMEPWSS.Hydrant.Service
 
         private ThProtectionContextMgd BuildHydrantParam(string fireExtinguisherName)
         {
-            var maxProtectDis = FireHydrantVM.FireTypeDataManager.Query(
-                FireHydrantVM.Parameter.FireType, 
-                FireHydrantVM.Parameter.DangerLevel,
-                fireExtinguisherName);
             var context = new ThProtectionContextMgd();
-            context.HydrantHoseLength = maxProtectDis;
+            context.HydrantHoseLength = FireHydrantVM.QueryMaxProtectDistance(fireExtinguisherName);
             context.HydrantClearanceRadius = 0;
             return context;
+        }
+        private List<Point3d> ContainsPts(Entity polygon, List<Point3d> pts)
+        {
+            return pts.Where(p => polygon.IsContains(p)).ToList();
+        }
+        public void Print(Database db)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
+            {
+                int colorIndex = 1;
+                CoverPoints.ForEach(o =>
+                {
+                    var ents = new List<Entity>();
+                    ents.Add(o.Item1.Clone() as Entity);
+                    o.Item2.ForEach(p =>
+                    {
+                        ents.Add(new Circle(p, Vector3d.ZAxis, 200.0));
+                    });
+                    ents.CreateGroup(acadDb.Database, colorIndex++);
+                });
+            }
         }
     }
 #endif

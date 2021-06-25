@@ -13,7 +13,7 @@ namespace ThMEPWSS.Hydrant.Data
 {
     public class ThFireHydrantExtractor : ThExtractorBase, IPrint
     {
-        private List<DBPoint> FireHydrants { get; set; }
+        public List<DBPoint> FireHydrants { get; set; }
         public ThFireHydrantExtractor()
         {
             FireHydrants = new List<DBPoint>();
@@ -21,7 +21,10 @@ namespace ThMEPWSS.Hydrant.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var vistor = new ThFireHydrantExtractionVisitor();
+            var vistor = new ThFireHydrantExtractionVisitor()
+            {
+                BlkNames = new List<string>() { "室内消火栓平面" },
+            };
             //后期再做远距离移动
             var hydrantExtractor = new ThFireHydrantRecognitionEngine(vistor);
             hydrantExtractor.Recognize(database, pts);

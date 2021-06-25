@@ -1,8 +1,10 @@
 ﻿#if ACAD2016
 using CLI;
+using System;
 using System.Linq;
 using ThMEPEngineCore.IO;
 using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Data;
 using Autodesk.AutoCAD.Geometry;
@@ -15,32 +17,42 @@ namespace ThMEPWSS.Hydrant.Service
 {
     public class ThCheckFireHydrantService : ICheck
     {
-        private ThFireHydrantVM FireHydrantVM { get; set; }
         public List<ThIfcRoom> Rooms { get; set; }
         public List<Entity> Covers { get; set; }
-        private ThAILayerManager AiLayerManager { get; set; }
+        public List<Tuple<Entity, List<Point3d>>> CoverPoints { get; set; }
+
+        private ThFireHydrantVM FireHydrantVM { get; set; }
+        private ThAILayerManager AiLayerManager { get; set; }        
+        private List<ThExtractorBase> Extractors { get; set; }
 
         public ThCheckFireHydrantService(ThFireHydrantVM fireHydrantVM)
         {
-            Rooms = new List<ThIfcRoom>();
-            Covers = new List<Entity>();
             FireHydrantVM = fireHydrantVM;
+            Rooms = new List<ThIfcRoom>();
+            Extractors = new List<ThExtractorBase>();
+            Covers = new List<Entity>();
+            CoverPoints = new List<Tuple<Entity, List<Point3d>>>();
             AiLayerManager = ThHydrantExtractLayerManager.Config();
         }
 
         public void Check(Database db, Point3dCollection pts)
-        {            
-            var extractors = Extract(db, pts); //获取数据
-            string geoContent = OutPutGeojson(extractors);
-
+        {
+            Extractors = Extract(db, pts); //获取数据
+            var fireHydrantExtractor = Extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
+            if (fireHydrantExtractor.FireHydrants.Count == 0)
+            {
+                return;
+            }
+            string geoContent = OutPutGeojson(Extractors);
             var context = BuildHydrantParam();
             var hydrant = new ThHydrantEngineMgd();
             var regions = hydrant.Validate(geoContent, context);
-            var polygons = ThHydrantResultParseService.Parse(regions);
-            Covers = ThHydrantResultParseService.ToDbEntities(polygons);
+            var coverPairs = ThHydrantResultParseService.Parse(regions);
+            Covers = coverPairs.Item2;
+            var points = ThHydrantResultParseService.ParsePoints(regions);
+            coverPairs.Item1.ForEach(o => CoverPoints.Add(Tuple.Create(o, ContainsPts(o, points))));
         }
-
-        public List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
+        private List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
         {
             //提取
             var extractors = new List<ThExtractorBase>()
@@ -83,7 +95,7 @@ namespace ThMEPWSS.Hydrant.Service
             return extractors;
         }
 
-        public string OutPutGeojson(List<ThExtractorBase> extractors)
+        private string OutPutGeojson(List<ThExtractorBase> extractors)
         {
             //用于孤立判断
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
@@ -107,6 +119,27 @@ namespace ThMEPWSS.Hydrant.Service
             context.HydrantHoseLength = FireHydrantVM.Parameter.FireHoseWalkRange;
             context.HydrantClearanceRadius = FireHydrantVM.Parameter.SprayWaterColumnRange;
             return context;
+        }
+        private List<Point3d> ContainsPts(Entity polygon,List<Point3d> pts)
+        {
+            return pts.Where(p=>polygon.IsContains(p)).ToList();
+        }
+        public void Print(Database db)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
+            {
+                int colorIndex = 1;
+                CoverPoints.ForEach(o =>
+                {
+                    var ents = new List<Entity>();
+                    ents.Add(o.Item1.Clone() as Entity);
+                    o.Item2.ForEach(p =>
+                    {
+                        ents.Add(new Circle(p, Vector3d.ZAxis, 200.0));
+                    });
+                    ents.CreateGroup(acadDb.Database, colorIndex++);
+                });
+            }
         }
     }
 }

@@ -22,9 +22,9 @@ namespace ThMEPWSS.Engine
         public ThFireHydrantExtractionVisitor()
         {
             BuildCenterSquare = true;
-            JudgeBlkNameExisted = IsExisted;
+            JudgeBlkNameExisted = CheckBlkNameIsExisted;
             JudgeLayerExisted = CheckLayerIsExisted;
-            BlkNames = new List<string>() { "室内消火栓平面" };            
+            BlkNames = new List<string>() { ""};            
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -73,13 +73,13 @@ namespace ThMEPWSS.Engine
             if (entity is BlockReference br)
             {
                 var blkName = br.GetEffectiveName();
-                return JudgeBlkNameExisted(blkName, BlkNames);
+                return JudgeBlkNameExisted(blkName, BlkNames) || CheckBlockReferenceVisibility(br);
             }
             return false;
         }
 
 
-        private bool IsExisted(string blkName,List<string> blkNames)
+        private bool CheckBlkNameIsExisted(string blkName,List<string> blkNames)
         {
             return blkNames.Where(o => blkName.ToUpper().Contains(o.ToUpper())).Any();
         }
@@ -106,6 +106,22 @@ namespace ThMEPWSS.Engine
         private bool CheckLayerIsExisted(Entity curve)
         {
             return true;
+        }
+        private bool CheckBlockReferenceVisibility(BlockReference br)
+        {
+            if(br.GetEffectiveName().Contains("消火栓"))
+            {
+                var blockReferenceData = new ThBlockReferenceData(br.ObjectId);
+                var blockVisiblityDic = blockReferenceData.DynablockVisibilityStates();
+                foreach (var item in blockVisiblityDic)
+                {
+                    if (item.Key.Contains("组合柜"))
+                    {
+                        return true;
+                    }
+                }
+            }            
+            return false;
         }
     }
 }

@@ -1,17 +1,16 @@
-﻿using System;
-using AcHelper.Commands;
-using ThMEPWSS.ViewModel;
-
-#if ACAD2016
+﻿#if ACAD2016
+using System;
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
+using AcHelper.Commands;
+using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.Hydrant.Model;
 using ThMEPWSS.Hydrant.Service;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 #endif
 
 namespace ThMEPWSS.Command
@@ -38,7 +37,7 @@ namespace ThMEPWSS.Command
                 var pts = nFrame.Vertices();
 
                 ICheck checkService = null;
-                if (FireHydrantVM.Parameter.CheckFireHydrant)
+                if (FireHydrantVM.Parameter.CheckObjectOption== CheckObjectOps.FireHydrant)
                 {
                     checkService = new ThCheckFireHydrantService(FireHydrantVM);
                 }
@@ -47,14 +46,8 @@ namespace ThMEPWSS.Command
                     checkService = new ThCheckFireExtinguisherService(FireHydrantVM);
                 }
                 checkService.Check(acadDb.Database, pts);
+                checkService.Print(acadDb.Database); //仅供测试用，后续删除
 
-#if DEBUG
-                // 打印倪同学的保护区域(后续删除)
-                checkService.Covers
-                    .Select(o => o.Clone() as Entity)
-                    .ToList()
-                    .CreateGroup(acadDb.Database, 5);
-#endif
                 // 校核
                 var regionCheckService = new ThCheckRegionService()
                 {
@@ -62,7 +55,7 @@ namespace ThMEPWSS.Command
                     Rooms = checkService.Rooms,
                     IsSingleStrands = FireHydrantVM.Parameter.GetProtectStrength,
                 };
-                regionCheckService.Check();
+                regionCheckService.Check(); 
 
                 //输出
                 var printService = new ThHydrantPrintService(
