@@ -14,8 +14,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
     {
         public void Layout(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes)
         {
-            var guardTourRooms = rooms.Where(x => GuardTourCommonRoomInfo.GTRoom.Any(y => y.Contains(x.Name))).ToList();
-            var stairRooms = rooms.Where(x => GuardTourCommonRoomInfo.StairRoom.Any(y => y.Contains(x.Name))).ToList();
+            var guardTourRooms = rooms.Where(x => HandleGuardTourRoomService.GTRoom.Any(y => y.Contains(x.Name))).ToList();
+            var stairRooms = rooms.Where(x => HandleGuardTourRoomService.StairRoom.Any(y => y.Contains(x.Name))).ToList();
 
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             foreach (var thRoom in guardTourRooms)

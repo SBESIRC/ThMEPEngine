@@ -93,6 +93,9 @@
     <PackageReference Include="MvvmLight">
       <Version>5.4.1</Version>
     </PackageReference>
+    <PackageReference Include="NPOI">
+      <Version>2.5.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\licenses.licx" />
