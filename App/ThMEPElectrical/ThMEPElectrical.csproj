@@ -163,8 +163,8 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
-    <Compile Include="SecurityPlaneSystem\CommonRoomInfo.cs" />
-    <Compile Include="SecurityPlaneSystem\GuardTourSystem\GuardTourCommonRoomInfo.cs" />
+    <Compile Include="SecurityPlaneSystem\CommonRoomHandleService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutStairwellsGTService.cs" />
