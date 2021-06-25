@@ -19,7 +19,7 @@ namespace ThMEPElectrical
     public class ThAutoFireAlarmSystemCmd
     {
 
-        [CommandMethod("TIANHUACAD", "ThAFASP", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THHZXTP", CommandFlags.Modal)]
         public void ThAFASB()
         {
             using (var cmd = new ThPolylineAutoFireAlarmSystemCommand())
@@ -28,7 +28,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThAFASF", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THHZXTF", CommandFlags.Modal)]
         public void ThAFASF()
         {
             using (var cmd = new ThFrameFireSystemDiagramCommand())
@@ -37,7 +37,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThAFASA", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THHZXTA", CommandFlags.Modal)]
         public void ThAFASA()
         {
             using (var cmd = new ThAllDrawingsFireSystemDiagramCommand())
