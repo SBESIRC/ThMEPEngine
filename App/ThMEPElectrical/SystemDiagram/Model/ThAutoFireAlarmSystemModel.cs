@@ -338,7 +338,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             {
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()
-               .FirstOrDefault(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "楼层框定");
+               .FirstOrDefault(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "AI-楼层框定E");
                 if (blkrefs.IsNull())
                     return;
                 InsertBlockService.ImportFireDistrictLayerAndStyle(db);
@@ -351,8 +351,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         //画防火分区名字
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
-                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, ColorIndex = 1, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
-                            newDBText.Rotation = blkrefs.Rotation;//.TransformBy(matrix);
+                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
+                            newDBText.Rotation = blkrefs.Rotation;
                             DrawEntitys.Add(newDBText);
                         }
                     });
