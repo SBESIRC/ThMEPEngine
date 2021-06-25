@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +16,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public DrainageLayerViewModel()
         {
             DynamicCheckBoxs = new ObservableCollection<DynamicCheckBox>();
+            DynamicOpenFiles = new ObservableCollection<DynamicCheckBox>();
             DynamicCheckBoxs.Add(new DynamicCheckBox { Content = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, IsChecked = true, ShowText = ThAutoFireAlarmSystemCommon.FireDistrictByLayer });
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -25,16 +27,27 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                         DynamicCheckBoxs.Add(new DynamicCheckBox { Content = LayerName, IsChecked = false , ShowText = AbbreviationString(LayerName) });
                 }
             }
-
+            RefreshOpenFileList();
         }
 
         private ObservableCollection<DynamicCheckBox> dynamicCheckBoxs { get; set; }
+        private ObservableCollection<DynamicCheckBox> dynamicOpenFiles { get; set; }
         public ObservableCollection<DynamicCheckBox> DynamicCheckBoxs
         {
             get { return dynamicCheckBoxs; }
             set
             {
                 dynamicCheckBoxs = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public ObservableCollection<DynamicCheckBox> DynamicOpenFiles
+        {
+            get { return dynamicOpenFiles; }
+            set
+            {
+                dynamicOpenFiles = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -45,6 +58,27 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 if (null == DynamicCheckBoxs || DynamicCheckBoxs.Count < 1)
                     return null;
                 return DynamicCheckBoxs.Where(c => c.IsChecked).ToList();
+            }
+        }
+
+        public List<DynamicCheckBox> SelectCheckFiles
+        {
+            get
+            {
+                if (null == DynamicOpenFiles || DynamicOpenFiles.Count < 1)
+                    return null;
+                return DynamicOpenFiles.Where(c => c.IsChecked).ToList();
+            }
+        }
+
+        public void RefreshOpenFileList()
+        {
+            var dm = Application.DocumentManager;
+            DynamicOpenFiles = new ObservableCollection<DynamicCheckBox>();
+            foreach (Document doc in dm)
+            {
+                var fileName = doc.Name.Split('\\').Last();
+                DynamicOpenFiles.Add(new DynamicCheckBox { Content = fileName, IsChecked = true, ShowText = AbbreviationString(fileName) });
             }
         }
 

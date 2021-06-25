@@ -12,6 +12,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
     public static class FireCompartmentParameter
     {
         public static List<string> LayerNames { get; set; } = new List<string>() { ThAutoFireAlarmSystemCommon.FireDistrictByLayer };
+        public static List<string> ChoiseFileNames { get; set; } = new List<string>();
 
         /// <summary>
         /// 控制总线计数模块

@@ -74,6 +74,13 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                         continue;
                     SelectLayers.Add(item.Content);
                 }
+                List<string> SelectFileNames = new List<string>();
+                foreach (var item in viewModel.DynamicOpenFiles)
+                {
+                    if (item == null || !item.IsChecked)
+                        continue;
+                    SelectFileNames.Add(item.Content);
+                }
                 if (SelectA.IsChecked.Value)
                     commondType = 1;
                 else if (SelectF.IsChecked.Value)
@@ -87,9 +94,16 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 else
                     PublicSectionType = 3;
 
+                if(commondType==1 && viewModel.SelectCheckFiles == null || viewModel.SelectCheckFiles.Count == 0)
+                {
+                    MessageBox.Show("数据错误：未获取到至少一张要统计的图纸，无法进行后续操作,请重新选择", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 DiagramGenerationType = DistinguishByFireCompartment.IsChecked.Value ? 1 : 2;
 
                 FireCompartmentParameter.LayerNames = SelectLayers;
+                FireCompartmentParameter.ChoiseFileNames = SelectFileNames;
                 FireCompartmentParameter.ControlBusCount = int.Parse(ControlBusCountTXT.Text);
                 FireCompartmentParameter.FireBroadcastingCount = int.Parse(FireBroadcastingTxt.Text);
                 FireCompartmentParameter.ShortCircuitIsolatorCount = int.Parse(ShortCircuitIsolatorTxt.Text);
@@ -118,6 +132,20 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 MessageBox.Show("添加失败！请检查输入是否正确！");
             }
             AddLayerTxt.Text = "";
+        }
+
+        private void CreationChecked(object sender, RoutedEventArgs e)
+        {
+            if (DrawingList.IsNull())
+                return;
+            if (SelectA.IsChecked.Value)
+            {
+                DrawingList.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                DrawingList.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

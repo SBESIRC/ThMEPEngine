@@ -42,6 +42,11 @@ namespace ThMEPElectrical.Command
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
             {
+                var FileName = doc.Name.Split('\\').Last();
+                if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(FileName, file)) != 1)
+                {
+                    continue;
+                }
                 using (DocumentLock docLock = doc.LockDocument())
                 using (var acadDatabase = Linq2Acad.AcadDatabase.Use(doc.Database))
                 {

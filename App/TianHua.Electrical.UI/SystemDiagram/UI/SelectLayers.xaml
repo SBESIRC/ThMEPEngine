@@ -20,7 +20,7 @@
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
             <Label Content="生成系统图方式："  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
-                <RadioButton Name="SelectA" Width="100" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
+                <RadioButton Name="SelectA" Width="100" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True" Checked="CreationChecked">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
@@ -29,7 +29,7 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="手动选择图纸" ></Label>
                     </Grid>
                 </RadioButton>
-                <RadioButton Name="SelectF" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False">
+                <RadioButton Name="SelectF" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False" Checked="CreationChecked">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
@@ -38,7 +38,7 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="手动选择楼层" ></Label>
                     </Grid>
                 </RadioButton>
-                <RadioButton Name="SelectP" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False">
+                <RadioButton Name="SelectP" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False" Checked="CreationChecked">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
@@ -47,6 +47,20 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="选择防火分区" ></Label>
                     </Grid>
                 </RadioButton>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
+                <ItemsControl x:Name="DrawingList" ItemsSource="{Binding DynamicOpenFiles}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding ShowText}" IsChecked="{Binding IsChecked}" ToolTip="{Binding Content}"></CheckBox>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" ></StackPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
