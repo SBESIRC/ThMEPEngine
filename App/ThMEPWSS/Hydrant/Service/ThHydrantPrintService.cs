@@ -53,9 +53,10 @@ namespace ThMEPWSS.Hydrant.Service
                 oHatch.Normal = normal;
                 oHatch.Elevation = 0.0;
                 oHatch.PatternScale = 2.0;
-                oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ZIGZAG");
+                oHatch.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
                 oHatch.ColorIndex = colorIndex;
                 oHatch.Layer = LayerName;
+                oHatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
                 acadDatabase.ModelSpace.Add(oHatch);
                 //this works ok  
                 oHatch.Associative = true;
