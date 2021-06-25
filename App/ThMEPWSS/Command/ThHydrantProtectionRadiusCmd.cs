@@ -52,7 +52,7 @@ namespace ThMEPWSS.Command
                 // 校核
                 var regionCheckService = new ThCheckRegionService()
                 {
-                    Covers = checkService.Covers,
+                    Covers = checkService.Covers.SelectMany(o=>o.Item3).ToList(),
                     Rooms = checkService.Rooms,
                     IsSingleStrands = FireHydrantVM.Parameter.GetProtectStrength,
                 };

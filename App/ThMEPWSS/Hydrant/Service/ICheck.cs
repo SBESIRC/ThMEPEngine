@@ -12,8 +12,7 @@ namespace ThMEPWSS.Hydrant.Service
         /// <summary>
         /// 保护区域对应的消火栓/灭火器的坐标点
         /// </summary>
-        List<Tuple<Entity,List<Point3d>>> CoverPoints { get; set; }
-        List<Entity> Covers { get; set; }
+        List<Tuple<Entity,Point3d,List<Entity>>> Covers { get; set; }
         void Check(Database db,Point3dCollection pts);
         void Print(Database db);
     }
