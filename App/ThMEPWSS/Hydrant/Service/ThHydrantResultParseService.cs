@@ -15,16 +15,18 @@ namespace ThMEPWSS.Hydrant.Service
 {
     public class ThHydrantResultParseService
     {
-        public static Tuple<List<Entity>,List<Entity>> Parse(string[] regions)
+        public static List<Tuple<Entity,Point3d,List<Entity>>> Parse(string[] regions)
         {
-            var originPolygons = new List<Entity>();
-            var islatedPolygons = new List<Entity>();
+            var results = new List<Tuple<Entity, Point3d, List<Entity>>>();
             var serializer = GeoJsonSerializer.Create();
             regions.ForEach(o =>
             {
                 using (var stringReader = new StringReader(o))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
+                    Entity coverArea = null;
+                    Point3d position = Point3d.Origin;
+                    var islatedPolygons = new List<Entity>();
                     var features = serializer.Deserialize<FeatureCollection>(jsonReader);
                     features.ForEach(f =>
                     {
@@ -36,12 +38,12 @@ namespace ThMEPWSS.Hydrant.Service
                                 {
                                     if (f.Geometry is Polygon polygon)
                                     {
-                                        originPolygons.Add(polygon.ToDbMPolygon());
+                                        coverArea=polygon.ToDbMPolygon();
                                         islatedPolygons.Add(polygon.ToDbMPolygon());
                                     }
                                     else if (f.Geometry is MultiPolygon mPolygon)
                                     {
-                                        originPolygons.Add(mPolygon.ToDbMPolygon());
+                                        coverArea=mPolygon.ToDbMPolygon();
                                         mPolygon.Geometries.Cast<Polygon>().ForEach(m => islatedPolygons.Add(m.ToDbMPolygon()));
                                     }
                                     else
@@ -49,36 +51,17 @@ namespace ThMEPWSS.Hydrant.Service
                                         throw new NotSupportedException();
                                     }
                                 }
-                            }                            
-                        }
-                    });
-                }
-            });            
-            return Tuple.Create(originPolygons, islatedPolygons);
-        }
-        public static List<Point3d> ParsePoints(string[] regions)
-        {
-            var points = new List<Point3d>();
-            var serializer = GeoJsonSerializer.Create();
-            regions.ForEach(o =>
-            {
-                using (var stringReader = new StringReader(o))
-                using (var jsonReader = new JsonTextReader(stringReader))
-                {
-                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-                    features.ForEach(f =>
-                    {
-                        if (f.Geometry != null)
-                        {
-                            if (f.Geometry is Point point)
+                            }
+                            else if (f.Geometry is Point point)
                             {
-                                points.Add(point.ToAcGePoint3d());
+                                position=point.ToAcGePoint3d();
                             }
                         }
                     });
+                    results.Add(Tuple.Create(coverArea, position, islatedPolygons));
                 }
-            });
-            return points;
-        } 
+            });            
+            return results;
+        }
     }
 }

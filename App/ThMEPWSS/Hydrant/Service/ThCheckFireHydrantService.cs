@@ -18,9 +18,7 @@ namespace ThMEPWSS.Hydrant.Service
     public class ThCheckFireHydrantService : ICheck
     {
         public List<ThIfcRoom> Rooms { get; set; }
-        public List<Entity> Covers { get; set; }
-        public List<Tuple<Entity, List<Point3d>>> CoverPoints { get; set; }
-
+        public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         private ThFireHydrantVM FireHydrantVM { get; set; }
         private ThAILayerManager AiLayerManager { get; set; }        
         private List<ThExtractorBase> Extractors { get; set; }
@@ -30,8 +28,7 @@ namespace ThMEPWSS.Hydrant.Service
             FireHydrantVM = fireHydrantVM;
             Rooms = new List<ThIfcRoom>();
             Extractors = new List<ThExtractorBase>();
-            Covers = new List<Entity>();
-            CoverPoints = new List<Tuple<Entity, List<Point3d>>>();
+            Covers = new List<Tuple<Entity, Point3d, List<Entity>>>();
             AiLayerManager = ThHydrantExtractLayerManager.Config();
         }
 
@@ -47,10 +44,7 @@ namespace ThMEPWSS.Hydrant.Service
             var context = BuildHydrantParam();
             var hydrant = new ThHydrantEngineMgd();
             var regions = hydrant.Validate(geoContent, context);
-            var coverPairs = ThHydrantResultParseService.Parse(regions);
-            Covers = coverPairs.Item2;
-            var points = ThHydrantResultParseService.ParsePoints(regions);
-            coverPairs.Item1.ForEach(o => CoverPoints.Add(Tuple.Create(o, ContainsPts(o, points))));
+            Covers = ThHydrantResultParseService.Parse(regions);
         }
         private List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
         {
@@ -129,14 +123,11 @@ namespace ThMEPWSS.Hydrant.Service
             using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
             {
                 int colorIndex = 1;
-                CoverPoints.ForEach(o =>
+                Covers.ForEach(o =>
                 {
                     var ents = new List<Entity>();
                     ents.Add(o.Item1.Clone() as Entity);
-                    o.Item2.ForEach(p =>
-                    {
-                        ents.Add(new Circle(p, Vector3d.ZAxis, 200.0));
-                    });
+                    ents.Add(new Circle(o.Item2, Vector3d.ZAxis, 200.0));
                     ents.CreateGroup(acadDb.Database, colorIndex++);
                 });
             }
