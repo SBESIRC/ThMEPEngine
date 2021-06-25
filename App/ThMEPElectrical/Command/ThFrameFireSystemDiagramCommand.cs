@@ -49,7 +49,6 @@ namespace ThMEPElectrical.Command
                     {
                         return;
                     }
-
                     //图块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                     BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);

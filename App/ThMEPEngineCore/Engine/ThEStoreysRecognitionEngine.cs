@@ -19,7 +19,7 @@ namespace ThMEPEngineCore.Engine
             {
                 var blkrefs = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
-                    .Where(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "楼层框定");
+                    .Where(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "AI-楼层框定E");
                 if (polygon.Count > 0)
                 {
                     var envelope = polygon.Envelope();

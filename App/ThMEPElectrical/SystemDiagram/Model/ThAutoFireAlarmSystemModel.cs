@@ -136,6 +136,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         case EStoreyType.NonStandardStorey:
                         case EStoreyType.RefugeStorey:
                         case EStoreyType.PodiumRoof:
+                        case EStoreyType.EvenStorey:
+                        case EStoreyType.OddStorey:
                             {
                                 if (sobj.Storeys.Count == 1)
                                 {

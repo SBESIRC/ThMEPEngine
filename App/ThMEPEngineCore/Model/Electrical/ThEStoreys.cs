@@ -18,17 +18,9 @@ namespace ThMEPEngineCore.Model.Electrical
         NonStandardStorey,
         RefugeStorey,
         PodiumRoof,
+        EvenStorey,
+        OddStorey,
     }
-
-    public enum EFloorRangeType
-    {
-        Unknown,
-        Self,
-        AllFloors,
-        EvenFloors,
-        OddFloors,
-    }
-
     public class ThEStoreys : ThIfcSpatialStructureElement
     {
         public ObjectId ObjectId { get; }
@@ -47,43 +39,27 @@ namespace ThMEPEngineCore.Model.Electrical
                 {
                     case EStoreyType.StandardStorey:
                         {
-                            if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_STANDAD_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_STANDAD_NUMBER];
-                            }
-                            else if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
-                            }
-                            return string.Empty;
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_STANDAD_NUMBER];
                         }
                     case EStoreyType.NonStandardStorey:
                         {
-                            if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER];
-                            }
-                            else if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
-                            }
-                            return string.Empty;
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NONSTANDAD_NUMBER];
                         }
                     case EStoreyType.RefugeStorey:
                         {
-                            if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_REFUGE_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_REFUGE_NUMBER];
-                            }
-                            return string.Empty;
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_REFUGE_NUMBER];
                         }
                     case EStoreyType.PodiumRoof:
                         {
-                            if (Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_PODIUM_NUMBER))
-                            {
-                                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_PODIUM_NUMBER];
-                            }
-                            return string.Empty;
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_PODIUM_NUMBER];
+                        }
+                    case EStoreyType.EvenStorey:
+                        {
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_EVEN_FLOOR_NUMBER];
+                        }
+                    case EStoreyType.OddStorey:
+                        {
+                            return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_ODD_FLOOR_NUMBER];
                         }
                     default:
                         {
@@ -107,28 +83,9 @@ namespace ThMEPEngineCore.Model.Electrical
                     case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR: return EStoreyType.NonStandardStorey;
                     case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_REFUGE_FLOOR: return EStoreyType.RefugeStorey;
                     case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_PODIUM_ROOF: return EStoreyType.PodiumRoof;
+                    case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_EVEN_FLOOR: return EStoreyType.EvenStorey;
+                    case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ODD_FLOOR: return EStoreyType.OddStorey;
                     default: return EStoreyType.Unknown;
-                }
-            }
-        }
-
-        public EFloorRangeType FloorRange
-        {
-            get
-            {
-                if (StoreyType == EStoreyType.StandardStorey && Data.Attributes.ContainsKey(ThPipeCommon.STOREY_ATTRIBUTE_VALUE_RANGE))
-                {
-                    switch (Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_RANGE])
-                    {
-                        case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ALL_FLOOR: return EFloorRangeType.AllFloors;
-                        case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_EVEN_FLOOR: return EFloorRangeType.EvenFloors;
-                        case ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ODD_FLOOR: return EFloorRangeType.OddFloors;
-                        default: return EFloorRangeType.Unknown;
-                    }
-                }
-                else
-                {
-                    return EFloorRangeType.Self;
                 }
             }
         }
@@ -147,21 +104,20 @@ namespace ThMEPEngineCore.Model.Electrical
                         {
                             var parser = new VentSNCalculator(StoreyNumber);
                             storeys.AddRange(parser.SerialNumbers);
-                            switch (FloorRange)
-                            {
-                                case EFloorRangeType.EvenFloors:
-                                    {
-                                        storeys.RemoveAll(o => (o & 1) == 1);
-                                        break;
-                                    }
-                                case EFloorRangeType.OddFloors:
-                                    {
-                                        storeys.RemoveAll(o => (o & 1) == 0);
-                                        break;
-                                    }
-                                default:
-                                    break;
-                            }
+                            break;
+                        }
+                    case EStoreyType.EvenStorey:
+                        {
+                            var parser = new VentSNCalculator(StoreyNumber);
+                            storeys.AddRange(parser.SerialNumbers);
+                            storeys.RemoveAll(o => (o & 1) == 1);
+                            break;
+                        }
+                    case EStoreyType.OddStorey:
+                        {
+                            var parser = new VentSNCalculator(StoreyNumber);
+                            storeys.AddRange(parser.SerialNumbers);
+                            storeys.RemoveAll(o => (o & 1) == 0);
                             break;
                         }
                     default:

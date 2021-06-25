@@ -227,6 +227,8 @@
         public const string STOREY_ATTRIBUTE_VALUE_STANDAD_NUMBER = "标准层编号";
         public const string STOREY_ATTRIBUTE_VALUE_REFUGE_NUMBER = "避难层编号";
         public const string STOREY_ATTRIBUTE_VALUE_PODIUM_NUMBER = "裙房楼层编号";
+        public const string STOREY_ATTRIBUTE_VALUE_EVEN_FLOOR_NUMBER = "偶数层编号";
+        public const string STOREY_ATTRIBUTE_VALUE_ODD_FLOOR_NUMBER = "奇数层编号";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR = "大屋面";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR = "小屋面";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR = "标准层";
@@ -234,7 +236,6 @@
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR = "非标层";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_REFUGE_FLOOR = "避难层";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_PODIUM_ROOF = "裙房屋面";
-        public const string STOREY_DYNAMIC_PROPERTY_VALUE_ALL_FLOOR = "全部楼层";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_EVEN_FLOOR = "偶数层";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_ODD_FLOOR = "奇数层";
     }
