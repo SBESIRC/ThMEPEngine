@@ -1771,7 +1771,23 @@ namespace ThMEPWSS.DebugNs
             var geoData = Dbg.LoadFromJsonFile<DrainageGeoData>(file);
             DrainageService.TestDrawingDatasCreation(geoData);
         }
+        [Feng("直接从drawingDatas")]
+        public static void qv92ji()
+        {
+            var file = @"D:\DATA\temp\637602373354770648.json";
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(file);
 
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var pt = Dbg.SelectPoint().ToPoint2d();
+                DrainageSystemDiagram.draw8(drDatas, pt);
+            }
+        }
         [Feng("从图纸提取geoData")]
         public static void qv6yoh()
         {

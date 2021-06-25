@@ -650,7 +650,7 @@
         {
             public string Label1;
             public string Label2;
-            public string Comment;
+            public List<string> Comments;
             public bool? IsLeftOrMiddleOrRight;
             public double AiringValue;
             public List<ThwPipeRun> PipeRuns;
