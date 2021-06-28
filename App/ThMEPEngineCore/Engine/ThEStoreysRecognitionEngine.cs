@@ -46,7 +46,18 @@ namespace ThMEPEngineCore.Engine
 
         public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new NotSupportedException();
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (ObjectId objId in dbObjs)
+                {
+                    var e = acadDatabase.Element<Entity>(objId);
+                    if (e is BlockReference blkref)
+                    {
+                        if (!blkref.BlockTableRecord.IsNull && blkref.GetEffectiveName() == "AI-楼层框定E")
+                            Elements.Add(new ThEStoreys(blkref.ObjectId));
+                    }
+                }
+            }
         }
     }
 }
