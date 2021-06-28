@@ -54,8 +54,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
                 InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Scale3d(100, 100, 100), Math.PI, new Dictionary<string, string>() { { "N", this.fireDistrict.Data.BlockData.BlockStatistics["防排抽烟机"].ToString() } });
                 #endregion
-
-                InsertBlockService.InsertSmokeExhaust(new Vector3d(0, OuterFrameLength * (FloorIndex - 1), 0));
+                if (FireCompartmentParameter.FixedPartType != 3)
+                {
+                    InsertBlockService.InsertSmokeExhaust(new Vector3d(0, OuterFrameLength * (FloorIndex - 1), 0));
+                }
             }
             //设置线型
             Result.ForEach(o =>

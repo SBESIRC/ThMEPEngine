@@ -40,9 +40,13 @@ namespace ThMEPElectrical
         public static readonly string FirePumpRoomCircuitModuleExcludingFireRoom = "消防水泵房线路模块（不含消控室）";
         public static readonly string LiquidLevelSignalCircuitModuleExcludingFireRoom = "液位信号线路模块（不含消控室）";
         public static readonly string FixedPartSmokeExhaust = "联动关闭排烟风机信号线";
+        public static readonly string FireHydrantPumpDirectStartSignalLine = "消火栓泵直接启动信号线";
+        public static readonly string SprinklerPumpDirectStartSignalLine = "喷淋泵直接启动信号线";
 
         //
         public static bool CanDrawFixedPartSmokeExhaust = false;
+        public static bool CanDrawFireHydrantPump = false;
+        public static bool CanDrawSprinklerPump = false;
         //配置
         public static readonly List<string> AlarmControlWireCircuitBlocks = new List<string>() { 
             "手动火灾报警按钮(带消防电话插座)", 

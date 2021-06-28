@@ -627,14 +627,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
-                    },
-                    new ThBlockModel()
-                    {
-                        UniqueName = "消火栓泵直接启动信号线",
-                        BlockName = "消火栓泵直接启动信号线",
-                        BlockNameRemark = "消火栓泵直接启动信号线",
-                        Index = 19,
-                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });
@@ -678,14 +670,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
-                    },
-                    new ThBlockModel()
-                    {
-                        UniqueName = "喷淋泵直接启动信号线",
-                        BlockName = "喷淋泵直接启动信号线",
-                        BlockNameRemark = "喷淋泵直接启动信号线",
-                        Index = 20,
-                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });

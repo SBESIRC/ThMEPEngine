@@ -263,8 +263,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
                 //初始化系统图需要的图层/线型等信息
                 InsertBlockService.InsertDiagramLayerAndStyle();
-                //开启联动关闭排烟风机信号线绘画权限
+                //开启相关信号线绘画权限
                 ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = true;
+                ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump = true;
+                ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump = true;
 
                 List<Entity> DrawEntitys = new List<Entity>();
                 Dictionary<Point3d, ThBlockModel> dicBlockPoints = new Dictionary<Point3d, ThBlockModel>();

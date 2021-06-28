@@ -20,8 +20,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             List<Entity> Result = new List<Entity>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
             int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
+            int FireHydrantPumpMinFloor = 0;//消火栓泵最低楼层
             int FireHydrantPumpCount = 0;//消火栓泵个数
             int SprayPumpCount = 0;//喷淋泵个数
+            int SprayPumpMinFloor = 0;//喷淋泵最低楼层
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
@@ -35,17 +37,21 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     FireHydrantPumpCount += AreaData.Data.BlockData.BlockStatistics["消火栓泵"];
                     FireHydrantPumpMaxFloor = FloorNum + 1;
+                    if (FireHydrantPumpMinFloor == 0)
+                        FireHydrantPumpMinFloor = FloorNum + 1;
                     Result.AddRange(DrawFireHydrantPumpLine(currentIndex, FloorNum));
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
                 {
                     SprayPumpCount += AreaData.Data.BlockData.BlockStatistics["喷淋泵"];
+                    if (SprayPumpMinFloor == 0)
+                        SprayPumpMinFloor = FloorNum + 1;
                 }
             }
             //都存在，才画
-            if (PressureSwitchMaxFloor > 0 && FireHydrantPumpMaxFloor > 0)
+            if (FireHydrantPumpMinFloor > 0 && PressureSwitchMaxFloor > FireHydrantPumpMinFloor)
             {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
                 Result.Add(Endline1);
                 //设置线型
                 Result.ForEach(o =>
@@ -72,6 +78,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 //画液位信号线路模块
                 if (FireCompartmentParameter.FixedPartType != 3)
                 {
+                    if (FireHydrantPumpMinFloor > 0)
+                    {
+                        InsertBlockService.InsertFireHydrantPump(new Vector3d(0, OuterFrameLength * (FireHydrantPumpMinFloor - 1), 0));
+                    }
+                    if (SprayPumpMinFloor > 0)
+                    {
+                        InsertBlockService.InsertSprinklerPump(new Vector3d(0, OuterFrameLength * (SprayPumpMinFloor - 1), 0));
+                    }
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
 
                     InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });

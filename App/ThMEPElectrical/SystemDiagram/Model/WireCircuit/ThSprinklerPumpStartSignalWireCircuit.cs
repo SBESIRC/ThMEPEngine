@@ -18,22 +18,19 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int currentIndex = 20;
             List<Entity> Result = new List<Entity>();
             int SprayPumpMaxFloor = 0;//喷淋泵最高楼层
-            for (int FloorNum =  0; FloorNum  < AllFireDistrictData.Count; FloorNum++)
+            for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
-                int Count = AreaData.Data.BlockData.BlockStatistics["喷淋泵"];
-                if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0 && AreaData.Data.BlockData.BlockStatistics["灭火系统压力开关"] > 0)
+                if (AreaData.Data.BlockData.BlockStatistics["灭火系统压力开关"] > 0)
                 {
                     SprayPumpMaxFloor = FloorNum + 1;
-                    Result.AddRange(DrawSprayPumpLine(currentIndex, FloorNum));
+                    Result.AddRange(DrawSprayPumpLine(currentIndex, FloorNum, AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0, AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0));
                 }
             }
             //都存在，才画
             if (SprayPumpMaxFloor > 0)
             {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMaxFloor - 350, 0));
-                Result.Add(Endline1);
                 //设置线型
                 Result.ForEach(o =>
                 {
@@ -54,27 +51,57 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
-        /// <summary>
-        /// 画喷淋泵附加线
-        /// </summary>
-        /// <param name="CurrentIndex"></param>
-        /// <param name="floorNum"></param>
-        /// <returns></returns>
-        private List<Entity> DrawSprayPumpLine(int CurrentIndex, int floorNum)
+        private List<Entity> DrawSprayPumpLine(int CurrentIndex, int floorNum, bool drawFirePump, bool drawSprinklerPump)
         {
             List<Entity> result = new List<Entity>();
-            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
-            result.Add(Endline1);
+            if (drawSprinklerPump)
+            {
+                Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
+                result.Add(Endline1);
+                if (drawFirePump)
+                {
+                    Line newLine = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2700, OuterFrameLength * floorNum + 2550, 0));
+                    result.Add(newLine);
 
-            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2700, OuterFrameLength * floorNum + 2650, 0));
-            result.Add(Endline2);
+                    Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 2550, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                    result.Add(Endline2);
 
-            Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0));
-            result.Add(Endline3);
+                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                    result.Add(Endline3);
 
-            Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 1200, 0));
-            result.Add(Endline4);
+                    Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 1200, 0));
+                    result.Add(Endline4);
+                }
+                Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2700, OuterFrameLength * floorNum + 2650, 0));
+                result.Add(Endline5);
 
+                Line Endline6 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                result.Add(Endline6);
+
+                Line Endline7 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                result.Add(Endline7);
+
+                Line Endline8 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 1200, 0));
+                result.Add(Endline8);
+            }
+            else
+            {
+                if (drawFirePump)
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
+                    result.Add(Endline1);
+                    Line newLine = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2700, OuterFrameLength * floorNum + 2550, 0));
+                    result.Add(newLine);
+                    Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 2550, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                    result.Add(Endline2);
+                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
+                    result.Add(Endline3);
+                    Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 1200, 0));
+                    result.Add(Endline4);
+                    Line Endline9 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0));
+                    result.Add(Endline9);
+                }
+            }
             return result;
         }
 
