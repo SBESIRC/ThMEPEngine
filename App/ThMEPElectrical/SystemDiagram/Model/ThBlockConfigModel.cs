@@ -408,7 +408,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 UniqueName = "防排抽烟机",
                 BlockName = "E-BFAS522",
                 BlockAliasName = "E-BFAS522_16",
-                BlockNameRemark = "防排抽烟机",
+                BlockNameRemark = "防排烟风机",
                 Index = 16,
                 Position = new Point3d(1100, 1200, 0),
                 CanHidden = true,
