@@ -25,6 +25,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BuildRoom.Interface;
 using NFox.Cad;
 using ThMEPEngineCore.LaneLine;
+using GeometryExtensions;
 
 namespace ThMEPEngineCore
 {
@@ -906,6 +907,34 @@ namespace ThMEPEngineCore
                 var engine = new ThAXISLineRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, nFrame.Vertices());
                 engine.Elements.Select(o => o.Outline).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractRoom", CommandFlags.Modal)]
+        public void THExtractRoom()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                var builder = new ThRoomBuilderEngine();
+                var rooms = builder.BuildFromMS(acadDatabase.Database, frame.Vertices());
+                rooms.Select(o => o.Boundary).ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();
