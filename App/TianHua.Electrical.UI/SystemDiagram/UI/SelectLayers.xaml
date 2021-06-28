@@ -84,7 +84,7 @@
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
-            <Label Content="是否绘制消防室出线端："  Focusable="False" />
+            <Label Content="是否绘制消控室出线端："  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
                 <RadioButton Name="IncludingFireRoom" Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
                     <Grid>
@@ -92,7 +92,7 @@
                             <RowDefinition Height="*"></RowDefinition>
                             <RowDefinition Height="20"></RowDefinition>
                         </Grid.RowDefinitions>
-                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="包含消防室" ></Label>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="包含消控室" ></Label>
                     </Grid>
                 </RadioButton>
                 <RadioButton Name="ExcludingFireRoom" Width="80" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
@@ -101,7 +101,7 @@
                             <RowDefinition Height="*"></RowDefinition>
                             <RowDefinition Height="20"></RowDefinition>
                         </Grid.RowDefinitions>
-                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="不含消防室" ></Label>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="不含消控室" ></Label>
                     </Grid>
                 </RadioButton>
                 <RadioButton Name="NotDrawFireRoom" Width="110" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
