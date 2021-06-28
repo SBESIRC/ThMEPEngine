@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
   <!-- The name of the product -->
-  <?define Name = "天华MEP工具集" ?>
+  <?define Name = "天华MEP工具集v1.4" ?>
   <!-- The Description of the product -->
   <?define Description = "为天华MEP设计师提供自动化的解决方案" ?>
   <!-- The manufacturer, for setup package publisher and folder info -->
