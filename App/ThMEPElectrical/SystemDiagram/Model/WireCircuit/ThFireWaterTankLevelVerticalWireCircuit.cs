@@ -21,7 +21,9 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int FireWaterTankMaxFloor = 0;// 消防水箱最高楼层
             int FireExtinguisherPoolMinFloor = 0;//消防水池最低楼层
             int FireExtinguisherPoolMaxFloor = 0;//消防水池最高楼层
+            int PressureSwitchMaxFloor = 0;//灭火系统压力开关最高楼层
             int FireExtinguisherPoolCount =0;    //消防水池个数
+
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
@@ -41,18 +43,29 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     FireExtinguisherPoolMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFireExtinguisherPoolLine(currentIndex, FloorNum));
                 }
+                if(AreaData.Data.BlockData.BlockStatistics["灭火系统压力开关"] > 0 && AreaData.Data.BlockData.BlockStatistics["消火栓泵"] ==0 && AreaData.Data.BlockData.BlockStatistics["喷淋泵"] == 0)
+                {
+                    PressureSwitchMaxFloor = FloorNum + 1;
+                    Result.AddRange(DrawPressureSwitchLine(currentIndex, FloorNum));
+                }
             }
             //都存在，才画
-            if (FireWaterTankMaxFloor > 0 || FireExtinguisherPoolMaxFloor > 0)
+            if (FireWaterTankMaxFloor > 0 || FireExtinguisherPoolMaxFloor > 0 || PressureSwitchMaxFloor>0)
             {
-                if (FireWaterTankMaxFloor >= FireExtinguisherPoolMaxFloor)
+                int MaxFloor = Math.Max(FireWaterTankMaxFloor, Math.Max(FireExtinguisherPoolMaxFloor, PressureSwitchMaxFloor));
+                if(PressureSwitchMaxFloor== MaxFloor)
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireWaterTankMaxFloor - 1) + 2350, 0));
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2650, 0));
+                    Result.Add(Endline1);
+                }
+                else if (FireWaterTankMaxFloor == MaxFloor)
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2350, 0));
                     Result.Add(Endline1);
                 }
                 else
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireExtinguisherPoolMaxFloor - 1) + 2250, 0));
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2250, 0));
                     Result.Add(Endline1);
                 }
                 
@@ -102,6 +115,22 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         {
             List<Entity> result = new List<Entity>();
             Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 4) + 1650, OuterFrameLength * floorNum + 2350, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2350, 0));
+            result.Add(Endline2);
+            return result;
+        }
+
+        /// <summary>
+        /// 画灭火系统压力开关附加线
+        /// </summary>
+        /// <param name="currentIndex"></param>
+        /// <param name="floorNum"></param>
+        /// <returns></returns>
+        private List<Entity> DrawPressureSwitchLine(int CurrentIndex, int floorNum)
+        {
+            List<Entity> result = new List<Entity>();
+            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
+            result.Add(Endline1);
+            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2650, 0));
             result.Add(Endline2);
             return result;
         }
