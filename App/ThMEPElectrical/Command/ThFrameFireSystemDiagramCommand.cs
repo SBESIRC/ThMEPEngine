@@ -49,6 +49,10 @@ namespace ThMEPElectrical.Command
                     {
                         return;
                     }
+
+                    //加载块集合配置文件白名单
+                    ThBlockConfigModel.Init();
+
                     //图块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                     BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
@@ -68,9 +72,6 @@ namespace ThMEPElectrical.Command
                         Active.Editor.WriteLine("\n检测到有未正确命名的防火分区，请先手动命名");
                         return;
                     }
-
-                    //加载块集合配置文件白名单
-                    ThBlockConfigModel.Init();
 
                     //火灾自动报警系统diagram实例化
                     var diagram = new ThAutoFireAlarmSystemModel();

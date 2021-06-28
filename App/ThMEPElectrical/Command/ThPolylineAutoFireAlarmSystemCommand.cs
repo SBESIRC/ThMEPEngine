@@ -57,6 +57,9 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
+                //加载块集合配置文件白名单
+                ThBlockConfigModel.Init();
+
                 //获取该区域的所有所需块
                 var dbobjs =new DBObjectCollection();
                 foreach (ObjectId obj in objs)
@@ -68,8 +71,7 @@ namespace ThMEPElectrical.Command
                 BlockReferenceEngine.Recognize(acadDatabase.Database, pts);
                 BlockReferenceEngine.RecognizeMS(acadDatabase.Database, pts);
 
-                //加载块集合配置文件白名单
-                ThBlockConfigModel.Init();
+                
                 //填充块数量到防火分区
                 var diagram = new ThAutoFireAlarmSystemModel();
                 //获取块引擎附加信息
