@@ -89,7 +89,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public void InitFloors(AcadDatabase acadDatabase, Polyline floorBoundary, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
         {
             FloorBoundary = floorBoundary;
-            var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
+            var FindFireCompartmentsEntity = spatialIndex.SelectCrossingPolygon(FloorBoundary);
             var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
             if (FindFireCompartmentsEntity.Count == fireCompartments.Count)
             {
