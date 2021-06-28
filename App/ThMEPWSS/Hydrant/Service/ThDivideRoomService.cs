@@ -21,7 +21,7 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> ProtectAreas { get; set; }
         private double zeroLength = 1e-4;
         private double PolygonBufferLength = 5.0;
-        private double RoomBufferLength = 0.0;
+        private double RoomBufferLength = 5.0;
         /// <summary>
         /// 房间轮廓被保护区域分割后的子区域所对应的保护区域
         /// Key->房间原始轮廓，Value->房间被分割的区域，及每个区域所受的保护区域
@@ -46,8 +46,8 @@ namespace ThMEPWSS.Hydrant.Service
 
             polygons = FilterPolygons(polygons);
 
-            //
-            var areas = polygons.BuildArea();
+            //var areas = polygons.BuildArea();
+            var areas = polygons;
 
             //对分割的Polygons进行内缩,用于判断哪些区域属于房间
             var polygonBufferDic = BufferPolygon(areas.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
