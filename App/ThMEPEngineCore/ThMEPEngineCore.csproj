@@ -230,13 +230,11 @@
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
-    <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3RoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallExtractionVisitor.cs" />
-    <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
     <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
@@ -390,7 +388,6 @@
     <Compile Include="Service\ThPositionTagsDbExtension.cs" />
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />
-    <Compile Include="Service\ThRoomDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
