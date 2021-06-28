@@ -121,7 +121,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockAliasName = "E-BFAS212",
                 BlockNameRemark = "手动火灾报警按钮(带消防电话插座)",
                 Index = 7,
-                CanHidden = true,
+                CanHidden = false,
                 Position = new Point3d(1500, 1500, 0),
                 ShowQuantity=true,
                 QuantityPosition=new Point3d(1850,1150,0)
@@ -145,7 +145,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockAliasName = "E-BFAS330",
                 BlockNameRemark = "火灾声光警报器",
                 Index = 7,
-                CanHidden = true,
+                CanHidden = false,
                 Position = new Point3d(1500, 800, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1850, 450, 0)

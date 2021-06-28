@@ -144,20 +144,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         private List<Entity> DrawSpecialBlock7(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["手动火灾报警按钮(带消防电话插座)"] == 0)
-            {
-                result.Add(DrawStraightLine(currentIndex));
-            }
-            else
-            {
-                double RightmostPosition = 0;
-                double BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.BlockName == "E-BFAS212" && y.Index == currentIndex).Position.X - 150;
-                Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-                result.Add(Midline1);
-                RightmostPosition = BlockPosition + 300;
-                Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-                result.Add(Midline2);
-            }
+            double RightmostPosition = 0;
+            double BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.BlockName == "E-BFAS212" && y.Index == currentIndex).Position.X - 150;
+            Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+            result.Add(Midline1);
+            RightmostPosition = BlockPosition + 300;
+            Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+            result.Add(Midline2);
             return result;
         }
         private List<Entity> DrawSpecialBlock9(int currentIndex)

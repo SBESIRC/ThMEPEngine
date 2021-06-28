@@ -71,7 +71,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         public override bool CheckLayerValid(Entity curve)
         {
-            return curve.Layer.Contains("E-");
+            return true;
         }
         
         private bool IsDistributeElementBlock(BlockReference blkref)

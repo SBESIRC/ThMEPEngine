@@ -489,13 +489,18 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     {
                         FindCount += BlockDataReturn.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
                     });
-                    BlockDataReturn.BlockStatistics[o.UniqueName] = FindCount / o.DependentStatisticalRule + 1;//向上缺省
+                    BlockDataReturn.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
                 });
                 //与读取到的[消防水箱],[灭火系统压力开关]同一分区，默认数量为2
                 if (BlockDataReturn.BlockStatistics["消防水池"] > 0 && BlockDataReturn.BlockStatistics["灭火系统压力开关"] > 0)
                 {
                     BlockDataReturn.BlockStatistics["消火栓泵"] = Math.Max(BlockDataReturn.BlockStatistics["消火栓泵"], 2);
                     BlockDataReturn.BlockStatistics["喷淋泵"] = Math.Max(BlockDataReturn.BlockStatistics["喷淋泵"], 2);
+                }
+                //有[消火栓泵],[喷淋泵]，默认一定至少有一个[灭火系统压力开关]
+                if (BlockDataReturn.BlockStatistics["消火栓泵"] > 0 || BlockDataReturn.BlockStatistics["喷淋泵"] > 0)
+                {
+                    BlockDataReturn.BlockStatistics["灭火系统压力开关"] = Math.Max(BlockDataReturn.BlockStatistics["灭火系统压力开关"], 1);
                 }
                 #endregion
             }
