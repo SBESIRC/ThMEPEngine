@@ -58,7 +58,10 @@ namespace ThMEPWSS.Hydrant.Service
                             }
                         }
                     });
-                    results.Add(Tuple.Create(coverArea, position, islatedPolygons));
+                    if(coverArea!=null)
+                    {
+                        results.Add(Tuple.Create(coverArea, position, islatedPolygons));
+                    }
                 }
             });            
             return results;

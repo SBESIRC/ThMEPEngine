@@ -10,6 +10,7 @@ using ThMEPEngineCore.LaneLine;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
+
 namespace ThMEPWSS.Hydrant.Service
 {
     public class ThDivideRoomService
@@ -20,7 +21,7 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> ProtectAreas { get; set; }
         private double zeroLength = 1e-4;
         private double PolygonBufferLength = 5.0;
-        private double RoomBufferLength = 5.0;
+        private double RoomBufferLength = 0.0;
         /// <summary>
         /// 房间轮廓被保护区域分割后的子区域所对应的保护区域
         /// Key->房间原始轮廓，Value->房间被分割的区域，及每个区域所受的保护区域
@@ -36,24 +37,26 @@ namespace ThMEPWSS.Hydrant.Service
             Results = new Dictionary<Entity, Dictionary<Entity, List<Entity>>>();
         }
         public void Divide()
-        {   
+        {
             // 前处理（打散、去重、合并、延长）
             var objs = Preprocess(); // 返回一堆直线 
-            var polygons = objs.Polygons(); //重新分割区域
 
-            // 去重
-            var duplicateRemoveService = new ThSimilarityDuplicateRemoveService(
-                polygons.Cast<Entity>().ToList());
-            duplicateRemoveService.DuplicateRemove();
-            polygons = duplicateRemoveService.Results.ToCollection();
+            var polygons = objs.Polygons(); //重新分割区域
+            //polygons.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 1);
+
+            polygons = FilterPolygons(polygons);
+
+            //
+            var areas = polygons.BuildArea();
 
             //对分割的Polygons进行内缩,用于判断哪些区域属于房间
-            var polygonBufferDic = BufferPolygon(polygons.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength); 
+            var polygonBufferDic = BufferPolygon(areas.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
+
             var spatialIndex = new ThCADCoreNTSSpatialIndex(polygonBufferDic.Keys.ToCollection());
             RoomOutlines.ForEach(o =>
             {
                 //查找属于此房间的分割区域
-                var splitPolygons =spatialIndex.SelectCrossingPolygon(o);
+                var splitPolygons = spatialIndex.SelectCrossingPolygon(o);
                 var belongedRooms = BelongedRoom(o, splitPolygons.Cast<Entity>().ToList()); //找到哪些分割区域属于房间
                 var container = new Dictionary<Entity, List<Entity>>();
                 belongedRooms.ForEach(e =>
@@ -65,9 +68,42 @@ namespace ThMEPWSS.Hydrant.Service
             });
             // 后续可能会根据面积对子区域进行过滤
         }
+        private DBObjectCollection FilterPolygons(DBObjectCollection polygons)
+        {
+            // 清除面积很小的Polyline
+            polygons = polygons
+                .Cast<Polyline>()
+                .Where(o => o.Area > 1.0)
+                .ToCollection();
+
+            // 去重
+            var duplicateRemoveService = new ThSimilarityDuplicateRemoveService(
+                polygons.Cast<Entity>().ToList());
+            duplicateRemoveService.DuplicateRemove();
+            polygons = duplicateRemoveService.Results.ToCollection();
+
+            return polygons;
+        }
         private List<Entity> BelongedProtectArea(Entity roomInnerPolygon)
         {
-            return ProtectAreas.Where(o => o.IsContains(roomInnerPolygon)).ToList();
+            return ProtectAreas.Where(o => 
+            { 
+                if(o is Polyline polyline)
+                {
+                    return polyline.IsContains(roomInnerPolygon);
+                }
+                else if(o is MPolygon mPolygon)
+                {
+                    return mPolygon
+                    .ToNTSPolygon().Shell
+                    .ToDbPolyline()
+                    .IsContains(roomInnerPolygon);
+                }
+                else
+                {
+                    return false;
+                }
+            }).ToList();
         }
         private List<Entity> BelongedRoom(Entity roomOutline,List<Entity> polygons)
         {
@@ -99,9 +135,17 @@ namespace ThMEPWSS.Hydrant.Service
             return result;
         }
         private DBObjectCollection Preprocess()
-        {           
+        {
             // 内缩房间轮廓线，便于分割
-            var roomOutlines = BufferPolygon(RoomOutlines, -1.0 * RoomBufferLength);
+            var roomOutlines = new Dictionary<Entity, Entity>();
+            if(ThAuxiliaryUtils.DoubleEquals(RoomBufferLength,0.0))
+            {
+                RoomOutlines.ForEach(o => roomOutlines.Add(o.Clone() as Entity, o));
+            }
+            else
+            {
+                roomOutlines = BufferPolygon(RoomOutlines, -1.0 * RoomBufferLength);
+            }
             // 转成多段线,且已打散
             var polys = new List<Polyline>();
             roomOutlines.Keys.ForEach(o => polys.AddRange(ToPolylines(o)));
@@ -143,20 +187,21 @@ namespace ThMEPWSS.Hydrant.Service
         }
         private DBObjectCollection Merge(DBObjectCollection lines)
         {
-            var results = new DBObjectCollection();
             lines = ClearZeroLines(lines, this.zeroLength);
-            lines.LineMerge().Cast<Curve>().ForEach(o =>
-                {
-                    if(o is Line line)
-                    {
-                        results.Add(line);
-                    }
-                    else if(o is Polyline polyline)
-                    {
-                        polyline.ToLines().ForEach(l=> results.Add(l));
-                    }
-                });
-            return ClearZeroLines(results, this.zeroLength);
+            var old_gap_distance = ThLaneLineMergeExtension.collinear_gap_distance;
+            var old_extend_length = ThLaneLineMergeExtension.extend_distance;
+            try
+            {
+                ThLaneLineMergeExtension.collinear_gap_distance = 1e-4;
+                ThLaneLineMergeExtension.extend_distance = 5.0;
+                lines = ThLaneLineMergeExtension.Merge(lines);
+            }
+            finally
+            {
+                ThLaneLineMergeExtension.collinear_gap_distance = old_gap_distance;
+                ThLaneLineMergeExtension.extend_distance = old_extend_length;
+            }
+            return ClearZeroLines(lines, this.zeroLength);
         }
         private List<Line> ToLines(Entity entity)
         {
