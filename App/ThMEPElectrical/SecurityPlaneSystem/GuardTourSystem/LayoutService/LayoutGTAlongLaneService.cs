@@ -15,7 +15,14 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
     {
         double layoutStairDis = 6000;
         double layoutSpace = 15000;
-        public void Layout(List<List<Line>> lanes, List<Polyline> columns, List<Point3d> stairPts)
+
+        public LayoutGTAlongLaneService(double space = 15000, double stairDis = 6000)
+        {
+            layoutSpace = space;
+            layoutStairDis = stairDis;
+        }
+
+        public List<(Point3d, Vector3d)> Layout(List<List<Line>> lanes, List<Polyline> columns, List<Point3d> stairPts)
         {
             List<(Point3d, Vector3d)> laneLayoutInfo = new List<(Point3d, Vector3d)>();
             foreach (var lane in lanes)
@@ -25,6 +32,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 var usefulPts = CalClosetStairPts(lane, stairPts);
                 laneLayoutInfo.AddRange(CalLayoutPtInfo(lane, usefulPts, upColumns));
             }
+
+            return laneLayoutInfo;
         }
 
         /// <summary>

@@ -197,6 +197,25 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
+        /// 获取空间内的车道线或者中心线
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<List<Line>> GetNeedLanes(List<List<Line>> lanes, Polyline room)
+        {
+            List<List<Line>> resLines = new List<List<Line>>();
+            foreach (var laneLst in lanes)
+            {
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(laneLst.ToCollection());
+                var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
+                resLines.Add(needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList());
+            }
+
+            return resLines; 
+        }
+
+        /// <summary>
         /// 找到可能可以布置控制器的构建
         /// </summary>
         /// <param name="door"></param>

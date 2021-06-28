@@ -10,6 +10,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
     public static class HandleGuardTourRoomService
     {
         static string roomNameColumn = "房间名称";
+        static string spaceColumn = "布置间距";
         static string stairRoomColumn = "楼梯间";
         public static List<string> GTRoom = new List<string>()
         {
@@ -29,7 +30,6 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
                 if (column.ColumnName.Contains(roomNameColumn))
                 {
                     columnName = column.ColumnName;
-                    break;
                 }
             }
 
@@ -38,7 +38,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
                 GTRoom.Clear();
                 foreach (DataRow row in table.Rows)
                 {
-                    GTRoom.AddRange(CommonRoomHandleService.HandleRoom(row[columnName].ToString()));
+                    var roomNames = CommonRoomHandleService.HandleRoom(row[columnName].ToString());
+                    GTRoom.AddRange(roomNames);
                 }
             }
 

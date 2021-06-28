@@ -16,19 +16,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
     {
         double angle = 30;
         double blockWidth = 300;
-        public List<Point3d> Layout(ThIfcRoom room, List<ThIfcRoom> stairRooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls) 
+        public List<(Point3d, Vector3d)> Layout(ThIfcRoom room, List<ThIfcRoom> stairRooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls) 
         {
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            List<Point3d> layoutPts = new List<Point3d>();
+            List<(Point3d, Vector3d)> layoutPts = new List<(Point3d, Vector3d)>();
             foreach (var sRoom in stairRooms)
             {
                 var thSRoom = sRoom.Boundary as Polyline;
                 var bufferSRoom = thSRoom.Buffer(5)[0] as Polyline;
                 var stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferSRoom);
+                var thRoom = room.Boundary as Polyline;
+                var bufferRoom = thRoom.Buffer(5)[0] as Polyline;
+                stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
 
                 foreach (var sDoor in stairDoors)
                 {
-                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room.Boundary as Polyline, sDoor);
+                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thRoom as Polyline, sDoor);
                     var structs = getLayoutStructureService.CalLayoutStruc(sDoor, columns, walls);
                     var layoutPt = CalControllerLayoutPt(structs, doorInfo.Item2, doorInfo.Item1);
                     layoutPts.Add(layoutPt);
@@ -45,9 +48,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
         /// <param name="dir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private Point3d CalControllerLayoutPt(List<Polyline> structs, Vector3d dir, Point3d doorPt)
+        private (Point3d, Vector3d) CalControllerLayoutPt(List<Polyline> structs, Vector3d dir, Point3d doorPt)
         {
-            List<Point3d> resLayoutInfo = new List<Point3d>();
+            List<(Point3d, Vector3d)> resLayoutInfo = new List<(Point3d, Vector3d)>();
             foreach (var str in structs)
             {
                 var allLines = str.GetAllLinesInPolyline();
@@ -64,12 +67,17 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                         }
 
                         var layoutPt = pt + lineDir * (blockWidth / 2);
-                        resLayoutInfo.Add(layoutPt);
+                        var layoutDir = Vector3d.ZAxis.CrossProduct(lineDir); 
+                        if (dir.DotProduct(layoutDir) < 0)
+                        {
+                            layoutDir = -layoutDir;
+                        }
+                        resLayoutInfo.Add((layoutPt, layoutDir));
                     }
                 }
             }
 
-            return resLayoutInfo.OrderBy(x => x.DistanceTo(doorPt)).FirstOrDefault();
+            return resLayoutInfo.OrderBy(x => x.Item1.DistanceTo(doorPt)).FirstOrDefault();
         }
     }
 }
