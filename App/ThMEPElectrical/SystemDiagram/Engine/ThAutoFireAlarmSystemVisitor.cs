@@ -88,6 +88,15 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             });
                             break;
                         }
+                    case StatisticType.NeedSpecialTreatment:
+                        {
+                            if (o.BlockName == blkref.Name)
+                            {
+                                IsRequired = true;
+                                return;
+                            }
+                            break;
+                        }
                     default:
                         break;
                 }

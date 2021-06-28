@@ -24,8 +24,11 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["灭火系统压力开关"] > 0)
                 {
-                    SprayPumpMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawSprayPumpLine(currentIndex, FloorNum, AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0, AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0));
+                }
+                if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
+                {
+                    SprayPumpMaxFloor = FloorNum + 1;
                 }
             }
             //都存在，才画
