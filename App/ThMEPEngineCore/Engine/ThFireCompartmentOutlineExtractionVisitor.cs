@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcSpatialElementData>();
             if (IsSpatialElement(polyline) && CheckLayerValid(polyline))
             {
-                var newFrame = ThMEPFrameService.NormalizeEx(polyline, 500.0);
+                var newFrame = ThMEPFrameService.NormalizeEx(polyline, 1000.0);
                 if(IsSpatialElement(newFrame))
                 {
                     results.Add(CreateSpatialElementData(newFrame, ""));
