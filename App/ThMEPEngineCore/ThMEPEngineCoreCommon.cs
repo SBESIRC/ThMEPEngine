@@ -60,7 +60,7 @@ namespace ThMEPEngineCore
         // 全局公差
         public static double LOOSE_ZERO_LENGTH = 10.0;
         public static double LOOSE_PARALLEL_ANGLE = 1.0;
-        public static double LOOSE_CLOSED_POLYLINE = 100.0;
+        public const double LOOSE_CLOSED_POLYLINE = 100.0;
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
 
