@@ -288,7 +288,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THCDZM" Global="THCDZM" />
-				<Command Local="THAFAS" Global="THAFAS" />
+				<Command Local="THHZXT" Global="THHZXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -299,7 +299,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THCDZM" Global="THCDZM" />
-				<Command Local="THAFAS" Global="THAFAS" />
+				<Command Local="THHZXT" Global="THHZXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -310,7 +310,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THCDZM" Global="THCDZM" />
-				<Command Local="THAFAS" Global="THAFAS" />
+				<Command Local="THHZXT" Global="THHZXT" />
             </Commands>
         </ComponentEntry>
     </Components>
