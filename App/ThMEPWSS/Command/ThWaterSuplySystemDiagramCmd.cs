@@ -17,11 +17,11 @@ namespace ThMEPWSS.Command
 {
     public class ThWaterSuplySystemDiagramCmd : IAcadCommand, IDisposable
     {
-        readonly DrainageViewModel UiConfigs;
+        readonly DrainageViewModel _UiConfigs;
 
         public ThWaterSuplySystemDiagramCmd(DrainageViewModel uiConfigs)
         {
-            UiConfigs = uiConfigs;
+            _UiConfigs = uiConfigs;
         }
 
         public void Dispose()
@@ -30,13 +30,26 @@ namespace ThMEPWSS.Command
 
         public void Execute()
         {
-            if(UiConfigs.SelectRadionButton.Content is null)
+            try
+            {
+                Execute(_UiConfigs);
+            }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+        }
+
+        public void Execute(DrainageViewModel uiConfigs)
+        {
+            var tmpUiConfigs = uiConfigs;
+            if (tmpUiConfigs.SelectRadionButton.Content is null)
             {
                 MessageBox.Show("不存在有效分组，请重新读取");
                 return;
             }
-            var areaIndex = Convert.ToInt32(UiConfigs.SelectRadionButton.Content.Split('组')[1]) - 1;//读取分区
-            var setViewModel = UiConfigs.SetViewModel;
+            var areaIndex = Convert.ToInt32(tmpUiConfigs.SelectRadionButton.Content.Split('组')[1]) - 1;//读取分区
+            var setViewModel = tmpUiConfigs.SetViewModel;
 
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
             if (setViewModel.DynamicRadios[1].IsChecked)
@@ -68,9 +81,9 @@ namespace ThMEPWSS.Command
                 }
             }
            
-            var selectedArea = UiConfigs.SelectedArea;
-            var floorAreaList = UiConfigs.FloorAreaList;
-            var floorNumList = UiConfigs.FloorNumList;
+            var selectedArea = tmpUiConfigs.SelectedArea;
+            var floorAreaList = tmpUiConfigs.FloorAreaList;
+            var floorNumList = tmpUiConfigs.FloorNumList;
 
             var floorNumbers = 1;//楼层数统计
             foreach (var fn in floorNumList)

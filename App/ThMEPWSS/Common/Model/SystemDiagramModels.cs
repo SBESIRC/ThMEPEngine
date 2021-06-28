@@ -242,7 +242,7 @@ namespace ThMEPWSS.Uitl
             public GRect GetGRect(Point3d basePt, bool bsPtIncluded)
             {
                 List<Point3d> pts = GetPoint3ds(basePt, bsPtIncluded);
-                return GeoAlgorithm.GetGRect(pts);
+                return GeoAlgorithm.ToGRect(pts);
             }
             private List<Point3d> GetPoint3ds(Point3d basePt, bool bsPtIncluded)
             {
@@ -1146,6 +1146,18 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static GRect ToGRect(this Point3dCollection pts)
+        {
+            if (pts.Count == 0)
+            {
+                return default;
+            }
+            var minX = pts.Cast<Point3d>().Select(p => p.X).Min();
+            var maxX = pts.Cast<Point3d>().Select(p => p.X).Max();
+            var minY = pts.Cast<Point3d>().Select(p => p.Y).Min();
+            var maxY = pts.Cast<Point3d>().Select(p => p.Y).Max();
+            return new GRect(minX, minY, maxX, maxY);
+        }
         public static Vector3d ToVector3d(this Point3d pt) => new Vector3d(pt.X, pt.Y, pt.Z);
         public static Vector2d ToVector2d(this Point2d pt) => new Vector2d(pt.X, pt.Y);
         public static Point2d ToLongPoint2d(this Point2d pt)
@@ -1207,7 +1219,8 @@ namespace ThMEPWSS.Uitl
                                         (pt1.Z + pt2.Z) / 2.0);
             return midPoint;
         }
-        public static GRect GetGRect(IList<Point3d> pts)
+        public static GRect ToGRect
+            (IList<Point3d> pts)
         {
             if (pts.Count == 0) return default;
             GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
@@ -1606,6 +1619,11 @@ namespace ThMEPWSS.Uitl
                     pts.Add(bd.MinPoint);
                 }
             }
+            return GetExtend2d(out minX, out minY, out maxX, out maxY, pts);
+        }
+     
+        public static bool GetExtend2d(out double minX, out double minY, out double maxX, out double maxY, Point3dCollection pts)
+        {
             if (pts.Count == 0)
             {
                 minX = minY = maxX = maxY = default;
@@ -1617,6 +1635,7 @@ namespace ThMEPWSS.Uitl
             maxY = pts.Cast<Point3d>().Select(p => p.Y).Max();
             return true;
         }
+
         static public void DrawLine(Point3d startPt, Point3d endPt, string layerName)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())

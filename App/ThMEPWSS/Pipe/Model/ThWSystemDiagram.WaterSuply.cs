@@ -1291,6 +1291,10 @@ namespace ThMEPWSS.Pipe.Model
                 for (int j = 0; j < FloorAreaList[i].Count; j++)
                 {
                     households[i, j] = Convert.ToInt32(kitchenIndex.SelectCrossingPolygon(FloorAreaList[i][j]).Count >0);
+                    if(households[i, j]>0)
+                    {
+                        ;
+                    }
                     areaNums += households[i, j];
                 }
                 if (AreaNums < areaNums)

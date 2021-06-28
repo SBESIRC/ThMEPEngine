@@ -633,7 +633,7 @@ namespace ThMEPWSS.Assistant
                 r1.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r1.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
                 r2.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r2.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
             };
-            var r = GeoAlgorithm.GetGRect(pts);
+            var r = GeoAlgorithm.ToGRect(pts);
             var pt1 = GeoAlgorithm.MidPoint(r.LeftTop, r.LeftButtom).ToPoint3d();
             var pt2 = GeoAlgorithm.MidPoint(r.RightTop, r.RightButtom).ToPoint3d();
             return DrawLineLazy(pt1, pt2);

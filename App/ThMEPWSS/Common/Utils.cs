@@ -5,9 +5,6 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Model;
 
@@ -23,8 +20,10 @@ namespace ThMEPWSS.Common
             {
                 if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
                 {
-                    using AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false);//////////
-                    var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
+                    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+                    {
+                        var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
+                    }
                 }
             }
             while (true)
