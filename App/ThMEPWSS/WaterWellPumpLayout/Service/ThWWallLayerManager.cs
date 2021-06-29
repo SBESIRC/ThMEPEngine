@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.WaterWellPumpLayout.Service
 {
-    public class ThWWallLayerManager
+    public class ThWWallLayerManager: ThDbLayerManager
     {
         public static List<string> XrefLayers(Database database)
         {
@@ -18,10 +18,6 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                     .Select(o => o.Name)
                     .ToList();
             }
-        }
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
         private static bool IsWallLayerName(string name)
         {
