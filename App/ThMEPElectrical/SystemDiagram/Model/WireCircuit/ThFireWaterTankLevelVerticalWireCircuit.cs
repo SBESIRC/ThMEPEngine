@@ -108,22 +108,6 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return result;
         }
 
-        /// <summary>
-        /// 画灭火系统压力开关附加线
-        /// </summary>
-        /// <param name="currentIndex"></param>
-        /// <param name="floorNum"></param>
-        /// <returns></returns>
-        private List<Entity> DrawPressureSwitchLine(int CurrentIndex, int floorNum)
-        {
-            List<Entity> result = new List<Entity>();
-            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 2650, 0));
-            result.Add(Endline1);
-            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2650, 0));
-            result.Add(Endline2);
-            return result;
-        }
-
         public override void InitCircuitConnection()
         {
             this.CircuitColorIndex = 3;

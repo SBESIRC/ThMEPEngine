@@ -94,7 +94,7 @@ namespace ThMEPElectrical.Command
                         };
                     });
                     int Max_FireDistrictNo = 0;
-                    var choise = floor.FireDistricts.Where(f => f.FireDistrictNo == -2);//.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
+                    var choise = floor.FireDistricts.Where(f => f.FireDistrictNo == -2);
                     if (choise.Count() > 0)
                     {
                         var The_MaxNo_FireDistrict = choise.Max(o => int.Parse(o.FireDistrictName.Split('-')[1]));
