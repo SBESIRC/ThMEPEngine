@@ -41,7 +41,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
             }
             //都存在，才画
-            if (FireHydrantPumpMinFloor > 0 && PressureSwitchMaxFloor > FireHydrantPumpMinFloor)
+            if (FireHydrantPumpMinFloor > 0 && PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
             {
                 Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
                 Result.Add(Endline1);
