@@ -37,5 +37,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static int TolToilateToWall = 800;
         public static int SublinkLength = 400;
         public static int MovedLength = 200;
+        public static string islandTag = "island";
     }
 }

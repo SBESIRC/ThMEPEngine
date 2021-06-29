@@ -47,6 +47,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WaterSupplyPoint.ToString());
                         geometry.Properties.Add(DrainageSDCommon.ProAreaId, toilate.AreaId);
                         geometry.Properties.Add(DrainageSDCommon.ProGroupId, toilate.GroupId);
+                        geometry.Properties.Add(DrainageSDCommon.ProDirection, new double[] { toilate.Dir.X, toilate.Dir.Y });
 
                         geometry.Boundary = new DBPoint(pt);
 
@@ -79,15 +80,38 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return geom;
         }
 
+        public static List<ThGeometry> buildVirtualColumn(List<Polyline> virtualColumn, string areaId)
+        {
+            List<ThGeometry> columnGeom = new List<ThGeometry>();
+
+            virtualColumn.ForEach(vcl =>
+              {
+                  var geometry = new ThGeometry();
+
+                  geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Column.ToString());
+                  geometry.Properties.Add(DrainageSDCommon.ProAreaId, areaId);
+
+                  geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, false);
+                  geometry.Boundary = vcl;
+
+                  columnGeom.Add(geometry);
+              });
+
+            return columnGeom;
+        }
+
         public static string getAreaId(List<ThExtractorBase> archiExtractor)
         {
             string areaId = "";
 
             var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
 
-            var pl = extractor.Region[0].Geometry as Polyline;
-            var areaPolylineToIdDic = extractor.ToiletGroupId;
-            areaId = areaPolylineToIdDic[pl];
+            if (extractor != null && extractor.Region.Count > 0)
+            {
+                var pl = extractor.Region[0].Geometry as Polyline;
+                var areaPolylineToIdDic = extractor.ToiletGroupId;
+                areaId = areaPolylineToIdDic[pl];
+            }
 
             return areaId;
         }
@@ -101,10 +125,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 var toilate = toilateList.Where(toilate => gj.Id.Contains(toilate.Uuid)).FirstOrDefault();
                 if (toilate != null)
                 {
-                    Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
+                    //Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
+
+                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * DrainageSDCommon.SublinkLength;
 
                     toilate.SupplyCoolOnBranch.Add(subLinkEndPt);
-                    toilate.Dir = gj.Direction;
+                    //toilate.Dir = gj.Direction;
                     toilate.AreaId = gj.AreaId;
                     toilate.GroupId = gj.GroupId;
 

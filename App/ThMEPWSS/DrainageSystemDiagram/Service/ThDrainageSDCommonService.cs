@@ -33,7 +33,44 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
             return obj;
         }
+        public static List<Point3d> orderPtInStrightLine(List<Point3d> pts)
+        {
+            //var pts = groupToilate.SelectMany(x => x.SupplyCoolOnBranch).ToList();
 
+            if (pts.Count > 1)
+            {
+                var matrix = getGroupMatrix(pts);
 
+                var ptsDict = pts.ToDictionary(x => x, x => x.TransformBy(matrix));
+                var ptsOrder = ptsDict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
+
+                pts = ptsOrder;
+            }
+            return pts;
+        }
+
+        public static Matrix3d getGroupMatrix(List<Point3d> pts)
+        {
+            var pt = pts.First();
+            var otherPtInGroup = pts.Where(x => x.IsEqualTo(pt, new Tolerance(10, 10)) == false).First();
+            var dirGroup = (otherPtInGroup - pt).GetNormal();
+
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dirGroup, Vector3d.ZAxis);
+            var matrix = Matrix3d.Displacement(pt.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
+            return matrix;
+        }
+
+        public static List<Point3d> getPT(Polyline pl)
+        {
+            var ptList = new List<Point3d>();
+            for (int i = 0; i < pl.NumberOfVertices; i++)
+            {
+                var pt = pl.GetPoint3dAt(i % pl.NumberOfVertices);
+                ptList.Add(pt);
+            }
+
+            return ptList;
+        }
     }
 }
