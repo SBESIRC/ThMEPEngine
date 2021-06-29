@@ -65,7 +65,7 @@ namespace ThMEPEngineCore.Engine
                     else if (o is Circle circle)
                     {
                         // 圆形柱
-                        var polyCircle = circle.ToPolyCircle();
+                        var polyCircle = circle.TessellateCircleWithArc(100.0);
                         polyCircle.TransformBy(matrix);
                         curves.Add(polyCircle);
                     }
