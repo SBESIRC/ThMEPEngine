@@ -338,11 +338,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
+                double Rotation = 0.00;
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()
                .FirstOrDefault(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "AI-楼层框定E");
-                if (blkrefs.IsNull())
-                    return;
+                if (!blkrefs.IsNull())
+                {
+                    Rotation = blkrefs.Rotation;
+                }
                 InsertBlockService.ImportFireDistrictLayerAndStyle(db);
                 var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
                 List<Entity> DrawEntitys = new List<Entity>();
@@ -354,7 +357,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
                             var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
-                            newDBText.Rotation = blkrefs.Rotation;
+                            newDBText.Rotation = Rotation;
                             DrawEntitys.Add(newDBText);
                         }
                     });
