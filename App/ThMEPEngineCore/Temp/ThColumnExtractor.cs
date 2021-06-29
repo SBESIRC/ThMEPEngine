@@ -54,12 +54,12 @@ namespace ThMEPEngineCore.Temp
                 {
                     var isolate = IsIsolate(Spaces, o);
                     geometry.Properties.Add(IsolatePropertyName, isolate);
-                }
-                
+                }                
                 if (GroupSwitch)
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -91,10 +91,7 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            if(GroupSwitch)
-            {
-                Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
-            }
+            Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
     }
 }

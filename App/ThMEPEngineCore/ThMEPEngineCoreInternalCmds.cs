@@ -512,7 +512,7 @@ namespace ThMEPEngineCore
                     var extractors = new List<ThExtractorBase>()
                     {
                         new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
-                        new ThColumnExtractor{UseDb3Engine=true,ColorIndex=2},
+                        new ThColumnExtractor{UseDb3Engine=false,ColorIndex=2},
                         new ThWaterSupplyPositionExtractor{ColorIndex=3},
                         new ThWaterSupplyStartExtractor{ColorIndex=4},
                         new ThToiletGroupExtractor { ColorIndex=5},
