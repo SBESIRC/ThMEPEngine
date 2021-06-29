@@ -128,9 +128,9 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         private List<Entity> DrawPressureSwitchLine(int CurrentIndex, int floorNum)
         {
             List<Entity> result = new List<Entity>();
-            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
+            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 2650, 0));
             result.Add(Endline1);
-            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2650, 0));
+            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 4) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2650, 0));
             result.Add(Endline2);
             return result;
         }
