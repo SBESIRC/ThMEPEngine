@@ -42,6 +42,10 @@ namespace ThMEPElectrical
         public static readonly string FixedPartSmokeExhaust = "联动关闭排烟风机信号线";
         public static readonly string FireHydrantPumpDirectStartSignalLine = "消火栓泵直接启动信号线";
         public static readonly string SprinklerPumpDirectStartSignalLine = "喷淋泵直接启动信号线";
+        public static readonly string SprinklerPumpDirectStartSignalLineModuleContainsFireRoom = "喷淋泵联动直接启动线路模块（含消控室）";
+        public static readonly string SprinklerPumpDirectStartSignalLineModuleExcludingFireRoom = "喷淋泵联动直接启动线路模块（不含消控室）";
+        public static readonly string FireHydrantPumpDirectStartSignalLineModuleContainsFireRoom = "消火栓泵联动直接启动线路模块（含消控室）";
+        public static readonly string FireHydrantPumpDirectStartSignalLineModuleExcludingFireRoom = "消火栓泵联动直接启动线路模块（不含消控室）";
 
         //
         public static bool CanDrawFixedPartSmokeExhaust = false;
