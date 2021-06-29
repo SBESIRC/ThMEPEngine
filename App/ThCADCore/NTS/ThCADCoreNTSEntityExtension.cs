@@ -87,5 +87,13 @@ namespace ThCADCore.NTS
                 other.ToNTSPolygon(), 
                 SpatialFunction.Intersection).ToDbCollection();
         }
+
+        public static DBObjectCollection Difference(Entity entity, DBObjectCollection objs,bool keepHoles=false)
+        {
+            return OverlayNGRobust.Overlay(
+                entity.ToNTSPolygon(),
+                objs.UnionGeometries(),
+                SpatialFunction.Difference).ToDbCollection(keepHoles);
+        }
     }
 }
