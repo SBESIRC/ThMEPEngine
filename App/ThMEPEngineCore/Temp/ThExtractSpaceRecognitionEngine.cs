@@ -466,6 +466,11 @@ namespace ThMEPEngineCore.Temp
         {
             throw new NotImplementedException();
         }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ThTempSpace:ThIfcSpace
     {

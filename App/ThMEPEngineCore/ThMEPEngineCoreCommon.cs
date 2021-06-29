@@ -8,7 +8,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_SECTION_S = "下层";
         public static string BUILDELEMENT_PROPERTY_CATEGORY = "Category";
         public static string BUILDELEMENT_PROPERTY_USER_TYPE = "UserType";
-        public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
+        public static string BUILDELEMENT_PROPERTY_BOUNDARY = "边界";
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
         public static string BUILDELEMENT_PROPERTY_HATCH_LAYER = "填充图层";
@@ -21,7 +21,7 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_MATERIAL,
             BUILDELEMENT_PROPERTY_LAYER,
             BUILDELEMENT_PROPERTY_PROJECT_LEVEL,
-            BUILDELEMENT_PROPERTY_Boundary,
+            BUILDELEMENT_PROPERTY_BOUNDARY,
             BUILDELEMENT_PROPERTY_HATCH_LAYER,
             BUILDELEMENT_PROPERTY_HATCH_PATTERN,
         };
@@ -42,7 +42,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
         public static string BUILDELEMENT_CATEGORY_DOOR = "门";
         public static string BUILDELEMENT_CATEGORY_WINDOW = "窗";
-        public static string BUILDELEMENT_CATEGORY_FLOOR = "楼板";
+        public static string BUILDELEMENT_CATEGORY_SLAB = "楼板";
         public static string BUILDELEMENT_CATEGORY_RAILING = "栏杆";
         public static string BUILDELEMENT_CATEGORY_LINEFOOT = "线脚";
 

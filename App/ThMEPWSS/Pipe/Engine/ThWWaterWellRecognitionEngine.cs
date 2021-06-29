@@ -157,7 +157,7 @@ namespace ThMEPWSS.Pipe.Engine
             extractionEngine.ExtractFromMS(database);
             Recognize(extractionEngine.Results, polygon);
         }
-        public void Recognize(List<ThRawIfcDistributionElementData> datas,Point3dCollection polygon)
+        public override void Recognize(List<ThRawIfcDistributionElementData> datas,Point3dCollection polygon)
         {
             var dbObjs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)

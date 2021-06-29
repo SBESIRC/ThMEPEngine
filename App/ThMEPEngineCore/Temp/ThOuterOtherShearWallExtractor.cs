@@ -5,6 +5,8 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -13,14 +15,17 @@ namespace ThMEPEngineCore.Temp
         private List<ThTempSpace> Spaces { get; set; }
         public List<Entity> OuterShearWalls { get ; set ; }
         public List<Entity> OtherShearWalls { get ; set ; }
+        private Dictionary<Entity, List<string>> BelongArchitectureIdDic { get; set; }
 
         public ThOuterOtherShearWallExtractor()
         {
             ElementLayer = "剪力墙";
+            TesslateLength = 20;
             Spaces = new List<ThTempSpace>();
             OuterShearWalls = new List<Entity>();
             OtherShearWalls = new List<Entity>(); 
             Category = BuiltInCategory.ShearWall.ToString();
+            BelongArchitectureIdDic = new Dictionary<Entity, List<string>>();
         }
         public void Extract(Database database, Point3dCollection pts)
         {
@@ -30,8 +35,14 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IShearWallData shearWallData = service;
-            OuterShearWalls = shearWallData.OuterShearWalls;
-            OtherShearWalls = shearWallData.OtherShearWalls;
+            shearWallData.OuterShearWalls.ForEach(o =>
+            {
+                var tesslate = ThTesslateService.Tesslate(o, TesslateLength);
+                OuterShearWalls.Add(tesslate);
+                var archOutlineIds = ThParseArchitectureOutlineIdService.ParseBelongedArchitectureIds(o);
+                BelongArchitectureIdDic.Add(tesslate, archOutlineIds);
+            });
+            OtherShearWalls = shearWallData.OtherShearWalls.Select(o =>ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -41,6 +52,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, "外圈剪力墙");
+                geometry.Properties.Add(BelongedArchOutlineIdPropertyName, BuildString(BelongArchitectureIdDic, o,","));
                 if (IsolateSwitch)
                 {
                     var isolate = IsIsolate(Spaces, o);
@@ -72,7 +84,7 @@ namespace ThMEPEngineCore.Temp
                 geos.Add(geometry);
             });
             return geos;
-        }
+        }        
 
         public void Print(Database database)
         {

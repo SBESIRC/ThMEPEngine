@@ -209,7 +209,7 @@ namespace ThMEPWSS.Pipe.Model
                 if (pts.Count > 0)
                 {
                     var yd = new YesDraw();
-                    yd.GoY(-500);
+                    yd.GoY(-500-800);
                     yd.OffsetXY(-200, -200);
                     yd.OffsetX(-1600);
                     var dx = yd.GetCurX();

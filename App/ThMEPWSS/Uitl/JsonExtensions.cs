@@ -11,6 +11,7 @@ using System.Linq;
 using NetTopologySuite.Geometries;
 using ThMEPWSS.DebugNs;
 using ThCADCore.NTS;
+using DotNetARX;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
@@ -37,16 +38,61 @@ namespace ThMEPWSS.JsonExtensionsNs
                 yield return kv.Value;
             }
         }
-        public static List<T> ToList<T>(this IList<T> source, IList<int> lis)
+        public static List<T> ToList<T>(this IEnumerable<int> lis, IList<T> source, bool reverse = false)
         {
+            if (reverse)
+            {
+                IList<int> lst = (lis as IList<int>) ?? lis.ToList();
+                return Enumerable.Range(0, source.Count).Where(i => !lst.Contains(i)).Select(i => source[i]).ToList();
+            }
             return lis.Select(li => source[li]).ToList();
         }
-        public static IEnumerable<int> SelectInts<T>(this IList<T> source, IList<T> std)
+        public static List<T> ToList<T>(this bool[] flags, IList<T> std, bool inverse)
         {
-            for (int i = 0; i < source.Count; i++)
+            var ret = new List<T>(std.Count);
+            if (inverse)
             {
-                yield return std.IndexOf(source[i]);
+                for (int i = 0; i < std.Count; i++)
+                {
+                    if (!flags[i])
+                    {
+                        ret.Add(std[i]);
+                    }
+                }
             }
+            else
+            {
+                for (int i = 0; i < std.Count; i++)
+                {
+                    if (flags[i])
+                    {
+                        ret.Add(std[i]);
+                    }
+                }
+            }
+            return ret;
+        }
+        public static IEnumerable<int> Select<T>(this IEnumerable<T> source, List<T> std, bool fast = false)
+        {
+            IList<T> lst = (source as IList<T>) ?? source.ToList();
+            if (fast)
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    yield return std.BinarySearch(lst[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < lst.Count; i++)
+                {
+                    yield return std.IndexOf(lst[i]);
+                }
+            }
+        }
+        public static T Last<T>(this IList<T> source,int index)
+        {
+            return source[source.Count - index];
         }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
@@ -54,6 +100,10 @@ namespace ThMEPWSS.JsonExtensionsNs
             {
                 if (f(source[i])) yield return i;
             }
+        }
+        public static string JoinN(this IEnumerable<string> strs)
+        {
+            return strs.JoinWith("\n");
         }
         public static string JoinWith(this IEnumerable<string> strs, string s)
         {
@@ -130,6 +180,7 @@ namespace ThMEPWSS.CADExtensionsNs
 {
     public static class CADExtensions
     {
+        public static Point2d GetCenter(this Geometry geo) => geo.ToGRect().Center;
         public static GRect ToGRect(this Geometry geo)
         {
             var env = geo.EnvelopeInternal;
@@ -137,7 +188,7 @@ namespace ThMEPWSS.CADExtensionsNs
         }
         public static LinearRing ToLinearRing(this GRect r)
         {
-            return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
+            return new LinearRing(Pipe.Service.GeoNTSConvertion.ConvertToCoordinateArray(r));
         }
         public static LineString ToLineString(this IList<Point3d> pts)
         {
@@ -149,9 +200,34 @@ namespace ThMEPWSS.CADExtensionsNs
             var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
         }
+        public static GCircle ToGCircle(this GRect r, bool larger)
+        {
+            return larger ? new GCircle(r.Center, r.OuterRadius) : new GCircle(r.Center, r.InnerRadius);
+        }
+        public static Point2d TransformBy(this Point2d pt, Point2d basePt)
+        {
+            return pt + basePt.ToVector2d();
+        }
+        public static Point2d TransformBy(this Point2d pt, Point3d basePt)
+        {
+            return pt + basePt.ToPoint2d().ToVector2d();
+        }
+        public static GRect ToGRect(this Point2d pt, double ext)
+        {
+            return GRect.Create(pt, ext);
+        }
+        public static GCircle ToGCircle(this Point2d pt, double radius)
+        {
+            return new GCircle(pt, radius);
+        }
         public static Polygon ToPolygon(this GRect r)
         {
             return new Polygon(r.ToLinearRing());
+        }
+        public static List<Geometry> ToGeometryList(this IEnumerable<Geometry> source) => source.ToList();
+        public static Polygon ToCirclePolygon(this GCircle circle, int numPoints, bool larger = true)
+        {
+            return Pipe.Service.GeoFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
         }
         public static LineString ToLineString(this GLineSegment seg)
         {
@@ -225,16 +301,17 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return arr;
         }
-        public static string GetCustomPropertyStrValue(this Entity e, string key)
+        public static string GetCustomPropertyStrValue(this BlockReference e, string key)
         {
-            var d = ToDict(e.ToDataItem().CustomProperties);
+            if (!e.ObjectId.IsValid) return null;
+            var d = ToDict(e.ObjectId.GetDynProperties());
             d.TryGetValue(key, out object o);
             return o?.ToString();
         }
-        public static string GetAttributesStrValue(this Entity e, string key)
+        public static string GetAttributesStrValue(this BlockReference br, string key)
         {
-            if (!(e is BlockReference)) return null;
-            var d = e.ToDataItem().Attributes;
+            if (!br.ObjectId.IsValid) return null;
+            var d = br.ObjectId.GetAttributesInBlockReference();
             d.TryGetValue(key, out string ret);
             return ret;
         }
@@ -336,11 +413,11 @@ namespace ThMEPWSS.CADExtensionsNs
             double angle10 = other_vector.GetAngleTo(vector10);
             double angle11 = other_vector.GetAngleTo(vector11);
 
-            if((angle00 < Math.PI/2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
+            if ((angle00 < Math.PI / 2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
             {
                 distance = this_point2.DistanceTo(other_point1);
             }
-            else if((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
+            else if ((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
             {
                 distance = this_point1.DistanceTo(other_point2);
             }
@@ -360,6 +437,13 @@ namespace ThMEPWSS.CADExtensionsNs
             distance = otherPoint.DistanceTo(closestPoint);
 
             return distance;
+        }
+        public static double PolyLineLength(this Polyline thisLine,double flag = 500.0)
+        {
+            double length = 0.0;
+            length = thisLine.Length + (thisLine.NumberOfVertices - 2) * flag;
+
+            return length;
         }
     }
 }

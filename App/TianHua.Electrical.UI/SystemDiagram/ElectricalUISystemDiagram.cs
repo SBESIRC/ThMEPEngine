@@ -9,7 +9,7 @@ namespace TianHua.Electrical.UI.SystemDiagram
     public class ElectricalUISystemDiagram
     {
         SelectLayers ChoiseLayers;
-        [CommandMethod("TIANHUACAD", "THAFAS", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THHZXT", CommandFlags.Modal)]
         public void THCL()
         {
             if (null != ChoiseLayers && ChoiseLayers.IsLoaded)
@@ -20,15 +20,15 @@ namespace TianHua.Electrical.UI.SystemDiagram
             {
                 if (ChoiseLayers.commondType == 1)
                 {
-                    CommandHandlerBase.ExecuteFromCommandLine(false, "THAFASA");
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THHZXTA");
                 }
                 else if (ChoiseLayers.commondType == 2)
                 {
-                    CommandHandlerBase.ExecuteFromCommandLine(false, "THAFASF");
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THHZXTF");
                 }
                 else if (ChoiseLayers.commondType == 3)
                 {
-                    CommandHandlerBase.ExecuteFromCommandLine(false, "THAFASP");
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THHZXTP");
                 }
             }
         }

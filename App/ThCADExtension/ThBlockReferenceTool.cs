@@ -51,5 +51,30 @@ namespace ThCADExtension
                 return "0";
         }
 
+        public static Extents3d GetBlockGeometryExtents(this ObjectId id)
+        {
+            try
+            {
+                var bref = id.GetObject(OpenMode.ForRead) as BlockReference;
+                return bref.GeometryExtentsBestFit();
+            }
+            catch
+            {
+                return new Extents3d();
+            }
+        }
+
+        public static Extents3d GetBlockGeometryExtents(this ObjectId id, Matrix3d parentTransform)
+        {
+            try
+            {
+                var bref = id.GetObject(OpenMode.ForRead) as BlockReference;
+                return bref.GeometryExtentsBestFit(parentTransform);
+            }
+            catch
+            {
+                return new Extents3d();
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace ThMEPElectrical.BlockConvert
         /// <returns></returns>
         public static List<string> VisibleTexts(this ThBlockReferenceData blockReference)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
                 var texts = new List<string>();
                 foreach (ObjectId obj in blockReference.VisibleEntities())

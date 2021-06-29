@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -17,16 +16,10 @@ namespace ThMEPEngineCore.Engine
         }
 
         public abstract void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix);
+        public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
         public virtual void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj)
         {
             //
-        }
-
-        public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
-
-        public virtual bool IsBuildElement(Entity entity)
-        {
-            return entity.ObjectId.IsValid;
         }
         public virtual bool IsDistributionElement(Entity entity)
         {

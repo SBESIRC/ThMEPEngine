@@ -167,8 +167,6 @@ namespace TianHua.Hvac.UI
             }
         }
 
-        
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textBox1.Text))
@@ -179,7 +177,7 @@ namespace TianHua.Hvac.UI
             if (air_speed < fan_model.MinAirSpeed)
                 air_speed = fan_model.MinAirSpeed;
             
-            ThDuctParameter Duct = new ThDuctParameter(air_vloume, air_speed);
+            ThDuctParameter Duct = new ThDuctParameter(air_vloume, air_speed, true);
             listBox1.Items.Clear();
             listBox1.Items.Add(Duct.DuctSizeInfor.RecommendInnerDuctSize);
             listBox1.SelectedItem = Duct.DuctSizeInfor.RecommendInnerDuctSize;

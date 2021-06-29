@@ -20,61 +20,71 @@
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
             <Label Content="生成系统图方式："  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                        <RowDefinition Height="Auto"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <RadioButton Grid.Row="0" Name="SelectA" Width="120"  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="所有已打开的图纸" ></Label>
-                        </Grid>
-                    </RadioButton>
-                    <RadioButton Grid.Row="1" Name="SelectF" Width="120" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="手动选择楼层范围" ></Label>
-                        </Grid>
-                    </RadioButton>
-                    <RadioButton Grid.Row="2" Name="SelectP" Width="120" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="手动选择防火分区" ></Label>
-                        </Grid>
-                    </RadioButton>
-                </Grid>
+                <RadioButton Name="SelectA" Width="100" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True" Checked="CreationChecked">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="手动选择图纸" ></Label>
+                    </Grid>
+                </RadioButton>
+                <RadioButton Name="SelectF" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False" Checked="CreationChecked">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="手动选择楼层" ></Label>
+                    </Grid>
+                </RadioButton>
+                <RadioButton Name="SelectP" Width="100" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="10,0,10,0" IsChecked="False" Checked="CreationChecked">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="选择防火分区" ></Label>
+                    </Grid>
+                </RadioButton>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
+                <ItemsControl x:Name="DrawingList" ItemsSource="{Binding DynamicOpenFiles}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding ShowText}" IsChecked="{Binding IsChecked}" ToolTip="{Binding Content}"></CheckBox>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" ></StackPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
-            <Label Content="计数模块:"  Focusable="False" />
+            <Label Content="线路/回路统计:"  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
-                <Label Content="火灾报警控制总线计数模块："></Label>
+                <Label Content="火灾报警控制总线计数模块：每"></Label>
                 <TextBox x:Name="ControlBusCountTXT" Width="30" HorizontalContentAlignment="Center" Text="{Binding ControlBusCountTXT,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+                <Label Content="个点位1条总线回路"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
-                <Label Content="短路隔离器计数模块："></Label>
+                <Label Content="短路隔离器计数模块：每"></Label>
                 <TextBox x:Name="ShortCircuitIsolatorTxt" Width="30" HorizontalContentAlignment="Center" Text="{Binding ShortCircuitIsolatorTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+                <Label Content="个点位1个短路隔离"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
-                <Label Content="消防广播火灾启动计数模块："></Label>
+                <Label Content="消防广播火灾启动计数模块：每"></Label>
                 <TextBox x:Name="FireBroadcastingTxt" Width="30" HorizontalContentAlignment="Center" Text="{Binding FireBroadcastingTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+                <Label Content="个点位1条消防广播回路"></Label>
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
-            <Label Content="系统图固定部分："  Focusable="False" />
+            <Label Content="是否绘制消防室出线端："  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
                 <RadioButton Name="IncludingFireRoom" Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
                     <Grid>
@@ -94,6 +104,15 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="不含消防室" ></Label>
                     </Grid>
                 </RadioButton>
+                <RadioButton Name="NotDrawFireRoom" Width="110" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="仅绘制计数模块" ></Label>
+                    </Grid>
+                </RadioButton>
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
@@ -109,7 +128,7 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="按防火分区区分" ></Label>
                     </Grid>
                 </RadioButton>
-                <RadioButton Name="DistinguishByCircuit" Width="80" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
+                <!--<RadioButton Name="DistinguishByCircuit" Width="80" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
@@ -117,12 +136,12 @@
                         </Grid.RowDefinitions>
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="按回路区分" ></Label>
                     </Grid>
-                </RadioButton>
+                </RadioButton>-->
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
         <StackPanel Grid.Row="4" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
-            <Label Content="添加防火分区图层:"  Focusable="False" />
+            <Label Content="添加防火分区图层:(建议包含防火分区编号信息)"  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Center">
                 <TextBox x:Name="AddLayerTxt" Width="140" HorizontalContentAlignment="Left"></TextBox>
                 <cus:ImageButton Margin="10,0,0,0" Content="添加" Width="40" Height="24"  Click="AddLayerButton_Click"></cus:ImageButton>
@@ -142,7 +161,7 @@
                 </ItemsControl.Template>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding Content}" IsChecked="{Binding IsChecked}"></CheckBox>
+                        <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding ShowText}" IsChecked="{Binding IsChecked}" ToolTip="{Binding Content}"></CheckBox>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemsPanel>

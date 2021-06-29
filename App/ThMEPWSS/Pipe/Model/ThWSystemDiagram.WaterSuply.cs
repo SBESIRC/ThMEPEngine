@@ -959,11 +959,9 @@ namespace ThMEPWSS.Pipe.Model
         public static List<int[]> CountKitchenNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
         {
             using var acadDatabase = AcadDatabase.Active();
-            //统计厨房数     
-            var engineKitchen = new ThRoomMarkRecognitionEngine()
-            {
-                LayerFilter = new List<string> { "AI-空间名称" },
-            };//创建厨房识别引擎
+            //统计厨房数
+            //创建厨房识别引擎
+            var engineKitchen = new ThRoomMarkRecognitionEngine();
             engineKitchen.RecognizeMS(acadDatabase.Database, selectArea);//厨房识别
             var ele = engineKitchen.Elements;
             var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
@@ -1386,44 +1384,6 @@ namespace ThMEPWSS.Pipe.Model
             return FlushFaucet;
         }
     }
-
-    public class ThExtractRoomNameService
-    {
-        public static IEnumerable<Polyline> RoomBuilder(AcadDatabase db, Point3dCollection selectedArea)
-        {
-            var roomMarkEngine = new ThRoomMarkRecognitionEngine()
-            {
-                LayerFilter = new List<string> { "AI-空间名称" },
-            };
-            roomMarkEngine.RecognizeMS(db.Database, selectedArea);
-            var rooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
-
-            if (rooms is null)
-            {
-                roomMarkEngine = new ThRoomMarkRecognitionEngine();
-                roomMarkEngine.Recognize(db.Database, selectedArea); //来源于参照
-                rooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
-            }
-            return rooms;
-
-        }
-        public static void Extract(Database db, Point3dCollection pts, List<string> layfilter)
-        {
-            //暂时Coding根据需要提取房间名称
-            var results = new List<string>();
-            //从外部参照提取
-            var roomMarkEngine = new ThRoomMarkRecognitionEngine()
-            {
-                LayerFilter = layfilter,
-            };
-            roomMarkEngine.RecognizeMS(db, pts); //来源于本地
-            if (roomMarkEngine.Elements.Count == 0)
-            {
-                roomMarkEngine.Recognize(db, pts); //来源于参照
-            }
-        }
-    } 
-
 }
 
 

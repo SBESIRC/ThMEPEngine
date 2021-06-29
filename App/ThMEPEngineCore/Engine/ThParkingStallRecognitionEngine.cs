@@ -13,10 +13,10 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThParkingStallExtractionEngine : ThDistributionElementExtractionEngine
     {
-        public ThParkingStallVisitor Visitor { get; set; }
+        public ThParkingStallExtractionVisitor Visitor { get; set; }
         public ThParkingStallExtractionEngine()
         {
-            Visitor = new ThParkingStallVisitor();
+            Visitor = new ThParkingStallExtractionVisitor();
         }
         public override void Extract(Database database)
         {
@@ -44,10 +44,10 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThParkingStallRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public ThParkingStallVisitor Visitor { get; set; }
+        public ThParkingStallExtractionVisitor Visitor { get; set; }
         public ThParkingStallRecognitionEngine()
         {
-            Visitor = new ThParkingStallVisitor();
+            Visitor = new ThParkingStallExtractionVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {            
@@ -112,6 +112,11 @@ namespace ThMEPEngineCore.Engine
                     Elements.Add(ThIfcParkingStall.Create(polyline));
                 }
             });
+        }
+
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

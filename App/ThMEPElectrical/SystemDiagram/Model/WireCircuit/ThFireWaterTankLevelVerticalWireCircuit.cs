@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 {
@@ -19,6 +20,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             List<Entity> Result = new List<Entity>();
             int FireWaterTankMaxFloor = 0;// 消防水箱最高楼层
             int FireExtinguisherPoolMinFloor = 0;//消防水池最低楼层
+            int FireExtinguisherPoolCount =0;    //消防水池个数
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
@@ -30,6 +32,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消防水池"] > 0)
                 {
+                    FireExtinguisherPoolCount += AreaData.Data.BlockData.BlockStatistics["消防水池"];
                     if (FireExtinguisherPoolMinFloor == 0)
                         FireExtinguisherPoolMinFloor = FloorNum + 1;
                     Result.AddRange(DrawFireExtinguisherPoolLine(currentIndex, FloorNum));
@@ -47,6 +50,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     o.Layer = this.CircuitLayer;
                     o.ColorIndex = this.CircuitColorIndex;
                 });
+
+                //画液位信号线路模块
+                if (FireCompartmentParameter.FixedPartType != 3)
+                {
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.LiquidLevelSignalCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.LiquidLevelSignalCircuitModuleExcludingFireRoom);
+
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (21 - 1) + Offset, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireExtinguisherPoolCount.ToString() } });
+                }
             }
             else
                 Result = new List<Entity>();

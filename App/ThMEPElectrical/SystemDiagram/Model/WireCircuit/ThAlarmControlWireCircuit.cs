@@ -29,13 +29,6 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
             Line Startline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1), 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * FloorIndex , 0));
             Result.Add(Startline3);
-
-            int FindCount = 0;
-            ThAutoFireAlarmSystemCommon.AlarmControlWireCircuitBlocks.ForEach(name =>
-            {
-                FindCount += this.fireDistrict.Data.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
-            });
-            InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2300, OuterFrameLength * (FloorIndex - 1) + 1500, 0), new Scale3d(-100, 100, 100), 0, new Dictionary<string, string>() { { "N", (FindCount / FireCompartmentParameter.ControlBusCount + 1).ToString() } });
             #endregion
 
             CurrentIndex++;

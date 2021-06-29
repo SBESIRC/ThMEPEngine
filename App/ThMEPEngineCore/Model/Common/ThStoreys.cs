@@ -1,10 +1,10 @@
 ﻿using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Publics.BaseCode;
-using System.Linq;
 
 namespace ThMEPEngineCore.Model.Common
 {
@@ -85,7 +85,13 @@ namespace ThMEPEngineCore.Model.Common
             ObjectId = id;
             Data = new ThBlockReferenceData(id);
         }
-        public string StoreyNumber => Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
+        public string StoreyNumber
+        {
+            get
+            {
+                return Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
+            }
+        }
         public string StoreyTypeString => (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);
         public StoreyType StoreyType
         {

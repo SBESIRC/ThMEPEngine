@@ -153,9 +153,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 tempNode.ParentNode.Location.IsInflectionPoint = CheckInflectionPoint(tempNode, tempNode.ParentNode);
 
                 route.Insert(0, tempNode.ParentNode.Location);
-                tempNode = tempNode.ParentNode;
+                tempNode = tempNode.ParentNode; 
             }
-
+             
             return route;
         }
         #endregion

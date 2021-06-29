@@ -75,21 +75,15 @@ namespace ThMEPElectrical.StructureHandleService
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomEngine = new ThDB3RoomExtractionEngine()
-                {
-                    LayerFilter = new List<string> { "AI-房间框线" },
-                };
+                var roomEngine = new ThDB3RoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
                 //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var markEngine = new ThDB3RoomExtractionEngine()
-                {
-                    LayerFilter = new List<string> { "AI-房间名称" },
-                };
+                var markEngine = new ThDB3RoomOutlineExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
                 //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var boundaryEngine = new ThDB3RoomRecognitionEngine();
+                var boundaryEngine = new ThDB3RoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markRecEngine = new ThRoomMarkRecognitionEngine();
@@ -138,20 +132,20 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
-                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
 
                 // 启动墙识别引擎
                 var ShearWallExtractEngine = new ThShearWallExtractionEngine();
                 ShearWallExtractEngine.Extract(acdb.Database);
-                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 

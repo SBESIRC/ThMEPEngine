@@ -1,4 +1,5 @@
-﻿using ThMEPEngineCore.CAD;
+﻿using System.Linq;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
@@ -32,23 +33,42 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if(IsolateSwitch)
-                {
-                    var isolate = isolateShearwalls.Contains(o);
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
-                }                
+                var isolate = isolateShearwalls.Contains(o);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
                 geometry.Boundary = o;
-                geos.Add(geometry);
+                if (IsolateSwitch) // 表示只传入孤立的剪力墙
+                {
+                    if(isolate)
+                    {
+                        geos.Add(geometry);
+                    }
+                }                
+                else
+                {
+                    geos.Add(geometry);
+                }
             });
             return geos;
         }
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            using (var engine = new ThShearWallRecognitionEngine())
+            if(UseDb3Engine)
             {
-                engine.Recognize(database, pts);
-                engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                using (var engine = new ThShearWallRecognitionEngine())
+                {
+                    engine.Recognize(database, pts);
+                    engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                }
+            }
+            else
+            {
+                var instance = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Walls = instance.Polys.Cast<Entity>().ToList();
             }
         }
         public override void SetRooms(List<ThIfcRoom> rooms)

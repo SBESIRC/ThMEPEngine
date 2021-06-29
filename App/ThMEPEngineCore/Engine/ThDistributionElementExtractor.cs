@@ -52,7 +52,14 @@ namespace ThMEPEngineCore.Engine
                     {
                         Visitors.ForEach(v =>
                         {
-                            v.Results.AddRange(DoExtract(e, v));
+                            if (!e.BlockTableRecord.IsNull)
+                            {
+                                var blockTableRecord = acadDatabase.Blocks.Element(e.BlockTableRecord);
+                                if (v.IsBuildElementBlock(blockTableRecord))
+                                {
+                                    v.Results.AddRange(DoExtract(e, v));
+                                }
+                            }
                         });
                     });
             }

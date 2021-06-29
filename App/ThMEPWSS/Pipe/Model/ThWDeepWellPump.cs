@@ -43,6 +43,23 @@ namespace ThMEPWSS.Pipe.Model
             }
 
         }
+        public void SetFontHeight(double fontHeight)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                var blk = db.Element<BlockReference>(PumpObjectID);
+                if (blk.IsDynamicBlock)
+                {
+                    foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
+                    {
+                        if (property.PropertyName == "字高")
+                        {
+                            property.Value = fontHeight;
+                        }
+                    }
+                }
+            }
+        }
         public void SetLocPoint(Point3d point)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())

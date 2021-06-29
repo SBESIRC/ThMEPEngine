@@ -1,11 +1,13 @@
 ﻿using System;
-using AcHelper.Commands;
-using ThMEPEngineCore.GeojsonExtractor;
 using NFox.Cad;
+using AcHelper;
+using AcHelper.Commands;
+using ThMEPWSS.ViewModel;
+using ThMEPWSS.FlushPoint.Model;
+using ThMEPEngineCore.GeojsonExtractor;
 
 #if ACAD2016
 using CLI;
-using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
@@ -16,7 +18,6 @@ using ThMEPWSS.FlushPoint.Data;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using ThMEPWSS.FlushPoint.Service;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 #endif
 
@@ -24,30 +25,30 @@ namespace ThMEPWSS.Command
 {
     public class THLayoutFlushPointCmd : IAcadCommand, IDisposable
     {
+        public static ThFlushPointVM FlushPointVM { get; set; }
         public void Dispose()
         {
         }
 
+#if ACAD2016
         public void Execute()
         {
-#if ACAD2016
+            using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个范围框");
-                if (per.Status != PromptStatus.OK)
+                var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
+                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                if (frame.Area < 1e-4)
                 {
                     return;
                 }
-                var entity = acadDb.Element<Entity>(per.ObjectId);
-                if (!(entity is Polyline))
-                {
-                    return;
-                }
-                var nFrame = ThMEPFrameService.Normalize(entity as Polyline);
-                var pts = nFrame.VerticesEx(100.0);
-
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var pts = nFrame.Vertices();
                 //收集数据
-                var roomExtractor = new ThRoomExtractor() { ColorIndex = 6};
+                var roomExtractor = new ThRoomExtractor()
+                {
+                    ColorIndex = 6,
+                };
                 roomExtractor.Extract(acadDb.Database, pts);
                 var parkingStallExtractor = new ThParkingStallExtractor();
                 parkingStallExtractor.Extract(acadDb.Database, pts);
@@ -92,8 +93,7 @@ namespace ThMEPWSS.Command
                 var layoutInfo = filterService.LayoutInfo; //用于保存插入块的结果、靠近/远离排水设施的点 
 
                 var layOutPts = washPoints; //区域满布
-                if (ThFlushPointParameterService.Instance.FlushPointParameter.
-                        OnlyDrainageFaclityNearbyOfArrangePosition)
+                if (FlushPointVM.Parameter.ArrangePosition == ArrangePositionOps.OnlyDrainageFacility)
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
                 }
@@ -108,11 +108,12 @@ namespace ThMEPWSS.Command
                 {
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
+                    Rooms = roomExtractor.Rooms.Select(o => o.Boundary).ToList(),
                     WashPointBlkName = "给水角阀平面",
-                    WashPointLayerName= "W-WSUP-EQPM",
-                    WashPoints= layOutPts,
-                    Db= acadDb.Database,
-                    PtRange=10.0,                   
+                    WashPointLayerName = "W-WSUP-EQPM",
+                    WashPoints = layOutPts,
+                    Db = acadDb.Database,
+                    PtRange = 10.0,
                 };
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
                 layoutInfo.LayoutBlock = layoutService.Layout();
@@ -123,31 +124,27 @@ namespace ThMEPWSS.Command
                 //点位标识的操作通过以下保存的结果与UI交互操作
                 ThPointIdentificationService.LayoutInfo = layoutInfo;
             }
-#endif
         }
-
-#if ACAD2016
         private ThWashParam BuildWashParam()
         {
             var washPara = new ThWashParam();
             // 保护半径
-            washPara.R = (int)ThFlushPointParameterService.Instance.FlushPointParameter.ProtectRadius;
+            washPara.R = (int)FlushPointVM.Parameter.ProtectRadius;
             // 建筑空间（隔油池、水泵房、垃圾房等）
-            washPara.protect_arch = ThFlushPointParameterService.Instance.
-                FlushPointParameter.NecessaryArrangeSpaceOfProtectTarget;
+            washPara.protect_arch = FlushPointVM.Parameter.NecessaryArrangeSpaceOfProtectTarget;
             // 停车区域
-            washPara.protect_park = ThFlushPointParameterService.Instance.
-                FlushPointParameter.ParkingAreaOfProtectTarget;
+            washPara.protect_park = FlushPointVM.Parameter.ParkingAreaOfProtectTarget;
             // 其它空间
-            washPara.protect_other = ThFlushPointParameterService.Instance.
-                FlushPointParameter.OtherSpaceOfProtectTarget;
+            washPara.protect_other = FlushPointVM.Parameter.OtherSpaceOfProtectTarget;
             // 必布空间的点位可以保护停车区域和其他空间
-            washPara.extend_arch = ThFlushPointParameterService.Instance.
-                FlushPointParameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
+            washPara.extend_arch = FlushPointVM.Parameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
             // 停车区域的点位可以保护其他空间
-            washPara.extend_park = ThFlushPointParameterService.Instance.
-                FlushPointParameter.ParkingAreaPointsOfArrangeStrategy;
+            washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
             return washPara;
+        }
+#else
+        public void Execute()
+        {
         }
 #endif
     }

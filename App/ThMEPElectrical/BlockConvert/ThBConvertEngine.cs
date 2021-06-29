@@ -18,11 +18,25 @@ namespace ThMEPElectrical.BlockConvert
         public abstract ObjectId Insert(string name, Scale3d scale, ThBlockReferenceData srcBlockReference);
 
         /// <summary>
-        /// 调整位置
+        /// 坐标变换
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockReference"></param>
         public abstract void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+
+        /// <summary>
+        /// 坐标调整
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockReference"></param>
+        public abstract void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+
+        /// <summary>
+        /// 设置动态块可见性
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockReference"></param>
+        public abstract void SetVisibilityState(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
 
         /// <summary>
         /// 设置属性信息

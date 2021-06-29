@@ -1,7 +1,7 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -22,46 +22,21 @@ namespace ThMEPElectrical.BlockConvert
         }
 
         /// <summary>
-        /// 提取图纸中的块引用
+        /// 获取转换图块的OBB
         /// </summary>
-        /// <param name="database"></param>
-        /// <param name="blkRef"></param>
+        /// <param name="br"></param>
+        /// <param name="ecs2Wcs"></param>
         /// <returns></returns>
-        public static ThBlockReferenceData GetBlockReference(this Database database, ObjectId blkRef)
+        public static Polyline GetBlockReferenceOBB(this BlockReference br, Matrix3d ecs2Wcs)
         {
-            return new ThBlockReferenceData(blkRef);
-        }
-
-        /// <summary>
-        /// 提取图纸中某个范围内所有的特点块的引用
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="block"></param>
-        /// <param name="extents"></param>
-        /// <returns></returns>
-        public static ObjectIdCollection GetBlockReferences(this Database database, 
-            ThBlockConvertBlock block, Extents3d extents)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Use(br.Database))
             {
-                var objs = new ObjectIdCollection();
-                var name = (string)block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
-                var blkRefs = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(o => o.GetEffectiveName() == name);
-                foreach(var blkRef in blkRefs)
-                {
-                    Plane XYPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);
-                    Matrix3d matrix = Matrix3d.Projection(XYPlane, XYPlane.Normal);
-                    var projectExtents = new Extents3d(
-                        extents.MinPoint.TransformBy(matrix),
-                        extents.MaxPoint.TransformBy(matrix));
-                    if (blkRef.Position.TransformBy(matrix).IsInside(projectExtents))
-                    {
-                        objs.Add(blkRef.ObjectId);
-                    }
-                }
-                return objs;
+                // 业务需求: 去除在“DEFPOINTS”上的图元
+                var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
+                var entities = blockTableRecord.GetEntities().Where(e => e.Layer != "DEFPOINTS");
+                var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
+                rectangle.TransformBy(ecs2Wcs);
+                return rectangle;
             }
         }
     }

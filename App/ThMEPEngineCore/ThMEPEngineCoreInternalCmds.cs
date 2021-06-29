@@ -9,6 +9,12 @@ using System;
 using DotNetARX;
 using ThMEPEngineCore.IO;
 using System.Text;
+using System.Linq;
+using ThMEPEngineCore.Temp;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
 
 
 #if ACAD2016
@@ -19,11 +25,6 @@ using Dreambuild.AutoCAD;
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using ThCADExtension;
-using ThMEPEngineCore.Temp;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 #endif
 
 namespace ThMEPEngineCore
@@ -178,127 +179,6 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THDXCXDemoTest", CommandFlags.Modal)]
-        public void THDXCXDemoTest()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
-            {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                else
-                {
-                    return;
-                }
-
-                //输入冲洗点位参数
-                var washPara = GetWashParameter();
-
-                var extractors = new List<ThExtractorBase>()
-                {
-                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
-                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=2},
-                    new ThShearWallExtractor{ColorIndex=3},
-                    new ThDrainageFacilityExtractor{ColorIndex=4},
-                };
-
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.OutputGeo(Active.Document.Name);
-
-                var washData = new ThWashGeoData();
-                washData.ReadFromFile(Active.Document.Name + ".Info.geojson");
-                var washPoint = new ThWashPointLayoutEngine();
-                double[] points = washPoint.Layout(washData, washPara);
-                var coords = GetPoints(points);
-                BuildCircleHatch(coords);
-            }
-        }
-
-        private void BuildCircleHatch(List<Point3d> pts, double radius = 500.0)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                foreach (var pt in pts)
-                {
-                    var circle1 = new Circle(pt, Vector3d.ZAxis, radius + 100);
-                    circle1.ColorIndex = 3;
-                    circle1.SetDatabaseDefaults();
-                    acadDatabase.ModelSpace.Add(circle1);
-
-                    var circle = new Circle(pt, Vector3d.ZAxis, radius);
-                    circle.ColorIndex = 3;
-                    circle.SetDatabaseDefaults();
-                    ObjectIdCollection ObjIds = new ObjectIdCollection();
-                    ObjIds.Add(acadDatabase.ModelSpace.Add(circle));
-
-                    Hatch oHatch = new Hatch();
-
-                    Vector3d normal = new Vector3d(0.0, 0.0, 1.0);
-
-                    oHatch.Normal = normal;
-
-                    oHatch.Elevation = 0.0;
-
-                    oHatch.PatternScale = 2.0;
-
-                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ZIGZAG");
-
-                    oHatch.ColorIndex = 1;
-
-
-                    acadDatabase.ModelSpace.Add(oHatch);
-                    //this works ok  
-                    oHatch.Associative = true;
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
-                    oHatch.EvaluateHatch(true);
-                }
-            }
-        }
-
-        private static List<Point3d> GetPoints(double[] coords)
-        {
-            var results = new List<Point3d>();
-            for (int i = 0; i < coords.Length; i += 2)
-            {
-                results.Add(new Point3d(coords[i], coords[i + 1], 0));
-            }
-            return results;
-        }
-
-        private ThWashParam GetWashParameter()
-        {
-            var param = new ThWashParam();
-            param.R = GetValue("\n输入保护半径");
-            param.protect_arch = GetValue("\n是否保护建筑空间[true(1)/false(0)] <true>", 1) == 0 ? false : true;
-            param.protect_park = GetValue("\n是否保护停车空间[true(1)/false(0)] <true>", 1) == 0 ? false : true;
-            param.protect_other = GetValue("\n是否保护不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
-            param.extend_arch = GetValue("\n建筑空间是否能保护停车空间和不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
-            param.extend_park = GetValue("\n停车空间是否能保护到不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
-            return param;
-        }
-        private int GetValue(string message, int init = 0)
-        {
-            var pdo = new PromptIntegerOptions(message);
-            var protectRadiusPdr = Active.Editor.GetInteger(pdo);
-            if (protectRadiusPdr.Status == PromptStatus.OK)
-            {
-                return protectRadiusPdr.Value;
-            }
-            else
-            {
-                return init;
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THACLDDemoTest", CommandFlags.Modal)]
         public void THExtractAreaCenterLineDemoTest()
         {
@@ -359,11 +239,10 @@ namespace ThMEPEngineCore
                     //通过停车区域的Space来制造阻挡物                    
                     new ThArchitectureWallExtractor {UseDb3Engine=true,ColorIndex=2},  // ArchitectureWall
                     new ThShearWallExtractor{UseDb3Engine=false,ColorIndex=3,ElementLayer = "Wall"},  // ShearWall
-                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=4,ElementLayer="Column"}, // Column
+                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=4,ElementLayer="柱"}, // Column
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
-                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
-                    new ThOuterBoundaryExtractor{ ColorIndex=8,ElementLayer="AI-OuterBoundary"}, //外墙边界
+                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)                    
                     new ThExternalSpaceExtractor{ ColorIndex=9,ElementLayer="AI-OuterBoundary"},
                 };
                 extractEngine.Accept(extractors);
@@ -610,6 +489,9 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THROUTEMAINPIPE", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
+            //todo: find all water suply points, and draw them in the drawing
+            //
+
             //Water Supply Detail Drawing (给排水大样图)
 
             string geojsonContent = string.Empty;
@@ -639,16 +521,22 @@ namespace ThMEPEngineCore
                     extractEngine.Accept(extractors);
                     extractEngine.Extract(acadDatabase.Database, pts);
 
-                    var toiletGroupDic = new Dictionary<Entity, string>();
-                    foreach (var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
-                    {
-                        toiletGroupDic.Add(item.Key, item.Value);
-                    }
+                    var areaGroupDic = new Dictionary<Entity, string>();
 
-                    extractEngine.Group(toiletGroupDic);
+                    var areaPolylineToIdDic = (extractors[4] as ThToiletGroupExtractor).ToiletGroupId;
+                    var areaPolyline = areaPolylineToIdDic.Keys.First();
+                    var areaId = areaPolylineToIdDic[areaPolyline];
+
+                    areaGroupDic.Add(areaPolyline, areaId);
+
+                    extractEngine.Group(areaGroupDic);
                     //geojsonContent = Active.Document.Name;
                     //geojsonContent = extractEngine.OutputGeo(Active.Document.Name);
                     geojsonContent = extractEngine.OutputGeo();
+
+                    //string path = @"D:\project\2.drainage\jsonSample\1-1.input.geojson";
+                    //File.WriteAllText(path, geojsonContent);
+               
                 }
             }
 
@@ -660,9 +548,10 @@ namespace ThMEPEngineCore
                 //string inputFile = inputFileName;
                 //string inputGeoJson = File.ReadAllText(inputFile);
 
-                var revisedContent = geojsonContent.Replace("WaterStartPoint","WaterSupplyStartPoint");
+                var groupedContent = SystemDiagramMethods.ProcessGrouping(geojsonContent);
 
-                var groupedContent = SystemDiagramMethods.ProcessGrouping(revisedContent);
+                //string outputFile = @"D:\project\2.drainage\jsonSample\1-2.output.geojson";
+                //File.WriteAllText(outputFile, geojsonContent);
 
                 var serializer = GeoJsonSerializer.Create();
                 var revisedContent2 = string.Empty;
@@ -686,7 +575,6 @@ namespace ThMEPEngineCore
                             var revisedPt = pt + dirVector;
                             f.Geometry.Coordinates[0].X = revisedPt.X;
                             f.Geometry.Coordinates[0].Y = revisedPt.Y;
-                            //f.Attributes["Direction"] = new double[2] { 1000.0,0.0};
                             var linePts = new List<Point3d>();
                             linePts.Add(pt);
                             linePts.Add(revisedPt);
@@ -708,9 +596,13 @@ namespace ThMEPEngineCore
                     }
                 }
 
+                //string path2 = @"D:\project\2.drainage\jsonSample\1-3.input.geojson";
+                //File.WriteAllText(path2, revisedContent2);
+
                 var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent2);
-                //string outputFile = @"D:\xx2.geojson";
-                //File.WriteAllText(outputFile, output);
+
+                //string path3 = @"D:\project\2.drainage\jsonSample\1-4.output.geojson";
+                //File.WriteAllText(path3, output);
 
                 using (var stringReader = new StringReader(output))
                 using (var jsonReader = new JsonTextReader(stringReader))
@@ -738,6 +630,7 @@ namespace ThMEPEngineCore
                 }
             }
         }
+#endif
         [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
         public void THLPDCDemoTest()
         {
@@ -759,12 +652,48 @@ namespace ThMEPEngineCore
                 }
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThStoreyExtractor(){ColorIndex=1,},
-                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true,},
-                    new ThOuterOtherColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
-                    new ThOuterOtherShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
-                    new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},
-                    new ThLightningReceivingBeltExtractor{ ColorIndex=6,GroupSwitch=true},
+                    new ThStoreyExtractor()
+                    {
+                        ColorIndex=1,
+                        GroupSwitch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThArchitectureOutlineExtractor()
+                    {
+                        ColorIndex=2,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThOuterOtherColumnExtractor()
+                    {
+                        ColorIndex=3,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false
+                    },
+                    new ThOuterOtherShearWallExtractor()
+                    {
+                        ColorIndex=4,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false
+                    },
+                    new ThBeamExtractor()
+                    {
+                        ColorIndex =5,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThLightningReceivingBeltExtractor
+                    {
+                        ColorIndex=6,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
                 };
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
@@ -773,8 +702,6 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
-#endif
-
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
         {

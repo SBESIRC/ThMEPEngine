@@ -61,7 +61,11 @@ namespace ThCADCore.NTS
         {
             using (var ov = new ThCADCoreNTSFixedPrecision())
             {
-                if (obj is Line line)
+                if (obj is DBPoint dbPoint)
+                {
+                    return dbPoint.ToNTSPoint();
+                }
+                else if (obj is Line line)
                 {
                     return line.ToNTSLineString();
                 }

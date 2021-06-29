@@ -29,7 +29,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public int commondType = 1;
 
         /// <summary>
-        /// 底部固定部分:1.包含消防室 2.不含消防室
+        /// 底部固定部分:1.包含消防室 2.不含消防室 3.仅绘制计数模块
         /// </summary>
         private int PublicSectionType = 1;
 
@@ -43,13 +43,12 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public SelectLayers()
         {
             InitializeComponent();
-            if (null == viewModel)
-                viewModel = new DrainageLayerViewModel()
-                {
-                    ShortCircuitIsolatorTxt = FireCompartmentParameter.ShortCircuitIsolatorCount,
-                    FireBroadcastingTxt = FireCompartmentParameter.FireBroadcastingCount,
-                    ControlBusCountTXT = FireCompartmentParameter.ControlBusCount
-                };
+            viewModel = new DrainageLayerViewModel()
+            {
+                ShortCircuitIsolatorTxt = FireCompartmentParameter.ShortCircuitIsolatorCount,
+                FireBroadcastingTxt = FireCompartmentParameter.FireBroadcastingCount,
+                ControlBusCountTXT = FireCompartmentParameter.ControlBusCount
+            };
             this.DataContext = viewModel;
         }
 
@@ -75,16 +74,36 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                         continue;
                     SelectLayers.Add(item.Content);
                 }
+                List<string> SelectFileNames = new List<string>();
+                foreach (var item in viewModel.DynamicOpenFiles)
+                {
+                    if (item == null || !item.IsChecked)
+                        continue;
+                    SelectFileNames.Add(item.Content);
+                }
                 if (SelectA.IsChecked.Value)
                     commondType = 1;
                 else if (SelectF.IsChecked.Value)
                     commondType = 2;
                 else
                     commondType = 3;
-                PublicSectionType = IncludingFireRoom.IsChecked.Value ? 1 : 2;
+                if (IncludingFireRoom.IsChecked.Value)
+                    PublicSectionType = 1;
+                else if (ExcludingFireRoom.IsChecked.Value)
+                    PublicSectionType = 2;
+                else
+                    PublicSectionType = 3;
+
+                if(commondType==1 && viewModel.SelectCheckFiles == null || viewModel.SelectCheckFiles.Count == 0)
+                {
+                    MessageBox.Show("数据错误：未获取到至少一张要统计的图纸，无法进行后续操作,请重新选择", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 DiagramGenerationType = DistinguishByFireCompartment.IsChecked.Value ? 1 : 2;
 
                 FireCompartmentParameter.LayerNames = SelectLayers;
+                FireCompartmentParameter.ChoiseFileNames = SelectFileNames;
                 FireCompartmentParameter.ControlBusCount = int.Parse(ControlBusCountTXT.Text);
                 FireCompartmentParameter.FireBroadcastingCount = int.Parse(FireBroadcastingTxt.Text);
                 FireCompartmentParameter.ShortCircuitIsolatorCount = int.Parse(ShortCircuitIsolatorTxt.Text);
@@ -113,6 +132,20 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 MessageBox.Show("添加失败！请检查输入是否正确！");
             }
             AddLayerTxt.Text = "";
+        }
+
+        private void CreationChecked(object sender, RoutedEventArgs e)
+        {
+            if (DrawingList.IsNull())
+                return;
+            if (SelectA.IsChecked.Value)
+            {
+                DrawingList.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                DrawingList.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

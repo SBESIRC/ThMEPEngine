@@ -13,6 +13,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPLighting.Garage.Model;
+using TianHua.Electrical.UI.SecurityPlaneUI;
 
 namespace TianHua.Electrical.UI
 {
@@ -123,7 +124,7 @@ namespace TianHua.Electrical.UI
 
         private string BlockDwgPath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
+            return ThCADCommon.BlockConvertDwgPath();
         }
 
         [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
@@ -135,6 +136,14 @@ namespace TianHua.Electrical.UI
             }
             AcadApp.ShowModelessDialog(BasementLightingUI);
         }
+
+        [CommandMethod("TIANHUACAD", "THSPS", CommandFlags.Modal)]
+        public void THSecurityPlaneUI()
+        {
+            SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
+            AcadApp.ShowModalWindow(securityPlaneSystemUI);
+        }
+
         private string LayoutType
         {
             get

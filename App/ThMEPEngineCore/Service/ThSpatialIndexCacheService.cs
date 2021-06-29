@@ -189,7 +189,7 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThWindowRecognitionEngine())
+            using (var engine = new ThDB3WindowRecognitionEngine())
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);

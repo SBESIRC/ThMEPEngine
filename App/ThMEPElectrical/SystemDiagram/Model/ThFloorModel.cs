@@ -29,6 +29,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public int FloorNumber { get; set; }
 
         /// <summary>
+        /// 是否是多楼层
+        /// </summary>
+        public bool IsMultiFloor { get; set; } = false;
+
+        /// <summary>
+        /// 多楼层名称
+        /// </summary>
+        public List<int> MulitFloorName { get; set; }
+
+        /// <summary>
         /// 防火分区信息
         /// </summary>
         public List<ThFireDistrictModel> FireDistricts { get; set; }
@@ -37,6 +47,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 楼层PolyLine
         /// </summary>
         public Polyline FloorBoundary { get; set; }
+        
         public ThFloorModel()
         {
             FireDistricts = new List<ThFireDistrictModel>();
@@ -51,11 +62,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
             FloorBoundary = GetBlockOBB(acadDatabase.Database, FloofBlockReference, FloofBlockReference.BlockTransform);
             var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
             var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
-            //foreach (Entity item in FindFireCompartmentsEntity)
-            //{
-            //    item.ColorIndex = 2;
-            //    acadDatabase.ModelSpace.Add(item);
-            //}
             if (FindFireCompartmentsEntity.Count > 0)
             {
                 FindFireCompartments.ForEach(o =>
@@ -73,6 +79,26 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 };
                 NewFireDistrict.InitFireDistrict(this.FloorNumber, FloofBlockReference);
                 this.FireDistricts.Add(NewFireDistrict);
+            }
+        }
+
+        /// <summary>
+        /// 初始化楼层
+        /// </summary>
+        /// <param name="storeys"></param>
+        public void InitFloors(AcadDatabase acadDatabase, Polyline floorBoundary, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            FloorBoundary = floorBoundary;
+            var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
+            var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
+            if (FindFireCompartmentsEntity.Count == fireCompartments.Count)
+            {
+                FindFireCompartments.ForEach(o =>
+                {
+                    ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
+                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    this.FireDistricts.Add(NewFireDistrict);
+                });
             }
         }
 

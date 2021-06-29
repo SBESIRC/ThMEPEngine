@@ -43,13 +43,22 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 风机选型
+            // 机房平面
             row.AddNewButton("机房平面",
                 "天华机房平面",
                 "THFJF",
                 "基于风机图块与风管中心线，自动生成风管、风阀、开洞等元素。",
                 "IDI_THCAD_THFJF_SMALL",
                 "IDI_THCAD_THFJF_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 地库风平面
+            row.AddNewButton("地库风平面",
+                "天华地库风平面",
+                "THDKFPM",
+                "天华地库风平面",
+                "IDI_THCAD_THDKFPM_SMALL",
+                "IDI_THCAD_THDKFPM_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
         private static void CreateElectricPanel(RibbonTabSource tab)
@@ -143,6 +152,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THYJZMLX_SMALL",
             "IDI_THCAD_THYJZMLX_LARGE",
             RibbonButtonStyle.LargeWithText);
+
+            //// 火灾自动报警系统图
+            //row.AddNewButton("火灾报警系统",
+            //"天华火灾报警系统",
+            //"THHZXT",
+            //"天华火灾报警系统",
+            //"IDI_THCAD_THHZXT_SMALL",
+            //"IDI_THCAD_THHZXT_LARGE",
+            //RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
@@ -158,6 +176,30 @@ namespace TianHua.AutoCAD.ThCui
                     "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
                     "IDI_THCAD_THPLPT_SMALL",
                     "IDI_THCAD_THPLPT_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("冲洗点位",
+                    "天华冲洗点位",
+                    "THDXCX",
+                    "天华冲洗点位",
+                    "IDI_THCAD_THDXCX_SMALL",
+                    "IDI_THCAD_THDXCX_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("潜水泵布置",
+                    "天华潜水泵布置",
+                    "THSJSB",
+                    "天华潜水泵布置",
+                    "IDI_THCAD_THSJSB_SMALL",
+                    "IDI_THCAD_THSJSB_LARGE",
                     RibbonButtonStyle.LargeWithText);
             }
 
@@ -184,6 +226,18 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
+
+            //{
+            //    var subPanel = row.AddNewPanel();
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    row.AddNewButton("消火栓",
+            //        "天华消火栓",
+            //        "THXHSJH",
+            //        "天华消火栓",
+            //        "IDI_THCAD_THXHSJH_SMALL",
+            //        "IDI_THCAD_THXHSJH_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
         }
 
         private static void CreateInventoryPanel(RibbonTabSource tab)

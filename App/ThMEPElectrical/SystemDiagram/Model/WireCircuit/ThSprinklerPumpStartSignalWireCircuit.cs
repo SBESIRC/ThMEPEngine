@@ -11,7 +11,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
     /// <summary>
     /// 喷淋泵启动信号线
     /// </summary>
-    public class ThSprinklerPumpStartSignalWireCircuit : ThWireCircuit
+    public class ThSprinklerPumpStartSignalVerticalWireCircuit : ThWireCircuit
     {
         public override List<Entity> Draw()
         {

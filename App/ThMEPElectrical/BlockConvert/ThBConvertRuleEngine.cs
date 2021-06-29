@@ -51,11 +51,11 @@ namespace ThMEPElectrical.BlockConvert
                     Attributes = new Dictionary<string, object>(),
                 };
 
-                // 暖通块名
+                // 源块名
                 int column = 0;
                 source.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] = table.Cells[row, column].Text();
 
-                // 暖通设备块
+                // 源块图示
                 column++;
 
                 // 可见性
@@ -67,11 +67,11 @@ namespace ThMEPElectrical.BlockConvert
                     Attributes = new Dictionary<string, object>(),
                 };
 
-                // 电气块名
+                // 目标块名
                 column++;
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] = table.Cells[row, column].Text();
 
-                // 电气块
+                // 目标块图示
                 column++;
 
                 // 是否炸开

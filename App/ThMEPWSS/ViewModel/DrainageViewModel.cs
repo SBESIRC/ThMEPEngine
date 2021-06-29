@@ -43,6 +43,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         {
             dynamicRadioButtons?.Clear();
             FloorListDatas = new List<string>();
+            ThMEPWSS.Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -128,11 +129,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
 
                     var AreaNums = 0;
-                    var roomBuilder = new ThRoomBuilderEngine()
-                    {
-                        RoomBoundaryLayerFilter = new List<string> { "AI-空间框线" },
-                        RoomMarkLayerFilter = new List<string> { "AI-空间名称" },
-                    };
+                    var roomBuilder = new ThRoomBuilderEngine();
                     var rooms = roomBuilder.BuildFromMS(acadDatabase.Database, SelectedArea);
                     if (rooms.Count != 0)
                     {

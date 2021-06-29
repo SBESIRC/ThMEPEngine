@@ -1,14 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using System;
-using System.Collections.Generic;
+﻿using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
-using ThCADExtension;
-using Linq2Acad;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -18,6 +12,13 @@ namespace ThMEPEngineCore.Algorithm
 
         public ThMEPOriginTransformer(Point3d center)
         {
+            var vector = center.GetVectorTo(Point3d.Origin);
+            Displacement = Matrix3d.Displacement(vector);
+        }
+
+        public ThMEPOriginTransformer(DBObjectCollection objs)
+        {
+            var center = objs.GetCentroid();
             var vector = center.GetVectorTo(Point3d.Origin);
             Displacement = Matrix3d.Displacement(vector);
         }
@@ -33,7 +34,7 @@ namespace ThMEPEngineCore.Algorithm
             var matrix = Displacement;
             TransformBy(objs, matrix);
         }
-        
+
         public void Transform(ref Point3d point)
         {
             var matrix = Displacement;
@@ -65,7 +66,7 @@ namespace ThMEPEngineCore.Algorithm
         private void TransformBy(ref Point3d point, Matrix3d matrix)
         {
 
-            point= point.TransformBy(matrix);
+            point = point.TransformBy(matrix);
         }
 
     }

@@ -12,12 +12,9 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomBuilderEngine : IDisposable
     {
-        public List<string> RoomBoundaryLayerFilter { get; set; }
-        public List<string> RoomMarkLayerFilter { get; set; }
         public ThRoomBuilderEngine()
         {
-            RoomBoundaryLayerFilter = new List<string>();
-            RoomMarkLayerFilter = new List<string>();
+
         }
         public void Dispose()
         {            
@@ -25,39 +22,13 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts)
         {
-            // Room 和 Mark 来源于本地
-            var roomEngine = new ThDB3RoomRecognitionEngine()
-            {
-                LayerFilter = this.RoomBoundaryLayerFilter,
-            };
+            var roomEngine = new ThRoomOutlineRecognitionEngine();
             roomEngine.RecognizeMS(db, pts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine()
-            {
-                LayerFilter = this.RoomMarkLayerFilter,
-            };
+            var markEngine = new ThRoomMarkRecognitionEngine();
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);            
-            return rooms;
-        }
-
-        public List<ThIfcRoom> BuildFromXRef(Database db, Point3dCollection pts)
-        {
-            // Room 和 Mark 来源于外参
-            var roomEngine = new ThDB3RoomRecognitionEngine()
-            {
-                LayerFilter = this.RoomBoundaryLayerFilter,
-            };
-            roomEngine.Recognize(db, pts);
-            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine()
-            {
-                LayerFilter = this.RoomMarkLayerFilter,
-            };
-            markEngine.Recognize(db, pts);
-            var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
-            Build(rooms, marks);
             return rooms;
         }
 
@@ -115,10 +86,10 @@ namespace ThMEPEngineCore.Engine
                 if (o.Value.Count > 0)
                 {
                     var smallestAreaRoom = o.Value.OrderBy(v=>(v.Boundary as Polyline).Area).First();
-                    //if(smallestAreaRoom.Tags.IndexOf(o.Key.Text)<0)
-                    //{
-                    //    smallestAreaRoom.Tags.Add(o.Key.Text);
-                    //}                    
+                    if (smallestAreaRoom.Tags.IndexOf(o.Key.Text) < 0)
+                    {
+                        smallestAreaRoom.Tags.Add(o.Key.Text);
+                    }
                 }
             });
         }

@@ -1,4 +1,6 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using ThMEPWSS.Command;
+using ThMEPWSS.ViewModel;
+using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -7,14 +9,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         uiDrainageSystem uiDrainage;
         uiDrainageSystemSet uiSet;
+        FireHydrant uiFireHydrant;
+        FlushPointUI uiFlushPoint;
         public void Initialize()
         {
-            return;
+            uiFireHydrant = null;
+            uiFlushPoint = null;
+            if (ThHydrantProtectionRadiusCmd.FireHydrantVM==null)
+            {
+                ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
+            }
+            if (THLayoutFlushPointCmd.FlushPointVM == null)
+            {
+                THLayoutFlushPointCmd.FlushPointVM = new ThFlushPointVM();
+            }
         }
 
         public void Terminate()
         {
-            return;
         }
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
@@ -36,7 +48,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// Tian Hua Create water suply system diagram
+        /// 给水系统图
         /// </summary>
         [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
@@ -49,7 +61,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// Tian Hua arrange pumps in water well
+        /// 潜水泵布置
         /// </summary>
         [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
         public void ThArrangePumpWithUI()
@@ -58,7 +70,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-
+        /// <summary>
+        /// 地上雨水系统图
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
@@ -73,6 +87,37 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var ui = new uiFireControlSystem();
             AcadApp.ShowModelessWindow(ui);
+        }
+
+        /// <summary>
+        /// 地上标准层排水、雨水平面	
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
+        public void ThDrainageSysAboveGround()
+        {
+            var ui = new uiDrainageSysAboveGround();
+            AcadApp.ShowModelessWindow(ui);
+        }
+
+        [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]
+
+        public void THDXCX()
+        {
+            if (uiFlushPoint != null && uiFlushPoint.IsLoaded)
+            {
+                return;
+            }
+            uiFlushPoint = new FlushPointUI(THLayoutFlushPointCmd.FlushPointVM);
+            AcadApp.ShowModelessWindow(uiFlushPoint);
+        }
+
+        [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
+        public void THXHSJH()
+        {
+            if (uiFireHydrant != null && uiFireHydrant.IsLoaded)
+                return;
+            uiFireHydrant = new FireHydrant(ThHydrantProtectionRadiusCmd.FireHydrantVM);
+            AcadApp.ShowModelessWindow(uiFireHydrant);
         }
     }
 }
