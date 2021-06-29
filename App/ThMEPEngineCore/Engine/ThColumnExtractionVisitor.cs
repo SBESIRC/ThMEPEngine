@@ -65,7 +65,8 @@ namespace ThMEPEngineCore.Engine
                     else if (o is Circle circle)
                     {
                         // 圆形柱
-                        var polyCircle = circle.TessellateCircleWithArc(100.0);
+                        // 细化成封闭多段线
+                        var polyCircle = circle.TessellateCircleWithArc(ThMEPEngineCoreCommon.CircularColumnTessellateArcLength);
                         polyCircle.TransformBy(matrix);
                         curves.Add(polyCircle);
                     }

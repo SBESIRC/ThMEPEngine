@@ -49,8 +49,19 @@ namespace ThMEPEngineCore.Engine
             {
                 hatch.Boundaries().ForEach(o =>
                 {
-                    o.TransformBy(matrix);
-                    curves.Add(o);
+                    if (o is Circle circle)
+                    {
+                        // 圆形柱
+                        // 细化成封闭多段线
+                        var poly = circle.TessellateCircleWithArc(ThMEPEngineCoreCommon.CircularColumnTessellateArcLength);
+                        poly.TransformBy(matrix);
+                        curves.Add(poly);
+                    }
+                    else
+                    {
+                        o.TransformBy(matrix);
+                        curves.Add(o);
+                    }
                 });
             }
             return curves.Select(o => CreateBuildingElementData(o)).ToList();
