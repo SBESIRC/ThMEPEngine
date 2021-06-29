@@ -19,6 +19,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int currentIndex = 19;
             List<Entity> Result = new List<Entity>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
+            int PressureSwitchMinFloor = 0;//灭火系统流量开关最低楼层
             int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
             int FireHydrantPumpMinFloor = 0;//消火栓泵最低楼层
             int FireHydrantPumpCount = 0;//消火栓泵个数
@@ -28,6 +29,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["灭火系统流量开关"] > 0)
                 {
+                    if(PressureSwitchMinFloor==0)
+                        PressureSwitchMinFloor= FloorNum + 1;
                     PressureSwitchMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFirePumpStartLine(currentIndex, FloorNum));
                 }
@@ -41,10 +44,18 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
             }
             //都存在，才画
-            if (FireHydrantPumpMinFloor > 0 && PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+            if (FireHydrantPumpMinFloor > 0 )
             {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
-                Result.Add(Endline1);
+                if (PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                    Result.Add(Endline1);
+                }
+                if(PressureSwitchMinFloor < FireHydrantPumpMinFloor)
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0));
+                    Result.Add(Endline1);
+                }
             }
             else
             {
