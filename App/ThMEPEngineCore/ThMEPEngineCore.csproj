@@ -106,6 +106,7 @@
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
+    <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
