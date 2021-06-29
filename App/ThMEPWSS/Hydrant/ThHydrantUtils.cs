@@ -1,5 +1,10 @@
-﻿using ThMEPEngineCore.Service;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Service;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Hydrant
@@ -30,6 +35,25 @@ namespace ThMEPWSS.Hydrant
                 }
             });
             return result;
+        }
+        public static List<Entity> MakeValid(Polygon polygon, double areaTolerance = 1.0)
+        {
+            var objs = polygon.Buffer(0).ToDbCollection();
+            return objs.Cast<Entity>().Where(o =>
+             {
+                 if (o is Polyline polyline)
+                 {
+                     return polyline.Area > areaTolerance;
+                 }
+                 else if (o is MPolygon mPolygon)
+                 {
+                     return mPolygon.Area > areaTolerance;
+                 }
+                 else
+                 {
+                     return false;
+                 }
+             }).ToList();
         }
     }
 }

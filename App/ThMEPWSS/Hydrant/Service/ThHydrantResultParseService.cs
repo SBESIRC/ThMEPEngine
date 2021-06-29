@@ -38,13 +38,15 @@ namespace ThMEPWSS.Hydrant.Service
                                 {
                                     if (f.Geometry is Polygon polygon)
                                     {
-                                        coverArea=polygon.ToDbMPolygon();
-                                        islatedPolygons.Add(polygon.ToDbMPolygon());
+                                        coverArea = polygon.ToDbMPolygon();                                        ;
+                                        islatedPolygons.AddRange(ThHydrantUtils.MakeValid(polygon));
                                     }
                                     else if (f.Geometry is MultiPolygon mPolygon)
                                     {
-                                        coverArea=mPolygon.ToDbMPolygon();
-                                        mPolygon.Geometries.Cast<Polygon>().ForEach(m => islatedPolygons.Add(m.ToDbMPolygon()));
+                                        coverArea =mPolygon.ToDbMPolygon();
+                                        mPolygon.Geometries
+                                        .Cast<Polygon>()
+                                        .ForEach(m => islatedPolygons.AddRange(ThHydrantUtils.MakeValid(m)));
                                     }
                                     else
                                     {
@@ -66,5 +68,6 @@ namespace ThMEPWSS.Hydrant.Service
             });            
             return results;
         }
+        
     }
 }
