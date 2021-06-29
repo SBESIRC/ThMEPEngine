@@ -1,6 +1,8 @@
 ﻿using System;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.OverlayNG;
+using NetTopologySuite.Operation.Overlay;
 
 namespace ThCADCore.NTS
 {
@@ -46,8 +48,7 @@ namespace ThCADCore.NTS
             }
             else
             {
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                //throw new NotSupportedException();
+                throw new NotSupportedException();
             }
         }
 
@@ -77,6 +78,14 @@ namespace ThCADCore.NTS
             {
                 throw new NotSupportedException();
             }
+        }
+
+        public static DBObjectCollection Intersection(Entity first, Entity other)
+        {
+            return OverlayNGRobust.Overlay(
+                first.ToNTSPolygon(),
+                other.ToNTSPolygon(), 
+                SpatialFunction.Intersection).ToDbCollection();
         }
     }
 }

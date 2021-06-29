@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
@@ -40,12 +41,21 @@ namespace ThMEPWSS.Hydrant.Service
             {
                 return;
             }
-            var divideService = new ThDivideRoomService(Rooms.Select(o => o.Boundary).ToList(), Covers);
-            divideService.Divide();
-            divideService.Results.ForEach(o =>
+            var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(Covers.ToCollection());
+            Rooms.ForEach(o =>
             {
-                CheckResults.Add(o.Key, Check(o.Value));
-            });
+                var covers = spatialIndex.SelectCrossingPolygon(o.Boundary);
+                var divideService = new ThDivideRoomService(o.Boundary, covers.Cast<Entity>().ToList());
+                divideService.Divide();
+                var belongedDic = new Dictionary<Entity, List<Entity>>();
+                divideService.UnProtectAreas.ForEach(o => belongedDic.Add(o, new List<Entity>()));
+                var belongedService = new ThRoomSplitAreaBelongedService(
+                    divideService.ProtectAreas, 
+                    covers.Cast<Entity>().ToList());
+                belongedService.Classify();                
+                belongedService.Results.ForEach(o => belongedDic.Add(o.Key, o.Value));
+                CheckResults.Add(o.Boundary, Check(belongedDic));
+            });            
         }
         /// <summary>
         /// 

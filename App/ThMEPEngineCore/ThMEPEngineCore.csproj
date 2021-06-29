@@ -93,6 +93,7 @@
     <Compile Include="GeojsonExtractor\Service\ThExtractLineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractPolylineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractService.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThRoomBuildAreaService.cs" />
     <Compile Include="GeojsonExtractor\ThAILayerManager.cs" />
     <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />

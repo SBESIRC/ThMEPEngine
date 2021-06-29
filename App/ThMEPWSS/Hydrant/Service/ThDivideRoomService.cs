@@ -1,243 +1,98 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.LaneLine;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
+using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThMEPWSS.Hydrant.Service
 {
     public class ThDivideRoomService
     {
-        public double TesslateLength { get; set; }
-        public double ExtendLength { get; set; }
-        private List<Entity> RoomOutlines { get; set; } //可能是洞（只支持一个Shell的洞）
-        private List<Entity> ProtectAreas { get; set; }
-        private double zeroLength = 1e-4;
-        private double PolygonBufferLength = 5.0;
-        private double RoomBufferLength = 5.0;
         /// <summary>
-        /// 房间轮廓被保护区域分割后的子区域所对应的保护区域
-        /// Key->房间原始轮廓，Value->房间被分割的区域，及每个区域所受的保护区域
+        /// 所有Entity不能带弧
         /// </summary>
-        public Dictionary<Entity,Dictionary<Entity, List<Entity>>> Results { get; private set; }
-
-        public ThDivideRoomService(List<Entity> roomOutlines,List<Entity> protectAreas)
+        private Entity Room { get; set; }
+        private List<Entity> CoverAreas { get; set; }
+        public List<Entity> UnProtectAreas { get; set; }
+        public List<Entity> ProtectAreas { get; set; }
+        private double PolygonBufferLength = 5.0;
+        public ThDivideRoomService(Entity room,List<Entity> coverAreas)
         {
-            RoomOutlines = roomOutlines;
-            ProtectAreas = protectAreas;
-            TesslateLength = 500;
-            ExtendLength = 1.0;
-            Results = new Dictionary<Entity, Dictionary<Entity, List<Entity>>>();
+            Room = room;
+            CoverAreas = coverAreas;
+            UnProtectAreas = new List<Entity>();
+            ProtectAreas = new List<Entity>();
         }
         public void Divide()
         {
-            // 前处理（打散、去重、合并、延长）
-            var objs = Preprocess(); // 返回一堆直线 
-
-            var polygons = objs.Polygons(); //重新分割区域
-            //polygons.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 1);
-
-            polygons = FilterPolygons(polygons);
-
-            //var areas = polygons.BuildArea();
-            var areas = polygons;
-
-            //对分割的Polygons进行内缩,用于判断哪些区域属于房间
-            var polygonBufferDic = BufferPolygon(areas.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
-
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(polygonBufferDic.Keys.ToCollection());
-            RoomOutlines.ForEach(o =>
+            if(CoverAreas.Count==0)
             {
-                //查找属于此房间的分割区域
-                var splitPolygons = spatialIndex.SelectCrossingPolygon(o);
-                var belongedRooms = BelongedRoom(o, splitPolygons.Cast<Entity>().ToList()); //找到哪些分割区域属于房间
-                var container = new Dictionary<Entity, List<Entity>>();
-                belongedRooms.ForEach(e =>
-                {
-                    //找出房间分割的区域在哪些保护区域里
-                    container.Add(polygonBufferDic[e], BelongedProtectArea(e));
-                });
-                Results.Add(o, container);
+                UnProtectAreas = new List<Entity>() { Room.Clone() as Entity};
+                return;
+            }
+            UnProtectAreas = Subtract(); // 获取未保护区域
+            var intersectAreas = Intersect(); // 获取房间与其它保护区域相交的区域
+            ProtectAreas = Split(intersectAreas); // 分割相交的区域(如一个相交区域中有其它相交区域，需要分割)
+        }
+
+        private List<Entity> Subtract()
+        {
+            // 用房间轮廓去保护区域做差集      
+            var results = Subtraction(Room, CoverAreas.ToCollection()).Cast<Entity>().ToList();
+            return DuplicatedRemove(results);
+        }
+
+        private List<Entity> Intersect()
+        {
+            var results = new List<Entity>();
+            CoverAreas.ForEach(e =>
+            {
+                var objs = Intersection(Room, e);
+                results.AddRange(objs.Cast<Entity>());
             });
-            // 后续可能会根据面积对子区域进行过滤
+            return DuplicatedRemove(results); //去重
         }
-        private DBObjectCollection FilterPolygons(DBObjectCollection polygons)
+        private List<Entity> Split(List<Entity> areas)
         {
-            // 清除面积很小的Polyline
-            polygons = polygons
-                .Cast<Polyline>()
-                .Where(o => o.Area > 1.0)
-                .ToCollection();
-
-            // 去重
-            var duplicateRemoveService = new ThSimilarityDuplicateRemoveService(
-                polygons.Cast<Entity>().ToList());
-            duplicateRemoveService.DuplicateRemove();
-            polygons = duplicateRemoveService.Results.ToCollection();
-
-            return polygons;
-        }
-        private List<Entity> BelongedProtectArea(Entity roomInnerPolygon)
-        {
-            return ProtectAreas.Where(o => 
-            { 
-                if(o is Polyline polyline)
+            var results = new List<Entity>();
+            var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(areas.ToCollection());
+            areas.ForEach(o =>
+            {
+                var objs = spatialIndex.SelectCrossingPolygon(o);
+                objs.Remove(o);
+                if(objs.Count == 0)
                 {
-                    return polyline.IsContains(roomInnerPolygon);
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    return mPolygon
-                    .ToNTSPolygon().Shell
-                    .ToDbPolyline()
-                    .IsContains(roomInnerPolygon);
+                    results.Add(o);
                 }
                 else
                 {
-                    return false;
-                }
-            }).ToList();
-        }
-        private List<Entity> BelongedRoom(Entity roomOutline,List<Entity> polygons)
-        {
-            return polygons.Where(o => roomOutline.IsContains(o)).ToList();
-        }
-        private Dictionary<Entity, Entity> BufferPolygon(List<Entity> polygons,double length)
-        {
-            var result = new Dictionary<Entity, Entity>();            
-            var bufferService = new ThNTSBufferService();
-            polygons.ForEach(o =>
-            {
-                if(o is Polyline polyline)
-                {
-                    var bufferEnt = bufferService.Buffer(o, length);
-                    if (bufferEnt != null)
-                    {
-                        result.Add(bufferEnt, o);
-                    }
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    var bufferEnt = bufferService.Buffer(o, length);
-                    if (bufferEnt != null)
-                    {
-                        result.Add(bufferEnt, o);
-                    }
+                    var subRes = Subtraction(o, objs);
+                    results.AddRange(DuplicatedRemove(subRes.Cast<Entity>().ToList()));
                 }
             });
-            return result;
-        }
-        private DBObjectCollection Preprocess()
-        {
-            // 内缩房间轮廓线，便于分割
-            var roomOutlines = new Dictionary<Entity, Entity>();
-            if(ThAuxiliaryUtils.DoubleEquals(RoomBufferLength,0.0))
-            {
-                RoomOutlines.ForEach(o => roomOutlines.Add(o.Clone() as Entity, o));
-            }
-            else
-            {
-                roomOutlines = BufferPolygon(RoomOutlines, -1.0 * RoomBufferLength);
-            }
-            // 转成多段线,且已打散
-            var polys = new List<Polyline>();
-            roomOutlines.Keys.ForEach(o => polys.AddRange(ToPolylines(o)));
-            ProtectAreas.ForEach(o => polys.AddRange(ToPolylines(o)));
-
-            var simplifer = new ThElementSimplifier();
-            var handleResults = simplifer.MakeValid(polys.ToCollection());
-            handleResults = simplifer.Normalize(handleResults);
-
-            // 转成直线
-            var lines = new DBObjectCollection();
-            handleResults.Cast<Curve>().ForEach(o =>
-            {
-                if(o is Polyline polyline)
-                {
-                    polyline.ToLines(TesslateLength).ForEach(l => lines.Add(l));
-                }
-                else if(o is Line line)
-                {
-                    lines.Add(line);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            });
-
-            // 去重
-            lines = ClearZeroLines(lines, this.zeroLength); //移除接近于零长度的线
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines);
-            lines = spatialIndex.Geometries.Values.ToCollection();
-
-            // 合并
-            lines = Merge(lines); 
-
-            // 延长            
-            lines = lines.Cast<Line>().Select(o => o.ExtendLine(ExtendLength)).ToCollection();
-            return lines;
-        }
-        private DBObjectCollection Merge(DBObjectCollection lines)
-        {
-            lines = ClearZeroLines(lines, this.zeroLength);
-            var old_gap_distance = ThLaneLineMergeExtension.collinear_gap_distance;
-            var old_extend_length = ThLaneLineMergeExtension.extend_distance;
-            try
-            {
-                ThLaneLineMergeExtension.collinear_gap_distance = 1e-4;
-                ThLaneLineMergeExtension.extend_distance = 5.0;
-                lines = ThLaneLineMergeExtension.Merge(lines);
-            }
-            finally
-            {
-                ThLaneLineMergeExtension.collinear_gap_distance = old_gap_distance;
-                ThLaneLineMergeExtension.extend_distance = old_extend_length;
-            }
-            return ClearZeroLines(lines, this.zeroLength);
-        }
-        private List<Line> ToLines(Entity entity)
-        {
-            var results = new List<Line>();
-            if (entity is MPolygon mPolygon)
-            {
-                mPolygon.Loops().ForEach(o => results.AddRange(o.ToLines(TesslateLength)));
-            }
-            else if(entity is Polyline polyline)
-            {
-                results.AddRange(polyline.ToLines(TesslateLength));
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             return results;
         }
-        private List<Polyline> ToPolylines(Entity entity)
+        private DBObjectCollection Intersection(Entity first, Entity other)
         {
-            if (entity is MPolygon mPolygon)
-            {
-                return mPolygon.Loops().Select(o => o.TessellatePolylineWithArc(TesslateLength)).ToList();
-            }
-            else if (entity is Polyline polyline)
-            {
-                return new List<Polyline> { polyline.TessellatePolylineWithArc(TesslateLength) };
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            var results = ThCADCoreNTSEntityExtension.Intersection(first, other);
+            var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
+            return bufferDic.Where(o => first.IsContains(o.Value)).Select(o => o.Key).ToCollection();
         }
-        private DBObjectCollection ClearZeroLines(DBObjectCollection lines,double baseLength =0.0)
+        private DBObjectCollection Subtraction(Entity entity,DBObjectCollection objs)
         {
-            return lines.Cast<Line>().Where(o => o.Length > baseLength).ToCollection();
+            //减去不在Entity里面的东西
+            var results = entity.ToNTSPolygon()
+                .Difference(CoverAreas.ToCollection().UnionGeometries())
+                .ToDbCollection(true);
+            var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
+            return bufferDic.Where(o => entity.IsContains(o.Value)).Select(o => o.Key).ToCollection();
+        }
+        private List<Entity> DuplicatedRemove(List<Entity> ents)
+        {
+            var sptialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
+            return sptialIndex.Geometries.Values.Cast<Entity>().ToList();
         }        
     }
 }

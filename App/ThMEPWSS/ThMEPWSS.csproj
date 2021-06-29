@@ -176,7 +176,9 @@
     <Compile Include="Hydrant\Service\ThHydrantResultParseService.cs" />
     <Compile Include="Hydrant\Service\ThJudgeRoomPrivacyService.cs" />
     <Compile Include="Hydrant\Service\ThQueryArchitectureOutlineService.cs" />
+    <Compile Include="Hydrant\Service\ThRoomSplitAreaBelongedService.cs" />
     <Compile Include="Hydrant\Service\ThSimilarityDuplicateRemoveService.cs" />
+    <Compile Include="Hydrant\ThHydrantUtils.cs" />
     <Compile Include="Model\EnumDiameterScale.cs" />
     <Compile Include="Model\RoomModel.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />

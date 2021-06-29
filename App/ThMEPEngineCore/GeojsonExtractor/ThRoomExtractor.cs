@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -58,6 +59,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {
                 //TODO
             }
+#if DEBUG
+            var entities = ThRoomBuildAreaService.BuildArea(Rooms.Select(o => o.Boundary as Polyline).ToList());
+            Rooms = entities.Select(o => ThIfcRoom.Create(o)).ToList();
+#endif
         }
         private void Clean()
         {            
