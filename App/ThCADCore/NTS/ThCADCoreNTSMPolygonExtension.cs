@@ -15,27 +15,14 @@ namespace ThCADCore.NTS
     {
         public static MPolygon ToDbMPolygon(this Polygon polygon)
         {
-            List<Curve> holes = new List<Curve>();
-            var shell = polygon.Shell.ToDbPolyline();
-            shell = shell.WashClone() as Polyline;
-            if (shell == null)
+            if (polygon.IsValid)
             {
-                return new MPolygon();
+                List<Curve> holes = new List<Curve>();
+                var shell = polygon.Shell.ToDbPolyline();
+                polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
+                return ThMPolygonTool.CreateMPolygon(shell, holes);
             }
-            else
-            {
-                shell.Closed = true;
-            }
-            polygon.Holes.ForEach(o =>
-            {
-                var clone = o.ToDbPolyline().WashClone() as Polyline;
-                if(clone != null)
-                {
-                    clone.Closed = true;
-                    holes.Add(clone);
-                }
-            });
-            return ThMPolygonTool.CreateMPolygon(shell, holes);
+            return new MPolygon();
         }
 
         public static Geometry ToNTSGeometry(this MPolygon mPolygon)
