@@ -44,23 +44,26 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
             }
             //都存在，才画
-            if (FireHydrantPumpMinFloor > 0 )
+            if (PressureSwitchMinFloor > 0)
             {
-                if (PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+                if (FireHydrantPumpMinFloor > 0)
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                    if (PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                        Result.Add(Endline1);
+                    }
+                    if (PressureSwitchMinFloor < FireHydrantPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0));
+                        Result.Add(Endline1);
+                    }
+                }
+                else
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
                     Result.Add(Endline1);
                 }
-                if(PressureSwitchMinFloor < FireHydrantPumpMinFloor)
-                {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0));
-                    Result.Add(Endline1);
-                }
-            }
-            else
-            {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
-                Result.Add(Endline1);
             }
             //设置线型
             Result.ForEach(o =>
