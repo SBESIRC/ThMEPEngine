@@ -73,6 +73,32 @@ namespace ThMEPWSS.Pipe.Engine
                 throw new NotSupportedException();
             }
         }
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 不支持外部参照
+            if (blockTableRecord.IsFromExternalReference)
+            {
+                return false;
+            }
+            // 不支持覆盖块
+            if (blockTableRecord.IsFromOverlayReference)
+            {
+                return false;
+            }
+            // 不支持图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
     class ThWDeepWellPumpEngine : ThDistributionElementRecognitionEngine
     {

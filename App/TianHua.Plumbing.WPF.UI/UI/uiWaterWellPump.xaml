@@ -109,8 +109,8 @@
                 <Label Content="布置方式:"  Visibility="Collapsed"></Label>
             </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center"  Visibility="Collapsed">
-                <RadioButton GroupName="ArrangeTypeGroup" Content="点选" Visibility="Collapsed" IsChecked="{Binding IsPickSelection}" />
-                <RadioButton Margin="15,0,0,0" GroupName="ArrangeTypeGroup" Content="框选" IsChecked="{Binding IsFrameSelection}"/>
+                <RadioButton GroupName="ArrangeTypeGroup" Content="点选" Visibility="Collapsed" />
+                <RadioButton Margin="15,0,0,0" GroupName="ArrangeTypeGroup" Content="框选"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <CheckBox Content="覆盖已布集水井" IsChecked="{Binding CoveredWaterWell}"/>

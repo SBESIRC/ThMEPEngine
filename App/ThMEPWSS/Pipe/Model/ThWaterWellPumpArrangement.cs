@@ -18,7 +18,7 @@ namespace ThMEPWSS.Pipe.Model
         public List<string> BlackList = new List<string>();//黑名单
         public WaterWellIdentifyConfigInfo()
         {
-            WhiteList.Add("集水井");
+            WhiteList.Add("A-Well-1");
         }
     }
     public class WaterWellConfigInfo
