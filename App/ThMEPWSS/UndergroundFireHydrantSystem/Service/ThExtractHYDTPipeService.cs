@@ -27,22 +27,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                //Results = acadDatabase
-                //   .ModelSpace
-                //   .OfType<Curve>()
-                //   .Where(o => IsHYDTPipeElement(o) && IsHYDTPipeLayer(o.Layer));
-                //var spatialIndex = new ThCADCoreNTSSpatialIndex(r1.ToCollection());
-                //var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                //return dbObjs;
-
-                var x = acadDatabase.ModelSpace.OfType<Entity>().ToList();
-                var R = ThDrainageSystemServiceGeoCollector.GetLines(x, layer => (layer == "W-FRPT-1-HYDT-PIPE" || layer == "W-FRPT-HYDT-PIPE"));
-                
-                var r = polygon.ToRect();
-                var geos = R.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                var ret = GeoFac.CreateIntersectsSelector(geos)(r.ToPolygon()).SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
-                
-                return ret;
+                var lines = ThDrainageSystemServiceGeoCollector.GetLines(acadDatabase.ModelSpace.OfType<Entity>().ToList(), layer => layer is "W-FRPT-1-HYDT-PIPE" or "W-FRPT-HYDT-PIPE");
+                return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())(polygon.ToRect().ToPolygon()).SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
             }
         }
         private bool IsHYDTPipeLayer(string layer)
@@ -97,19 +83,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                 }
 
-                
+
                 ;
-                foreach(var v in dbObjs)
+                foreach (var v in dbObjs)
                 {
                     var ad = (v as Entity).AcadObject;
                     dynamic o = ad;
                     objName = o.ObjectName;
-                    if(!objName.ToUpper().Contains("VALVE"))
+                    if (!objName.ToUpper().Contains("VALVE"))
                     {
                         ;
                     }
                     ;
-                    
+
                 }
                 return dbObjs;
             }
@@ -149,24 +135,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                
+
                 var spatialIndex1 = new ThCADCoreNTSSpatialIndex(rects.ToCollection());
                 DBObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
 
-                if(DBObjs.Count != 0)
+                if (DBObjs.Count != 0)
                 {
-                    
+
                     return DBObjs;
                 }
                 else
                 {
-                    
+
                     return DBObjs1;
                 }
-                
+
             }
         }
-       
+
 
         private bool IsValve(string valve)
         {
@@ -217,7 +203,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public List<Point3d> GetPipeMarkPoisition()
         {
             var poisition = new List<Point3d>();
-            foreach(var db in DBobj)
+            foreach (var db in DBobj)
             {
                 var br = db as BlockReference;
                 var pt1 = new Point3d(br.Position.X + Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点1 X")),
@@ -384,7 +370,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 Results = acadDatabase
                    .ModelSpace
                    .OfType<DBText>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();                
+                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
             }
         }
         private bool IsHYDTPipeLayer(string layer)
