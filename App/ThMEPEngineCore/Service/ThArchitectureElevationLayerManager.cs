@@ -21,7 +21,6 @@ namespace ThMEPEngineCore.Service
         private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            // 图层名未包含S_BEAM         
             string[] patterns = layerName.Split('-').ToArray();
             if (patterns.Count() < 3)
             {

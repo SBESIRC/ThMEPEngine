@@ -33,8 +33,7 @@ namespace ThMEPEngineCore.Service
         private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            // 图层名未包含S_BEAM
-            if (!layerName.Contains("AD-FLOOR-AREA")&& !layerName.Contains("AD-NAME-ROOM"))
+            if (!layerName.Contains("AD-FLOOR-AREA") && !layerName.Contains("AD-NAME-ROOM"))
             {
                 return false;
             }
