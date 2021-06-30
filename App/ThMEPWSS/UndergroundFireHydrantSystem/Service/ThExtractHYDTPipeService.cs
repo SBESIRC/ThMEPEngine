@@ -40,7 +40,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 
                 var r = polygon.ToRect();
                 var geos = R.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                var ret = GeoFac.CreateGeometrySelector(geos)(r.ToPolygon()).SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
+                var ret = GeoFac.CreateIntersectsSelector(geos)(r.ToPolygon()).SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
                 
                 return ret;
             }

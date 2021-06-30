@@ -527,8 +527,7 @@ namespace ThMEPWSS.DebugNs
             ((Action)ctx["showCurrentLogWindow"])();
         }
         public static bool isDebugging => FengDbgTest.ctx != null;
-        public static bool __showXLabel => false;
-        //public static bool __showXLabel => true;
+      
         public static void SetText(IEnumerable<string> lines)
         {
             if (!isDebugging) return;

@@ -623,10 +623,11 @@ namespace ThMEPWSS.Pipe.Model
         {
             drawLazy(ctx);
         }
+        public static bool showXLabel;
         private void drawLazy(PipeRunDrawingContext ctx)
         {
             if (Storey == null) return;
-            if (Dbg.__showXLabel)
+            if (showXLabel)
             {
                 DU.DrawingQueue.Enqueue(adb =>
                 {
