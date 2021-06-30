@@ -4,10 +4,12 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -141,6 +143,14 @@ namespace ThCADCore.NTS
             // self-union trick:
             //  http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
             return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection();
+        }
+
+        public static DBObjectCollection Buffer(this MPolygon mPolygon, double length)
+        {
+            return mPolygon.ToNTSPolygon().Buffer(length, new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+            }).ToDbCollection();
         }
     }
 }
