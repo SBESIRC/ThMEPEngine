@@ -93,6 +93,7 @@
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
+    <Compile Include="Command\ThInsertStoreyCommand.cs" />
     <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
     <Compile Include="Command\ThIntrusionAlarmSystemHositingCommand.cs" />
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
