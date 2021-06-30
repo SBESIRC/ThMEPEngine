@@ -42,7 +42,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     PressureSwitchMaxFloor = FloorNum + 1;
                     if (SprayPumpMinFloor > 0)
                     {
-                        Result.AddRange(DrawSprayPumpLine(currentIndex, FloorNum, AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0, AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0));
+                        Result.AddRange(DrawSprayPumpLine(currentIndex, FloorNum, AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0));
                     }
                     else
                     {
@@ -95,6 +95,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 if (SprayPumpMinFloor > 0)
                 {
                     InsertBlockService.InsertSprinklerPump(new Vector3d(0, OuterFrameLength * (SprayPumpMinFloor - 1), 0));
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.SprinklerPumpManualControlCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.SprinklerPumpManualControlCircuitModuleExcludingFireRoom);
                     InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
                 }
                 else if(PressureSwitchMinFloor>0)
@@ -127,27 +128,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             });
             return result;
         }
-        private List<Entity> DrawSprayPumpLine(int CurrentIndex, int floorNum, bool drawFirePump, bool drawSprinklerPump)
+        private List<Entity> DrawSprayPumpLine(int CurrentIndex, int floorNum, bool drawSprinklerPump)
         {
             List<Entity> result = new List<Entity>();
             if (drawSprinklerPump)
             {
                 Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
                 result.Add(Endline1);
-                if (drawFirePump)
-                {
-                    Line newLine = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2700, OuterFrameLength * floorNum + 2550, 0));
-                    result.Add(newLine);
-
-                    Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 2550, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
-                    result.Add(Endline2);
-
-                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
-                    result.Add(Endline3);
-
-                    Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 1200, 0));
-                    result.Add(Endline4);
-                }
 
                 Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0));
                 result.Add(Endline5);
@@ -168,19 +155,6 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
                 result.Add(Endline1);
-                if (drawFirePump)
-                {
-                    Line newLine = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2700, OuterFrameLength * floorNum + 2550, 0));
-                    result.Add(newLine);
-                    Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 2550, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
-                    result.Add(Endline2);
-                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset - 100, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + Offset, OuterFrameLength * floorNum + 1300, 0));
-                    result.Add(Endline3);
-                    Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 2) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 1200, 0));
-                    result.Add(Endline4);
-                    //Line Endline9 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 2) + 2600, OuterFrameLength * floorNum + 2650, 0));
-                    //result.Add(Endline9);
-                }
                 Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0));
                 result.Add(Endline5);
 

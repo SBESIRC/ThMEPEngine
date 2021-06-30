@@ -88,7 +88,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 if (FireHydrantPumpMinFloor > 0)
                 {
                     InsertBlockService.InsertFireHydrantPump(new Vector3d(0, OuterFrameLength * (FireHydrantPumpMinFloor - 1), 0));
-                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FireHydrantPumpManualControlCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FireHydrantPumpManualControlCircuitModuleExcludingFireRoom);
                     InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });
                 }
                 else if (PressureSwitchMaxFloor > 0)
@@ -112,6 +112,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
             Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 1200, 0));
             result.Add(Endline4);
+
+            Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+            result.Add(Endline5);
+
+            Line Endline6 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset -100, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+            result.Add(Endline6);
             return result;
         }
 

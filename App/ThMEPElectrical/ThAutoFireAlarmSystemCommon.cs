@@ -33,11 +33,9 @@ namespace ThMEPElectrical
         public static readonly string SystemDiagramChartHeader3 = "楼层或防火分区火灾自动报警设备";
         public static readonly string FixedPartContainsFireRoom = "系统图固定部分（含消控室）";
         public static readonly string ManualControlCircuitModuleContainsFireRoom = "手动控制线路模块（含消控室）";
-        public static readonly string FirePumpRoomCircuitModuleContainsFireRoom = "消防水泵房线路模块（含消控室）";
         public static readonly string LiquidLevelSignalCircuitModuleContainsFireRoom = "液位信号线路模块（含消控室）";
         public static readonly string FixedPartExcludingFireRoom = "系统图固定部分（不含消控室）";
         public static readonly string ManualControlCircuitModuleExcludingFireRoom = "手动控制线路模块（不含消控室）";
-        public static readonly string FirePumpRoomCircuitModuleExcludingFireRoom = "消防水泵房线路模块（不含消控室）";
         public static readonly string LiquidLevelSignalCircuitModuleExcludingFireRoom = "液位信号线路模块（不含消控室）";
         public static readonly string FixedPartSmokeExhaust = "联动关闭排烟风机信号线";
         public static readonly string FireHydrantPumpDirectStartSignalLine = "消火栓泵直接启动信号线";
@@ -46,6 +44,10 @@ namespace ThMEPElectrical
         public static readonly string SprinklerPumpDirectStartSignalLineModuleExcludingFireRoom = "喷淋泵联动直接启动线路模块（不含消控室）";
         public static readonly string FireHydrantPumpDirectStartSignalLineModuleContainsFireRoom = "消火栓泵联动直接启动线路模块（含消控室）";
         public static readonly string FireHydrantPumpDirectStartSignalLineModuleExcludingFireRoom = "消火栓泵联动直接启动线路模块（不含消控室）";
+        public static readonly string FireHydrantPumpManualControlCircuitModuleContainsFireRoom = "消火栓泵手动控制线路模块（含消控室）";
+        public static readonly string FireHydrantPumpManualControlCircuitModuleExcludingFireRoom = "消火栓泵手动控制线路模块（不含消控室）";
+        public static readonly string SprinklerPumpManualControlCircuitModuleContainsFireRoom = "喷淋泵手动控制线路模块（含消控室）";
+        public static readonly string SprinklerPumpManualControlCircuitModuleExcludingFireRoom = "喷淋泵手动控制线路模块（不含消控室）";
 
         //
         public static bool CanDrawFixedPartSmokeExhaust = false;
