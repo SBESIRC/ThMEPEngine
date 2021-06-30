@@ -17,7 +17,24 @@ namespace ThCADCore.NTS
         {
             List<Curve> holes = new List<Curve>();
             var shell = polygon.Shell.ToDbPolyline();
-            polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
+            shell = shell.WashClone() as Polyline;
+            if (shell == null)
+            {
+                return new MPolygon();
+            }
+            else
+            {
+                shell.Closed = true;
+            }
+            polygon.Holes.ForEach(o =>
+            {
+                var clone = o.ToDbPolyline().WashClone() as Polyline;
+                if(clone != null)
+                {
+                    clone.Closed = true;
+                    holes.Add(clone);
+                }
+            });
             return ThMPolygonTool.CreateMPolygon(shell, holes);
         }
 
@@ -129,6 +146,14 @@ namespace ThCADCore.NTS
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSGeometry());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+        }
+        public static DBObjectCollection MakeValid(this MPolygon mPolygon)
+        {
+            // zero-width buffer trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
+            // self-union trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
+            return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection();
         }
     }
 }
