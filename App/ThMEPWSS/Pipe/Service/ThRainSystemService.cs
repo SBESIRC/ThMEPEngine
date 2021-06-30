@@ -1276,7 +1276,7 @@ new Point2d(maxX, minY)
             var bds = geoData.Labels.Select(x => x.Boundary).ToList();
             var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
             var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-            var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
+            var f1 = GeoFac.CreateContainsSelector(lineHGs);
             foreach (var bd in bds)
             {
                 var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1500, 250);
@@ -1284,7 +1284,7 @@ new Point2d(maxX, minY)
                     var e = DU.DrawRectLazy(g);
                     e.ColorIndex = 2;
                 }
-                var _lineHGs = f1(g);
+                var _lineHGs = f1(g.ToPolygon());
                 var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                 var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                 var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
@@ -2832,7 +2832,7 @@ new Point2d(maxX, minY)
             FixStoreys(storeys);
             return storeys;
         }
-        static void FixStoreys(List<ThStoreysData> storeys)
+        public static void FixStoreys(List<ThStoreysData> storeys)
         {
             var lst1 = storeys.Where(s => s.Storeys.Count == 1).Select(s => s.Storeys[0]).ToList();
             foreach (var s in storeys.Where(s => s.Storeys.Count > 1).ToList())
@@ -3930,7 +3930,7 @@ new Point2d(maxX, minY)
                 BoundaryDict[pl] = r;
             }
             this.WaterBuckets = pls;
-            var si = new NTSSpatialIndex1(pls.ToCollection());
+            var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(pls.ToCollection());
             thGravityService.GetGravityWaterBuckets = rg => si.SelectCrossingPolygon(rg).Cast<Entity>().ToList();
         }
         List<KeyValuePair<Entity, string>> brokenCondensePipes = new List<KeyValuePair<Entity, string>>();

@@ -92,14 +92,13 @@ pt,
             }
             return flags.ToList(points, true);
         }
-        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer)
+        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer,double radius=5)
         {
-            var radius = 5;
             var points = GetAlivePoints(lines, radius);
             var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
             var list = lines.Where(x => x.IsHorizontal(5)).Select(x => x.ToLineString()).ToGeometryList();
             list.Add(killer);
-            return points.Except(GeoFac.CreateGeometrySelector(pts)(GeoFac.CreateGeometry(list)).Select(pts).ToList(points)).ToList();
+            return points.Except(GeoFac.CreateIntersectsSelector(pts)(GeoFac.CreateGeometry(list)).Select(pts).ToList(points)).ToList();
         }
         public static Func<Point3d, Geometry> NearestNeighbourPoint3dF(List<Geometry> geos)
         {
@@ -503,33 +502,18 @@ pt,
             };
             return shapeFactory.CreateCircle();
         }
-        public static Func<GRect, List<Geometry>> CreateGRectContainsSelector(List<Geometry> geos)
+        public static Func<Geometry, List<Geometry>> CreateContainsSelector(List<Geometry> geos)
         {
             if (geos.Count == 0) return r => new List<Geometry>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
+            return geo =>
             {
-                if (!r.IsValid) return new List<Geometry>();
-                var poly = new Polygon(r.ToLinearRing());
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
+                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
             };
         }
-        public static Func<GRect, List<Geometry>> CreateGRectSelector(List<Geometry> geos)
-        {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
-            {
-                if (!r.IsValid) return new List<Geometry>();
-                var poly = new Polygon(r.ToLinearRing());
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
-            };
-        }
-        public static Func<Geometry, List<Geometry>> CreateGeometrySelector(List<Geometry> geos)
+        public static Func<Geometry, List<Geometry>> CreateIntersectsSelector<T>(List<T> geos)where T:Geometry
         {
             if (geos.Count == 0) return r => new List<Geometry>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
@@ -539,31 +523,6 @@ pt,
                 if (geo == null) throw new ArgumentNullException();
                 var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
-            };
-        }
-        public static Func<LinearRing, List<Geometry>> CreateLinearRingSelector(List<Geometry> geos)
-        {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
-            {
-                if (r == null) throw new ArgumentNullException();
-                var poly = new Polygon(r);
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
-            };
-        }
-        public static Func<Polygon, List<Geometry>> CreatePolygonSelector(List<Geometry> geos)
-        {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return poly =>
-            {
-                if (poly == null) throw new ArgumentNullException();
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
             };
         }
         public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex(List<Geometry> geos)
@@ -588,7 +547,7 @@ pt,
             if (killer != null)
             {
                 var _pts = pts.Select(pt => pt.ToNTSPoint()).Cast<Geometry>().ToList();
-                var ptsf = CreateGeometrySelector(_pts);
+                var ptsf = CreateIntersectsSelector(_pts);
                 pts = ptsf(killer).Select(_pts).ToList(pts, reverse: true);
             }
             var gvs = new List<GVector>(pts.Count);
@@ -656,6 +615,7 @@ pt,
         public List<Geometry> WaterPorts;
         public List<Geometry> WashingMachines;
         public List<Geometry> CleaningPorts;
+        public List<Geometry> SideFloorDrains;
         public void Init()
         {
             Storeys ??= new List<Geometry>();
@@ -664,11 +624,12 @@ pt,
             DLines ??= new List<Geometry>();
             VLines ??= new List<Geometry>();
             VerticalPipes ??= new List<Geometry>();
-            WrappingPipes??= new List<Geometry>();
+            WrappingPipes ??= new List<Geometry>();
             FloorDrains ??= new List<Geometry>();
             WaterPorts ??= new List<Geometry>();
             WashingMachines ??= new List<Geometry>();
             CleaningPorts ??= new List<Geometry>();
+            SideFloorDrains ??= new List<Geometry>();
         }
         public static DrainageCadData Create(DrainageGeoData data)
         {
@@ -689,6 +650,7 @@ pt,
             o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
             o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
             o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
+            o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
             return o;
         }
 
@@ -701,7 +663,10 @@ pt,
         {
             return x => x.Buffer(bfSize);
         }
-
+        public static Func<Point2d, Point> ConvertSideFloorDrains()
+        {
+            return x => x.ToNTSPoint();
+        }
         public static Func<Point2d, Polygon> ConvertCleaningPortsF()
         {
             return x => new GCircle(x, 40).ToCirclePolygon(36);
@@ -766,13 +731,14 @@ pt,
             ret.AddRange(WaterPorts);
             ret.AddRange(WashingMachines);
             ret.AddRange(CleaningPorts);
+            ret.AddRange(SideFloorDrains);
             return ret;
         }
         public List<DrainageCadData> SplitByStorey()
         {
             var lst = new List<DrainageCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -788,6 +754,7 @@ pt,
                 o.WaterPorts.AddRange(objs.Where(x => this.WaterPorts.Contains(x)));
                 o.WashingMachines.AddRange(objs.Where(x => this.WashingMachines.Contains(x)));
                 o.CleaningPorts.AddRange(objs.Where(x => this.CleaningPorts.Contains(x)));
+                o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
                 lst.Add(o);
             }
             return lst;
@@ -879,7 +846,7 @@ pt,
         {
             var lst = new List<RainSystemCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -922,6 +889,7 @@ pt,
         public List<string> WaterPortLabels;
         public List<GRect> WashingMachines;
         public List<Point2d> CleaningPorts;
+        public List<Point2d> SideFloorDrains;
         public void Init()
         {
             Storeys ??= new List<GRect>();
@@ -936,9 +904,11 @@ pt,
             WaterPortLabels ??= new List<string>();
             WashingMachines ??= new List<GRect>();
             CleaningPorts ??= new List<Point2d>();
+            SideFloorDrains ??= new List<Point2d>();
         }
         public void FixData()
         {
+            Init();
             Storeys = Storeys.Where(x => x.IsValid).Distinct().ToList();
             Labels = Labels.Where(x => x.Boundary.IsValid).Distinct().ToList();
             LabelLines = LabelLines.Where(x => x.Length > 0).Distinct().ToList();

@@ -15,6 +15,8 @@ namespace ThMEPWSS.Pipe.Service
     using ThMEPWSS.Uitl.ExtensionsNs;
     using ThMEPWSS.DebugNs;
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
+    using Linq2Acad;
+    using ThMEPWSS.Assistant;
 
     public partial class DrainageSystemDiagram
     {
@@ -458,25 +460,15 @@ namespace ThMEPWSS.Pipe.Service
             //}
             return o;
         }
-        public static void drawOutputs(Point2d basePoint1, double width, ThwOutput output)
+        public static void DrawOutputs1(Point2d basePoint1, double width, ThwOutput output)
         {
             Point2d pt2, pt3;
             if (output.DirtyWaterWellValues != null)
             {
                 var v = new Vector2d(-2000 - 400, -600);
                 var pt = basePoint1 + v;
-                if (output.DirtyWaterWellValues.Count == 1)
-                {
-                    DrawDirtyWaterWell(pt, "666");
-                }
-                else if (output.DirtyWaterWellValues.Count >= 2)
-                {
-                    var pts = GetBasePoints(pt.OffsetX(-800), 2, output.DirtyWaterWellValues.Count, 800, 800).ToList();
-                    for (int i = 0; i < output.DirtyWaterWellValues.Count; i++)
-                    {
-                        DrawDirtyWaterWell(pts[i], output.DirtyWaterWellValues[i]);
-                    }
-                }
+                var values = output.DirtyWaterWellValues;
+                DrawDiryWaterWells1(pt, values);
             }
             {
                 var dx = width - 3600;
@@ -540,8 +532,32 @@ namespace ThMEPWSS.Pipe.Service
                 drawHanging(vs2.ToPoint2ds(pts[1]).Last(), output.Hanging2);
             }
         }
+        public static void DrawDiryWaterWells2(Point2d pt, List<string> values)
+        {
+            var dx = 0;
+            foreach (var value in values)
+            {
+                DrawDirtyWaterWell(pt.OffsetX(400) + new Vector2d(dx, 0), value);
+                dx += 800;
+            }
+        }
+        public static void DrawDiryWaterWells1(Point2d pt, List<string> values)
+        {
+            if (values.Count == 1)
+            {
+                DrawDirtyWaterWell(pt, values[0]);
+            }
+            else if (values.Count >= 2)
+            {
+                var pts = GetBasePoints(pt.OffsetX(-800), 2, values.Count, 800, 800).ToList();
+                for (int i = 0; i < values.Count; i++)
+                {
+                    DrawDirtyWaterWell(pts[i], values[i]);
+                }
+            }
+        }
 
-        private static Point2d drawHanging(Point2d start, Hanging hanging)
+        public static Point2d drawHanging(Point2d start, Hanging hanging)
         {
             var vecs = new List<Vector2d> { new Vector2d(789, 0), new Vector2d(1270, 0), new Vector2d(180, 0), new Vector2d(1090, 0) };
             var segs = vecs.ToGLineSegments(start);
@@ -597,12 +613,13 @@ namespace ThMEPWSS.Pipe.Service
             o.HasCleaningPort1 = true;
             o.HasCleaningPort2 = true;
             o.HasCleaningPort3 = true;
-            o.HasLargeCleaningPort = false;
+            o.HasLargeCleaningPort = true;
             //o.HangingCount = 1;
             o.HangingCount = 2;
+            o.LinesCount = 3;
             o.Hanging1 = new Hanging() { FloorDrainsCount = 1, HasDoubleSCurve = true };
             o.Hanging2 = new Hanging() { FloorDrainsCount = 2, HasDoubleSCurve = true };
-            drawOutputs(basePoint, 3600, o);
+            DrawOutputs1(basePoint, 3600, o);
         }
         public static void draw5(Point2d basePoint)
         {
@@ -622,18 +639,59 @@ namespace ThMEPWSS.Pipe.Service
                 groups[1].DL = groups[1].PL;
             }
 
-            NewMethod6(basePoint, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, storeys, groups);
+            NewMethod6(new DrawingOption()
+            {
+                basePoint = basePoint,
+                OFFSET_X = OFFSET_X,
+                SPAN_X = SPAN_X,
+                HEIGHT = HEIGHT,
+                COUNT = COUNT,
+                storeys = storeys,
+                groups = groups
+            });
 
         }
-
-        public static void NewMethod6(Point2d basePoint, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, List<string> storeys, List<ThwPipeLineGroup> groups)
+        public static void NewMethod6(DrawingOption option)
         {
-            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-            for (int i = 0; i < storeys.Count; i++)
+            var maxStoreyIndex = option.maxStoreyIndex;
+            var test = option.test;
+            var layer = option.layer;
+            if (string.IsNullOrWhiteSpace(layer)) layer = "W-DRAI-DOME-PIPE";
+            void drawPipe(GLineSegment seg)
             {
-                var storey = storeys[i];
-                var bsPt1 = basePoint.OffsetY(HEIGHT * i);
-                DrawStoreyLine(storey, bsPt1.ToPoint3d(), lineLen);
+                var line = DU.DrawLineSegmentLazy(seg);
+                line.Layer = layer;
+                line.ColorIndex = 256;
+            }
+            void drawPipes(IEnumerable<GLineSegment> segs)
+            {
+                var lines = DU.DrawLineSegmentsLazy(segs);
+                foreach (var line in lines)
+                {
+                    line.Layer = layer;
+                    line.ColorIndex = 256;
+                }
+            }
+            var basePoint = option.basePoint;
+            var OFFSET_X = option.OFFSET_X;
+            var SPAN_X = option.SPAN_X;
+            var HEIGHT = option.HEIGHT;
+            var COUNT = option.COUNT;
+            var groups = option.groups;
+            var storeys = option.storeys;
+            var dy = HEIGHT - 1800.0;
+            {
+                var drawStoreyLine = option.drawStoreyLine;
+                if (drawStoreyLine)
+                {
+                    var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+                    for (int i = 0; i < storeys.Count; i++)
+                    {
+                        var storey = storeys[i];
+                        var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                        DrawStoreyLine(storey, bsPt1.ToPoint3d(), lineLen);
+                    }
+                }
             }
             var vecs0 = new List<Vector2d> { new Vector2d(0, 1800 + dy), new Vector2d(0, -1800 - dy) };
             var vecs1 = new List<Vector2d> { new Vector2d(0, 1800 + dy), new Vector2d(0, -780), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy) };
@@ -643,7 +701,7 @@ namespace ThMEPWSS.Pipe.Service
             var vecs5 = vecs2.GetYAxisMirror();
             var vecs6 = vecs3.GetYAxisMirror();
             var vec7 = new Vector2d(-90, 90);
-            var start = storeys.Count - 1;
+            var start = maxStoreyIndex == 0 ? storeys.Count - 1 : maxStoreyIndex + 1;
             var end = 0;
             PipeRunLocationInfo[] getPipeRunLocationInfos(Point2d basePoint, ThwPipeLine thwPipeLine, int j)
             {
@@ -665,7 +723,11 @@ namespace ThMEPWSS.Pipe.Service
                         var bsPt1 = basePoint.OffsetY(HEIGHT * i);
                         {
                             var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X) + new Vector2d(tdx, 0);
-                            if (i == start) continue;
+                            if (i == start)
+                            {
+                                arr[i] = null;
+                                continue;
+                            }
                             if (run.HasLongTranslator && run.HasShortTranslator)
                             {
                                 if (run.IsLongTranslatorToLeftOrRight)
@@ -780,12 +842,14 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     for (int i = start; i >= end; i--)
                     {
+                        var storey = storeys.TryGet(i);
+                        if (storey == null) continue;
                         var run = thwPipeLine.PipeRuns.TryGet(i);
-                        var output = thwPipeLine.Output;
-                        var storey = storeys[i];
                         if (run == null) continue;
-
                         var info = arr[i];
+                        if (info == null) continue;
+                        var output = thwPipeLine.Output;
+
                         {
                             if (storey == "1F")
                             {
@@ -803,20 +867,23 @@ namespace ThMEPWSS.Pipe.Service
                                 //o.Hanging1 = new Hanging() { FloorDrainsCount = 1, HasDoubleSCurve = true };
                                 //o.Hanging2 = new Hanging() { FloorDrainsCount = 2, HasDoubleSCurve = true };
                                 //drawOutputs(basePt, 3600, o);
-                                drawOutputs(basePt, 3600, thwPipeLine.Output);
+                                if (thwPipeLine.Output != null) DrawOutputs1(basePt, 3600, thwPipeLine.Output);
                             }
                         }
                         {
                             if (i == end)
                             {
                                 var dy = -3000;
-                                foreach (var comment in thwPipeLine.Comments)
+                                if (thwPipeLine.Comments != null)
                                 {
-                                    if (!string.IsNullOrEmpty(comment))
+                                    foreach (var comment in thwPipeLine.Comments)
                                     {
-                                        DU.DrawTextLazy(comment,350, info.EndPoint.OffsetY(dy));
+                                        if (!string.IsNullOrEmpty(comment))
+                                        {
+                                            DU.DrawTextLazy(comment, 350, info.EndPoint.OffsetY(dy));
+                                        }
+                                        dy -= 350;
                                     }
-                                    dy -= 350;
                                 }
                             }
                         }
@@ -824,7 +891,7 @@ namespace ThMEPWSS.Pipe.Service
                         {
                             if (run.HasLongTranslator)
                             {
-                                var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 479), new Vector2d(-121, 121), new Vector2d(-789, 0), new Vector2d(-1270, 0), new Vector2d(-180, -15), new Vector2d(-1090, 0) };
+                                var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 479), new Vector2d(-121, 121), new Vector2d(-789, 0), new Vector2d(-1270, 0), new Vector2d(-180, 0), new Vector2d(-1090, 0) };
                                 if (isLeftOrRight == false)
                                 {
                                     vecs = vecs.GetYAxisMirror();
@@ -834,14 +901,14 @@ namespace ThMEPWSS.Pipe.Service
                                 {
                                     var p1 = pt;
                                     var p2 = pt.OffsetX(1700);
-                                    DrawDomePipes(new GLineSegment(p1, p2));
+                                    drawPipe(new GLineSegment(p1, p2));
                                     pt = p2;
                                 }
                                 if (isLeftOrRight == true && run.IsLongTranslatorToLeftOrRight == false)
                                 {
                                     var p1 = pt;
                                     var p2 = pt.OffsetX(-1700);
-                                    DrawDomePipes(new GLineSegment(p1, p2));
+                                    drawPipe(new GLineSegment(p1, p2));
                                     pt = p2;
                                 }
                                 var segs = vecs.ToGLineSegments(pt);
@@ -859,7 +926,7 @@ namespace ThMEPWSS.Pipe.Service
                                     {
                                         _segs = segs.Take(4).ToList();
                                     }
-                                    DrawDomePipes(_segs);
+                                    drawPipes(_segs);
                                 }
                                 if (hanging.FloorDrainsCount >= 1)
                                 {
@@ -868,7 +935,12 @@ namespace ThMEPWSS.Pipe.Service
                                 if (hanging.FloorDrainsCount >= 2)
                                 {
                                     DrawFloorDrain(segs.Last(1).EndPoint.ToPoint3d(), isLeftOrRight);
+                                    if (hanging.IsSeries)
+                                    {
+                                        DrawDomePipes(segs.Last(2));
+                                    }
                                 }
+
                                 if (hanging.HasSCurve)
                                 {
                                     var p1 = segs.Last(3).StartPoint;
@@ -903,7 +975,7 @@ namespace ThMEPWSS.Pipe.Service
                                     {
                                         _segs = _segs.Take(2).ToList();
                                     }
-                                    DrawDomePipes(_segs);
+                                    drawPipes(_segs);
                                 }
                                 if (hanging.FloorDrainsCount >= 1)
                                 {
@@ -978,31 +1050,74 @@ namespace ThMEPWSS.Pipe.Service
                             }
                             if (bi.BlueToLeftLast)
                             {
-                                var p1 = info.EndPoint;
-                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                                var p3 = info.EndPoint.OffsetX(-300);
-                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                                var p5 = p1.OffsetY(HEIGHT);
-                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p4, p2), new GLineSegment(p2, p5) };
+                                if (run.HasLongTranslator)
+                                {
+                                    if (run.IsLongTranslatorToLeftOrRight)
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy + 400), new Vector2d(-300, -225) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                    else
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy + 400), new Vector2d(-300, -225) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                }
+                                else if (!run.HasLongTranslator)
+                                {
+                                    var vs = new List<Vector2d> { new Vector2d(0, -1125), new Vector2d(-300, -225) };
+                                    info.DisplaySegs = vs.ToGLineSegments(info.StartPoint);
+                                }
                             }
                             if (bi.BlueToRightLast)
                             {
-                                var p1 = info.EndPoint;
-                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                                var p3 = info.EndPoint.OffsetX(300);
-                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                                var p5 = p1.OffsetY(HEIGHT);
-                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p4, p2), new GLineSegment(p2, p5) };
+                                if (!run.HasLongTranslator && !run.HasShortTranslator)
+                                {
+                                    var p1 = info.EndPoint;
+                                    var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
+                                    var p3 = info.EndPoint.OffsetX(300);
+                                    var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
+                                    var p5 = p1.OffsetY(HEIGHT);
+                                    info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p4, p2), new GLineSegment(p2, p5) };
+                                }
                             }
                             if (bi.BlueToLeftMiddle)
                             {
-                                var p1 = info.EndPoint;
-                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                                var p3 = info.EndPoint.OffsetX(-300);
-                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                                var segs = info.Segs.ToList();
-                                segs.Add(new GLineSegment(p2, p4));
-                                info.DisplaySegs = segs;
+                                if (!run.HasLongTranslator && !run.HasShortTranslator)
+                                {
+                                    var p1 = info.EndPoint;
+                                    var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
+                                    var p3 = info.EndPoint.OffsetX(-300);
+                                    var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
+                                    var segs = info.Segs.ToList();
+                                    segs.Add(new GLineSegment(p2, p4));
+                                    info.DisplaySegs = segs;
+                                }
+                                else if (run.HasLongTranslator)
+                                {
+                                    if (run.IsLongTranslatorToLeftOrRight)
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                    else
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                }
                             }
                             if (bi.BlueToRightMiddle)
                             {
@@ -1087,13 +1202,13 @@ namespace ThMEPWSS.Pipe.Service
                                 if (run.HasShortTranslator)
                                 {
                                     var segs = vecs.ToGLineSegments(info.Segs.Last(2).StartPoint.OffsetY(-300));
-                                    DrawDomePipes(segs);
+                                    drawPipes(segs);
                                     DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
                                 }
                                 else
                                 {
                                     var segs = vecs.ToGLineSegments(info.Segs.Last().StartPoint.OffsetY(-300));
-                                    DrawDomePipes(segs);
+                                    drawPipes(segs);
                                     DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
                                 }
                             }
@@ -1120,7 +1235,7 @@ namespace ThMEPWSS.Pipe.Service
                         var segs = info.DisplaySegs ?? info.Segs;
                         if (segs != null)
                         {
-                            DrawDomePipes(segs);
+                            drawPipes(segs);
                         }
                     }
                 }
@@ -1138,6 +1253,10 @@ namespace ThMEPWSS.Pipe.Service
                         {
                             DrawBluePipes(segs);
                         }
+                        //if (info.DisplaySegs != null)
+                        //{
+                        //    drawPipes(info.Segs);
+                        //}
                     }
                 }
                 if (grp.DL != null)
@@ -1152,7 +1271,7 @@ namespace ThMEPWSS.Pipe.Service
                         var segs = info.DisplaySegs ?? info.Segs;
                         if (segs != null)
                         {
-                            DrawDomePipes(segs);
+                            drawPipes(segs);
                         }
                     }
                 }
@@ -1168,7 +1287,7 @@ namespace ThMEPWSS.Pipe.Service
                         var segs = info.DisplaySegs ?? info.Segs;
                         if (segs != null)
                         {
-                            DrawDomePipes(segs);
+                            drawPipes(segs);
                         }
                     }
                 }
@@ -1178,24 +1297,27 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
 
-        private static void DrawNoteText(string text, Point2d pt)
+
+        public static bool Testing = false;
+        //public static bool Testing = true;
+        public static void DrawNoteText(string text, Point2d pt)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
             var t = DU.DrawTextLazy(text, 350, pt);
             SetLabelStylesForDraiNote(t);
         }
 
-        private static void DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
+        public static void DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
         {
             var p2 = p1 + vec7;
             DrawDomePipes(new GLineSegment(p1, p2));
-            DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
+            if (!Testing) DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
         }
-        private static void DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
+        public static void DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
         {
             var p2 = p1 + vec7;
             DrawDomePipes(new GLineSegment(p1, p2));
-            DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight);
+            if (!Testing) DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight);
         }
 
 

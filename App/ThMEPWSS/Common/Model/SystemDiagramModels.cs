@@ -641,6 +641,24 @@ namespace ThMEPWSS.Uitl
     }
     public struct GLineSegment
     {
+        public class EqualityComparer : IEqualityComparer<GLineSegment>
+        {
+            double radius;
+            public EqualityComparer(double radius)
+            {
+                this.radius = radius;
+            }
+            public bool Equals(GLineSegment x, GLineSegment y)
+            {
+                return x.StartPoint.GetDistanceTo(y.StartPoint) <= radius && x.EndPoint.GetDistanceTo(y.EndPoint) <= radius
+                    || x.StartPoint.GetDistanceTo(y.EndPoint) <= radius && x.EndPoint.GetDistanceTo(y.StartPoint) <= radius;
+            }
+
+            public int GetHashCode(GLineSegment obj)
+            {
+                return 0;
+            }
+        }
         public bool IsNull => Equals(this, default(GLineSegment));
         public GLineSegment(double x1, double y1, double x2, double y2)
         {
@@ -927,6 +945,11 @@ namespace ThMEPWSS.Uitl
             {
                 yield return m;
             }
+        }
+        public static IEnumerable<T> Yield<T>(this IEnumerable<T> source)
+        {
+            if (source == null) return Enumerable.Empty<T>();
+            return source;
         }
         public static IEnumerable<T> YieldAfter<T>(this IEnumerable<T> souce, T item)
         {

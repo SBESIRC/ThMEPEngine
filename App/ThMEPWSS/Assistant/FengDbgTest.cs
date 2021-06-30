@@ -461,6 +461,12 @@ namespace ThMEPWSS.DebugNs
         {
             FengDbgTesting.AddLazyAction(name, f);
         }
+        public static void SaveToTempJsonFile(object obj)
+        {
+            var file = @"Y:\" + DateTime.Now.Ticks + ".json";
+            File.WriteAllText(file, obj.ToCadJson());
+            Dbg.PrintLine(file);
+        }
         public static void SaveToJsonFile(object obj)
         {
             var file = @"D:\DATA\temp\" + DateTime.Now.Ticks + ".json";
@@ -760,6 +766,39 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             short targetColorIndex = 1;
             db.SetLayerColor(targetLayerName, targetColorIndex);
             return targetLayerName;
+        }
+        public static void UnlockCurrentLayer()
+        {
+            using var adb = AcadDatabase.Active();
+            var db = adb.Database;
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            foreach (var layerId in lt)
+            {
+                if (db.Clayer == layerId)
+                {
+                    LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+                    if (ltr != null)
+                    {
+                        if (ltr.IsFrozen)
+                        {
+                            ltr.IsFrozen = false;
+                        }
+                        if (ltr.IsLocked)
+                        {
+                            ltr.IsLocked = false;
+                        }
+                        if (ltr.IsPlottable)
+                        {
+                            ltr.IsPlottable = false;
+                        }
+                        if (ltr.IsOff)
+                        {
+                            ltr.IsOff = false;
+                        }
+                    }
+                    return;
+                }
+            }
         }
         public static void UpdateScreen()
         {
@@ -3577,7 +3616,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     var pl = EntityFactory.CreatePolyline(r.ToPoint3dCollection());
                     pls.Add(pl);
                 }
-                var si = new NTSSpatialIndex1(pls.ToCollection());
+                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(pls.ToCollection());
                 var lst = si.SelectCrossingPolygon(Dbg.SelectGRect().ToPoint3dCollection()).Cast<Entity>().ToList();
                 foreach (var e in lst)
                 {
@@ -3791,7 +3830,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 Dbg.BuildAndSetCurrentLayer(db);
                 var sv = new ThRainSystemService() { adb = adb };
                 sv.InitCache();
-                var si = new NTSSpatialIndex1(sv.CondensePipes.ToCollection());
+                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.CondensePipes.ToCollection());
                 var input = SelectPoints();
                 var range = new Point3dCollection();
                 range.Add(input.Item1);
@@ -4012,6 +4051,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
+            [Feng]
             public static void CollectEntitiesCodegen()
             {
                 Dbg.FocusMainWindow();
@@ -4025,6 +4065,15 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                             NewMethod3(e);
                         }
                     }
+                }
+            }
+            [Feng]
+            public static void GetAllBlocks()
+            {
+                Dbg.FocusMainWindow();
+                using (var adb = AcadDatabase.Active())
+                {
+                    Dbg.SetText(adb.Blocks.Select(x => x.Name));
                 }
             }
             private static void NewMethod3(Entity e)
@@ -4060,7 +4109,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine($"{source}.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()} && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()}) ");
                 }
             }
-
+            [Feng]
             public static void BlockReferenceToDataItemToJson()
             {
                 Dbg.FocusMainWindow();
@@ -4071,6 +4120,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(Dbg.SelectEntity<BlockReference>(adb).ToDataItem().ToJson());
                 }
             }
+            [Feng]
             public static void GetEntityBoundsGRectCadJson()
             {
                 Dbg.FocusMainWindow();
@@ -4081,6 +4131,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(Dbg.SelectEntity<Entity>(adb).Bounds.ToGRect().ToCadJson());
                 }
             }
+            [Feng]
             public static void GetEntityType()
             {
                 Dbg.FocusMainWindow();
@@ -4092,6 +4143,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.GetType().ToString());
                 }
             }
+            [Feng]
             public static void GetEntityLength()
             {
                 Dbg.FocusMainWindow();
@@ -4104,6 +4156,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(seg.Length.ToString());
                 }
             }
+            [Feng]
             public static void GetEntityBlockName()
             {
                 Dbg.FocusMainWindow();
@@ -4115,6 +4168,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Name);
                 }
             }
+            [Feng]
             public static void GetEntityBlockEffectiveName()
             {
                 Dbg.FocusMainWindow();
@@ -4126,7 +4180,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.GetEffectiveName());
                 }
             }
-
+            [Feng]
             public static void GetCircleRadius()
             {
                 Dbg.FocusMainWindow();
@@ -4138,6 +4192,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Radius.ToString());
                 }
             }
+            [Feng]
             public static void GetEntityLayer()
             {
                 Dbg.FocusMainWindow();
@@ -4149,6 +4204,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Layer);
                 }
             }
+            [Feng]
             public static void GetTextStyleName()
             {
                 Dbg.FocusMainWindow();
@@ -4160,6 +4216,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.TextStyleName);
                 }
             }
+            [Feng]
             public static void ScaleEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4171,6 +4228,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Scale(e, Dbg.SelectPoint(), 2);
                 }
             }
+            [Feng]
             public static void RotateEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4182,6 +4240,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Rotate(e, Dbg.SelectPoint(), GeoAlgorithm.AngleFromDegree(45));
                 }
             }
+            [Feng]
             public static void MoveEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4193,6 +4252,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Move(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
                 }
             }
+            [Feng]
             public static void CopyEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4204,6 +4264,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Copy(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
                 }
             }
+            [Feng]
             public static void GetScaleFactors()
             {
                 Dbg.FocusMainWindow();
@@ -6887,314 +6948,6 @@ namespace ThMEPWSS.DebugNs
 
 
 
-namespace ThMEPWSS.DebugNs
-{
-    using System;
-    using NFox.Cad;
-    using DotNetARX;
-    using Linq2Acad;
-    using System.Linq;
-    using ThCADExtension;
-    using Dreambuild.AutoCAD;
-    using System.Collections.Generic;
-    using NetTopologySuite.Geometries;
-    using NetTopologySuite.Index.Strtree;
-    using NetTopologySuite.Geometries.Prepared;
-    using Autodesk.AutoCAD.Geometry;
-    using Autodesk.AutoCAD.DatabaseServices;
-    using ThCADCore.NTS;
-
-    /// <summary>
-    /// 空间索引DB图元（去除空间重合的DB图元）
-    /// </summary>
-    public class NTSSpatialIndex1 : IDisposable
-    {
-        private STRtree<Geometry> Engine { get; set; }
-        public Dictionary<Geometry, DBObject> Geometries { get; set; }
-        public NTSSpatialIndex1(DBObjectCollection objs)
-        {
-            Geometries = new Dictionary<Geometry, DBObject>();
-            Update(objs, new DBObjectCollection());
-        }
-
-        public void Dispose()
-        {
-            //
-        }
-
-        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
-        }
-
-        private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
-        }
-
-        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Contains(preparedGeometry, o)).ToCollection();
-        }
-
-        private bool Contains(IPreparedGeometry preparedGeometry, Entity entity)
-        {
-            return preparedGeometry.Contains(ToNTSGeometry(entity));
-        }
-
-        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
-        {
-            return preparedGeometry.Intersects(ToNTSGeometry(entity));
-        }
-
-        private Geometry ToNTSGeometry(DBObject obj)
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            {
-                if (obj is Line line)
-                {
-                    return line.ToNTSLineString();
-                }
-                else if (obj is Polyline polyline)
-                {
-                    return polyline.ToNTSLineString();
-                }
-                else if (obj is Arc arc)
-                {
-                    return arc.ToNTSGeometry();
-                }
-                else if (obj is Circle circle)
-                {
-                    //return circle.ToNTSGeometry();
-
-                    var length = ThCADCoreNTSService.Instance.ArcTessellationLength;
-                    var circum = 2 * Math.PI * circle.Radius;
-                    int num = (int)Math.Ceiling(circum / length);
-                    return circle.ToNTSPolygon(num < 6 ? 6 : num);
-
-                    //if (num >= 3)
-                    //{
-                    //    return circle.ToNTSPolygon(num);
-                    //}
-                    //else
-                    //{
-                    //    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    //}
-                }
-                else if (obj is MPolygon mPolygon)
-                {
-                    return mPolygon.ToNTSPolygon();
-                }
-                else if (obj is Entity entity)
-                {
-                    try
-                    {
-                        return entity.GeometricExtents.ToNTSPolygon();
-                    }
-                    catch
-                    {
-                        // 若异常抛出，则返回一个“空”的Polygon
-                        return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-        }
-
-        private Polygon ToNTSPolygon(DBObject obj)
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            {
-                if (obj is Polyline poly)
-                {
-                    return poly.ToNTSPolygon();
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 更新索引
-        /// </summary>
-        /// <param name="adds"></param>
-        /// <param name="removals"></param>
-        public void Update(DBObjectCollection adds, DBObjectCollection removals)
-        {
-            // 添加新的对象
-            adds.Cast<DBObject>().ForEachDbObject(o =>
-            {
-                var geometry = ToNTSGeometry(o);
-                if (!Geometries.Keys.Contains(geometry))
-                {
-                    Geometries.Add(geometry, o);
-                }
-            });
-            // 移除删除对象
-            Geometries.RemoveAll((k, v) => removals.Contains(v));
-
-            // 创建新的索引
-            Engine = new STRtree<Geometry>();
-            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
-        }
-
-        /// <summary>
-        /// Crossing selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
-        {
-            var geometry = ToNTSPolygon(polyline);
-            return CrossingFilter(
-                Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        public DBObjectCollection SelectCrossingPolygon(MPolygon mPolygon)
-        {
-            /*
-             * 线获取MPolygon外圈内所有的物体
-             * 减去洞内包括的物体
-             */
-            var loops = mPolygon.Loops();
-            var objs = SelectCrossingPolygon(loops[0]);
-            for (int i = 1; i < loops.Count; i++)
-            {
-                foreach (DBObject innerObj in SelectWindowPolygon(loops[i]))
-                {
-                    objs.Remove(innerObj);
-                }
-            }
-            return objs;
-        }
-
-        public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
-        {
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(polygon);
-            return SelectCrossingPolygon(pline);
-        }
-
-        /// <summary>
-        /// Crossing selection
-        /// </summary>
-        /// <param name="pt1"></param>
-        /// <param name="pt2"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
-        {
-            var extents = new Extents3d(pt1, pt2);
-            return SelectCrossingPolygon(extents.ToRectangle());
-        }
-
-        /// <summary>
-        /// Window selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
-        {
-            var geometry = ToNTSPolygon(polyline);
-            return WindowFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        /// <summary>
-        /// Fence Selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectFence(Polyline polyline)
-        {
-            var geometry = ToNTSGeometry(polyline);
-            return FenceFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        /// <summary>
-        /// Fence Selection
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectFence(Line line)
-        {
-            var geometry = ToNTSGeometry(line);
-            return FenceFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        public DBObjectCollection SelectAll()
-        {
-            var objs = new DBObjectCollection();
-            foreach (var item in Geometries.Values)
-            {
-                objs.Add(item);
-            }
-            return objs;
-        }
-
-        public void AddTag(DBObject obj, object tag)
-        {
-            if (Geometries.ContainsValue(obj))
-            {
-                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
-            }
-        }
-
-        public object Tag(DBObject obj)
-        {
-            if (!Geometries.ContainsValue(obj))
-            {
-                return null;
-            }
-            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
-        }
-
-        private DBObjectCollection Query(Envelope envelope)
-        {
-            var objs = new DBObjectCollection();
-            foreach (var geometry in Engine.Query(envelope))
-            {
-                if (Geometries.ContainsKey(geometry))
-                {
-                    objs.Add(Geometries[geometry]);
-                }
-            }
-            return objs;
-        }
-
-        /// <summary>
-        /// 最近的几个邻居
-        /// </summary>
-        /// <param name="curve"></param>
-        /// <returns></returns>
-        public DBObjectCollection NearestNeighbours(Curve curve, int num)
-        {
-            var geometry = ToNTSGeometry(curve);
-            var neighbours = Engine.NearestNeighbour(
-                geometry.EnvelopeInternal,
-                geometry,
-                new GeometryItemDistance(),
-                num)
-                .Where(o => !o.EqualsExact(geometry));
-            var objs = new DBObjectCollection();
-            foreach (var neighbour in neighbours)
-            {
-                objs.Add(Geometries[neighbour]);
-            }
-            return objs;
-        }
-    }
-}
 
 
 
@@ -14885,11 +14638,11 @@ namespace ThMEPWSS.DebugNs
                                     var bds = data.Labels.Select(pl => geoData.Labels[cadDataMain.Labels.IndexOf(pl)]).Select(x => x.Boundary).ToList();
                                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
+                                    var f1 = GeoFac.CreateContainsSelector(lineHGs);
                                     foreach (var bd in bds)
                                     {
                                         var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1000, 250);
-                                        var _lineHGs = f1(g);
+                                        var _lineHGs = f1(g.ToPolygon());
                                         var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
@@ -14959,7 +14712,7 @@ namespace ThMEPWSS.DebugNs
                     var bds = geoData.Labels.Select(x => x.Boundary).ToList();
                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
+                    var f1 = GeoFac.CreateContainsSelector(lineHGs);
                     DU.Dispose();
                     var disList = new List<double>();
                     foreach (var bd in bds)
@@ -14969,7 +14722,7 @@ namespace ThMEPWSS.DebugNs
                             var e = DU.DrawRectLazy(g);
                             e.ColorIndex = 2;
                         }
-                        var _lineHGs = f1(g);
+                        var _lineHGs = f1(g.ToPolygon());
                         var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
@@ -16561,25 +16314,7 @@ namespace ThMEPWSS.DebugNs
                 });
             });
         }
-        [Feng("💰自定义空间索引")]
-        public static void qthme9()
-        {
-
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var line1 = Dbg.SelectEntity<Line>(adb);
-                var seg1 = line1.ToGLineSegment();
-                var si = GLineSegmentConnectionNTSSpacialIndex.Create(new GLineSegment[] { seg1 }, 10);
-                var lst = si.SelectCrossingGRect(Dbg.SelectGRect());
-                Dbg.PrintLine(lst.Count.ToString());
-            }
-        }
+       
         public static void qtla9m(IList<Geometry> geos)
         {
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
@@ -16628,129 +16363,11 @@ namespace ThMEPWSS.DebugNs
             }
 
         }
-        public class GLineSegmentConnectionNTSSpacialIndex : NTSSpacialIndexAB<GLineSegment>
-        {
-            double radius;
-            protected GLineSegmentConnectionNTSSpacialIndex() : base() { }
-            public static GLineSegmentConnectionNTSSpacialIndex Create(IEnumerable<GLineSegment> lines, double radius)
-            {
-                var si = new GLineSegmentConnectionNTSSpacialIndex();
-                si.radius = radius;
-                foreach (var seg in lines)
-                {
-                    si.dict[si.ToNTSGeometry(seg)] = seg;
-                }
-                si.InitEngine();
-                return si;
-            }
-            public override Geometry ToNTSGeometry(GLineSegment seg)
-            {
-                var points1 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.StartPoint, this.radius));
-                var points2 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.EndPoint, this.radius));
-                var ring1 = new LinearRing(points1);
-                var ring2 = new LinearRing(points2);
-                var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
-                return geo;
-            }
-        }
-        public class GCircleNTSSpacialIndex : NTSSpacialIndexAB<GCircle>
-        {
-            protected GCircleNTSSpacialIndex() : base() { }
-            public static GCircleNTSSpacialIndex Create(IEnumerable<GCircle> lines)
-            {
-                var si = new GCircleNTSSpacialIndex();
-                foreach (var seg in lines)
-                {
-                    si.dict[si.ToNTSGeometry(seg)] = seg;
-                }
-                si.InitEngine();
-                return si;
-            }
-            public override Geometry ToNTSGeometry(GCircle circle)
-            {
-                var numPoints = 6;
-                // 获取圆的外接矩形
-                var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
-                {
-                    NumPoints = numPoints,
-                    Size = 2 * circle.Radius,
-                    Centre = circle.Center.ToNTSCoordinate(),
-                };
-                return shapeFactory.CreateCircle().Shell;
-            }
-        }
+    
+      
 
 
-        public abstract class NTSSpacialIndexAB<T>
-        {
-            public NetTopologySuite.Index.Strtree.STRtree<Geometry> Engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            public Dictionary<Geometry, T> dict = new Dictionary<Geometry, T>();
-            public void InitEngine()
-            {
-                if (dict.Keys.Count == 0) throw new System.Exception("索引数组为空");
-                dict.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
-            }
-            public static Polygon ToNTSPolygon(Polyline polyLine)
-            {
-                var geometry = polyLine.ToNTSLineString();
-                if (geometry is LinearRing ring)
-                {
-                    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
-                }
-                else
-                {
-                    //return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    return null;
-                }
-            }
-            public List<T> SelectCrossingGRect(GRect gRect)
-            {
-                var geometry = ConvertToNTSPolygon(gRect);
-                if (geometry == null) return new List<T>();
-                return CrossingFilter(
-                    Query(geometry.EnvelopeInternal),
-                    ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry))
-                    .ToList();
-            }
-
-            public static Polygon ConvertToNTSPolygon(GRect gRect)
-            {
-                if (!gRect.IsValid) return null;
-                Coordinate[] points = GeoNTSConvertion.ConvertToCoordinateArray(gRect);
-                var ring = ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
-                var geometry = ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
-                return geometry;
-            }
-
-
-
-            public List<T> SelectCrossingPolygon(Polyline polyline)
-            {
-                var geometry = ToNTSPolygon(polyline);
-                if (geometry == null) return new List<T>();
-                return CrossingFilter(
-                    Query(geometry.EnvelopeInternal),
-                    ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry))
-                    .ToList();
-            }
-            public IEnumerable<T> CrossingFilter(IEnumerable<T> objs, NetTopologySuite.Geometries.Prepared.IPreparedGeometry preparedGeometry)
-            {
-                return objs.Where(o => Intersects(preparedGeometry, o));
-            }
-            public bool Intersects(NetTopologySuite.Geometries.Prepared.IPreparedGeometry preparedGeometry, T key)
-            {
-                return preparedGeometry.Intersects(ToNTSGeometry(key));
-            }
-            private IEnumerable<T> Query(Envelope envelope)
-            {
-                foreach (var geometry in Engine.Query(envelope))
-                {
-                    if (dict.TryGetValue(geometry, out T value)) yield return value;
-                }
-            }
-            public abstract Geometry ToNTSGeometry(T key);
-        }
-
+     
         private static void NewMethod()
         {
             ThWRainSystemDiagram.DrawingTest();

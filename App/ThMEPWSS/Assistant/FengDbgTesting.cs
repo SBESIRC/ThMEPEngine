@@ -688,15 +688,31 @@ namespace ThMEPWSS.DebugNs
     [Feng]
     public class Sankaku2
     {
+        [Feng("CollectRoomData")]
+        public static void qvfyms()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var list = DrainageService.CollectRoomData(adb);
+                Console.WriteLine(list.Select(x => x.Key).ToJson());
+            }
+        }
         [Feng("😋qv8z4i")]
         public static void qv8z4i()
         {
-            var names = new string[]
-            {
-                nameof(ThDrainageSystemServiceGeoCollector.CollectVerticalPipes),
-                nameof(DrainageSystemDiagram.draw8),
-                nameof(DrainageService.TestDrawingDatasCreation),
-            };
+            Console.WriteLine(nameof(ThDrainageSystemServiceGeoCollector.CollectVerticalPipes));
+            Console.WriteLine(nameof(DrainageSystemDiagram.draw8));
+            Console.WriteLine(nameof(DrainageService.TestDrawingDatasCreation));
+            Console.WriteLine(nameof(DrainageService.CreateDrawingDatas));
+            Console.WriteLine(nameof(DrainageSystemDiagram.draw10));
+        }
+        [Feng("draw11")]
+        public static void qvhw7v()
+        {
+            DrainageSystemDiagram.draw11();
         }
         [Feng("draw8")]
         public static void qv8ttl()
@@ -887,6 +903,26 @@ namespace ThMEPWSS.DebugNs
                 DrainageSystemDiagram.draw6(basePt.ToPoint2d());
             }
         }
+        [Feng("draw8#1")]
+        public static void qvg1qe()
+        {
+            DrainageSystemDiagram.qvg1qe();
+        }
+        [Feng("draw8#2")]
+        public static void qvg1vf()
+        {
+            DrainageSystemDiagram.qvg1vf();
+        }
+        [Feng("01")]
+        public static void qvg7cd()
+        {
+            DrainageSystemDiagram.qvg7cd();
+        }
+        [Feng("02")]
+        public static void qvg7cs()
+        {
+            DrainageSystemDiagram.qvg7cs();
+        }
         [Feng("draw5")]
         public static void qv3kmr()
         {
@@ -1058,6 +1094,51 @@ namespace ThMEPWSS.DebugNs
                         }
                     });
                 }
+            }
+        }
+        [Feng("qvgbqf")]
+        public static void qvgbqf()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                Console.WriteLine(adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-DRAI-WAST-PIPE").Count());
+            }
+        }
+        [Feng("侧排地漏")]
+        public static void qvgb8o()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                DU.DrawBlockReference("侧排地漏", bsPt - new Vector3d(295694.822273396, 289462.973599816, 0));
+            }
+        }
+        [Feng("侧排地漏test")]
+        public static void qvgb5e()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var bsPt = Dbg.SelectPoint();
+                DU.DrawBlockReference("侧排地漏", bsPt);
+                Dbg.AddButton("获取修正量", () =>
+                {
+                    var pt = Dbg.SelectPoint();
+                    var v = pt - bsPt;
+                    Console.WriteLine($"new Vector3d({v.X},{v.Y},0)");
+                });
             }
         }
         [Feng("P型存水弯test")]
@@ -1771,7 +1852,7 @@ namespace ThMEPWSS.DebugNs
             var geoData = Dbg.LoadFromJsonFile<DrainageGeoData>(file);
             DrainageService.TestDrawingDatasCreation(geoData);
         }
-        [Feng("直接从drawingDatas")]
+        [Feng("直接从drawingDatas draw8")]
         public static void qv92ji()
         {
             var file = @"D:\DATA\temp\637602373354770648.json";
@@ -1788,13 +1869,46 @@ namespace ThMEPWSS.DebugNs
                 DrainageSystemDiagram.draw8(drDatas, pt);
             }
         }
+        [Feng("draw9")]
+        public static void qveh3t()
+        {
+            var file = @"D:\DATA\temp\637602373354770648.json";
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(file);
+
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var pt = Dbg.SelectPoint().ToPoint2d();
+                //DrainageSystemDiagram.draw9(drDatas, pt);
+            }
+        }
         [Feng("从图纸提取geoData")]
         public static void qv6yoh()
         {
             var geoData = DrainageService.CollectGeoData();
             DrainageService.TestDrawingDatasCreation(geoData);
         }
+        [Feng("DrainageSystemDiagram.Start();")]
+        public static void qveg9o()
+        {
+            DrainageSystemDiagram.Start();
+        }
+        [Feng("draw10")]
+        public static void qvemj1()
+        {
+            DrainageSystemDiagram.draw10();
+        }
 
+        [Feng("UnlockCurrentLayer")]
+        public static void qvenc4()
+        {
+            using (Dbg.DocumentLock)
+                Dbg.UnlockCurrentLayer();
+        }
         public static List<Point2d> GetAlivePointsByNTS(List<Point2d> points, double radius)
         {
             var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToList();
@@ -1918,7 +2032,7 @@ namespace ThMEPWSS.DebugNs
                     {
                         var lst = g.ToList();
                         lst.Remove(c);
-                        var f = GeoFac.CreateGeometrySelector(lst);
+                        var f = GeoFac.CreateIntersectsSelector(lst);
                         Dbg.PrintLine(f(c).Count);//OK,如果有地漏是串联的，那么这里会等于2，否则等于1
                     }
 
@@ -2179,7 +2293,7 @@ namespace ThMEPWSS.DebugNs
         [Feng("🔴一些工具")]
         public static void qu0k4p()
         {
-            FengDbgTest.qt8czw.AddButtons1(typeof(ThDebugClass.qu0jxf));
+            FengDbgTest.qt8czw.AddButtons2(typeof(ThDebugClass.qu0jxf));
         }
         //        Dbg.FocusMainWindow();
         //using (Dbg.DocumentLock)
@@ -2775,8 +2889,8 @@ namespace ThMEPWSS.DebugNs
             var r = "{'type':'GRect','values':[521552.78763576248,867324.05193330813,533133.08130046073,876100.43981294858]}".FromCadJson<GRect>();
             var segs = loadsegs();
             var dlines = segs.Select(x => x.ToLineString()).ToGeometryList();
-            var f = GeoFac.CreateGRectContainsSelector(dlines);
-            var list = f(r);
+            var f = GeoFac.CreateContainsSelector(dlines);
+            var list = f(r.ToPolygon());
             var ext = new Extents3d();
             foreach (var dline in list)
             {
@@ -3077,6 +3191,13 @@ $@"{root}\09_长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg",
                           Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
                       });
             }
+            AddButton("全部打开", () =>
+            {
+                foreach (var file in files)
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+                }
+            });
         }
         public static void AddButton(string name, Action f)
         {
@@ -3154,7 +3275,7 @@ $@"{root}\09_长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg",
                 var geos = bds.Where(x => x.IsValid).Select(x => x.ToPolygon()).Cast<Geometry>().ToList();
                 Dbg.PrintLine(geos.Count);
                 var geo = GeoFac.CreateGeometry(geos);
-                var f = GeoFac.CreateGeometrySelector(geos);
+                var f = GeoFac.CreateIntersectsSelector(geos);
                 var results = f(_geo);
                 Dbg.PrintLine(results.Count);
             }

@@ -1,4 +1,23 @@
-﻿To do list:
+﻿排水系统图
+
+立管分组
+tl最高、最低层判断
+
+dline连地漏和污水口，那就视为降板地漏
+FL_TL加清洁口
+
+增加侧排地漏的支持
+
+
+
+
+
+
+
+
+雨水系统图
+
+To do list:
 1. water bucket, too slow
 2. drawing issues for roof pipe system
 
@@ -31,19 +50,6 @@ NearestNeighbours
 
 在第一层 散排至雨水沟
 其它层，散排至第N层
-
-
-
-
-
-
-
-Y1L1-2乙字弯
-NL1-5、NL2-5，冷凝管
-Y2L1-3地漏
-
-
-
 
 
 

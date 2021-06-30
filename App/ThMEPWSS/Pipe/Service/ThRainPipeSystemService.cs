@@ -157,7 +157,8 @@
             }
 #pragma warning disable
         }
-        static void SortStoreys(List<ThWSDStorey> wsdStoreys)
+       
+        public static void SortStoreys(List<ThWSDStorey> wsdStoreys)
         {
             static int getScore(string label)
             {
@@ -456,7 +457,7 @@
                     //凭空生成一个雨水口
                     if (false)
                     {
-                        var f = GeoFac.CreateGeometrySelector(item.LabelLines);
+                        var f = GeoFac.CreateIntersectsSelector(item.LabelLines);
                         foreach (var lb in item.Labels)
                         {
                             var j = cadDataMain.Labels.IndexOf(lb);
@@ -512,7 +513,7 @@
                                     labels.Add(lb);
                                 }
                             }
-                            var f = GeoFac.CreateGeometrySelector(item.LabelLines);
+                            var f = GeoFac.CreateIntersectsSelector(item.LabelLines);
                             foreach (var lb in labels)
                             {
                                 var _lines = f(GRect.Create(lb.GetCenter(), 100).ToPolygon());
@@ -539,7 +540,7 @@
                                             lst.AddRange(item.WaterWells);
                                             lst.AddRange(item.WaterPortSymbols);
                                             var _geo = GeoFac.CreateGeometry(lst.Distinct().ToArray());
-                                            pointGeos = pointGeos.Except(GeoFac.CreateGeometrySelector(pointGeos)(_geo)).Distinct().ToList();
+                                            pointGeos = pointGeos.Except(GeoFac.CreateIntersectsSelector(pointGeos)(_geo)).Distinct().ToList();
                                         }
                                         foreach (var geo in pointGeos)
                                         {
@@ -558,10 +559,10 @@
                         if (false)
                         {
                             //修复屋面雨水斗，后面继续补上相关信息
-                            var f1 = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                            var f1 = GeoFac.CreateIntersectsSelector(item.VerticalPipes);
                             var lbLinesGroups = GeoFac.GroupGeometries(item.LabelLines).Select(g => GeoFac.CreateGeometry(g.ToArray())).ToList();
-                            var f2 = GeoFac.CreateGeometrySelector(lbLinesGroups);
-                            var f3 = GeoFac.CreateGeometrySelector(item.WLines);
+                            var f2 = GeoFac.CreateIntersectsSelector(lbLinesGroups);
+                            var f3 = GeoFac.CreateIntersectsSelector(item.WLines);
                             foreach (var lb in item.Labels)
                             {
                                 var ct = geoData.Labels[cadDataMain.Labels.IndexOf(lb)];
@@ -603,7 +604,7 @@
                 }
 
                 var labelLinesGroup = GeoFac.GroupGeometries(item.LabelLines);
-                var lbsGeosFilter = GeoFac.CreateGeometrySelector(labelLinesGroup.Select(lbs => GeoFac.CreateGeometry(lbs)).ToList());
+                var lbsGeosFilter = GeoFac.CreateIntersectsSelector(labelLinesGroup.Select(lbs => GeoFac.CreateGeometry(lbs)).ToList());
                 foreach (var pl in item.Labels)
                 {
                     var j = cadDataMain.Labels.IndexOf(pl);
@@ -681,7 +682,7 @@
                 var shortTranslatorLabels = new HashSet<string>();
 
                 {
-                    var gbkf = GeoFac.CreateGeometrySelector(item.GravityWaterBuckets);
+                    var gbkf = GeoFac.CreateIntersectsSelector(item.GravityWaterBuckets);
                     foreach (var lb in item.Labels)
                     {
                         var j = cadDataMain.Labels.IndexOf(lb);
@@ -1125,7 +1126,7 @@
                             //var wrappingPipes = g.Where(pl => item.WrappingPipes.Contains(pl)).ToList();
                             var wrappingPipes = new List<Geometry>();
                             {
-                                var f = GeoFac.CreateGeometrySelector(item.WrappingPipes);
+                                var f = GeoFac.CreateIntersectsSelector(item.WrappingPipes);
                                 foreach (var wline in wlines)
                                 {
                                     wrappingPipes.AddRange(f(wline));
@@ -1161,7 +1162,7 @@
                                             if (!AllNotEmpty(_fds, _wlines)) continue;
                                             {
                                                 //pipe和wline不相交的情况，跳过
-                                                var f = GeoFac.CreateGeometrySelector(_wlines);
+                                                var f = GeoFac.CreateIntersectsSelector(_wlines);
                                                 if (f(pp).Count == 0) continue;
                                             }
                                             foreach (var fd in _fds)
@@ -1171,7 +1172,7 @@
                                             {
                                                 //套管还要在wline上才行
                                                 var _wrappingPipes = new List<Geometry>();
-                                                var f = GeoFac.CreateGeometrySelector(wrappingPipes);
+                                                var f = GeoFac.CreateIntersectsSelector(wrappingPipes);
                                                 foreach (var wline in _wlines)
                                                 {
                                                     _wrappingPipes.AddRange(f(wline));
@@ -1198,7 +1199,7 @@
                                             if (!AllNotEmpty(_fds, _wlines, _pps)) continue;
                                             {
                                                 //pipe和wline不相交的情况，跳过
-                                                var f = GeoFac.CreateGeometrySelector(_wlines);
+                                                var f = GeoFac.CreateIntersectsSelector(_wlines);
                                                 if (f(pp).Count == 0) continue;
                                             }
                                             foreach (var fd in _fds)
@@ -1312,7 +1313,7 @@
                     //处理方式：
                     //若地漏没有连接任何横管，则在地漏圆心500的范围内找没有连接任何地漏的最近的NL或Y2L，认为两者相连。
                     var gs = GeoFac.GroupGeometries(ToList(item.FloorDrains, item.WLines));
-                    var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
+                    var f = GeoFac.CreateIntersectsSelector(item.VerticalPipes);
                     foreach (var g in gs)
                     {
                         if (g.Count == 1)
@@ -1507,10 +1508,10 @@
                             wlinesGeo.Add(GeoFac.CreateGeometry(g.ToArray()));
                         }
                     }
-                    var filtWLines = GeoFac.CreateGeometrySelector(wlinesGeo);
+                    var filtWLines = GeoFac.CreateIntersectsSelector(wlinesGeo);
                     {
-                        var f1 = GeoFac.CreateGeometrySelector(item_WrappingPipes);
-                        var f2 = GeoFac.CreateGeometrySelector(item_WaterPortSymbols);
+                        var f1 = GeoFac.CreateIntersectsSelector(item_WrappingPipes);
+                        var f2 = GeoFac.CreateIntersectsSelector(item_WaterPortSymbols);
                         var gs = GeoFac.GroupGeometries(ToList(item_WLines, item_VerticalPipes, item_WaterPortSymbols));
                         foreach (var g in gs)
                         {
@@ -1727,8 +1728,8 @@
                         drData.PipeLabelToWaterWellLabels.AddRange(pipeLabelToWaterWellLabels);
                     }
                     {
-                        var f1 = GeoFac.CreateGeometrySelector(item_WrappingPipes);
-                        var f3 = GeoFac.CreateGeometrySelector(item_WaterPortSymbols);
+                        var f1 = GeoFac.CreateIntersectsSelector(item_WrappingPipes);
+                        var f3 = GeoFac.CreateIntersectsSelector(item_WaterPortSymbols);
                         foreach (var pipe in item_VerticalPipes)
                         {
                             lbDict.TryGetValue(pipe, out string label);
@@ -1756,7 +1757,7 @@
                                 }
                             }
                         }
-                        var f2 = GeoFac.CreateGeometrySelector(item.WaterPort13s);
+                        var f2 = GeoFac.CreateIntersectsSelector(item.WaterPort13s);
                         foreach (var pipe in item_VerticalPipes)
                         {
                             void f()
@@ -1798,10 +1799,10 @@
                     void f5(List<GLineSegment> segs)
                     {
                         var _wlines1 = wlines1.Select(seg => seg.Buffer(10)).ToList();
-                        var f1 = GeoFac.CreateGeometrySelector(_wlines1);
+                        var f1 = GeoFac.CreateIntersectsSelector(_wlines1);
                         var _wlines2 = segs.Select(seg => seg.Extend(-20).Buffer(10)).ToList();
                         var _wlines3 = segs.Select(seg => seg.Extend(.1).Buffer(10)).ToList();
-                        var f2 = GeoFac.CreateGeometrySelector(_wlines2);
+                        var f2 = GeoFac.CreateIntersectsSelector(_wlines2);
                         var _rs = item.WaterWells.Concat(item.WrappingPipes).Concat(item.WaterPortSymbols).Concat(item.VerticalPipes).Distinct().ToArray();
                         var __wlines2 = _wlines2.Except(f2(GeoFac.CreateGeometry(_rs))).Distinct().ToList();
                         var __wlines3 = __wlines2.Select(_wlines2).ToList().Select(_wlines3).ToList();
@@ -1953,8 +1954,8 @@
 
                 }
                 {
-                    var f1 = GeoFac.CreateGeometrySelector(item.WLines);
-                    var f2 = GeoFac.CreateGeometrySelector(lbDict.Keys.ToList());
+                    var f1 = GeoFac.CreateIntersectsSelector(item.WLines);
+                    var f2 = GeoFac.CreateIntersectsSelector(lbDict.Keys.ToList());
                     foreach (var kv in lbDict)
                     {
                         var m = ThRainSystemService.TestGravityLabelConnected(kv.Value);
