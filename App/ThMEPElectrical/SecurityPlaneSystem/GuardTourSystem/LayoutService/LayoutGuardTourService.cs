@@ -36,7 +36,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 var nLanes = getLayoutStructureService.GetNeedLanes(lanes, bufferRoom);
                  
                 LayoutOtherGTService layoutStairwellsGTService = new LayoutOtherGTService();
-                var layoutPts = layoutStairwellsGTService.Layout(thRoom, otherRooms, doors, columns, walls);
+                var layoutPts = layoutStairwellsGTService.Layout(thRoom, otherRooms, nDoors, columns, walls);
 
                 LayoutGTAlongLaneService layoutGTAlongLaneService = new LayoutGTAlongLaneService();
                 var laneLayoutPts = layoutGTAlongLaneService.Layout(lanes, columns, layoutPts.Select(x => x.Item1).ToList());

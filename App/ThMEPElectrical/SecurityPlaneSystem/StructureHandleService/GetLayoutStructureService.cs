@@ -115,6 +115,26 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
+        /// 找到与门相交的房间
+        /// </summary>
+        /// <param name="door"></param>
+        /// <param name="rooms"></param>
+        /// <returns></returns>
+        public List<ThIfcRoom> GetNeedTHRooms(Polyline door, List<ThIfcRoom> rooms)
+        {
+            List<ThIfcRoom> needRooms = new List<ThIfcRoom>();
+            foreach (var room in rooms)
+            {
+                if (door.Intersects(room.Boundary))
+                {
+                    needRooms.Add(room);
+                }
+            }
+
+            return needRooms;
+        }
+
+        /// <summary>
         /// 找到需要的与房间相交的门
         /// </summary>
         /// <param name="doors"></param>

@@ -164,6 +164,13 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\HandleAccessControlRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutAccessControlService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayVisitorTalkService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\CommonRoomHandleService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
@@ -257,9 +264,7 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SecurityPlaneSystem\AccessControlSystem\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.Utls
@@ -168,6 +169,41 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
 
             var orderPts = pts.Select(x => x.TransformBy(matrix)).ToList();
             return orderPts;
+        }
+
+        /// <summary>
+        /// 计算控制器布置点位
+        /// </summary>
+        /// <param name="structs"></param>
+        /// <param name="dir"></param>
+        /// <param name="doorPt"></param>
+        /// <returns></returns>
+        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Polyline polyline, Vector3d dir, Point3d doorPt, double angle, double blockWidth)
+        {
+            Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
+            var bufferPolyline = polyline.Buffer(5)[0] as Polyline;
+            foreach (var str in structs)
+            {
+                var allLines = str.GetAllLinesInPolyline().Where(x => bufferPolyline.Intersects(x)).ToList();
+                foreach (var line in allLines)
+                {
+                    var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
+                    if (!dir.IsParallelWithTolerance(lineDir, angle) && line.Length > blockWidth)
+                    {
+                        var pt = line.StartPoint.DistanceTo(doorPt) < line.EndPoint.DistanceTo(doorPt) ? line.StartPoint : line.EndPoint;
+                        var checkDir = (pt - doorPt).GetNormal();
+                        if (checkDir.DotProduct(lineDir) < 0)
+                        {
+                            lineDir = -lineDir;
+                        }
+
+                        var layoutPt = pt + lineDir * (blockWidth / 2);
+                        resLayoutInfo.Add(line, layoutPt);
+                    }
+                }
+            }
+
+            return resLayoutInfo.OrderBy(x => x.Value.DistanceTo(doorPt)).ToDictionary(x => x.Key, y => y.Value);
         }
     }
 }
