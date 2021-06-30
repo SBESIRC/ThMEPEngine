@@ -11,6 +11,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
+        uiDrainageSysAboveGround uiAGSysDrain;
         public void Initialize()
         {
             uiFireHydrant = null;
@@ -46,7 +47,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             uiSet = new uiDrainageSystemSet();
             AcadApp.ShowModelessWindow(uiSet);
         }
-
         /// <summary>
         /// 给水系统图
         /// </summary>
@@ -95,8 +95,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
         public void ThDrainageSysAboveGround()
         {
-            var ui = new uiDrainageSysAboveGround();
-            AcadApp.ShowModelessWindow(ui);
+            if (uiAGSysDrain != null && uiAGSysDrain.IsLoaded)
+                return;
+            uiAGSysDrain = new uiDrainageSysAboveGround();
+            AcadApp.ShowModelessWindow(uiAGSysDrain);
         }
 
         [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]

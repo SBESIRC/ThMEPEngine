@@ -7,7 +7,7 @@
                     Title="地上排水" MinWidth="150"
                     xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     mc:Ignorable="d" SizeToContent="WidthAndHeight">
-    <Grid Margin="5">
+    <Grid Margin="5" x:Name="gridForm">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -19,21 +19,21 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Vertical">
-                <cus:ImageButton Height="22" Content="楼层框定" Margin="0,0,0,5"></cus:ImageButton>
-                <cus:ImageButton Height="22" Content="读取楼层" Margin="0"></cus:ImageButton>
+                <cus:ImageButton Height="22" Content="楼层框定" Name="btnFloorFrame" Margin="0,0,0,5" Click="btnFloorFrame_Click"></cus:ImageButton>
+                <cus:ImageButton Height="22" Content="读取楼层" Margin="0" Name="btnReadFloor" Click="btnReadFloor_Click"></cus:ImageButton>
             </StackPanel>
             <cus:ImageButton Name="btnSet" Grid.Column="1" Content="参数设置" Margin="5,0,0,0" Click="btnSet_Click"></cus:ImageButton>
         </Grid>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,0">
             <Border BorderThickness="0,1,0,0"></Border>
             <Label Content="楼层表：" FontWeight="Black"></Label>
-            <ListBox Grid.Row="1" Height="200" BorderThickness="0"></ListBox>
+            <ListBox Grid.Row="1" Height="200" BorderThickness="0" ItemsSource="{Binding FloorFrameds}" DisplayMemberPath="floorShowName" MouseDoubleClick="ListBox_MouseDoubleClick"/>
             <Border BorderThickness="0,1,0,0"></Border>
         </StackPanel>
         
         <Grid Grid.Row="2" Margin="0,5,0,0">
-            <cus:ImageButton Content="布置立管" Width="60" HorizontalAlignment="Left"></cus:ImageButton>
-            <cus:ImageButton Content="应用" Width="40" Height="22" HorizontalAlignment="Right"></cus:ImageButton>
+            <cus:ImageButton Content="布置立管" Width="60" HorizontalAlignment="Left" TextMargin="5" Name="btnLayoutPipe" Click="btnLayoutPipe_Click"></cus:ImageButton>
+            <cus:ImageButton Content="应用" Width="40" Height="22" HorizontalAlignment="Right" Visibility="Collapsed"></cus:ImageButton>
         </Grid>
     </Grid>
 </cus:ThCustomWindow>

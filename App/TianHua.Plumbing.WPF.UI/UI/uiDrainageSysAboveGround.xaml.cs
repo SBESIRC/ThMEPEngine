@@ -1,18 +1,19 @@
-﻿using System;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using ThControlLibraryWPF;
+using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPWSS.Command;
+using ThMEPWSS.Common;
+using ThMEPWSS.Model;
+using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -21,18 +22,133 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiDrainageSysAboveGround : ThCustomWindow
     {
+        //防止用户重复点击按钮，这里将窗体隐藏用户选择完成后在显示，
+        //或将按钮全部置为不可用状态，选择完成后在进行可用
+        //或使用一个标志，根据标志的值判断是否再执行中，如果执行中，就不再执行代码
+        //或使用进度条，或等待页面
+        ShowListViewModel viewModel = new ShowListViewModel();
+        static DrainageSystemAGViewmodel setViewModel = null;
+        bool _createFrame = false;
+        bool _readFloor = false;
         public uiDrainageSysAboveGround()
         {
             InitializeComponent();
+            this.DataContext = viewModel;
+            if(null == setViewModel)
+                setViewModel = new DrainageSystemAGViewmodel();
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var ui = new uiDrainageSysAboveGroundSet();
+            var copyViewModel = ModelCloneUtil.Copy(setViewModel);
+            var ui = new uiDrainageSysAboveGroundSet(copyViewModel);
+            ui.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             var result = ui.ShowDialog();
-            if (result.Value) 
+            if (result.Value)
             {
-                
+                setViewModel = ModelCloneUtil.Copy(copyViewModel);
+            }
+
+        }
+        private void btnFloorFrame_Click(object sender, RoutedEventArgs e)
+        {
+            if (_createFrame)
+                return;
+            try
+            {
+                _createFrame = true;
+                ThMEPWSS.Common.Utils.CreateFloorFraming();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "天华-错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally 
+            {
+                _createFrame = false;
+            }
+        }
+        private void btnReadFloor_Click(object sender, RoutedEventArgs e)
+        {
+            if (_readFloor)
+                return;
+            try
+            {
+                _readFloor = true;
+                if (viewModel.FloorFrameds == null)
+                    viewModel.FloorFrameds = new ObservableCollection<FloorFramed>();
+                var res = FramedReadUtil.SelectFloorFramed(out List<FloorFramed> selectList);
+                if (res && null != selectList && selectList.Count>0) 
+                {
+                    viewModel.FloorFrameds.Clear();
+                    selectList = FramedReadUtil.FloorFramedOrder(selectList,true);
+                    foreach (var item in selectList)
+                    {
+                        viewModel.FloorFrameds.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "天华-错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally 
+            {
+                _readFloor = false;
+            }
+        }
+
+        private void btnLayoutPipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (null == viewModel || viewModel.FloorFrameds == null || viewModel.FloorFrameds.Count < 1)
+            {
+                MessageBox.Show("没有任何楼层信息，在读取楼层信息后在进行相应的操作，如果图纸中也没有楼层信息，请放置楼层信息后再进行后续操作",
+                    "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            //放置用户重复点击按钮，先将按钮置为不可用，业务完成后再将按钮置为可用
+            //直接设置后，后续的页面逻辑会卡UI线程，需要刷新一下界面
+            try
+            {
+                FormUtil.DisableForm(gridForm);
+                ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(viewModel.FloorFrameds.ToList(), setViewModel);
+                thDrainSystem.Execute();
+                //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
+                ThMEPWSS.Common.Utils.FocusToCAD();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "天华-错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally 
+            {
+                FormUtil.EnableForm(gridForm);
+            }
+            
+        }
+
+        private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            //导航定位选中的楼层框
+            var selectItem = ((ListBox)sender).SelectedValue;
+            if (null == selectItem)
+                return;
+            var selectFloor = (FloorFramed)selectItem;
+            if (null == selectItem)
+                return;
+            Interaction.ZoomObjects(new List<ObjectId> { selectFloor.blockId });
+        }
+    }
+    class ShowListViewModel : NotifyPropertyChangedBase
+    {
+        private ObservableCollection<FloorFramed> floorFrameds { get; set; }
+        public ObservableCollection<FloorFramed> FloorFrameds
+        {
+            get { return floorFrameds; }
+            set
+            {
+                floorFrameds = value;
+                this.RaisePropertyChanged();
             }
         }
     }

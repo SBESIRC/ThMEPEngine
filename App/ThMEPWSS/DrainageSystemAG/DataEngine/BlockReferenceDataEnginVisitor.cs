@@ -8,10 +8,10 @@ using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
 {
-    public class EquipmentDataEnginVisitor: ThDistributionElementExtractionVisitor
+    public class BlockReferenceDataEnginVisitor : ThDistributionElementExtractionVisitor
     {
         protected Dictionary<string, int> blockNames;
-        public EquipmentDataEnginVisitor(Dictionary<string, int> bNames) 
+        public BlockReferenceDataEnginVisitor(Dictionary<string, int> bNames) 
         {
             blockNames = new Dictionary<string, int>();
             if (null != bNames && bNames.Count > 0)
@@ -29,6 +29,20 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
             if (dbObj is BlockReference blkref)
             {
                 HandleBlockReference(elements, blkref, matrix);
+            }
+            else if (dbObj.GetType().ToString().ToUpper().Contains("IMPENTITY")) 
+            {
+                //自定义实体，直接炸开继续循环获取
+                try 
+                {
+                    var explodes = ThMEPTCHService.ExplodeTCHElement(dbObj);
+                    if (null != explodes && explodes.Count > 0)
+                        foreach (Entity entity in explodes)
+                            DoExtract(elements, entity, matrix);
+                }
+                catch (Exception ex) 
+                { }
+                
             }
         }
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -93,9 +107,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                 throw new NotSupportedException();
             }
         }
-        public override bool CheckLayerValid(Entity curve)
-        {
-            return true;
-        }
+        //public override bool CheckLayerValid(Entity curve)
+        //{
+        //    return true;
+        //}
     }
 }

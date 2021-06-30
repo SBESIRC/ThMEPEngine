@@ -3,7 +3,8 @@
     
     <SolidColorBrush x:Key="WindowTitleBackgroundColor" Color="#474747"/>
     <SolidColorBrush x:Key="WindowTitleForegroundColor" Color="#969696"/>
-    <SolidColorBrush x:Key="DisableBackgroundColor" Color="#2c2c2c"/>
+    <SolidColorBrush x:Key="DisableBackgroundColor" Color="#F0ACACAC"/>
+    <SolidColorBrush x:Key="DisableForegroundColor" Color="Gray"/>
     <SolidColorBrush x:Key="ForegroundColor" Color="#505050"/>
     <SolidColorBrush x:Key="BackgroundColor" Color="White"/>
     

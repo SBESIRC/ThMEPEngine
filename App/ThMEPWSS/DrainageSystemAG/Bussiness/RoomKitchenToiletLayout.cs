@@ -23,14 +23,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private List<TubeWellsRoomModel> _tubeWellsRooms = new List<TubeWellsRoomModel>();
         private List<RoomPipeRoomRelation> _roomPipeRoomRelations = new List<RoomPipeRoomRelation>();
         private AcadDatabase _acdb;
+        private string _floorUid;
         /// <summary>
         /// 卫生间、厨房业务逻辑构造方法
         /// </summary>
         /// <param name="toiletRooms">卫生间房间</param>
         /// <param name="kitchenRooms">厨房房间</param>
         /// <param name="tubeWellsRooms">管道井房间信息</param>
-        public RoomKitchenToiletLayout(AcadDatabase database,List<RoomModel> toiletRooms,List<RoomModel> kitchenRooms, List<TubeWellsRoomModel> tubeWellsRooms) 
+        public RoomKitchenToiletLayout(string floorId,AcadDatabase database,List<RoomModel> toiletRooms,List<RoomModel> kitchenRooms, List<TubeWellsRoomModel> tubeWellsRooms) 
         {
+            _floorUid = floorId;
             _acdb = database;
             if (null != toiletRooms && toiletRooms.Count>0)
                 foreach (var item in toiletRooms) 
@@ -185,13 +187,19 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         /// <param name="room"></param>
         private void PipingShaftOnlyKitchen(PipeRoomSpace roomModel, RoomModel room) 
         {
-            //厨房独用
-            //一根废水立管（FL）
-            //这里立管占位置都是矩形的
+            //厨房独用 一根废水立管（FL） 这里立管占位置都是矩形的
             //图纸比例1:50 1:100    带定位立管 定位点在中心处
-            //图纸比例1:150         带定位立管150  定位点在左下角
-            List<DynBlockWidthLength> blockWidth = new List<DynBlockWidthLength>();
-            blockWidth.Add(new DynBlockWidthLength("带定位立管", "DN100","FL"));
+            //图纸比例1:150         带定位立管150  定位点在中心处
+            var blockWidth = new List<DynBlockWidthLength>();
+            if (SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150)
+            {
+                blockWidth.Add(new DynBlockWidthLength(ThWSSCommon.Layout_PositionRiser150BlockName, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
+            }
+            else 
+            {
+                blockWidth.Add(new DynBlockWidthLength(ThWSSCommon.Layout_PositionRiserBlockName, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
+            }
+            
             PipingToBlock(roomModel, blockWidth);
 
         }
@@ -206,12 +214,15 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             //管井内必然有一根通气立管（TL）和一根污废立管（PL）。若UI上勾选了“沉箱”，则再增加一根沉箱立管（DL）。
             //Case1无沉箱 TL-PL Case2有沉箱 DL-TL-PL
             List<DynBlockWidthLength> blockWidth = new List<DynBlockWidthLength>();
+            string blockNames = ThWSSCommon.Layout_PositionRiserBlockName;
+            if (SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150)
+                blockNames = ThWSSCommon.Layout_PositionRiser150BlockName;
             if (SetServicesModel.Instance.toiletIsCaisson) 
             {
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(),"DL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(),"DL"));
             }
-            blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
-            blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
+            blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+            blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
 
             PipingToBlock(roomModel, blockWidth);
         }
@@ -219,15 +230,13 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private void PipingToBlock(PipeRoomSpace roomModel,List<DynBlockWidthLength> dynBlocks) 
         {
             //这里立管占位置都是矩形的
-            //图纸比例1:50 1:100    带定位立管 定位点在中心处
-            //图纸比例1:150         带定位立管150  定位点在中心处
-            var calcWidths = DrainSysAGCommon.GetDynBlockMaxWidth(_acdb, dynBlocks);
+            var calcWidths = DrainSysAGCommon.GetDynBlockMaxWidth(dynBlocks);
             var width = calcWidths.Max(c => c.width);
             var createPoint = roomModel.startPoint + roomModel.shortAxis.MultiplyBy(width / 2);
             foreach (var item in dynBlocks)
             {
                 createPoint = createPoint + roomModel.longAxis.MultiplyBy(item.width / 2);
-                var block = new CreateBlockInfo(item.blockName, "W-DRAI-EQPM", createPoint);
+                var block = new CreateBlockInfo(_floorUid,item.blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, createPoint,EnumEquipmentType.riser);
                 block.spaceId = roomModel.pipeRoomModel.thIFCRoom.Uuid;
                 block.tag = item.tag;
                 block.dymBlockAttr.Add("可见性1", item.dynName);
@@ -247,6 +256,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             //管井内必然有一根通气立管（TL）和一根污废立管（PL）。若UI上勾选了“沉箱”，则再增加一根沉箱立管（DL）。一根废水立管（FL）
             //若管井仅短边靠近厨房，顺序应为FL-TL-PL或FL-DL-TL-PL
             //若管井长边靠近厨房，则顺序为TL-PL-FL或DL-TL-PL-FL
+            string blockNames = ThWSSCommon.Layout_PositionRiserBlockName;
+            if (SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150)
+                blockNames = ThWSSCommon.Layout_PositionRiser150BlockName;
             var startPoint = GetPipingShaftStartPoint(kitchenRoomModel, pipeRoomModel.pipeRoomModel, out Vector3d shortAxis, out Vector3d longAxis, out bool longNearKitch,true);
             List<DynBlockWidthLength> blockWidth = new List<DynBlockWidthLength>();
             if (longNearKitch)
@@ -254,22 +266,22 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 //则顺序为TL-PL-FL或DL-TL-PL-FL
                 if(SetServicesModel.Instance.toiletIsCaisson)
                 {
-                    blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
+                    blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
                 }
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
             }
             else 
             {
                 //顺序应为FL-TL-PL或FL-DL-TL-PL
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
                 if (SetServicesModel.Instance.toiletIsCaisson)
                 {
-                    blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
+                    blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
                 }
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
-                blockWidth.Add(new DynBlockWidthLength("带定位立管", SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
             }
             var pipeRoom = new PipeRoomSpace(pipeRoomModel.pipeRoomModel, startPoint, shortAxis, longAxis,false);
             PipingToBlock(pipeRoom, blockWidth);
@@ -362,16 +374,19 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
              */
             if (dir.CrossProduct(dir).Z < 0)
                 return false;
+            string blockNames = ThWSSCommon.Layout_PositionRiserBlockName;
+            if (SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150)
+                blockNames = ThWSSCommon.Layout_PositionRiser150BlockName;
             //判断附近是否有烟道井
             List<DynBlockWidthLength> dynBlocks = new List<DynBlockWidthLength>();
-            dynBlocks.Add(new DynBlockWidthLength("带定位立管", "DN100", "FL"));
-            var calcWidths = DrainSysAGCommon.GetDynBlockMaxWidth(_acdb, dynBlocks);
+            dynBlocks.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
+            var calcWidths = DrainSysAGCommon.GetDynBlockMaxWidth(dynBlocks);
             var width = calcWidths.Max(c => c.width);
             var createPoint = sp + dir.MultiplyBy(width / 2);
             foreach (var item in dynBlocks)
             {
                 createPoint = createPoint + dir2.MultiplyBy(item.width / 2);
-                var block = new CreateBlockInfo(item.blockName, "W-DRAI-EQPM", createPoint);
+                var block = new CreateBlockInfo(_floorUid,item.blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, createPoint,EnumEquipmentType.riser);
                 block.spaceId = roomId;
                 block.tag = item.tag;
                 block.dymBlockAttr.Add("可见性1", item.dynName);
@@ -388,7 +403,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         {
             foreach (var room in targetRooms)
             {
-                var roomPline = room.outLine.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
                 var roomPipeRoom = new RoomPipeRoomRelation(room);
                 foreach (var item in _tubeWellsRooms)
                 {
@@ -407,7 +421,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     }
                     if (null == pipeRoom)
                         continue;
-                    pipeRoom.minDisToRoom = roomPline.Distance(pipeRoom.startPoint);
+                    pipeRoom.minDisToRoom = room.outLine.Distance(pipeRoom.startPoint);
                     roomPipeRoom.pipeRoomSpaces.Add(pipeRoom);
                 }
                 _roomPipeRoomRelations.Add(roomPipeRoom);
@@ -445,11 +459,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             //管井是个矩形。先找到矩形的较短的两侧，然后在两侧中找到距离墙（延长线）较远的边（靠外布置）。这条边认为是布置立管的起点，按顺序往另一条短边依次布置立管。
             //优先排布在长边一侧，靠近房间,靠近房间的线基本和房间线平行，这里不用考虑太多斜边问题
             //房间的形状基本不会太过不规整，这里就不考虑斜边多，怪异形状
-            var gmtry = room.outLine.ToNTSGeometry().EnvelopeInternal;
-            var centerPoint = new Point3d((gmtry.MinX + gmtry.MaxX) / 2, (gmtry.MinY + gmtry.MaxY) / 2, 0);
-
-            var pipeRoomPline = tubeWell.outLine.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
-            var pipeRoomLines = DrainSysAGCommon.PolyLineToLines(pipeRoomPline);
+            var centerPoint = room.GetRoomCenterPoint();
+            var pipeRoomLines = DrainSysAGCommon.PolyLineToLines(tubeWell.outLine);
             var objs = new DBObjectCollection();
             pipeRoomLines.ForEach(x => objs.Add(x));
             pipeRoomLines = ThMEPLineExtension.LineSimplifier(objs, 50, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();

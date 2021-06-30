@@ -115,32 +115,29 @@ namespace ThMEPWSS.Engine
                 var ntsPLine = item.Boundary.ToNTSPolygon();
                 pRoom.outLine = ntsPLine.ToDbPolylines().FirstOrDefault();
                 pRoom.roomTypeName = EnumRoomType.Other;
-                if (item.Tags == null || item.Tags.Count < 1)
+                if (item.Tags != null && item.Tags.Count > 0)
                 {
-                    ////没有找到空间名称,这里只找面积比较小的，可能是管井的空间
-                    pipeRooms.Add(pRoom);
-                    continue;
-                }
-                //计算类别，这里是获取基本的房间
-                foreach (var name in item.Tags)
-                {
-                    if (pRoom.roomTypeName != EnumRoomType.Other)
-                        break;
-                    if (IsToilte(name))
+                    //计算类别，这里是获取基本的房间
+                    foreach (var name in item.Tags)
                     {
-                        pRoom.roomTypeName = EnumRoomType.Toilet;
-                    }
-                    else if (IsKitchen(name))
-                    {
-                        pRoom.roomTypeName = EnumRoomType.Kitchen;
-                    }
-                    else if (IsBalcony(name))
-                    {
-                        pRoom.roomTypeName = EnumRoomType.Balcony;
-                    }
-                    else if (IsCorridor(name))
-                    {
-                        pRoom.roomTypeName = EnumRoomType.Corridor;
+                        if (pRoom.roomTypeName != EnumRoomType.Other)
+                            break;
+                        if (IsToilte(name))
+                        {
+                            pRoom.roomTypeName = EnumRoomType.Toilet;
+                        }
+                        else if (IsKitchen(name))
+                        {
+                            pRoom.roomTypeName = EnumRoomType.Kitchen;
+                        }
+                        else if (IsBalcony(name))
+                        {
+                            pRoom.roomTypeName = EnumRoomType.Balcony;
+                        }
+                        else if (IsCorridor(name))
+                        {
+                            pRoom.roomTypeName = EnumRoomType.Corridor;
+                        }
                     }
                 }
                 if (pRoom.roomTypeName == EnumRoomType.Other || pRoom.roomTypeName == EnumRoomType.FlueWell || pRoom.roomTypeName == EnumRoomType.TubeWell)
@@ -152,10 +149,11 @@ namespace ThMEPWSS.Engine
                         {
                             if (hisIds.Any(c => c.Equals(tfRoom.thIFCRoom.Uuid)))
                                 continue;
-                            if (ntsPLine.Crosses(tfRoom.outLine.ToNTSGeometry()))
+                            var thOutLine = tfRoom.outLine.ToNTSPolygon();
+                            if (ntsPLine.Intersects(thOutLine) || ntsPLine.Crosses(thOutLine))
                             {
                                 pRoom.roomTypeName = tfRoom.roomTypeName;
-                                pRoom.outLine = ntsPLine.Union(tfRoom.outLine.ToNTSGeometry()).ToDbCollection().ToNTSMultiPolygon().ToDbPolylines().FirstOrDefault();
+                                pRoom.outLine = ntsPLine.Union(thOutLine).ToDbCollection().ToNTSMultiPolygon().ToDbPolylines().FirstOrDefault();
                                 hisIds.Add(tfRoom.thIFCRoom.Uuid);
                             }
                         }
@@ -190,6 +188,8 @@ namespace ThMEPWSS.Engine
                     var room = new RoomModel();
                     room.thIFCRoom = ThIfcRoom.Create(item);
                     room.outLine = room.thIFCRoom.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    if (room.outLine.Area < 10)
+                        continue;
                     room.roomTypeName = EnumRoomType.TubeWell;
                     rooms.Add(room);
                 }
@@ -201,6 +201,8 @@ namespace ThMEPWSS.Engine
                     var room = new RoomModel();
                     room.thIFCRoom = ThIfcRoom.Create(item.GeometricExtents.ToNTSPolygon().ToDbEntity());
                     room.outLine = room.thIFCRoom.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    if (room.outLine.Area < 10)
+                        continue;
                     room.roomTypeName = EnumRoomType.FlueWell;
                     rooms.Add(room);
                 }
@@ -219,9 +221,9 @@ namespace ThMEPWSS.Engine
             {
                 if (item == null || item.thIFCRoom == null || (item.roomTypeName != EnumRoomType.TubeWell && item.roomTypeName != EnumRoomType.Other))
                     continue;
-                if (item.roomTypeName == EnumRoomType.TubeWell)
+                if (item.roomTypeName != EnumRoomType.Other)
                 {
-                    tubeRooms.Add(item);
+                    //tubeRooms.Add(item);
                     continue;
                 }
                 var area = item.outLine.Area;
@@ -256,7 +258,7 @@ namespace ThMEPWSS.Engine
                 var area = item.outLine.Area;
                 if (area > maxFlueWellRoomArea || area < minFlueWellRoomArea)
                     continue;
-                var gmtry = item.outLine.ToNTSGeometry().EnvelopeInternal;
+                var gmtry = item.GetRoomOBBPolyline().ToNTSGeometry().EnvelopeInternal;
                 var minDis = Math.Min(gmtry.Width, gmtry.Height);
                 if (minDis >= minFlueWellRoomMinSideLength)
                     flueRooms.Add(item);

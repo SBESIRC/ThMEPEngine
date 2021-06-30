@@ -199,6 +199,14 @@
                                     </MultiBinding>
                                 </Setter.Value>
                             </Setter>
+                            <Setter Property="Foreground" TargetName="text">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource foregroundConverter}" NotifyOnSourceUpdated="True" ConverterParameter="Foreground">
+                                        <Binding Path="DisabledForeground" RelativeSource="{RelativeSource TemplatedParent}" NotifyOnSourceUpdated="True"/>
+                                        <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <!--End 按钮不可用事件-->
                     </ControlTemplate.Triggers>

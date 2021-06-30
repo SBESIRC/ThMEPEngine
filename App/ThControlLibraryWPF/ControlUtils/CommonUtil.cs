@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -62,5 +64,89 @@ namespace ThControlLibraryWPF.ControlUtils
             }
             comboBox.SelectedIndex = 0;
         }
+
+        #region 枚举的相关信息
+        public static List<UListItemData> EnumDescriptionToList(Type enumType,int minValue,int maxValue, string noSelectName = "") 
+        {
+            var uList = EnumDescriptionToList(enumType, noSelectName);
+            var retUList = new List<UListItemData>();
+            foreach (var item in uList) 
+            {
+                if (item.Value == -1)
+                {
+                    retUList.Add(item);
+                }
+                else if (item.Value >= minValue && item.Value <= maxValue) 
+                {
+                    retUList.Add(item);
+                }
+            }
+            return retUList;
+        }
+        public static List<UListItemData> EnumDescriptionToList(Type enumType, List<int> values, string noSelectName = "")
+        {
+            var uList = EnumDescriptionToList(enumType, noSelectName);
+            var retUList = new List<UListItemData>();
+            foreach (var item in uList) 
+            {
+                if (item.Value == -1)
+                {
+                    retUList.Add(item);
+                }
+                else if(values.Any(c=>c == item.Value))
+                {
+                    retUList.Add(item);
+                }
+            }
+            return retUList;
+        }
+        public static List<UListItemData> EnumDescriptionToList(Type enumType, string noSelectName = "")
+        {
+            if (enumType.BaseType != typeof(Enum))
+                throw new Exception("不支持非枚举类型");
+            var itemDatas = new List<UListItemData>();
+            string[] allEnums = null;
+            try
+            {
+                allEnums = Enum.GetNames(enumType);
+            }
+            catch (Exception ex) { throw ex; }
+            if (!string.IsNullOrEmpty(noSelectName))
+            {
+                itemDatas.Add(new UListItemData(noSelectName, -1));
+            }
+            if (null == allEnums || allEnums.Length < 1)
+                return itemDatas;
+            foreach (var item in allEnums)
+            {
+                var enumItem = enumType.GetField(item);
+                int value = (int)enumItem.GetValue(item);
+                object[] objs = enumItem.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                string des = "";
+                if (objs.Length == 0)
+                    des = item;
+                else
+                    des = ((DescriptionAttribute)objs[0]).Description;
+                itemDatas.Add(new UListItemData(des, value, enumItem));
+            }
+            return itemDatas;
+        }
+        /// <summary>
+        /// 获取枚举值的描述信息DescriptionAttribute中内容
+        /// [DescriptionAttribute("")]
+        /// </summary>
+        /// <param name="enumValue"></param>
+        /// <returns></returns>
+        public static string GetEnumDescription(Enum enumValue)
+        {
+            string value = enumValue.ToString();
+            FieldInfo field = enumValue.GetType().GetField(value);
+            object[] objs = field.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            if (objs.Length == 0)
+                return value;
+            DescriptionAttribute description = (DescriptionAttribute)objs[0];
+            return description.Description;
+        }
+        #endregion
     }
 }

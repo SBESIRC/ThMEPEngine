@@ -16,14 +16,6 @@ namespace ThMEPWSS
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "THDSYSXT", CommandFlags.Modal)]
-        public void THDSYSXT()
-        {
-            using (var cmd = new ThDrainSystemAboveGroundCmd())
-            {
-                cmd.Execute();
-            }
-        }
         [CommandMethod("TIANHUACAD", "THLGLC", CommandFlags.Modal)]
         public void THLGLC()
         {

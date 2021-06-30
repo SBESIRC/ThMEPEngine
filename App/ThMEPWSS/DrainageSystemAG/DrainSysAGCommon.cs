@@ -4,8 +4,6 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.DrainageSystemAG.Models;
@@ -15,43 +13,7 @@ namespace ThMEPWSS.DrainageSystemAG
 {
     class DrainSysAGCommon
     {
-        public static Point3dCollection GetPolyLinePointColllection(Polyline polyline) 
-        {
-            var firstPt = polyline.GetPoint3dAt(0);
-            var pts = new List<Point3d>();
-            pts.Add(firstPt);
-            for (int i = 1; i < polyline.NumberOfVertices; i++)
-            {
-                var pt = polyline.GetPoint3dAt(i);
-                if (firstPt.DistanceTo(pt) < 1)
-                    continue;
-                pts.Add(pt);
-            }
-            pts.Add(firstPt);
-            return new Point3dCollection(pts.ToArray());
-        }
-        public static Point3d PolyLineCenterPoint(Polyline polyline) 
-        {
-            Point3d sumPoints = new Point3d();
-            int count = 0;
-            var xVect = new Vector3d();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                var sp = polyline.GetPoint3dAt(i);
-                var ep = polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices);
-                if (sp.DistanceTo(ep) < 0.0001)
-                    continue;
-                var dir = (ep - sp).GetNormal();
-                count += 1;
-                var lineMidPoint = sp + dir.MultiplyBy(sp.DistanceTo(ep) / 2);
-                if (xVect.Length < 0.4)
-                    xVect = dir;
-                sumPoints = new Point3d(sumPoints.X + lineMidPoint.X, sumPoints.Y + lineMidPoint.Y, sumPoints.Z + lineMidPoint.Z);
-                
-            }
-            Point3d point = sumPoints / count;
-            return point;
-        }
+        public static readonly string BLOCKNAMEPREFIX = "TH-AGDRAIN-BLOCK";
         public static List<Line> PolyLineToLines(Polyline polyline)
         {
             List<Line> lines = new List<Line>();
@@ -66,37 +28,62 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             return lines;
         }
-        public static List<DynBlockWidthLength> GetDynBlockMaxWidth(AcadDatabase acdb, List<DynBlockWidthLength> dynBlockWidthLengths)
+        public static List<Entity> GetBlockInnerElement<T>(BlockReference blockReference, Matrix3d matrix) 
         {
-            //这里的块都是正方形，不用考虑朝向问题
-            foreach (var item in dynBlockWidthLengths)
+            List<Entity> resT = new List<Entity>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var objIds = ThDynamicBlockUtils.VisibleEntities(acdb.Database, item.blockName, item.dynName).Cast<ObjectId>().ToList();
-                if (null == objIds || objIds.Count < 1)
-                    continue;
-                var entitys = new List<Entity>();
-                foreach (ObjectId id in objIds)
+                
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                foreach (var id in blockTableRecord)
                 {
-                    var ent = acdb.Element<Entity>(id);
-                    entitys.Add(ent);
+                    var dbObj = acadDatabase.Element<Entity>(id);
+                    if (null == dbObj)
+                        continue;
+                    if (dbObj is BlockReference)
+                    {
+                        var block = dbObj as BlockReference;
+                        var mcs2wcs = block.BlockTransform.PreMultiplyBy(matrix);
+                        var res = GetBlockInnerElement<T>(block,mcs2wcs);
+                        if (res == null || res.Count < 1)
+                            continue;
+                        resT.AddRange(res);
+                    }
+                    else if (dbObj is T) 
+                    {
+                        resT.Add(dbObj.GetTransformedCopy(matrix));
+                    }
                 }
-                if (entitys.Count < 1)
-                    continue;
-                var extents = entitys[0].GeometricExtents;
-                for (int i = 1; i < entitys.Count; i++)
-                    extents.AddExtents(entitys[i].GeometricExtents);
-                item.width = extents.ToEnvelope().Width;
-                item.length = extents.ToEnvelope().Height;
             }
-            return dynBlockWidthLengths;
+            return resT;
         }
         public static List<DynBlockWidthLength> GetDynBlockMaxWidth(List<DynBlockWidthLength> dynBlockWidthLengths)
         {
             //这里的块都是正方形，不用考虑朝向问题
             using (AcadDatabase acdb = AcadDatabase.Active()) 
             {
-                return GetDynBlockMaxWidth(acdb, dynBlockWidthLengths);
+                //这里的块都是正方形，不用考虑朝向问题
+                foreach (var item in dynBlockWidthLengths)
+                {
+                    var objIds = ThDynamicBlockUtils.VisibleEntities(acdb.Database, item.blockName, item.dynName).Cast<ObjectId>().ToList();
+                    if (null == objIds || objIds.Count < 1)
+                        continue;
+                    var entitys = new List<Entity>();
+                    foreach (ObjectId id in objIds)
+                    {
+                        var ent = acdb.Element<Entity>(id);
+                        entitys.Add(ent);
+                    }
+                    if (entitys.Count < 1)
+                        continue;
+                    var extents = entitys[0].GeometricExtents;
+                    for (int i = 1; i < entitys.Count; i++)
+                        extents.AddExtents(entitys[i].GeometricExtents);
+                    item.width = extents.ToEnvelope().Width;
+                    item.length = extents.ToEnvelope().Height;
+                }
             }
+            return dynBlockWidthLengths;
         }
         public static List<TubeWellsRoomModel> GetTubeWellRoomRelation(List<RoomModel> allToilteKitchenRooms, List<RoomModel> tubeWellRooms)
         {
@@ -105,14 +92,13 @@ namespace ThMEPWSS.DrainageSystemAG
                 return retRooms;
             foreach (var room in tubeWellRooms)
             {
-                var gmtry = room.outLine.ToNTSGeometry().EnvelopeInternal;
-                var centerPoint = new Point3d((gmtry.MinX + gmtry.MaxX) / 2, (gmtry.MinY + gmtry.MaxY) / 2, 0);
+                var centerPoint = room.GetRoomCenterPoint();
                 var bufferGmtry = room.outLine.ToNTSGeometry().Buffer(500);
                 TubeWellsRoomModel roomModel = new TubeWellsRoomModel(room, centerPoint);
                 //管道井 和 卫生间厨房关系判断
                 foreach (var item in allToilteKitchenRooms)
                 {
-                    var pline = item.outLine.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    var pline = item.outLine;
                     if (pline.Contains(centerPoint))
                     {
                         //在内部
@@ -127,6 +113,67 @@ namespace ThMEPWSS.DrainageSystemAG
                 retRooms.Add(roomModel);
             }
             return retRooms;
+        }
+    
+    
+        public static CreateBlockInfo CopyOneBlock(CreateBlockInfo cBlock, Point3d oldBasePoint, Point3d newBasePoint, string floorId)
+        {
+            var moveVector = cBlock.createPoint - oldBasePoint;
+            var newPoint = newBasePoint + moveVector;
+            var createBlock = new CreateBlockInfo(floorId, cBlock.blockName, cBlock.layerName, newPoint, cBlock.equipmentType, cBlock.belongBlockId,cBlock.uid);
+            createBlock.rotateAngle = cBlock.rotateAngle;
+            createBlock.scaleNum = cBlock.scaleNum;
+            if (cBlock.attNameValues != null && cBlock.attNameValues.Count > 0)
+                foreach (var keyValue in cBlock.attNameValues)
+                    createBlock.attNameValues.Add(keyValue.Key, keyValue.Value);
+            if (cBlock.dymBlockAttr != null && cBlock.dymBlockAttr.Count > 0)
+                foreach (var keyValue in cBlock.dymBlockAttr)
+                    createBlock.dymBlockAttr.Add(keyValue.Key, keyValue.Value);
+            createBlock.spaceId = cBlock.spaceId;
+            createBlock.tag = cBlock.tag;
+            return createBlock;
+        }
+        public static CreateBasicElement CopyBaseElement(CreateBasicElement cElem, Point3d oldBasePoint, Point3d newBasePoint, string floorId)
+        {
+            CreateBasicElement basicElement = null;
+            if (cElem.baseCurce is Line)
+            {
+                Line line = (Line)cElem.baseCurce;
+                var lineSp = line.StartPoint;
+                var lineEp = line.EndPoint;
+                var spVector = lineSp - oldBasePoint;
+                var epVector = lineEp - oldBasePoint;
+                lineSp = newBasePoint + spVector;
+                lineEp = newBasePoint + epVector;
+                Line newLine = new Line(lineSp, lineEp);
+                basicElement = new CreateBasicElement(floorId, newLine, cElem.layerName, cElem.belongBlockId,cElem.curveTag, cElem.lineColor);
+            }
+            else if (cElem.baseCurce is Circle)
+            {
+
+            }
+            return basicElement;
+        }
+
+        public static CreateDBTextElement CopyTextElement(CreateDBTextElement cText, Point3d oldBasePoint, Point3d newBasePoint, string floorId)
+        {
+            var oldPoint = cText.dbText.Position;
+            var vectorMove = oldPoint - oldBasePoint;
+            var newPoint = newBasePoint + vectorMove;
+            DBText text = new DBText
+            {
+                TextString = cText.dbText.TextString,
+                Height = cText.dbText.Height,
+                WidthFactor = cText.dbText.WidthFactor,
+                HorizontalMode = cText.dbText.HorizontalMode,
+                Oblique = cText.dbText.Oblique,
+                Position = newPoint,
+                Rotation = cText.dbText.Rotation,
+            };
+            if (!string.IsNullOrEmpty(cText.layerName))
+                text.Layer = cText.layerName;
+            var copyText = new CreateDBTextElement(floorId, newPoint, text, cText.belongBlockId, cText.layerName,cText.textStyle, cText.uid);
+            return copyText;
         }
     }
 }

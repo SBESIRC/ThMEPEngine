@@ -39,6 +39,8 @@
         <Setter Property="DisabledBackground" Value="{StaticResource DisableBackgroundColor}"/>
         <Setter Property="MouseOverBackground" Value="{StaticResource ButtonMouseOverBackgroundColor}" />
         <Setter Property="MouseOverForeground" Value="{StaticResource ButtonMouseOverForegroundColor}"/>
+        <Setter Property="DisabledBackground" Value="{StaticResource DisableBackgroundColor}"/>
+        <Setter Property="DisabledForeground" Value="{StaticResource DisableForegroundColor}"/>
     </Style>
 
     <!--按钮默认样式-->

@@ -76,5 +76,14 @@ namespace ThMEPWSS.Common
             //var mi = w.GetType().GetMethod("Focus");
             //mi?.Invoke(w, null);
         }
+        public static void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
+        }
     }
 }

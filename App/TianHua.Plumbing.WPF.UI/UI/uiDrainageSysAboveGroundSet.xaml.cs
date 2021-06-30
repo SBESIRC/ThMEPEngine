@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -21,9 +22,22 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiDrainageSysAboveGroundSet : ThCustomWindow
     {
-        public uiDrainageSysAboveGroundSet()
+        public uiDrainageSysAboveGroundSet(DrainageSystemAGViewmodel viewModel)
         {
             InitializeComponent();
+            this.DataContext = viewModel;
+        }
+
+        private void btnOk_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+            this.Close();
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

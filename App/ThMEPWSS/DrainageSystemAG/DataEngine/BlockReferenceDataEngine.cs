@@ -11,72 +11,16 @@ using ThMEPWSS.DrainageSystemAG.Models;
 
 namespace ThMEPWSS.DrainageSystemAG.DataEngine
 {
-    class EquipmentDataEngine
+    class BlockReferenceDataEngine
     {
-        public List<EquipmentBlcokVisitorModel> equipmentBlcokVisitors { get; }
+        List<EquipmentBlcokVisitorModel> equipmentBlcokVisitors { get; }
         /// <summary>
         /// 获取本图纸中所有的设备信息
         /// </summary>
-        public EquipmentDataEngine() 
+        public BlockReferenceDataEngine() 
         {
             equipmentBlcokVisitors = new List<EquipmentBlcokVisitorModel>();
             InitBlockNames();
-            ///一次遍历获取数据，防止后面在多次遍历数据
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var eqBlocks = acdb.ModelSpace.OfType<BlockReference>();
-                var test = acdb.ModelSpace.OfType<Entity>();
-                foreach (var item in test) 
-                {
-                    continue;
-                    if (item.GetType().Name.StartsWith("Imp")) 
-                    {
-                        Type type = item.GetType();
-                        var tType = item.AcadObject.GetType();
-                        var block = acdb.Blocks.Where(c => c.Id == item.OwnerId);
-                        var t = item.GetType().Assembly;
-                        var testT= t.GetTypes().Where(c => item.GetType().IsAssignableFrom(c)).Where(c => c.IsClass);
-                        string typeN = item.LayerNameTypedValue().ToString();
-
-                        PropertyDescriptor pd = TypeDescriptor.GetProperties(item.AcadObject)["ObjectName"];
-                        var dict = new Dictionary<string, object>();
-                        foreach (PropertyDescriptor pi in TypeDescriptor.GetProperties(item.AcadObject))
-                        {
-                            var proT = pi.PropertyType;
-                            if (proT == typeof(string) || proT == typeof(double) || proT == typeof(float) || proT == typeof(int) || proT == typeof(long)
-                                || proT == typeof(Point2d) || proT == typeof(Point3d))
-                            {
-                                try
-                                {
-                                    var v = pi.GetValue(item.AcadObject);
-                                    dict[pi.Name] = v;
-                                    var str = pd.GetValue(item.AcadObject) as string;
-                                }
-                                catch
-                                {
-
-                                }
-                                
-                            }
-                        }
-                        
-                        var mt = type.GetMethod("get_BlockName");
-                        //object obj = Activator.CreateInstance(type,item.UnmanagedObject,false);
-                        //var res = mt.Invoke(obj, null);
-                        
-                        var explodeResult = new DBObjectCollection();
-                        item.Explode(explodeResult);
-                    }
-                    if (item.GetType().Name.StartsWith("ProxyEntity")) 
-                    {
-                        //其它插件生成的元素，该电脑没有安装相应的插件，无法显示
-                        var explodeResult = new DBObjectCollection();
-                        item.Explode(explodeResult);
-                    }
-                }
-            }
-
-
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 ThDistributionElementExtractor thDistribution = new ThDistributionElementExtractor();
@@ -140,6 +84,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             //地漏 - 块名称过滤
             Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
             //floorDrainNames.Add("地漏", 1);
+            floorDrainNames.Add("W-drain", 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_1, 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_2, 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_3, 2);
@@ -168,7 +113,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             balconyRiserNames.Add(ThWSSCommon.BalconyRiserBlockName, 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.balconyRiser, balconyRiserNames));
 
-            //屋面雨水斗 - 块名称过滤
+            //屋面雨水立管 - 块名称过滤
             Dictionary<string, int> roofRiserNames = new Dictionary<string, int>();
             roofRiserNames.Add(ThWSSCommon.RoofRainwaterRiserBlockName, 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.roofRainRiser, roofRiserNames));
@@ -188,6 +133,17 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             Dictionary<string, int> chimneyNames = new Dictionary<string, int>();
             chimneyNames.Add(ThWSSCommon.FlueShaftBlockName, 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.flueWell, chimneyNames));
+
+            //获取设备图块
+            Dictionary<string, int> equipmentNames = new Dictionary<string, int>();
+            equipmentNames.Add("AE-EQPM", 1);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.equipment, equipmentNames));
+
+
+            //获取建筑标高图块
+            Dictionary<string, int> buildingElevationNames = new Dictionary<string, int>();
+            buildingElevationNames.Add("AD-LEVL-HIGH", 1);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.buildingElevation, buildingElevationNames));
         }
 
     }
