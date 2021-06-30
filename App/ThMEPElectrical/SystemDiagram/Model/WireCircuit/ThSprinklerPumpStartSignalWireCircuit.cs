@@ -56,9 +56,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 if (SprayPumpMinFloor > 0)
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
-                    Result.Add(Endline1);
-                    if(SprayPumpMinFloor> PressureSwitchMinFloor)
+                    if (PressureSwitchMaxFloor >= SprayPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
+                        Result.Add(Endline1);
+                    }
+                    if (PressureSwitchMinFloor < SprayPumpMinFloor)
                     {
                         Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
                         Result.Add(Endline2);
@@ -92,12 +95,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 if (SprayPumpMinFloor > 0)
                 {
                     InsertBlockService.InsertSprinklerPump(new Vector3d(0, OuterFrameLength * (SprayPumpMinFloor - 1), 0));
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
                 }
-                else
+                else if(PressureSwitchMinFloor>0)
                 {
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.SprinklerPumpDirectStartSignalLineModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.SprinklerPumpDirectStartSignalLineModuleExcludingFireRoom);
                 }
-                InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
             }
             return Result;
         }

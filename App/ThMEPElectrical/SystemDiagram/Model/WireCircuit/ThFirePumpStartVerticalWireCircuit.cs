@@ -88,15 +88,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 if (FireHydrantPumpMinFloor > 0)
                 {
                     InsertBlockService.InsertFireHydrantPump(new Vector3d(0, OuterFrameLength * (FireHydrantPumpMinFloor - 1), 0));
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
+                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });
                 }
                 else if (PressureSwitchMaxFloor > 0)
                 {
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleExcludingFireRoom);
-                }
-                InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
-
-                InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });
-                
+                }              
             }
             return Result;
         }
