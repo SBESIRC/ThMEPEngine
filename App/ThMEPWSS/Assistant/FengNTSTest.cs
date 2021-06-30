@@ -5532,7 +5532,7 @@ namespace qsqhzy
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon().Geometries);
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
