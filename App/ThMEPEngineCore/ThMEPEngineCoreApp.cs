@@ -328,12 +328,20 @@ namespace ThMEPEngineCore
         public void THExtractArchWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
                 var options = new PromptKeywordOptions("\n选择处理方式");
                 options.Keywords.Add("提取", "E", "提取(E)");
@@ -345,12 +353,10 @@ namespace ThMEPEngineCore
                     return;
                 }
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
                 if (result2.StringResult == "识别")
                 {
                     var engine = new ThDB3ArchWallRecognitionEngine();
-                    engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                    engine.Recognize(acadDatabase.Database, frame.Vertices());
                     engine.Elements.Select(o => o.Outline).ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
@@ -363,7 +369,7 @@ namespace ThMEPEngineCore
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
                     var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
                     {
                         results.Add(filterObj as Entity);
                     }
