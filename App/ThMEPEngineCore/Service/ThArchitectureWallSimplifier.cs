@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
@@ -57,7 +58,51 @@ namespace ThMEPEngineCore.Service
 
         public static DBObjectCollection BuildArea(DBObjectCollection walls)
         {
-            return walls.BuildArea();
+            // 外缩
+            var results = Buffer(walls, 5.0);
+            results = FilterSmallAreaEntity(results);            
+            results = results.UnionPolygons();
+            results = results.BuildArea();
+            // 内缩
+            results = Buffer(results, -5.0);
+            results = FilterSmallAreaEntity(results);
+            return results;
+        }
+        private static DBObjectCollection Buffer(DBObjectCollection objs ,double length)
+        {
+            var results = new DBObjectCollection();
+            foreach (Entity  obj in objs)
+            {
+                if (obj is Polyline polyline)
+                {
+                    var bufferRes = polyline.ToNTSPolygon().Buffer(length).ToDbCollection();
+                    bufferRes.Cast<Entity>().ForEach(e => results.Add(e));
+                }
+                else if(obj is MPolygon mPolygon)
+                {
+                    var bufferRes = mPolygon.ToNTSPolygon().Buffer(length).ToDbCollection();
+                    bufferRes.Cast<Entity>().ForEach(e => results.Add(e));
+                }                
+            }
+            return results;
+        }
+        private static DBObjectCollection FilterSmallAreaEntity(DBObjectCollection polygons,double areaTolerance=1.0)
+        {
+            return polygons.Cast<Entity>().Where(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    return polyline.Area > areaTolerance;
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    return mPolygon.Area > areaTolerance;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }).ToCollection();
         }
     }
 }
