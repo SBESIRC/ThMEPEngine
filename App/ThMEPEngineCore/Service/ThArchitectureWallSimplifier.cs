@@ -59,39 +59,19 @@ namespace ThMEPEngineCore.Service
 
         public static DBObjectCollection BuildArea(DBObjectCollection walls)
         {
-            walls = Buffer(walls, -DISTANCE_TOLERANCE);
+            walls = walls.BufferPolygons(-DISTANCE_TOLERANCE);
             walls = walls.BuildArea();
-            walls = Buffer(walls, DISTANCE_TOLERANCE);
-            walls = FilterSmallAreaPolygon(walls);
+            walls = walls.BufferPolygons(DISTANCE_TOLERANCE);
             return walls;
         }
-        private static DBObjectCollection Buffer(DBObjectCollection objs, double length)
+
+        public static DBObjectCollection Filter(DBObjectCollection walls)
         {
-            var results = new DBObjectCollection();
-            foreach (Entity obj in objs)
+            return walls.Cast<Entity>().Where(o =>
             {
-                if (obj is AcPolygon polyline)
+                if (o is AcPolygon polygon)
                 {
-                    polyline.Buffer(length).Cast<Entity>().ForEach(e => results.Add(e));
-                }
-                else if (obj is MPolygon mPolygon)
-                {
-                    mPolygon.Buffer(length).Cast<Entity>().ForEach(e => results.Add(e));
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
-        }
-        private static DBObjectCollection FilterSmallAreaPolygon(DBObjectCollection polygons)
-        {
-            return polygons.Cast<Entity>().Where(o =>
-            {
-                if (o is AcPolygon polyline)
-                {
-                    return polyline.Area > AREA_TOLERANCE;
+                    return polygon.Area > AREA_TOLERANCE;
                 }
                 else if (o is MPolygon mPolygon)
                 {

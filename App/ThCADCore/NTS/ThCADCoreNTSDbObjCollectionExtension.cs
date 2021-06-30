@@ -49,6 +49,11 @@ namespace ThCADCore.NTS
             return curves.UnionGeometries().ToDbCollection();
         }
 
+        public static DBObjectCollection BufferPolygons(this DBObjectCollection polygons, double distance)
+        {
+            return polygons.ToNTSMultiPolygon().Buffer(distance).ToDbCollection();
+        }
+
         public static Geometry Intersection(this DBObjectCollection curves, Curve curve)
         {
             return OverlayNGRobust.Overlay(

@@ -63,6 +63,7 @@ namespace ThMEPEngineCore.Engine
                 var results = ThArchitectureWallSimplifier.Normalize(curves);
                 results = ThArchitectureWallSimplifier.Simplify(results);
                 results = ThArchitectureWallSimplifier.BuildArea(results);
+                results = ThArchitectureWallSimplifier.Filter(results);
                 results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
             }
         }

@@ -1,21 +1,20 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using System;
 using DotNetARX;
-using ThMEPEngineCore.IO;
 using System.Text;
 using System.Linq;
-using ThMEPEngineCore.Temp;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 using ThCADExtension;
-
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Temp;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 #if ACAD2016
 using CLI;
@@ -54,11 +53,13 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
 
-                foreach (Entity obj in objs.Buffer(result2.Value))
-                {
-                    acadDatabase.ModelSpace.Add(obj);
-                    obj.SetDatabaseDefaults();
-                }
+                objs.BufferPolygons(result2.Value)
+                    .Cast<Entity>()
+                    .ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
             }
         }
 
