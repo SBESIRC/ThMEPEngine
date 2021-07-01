@@ -10,6 +10,7 @@ namespace ThMEPHVAC.Model
         public DBObjectCollection geo;
         public DBObjectCollection flg;
         public DBObjectCollection center_line;
+        public Line_Info(){ }
         public Line_Info(DBObjectCollection geo_, DBObjectCollection flg_, DBObjectCollection center_line_)
         {
             geo = geo_;
@@ -485,11 +486,34 @@ namespace ThMEPHVAC.Model
             var elbow_flg = new DBObjectCollection() { flg1, flg2 };
             return new Line_Info(elbow_outline, elbow_flg, elbow_centerline);
         }
-
-        public static DBObjectCollection Create_duct(double length, double width)
+        public static void Get_duct_geo_flg_center_line( Line l,
+                                                         double width,
+                                                         double angle,
+                                                         Point3d center_point,
+                                                         out DBObjectCollection geo,
+                                                         out DBObjectCollection flg,
+                                                         out DBObjectCollection center_line)
+        {
+            geo = new DBObjectCollection();
+            flg = new DBObjectCollection();
+            center_line = new DBObjectCollection();
+            var lines = Create_duct(l.Length, width);
+            Matrix3d mat = Matrix3d.Displacement(center_point.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
+            var l1 = lines[0] as Line;
+            l1.TransformBy(mat);
+            geo.Add(l1);
+            var l2 = lines[1] as Line;
+            l2.TransformBy(mat);
+            geo.Add(l2);
+            flg.Add(new Line(l1.StartPoint, l2.StartPoint));
+            flg.Add(new Line(l1.EndPoint, l2.EndPoint));
+            center_line.Add(l);
+        }
+        public static DBObjectCollection Create_duct(double length, 
+                                                     double width)
         {
             //绘制辅助中心线
-            Line auxiliaryCenterLine = new Line()
+            var auxiliaryCenterLine = new Line()
             {
                 StartPoint = new Point3d(-length / 2.0, 0, 0),
                 EndPoint = new Point3d(length / 2.0, 0, 0),
@@ -498,8 +522,8 @@ namespace ThMEPHVAC.Model
             //偏移出管轮廓线
             var ductUpperLineCollection = auxiliaryCenterLine.GetOffsetCurves(0.5 * width);
             var ductBelowLineCollection = auxiliaryCenterLine.GetOffsetCurves(-0.5 * width);
-            Line ductUpperLine = (Line)ductUpperLineCollection[0];
-            Line ductBelowLine = (Line)ductBelowLineCollection[0];
+            var ductUpperLine = (Line)ductUpperLineCollection[0];
+            var ductBelowLine = (Line)ductBelowLineCollection[0];
 
             return new DBObjectCollection()
             {

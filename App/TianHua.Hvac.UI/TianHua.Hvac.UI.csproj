@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThHvacDuctPortModifyCmd.cs" />
     <Compile Include="Command\THHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="fmBypass.cs">
@@ -63,6 +64,12 @@
     </Compile>
     <Compile Include="fmBypass.Designer.cs">
       <DependentUpon>fmBypass.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fmDuctModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmDuctModify.Designer.cs">
+      <DependentUpon>fmDuctModify.cs</DependentUpon>
     </Compile>
     <Compile Include="fmDuctPorts.cs">
       <SubType>Form</SubType>
@@ -134,6 +141,10 @@
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
+      <Project>{5DDFCADA-BEA4-402C-B3E4-5C7F83C2F09E}</Project>
+      <Name>DotNetARX</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
       <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
       <Name>ThCADCore</Name>
@@ -158,6 +169,9 @@
   <ItemGroup>
     <EmbeddedResource Include="fmBypass.resx">
       <DependentUpon>fmBypass.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmDuctModify.resx">
+      <DependentUpon>fmDuctModify.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmDuctPorts.resx">
       <DependentUpon>fmDuctPorts.cs</DependentUpon>

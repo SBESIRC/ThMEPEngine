@@ -20,7 +20,7 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
-        private static readonly ThDuctPortsParam in_param = new ThDuctPortsParam();
+        private static readonly DuctPortsParam in_param = new DuctPortsParam();
         public void Dispose() { }
 
         public void Execute()
@@ -65,7 +65,6 @@ namespace TianHua.Hvac.UI.Command
                     center_lines = new DBObjectCollection();
                     return;
                 }
-
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Line)).DxfName,
@@ -75,7 +74,7 @@ namespace TianHua.Hvac.UI.Command
                 center_lines = Get_center_line("请选择中心线", out string layer, sf);
                 if (center_lines.Count == 0)
                     return;
-                ThDuctPortsDraw.Draw_lines(center_lines, Matrix3d.Identity, layer);
+                ThDuctPortsDrawService.Draw_lines(center_lines, Matrix3d.Identity, layer, out _);
             }
         }
         private bool Get_duct_port_info()
@@ -130,9 +129,9 @@ namespace TianHua.Hvac.UI.Command
             {
                 var objIds = result.Value.GetObjectIds();
                 var coll = objIds.ToObjectIdCollection();
-                layer = ThDuctPortsDraw.Get_cur_layer(coll);
+                layer = ThDuctPortsDrawService.Get_cur_layer(coll);
                 var lines = Pre_proc(coll);
-                ThDuctPortsDraw.Remove_ids(objIds);
+                ThDuctPortsDrawService.Remove_ids(objIds);
                 return lines;
             }
             else

@@ -1,6 +1,6 @@
 ﻿namespace ThMEPHVAC.Model
 {
-    public class ThDuctPortsParam
+    public class DuctPortsParam
     {
         public int port_num;
         public double air_speed;
