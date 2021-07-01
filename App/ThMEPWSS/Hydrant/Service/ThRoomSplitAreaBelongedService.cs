@@ -23,8 +23,11 @@ namespace ThMEPWSS.Hydrant.Service
             var polygonBufferDic =  ThHydrantUtils.BufferPolygon(SplitAreas, -1.0 * PolygonBufferLength);
             SplitAreas.ForEach(o =>
             {
-                var belongedAreas = BelongedProtectArea(polygonBufferDic[o]);
-                Results.Add(o, belongedAreas);
+                if(polygonBufferDic.ContainsKey(o))
+                {
+                    var belongedAreas = BelongedProtectArea(polygonBufferDic[o]);
+                    Results.Add(o, belongedAreas);
+                }
             });
         }        
         private List<Entity> BelongedProtectArea(Entity splitArea)
