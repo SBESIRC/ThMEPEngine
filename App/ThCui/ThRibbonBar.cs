@@ -153,6 +153,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THYJZMLX_LARGE",
             RibbonButtonStyle.LargeWithText);
 
+            // 楼层定义
+            row.AddNewButton("楼层定义",
+                "天华楼层定义",
+                "THLCDY",
+                "天华楼层定义",
+                "IDI_THCAD_THLCDY_SMALL",
+                "IDI_THCAD_THLCDY_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
             // 火灾自动报警系统图
             row.AddNewButton("火灾报警系统",
             "天华火灾报警系统",
