@@ -75,12 +75,6 @@
     <Compile Include="fmFDUse.Designer.cs">
       <DependentUpon>fmFDUse.cs</DependentUpon>
     </Compile>
-    <Compile Include="fmFloorDrain.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmFloorDrain.Designer.cs">
-      <DependentUpon>fmFloorDrain.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmSprinklerLayout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,9 +97,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="fmFDUse.resx">
       <DependentUpon>fmFDUse.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmFloorDrain.resx">
-      <DependentUpon>fmFloorDrain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmSprinklerLayout.resx">
       <DependentUpon>fmSprinklerLayout.cs</DependentUpon>
