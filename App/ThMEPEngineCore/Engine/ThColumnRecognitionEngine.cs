@@ -57,6 +57,10 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs.Cast<Curve>().ToList();
             }
+            if (curves.Count == 0)
+            {
+                return;
+            }
             Preprocess(curves.ToCollection()).UnionPolygons().Cast<Curve>()
                 .ForEach(o =>
                 {
