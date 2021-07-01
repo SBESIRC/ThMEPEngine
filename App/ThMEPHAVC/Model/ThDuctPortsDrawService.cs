@@ -267,5 +267,11 @@ namespace ThMEPHVAC.Model
             if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE))
                 data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE, port_range);
         }
+        public static void Move_to_origin(Point3d align_p, DBObjectCollection line_set)
+        {
+            var dis_mat = Matrix3d.Displacement(-align_p.GetAsVector());
+            foreach (Line l in line_set)
+                l.TransformBy(dis_mat);
+        }
     }
 }

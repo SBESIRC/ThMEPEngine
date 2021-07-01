@@ -21,11 +21,12 @@ namespace TianHua.Hvac.UI.Command
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
         private static readonly DuctPortsParam in_param = new DuctPortsParam();
+        private Point3d start_point;
         public void Dispose() { }
 
         public void Execute()
         {
-            Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines);
+            Get_center_line_start_point(out DBObjectCollection center_lines);
             if (center_lines.Count == 0)
                 return;
             Get_exclude_line("请选择不布置风口的线", out DBObjectCollection exclude_line);
@@ -40,22 +41,23 @@ namespace TianHua.Hvac.UI.Command
                 return;
             if (in_param.port_range.Contains("侧"))
                 in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-            var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, start_point, in_param);
+            ThDuctPortsDrawService.Move_to_origin(start_point, exclude_line);
+            var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, Point3d.Origin, in_param);
             if (graph_res.merged_endlines.Count == 0)
             {
                 Prompt_msg("选择错误起始点");
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
-            var judger = new ThDuctPortsJudger(graph_res.merged_endlines, adjust_graph.endline_segs);
-            var painter = new ThDuctPortsDraw(in_param, judger.dir_align_points, judger.ver_align_points);
+            var judger = new ThDuctPortsJudger(start_point, graph_res.merged_endlines, adjust_graph.endline_segs);
+            var painter = new ThDuctPortsDraw(start_point, in_param, judger.dir_align_points, judger.ver_align_points);
             painter.Draw(graph_res, adjust_graph);
         }
         private void Prompt_msg(string message)
         {
             Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(message);
         }
-        private void Get_center_line_start_point(out Point3d start_point, out DBObjectCollection center_lines)
+        private void Get_center_line_start_point(out DBObjectCollection center_lines)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -72,9 +74,10 @@ namespace TianHua.Hvac.UI.Command
                 };
                 var sf = ThSelectionFilterTool.Build(dxfNames);
                 center_lines = Get_center_line("请选择中心线", out string layer, sf);
-                if (center_lines.Count == 0)
+                 if (center_lines.Count == 0)
                     return;
-                ThDuctPortsDrawService.Draw_lines(center_lines, Matrix3d.Identity, layer, out _);
+                var mat = Matrix3d.Displacement(start_point.GetAsVector());
+                ThDuctPortsDrawService.Draw_lines(center_lines, mat, layer, out _);
             }
         }
         private bool Get_duct_port_info()
@@ -111,11 +114,13 @@ namespace TianHua.Hvac.UI.Command
                 if (result.Status == PromptStatus.OK)
                 {
                     var objIds = result.Value.GetObjectIds();
-                    exclude_line = objIds.Cast<ObjectId>().Select(o => o.GetDBObject()).ToCollection();
+                    exclude_line = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).ToCollection();
                 }
             }
         }
-        private DBObjectCollection Get_center_line(string prompt, out string layer, SelectionFilter sf)
+        private DBObjectCollection Get_center_line(string prompt, 
+                                                   out string layer, 
+                                                   SelectionFilter sf)
         {
             layer = "0";
             PromptSelectionOptions options = new PromptSelectionOptions()
@@ -146,7 +151,8 @@ namespace TianHua.Hvac.UI.Command
         }
         private DBObjectCollection Pre_proc(ObjectIdCollection objs)
         {
-            var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject()).ToCollection();
+            var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).ToCollection();
+            ThDuctPortsDrawService.Move_to_origin(start_point, lines);
             var service = new ThLaneLineCleanService();
             var res = ThLaneLineEngine.Explode(service.Clean(lines));
             var extendLines = new DBObjectCollection();

@@ -23,15 +23,19 @@ namespace ThMEPHVAC.Model
         private DuctPortsParam in_param;
         private ObjectId start_id;
         private bool is_first;
-        public ThDuctPortsDraw(DuctPortsParam in_param_,
+        private Point3d start_point;
+        private Vector3d org_dis_vec;
+        private Matrix3d org_dis_mat;
+        public ThDuctPortsDraw(Point3d start_point_,
+                               DuctPortsParam in_param_,
                                List<Point2d> duct_dir_align_points_,
                                List<Point2d> duct_ver_align_points_)
         {
-            Param_init(in_param_);
+            Param_init(in_param_, start_point_);
             duct_dir_align_points = duct_dir_align_points_;
             duct_ver_align_points = duct_ver_align_points_;
         }
-        private void Param_init(DuctPortsParam in_param_)
+        private void Param_init(DuctPortsParam in_param_, Point3d start_point_)
         {
             is_first = true;
             duct_size_style = "HT-STYLE3";
@@ -43,11 +47,14 @@ namespace ThMEPHVAC.Model
             main_height = ThDuctPortsService.Get_height(in_param.in_duct_size);
             entity_ids = new List<Entity_param>();
             service = new ThDuctPortsDrawService(in_param.scenario, in_param.scale);
+            start_point = start_point_;
+            org_dis_vec = start_point.GetAsVector();
+            org_dis_mat = Matrix3d.Displacement(org_dis_vec);
         }
         public void Draw(ThDuctPortsAnalysis anay_res, ThDuctPortsConstructor endlines)
         {
             have_main = anay_res.main_ducts.Count != 0;
-            start_id = service.Insert_start_flag(anay_res.start_point);
+            start_id = service.Insert_start_flag(start_point);
             Draw_endlines(endlines);
             Draw_mainlines(anay_res);
             Draw_special_shape(anay_res.special_shapes_info);
@@ -65,7 +72,7 @@ namespace ThMEPHVAC.Model
             var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
             if (ports.Count < 2)
                 return;
-            Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0);
+            Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0) + org_dis_vec;
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
             double h = ThDuctPortsService.Get_text_height(in_param.scale);
             double scale_h = h * 2 / 3;
@@ -78,7 +85,7 @@ namespace ThMEPHVAC.Model
                                                            { "数量", in_param.port_num.ToString() },
                                                            { "风量", single_port_volume.ToString("0.")} });
             }
-            Insert_leader(Get_mark_base_point(ports), p);
+            Insert_leader(Get_mark_base_point(ports) + org_dis_vec, p);
         }
         private Point3d Get_mark_base_point(List<Port_Info> ports)
         {
@@ -250,7 +257,7 @@ namespace ThMEPHVAC.Model
                            Matrix3d.Rotation(-cross_info.rotate_angle, Vector3d.ZAxis, Point3d.Origin);
             if (cross_info.is_flip)
                 mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
-            return mat;
+            return org_dis_mat * mat;
         }
         private Matrix3d Get_tee_trans_mat(Tee_Info tee_info)
         {
@@ -258,7 +265,7 @@ namespace ThMEPHVAC.Model
                            Matrix3d.Rotation(-tee_info.rotate_angle, Vector3d.ZAxis, Point3d.Origin);
             if (tee_info.is_flip)
                 mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
-            return mat;
+            return org_dis_mat * mat;
         }
         private Matrix3d Get_elbow_trans_mat(Elbow_Info elbow_info)
         {
@@ -266,7 +273,7 @@ namespace ThMEPHVAC.Model
                            Matrix3d.Rotation(-elbow_info.rotate_angle, Vector3d.ZAxis, Point3d.Origin);
             if (elbow_info.is_flip)
                 mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
-            return mat;
+            return org_dis_mat * mat;
         }
         private static Elbow_Info Get_elbow_info(Special_graph_Info info)
         {
@@ -316,17 +323,17 @@ namespace ThMEPHVAC.Model
                 throw new NotImplementedException();
             }
         }
-        private void Draw_endlines(ThDuctPortsConstructor endlins)
+        private void Draw_endlines(ThDuctPortsConstructor endlines)
         {
-            Draw_special_shape(endlins.endline_elbow);
-            for (int i = 0; i < endlins.endline_segs.Count; ++i)
+            Draw_special_shape(endlines.endline_elbow);
+            for (int i = 0; i < endlines.endline_segs.Count; ++i)
             {
                 string pre_duct_text_info = String.Empty;
-                var infos = endlins.endline_segs[i];
+                var infos = endlines.endline_segs[i];
                 Point2d ver_wall_point = (duct_ver_align_points.Count > 0) ? duct_ver_align_points[i] : Point2d.Origin;
                 Point2d dir_wall_point = (duct_dir_align_points.Count > 0) ? duct_dir_align_points[i] : Point2d.Origin;
                 Draw_port_duct(infos.segs, ref pre_duct_text_info);
-                service.dim_service.Draw_dimension(infos.segs, dir_wall_point, ver_wall_point);
+                service.dim_service.Draw_dimension(infos.segs, dir_wall_point, ver_wall_point, start_point);
             }
         }
         private void Draw_port_duct(List<Duct_ports_Info> infos, ref string duct_text_info)
@@ -345,12 +352,12 @@ namespace ThMEPHVAC.Model
                 Collect_duct_geo(geo_set, cur_seg);
                 Record_pre_seg_info(cur_seg, duct_text_info, info, ref pre_seg, ref pre_duct_size, ref pre_air_volume);
                 param = ThDuctPortsService.Create_duct_modify_param(cur_seg, pre_duct_size, pre_air_volume, start_id);
-                service.Draw_shape(pre_seg, Matrix3d.Identity, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, out ObjectIdList seg_center_ids);
+                service.Draw_shape(pre_seg, org_dis_mat, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, out ObjectIdList seg_center_ids);
                 ThDuctPortsRecoder.Create_duct_group(seg_geo_ids, seg_flg_ids, seg_center_ids, param);
                 if (i == 0)
                     continue;
                 var reducing = Get_endline_duct_reducing(geo_set);
-                service.Draw_shape(reducing, Matrix3d.Identity, out ObjectIdList red_geo_ids, out ObjectIdList red_flg_ids, out ObjectIdList red_center_ids);
+                service.Draw_shape(reducing, org_dis_mat, out ObjectIdList red_geo_ids, out ObjectIdList red_flg_ids, out ObjectIdList red_center_ids);
                 param = ThDuctPortsService.Create_duct_modify_param(reducing, pre_duct_size, pre_air_volume, start_id);
                 var id = ThDuctPortsRecoder.Create_reducing_group(red_geo_ids, red_flg_ids, red_center_ids, param);
                 entity_ids.Add(new Entity_param (id, "Reducing"));
@@ -403,6 +410,7 @@ namespace ThMEPHVAC.Model
             DBText text = Create_duct_info(info.duct_size, !have_main && is_first);
             is_first = false;
             Matrix3d mat = Get_side_text_info_trans_mat(angle, info.width, center_point, text, info.l);
+            mat = org_dis_mat * mat;
             Seperate_duct_size_elevation(text, mat, info.l, out DBText duct_size_text, out DBText elevation_size);
             if (pre_duct_text_info != duct_size_text.TextString && info.l.Length > 10)
             {
@@ -491,6 +499,7 @@ namespace ThMEPHVAC.Model
                 var mainlines = Get_main_duct(info, out double duct_width, out string duct_size);
                 ThDuctPortsService.Get_line_pos_info(l, out double angle, out Point3d center_point);
                 Matrix3d mat = Matrix3d.Displacement(center_point.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
+                mat = org_dis_mat * mat;
                 ThDuctPortsDrawService.Draw_lines(mainlines.geo, mat, service.geo_layer, out ObjectIdList geo_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.flg_layer, out ObjectIdList flg_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.center_line, Matrix3d.Identity, service.center_layer, out ObjectIdList center_ids);
@@ -509,7 +518,7 @@ namespace ThMEPHVAC.Model
             Matrix3d mat = Get_main_text_info_trans_mat(angle, center_point, text);
             Vector3d dir_vec = ThDuctPortsService.Get_edge_direction(l);
             Vector3d vertical_vec = -Get_text_vertical_vec(dir_vec);
-            mat = Matrix3d.Displacement(vertical_vec * text.Height * 0.5) * mat;
+            mat = org_dis_mat * Matrix3d.Displacement(vertical_vec * text.Height * 0.5) * mat;
             Seperate_duct_size_elevation(text, mat, l, out DBText duct_size_text, out DBText elevation_size);
             if (pre_duct_size_text != duct_size_text.TextString)
             {
@@ -542,12 +551,15 @@ namespace ThMEPHVAC.Model
                     if (in_param.port_range.Contains("下"))
                     {
                         Point3d p = ThDuctPortsService.Get_down_port_insert_pos(dir_vec, pos.position, port_width, port_height);
+                        p += org_dis_vec;
                         var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, p, new Scale3d(), angle);
                         ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, in_param.port_range);
                     }
                     else
                     {
                         ThDuctPortsService.Get_side_port_insert_pos(dir_vec, pos.position, info.width, port_width, out Point3d pL, out Point3d pR);
+                        pL += org_dis_vec;
+                        pR += org_dis_vec;
                         var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, pL, new Scale3d(), angle + Math.PI * 0.5);
                         ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, in_param.port_range);
                         obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, pR, new Scale3d(), angle - Math.PI * 0.5);
@@ -627,7 +639,7 @@ namespace ThMEPHVAC.Model
                         if (cross_z > 0 && Math.Abs(cross_z) > 1e-3)
                             angle += Math.PI;
                         double text_angle = (angle > 0 || angle < Math.PI) ? angle - Math.PI : angle;
-                        Point3d tar_p = endline.segs[0].start_point + vertical_r * width * 0.5;
+                        Point3d tar_p = endline.segs[0].start_point + vertical_r * width * 0.5 + start_point.GetAsVector();
                         var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(service.valve_layer, service.valve_name, tar_p, new Scale3d(), angle);
                         ThDuctPortsDrawService.Set_valve_dyn_block_properity(obj, width, 250, text_angle, valve_visibility);
                     }
