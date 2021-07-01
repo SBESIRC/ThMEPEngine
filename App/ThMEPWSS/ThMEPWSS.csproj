@@ -349,8 +349,12 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PipeLineList.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetPipePart.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetInput.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PointAngle.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PolyLineSplit.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThExtractHYDTPipeService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />

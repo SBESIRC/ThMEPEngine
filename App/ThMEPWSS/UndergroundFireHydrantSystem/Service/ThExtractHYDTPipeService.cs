@@ -163,12 +163,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public List<Point3dEx> CreatePointList()
         {
             HydrantPosition = new List<Point3dEx>();
-            foreach (var db in DBObjs)
+            var pt = new Point3dEx(new Point3d());
+            if (DBObjs.Count != 0)
             {
-                var br = db as BlockReference;
-                var pt = new Point3dEx(br.Position);
-                HydrantPosition.Add(pt);
+                foreach (var db in DBObjs)
+                {
+                    var br = db as BlockReference;
+                    pt = new Point3dEx(br.Position);
+                    HydrantPosition.Add(pt);
+                }
             }
+            else
+            {
+                foreach (var db in DBObjs1)
+                {
+                    var br = db as Polyline;
+                    pt = new Point3dEx(br.StartPoint);
+                    HydrantPosition.Add(pt);
+                }
+            }
+                
             return HydrantPosition;
         }
     }
@@ -200,18 +214,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             return valve.ToUpper() == "消火栓环管标记";
         }
-        public List<Point3d> GetPipeMarkPoisition()
+        public List<List<Point3d>> GetPipeMarkPoisition()
         {
-            var poisition = new List<Point3d>();
+            var poisition = new List<List<Point3d>>();
             foreach (var db in DBobj)
             {
+                var pos = new List<Point3d>();
                 var br = db as BlockReference;
                 var pt1 = new Point3d(br.Position.X + Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点1 X")),
                     br.Position.Y + Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点1 Y")), 0);
                 var pt2 = new Point3d(br.Position.X + Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点2 X")),
                     br.Position.Y + Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点2 Y")), 0);
-                poisition.Add(pt1);
-                poisition.Add(pt2);
+                pos.Add(pt1);
+                pos.Add(pt2);
+                poisition.Add(pos);
             }
             return poisition;
         }
@@ -330,7 +346,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private bool IsHYDTPipeLayer(string layer)
         {
             return layer.ToUpper() == "W-RAIN-DIMS" ||
-                   layer.ToUpper() == "W-DRAI-DIMS";
+                   layer.ToUpper() == "W-DRAI-DIMS" ||
+                   layer.ToUpper() == "W-WSUP-DIMS" ||
+                   layer.ToUpper() == "W-FRPT-HYDT-DIMS";
         }
         private bool IsHYDTPipeElement(Curve curve)
         {
@@ -342,10 +360,29 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             LabelPosition = new List<Line>();
             foreach (var db in DBObjs)
             {
-                var line = db as Line;
-                var br = db as BlockReference;
+                if(db is Polyline)
+                {
+                    var fl = db as Polyline;
+                    var ptPre = fl.GetPoint3dAt(0);
+                    for (int i = 1; i < fl.NumberOfVertices; i++)
+                    {
+                        var pti = fl.GetPoint3dAt(i);
+                        var pt1 = new Point3dEx(ptPre.X, ptPre.Y, 0);
+                        var pt2 = new Point3dEx(pti.X, pti.Y, 0);
+                        
+                        LabelPosition.Add(new Line(pt1._pt, pt2._pt));
+                        ptPre = fl.GetPoint3dAt(i);
+                    }
+                    
+                }
+                else
+                {
+                    var line = db as Line;
+                    var br = db as BlockReference;
 
-                LabelPosition.Add(new Line(line.StartPoint, line.EndPoint));
+                    LabelPosition.Add(new Line(line.StartPoint, line.EndPoint));
+                }
+                
             }
             return LabelPosition;
         }
@@ -370,12 +407,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 Results = acadDatabase
                    .ModelSpace
                    .OfType<DBText>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
+                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList(); 
             }
         }
         private bool IsHYDTPipeLayer(string layer)
         {
-            return layer.ToUpper() == "W-RAIN-DIMS" || layer.ToUpper() == "W-FRPT-HYDT-DIMS";
+            return layer.ToUpper() == "W-RAIN-DIMS" || layer.ToUpper() == "W-FRPT-HYDT-DIMS" || layer.ToUpper() == "W-WSUP-DIMS";
         }
     }
 

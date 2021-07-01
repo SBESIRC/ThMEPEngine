@@ -18,7 +18,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var pt1 = stPt;
                 var pt2 = new Point3d();
-
+                if(i != 0)
+                {
+                    if(ptTypeDic[rstPath[i-1]].Equals("MainLoop"))
+                    {
+                        return stPt;
+                    }
+                }
                 if (ptTypeDic[rstPath[i + 1]].Equals("Valve"))
                 {
                     pt2 = new Point3d(stPt.X + 1200 - valveWidth / 2, stPt.Y, 0);
@@ -35,7 +41,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static Point3d GetSubLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, bool IsSubLoop, int i, 
+        public static Point3d GetSubLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, bool IsSubLoop, int i,
             Point3dEx pt, Point3d stPt, Dictionary<Point3dEx, string> markList, double pipeGap, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

@@ -18,10 +18,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             foreach (var line in lineList)
             {
                 var isOnLine = line.PointOnLine(pt, false, Tolerance);
-                if (PointIsLineTerm(pt, line))
-                {
-                    continue;
-                }
+                //if (PointIsLineTerm(pt, line))
+                //{
+                //    continue;
+                //}
                 if (isOnLine)
                 {
                     return line;
@@ -66,19 +66,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public static bool IsSecondLoop(Point3dEx pt1, Point3dEx pt2, double angle)
         {
-            double Tolerance = 10.0;
-            switch (angle)
-            {
-                case 0:
-                    return (Math.Abs(pt1._pt.X - pt2._pt.X) < Tolerance && pt1._pt.Y > pt2._pt.Y);
-                case Math.PI/2:
-                    return (Math.Abs(pt1._pt.Y - pt2._pt.Y) < Tolerance && pt1._pt.X < pt2._pt.X);
-                case Math.PI:
-                    return (Math.Abs(pt1._pt.X - pt2._pt.X) < Tolerance && pt1._pt.Y < pt2._pt.Y);
-                case Math.PI *3 / 2:
-                    return (Math.Abs(pt1._pt.Y - pt2._pt.Y) < Tolerance && pt1._pt.X > pt2._pt.X);
-            }
-            return false;
+            double Tolerance = 0.004;//弧度制
+            double ang = PointAngle.ComputeAngle(pt1._pt, pt2._pt);
+            var flag = Math.Abs(angle - ang) < Tolerance || Math.Abs(Math.Abs(angle - ang) - 2 * Math.PI) < Tolerance;
+            return flag;
         }
     }
 }

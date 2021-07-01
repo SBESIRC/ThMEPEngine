@@ -2,6 +2,8 @@
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System.Collections.Generic;
+using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -24,25 +26,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
                 PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
-                var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
-                var mark = markEngine.Extract(acadDatabase.Database, selectArea);
-                var pipeMarkSite = markEngine.GetPipeMarkPoisition();
-
-                var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
-                var hydrantDB = hydrantEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.hydrantPosition = hydrantEngine.CreatePointList();
-
-                foreach (var pms in pipeMarkSite)
-                {
-                    fireHydrantSysIn.markLine.Add(PointCompute.PointInLine(pms, lineList));
-                }
+                PipeLineList.PipeLineAutoConnect(ref lineList);//管线自动连接
 
                 var valveEngine = new ThExtractValveService();//提取蝶阀
                 var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
                 fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
                 var valveList = new List<Line>();
+                
                 PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);
-
+        
                 PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断
 
                 var nodeEngine = new ThExtractNodeTag();//提取消火栓环管节点标记
@@ -60,35 +52,73 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2);
                 }
 
-                
+                var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
+                var hydrantDB = hydrantEngine.Extract(acadDatabase.Database, selectArea);
+                fireHydrantSysIn.hydrantPosition = hydrantEngine.CreatePointList();
+
+                var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
+                var mark = markEngine.Extract(acadDatabase.Database, selectArea);
+                var pipeMarkSite = markEngine.GetPipeMarkPoisition();
+
+
+                foreach (var pms in pipeMarkSite)
+                {
+                    var markL = new List<Line>();
+                    foreach (var v in pms)
+                    {
+                        markL.Add(PointCompute.PointInLine(v, lineList));
+                    }
+                    fireHydrantSysIn.markLineList.Add(markL);
+                }
 
 
                 var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
                 var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
                 var labelLine = labelEngine.CreateLabelLineList();
 
-
                 var textEngine = new ThExtractLabelText();//提取文字
                 textEngine.Extract(acadDatabase.Database);
 
                 var fireHydrantEngine = new ThExtractFireHydrant();
                 fireHydrantEngine.Extract(acadDatabase.Database);
-                
+
                 foreach (var pt in fireHydrantSysIn.hydrantPosition)
                 {
+                    var flag = false;
                     var tpt = new Point3dEx(new Point3d());
-                    foreach(var p in pointList)
+                    foreach (var p in pointList)
                     {
-                        if(p._pt.DistanceTo(pt._pt) < 150)
+                        if (p._pt.DistanceTo(pt._pt) < 200)
                         {
                             tpt = p;
+                            flag = true;
                         }
+
+                    }
+                    if (!flag)
+                    {
+                        ;
                     }
                     var termPoint = new TermPoint(pt);
                     termPoint.SetLines(labelLine);
                     termPoint.SetPipeNumber(textEngine.Results);
                     termPoint.SetType(fireHydrantEngine.Results);
                     fireHydrantSysIn.termPointDic.Add(tpt, termPoint);
+                }
+
+                foreach (var pt in pointList)
+                {
+                    if (fireHydrantSysIn.ptDic[pt].Count == 1)
+                    {
+                        if(!fireHydrantSysIn.termPointDic.ContainsKey(pt))
+                        {
+                            var termPoint = new TermPoint(pt);
+                            termPoint.Type = 2;
+                            termPoint.PipeNumber = " ";
+                            fireHydrantSysIn.termPointDic.Add(pt, termPoint);
+
+                        } 
+                    }
                 }
             }
         }

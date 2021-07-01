@@ -99,7 +99,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             else
             {
-                if(PipeNumber[0] == 'X')
+                if(PipeNumber[0] == 'X' || PipeNumber[0] == 'B')
                 {
                     Type = 1;//只供给消火栓
                 }

@@ -13,44 +13,53 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class GetFireHydrantPipe
     {
-        public static void GetMainLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn)
+        public static void GetMainLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<List<Point3dEx>> mainPathList, FireHydrantSystemIn fireHydrantSysIn)
         {
             using ( AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //var stPt = new Point3d(12650, 50000, 0);
-                var stPt = fireHydrantSysOut.InsertPoint;
-                var ptStart = new Point3d(stPt.X, stPt.Y, 0);
-                double pipeLength = 1600;
-                double pipeGap = 400;
-                double valveWidth = 240;
-                bool valveCheck = true;
-                
-                for (int i = 0; i < rstPath.Count - 2; i++)
+                var index = 0;
+                var stPt1 = fireHydrantSysOut.InsertPoint;
+                foreach (var rstPath in mainPathList)
                 {
-                    var pt = rstPath[i];
-                    if (fireHydrantSysIn.ptTypeDic[pt].Equals("MainLoop"))
+                    var stPt = new Point3d(stPt1.X, stPt1.Y + 20000 * index, 0);
+                    var ptStart = new Point3d(stPt.X, stPt.Y, 0);
+                    index += 1;
+                    double pipeLength = 1600;
+                    double pipeGap = 400;
+                    double valveWidth = 240;
+                    bool valveCheck = true;
+
+                    for (int i = 0; i < rstPath.Count - 2; i++)
                     {
-                        stPt = GetPipePart.GetMainLoopPoint(ref fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn.ptTypeDic, valveWidth, pipeLength);
-                        continue;
+                        var pt = rstPath[i];
+                        if (fireHydrantSysIn.ptTypeDic[pt].Equals("MainLoop"))
+                        {
+                            stPt = GetPipePart.GetMainLoopPoint(ref fireHydrantSysOut, i, stPt, rstPath, fireHydrantSysIn.ptTypeDic, valveWidth, pipeLength);
+                            continue;
+                        }
+                        if (fireHydrantSysIn.ptTypeDic[pt].Equals("SubLoop"))
+                        {
+                            bool isSubLoop = false;
+                            stPt = GetPipePart.GetSubLoopPoint(ref fireHydrantSysOut, isSubLoop, i, pt, stPt, fireHydrantSysIn.markList, pipeGap, pipeLength);
+                            continue;
+                        }
+                        if (fireHydrantSysIn.ptTypeDic[pt].Equals("Branch"))
+                        {
+                            stPt = GetPipePart.GetBranchPoint(ref fireHydrantSysOut, pt, stPt, pipeGap, pipeLength);
+                            continue;
+                        }
+                        if (fireHydrantSysIn.ptTypeDic[pt].Equals("Valve"))
+                        {
+                            stPt = GetPipePart.GetValvePoint(ref fireHydrantSysOut, stPt, ref valveCheck);
+                            continue;
+                        }
                     }
-                    if (fireHydrantSysIn.ptTypeDic[pt].Equals("SubLoop"))
-                    {
-                        bool isSubLoop = false;
-                        stPt = GetPipePart.GetSubLoopPoint(ref fireHydrantSysOut, isSubLoop, i, pt, stPt, fireHydrantSysIn.markList, pipeGap, pipeLength);
-                        continue;
-                    }
-                    if (fireHydrantSysIn.ptTypeDic[pt].Equals("Branch"))
-                    {
-                        stPt = GetPipePart.GetBranchPoint(ref fireHydrantSysOut, pt, stPt, pipeGap, pipeLength);
-                        continue;
-                    }
-                    if (fireHydrantSysIn.ptTypeDic[pt].Equals("Valve"))
-                    {
-                        stPt = GetPipePart.GetValvePoint(ref fireHydrantSysOut, stPt, ref valveCheck);
-                        continue;
-                    }
+                    GetPipePart.GetMainLoopDetial(ref fireHydrantSysOut, stPt, ptStart);
                 }
-                GetPipePart.GetMainLoopDetial(ref fireHydrantSysOut, stPt, ptStart);
+
+                fireHydrantSysOut.InsertPoint = new Point3d(stPt1.X, stPt1.Y + 20000 * index, 0); ;
+
+
             } 
         }
 
@@ -119,28 +128,36 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (branchDic[pt].Count == 1)//单支路
                 {
                     var stPt = fireHydrantSysOut.BranchDrawDic[pt];
-                    if (fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(1))//终点是类型1，消火栓
+                    if(fireHydrantSysIn.termPointDic.ContainsKey(branchDic[pt].First().Last()))
                     {
-                        string pipeNumber = fireHydrantSysIn.termPointDic[branchDic[pt][0].Last()].PipeNumber;//立管标号
-                        if (pipeNumber[0].Equals('X'))//消火栓
+                        if (fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(1))//终点是类型1，消火栓
                         {
-                            GetBranchType1(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
-                        }  
-                    }
+                            string pipeNumber = fireHydrantSysIn.termPointDic[branchDic[pt][0].Last()].PipeNumber;//立管标号
+                            if (pipeNumber[0].Equals('X'))//消火栓
+                            {
+                                GetBranchType1(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
+                            }
+                        }
 
-                    if(fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(2))//终点是类型2，其他区域
-                    {
-                        GetBranchType2(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
+                        if (fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(2))//终点是类型2，其他区域
+                        {
+                            GetBranchType2(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
+                        }
+                        if (fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(3))//终点是类型3，消火栓和其他楼层共用支管
+                        {
+                            GetBranchType4(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
+                        }
                     }
-                    if(fireHydrantSysIn.termPointDic[branchDic[pt].First().Last()].Type.Equals(3))//终点是类型3，消火栓和其他楼层共用支管
-                    {
-                        GetBranchType4(ref fireHydrantSysOut, stPt, branchDic[pt][0], fireHydrantSysIn);
-                    }
+                    
                 }
                 else//两个支路
                 {
                     var stPt = fireHydrantSysOut.BranchDrawDic[pt];
-                    GetBranchType3(ref fireHydrantSysOut, stPt, branchDic[pt], fireHydrantSysIn);
+                    if(branchDic[pt].Count != 0)
+                    {
+                        GetBranchType3(ref fireHydrantSysOut, stPt, branchDic[pt], fireHydrantSysIn);
+                    }
+                    
                 }
             }
 

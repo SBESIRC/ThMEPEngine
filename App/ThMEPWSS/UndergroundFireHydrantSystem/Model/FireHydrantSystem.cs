@@ -85,7 +85,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
     class FireHydrantSystemIn
     {
-        public List<Line> markLine { get; set; }
+        public List<List<Line>> markLineList { get; set; }
         public List<List<Point3dEx>> nodeList { get; set; }
         public Dictionary<Point3dEx, double> angleList { get; set; }
         public Dictionary<Point3dEx, string> markList { get; set; }
@@ -98,7 +98,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public FireHydrantSystemIn()
         {
-            markLine = new List<Line>();//环管标记所在直线
+            markLineList = new List<List<Line>>();//环管标记所在直线
             nodeList = new List<List<Point3dEx>>();//次环节点
             angleList = new Dictionary<Point3dEx, double>();//次环节点角度
             markList = new Dictionary<Point3dEx, string>();//次环节点名称

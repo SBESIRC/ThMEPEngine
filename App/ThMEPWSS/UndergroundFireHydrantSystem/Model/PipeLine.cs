@@ -59,12 +59,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     pointList.Add(pt1);
                     pointList.Add(pt2);
                     valveList.Add(line1);
-                    lineList.Add(new Line(pt1._pt, pt2._pt));
+                    //lineList.Add(new Line(pt1._pt, pt2._pt));
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
                 }
                 else
                 {
-                    ;
                     var br = new DBObjectCollection();
                         
                     (v as Entity).Explode(br);
@@ -86,33 +85,44 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     pointList.Add(pt1);
                     pointList.Add(pt2);
                     valveList.Add(new Line(bdpt1, bdpt2));
-                    lineList.Add(new Line(pt1._pt, pt2._pt));
+                    //lineList.Add(new Line(pt1._pt, pt2._pt));
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
-                    ;
                 }
-
- 
+                
             }
+            PipeLineSplit(ref lineList, valveList);
+
         }
 
-        public static void PipeLineSplit(ref List<Line> lineList, List<Point3dEx> pointList)
+        public static void PipeLineSplit(ref List<Line> pipeLineList, List<Point3dEx> pointList)
         {
             foreach (var pt in pointList)//管线打断
             {
-                var line = PointCompute.PointInLine(pt._pt, lineList);
+                var line = PointCompute.PointInLine(pt._pt, pipeLineList);
                 if (!PointCompute.IsNullLine(line))
                 {
                     if (!PointCompute.PointIsLineTerm(pt._pt, line))
                     {
-                        lineList.Remove(line);
+                        pipeLineList.Remove(line);
                         var lList = PointCompute.CreateNewLine(pt._pt, line);
 
                         foreach (var ls in lList)
                         {
-                            lineList.Add(ls);
+                            pipeLineList.Add(ls);
                         }
                     }
                 }
+            }
+        }
+
+
+        public static void PipeLineSplit(ref List<Line> pipeLineList, List<Line> valveLineList)
+        {
+            foreach (var valve in valveLineList)//管线打断
+            {
+                var pipeLine = LineOnLine.LineIsOnLine(valve, pipeLineList);
+                LineOnLine.LineSplit(valve, pipeLine, ref pipeLineList);
+
             }
         }
     }

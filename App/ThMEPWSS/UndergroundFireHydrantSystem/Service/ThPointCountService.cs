@@ -24,7 +24,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         public override int GetHashCode()
         {
-            return ((int)_pt.X / 10).GetHashCode() ^ ((int)_pt.Y / 10).GetHashCode();
+            return ((int)_pt.X / 1000).GetHashCode() ^ ((int)_pt.Y / 1000).GetHashCode();
         }
         public bool Equals(Point3dEx other)
         {
@@ -121,34 +121,38 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        public static void SetPointType(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> rstPath)
+        public static void SetPointType(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3dEx>> rstPaths)
         {
-            foreach (var pt in rstPath)
+            foreach(var ptls in rstPaths)
             {
-                if (fireHydrantSysIn.ptDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch
+                foreach (var pt in ptls)
                 {
-                    foreach (var nd in fireHydrantSysIn.nodeList)
+                    if (fireHydrantSysIn.ptDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch
                     {
-                        if (nd.Contains(pt))//次环点SubLoop
+                        foreach (var nd in fireHydrantSysIn.nodeList)
                         {
-                            fireHydrantSysIn.ptTypeDic.Remove(pt);
-                            fireHydrantSysIn.ptTypeDic.Add(pt, "SubLoop");
-                            break;
+                            if (nd.Contains(pt))//次环点SubLoop
+                            {
+                                fireHydrantSysIn.ptTypeDic.Remove(pt);
+                                fireHydrantSysIn.ptTypeDic.Add(pt, "SubLoop");
+                                break;
+                            }
+                            fireHydrantSysIn.ptTypeDic.Remove(pt);//支路点 Branch
+                            fireHydrantSysIn.ptTypeDic.Add(pt, "Branch");
                         }
-                        fireHydrantSysIn.ptTypeDic.Remove(pt);//支路点 Branch
-                        fireHydrantSysIn.ptTypeDic.Add(pt, "Branch");
-                    }
-                    
-                }
 
-                if (fireHydrantSysIn.ptDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
-                {
-                    if (!fireHydrantSysIn.ptTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
+                    }
+
+                    if (fireHydrantSysIn.ptDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
                     {
-                        fireHydrantSysIn.ptTypeDic.Add(pt, "MainLoop");
+                        if (!fireHydrantSysIn.ptTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
+                        {
+                            fireHydrantSysIn.ptTypeDic.Add(pt, "MainLoop");
+                        }
                     }
                 }
             }
+            
         }
     }
 }

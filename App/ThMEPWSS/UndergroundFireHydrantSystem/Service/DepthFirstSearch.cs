@@ -10,7 +10,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     class DepthFirstSearch
     {
         public static void BranchSearch(Point3dEx startPt, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPath,
-            List<Point3dEx> loopPath, FireHydrantSystemIn fireHydrantSysIn)
+            List<Point3dEx> loopPath, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> extraNodes)
         {
             const double DisToTerm = 150;
             var cur = startPt;
@@ -33,6 +33,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         break;
                     }
                     
+                }
+                if(fireHydrantSysIn.ptTypeDic[cur].Equals("MainLoop") && fireHydrantSysIn.ptDic[cur].Count == 1)
+                {
+                    //是支路的边缘点且邻接点数目为1
+                    rstPath.Add(tempPath1);
+                    breakFlag1 = true;
+                    break;
+                }
+                if(extraNodes.Contains(cur))
+                {
+                    //针对连通阀的点
+                    breakFlag1 = true;
+                    break;
                 }
                 if (breakFlag1)//路径1遍历结束
                 {
@@ -102,7 +115,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             return;
                         }
                     }
-                    
+                    if (fireHydrantSysIn.ptTypeDic[cur].Equals("MainLoop") && fireHydrantSysIn.ptDic[cur].Count == 1)
+                    {
+                        rstPath.Add(tempPath2);
+                        return;
+                    }
+                    if (extraNodes.Contains(cur))
+                    {
+                        return;
+                    }
+
                     if (cur.Equals(startPt))
                     {
                         foreach (var pt in fireHydrantSysIn.ptDic[cur])
@@ -132,12 +154,55 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        public static void dfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<Point3dEx> rstPath, Point3dEx target,
-             FireHydrantSystemIn fireHydrantSysIn)
+        public static void dfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
+             FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
-                rstPath = new List<Point3dEx>(tempPath);
+                var rstPath = new List<Point3dEx>(tempPath);
+                var flag = true;
+                if(rstPaths.Count == 0)
+                {
+                    rstPaths.Add(rstPath);
+                }
+                else
+                {
+                    foreach(var tmpPath in rstPaths.ToArray())
+                    {
+                        if(tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())
+                        {
+                            if(tmpPath.Count < rstPath.Count)
+                            {
+                                rstPaths.Remove(tmpPath);
+                                rstPaths.Add(rstPath);
+                                flag = false;
+                                foreach(var pt in tmpPath)
+                                {
+                                    if(!rstPath.Contains(pt))
+                                    {
+                                        extraNodes.Add(pt);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                flag = false;
+                                foreach (var pt in rstPath)
+                                {
+                                    if (!tmpPath.Contains(pt))
+                                    {
+                                        extraNodes.Add(pt);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                    if(flag)
+                    {
+                        rstPaths.Add(rstPath);
+                    }
+                }
                 return;
             }
 
@@ -148,6 +213,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (nd.Contains(cur))
                 {
                     subLoopPoint = true;
+                    break;
                 }
             }
             foreach (Point3dEx p in neighbors)
@@ -169,7 +235,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 visited.Add(p);
 
                 //递归搜索
-                dfsMainLoop(p, tempPath, visited, ref rstPath, target, fireHydrantSysIn);
+                dfsMainLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn, ref extraNodes);
 
                 //删除不符合要求的点
                 tempPath.RemoveAt(tempPath.Count - 1);
@@ -178,12 +244,41 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<Point3dEx> rstPath, Point3dEx target,
+        public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
             FireHydrantSystemIn fireHydrantSysIn)
         {
             if (cur.Equals(target))
             {
-                rstPath = new List<Point3dEx>(tempPath);
+                var rstPath = new List<Point3dEx>(tempPath);
+                var flag = true;
+                if (rstPaths.Count == 0)
+                {
+                    rstPaths.Add(rstPath);
+                }
+                else
+                {
+                    foreach (var tmpPath in rstPaths.ToArray())
+                    {
+                        if (tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())
+                        {
+                            if (tmpPath.Count < rstPath.Count)
+                            {
+                                rstPaths.Remove(tmpPath);
+                                rstPaths.Add(rstPath);
+                                flag = false;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+
+                        }
+                    }
+                    if (flag)
+                    {
+                        rstPaths.Add(rstPath);
+                    }
+                }
                 return;
             }
 
@@ -226,7 +321,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 tempPath.Add(p);
                 visited.Add(p);
 
-                dfsSubLoop(p, tempPath, visited, ref rstPath, target, fireHydrantSysIn);
+                dfsSubLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn);
 
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
