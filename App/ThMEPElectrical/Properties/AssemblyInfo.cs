@@ -35,6 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.4.1.0")]
 [assembly: AssemblyFileVersion("1.4.1.0")]
 
+[assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBlockConvertCmds))]

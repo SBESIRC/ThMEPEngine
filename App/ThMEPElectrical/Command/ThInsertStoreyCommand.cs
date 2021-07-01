@@ -6,58 +6,52 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using GeometryExtensions;
 
 namespace ThMEPElectrical.Command
 {
+
+    // https://spiderinnet1.typepad.com/blog/2012/02/autocad-net-entityjig-honor-ucs-when-inserting-block-insertblockreference.html
     public class ThStoreyBlockJig : EntityJig
     {
-        Point3d mCenterPt, mActualPoint;
+        private Point3d mPosition;
 
         public ThStoreyBlockJig(BlockReference br) : base(br)
         {
-            mCenterPt = br.Position;
+            br.TransformBy(Active.Editor.UCS2WCS());
         }
 
         protected override SamplerStatus Sampler(JigPrompts prompts)
         {
-            JigPromptPointOptions jigOpts = new JigPromptPointOptions()
+            JigPromptPointOptions opts = new JigPromptPointOptions()
             {
                 Message = "\n请指定插入点",
                 UserInputControls =
                 UserInputControls.Accept3dCoordinates |
-                UserInputControls.NoZeroResponseAccepted |
-                UserInputControls.NoNegativeResponseAccepted,
+                UserInputControls.GovernedByUCSDetect |
+                UserInputControls.UseBasePointElevation,
             };
-            PromptPointResult dres = prompts.AcquirePoint(jigOpts);
-            if (mActualPoint == dres.Value)
+            PromptPointResult prResult = prompts.AcquirePoint(opts);
+            if (prResult.Status == PromptStatus.Cancel)
+            {
+                return SamplerStatus.Cancel;
+            }
+            if (prResult.Value.Equals(mPosition))
             {
                 return SamplerStatus.NoChange;
             }
             else
             {
-                mActualPoint = dres.Value;
+                mPosition = prResult.Value;
+                return SamplerStatus.OK;
             }
-
-            return SamplerStatus.OK;
         }
 
         protected override bool Update()
         {
-            mCenterPt = mActualPoint;
-            try
-            {
-                ((BlockReference)Entity).Position = mCenterPt;
-            }
-            catch (System.Exception)
-            {
-                return false;
-            }
+            var br = (BlockReference)Entity;
+            br.Position = mPosition;
             return true;
-        }
-
-        public Entity GetEntity()
-        {
-            return Entity;
         }
     }
 
@@ -79,9 +73,8 @@ namespace ThMEPElectrical.Command
                 var pr = Active.Editor.Drag(jig);
                 if (pr.Status == PromptStatus.OK)
                 {
-                    var blkref = jig.GetEntity();
-                    currentDb.ModelSpace.Add(blkref);
-                    blkref.SetDatabaseDefaults();
+                    currentDb.ModelSpace.Add(br);
+                    br.SetDatabaseDefaults();
                 }
             }
         }
