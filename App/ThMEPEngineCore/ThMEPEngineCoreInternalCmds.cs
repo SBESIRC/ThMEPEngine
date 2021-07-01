@@ -1,8 +1,5 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
-using DotNetARX;
-using System.Text;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -11,19 +8,20 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 
 #if ACAD2016
 using CLI;
+using System;
 using System.IO;
+using System.Text;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
+using ThMEPEngineCore.IO;
 #endif
 
 namespace ThMEPEngineCore
@@ -55,7 +53,7 @@ namespace ThMEPEngineCore
 
                 objs.BufferPolygons(result2.Value)
                     .Cast<Entity>()
-                    .ForEach(o =>
+                    .ForEachDbObject(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.SetDatabaseDefaults();
