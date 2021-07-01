@@ -215,6 +215,7 @@
     <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThRoomOutlineSimplifier.cs" />
+    <Compile Include="Service\ThShearWallSimplifer.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
     <Compile Include="Engine\ThDB3SlabExtractionVisitor.cs" />
