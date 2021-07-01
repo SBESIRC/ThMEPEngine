@@ -1,6 +1,7 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
@@ -35,32 +36,29 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            List<Entity> ents = new List<Entity>();
+            var curves = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
                 ThCADCoreNTSSpatialIndex shearwallCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 foreach (var filterObj in shearwallCurveSpatialIndex.SelectCrossingPolygon(polygon))
                 {
-                    ents.Add(filterObj as Entity);
+                    curves.Add(filterObj as Curve);
                 }
             }
             else
             {
-                ents = objs.Cast<Entity>().ToList();
+                curves = objs;
             }
-            ents.ForEach(o =>
+            ThShearWallSimplifier thShearWallSimplifier = new ThShearWallSimplifier();
+            curves = thShearWallSimplifier.MakeValid(curves);
+            if (curves.Count > 0)
             {
-                if (o is Polyline polyline && polyline.Area > 0.0)
-                {
-                    var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ShearWallBufferDistance);
-                    if (bufferObjs.Count == 1)
-                    {
-                        var outline = bufferObjs[0] as Polyline;
-                        Elements.Add(ThIfcWall.Create(outline));
-                    }
-                }
-            });
+                var results = thShearWallSimplifier.Normalize(curves);
+                results = thShearWallSimplifier.Simplify(results);
+                results = thShearWallSimplifier.Filter(results);
+                results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
+            }
         }
     }
 }

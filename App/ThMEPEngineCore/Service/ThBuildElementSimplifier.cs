@@ -11,9 +11,10 @@ namespace ThMEPEngineCore.Service
 {
     public abstract class ThBuildElementSimplifier
     {
-        private const double OFFSET_DISTANCE = 30.0;
-        private const double DISTANCE_TOLERANCE = 1.0;
-        private const double TESSELLATE_ARC_LENGTH = 10.0;
+        protected double OFFSETDISTANCE = 30.0;
+        protected double DISTANCETOLERANCE = 1.0;
+        protected double TESSELLATEARCLENGTH = 10.0;
+        protected double AREATOLERANCE = 1.0;
 
         public virtual DBObjectCollection Simplify(DBObjectCollection curves)
         {
@@ -22,7 +23,7 @@ namespace ThMEPEngineCore.Service
             {
                 // 由于投影误差，DB3切出来的线中有非常短的线段（长度<1mm)
                 // 这里使用简化算法，剔除掉这些非常短的线段
-                objs.Add(o.DPSimplify(DISTANCE_TOLERANCE));
+                objs.Add(o.DPSimplify(DISTANCETOLERANCE));
             });
             return objs;
         }
@@ -39,18 +40,19 @@ namespace ThMEPEngineCore.Service
                 }
             });
             return objs;
-        }
+        }      
 
         public virtual DBObjectCollection Normalize(DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
+            //double OFFSETDISTANCE = OffsetDistance();
             foreach (AcPolygon curve in curves)
             {
-                curve.Buffer(-OFFSET_DISTANCE)
+                curve.Buffer(-OFFSETDISTANCE)
                     .Cast<AcPolygon>()
                     .ForEach(o =>
                     {
-                        o.Buffer(OFFSET_DISTANCE)
+                        o.Buffer(OFFSETDISTANCE)
                         .Cast<AcPolygon>()
                         .ForEach(e => objs.Add(e));
                     });
@@ -58,6 +60,24 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
+        public virtual DBObjectCollection Filter(DBObjectCollection walls)
+        {
+            return walls.Cast<Entity>().Where(o =>
+            {
+                if (o is AcPolygon polygon)
+                {
+                    return polygon.Area > AREATOLERANCE;
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    return mPolygon.Area > AREATOLERANCE;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }).ToCollection();
+        }
         public virtual DBObjectCollection Tessellate(DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
@@ -65,11 +85,11 @@ namespace ThMEPEngineCore.Service
             {
                 if (c is AcPolygon polygon)
                 {
-                    objs.Add(polygon.Tessellate(TESSELLATE_ARC_LENGTH));
+                    objs.Add(polygon.Tessellate(TESSELLATEARCLENGTH));
                 }
                 else if (c is Circle circle)
                 {
-                    objs.Add(circle.Tessellate(TESSELLATE_ARC_LENGTH));
+                    objs.Add(circle.Tessellate(TESSELLATEARCLENGTH));
                 }
                 else
                 {
