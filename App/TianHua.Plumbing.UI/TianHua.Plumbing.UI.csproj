@@ -63,18 +63,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="fmFDParam.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmFDParam.Designer.cs">
-      <DependentUpon>fmFDParam.cs</DependentUpon>
-    </Compile>
-    <Compile Include="fmFDUse.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmFDUse.Designer.cs">
-      <DependentUpon>fmFDUse.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmSprinklerLayout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,12 +80,6 @@
     </Compile>
     <Compile Include="PlumbingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="fmFDParam.resx">
-      <DependentUpon>fmFDParam.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmFDUse.resx">
-      <DependentUpon>fmFDUse.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmSprinklerLayout.resx">
       <DependentUpon>fmSprinklerLayout.cs</DependentUpon>
     </EmbeddedResource>
