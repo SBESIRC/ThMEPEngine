@@ -441,9 +441,12 @@ namespace ThMEPEngineCore
                     if (o.Outline is Curve curve)
                     {
                         var clone = curve.WashClone();
-                        clone.ColorIndex = 6;
-                        clone.SetDatabaseDefaults();
-                        objIds.Add(acadDatabase.ModelSpace.Add(clone));
+                        if(clone!=null)
+                        {
+                            clone.ColorIndex = 6;
+                            clone.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(clone));
+                        }
                     }
                 });
             }
@@ -703,15 +706,22 @@ namespace ThMEPEngineCore
         public void THExtractRailing()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var railingRecognitionEngine = new ThRailingRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var railingRecognitionEngine = new ThRailingRecognitionEngine();
                 railingRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 railingRecognitionEngine.Elements.ForEach(o =>
                 {
@@ -725,17 +735,24 @@ namespace ThMEPEngineCore
         public void THExtractCornice()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var lineFootRecognitionEngine = new ThDB3CorniceRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                lineFootRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                lineFootRecognitionEngine.Elements.ForEach(o =>
+                ThDB3CorniceRecognitionEngine corniceRecognitionEngine = new ThDB3CorniceRecognitionEngine();
+                corniceRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                corniceRecognitionEngine.Elements.ForEach(o =>
                 {
                     var curve = o.Outline as Curve;
                     acadDatabase.ModelSpace.Add(curve.WashClone());
