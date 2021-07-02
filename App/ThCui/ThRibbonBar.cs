@@ -236,17 +236,17 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
             }
 
-            {
-                var subPanel = row.AddNewPanel();
-                var subRow = subPanel.AddNewRibbonRow();
-                row.AddNewButton("消火栓",
-                    "天华消火栓",
-                    "THXHSJH",
-                    "天华消火栓",
-                    "IDI_THCAD_THXHSJH_SMALL",
-                    "IDI_THCAD_THXHSJH_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            //{
+            //    var subPanel = row.AddNewPanel();
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    row.AddNewButton("消火栓",
+            //        "天华消火栓",
+            //        "THXHSJH",
+            //        "天华消火栓",
+            //        "IDI_THCAD_THXHSJH_SMALL",
+            //        "IDI_THCAD_THXHSJH_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
         }
 
         private static void CreateInventoryPanel(RibbonTabSource tab)
