@@ -42,6 +42,13 @@ namespace ThMEPWSS.Hydrant.Service
             var extractors = Extract(db, pts); //获取数据
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
             Rooms = roomExtractor.Rooms; //获取房间
+
+            //过滤只连接一个房间框线的门
+            var doorOpeningExtractor = extractors
+                .Where(o => o is ThHydrantDoorOpeningExtractor)
+                .First() as ThHydrantDoorOpeningExtractor;
+            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList());
+
             //用于判断私立空间或公立空间
             IRoomPrivacy privacyCheck = new ThJudgeRoomPrivacyService();
             roomExtractor.iRoomPrivacy = privacyCheck;
@@ -86,7 +93,7 @@ namespace ThMEPWSS.Hydrant.Service
                         IsolateSwitch=true,
                         ElementLayer = AiLayerManager.ColumnLayer,
                     },
-                    new ThDoorOpeningExtractor()
+                    new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
                         ElementLayer = AiLayerManager.DoorOpeningLayer,

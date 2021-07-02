@@ -19,9 +19,14 @@ namespace ThCADCore.NTS
         {
             if (polygon.IsValid)
             {
-                List<Curve> holes = new List<Curve>();
+                var holes = new List<Curve>();
                 var shell = polygon.Shell.ToDbPolyline();
-                polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
+                if(shell.Area<=1.0) 
+                {
+                    //防止近视与线的闭合Polyline的问题
+                    return new MPolygon();
+                }
+                holes = polygon.Holes.Select(o=>o.ToDbPolyline()).Where(o=>o.Area>1.0).Cast<Curve>().ToList();
                 return ThMPolygonTool.CreateMPolygon(shell, holes);
             }
             return new MPolygon();

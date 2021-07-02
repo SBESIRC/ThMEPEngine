@@ -6,6 +6,7 @@ using ThMEPEngineCore.Service;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPWSS.Hydrant
 {
@@ -36,24 +37,42 @@ namespace ThMEPWSS.Hydrant
             });
             return result;
         }
-        public static List<Entity> MakeValid(Polygon polygon, double areaTolerance = 1.0)
+        public static Entity MakeValid(Polygon polygon)
         {
-            var objs = polygon.Buffer(0).ToDbCollection();
-            return objs.Cast<Entity>().Where(o =>
-             {
-                 if (o is Polyline polyline)
-                 {
-                     return polyline.Area > areaTolerance;
-                 }
-                 else if (o is MPolygon mPolygon)
-                 {
-                     return mPolygon.Area > areaTolerance;
-                 }
-                 else
-                 {
-                     return false;
-                 }
-             }).ToList();
+            var objs = polygon.Buffer(0).ToDbCollection(true);
+            var areaDic = new Dictionary<Entity, double>();
+            objs.Cast<Entity>().ForEach(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    areaDic.Add(polyline, polyline.Area);
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    areaDic.Add(mPolygon, mPolygon.Area);
+                }
+                else
+                {
+                    areaDic.Add(o, 0.0);
+                }
+            });
+            return areaDic.OrderByDescending(o => o.Value).First().Key;
+        }
+        public static MPolygon MakeValid(MultiPolygon multiPolygon)
+        {
+            var loops = new List<DBObjectCollection>();
+            var polygons = multiPolygon.Geometries.Cast<Polygon>();
+            polygons.ForEach(o =>
+            {
+                var result = new DBObjectCollection();
+                var polys = o.ToDbCollection().Cast<Polyline>();
+                polys.ForEach(p =>
+                {
+                    result.Add(p.MakeValid().Cast<Polyline>().OrderByDescending(e => e.Area).First());
+                });
+                loops.Add(result);
+            });
+            return ThMPolygonTool.CreateMPolygon(loops);
         }
     }
 }

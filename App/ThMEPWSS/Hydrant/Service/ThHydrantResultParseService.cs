@@ -37,16 +37,16 @@ namespace ThMEPWSS.Hydrant.Service
                                 if (f.Attributes["Name"] as string == "Covered region")
                                 {
                                     if (f.Geometry is Polygon polygon)
-                                    {
-                                        coverArea = polygon.ToDbMPolygon();                                        ;
-                                        islatedPolygons.AddRange(ThHydrantUtils.MakeValid(polygon));
+                                    {                                       
+                                        coverArea = ThHydrantUtils.MakeValid(polygon);                                        ;
+                                        islatedPolygons.Add(coverArea.Clone() as Entity);
                                     }
                                     else if (f.Geometry is MultiPolygon mPolygon)
                                     {
-                                        coverArea =mPolygon.ToDbMPolygon();
+                                        coverArea = ThHydrantUtils.MakeValid(mPolygon);
                                         mPolygon.Geometries
                                         .Cast<Polygon>()
-                                        .ForEach(m => islatedPolygons.AddRange(ThHydrantUtils.MakeValid(m)));
+                                        .ForEach(m => islatedPolygons.Add(ThHydrantUtils.MakeValid(m)));
                                     }
                                     else
                                     {
@@ -67,7 +67,6 @@ namespace ThMEPWSS.Hydrant.Service
                 }
             });            
             return results;
-        }
-        
+        }        
     }
 }

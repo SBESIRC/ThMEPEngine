@@ -21,31 +21,39 @@ namespace ThMEPWSS.Hydrant.Service
         public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         private ThFireHydrantVM FireHydrantVM { get; set; }
         private ThAILayerManager AiLayerManager { get; set; }        
-        private List<ThExtractorBase> Extractors { get; set; }
 
         public ThCheckFireHydrantService(ThFireHydrantVM fireHydrantVM)
         {
             FireHydrantVM = fireHydrantVM;
             Rooms = new List<ThIfcRoom>();
-            Extractors = new List<ThExtractorBase>();
             Covers = new List<Tuple<Entity, Point3d, List<Entity>>>();
             AiLayerManager = ThHydrantExtractLayerManager.Config();
         }
 
         public void Check(Database db, Point3dCollection pts)
         {
-            Extractors = Extract(db, pts); //获取数据
-            var fireHydrantExtractor = Extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
+            var extractors = Extract(db, pts); //获取数据
+            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            Rooms = roomExtractor.Rooms; //获取房间
+
+            //过滤只连接一个房间框线的门
+            var doorOpeningExtractor = extractors
+                .Where(o => o is ThHydrantDoorOpeningExtractor)
+                .First() as ThHydrantDoorOpeningExtractor;
+            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList());
+
+            var fireHydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
             if (fireHydrantExtractor.FireHydrants.Count == 0)
             {
                 return;
             }
-            string geoContent = OutPutGeojson(Extractors);
+            string geoContent = OutPutGeojson(extractors);
             var context = BuildHydrantParam();
             var hydrant = new ThHydrantEngineMgd();
             var regions = hydrant.Validate(geoContent, context);
             Covers = ThHydrantResultParseService.Parse(regions);
         }
+
         private List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
         {
             //提取
@@ -69,7 +77,7 @@ namespace ThMEPWSS.Hydrant.Service
                         IsolateSwitch=true,
                         ElementLayer = AiLayerManager.ColumnLayer,
                     },
-                    new ThDoorOpeningExtractor()
+                    new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
                         ElementLayer = AiLayerManager.DoorOpeningLayer,
