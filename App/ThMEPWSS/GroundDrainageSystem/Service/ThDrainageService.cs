@@ -290,7 +290,7 @@
         }
 
         const double MAX_SHORTTRANSLATOR_DISTANCE = 150;
-    
+
         public static void CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out StringBuilder sb, out List<DrainageDrawingData> drDatas, List<KeyValuePair<string, Geometry>> roomData = null)
         {
             DrawingTransaction.Cur.AbleToDraw = false;
@@ -650,6 +650,39 @@
                     return label;
                 }
 
+                {
+                    var f = F(item.VerticalPipes);
+                    foreach (var dlinesGeo in dlinesGeos)
+                    {
+                        var pipes = f(dlinesGeo);
+                        var d = pipes.Select(getLabel).Where(x => x != null).ToCountDict();
+                        foreach (var label in d.Where(x => x.Value > 1).Select(x => x.Key))
+                        {
+                            var pps = pipes.Where(p => getLabel(p) == label).ToList();
+                            if (pps.Count == 2)
+                            {
+                                var dis = pps[0].GetCenter().GetDistanceTo(pps[1].GetCenter());
+                                if (10 < dis && dis <= MAX_SHORTTRANSLATOR_DISTANCE)
+                                {
+                                    //通气立管没有乙字弯
+                                    if (!label.StartsWith("TL"))
+                                    {
+                                        shortTranslatorLabels.Add(label);
+                                    }
+                                }
+                                else if (dis > MAX_SHORTTRANSLATOR_DISTANCE)
+                                {
+                                    longTranslatorLabels.Add(label);
+                                }
+                            }
+                            else
+                            {
+                                longTranslatorLabels.Add(label);
+                            }
+                        }
+                    }
+                }
+
                 //关联地漏
                 {
                     var dict = new Dictionary<string, int>();
@@ -695,9 +728,9 @@
                     var f1 = F(item.WaterPorts);
 
                     var ok_ents = new HashSet<Geometry>();
-                    var d = new Dictionary<string, string>();
+                    var outletd = new Dictionary<string, string>();
                     var has_wrappingpipes = new HashSet<string>();
-
+                    var portd = new Dictionary<Geometry, string>();
                     {
                         //先提取直接连接的
                         var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
@@ -707,16 +740,25 @@
                             if (waterPorts.Count == 1)
                             {
                                 var waterPort = waterPorts[0];
+                                var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
+                                portd[dlinesGeo] = waterPortLabel;
+                                //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
                                 var pipes = f2(dlinesGeo);
                                 ok_ents.AddRange(pipes);
                                 foreach (var pipe in pipes)
                                 {
                                     if (lbDict.TryGetValue(pipe, out string label))
                                     {
-                                        d[label] = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
-                                        if (wrappingPipesf(dlinesGeo).Any())
+                                        outletd[label] = waterPortLabel;
+                                        var wrappingpipes = wrappingPipesf(dlinesGeo);
+                                        if (wrappingpipes.Count > 0)
                                         {
                                             has_wrappingpipes.Add(label);
+                                        }
+                                        foreach (var wp in wrappingpipes)
+                                        {
+                                            portd[wp] = waterPortLabel;
+                                            DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
                                         }
                                     }
                                 }
@@ -745,15 +787,23 @@
                                     if (waterPort.GetCenter().GetDistanceTo(pt) <= 1500)
                                     {
                                         var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
+                                        portd[dlinesGeo] = waterPortLabel;
+                                        //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
                                         foreach (var pipe in f2(dlinesGeo))
                                         {
                                             if (lbDict.TryGetValue(pipe, out string label))
                                             {
-                                                d[label] = waterPortLabel;
+                                                outletd[label] = waterPortLabel;
                                                 ok_ents.Add(pipe);
-                                                if (wrappingPipesf(dlinesGeo).Any())
+                                                var wrappingpipes = wrappingPipesf(dlinesGeo);
+                                                if (wrappingpipes.Any())
                                                 {
                                                     has_wrappingpipes.Add(label);
+                                                }
+                                                foreach (var wp in wrappingpipes)
+                                                {
+                                                    portd[wp] = waterPortLabel;
+                                                    DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
                                                 }
                                             }
                                         }
@@ -762,12 +812,49 @@
                             }
                         }
                     }
+                    {
+                        //给套管做标记
+                        var wpf=F(item.WrappingPipes.Where(wp => !portd.ContainsKey(wp)).ToList());
+                        foreach (var dlinesGeo in dlinesGeos)
+                        {
+                            if (!portd.TryGetValue(dlinesGeo, out string v)) continue;
+                            foreach (var wp in wpf(dlinesGeo))
+                            {
+                                if (!portd.ContainsKey(wp))
+                                {
+                                    portd[wp] = v;
+                                }
+                            }
+                        }
+                    }
+                    {
+                        var pipesf = F(item.VerticalPipes);
+                        //再处理通过套管来连接的
+                        foreach (var wp in item.WrappingPipes)
+                        {
+                            if(portd.TryGetValue(wp,out string v))
+                            {
+                                var pipes = pipesf(wp);
+                                foreach (var pipe in pipes)
+                                {
+                                    if(lbDict.TryGetValue(pipe, out string label))
+                                    {
+                                        if (!outletd.ContainsKey(label))
+                                        {
+                                            outletd[label] = v;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
 
                     {
-                        sb.AppendLine("排出：" + d.ToJson());
-                        drData.Outlets = d;
+                        sb.AppendLine("排出：" + outletd.ToJson());
+                        drData.Outlets = outletd;
 
-                        d.Join(lbDict, kv => kv.Key, kv => kv.Value, (kv1, kv2) =>
+                        outletd.Join(lbDict, kv => kv.Key, kv => kv.Value, (kv1, kv2) =>
                         {
                             var num = kv1.Value;
                             var pipe = kv2.Key;

@@ -710,7 +710,33 @@ namespace ThMEPWSS.DebugNs
             Console.WriteLine(nameof(DrainageService.TestDrawingDatasCreation));
             Console.WriteLine(nameof(DrainageService.CreateDrawingDatas));
             Console.WriteLine(nameof(DrainageSystemDiagram.draw10));
+            Console.WriteLine(nameof(DrainageSystemDiagram.draw13));
         }
+        [Feng("xx")]
+        public static void qvkflv()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer == "W-FRPT-HYDT-PIPE").Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                foreach (var line in AutoConn(lines))
+                {
+                    DU.DrawLineSegmentBufferLazy(line, 10).ColorIndex = 4;
+                }
+            }
+        }
+        public static IEnumerable<GLineSegment> AutoConn(List<GLineSegment> lines)
+        {
+            foreach (var g in GeoFac.GroupParallelLines(lines, 3000, 1))
+            {
+                yield return GeoFac.GetCenterLine(g);
+            }
+        }
+
         [Feng("draw13")]
         public static void qvk1j8()
         {

@@ -18,7 +18,7 @@
     using NetTopologySuite.Operation.OverlayNG;
     using NetTopologySuite.Operation.Overlay;
     using NetTopologySuite.Algorithm;
-
+    using DU = ThMEPWSS.Assistant.DrawUtils;
     public class RainSystemDrawingData
     {
         public List<string> RoofLabels = new List<string>();
@@ -59,7 +59,33 @@ pt,
     }
     public static class GeoFac
     {
-        public static List<List<GLineSegment>> GroupParallelLines(List<GLineSegment> lines, double extend_distance, double collinear_gap_distance)
+        public class AngleDegreeParallelComparer : IEqualityComparer<double>
+        {
+            double tol;
+
+            public AngleDegreeParallelComparer(double tol)
+            {
+                this.tol = tol;
+            }
+
+            public static void FixAngleDegree(ref double v)
+            {
+                while (v < 0) v += 360;
+                while (v >= 360) v -= 360;
+            }
+            public bool Equals(double x, double y)
+            {
+                var v = x - y;
+                FixAngleDegree(ref v);
+                return v.EqualsTo(0, tol) || v.EqualsTo(360, tol);
+            }
+
+            public int GetHashCode(double obj)
+            {
+                return 0;
+            }
+        }
+        public static List<List<GLineSegment>> GroupParallelLines(List<GLineSegment> lines, double extend_distance, double collinear_gap_distance, double angle_tollerence = 1)
         {
             lines = lines.Where(x => x.IsValid).Distinct().ToList();
             var lineGeos = lines.Select(x => x.ToLineString()).ToList();
@@ -70,15 +96,28 @@ pt,
                 var objs = spatialIndex(buffer).Select(lineGeos).ToList(lines);
                 if (objs.Count > 1)
                 {
-                    var parallelLines = objs.Where(l => l.IsParallelTo(line, 1)).ToList();
+                    var parallelLines = objs.Where(l => l.IsParallelTo(line, angle_tollerence)).ToList();
                     if (parallelLines.Count > 1)
                     {
+                        var angle = line.AngleDegree;
                         var parallelLineGeos = parallelLines.Select(lines).ToList(lineGeos);
+
                         var tagLines = parallelLineGeos.Where(l => l.UserData != null).ToList();
                         var tag = parallelLineGeos.Select(l => l.UserData).FirstOrDefault(x => x != null) ?? new object();
                         foreach (var l in parallelLineGeos)
                         {
-                            l.UserData ??= tag;
+                            if (l.UserData == null)
+                            {
+                                l.UserData = tag;
+                            }
+                            else if (l.UserData != tag)
+                            {
+                                var _tag = l.UserData;
+                                foreach (var _l in lineGeos.Where(x => x.UserData == _tag).ToList())
+                                {
+                                    _l.UserData = tag;
+                                }
+                            }
                         }
                     }
                 }

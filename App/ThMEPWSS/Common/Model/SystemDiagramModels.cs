@@ -702,7 +702,7 @@ namespace ThMEPWSS.Uitl
         {
             get
             {
-                var dg = GeoAlgorithm.AngleToDegree((EndPoint - StartPoint).Angle);
+                var dg = (EndPoint - StartPoint).Angle.AngleToDegree();
                 if (dg < 0) dg += 360;
                 if (dg >= 360) dg -= 360;
                 return dg;
@@ -1211,13 +1211,13 @@ namespace ThMEPWSS.Uitl
         {
             return new Point2d(v.X, v.Y);
         }
-      
-        public static bool IsParallelTo(this GLineSegment first, GLineSegment second,double angleTol)
+
+        public static bool IsParallelTo(this GLineSegment first, GLineSegment second, double angleTol)
         {
             var v1 = first.EndPoint - first.StartPoint;
             var v2 = second.EndPoint - second.StartPoint;
-            var angle=v1.GetAngleTo(v2);
-            return angle.EqualsTo(.0, angleTol) || angle.EqualsTo(180.0, angleTol);
+            var angle = v1.GetAngleTo(v2);
+            return angle.EqualsTo(.0, angleTol) || angle.EqualsTo(180.0, angleTol) || angle.EqualsTo(360.0, angleTol);
         }
         public static bool EqualsTo(this double value1, double value2, double tollerance)
         {

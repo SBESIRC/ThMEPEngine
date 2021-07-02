@@ -94,6 +94,16 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             return source[source.Count - index];
         }
+        public static Dictionary<T, int> ToCountDict<T>(this IEnumerable<T> source)
+        {
+            var d = new Dictionary<T, int>();
+            foreach (var item in source)
+            {
+                d.TryGetValue(item, out int value);
+                d[item] = value + 1;
+            }
+            return d;
+        }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
             for (int i = 0; i < source.Count; i++)

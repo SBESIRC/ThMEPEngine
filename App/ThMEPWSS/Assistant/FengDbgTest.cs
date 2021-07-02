@@ -3860,6 +3860,18 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             }
             [Feng]
+            public static void ShowBoundary()
+            {
+                Dbg.FocusMainWindow();
+                using (var adb = AcadDatabase.Active())
+                {
+                    Dbg.BuildAndSetCurrentLayer(adb.Database);
+                    var e = Dbg.TrySelectEntity<Entity>(adb);
+                    DU.DrawRectLazy(e.Bounds.ToGRect());
+                    DU.Draw(adb);
+                }
+            }
+            [Feng]
             public static void GetAllBlocks()
             {
                 Dbg.FocusMainWindow();
