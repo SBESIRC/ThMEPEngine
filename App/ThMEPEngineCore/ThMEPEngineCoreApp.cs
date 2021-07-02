@@ -418,14 +418,22 @@ namespace ThMEPEngineCore
         public void THExtractWindow()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var windowEngine = new ThDB3WindowRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var windowEngine = new ThDB3WindowRecognitionEngine();
                 windowEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 var objIds = new ObjectIdList();
                 windowEngine.Elements.ForEach(o =>
@@ -438,7 +446,6 @@ namespace ThMEPEngineCore
                         objIds.Add(acadDatabase.ModelSpace.Add(clone));
                     }
                 });
-                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
             }
         }
         [CommandMethod("TIANHUACAD", "ThExtractParkingStall", CommandFlags.Modal)]
@@ -622,7 +629,7 @@ namespace ThMEPEngineCore
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
-
+                
                 var doorEngine = new ThDB3DoorRecognitionEngine();
                 doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 doorEngine.Elements.ForEach(o =>
@@ -631,6 +638,7 @@ namespace ThMEPEngineCore
                     o.Outline.SetDatabaseDefaults();
                     acadDatabase.ModelSpace.Add(o.Outline);
                 });
+
             }
         }
 
