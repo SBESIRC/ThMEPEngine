@@ -639,7 +639,7 @@ namespace ThMEPWSS.Pipe.Service
                 groups[1].DL = groups[1].PL;
             }
 
-            NewMethod6(new DrawingOption()
+            DrawVer1(new DrawingOption()
             {
                 basePoint = basePoint,
                 OFFSET_X = OFFSET_X,
@@ -651,7 +651,7 @@ namespace ThMEPWSS.Pipe.Service
             });
 
         }
-        public static void NewMethod6(DrawingOption option)
+        public static void DrawVer1(DrawingOption option)
         {
             var maxStoreyIndex = option.maxStoreyIndex;
             var test = option.test;

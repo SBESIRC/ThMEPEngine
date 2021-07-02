@@ -59,7 +59,9 @@ namespace ThMEPWSS.DebugNs
     using System.CodeDom.Compiler;
     using System.Linq.Expressions;
     using ThMEPEngineCore.Algorithm;
-
+    using NetTopologySuite.Operation.OverlayNG;
+    using NetTopologySuite.Operation.Overlay;
+    using NetTopologySuite.Algorithm;
 
     public static class HighlightHelper
     {
@@ -709,10 +711,34 @@ namespace ThMEPWSS.DebugNs
             Console.WriteLine(nameof(DrainageService.CreateDrawingDatas));
             Console.WriteLine(nameof(DrainageSystemDiagram.draw10));
         }
+        [Feng("draw13")]
+        public static void qvk1j8()
+        {
+            DrainageSystemDiagram.draw13();
+        }
+        [Feng("draw12")]
+        public static void qvjyot()
+        {
+            DrainageSystemDiagram.draw12();
+        }
         [Feng("draw11")]
         public static void qvhw7v()
         {
             DrainageSystemDiagram.draw11();
+        }
+      
+        [Feng("qvkdxw")]
+        public static void qvkdxw()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                DU.DrawLineSegmentBufferLazy(GeoFac.GetCenterLine(Dbg.SelectEntities(adb).OfType<Line>().Select(x => x.ToGLineSegment()).ToList()), 10);
+            }
         }
         [Feng("draw8")]
         public static void qv8ttl()
@@ -1902,7 +1928,119 @@ namespace ThMEPWSS.DebugNs
         {
             DrainageSystemDiagram.draw10();
         }
+        [Feng("qvjrf9")]
+        public static void qvjrf9()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                Console.WriteLine(Dbg.SelectEntity<Entity>(adb).Bounds.ToGRect().ToCadJson());
+            }
+        }
+        [Feng("qvjs5p")]
+        public static void qvjs5p()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            {
+                foreach (var e in adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() == "地漏平面"))
+                {
+                    Dbg.ShowWhere(e);
+                }
+                DU.Draw(adb);
+            }
+        }
+        [Feng("qvjptc")]
+        public static void qvjptc()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            {
+                var r = "{'type':'GRect','values':[1320824.8471009475,784824.70226323092,1323311.1004554592,787140.50510722329]}".FromCadJson<GRect>();
+                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
+                {
+                    var ed = Active.Editor;
+                    var opt = new PromptEntityOptions("请选择");
+                    var ret = ed.GetEntity(opt);
+                    if (ret.Status == PromptStatus.OK)
+                    {
+                        var br = (BlockReference)trans.GetObject(ret.ObjectId, OpenMode.ForWrite, false);
+                        br.ExplodeToOwnerSpace();
+                        using (var adb = AcadDatabase.Use(br.Database))
+                        {
+                            foreach (var e in adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() == "地漏平面"))
+                            {
+                                Dbg.ShowWhere(e);
+                            }
+                            DU.Draw(adb);
+                        }
+                    }
 
+                    trans.Abort();
+                    //trans.Commit();
+                }
+            }
+            //using (Dbg.DocumentLock)
+            //using (var adb = AcadDatabase.Active())
+            //using (var tr = new DrawingTransaction(adb))
+            //{
+            //    var db = adb.Database;
+            //    Dbg.BuildAndSetCurrentLayer(db);
+            //    //var brs = Dbg.SelectEntity<BlockReference>(adb).ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
+            //    ////Console.WriteLine(brs.Select(x => x.IsDynamicBlock).ToCadJson());
+            //    ////Console.WriteLine(brs.Select(x => x.GetBlockName()).ToCadJson());               
+            //    //foreach (var br in brs)
+            //    //{
+            //    //    br.ExplodeToOwnerSpace();
+            //    //}
+
+            //    //Dbg.SelectEntity<BlockReference>(adb).ExplodeToOwnerSpace();
+
+            //    //using (var trans = adb.Database.TransactionManager.StartTransaction())
+            //    //{
+            //    //    var ed = Active.Editor;
+            //    //    var opt = new PromptEntityOptions("请选择");
+            //    //    var ret = ed.GetEntity(opt);
+            //    //    if (ret.Status == PromptStatus.OK)
+            //    //    {
+            //    //        var br=(BlockReference)trans.GetObject(ret.ObjectId, OpenMode.ForWrite, false);
+            //    //        br.ExplodeToOwnerSpace();
+            //    //    }
+            //    //    trans.Abort();
+            //    //}
+            //}
+        }
+        [Feng("qvjo7o")]
+        public static void qvjo7o()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                //Console.WriteLine(Dbg.SelectEntity<BlockReference>(adb).ExplodeToDBObjectCollection().OfType<BlockReference>().Select(x => x.Name).ToCadJson()); ;
+                //Console.WriteLine(Dbg.SelectEntity<BlockReference>(adb).ExplodeToDBObjectCollection().OfType<BlockReference>().Select(x => x.IsDynamicBlock).ToCadJson()); 
+
+                //foreach (var br in Dbg.SelectEntity<BlockReference>(adb).ExplodeToDBObjectCollection().OfType<BlockReference>())
+                //{
+                //    adb.ModelSpace.Add(br);
+                //}
+
+            }
+        }
+        //[Feng("db.SetCurrentLayer")]
+        public static void qvjnyy()
+        {
+            using (var adb = AcadDatabase.Active())
+            {
+                adb.Database.SetCurrentLayer("0");
+            }
+        }
         [Feng("UnlockCurrentLayer")]
         public static void qvenc4()
         {
@@ -1975,137 +2113,88 @@ namespace ThMEPWSS.DebugNs
             }
         }
 
-
-
-        [Feng("水管井")]
-        public static void quqgdc()
+        public class qvjp9n
         {
-            //6.3.8	水管井的FL
-            //若FL在水管井中，则认为该FL在出现的每层都安装了一个地漏。
-            //水管井的判断：
-            //空间名称为“水”、包含“水井”或“水管井”（持续更新）。
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+
+            [Feng("水管井")]
+            public static void quqgdc()
             {
-                var list = DrainageService.CollectRoomData(adb);
-                foreach (var kv in list)
+                //6.3.8	水管井的FL
+                //若FL在水管井中，则认为该FL在出现的每层都安装了一个地漏。
+                //水管井的判断：
+                //空间名称为“水”、包含“水井”或“水管井”（持续更新）。
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    if (kv.Key == "水" || kv.Key.Contains("水井") || kv.Key.Contains("水管井"))
+                    var list = DrainageService.CollectRoomData(adb);
+                    foreach (var kv in list)
                     {
-                        Dbg.PrintLine(kv.Key);
+                        if (kv.Key == "水" || kv.Key.Contains("水井") || kv.Key.Contains("水管井"))
+                        {
+                            Dbg.PrintLine(kv.Key);
+                        }
                     }
                 }
             }
-        }
-        [Feng("quqfmg")]
-        public static void quqfmg()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            [Feng("quqfmg")]
+            public static void quqfmg()
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
-                var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
-                var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
-                var ls = lines.Select(x => x.ToLineString()).ToList();
-                var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
-                var _gs = new List<List<Geometry>>();
-                foreach (var g in gs)
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var _circles = g.Where(x => cs.Contains(x)).ToList();
-                    var _lines = g.Where(x => ls.Contains(x)).ToList();
-                    var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
-                    var lst = new List<Geometry>();
-                    lst.AddRange(_circles);
-                    lst.AddRange(segs.Select(x => x.Extend(.1).ToLineString()));//延长一点点！
-                    _gs.Add(lst);
-                }
-                foreach (var g in _gs)
-                {
-                    var _circles = g.Where(x => cs.Contains(x)).ToList();
-                    foreach (var c in _circles)
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
+                    var ls = lines.Select(x => x.ToLineString()).ToList();
+                    var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
+                    var _gs = new List<List<Geometry>>();
+                    foreach (var g in gs)
                     {
-                        var lst = g.ToList();
-                        lst.Remove(c);
-                        var f = GeoFac.CreateIntersectsSelector(lst);
-                        Dbg.PrintLine(f(c).Count);//OK,如果有地漏是串联的，那么这里会等于2，否则等于1
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
+                        var _lines = g.Where(x => ls.Contains(x)).ToList();
+                        var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                        var lst = new List<Geometry>();
+                        lst.AddRange(_circles);
+                        lst.AddRange(segs.Select(x => x.Extend(.1).ToLineString()));//延长一点点！
+                        _gs.Add(lst);
                     }
-
-                }
-            }
-        }
-        [Feng("在交点处打碎")]
-        public static void quqqrp()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var seg1 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
-                var seg2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
-                var geo = seg1.ToLineString().Union(seg2.ToLineString());//MultiLineString
-                var segs = geo.ToDbCollection().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).ToList();
-
-                FengDbgTesting.AddLazyAction("", adb =>
-                {
-                    foreach (var seg in segs)
+                    foreach (var g in _gs)
                     {
-                        DU.DrawLineSegmentLazy(seg);
-                    }
-                });
-            }
-        }
-        [Feng("qurx6s")]
-        public static void qurx6s()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var circle = Dbg.SelectEntity<Circle>(adb);
-                //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6));
-                DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6, false));
-                //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(36));
-            }
-        }
-        [Feng("quqdxf")]
-        public static void quqdxf()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
-                var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
-                var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
-                var ls = lines.Select(x => x.ToLineString()).ToList();
-                var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
-                //Dbg.PrintLine(gs.Count);
-                foreach (var g in gs)
-                {
-                    var _circles = g.Where(x => cs.Contains(x)).ToList();
-                    var _lines = g.Where(x => ls.Contains(x)).ToList();
-                    var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
-                    FengDbgTesting.AddLazyAction("", adb =>
-                    {
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
                         foreach (var c in _circles)
                         {
-                            DU.DrawGeometryLazy(c);
+                            var lst = g.ToList();
+                            lst.Remove(c);
+                            var f = GeoFac.CreateIntersectsSelector(lst);
+                            Dbg.PrintLine(f(c).Count);//OK,如果有地漏是串联的，那么这里会等于2，否则等于1
                         }
+
+                    }
+                }
+            }
+            [Feng("在交点处打碎")]
+            public static void quqqrp()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var seg1 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    var seg2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    var geo = seg1.ToLineString().Union(seg2.ToLineString());//MultiLineString
+                    var segs = geo.ToDbCollection().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).ToList();
+
+                    FengDbgTesting.AddLazyAction("", adb =>
+                    {
                         foreach (var seg in segs)
                         {
                             DU.DrawLineSegmentLazy(seg);
@@ -2113,178 +2202,230 @@ namespace ThMEPWSS.DebugNs
                     });
                 }
             }
-        }
-        public static List<Geometry> ToGeometries(IEnumerable<Geometry> geos1, IEnumerable<Geometry> geos2)
-        {
-            return geos1.Concat(geos2).ToList();
-        }
-        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
-        {
-            return source1.Concat(source2).ToList();
-        }
-        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2, IEnumerable<T> source3)
-        {
-            return source1.Concat(source2).Concat(source3).ToList();
-        }
-        [Feng("quqcqu")]
-        public static void quqcqu()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            [Feng("qurx6s")]
+            public static void qurx6s()
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e1 = Dbg.SelectEntity<Line>(adb);
-                var e2 = Dbg.SelectEntity<Circle>(adb);
-                var g1 = e1.ToGLineSegment().ToLineString();
-                var g2 = e2.ToGCircle().ToCirclePolygon(36);
-                var g3 = g1.Difference(g2);
-                FengDbgTesting.AddLazyAction("", _adb =>
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    DU.DrawGeometryLazy(g3);
-                    Dbg.PrintLine(g3.Intersects(g2));
-                });
-            }
-        }
-        [Feng("quqb3e")]
-        public static void quqb3e()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                //Dbg.BuildAndSetCurrentLayer(db);
-                var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
-                var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
-                //[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]
-                Dbg.PrintText(circles.ToCadJson());
-                //[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]
-                Dbg.PrintText(lines.ToCadJson());
-            }
-        }
-        [Feng("quqbet")]
-        public static void quqbet()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var circles = "[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]".FromCadJson<List<GCircle>>();
-                var lines = "[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]".FromCadJson<List<GLineSegment>>();
-                foreach (var e in circles)
-                {
-                    DU.DrawGeometryLazy(e);
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circle = Dbg.SelectEntity<Circle>(adb);
+                    //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6));
+                    DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6, false));
+                    //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(36));
                 }
-                foreach (var e in lines)
+            }
+            [Feng("quqdxf")]
+            public static void quqdxf()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    DU.DrawLineSegmentLazy(e);
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
+                    var ls = lines.Select(x => x.ToLineString()).ToList();
+                    var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
+                    //Dbg.PrintLine(gs.Count);
+                    foreach (var g in gs)
+                    {
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
+                        var _lines = g.Where(x => ls.Contains(x)).ToList();
+                        var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                        FengDbgTesting.AddLazyAction("", adb =>
+                        {
+                            foreach (var c in _circles)
+                            {
+                                DU.DrawGeometryLazy(c);
+                            }
+                            foreach (var seg in segs)
+                            {
+                                DU.DrawLineSegmentLazy(seg);
+                            }
+                        });
+                    }
                 }
-                var nothing = nameof(FengDbgTesting.GetSegsToConnect);
-                var h = GeoFac.LineGrouppingHelper.Create(lines);
-                h.InitPointGeos(radius: 2.5);
-                h.DoGroupingByPoint();
-                h.CalcAlonePoints();
-                h.DistinguishAlonePoints();
-                foreach (var geo in h.GetAlonePoints())
+            }
+            public static List<Geometry> ToGeometries(IEnumerable<Geometry> geos1, IEnumerable<Geometry> geos2)
+            {
+                return geos1.Concat(geos2).ToList();
+            }
+            public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
+            {
+                return source1.Concat(source2).ToList();
+            }
+            public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2, IEnumerable<T> source3)
+            {
+                return source1.Concat(source2).Concat(source3).ToList();
+            }
+            [Feng("quqcqu")]
+            public static void quqcqu()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    DU.DrawGeometryLazy(geo);
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var e1 = Dbg.SelectEntity<Line>(adb);
+                    var e2 = Dbg.SelectEntity<Circle>(adb);
+                    var g1 = e1.ToGLineSegment().ToLineString();
+                    var g2 = e2.ToGCircle().ToCirclePolygon(36);
+                    var g3 = g1.Difference(g2);
+                    FengDbgTesting.AddLazyAction("", _adb =>
+                    {
+                        DU.DrawGeometryLazy(g3);
+                        Dbg.PrintLine(g3.Intersects(g2));
+                    });
                 }
-                //去掉起点剩下的全是终点
             }
-        }
-
-
-        [Feng("qupz46")]
-        public static void qupz46()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            [Feng("quqb3e")]
+            public static void quqb3e()
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = new Leader();
-                e.HasArrowHead = true;
-                for (int i = 0; i < 3; i++)
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    e.AppendVertex(Dbg.SelectPoint());
+                    var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    //[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]
+                    Dbg.PrintText(circles.ToCadJson());
+                    //[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]
+                    Dbg.PrintText(lines.ToCadJson());
                 }
-                //e.Layer = "H-DIMS-DUCT";
-                e.Dimasz = 200;
-                //e.Dimtxt = 1000;
-                //e.SetDimstyleData(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100"));
-
-                //Dbg.PrintLine(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100").ObjectId.ToString());
-                //e.SetDatabaseDefaults(db);
-                DU.DrawEntityLazy(e);
-
             }
-        }
-        [Feng("quq0kg")]
-        public static void quq0kg()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            [Feng("quqbet")]
+            public static void quqbet()
             {
-                var e1 = Dbg.SelectEntity<Leader>(adb);
-                Debugger.Break();
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = "[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]".FromCadJson<List<GCircle>>();
+                    var lines = "[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]".FromCadJson<List<GLineSegment>>();
+                    foreach (var e in circles)
+                    {
+                        DU.DrawGeometryLazy(e);
+                    }
+                    foreach (var e in lines)
+                    {
+                        DU.DrawLineSegmentLazy(e);
+                    }
+                    var nothing = nameof(FengDbgTesting.GetSegsToConnect);
+                    var h = GeoFac.LineGrouppingHelper.Create(lines);
+                    h.InitPointGeos(radius: 2.5);
+                    h.DoGroupingByPoint();
+                    h.CalcAlonePoints();
+                    h.DistinguishAlonePoints();
+                    foreach (var geo in h.GetAlonePoints())
+                    {
+                        DU.DrawGeometryLazy(geo);
+                    }
+                    //去掉起点剩下的全是终点
+                }
             }
-        }
-        [Feng("qupzpe")]
-        public static void qupzpe()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                //var db = adb.Database;
-                //Dbg.BuildAndSetCurrentLayer(db);
 
-                var e1 = Dbg.SelectEntity<Leader>(adb);
-                var e2 = Dbg.SelectEntity<Leader>(adb);
-                //e2.Dimldrblk = e1.Dimldrblk;//boom
-                //e2.DimensionStyle = e1.DimensionStyle;//boom
 
-                //var e2=(Leader)e1.GetTransformedCopy(Matrix3d.Displacement(new Vector3d(100,0,0)));
-                //e2.AppendVertex(Dbg.SelectPoint());
-                //DU.DrawEntityLazy(e2);
-            }
-        }
-        [Feng("qupz57")]
-        public static void qupz57()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            [Feng("qupz46")]
+            public static void qupz46()
             {
-                var db = adb.Database;
-                //Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Leader>(adb);
-                Dbg.PrintLine(e.DimensionStyleName);
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var e = new Leader();
+                    e.HasArrowHead = true;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        e.AppendVertex(Dbg.SelectPoint());
+                    }
+                    //e.Layer = "H-DIMS-DUCT";
+                    e.Dimasz = 200;
+                    //e.Dimtxt = 1000;
+                    //e.SetDimstyleData(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100"));
+
+                    //Dbg.PrintLine(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100").ObjectId.ToString());
+                    //e.SetDatabaseDefaults(db);
+                    DU.DrawEntityLazy(e);
+
+                }
+            }
+            [Feng("quq0kg")]
+            public static void quq0kg()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var e1 = Dbg.SelectEntity<Leader>(adb);
+                    Debugger.Break();
+                }
+            }
+            [Feng("qupzpe")]
+            public static void qupzpe()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    //var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+
+                    var e1 = Dbg.SelectEntity<Leader>(adb);
+                    var e2 = Dbg.SelectEntity<Leader>(adb);
+                    //e2.Dimldrblk = e1.Dimldrblk;//boom
+                    //e2.DimensionStyle = e1.DimensionStyle;//boom
+
+                    //var e2=(Leader)e1.GetTransformedCopy(Matrix3d.Displacement(new Vector3d(100,0,0)));
+                    //e2.AppendVertex(Dbg.SelectPoint());
+                    //DU.DrawEntityLazy(e2);
+                }
+            }
+            [Feng("qupz57")]
+            public static void qupz57()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+                    var e = Dbg.SelectEntity<Leader>(adb);
+                    Dbg.PrintLine(e.DimensionStyleName);
+                }
+            }
+            static _nzm nzm => Dbg.nzm;
+            [Feng(" aes test")]
+            public static void qu7tls()
+            {
+                //nzm.OpenDir(@"Y:\");
+                Dbg.PrintLine(nzm.AesEncrypt("xxx", "1234567812345678"));
+                Dbg.PrintLine(nzm.AesDecrypt("bkPUyMh5oM1Aoe+tkd7IEA==", "1234567812345678"));
+                Dbg.PrintLine(nzm.GetMd5String(nzm.EncodeUtf8("xxx")));
+                Dbg.PrintLine(nzm.AesEncrypt("xxx", nzm.GetMd5String(nzm.EncodeUtf8("xxx"))));
             }
         }
-        static _nzm nzm => Dbg.nzm;
-        [Feng(" aes test")]
-        public static void qu7tls()
-        {
-            //nzm.OpenDir(@"Y:\");
-            Dbg.PrintLine(nzm.AesEncrypt("xxx", "1234567812345678"));
-            Dbg.PrintLine(nzm.AesDecrypt("bkPUyMh5oM1Aoe+tkd7IEA==", "1234567812345678"));
-            Dbg.PrintLine(nzm.GetMd5String(nzm.EncodeUtf8("xxx")));
-            Dbg.PrintLine(nzm.AesEncrypt("xxx", nzm.GetMd5String(nzm.EncodeUtf8("xxx"))));
-        }
+
     }
 
 
@@ -2806,11 +2947,6 @@ namespace ThMEPWSS.DebugNs
     public static class DrainageTest
     {
 
-        [Feng("quimgi")]
-        public static void quimgi()
-        {
-
-        }
 
         private static void NewMethod5()
         {
@@ -2855,7 +2991,7 @@ namespace ThMEPWSS.DebugNs
             };
         }
 
-        [Feng("quizl8")]
+
         public static void quizl8()
         {
             Dbg.FocusMainWindow();
@@ -2924,7 +3060,7 @@ namespace ThMEPWSS.DebugNs
             return _segs;
         }
 
-        [Feng("quirdk")]
+
         public static void quirdk()
         {
             Dbg.FocusMainWindow();
@@ -2939,7 +3075,7 @@ namespace ThMEPWSS.DebugNs
                 DU.DrawRectLazy(ee.Bounds.ToGRect());
             }
         }
-        [Feng("quim6x")]
+
         public static void quim6x()
         {
             Dbg.FocusMainWindow();
@@ -2962,7 +3098,7 @@ namespace ThMEPWSS.DebugNs
                 Dbg.PrintText(segs.ToCadJson());
             }
         }
-        [Feng("quizgv")]
+
         public static void quizgv()
         {
             Dbg.FocusMainWindow();

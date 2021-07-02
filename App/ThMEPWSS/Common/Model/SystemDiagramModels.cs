@@ -659,6 +659,22 @@ namespace ThMEPWSS.Uitl
                 return 0;
             }
         }
+        public GLineSegment TransformBy(Matrix2d leftSide)
+        {
+            return new GLineSegment(StartPoint.TransformBy(leftSide), EndPoint.TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(Matrix3d leftSide)
+        {
+            return new GLineSegment(StartPoint.ToPoint3d().TransformBy(leftSide), EndPoint.ToPoint3d().TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(ref Matrix2d leftSide)
+        {
+            return new GLineSegment(StartPoint.TransformBy(leftSide), EndPoint.TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(ref Matrix3d leftSide)
+        {
+            return new GLineSegment(StartPoint.ToPoint3d().TransformBy(leftSide), EndPoint.ToPoint3d().TransformBy(leftSide));
+        }
         public bool IsNull => Equals(this, default(GLineSegment));
         public GLineSegment(double x1, double y1, double x2, double y2)
         {
@@ -1195,16 +1211,13 @@ namespace ThMEPWSS.Uitl
         {
             return new Point2d(v.X, v.Y);
         }
-        public static bool IsParallelTo(this Vector3d vector, Vector3d other, double tol)
+      
+        public static bool IsParallelTo(this GLineSegment first, GLineSegment second,double angleTol)
         {
-            double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
-            return (angle < tol) || ((180.0 - angle) < tol);
-        }
-        public static bool IsParallelTo(this GLineSegment first, GLineSegment second)
-        {
-            var firstVec = first.EndPoint - first.StartPoint;
-            var secondVec = second.EndPoint - second.StartPoint;
-            return firstVec.IsParallelTo(secondVec);
+            var v1 = first.EndPoint - first.StartPoint;
+            var v2 = second.EndPoint - second.StartPoint;
+            var angle=v1.GetAngleTo(v2);
+            return angle.EqualsTo(.0, angleTol) || angle.EqualsTo(180.0, angleTol);
         }
         public static bool EqualsTo(this double value1, double value2, double tollerance)
         {
@@ -1644,7 +1657,7 @@ namespace ThMEPWSS.Uitl
             }
             return GetExtend2d(out minX, out minY, out maxX, out maxY, pts);
         }
-     
+
         public static bool GetExtend2d(out double minX, out double minY, out double maxX, out double maxY, Point3dCollection pts)
         {
             if (pts.Count == 0)

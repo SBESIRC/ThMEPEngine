@@ -961,9 +961,9 @@
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
-                List<Geometry> endpoints = null;
+                List<Point> endpoints = null;
                 Geometry endpointsGeo = null;
-                List<Geometry> _GetEndPoints()
+                List<Point> _GetEndPoints()
                 {
                     return GetEndPoints(fl.GetCenter(), pts.Select(x => x.ToNTSPoint()).ToList());
                 }
@@ -1011,7 +1011,7 @@
             }
             return hs;
         }
-        static List<Geometry> GetEndPoints(Point2d start, List<Point> points)
+        static List<Point> GetEndPoints(Point2d start, List<Point> points)
         {
             //以图层为W-DRAI-DOME-PIPE或W-DRAI-WAST-PIPE水平水管的管线结构的结束点
             return points.Except(GeoFac.CreateIntersectsSelector(points)(new GCircle(start, 5).ToCirclePolygon(36))).ToList();
@@ -1028,9 +1028,9 @@
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
-                List<Geometry> endpoints = null;
+                List<Point> endpoints = null;
                 Geometry endpointsGeo = null;
-                List<Geometry> _GetEndPoints()
+                List<Point> _GetEndPoints()
                 {
                     return GetEndPoints(fl.GetCenter(), pts.Select(x => x.ToNTSPoint()).ToList());
                 }
@@ -1067,9 +1067,9 @@
             var list = new List<Geometry>(FLs.Count);
             foreach (var fl in FLs)
             {
-                List<Geometry> endpoints = null;
+                List<Point> endpoints = null;
                 Geometry endpointsGeo = null;
-                List<Geometry> _GetEndPoints()
+                List<Point> _GetEndPoints()
                 {
                     return GetEndPoints(fl.GetCenter(), pts.Select(x => x.ToNTSPoint()).ToList());
                 }

@@ -15,6 +15,10 @@
     using ThCADExtension;
     using NetTopologySuite.Geometries;
     using ThMEPWSS.DebugNs;
+    using NetTopologySuite.Operation.OverlayNG;
+    using NetTopologySuite.Operation.Overlay;
+    using NetTopologySuite.Algorithm;
+
     public class RainSystemDrawingData
     {
         public List<string> RoofLabels = new List<string>();
@@ -55,6 +59,48 @@ pt,
     }
     public static class GeoFac
     {
+        public static List<List<GLineSegment>> GroupParallelLines(List<GLineSegment> lines, double extend_distance, double collinear_gap_distance)
+        {
+            lines = lines.Where(x => x.IsValid).Distinct().ToList();
+            var lineGeos = lines.Select(x => x.ToLineString()).ToList();
+            var spatialIndex = GeoFac.CreateIntersectsSelector(lineGeos);
+            foreach (var line in lines)
+            {
+                var buffer = line.Extend(extend_distance).Buffer(collinear_gap_distance);
+                var objs = spatialIndex(buffer).Select(lineGeos).ToList(lines);
+                if (objs.Count > 1)
+                {
+                    var parallelLines = objs.Where(l => l.IsParallelTo(line, 1)).ToList();
+                    if (parallelLines.Count > 1)
+                    {
+                        var parallelLineGeos = parallelLines.Select(lines).ToList(lineGeos);
+                        var tagLines = parallelLineGeos.Where(l => l.UserData != null).ToList();
+                        var tag = parallelLineGeos.Select(l => l.UserData).FirstOrDefault(x => x != null) ?? new object();
+                        foreach (var l in parallelLineGeos)
+                        {
+                            l.UserData ??= tag;
+                        }
+                    }
+                }
+            }
+            var results = new List<List<GLineSegment>>();
+            foreach (var group in lineGeos.GroupBy(o => o.UserData))
+            {
+                if (group.Key == null)
+                {
+                    foreach (var o in group)
+                    {
+                        results.Add(new List<GLineSegment>() { lines[lineGeos.IndexOf(o)] });
+                    }
+                }
+                else
+                {
+                    results.Add(group.Select(lineGeos).ToList(lines));
+                }
+            }
+            return results;
+        }
+
         static readonly NetTopologySuite.Index.Strtree.GeometryItemDistance itemDist = new NetTopologySuite.Index.Strtree.GeometryItemDistance();
         public static List<Point2d> GetAlivePoints(List<GLineSegment> segs, double radius)
         {
@@ -92,7 +138,7 @@ pt,
             }
             return flags.ToList(points, true);
         }
-        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer,double radius=5)
+        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer, double radius = 5)
         {
             var points = GetAlivePoints(lines, radius);
             var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
@@ -381,6 +427,36 @@ pt,
             }
         }
         public static readonly NetTopologySuite.Utilities.GeometricShapeFactory GeometricShapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory);
+        public static List<GLineSegment> ToNodedLineSegments(IList<GLineSegment> lineSegments)
+        {
+            var arr = lineSegments.Where(x => x.IsValid).Distinct().Select(x => x.ToLineString()).ToArray();
+            if (arr.Length == 0) return new List<GLineSegment>();
+            var geo = OverlayNGRobust.Overlay(new MultiLineString(arr), null, SpatialFunction.Union);
+            static IEnumerable<GLineSegment> f(LineString ls)
+            {
+                var arr = ls.Coordinates.Select(x => x.ToPoint2d()).ToArray();
+                for (int i = 1; i < arr.Length; i++)
+                {
+                    var seg = new GLineSegment(arr[i - 1], arr[i]);
+                    if (seg.IsValid)
+                    {
+                        yield return seg;
+                    }
+                }
+            }
+            if (geo is LineString ls)
+            {
+                return f(ls).ToList();
+            }
+            else if (geo is MultiLineString mls)
+            {
+                return mls.Geometries.OfType<LineString>().SelectMany(ls => f(ls)).ToList();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
         public static List<Geometry> CreateGeometries(IList<GLineSegment> lineSegments, double radius, int numPoints = 6)
         {
             var ret = new List<Geometry>(lineSegments.Count);
@@ -402,6 +478,98 @@ pt,
         {
             var geos = CreateGeometries(lineSegments, radius, numPoints);
             return _GroupGeometriesToKVIndex(geos);
+        }
+        public class Extents2dCalculator
+        {
+            public double MinX;
+            public double MinY;
+            public double MaxX;
+            public double MaxY;
+            public static Extents2d Calc(IEnumerable<GLineSegment> segs)
+            {
+                var o = new Extents2dCalculator();
+                o.Update(segs);
+                return o.ToExtents2d();
+            }
+            public void Update(IEnumerable<GLineSegment> segs)
+            {
+                foreach (var seg in segs)
+                {
+                    Update(seg);
+                }
+            }
+            public void Update(GLineSegment seg)
+            {
+                Update(seg.StartPoint);
+                Update(seg.EndPoint);
+            }
+            public void Update(Point2d pt)
+            {
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public void Update(Point3d pt)
+            {
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public void Update(Extents2d ext)
+            {
+                var pt = ext.MinPoint;
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                pt = ext.MaxPoint;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public Extents2d ToExtents2d()
+            {
+                return new Extents2d(MinX, MinY, MaxY, MaxY);
+            }
+            public Extents3d ToExtents3d()
+            {
+                return new Extents3d(new Point3d(MinX, MinY, 0), new Point3d(MaxY, MaxY, 0));
+            }
+            public GRect ToGRect()
+            {
+                return new GRect(MinX, MinY, MaxY, MaxY);
+            }
+        }
+        public static GLineSegment GetCenterLine(List<GLineSegment> segs)
+        {
+            // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // 😀Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
+            if (segs.Count == 0) throw new ArgumentException();
+            if (segs.Count == 1) return segs[0];
+            var geo = MinimumDiameter.GetMinimumRectangle(new MultiLineString(segs.Select(x => x.ToLineString()).ToArray()));
+            var ls = (geo as Polygon)?.Shell ?? (geo as LineString);
+            var pts = ls.Coordinates.Select(x => x.ToPoint2d()).ToArray();
+            if (pts.Length == 2)
+            {
+                return new GLineSegment(pts[0], pts[1]);
+            }
+            return new GLineSegment(pts[0] + .5 * (pts[1] - pts[0]), pts[2] + .5 * (pts[3] - pts[2]));
+        }
+        public static GLineSegment GetCenterLine(List<GLineSegment> segs, double work_around)
+        {
+            if (work_around > 0)
+            {
+                var ext = Extents2dCalculator.Calc(segs);
+                var center = ext.GetCenter();
+                if (center.GetDistanceTo(Point2d.Origin) > work_around)
+                {
+                    var v = center.ToVector2d();
+                    var m1 = Matrix2d.Displacement(-v);
+                    var m2 = Matrix2d.Displacement(v);
+                    return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                }
+            }
+            return GetCenterLine(segs);
         }
         public static Geometry CreateGeometry(IEnumerable<Geometry> geomList)
         {
@@ -513,16 +681,27 @@ pt,
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
             };
         }
-        public static Func<Geometry, List<Geometry>> CreateIntersectsSelector<T>(List<T> geos)where T:Geometry
+        public static Func<Geometry, List<T>> CreateIntersectsSelector<T>(List<T> geos) where T : Geometry
         {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
                 if (geo == null) throw new ArgumentNullException();
                 var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
+            };
+        }
+        public static Func<T, List<T>> CreateSTRTreeSelector<T>(List<T> list, Func<T, Envelope> getEnvelope, Func<T, bool> test)
+        {
+            if (list.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            foreach (var item in list) engine.Insert(getEnvelope(item), item);
+            return item =>
+            {
+                if (item == null) throw new ArgumentNullException();
+                return engine.Query(getEnvelope(item)).Where(g => test(g)).ToList();
             };
         }
         public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex(List<Geometry> geos)

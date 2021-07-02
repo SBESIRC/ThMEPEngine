@@ -80,17 +80,7 @@ namespace ThMEPWSS.DebugNs
             public static void AddButton(string name, Action f)
             {
                 if (!Dbg.isDebugging) return;
-                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
-                {
-                    try
-                    {
-                        f?.Invoke();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        MessageBox.Show((ex.InnerException ?? ex).Message);
-                    }
-                });
+                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
             }
             private static void qt8ddf()
             {
@@ -117,6 +107,7 @@ namespace ThMEPWSS.DebugNs
 
                 if (false)
                 {
+                    AddButtons2(typeof(Sankaku1.qvjp9n));
                     AddButtons2(typeof(FengDbgTesting));
                     AddButtons2(typeof(quj50y));
                     AddButtons2(typeof(quin3c));
@@ -527,7 +518,7 @@ namespace ThMEPWSS.DebugNs
             ((Action)ctx["showCurrentLogWindow"])();
         }
         public static bool isDebugging => FengDbgTest.ctx != null;
-      
+
         public static void SetText(IEnumerable<string> lines)
         {
             if (!isDebugging) return;
@@ -3796,206 +3787,8 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             }
         }
 
-        public static void ExtendLineTest1()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var line = new Line() { StartPoint = Dbg.SelectPoint(), /*EndPoint = Dbg.SelectPoint()*/ };
-                line.Extend(false, Dbg.SelectPoint());
-                DU.DrawEntityLazy(line);
-            }
-        }
-
-        class SpacialIndexHelper
-        {
-            public void Create<T>(IList<T> ents) where T : Entity
-            {
-
-            }
-        }
-        public static void FixSpacialIndex2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.CondensePipes.ToCollection());
-                var input = SelectPoints();
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                foreach (var e in si.SelectCrossingPolygon(range).Cast<Entity>())
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FixSpacialIndex1()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                ThCADCoreNTSService.Instance.ArcTessellationLength = 30;
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.VerticalPipeLines.ToCollection());
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.ConnectToRainPortSymbols.ToCollection());
-                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.CondensePipes.ToCollection());
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.VerticalPipes.ToCollection());
-                //var range = Dbg.SelectGRect().ToPoint3dCollection();
-                var input = SelectPoints();
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                foreach (var e in si.SelectCrossingPolygon(range).Cast<Entity>())
-                {
-                    Dbg.ShowWhere(e);
-                }
-                //foreach (var e in sv.FiltByRect(range, sv.CondensePipes))
-                //{
-                //    Dbg.ShowWhere(e);
-                //}
-                Dbg.PrintLine(sv.CondensePipes.Count);
 
 
-            }
-
-        }
-        public static void ExplodeTianZhengTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var o = Dbg.SelectEntity<Entity>(adb);
-                var objs = new DBObjectCollection();
-                o.Explode(objs);
-                Dbg.SetText(objs.Cast<Entity>().Select(e => e.GetType().ToString()));
-            }
-        }
-        public static void GetCondensePipesTest_MaybeBug()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var range = Dbg.SelectGRect().ToPoint3dCollection();
-                foreach (var e in sv.GetCondensePipes(range))
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FiltByRectTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var range = Dbg.SelectGRect().ToPoint3dCollection();
-                foreach (var e in sv.FiltByRect(range, sv.CondensePipes))
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FindOutBrokenCondensePipesTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectData();
-                //foreach (var e in sv.WRainLines)
-                //{
-                //    var lb = sv.GetLabel(e);
-                //    if (lb != null)
-                //    {
-                //        //DU.DrawTextLazy(lb, sv.BoundaryDict[e].Center.ToPoint3d());
-                //    }
-                //    else
-                //    {
-                //        DU.DrawTextLazy("todo", sv.BoundaryDict[e].Center.ToPoint3d());
-                //    }
-                //}
-
-                var cps1 = new HashSet<Entity>();
-                var cps2 = new HashSet<Entity>();
-                foreach (var e in sv.CondensePipes)
-                {
-                    var lb = sv.GetLabel(e);
-                    if (lb != null)
-                    {
-                        //DU.DrawTextLazy(lb, sv.BoundaryDict[e].Center.ToPoint3d());
-                        cps1.Add(e);
-                    }
-                    else
-                    {
-                        //DU.DrawTextLazy("todo", sv.BoundaryDict[e].Center.ToPoint3d());
-                        cps2.Add(e);
-                    }
-                }
-                foreach (var e in cps2)
-                {
-                    var bd = sv.BoundaryDict[e];
-                    Entity ee = null;
-                    double dis = double.MaxValue;
-                    foreach (var c in cps1)
-                    {
-                        var d = GeoAlgorithm.Distance(sv.BoundaryDict[c].Center, bd.Center);
-                        if (d < dis)
-                        {
-                            dis = d;
-                            ee = c;
-                        }
-                    }
-                    if (ee != null && dis < 500)
-                    {
-                        if (sv.GetLabel(ee) == "NL1-3")
-                        {
-                            Dbg.ShowWhere(e);
-                        }
-                    }
-                }
-
-            }
-        }
 
         public static void RunThRainSystemDiagramCmd_NoRectSelection3_DrawFromJson_MyDrawing()
         {
@@ -5706,90 +5499,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             }
         }
-        public static void ThRainSystemServiceTest3_OK()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-                foreach (var e1 in sv.VerticalPipeDBTexts)
-                {
-                    //Dbg.ShowWhere(e);
-                    foreach (var e2 in sv.VerticalPipeLines)
-                    {
-                        if (e2 is Line line)
-                        {
-                            var seg = line.ToGLineSegment();
-                            if (seg.IsHorizontal(10))
-                            {
-                                //Dbg.ShowWhere(e);
-                                var c1 = sv.BoundaryDict[e1].Center;
-                                var c2 = sv.BoundaryDict[e2].Center;
-                                if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
-                                {
-                                    //Dbg.ShowWhere(e1);
-                                    //Dbg.ShowWhere(e2);
-                                    dbTxtToHLineDict[e1] = e2;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                {
-                    var list = sv.VerticalPipeLines;
-                    var pairs = new List<KeyValuePair<int, int>>();
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        for (int j = i + 1; j < list.Count; j++)
-                        {
-                            var line1 = list[i] as Line;
-                            var line2 = list[j] as Line;
-                            if (line1 != null && line2 != null)
-                            {
-                                //var pline1 = ThRainSystemService.expandLine(line1, 10);
-                                //var pline2 = ThRainSystemService.expandLine(line2, 10);
-                                var pline1 = line1.Buffer(10);
-                                var pline2 = line2.Buffer(10);
-                                //if (ThRainSystemService.IsIntersects(pline1, pline2))
-                                if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
-                                {
-                                    pairs.Add(new KeyValuePair<int, int>(i, j));
-                                }
-                            }
-                        }
-                    }
 
-                    var dict = new ListDict<int>();
-                    var h = new BFSHelper()
-                    {
-                        Pairs = pairs.ToArray(),
-                        TotalCount = list.Count,
-                        Callback = (g, i) =>
-                        {
-                            dict.Add(g.root, i);
-                        },
-                    };
-                    h.BFS();
-                    groups = new List<List<Entity>>();
-                    dict.ForEach((_i, l) =>
-                    {
-                        groups.Add(l.Select(i => list[i]).ToList());
-                    });
-                    foreach (var g in groups)
-                    {
-                        DU.DrawBoundaryLazy(g.ToArray());
-                    }
-                }
-
-            }
-        }
         public static void ThCADCoreNTSSpatialIndexTest()
         {
             Dbg.FocusMainWindow();
@@ -5896,340 +5606,8 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
 
             }
         }
-        public static void spacial_test()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var lines = sv.VerticalPipeLines;
-                ThRainSystemService.GroupLinesBySpatialIndex(lines);
-            }
-        }
 
 
-
-        public static void spacial_test2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.FindShortConverters();
-                var lines = sv.VerticalPipeLines;
-                var pipes = sv.VerticalPipes;
-                var shortConverters = sv.AllShortConverters.ToList();
-                var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-                var linesGroup = new List<List<Entity>>();
-                var groups = new List<List<Entity>>();
-                var plDict = new Dictionary<Entity, Polyline>();
-                var lineToPipesDict = new ListDict<Entity>();
-                var pls1 = new List<Polyline>();
-                var pls2 = new List<Polyline>();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    var bd = sv.BoundaryDict[e];
-                    var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
-                    pls1.Add(pl);
-                    plDict[e] = pl;
-                }
-                foreach (var e in sv.VerticalPipeLines)
-                {
-                    var pl = (e as Line).Buffer(10);
-                    pls2.Add(pl);
-                    plDict[e] = pl;
-                }
-                var si = ThRainSystemService.BuildSpatialIndex(pls1);
-                foreach (var pl2 in pls2)
-                {
-                    foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
-                    {
-                        var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
-                        var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
-                        lineToPipesDict.Add(line, pipe);
-                    }
-                }
-                lineToPipesDict.ForEach((line, pipes) =>
-                {
-                    DU.DrawBoundaryLazy(line);
-                    DU.DrawBoundaryLazy(pipes.ToArray());
-                });
-                if (false)
-                {
-                    foreach (var e1 in sv.VerticalPipeLines)
-                    {
-                        foreach (var e2 in sv.VerticalPipes)
-                        {
-                            if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
-                            {
-                                lineToPipesDict.Add(e1, e2);
-                                //DU.DrawBoundaryLazy(e2);
-                                //DU.DrawRectLazy(sv.BoundaryDict[e2]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //public static void ThRainSystemServiceTest4_OK()
-        //{
-        //    Dbg.FocusMainWindow();
-        //    using (var adb = AcadDatabase.Active())
-        //    using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-        //    using (var tr = DrawUtils.DrawingTransaction)
-        //    {
-        //        var db = adb.Database;
-        //        Dbg.BuildAndSetCurrentLayer(db);
-        //        var sv = new ThRainSystemService() { adb = adb };
-        //        sv.InitCache();
-        //        sv.FindShortConverters();
-        //        var lines = sv.VerticalPipeLines;
-        //        var pipes = sv.VerticalPipes;
-        //        var shortConverters = sv.AllShortConverters.ToList();
-        //        var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-        //        var linesGroup = new List<List<Entity>>();
-        //        var groups = new List<List<Entity>>();
-        //        var plDict = new Dictionary<Entity, Polyline>();
-        //        var lineToPipesDict = new ListDict<Entity>();
-        //        foreach (var e1 in sv.VerticalPipeDBTexts)
-        //        {
-        //            foreach (var e2 in sv.VerticalPipeLines)
-        //            {
-        //                if (e2 is Line line)
-        //                {
-        //                    var seg = line.ToGLineSegment();
-        //                    if (seg.IsHorizontal(10))
-        //                    {
-        //                        var c1 = sv.BoundaryDict[e1].Center;
-        //                        var c2 = sv.BoundaryDict[e2].Center;
-        //                        if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
-        //                        {
-        //                            dbTxtToHLineDict[e1] = e2;
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        {
-        //            var pairs = new List<KeyValuePair<int, int>>();
-        //            //for (int i = 0; i < lines.Count; i++)
-        //            //{
-        //            //    for (int j = i + 1; j < lines.Count; j++)
-        //            //    {
-        //            //        var line1 = lines[i] as Line;
-        //            //        var line2 = lines[j] as Line;
-        //            //        if (line1 != null && line2 != null)
-        //            //        {
-        //            //            var pline1 = line1.Buffer(10);
-        //            //            var pline2 = line2.Buffer(10);
-        //            //            if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
-        //            //            {
-        //            //                pairs.Add(new KeyValuePair<int, int>(i, j));
-        //            //            }
-        //            //        }
-        //            //    }
-        //            //}
-        //            var bfs = lines.Select(e => (e as Line)?.Buffer(10)).ToList();
-        //            var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
-        //            for (int i = 0; i < bfs.Count; i++)
-        //            {
-        //                Polyline bf = bfs[i];
-        //                if (bf != null)
-        //                {
-        //                    var lst = si.SelectCrossingPolygon(bf).Cast<Polyline>().Select(e => bfs.IndexOf(e)).Where(j => i < j).ToList();
-        //                    lst.ForEach(j => pairs.Add(new KeyValuePair<int, int>(i, j)));
-        //                }
-        //            }
-
-        //            var dict = new ListDict<int>();
-        //            var h = new BFSHelper()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                TotalCount = lines.Count,
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_i, l) =>
-        //            {
-        //                linesGroup.Add(l.Select(i => lines[i]).ToList());
-        //            });
-        //        }
-        //        foreach (var g in linesGroup)
-        //        {
-        //            //DU.DrawBoundaryLazy(g.ToArray());
-        //            //if (GeoAlgorithm.GetBoundaryRect(g.ToArray()).ToJson() == "[-1556.47474123369,398855.075333649,852.092909549596,401109.883025958]")
-        //            if (Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(g.ToArray()).MinX) == -1556)
-        //            {
-        //                foreach (var e in g)
-        //                {
-        //                    //DU.DrawBoundaryLazy(e);
-        //                    //Dbg.ShowWhere(e);
-        //                    if (e is Line line)
-        //                    {
-        //                        //var l=DU.DrawLineLazy(line.StartPoint, line.EndPoint);
-        //                        //l.ColorIndex = 5;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var pls1 = new List<Polyline>();
-        //            var pls2 = new List<Polyline>();
-        //            foreach (var e in sv.VerticalPipes)
-        //            {
-        //                var bd = sv.BoundaryDict[e];
-        //                var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
-        //                plDict[e] = pl;
-        //                pls1.Add(pl);
-        //            }
-        //            foreach (var e in sv.VerticalPipeLines)
-        //            {
-        //                var pl = (e as Line).Buffer(10);
-        //                plDict[e] = pl;
-        //                pls2.Add(pl);
-        //            }
-        //            //foreach (var e1 in sv.VerticalPipeLines)
-        //            //{
-        //            //    foreach (var e2 in sv.VerticalPipes)
-        //            //    {
-        //            //        if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
-        //            //        {
-        //            //            lineToPipesDict.Add(e1, e2);
-        //            //            //DU.DrawBoundaryLazy(e2);
-        //            //            //DU.DrawRectLazy(sv.BoundaryDict[e2]);
-        //            //        }
-        //            //    }
-        //            //}
-        //            var si = ThRainSystemService.BuildSpatialIndex(pls1);
-        //            foreach (var pl2 in pls2)
-        //            {
-        //                foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
-        //                {
-        //                    var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
-        //                    var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
-        //                    lineToPipesDict.Add(line, pipe);
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var totalList = new List<Entity>();
-        //            totalList.AddRange(sv.VerticalPipeDBTexts);
-        //            totalList.AddRange(sv.VerticalPipes);
-        //            totalList.AddRange(sv.VerticalPipeLines);
-        //            var pairs = new List<KeyValuePair<Entity, Entity>>();
-        //            foreach (var kv in dbTxtToHLineDict) pairs.Add(kv);
-        //            //foreach (var kv in dbTxtToHLineDict)
-        //            //{
-        //            //    DU.DrawBoundaryLazy(new Entity[] { kv.Key, kv.Value });
-        //            //}
-        //            lineToPipesDict.ForEach((e, l) => { l.ForEach(o => pairs.Add(new KeyValuePair<Entity, Entity>(e, o))); });
-        //            //lineToPipesDict.ForEach((e, l) =>
-        //            //{
-        //            //    DU.DrawBoundaryLazy(e);
-        //            //    DU.DrawBoundaryLazy(l.ToArray());
-        //            //});
-        //            //return;
-        //            foreach (var g in linesGroup) for (int i = 1; i < g.Count; i++) pairs.Add(new KeyValuePair<Entity, Entity>(g[i - 1], g[i]));
-        //            var dict = new ListDict<Entity>();
-        //            var h = new BFSHelper2<Entity>()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                Items = totalList.ToArray(),
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_start, ents) =>
-        //            {
-        //                groups.Add(ents);
-        //            });
-        //            foreach (var g in groups)
-        //            {
-        //                //DU.DrawBoundaryLazy(g.ToArray());
-        //                sv.SortBy2DSpacePosition(
-        //                    g.Where(e => sv.VerticalPipes.Contains(e)).ToList(),
-        //                    g.Where(e => sv.VerticalPipeDBTexts.Contains(e)).ToList(),
-        //                    out List<Entity> targetPipes,
-        //                    out List<Entity> targetTexts);
-        //                if (targetPipes.Count == targetTexts.Count && targetTexts.Count > 0)
-        //                {
-        //                    //Dbg.PrintLine(targetTexts.Select(o => (o as DBText)?.TextString).ToJson());
-
-
-        //                    for (int i = 0; i < targetPipes.Count; i++)
-        //                    {
-        //                        var pipe = targetPipes[i];
-        //                        var dbT = targetTexts[i] as DBText;
-        //                        var t = dbT.TextString;
-        //                        Dbg.PrintLine(t);
-        //                        Dbg.PrintLine("has short cvt:" + shortConverters.Contains(pipe));
-        //                        if (t == "Y1L1-2")
-        //                        {
-        //                            //Dbg.PrintLine(scvts.Contains(pipe));
-        //                            Dbg.ShowWhere(pipe);
-        //                        }
-        //                    }
-        //                }
-        //            }
-
-        //        }
-
-        //    }
-        //    Dbg.FocusMainWindow();
-
-        //}
-        public static void SelectCrossingPolygonDemo(Point3dCollection pts, List<Entity> rst)
-        {
-            if (pts.Count >= 3)
-            {
-                var spacialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(rst.ToCollection());
-                rst = spacialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
-            }
-        }
-        public static void DisplayGroup()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                foreach (var lst in groups)
-                {
-                    if (lst.Contains(e))
-                    {
-                        //DU.DrawBoundaryLazy(lst.ToArray(), 2);
-                        foreach (var o in lst)
-                        {
-                            DU._DrawBoundary(db, o, 2);
-                        }
-                    }
-                }
-            }
-        }
-        static List<List<Entity>> groups;
 
         public static void ShowLineLength()
         {
@@ -16313,7 +15691,7 @@ namespace ThMEPWSS.DebugNs
                 });
             });
         }
-       
+
         public static void qtla9m(IList<Geometry> geos)
         {
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
@@ -16362,11 +15740,11 @@ namespace ThMEPWSS.DebugNs
             }
 
         }
-    
-      
 
 
-     
+
+
+
         private static void NewMethod()
         {
             ThWRainSystemDiagram.DrawingTest();

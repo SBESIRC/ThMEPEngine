@@ -23,6 +23,7 @@
     using NetTopologySuite.Geometries;
     using ThMEPWSS.DebugNs;
     using ThMEPWSS.Assistant;
+    using ThMEPWSS.Pipe.Model;
 
     public class ThDrainageSystemServiceGeoCollector
     {
@@ -653,7 +654,7 @@
 
             Dbg.Log(groups);
 
-            NewMethod6(new DrawingOption()
+            DrawVer1(new DrawingOption()
             {
                 basePoint = basePoint,
                 OFFSET_X = OFFSET_X,
@@ -814,15 +815,56 @@
                 var roomData = DrainageService.CollectRoomData(adb);
                 DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out StringBuilder sb, out List<DrainageDrawingData> drDatas, roomData: roomData);
                 DU.Dispose();
-                //Draw(drDatas, pt, storeysItems);
-                Dbg.SaveToTempJsonFile(drDatas);
-                Dbg.SaveToTempJsonFile(storeysItems);
+                if (!NoDraw)
+                {
+                    Draw(drDatas, pt, storeysItems);
+                }
+                else
+                {
+                    Dbg.SaveToTempJsonFile(drDatas);
+                    Dbg.SaveToTempJsonFile(storeysItems);
+                }
             }
         }
+        static bool NoDraw;
+        static bool YesDraw;
+        public static void draw13()
+        {
+            try
+            {
+                NoDraw = true;
+                draw11();
+            }
+            finally
+            {
+                NoDraw = false;
+            }
+        }
+
+       
+      
+        public static void draw12()
+        {
+            try
+            {
+                NoDraw = true;
+                draw10();
+            }
+            finally
+            {
+                NoDraw = false;
+            }
+        }
+
+        static bool isWantedStorey(string storey)
+        {
+            return GetScore(storey) < ushort.MaxValue;
+        }
+
         public static void draw11()
         {
-            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"Y:\637606586634549487.json");
-            var storeysItems = Dbg.LoadFromJsonFile<List<StoreysItem>>(@"Y:\637606586634569436.json");
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"Y:\637607490188931855.json");
+            var storeysItems = Dbg.LoadFromJsonFile<List<StoreysItem>>(@"Y:\637607490188941561.json");
             Dbg.FocusMainWindow();
             if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
             var pt = point3D.ToPoint2d();
@@ -830,64 +872,237 @@
             using (var adb = AcadDatabase.Active())
             using (var tr = new DrawingTransaction(adb))
             {
-                //Draw(drDatas, pt, storeysItems);
-                Console.WriteLine(storeysItems.ToCadJson());
-                var storeys = new List<string>();
-                foreach (var item in storeysItems)
+                if (NoDraw)
                 {
-                    item.Init();
-                    storeys.AddRange(item.Labels.Where(x => GetScore(x) < ushort.MaxValue));
-                }
-                storeys = storeys.Distinct().OrderBy(GetScore).ToList();
-                var pls = new HashSet<string>();
-                var tls = new HashSet<string>();
-                var lst = new List<xxx>();
-                for (int i = 0; i < storeysItems.Count; i++)
-                {
-                    var item = storeysItems[i];
-                    foreach (var gp in drDatas[i].toiletGroupers)
+                    //Draw(drDatas, pt, storeysItems);
+                    Console.WriteLine(storeysItems.ToCadJson());
+                    var allFls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("FL")));
+                    var allTls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("TL")));
+                    var allPls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("PL")));
+
+                    var storeys = new List<string>();
+                    foreach (var item in storeysItems)
                     {
-                        if (gp.WLType == ThDrainageService.WLType.PL_TL && gp.PLs.Count == 1 && gp.TLs.Count == 1)
+                        item.Init();
+                        storeys.AddRange(item.Labels.Where(isWantedStorey));
+                    }
+                    storeys = storeys.Distinct().OrderBy(GetScore).ToList();
+                    var flstoreylist = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
                         {
-                            var pl = gp.PLs[0];
-                            var tl = gp.TLs[0];
-                            foreach (var s in item.Labels.Where(x => storeys.Contains(x)))
+                            var item = storeysItems[i];
+                            foreach (var fl in drDatas[i].VerticalPipeLabels.Where(x => x.StartsWith("FL")))
                             {
-                                var x = new xxx() { pl = pl, tl = tl, storey = s };
-                                pls.Add(pl);
-                                tls.Add(tl);
-                                lst.Add(x);
+                                foreach (var s in item.Labels)
+                                {
+                                    flstoreylist.Add(new KeyValuePair<string, string>(fl, s));
+                                }
                             }
                         }
                     }
-                }
-               
-                var d = new Dictionary<string, KeyValuePair<int, int>>();
-                foreach (var tl in tls)
-                {
-                    int min = int.MaxValue;
-                    int max = int.MinValue;
-                    foreach (var item in lst)
+                    Console.WriteLine(flstoreylist.ToCadJson());
+                    var pls = new HashSet<string>();
+                    var tls = new HashSet<string>();
+                    var pltlList = new List<PlTlStoreyItem>();
+                    for (int i = 0; i < storeysItems.Count; i++)
                     {
-                        if (item.tl == tl)
+                        var item = storeysItems[i];
+                        foreach (var gp in drDatas[i].toiletGroupers)
                         {
-                            var s = GetScore(item.storey);
-                            if (s < min) min = s;
-                            if (s > max) max = s;
-                            d[tl] = new KeyValuePair<int, int>(min, max);
+                            if (gp.WLType == ThDrainageService.WLType.PL_TL && gp.PLs.Count == 1 && gp.TLs.Count == 1)
+                            {
+                                var pl = gp.PLs[0];
+                                var tl = gp.TLs[0];
+                                foreach (var s in item.Labels.Where(x => storeys.Contains(x)))
+                                {
+                                    var x = new PlTlStoreyItem() { pl = pl, tl = tl, storey = s };
+                                    pls.Add(pl);
+                                    tls.Add(tl);
+                                    pltlList.Add(x);
+                                }
+                            }
                         }
                     }
+                    var plstoreylist = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var pl in drDatas[i].VerticalPipeLabels.Where(x => x.StartsWith("PL")))
+                            {
+                                if (pls.Contains(pl)) continue;
+                                foreach (var s in item.Labels)
+                                {
+                                    flstoreylist.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    Console.WriteLine(plstoreylist.ToCadJson());
+                    Console.WriteLine(flstoreylist.ToCadJson());
+                    var tlMinMaxStoreyScoreDict = new Dictionary<string, KeyValuePair<int, int>>();
+                    foreach (var tl in tls)
+                    {
+                        int min = int.MaxValue;
+                        int max = int.MinValue;
+                        foreach (var item in pltlList)
+                        {
+                            if (item.tl == tl)
+                            {
+                                var s = GetScore(item.storey);
+                                if (s < min) min = s;
+                                if (s > max) max = s;
+                                tlMinMaxStoreyScoreDict[tl] = new KeyValuePair<int, int>(min, max);
+                            }
+                        }
+                    }
+                    Console.WriteLine(tlMinMaxStoreyScoreDict.ToCadJson());
+                    Console.WriteLine(pltlList.OrderBy(x => GetScore(x.storey)).ThenBy(x => x.pl).ToCadJson());
+                    var plLongTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var pl in drDatas[i].LongTranslatorLabels.Where(x => x.StartsWith("PL")))
+                                {
+                                    plLongTransList.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    var flLongTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var fl in drDatas[i].LongTranslatorLabels.Where(x => x.StartsWith("FL")))
+                                {
+                                    flLongTransList.Add(new KeyValuePair<string, string>(fl, s));
+                                }
+                            }
+                        }
+                    }
+                    var plShortTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var pl in drDatas[i].ShortTranslatorLabels.Where(x => x.StartsWith("PL")))
+                                {
+                                    plLongTransList.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    var flShortTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var fl in drDatas[i].ShortTranslatorLabels.Where(x => x.StartsWith("FL")))
+                                {
+                                    flLongTransList.Add(new KeyValuePair<string, string>(fl, s));
+                                }
+                            }
+                        }
+                    }
+                    var minS = storeys.Select(x => GetScore(x)).Min();
+                    var maxS = storeys.Select(x => GetScore(x)).Max();
+                    var countS = maxS - minS + 1;
+                    {
+                        var allstoreys = new List<int>();
+                        for (int storey = minS; storey <= maxS; storey++)
+                        {
+
+                        }
+                        bool hasLong(string label, string storey, PipeType pipeType)
+                        {
+                            if (pipeType == PipeType.FL)
+                            {
+                                return flLongTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            if (pipeType == PipeType.PL)
+                            {
+                                return plLongTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            throw new Exception();
+                        }
+                        bool hasShort(string label, string storey, PipeType pipeType)
+                        {
+                            if (pipeType == PipeType.FL)
+                            {
+                                return flShortTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            if (pipeType == PipeType.PL)
+                            {
+                                return plShortTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            throw new Exception();
+                        }
+                        var flGroupingItems = new List<DrainageGroupingItem>();
+
+                    }
                 }
-                Console.WriteLine(d.ToCadJson());
-                Console.WriteLine(lst.OrderBy(x => GetScore(x.storey)).ThenBy(x => x.pl).ToCadJson());
+                else
+                {
+                    Draw(drDatas, pt, storeysItems);
+                }
             }
         }
-        public class xxx
+        public class DrainageGroupingItem : IEquatable<DrainageGroupingItem>
+        {
+            public string Label;
+            public struct ValueItem
+            {
+                public bool HasLong;
+                public bool HasShort;
+            }
+            public ValueItem Value;
+            public bool Equals(DrainageGroupingItem other)
+            {
+                return this.Value.Equals(other.Value);
+            }
+        }
+        public enum PipeType
+        {
+            FL, PL,
+        }
+        public class Dict<K, V> where V : new()
+        {
+            public Dictionary<K, V> d = new Dictionary<K, V>();
+            public V this[K k]
+            {
+                get
+                {
+                    if (!d.TryGetValue(k, out V v))
+                    {
+                        v = new V();
+                        d[k] = v;
+                    }
+                    return v;
+                }
+                set
+                {
+                    d[k] = value;
+                }
+            }
+        }
+        public class PlTlStoreyItem
         {
             public string pl;
             public string tl;
             public string storey;
         }
+
         public static List<StoreysItem> GetStoreysItem(List<ThStoreysData> storeys)
         {
             var storeysItems = new List<StoreysItem>();
@@ -979,7 +1194,7 @@
 
                     foreach (var storey in storeysItems[i].Labels.Yield())
                     {
-                        if (GetScore(storey) >= ushort.MaxValue) continue;
+                        if (!isWantedStorey(storey)) continue;
                         var run = new ThwPipeRun()
                         {
                             Storey = storey,
@@ -1084,8 +1299,8 @@
             var pipeLineGroups2 = new List<ThwPipeLineGroup>();
 
 
-            var maxStorey = storeys.Where(x => GetScore(x) < ushort.MaxValue).FindByMax(GetScore);
-            //var minStorey = storeys.Where(x => GetScore(x) < ushort.MaxValue).FindByMin(GetScore);
+            var maxStorey = storeys.Where(isWantedStorey).FindByMax(GetScore);
+            //var minStorey = storeys.Where(x => GetScore(x) < ).FindByMin(GetScore);
             var minStorey = "3F";
 
             Console.WriteLine(drDatas.Select(x => x.toiletGroupers).ToCadJson());
@@ -1137,7 +1352,7 @@
             }
             var maxStoreyIndex = storeys.IndexOf(maxStorey);
 
-            NewMethod6(new DrawingOption()
+            DrawVer1(new DrawingOption()
             {
                 basePoint = basePoint,
                 OFFSET_X = OFFSET_X,
@@ -1152,7 +1367,7 @@
 
             if (pipeLineGroups2.Count > 0)
             {
-                NewMethod6(new DrawingOption()
+                DrawVer1(new DrawingOption()
                 {
                     basePoint = basePoint,
                     OFFSET_X = OFFSET_X,
@@ -1346,7 +1561,7 @@
             }
 
 
-            NewMethod6(new DrawingOption()
+            DrawVer1(new DrawingOption()
             {
                 basePoint = basePoint,
                 OFFSET_X = OFFSET_X,
@@ -1360,7 +1575,7 @@
 
             if (pipeLineGroups2.Count > 0)
             {
-                NewMethod6(new DrawingOption()
+                DrawVer1(new DrawingOption()
                 {
                     basePoint = basePoint,
                     OFFSET_X = OFFSET_X,

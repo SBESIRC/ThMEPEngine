@@ -23,8 +23,8 @@ namespace ThMEPWSS.Pipe.Model
     public enum TranslatorTypeEnum
     {
         None,
-        Long, //转管
         Short, //乙字湾
+        Long, //长转管
     }
 
     public enum WaterBucketEnum
