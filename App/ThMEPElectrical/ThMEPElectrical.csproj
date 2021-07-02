@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net48.targets" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

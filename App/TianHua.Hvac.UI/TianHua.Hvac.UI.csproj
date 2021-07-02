@@ -16,7 +16,7 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net48.targets" />
   <ItemGroup>
     <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Charts.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
