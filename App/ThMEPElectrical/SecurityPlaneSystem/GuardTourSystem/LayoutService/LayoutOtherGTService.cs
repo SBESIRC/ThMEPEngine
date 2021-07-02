@@ -31,7 +31,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
 
                 foreach (var sDoor in stairDoors)
                 {
-                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thRoom as Polyline, sDoor);
+                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thRoom, sDoor);
                     var structs = getLayoutStructureService.CalLayoutStruc(sDoor, columns, walls);
                     var layoutPt = CalControllerLayoutPt(structs, doorInfo.Item2, doorInfo.Item1);
                     layoutPts.Add(layoutPt);

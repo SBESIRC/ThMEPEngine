@@ -8,21 +8,40 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.Model;
+using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 {
     public class LayoutVideo
     {
         double bufferWidth = 300;
-        public KeyValuePair<Point3d, Vector3d> Layout(Point3d doorPt, Vector3d dir, List<Polyline> walls, List<Polyline> columns)
+        public LayoutModel Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> walls, List<Polyline> columns)
         {
-            var pts = CreateClomunLayoutPt(doorPt, columns, walls);
-            pts.AddRange(CreateWallLayoutPt(doorPt, columns, walls));
+            Polyline room = thRoom.Boundary as Polyline; 
+            //找到可布置构建
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var roomPtInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2);
+            if (poly != null)
+            {
+                return null;
+            }
+            var nCols = getLayoutStructureService.GetNeedColumns(columns, room, poly);
+            var nWalls = getLayoutStructureService.GetNeedWalls(walls, room, poly);
 
-            var layoutPt = CalLayoutPt(pts, dir, doorPt);
-            var layoutDir = (doorPt - layoutPt).GetNormal();
+            //计算布置点位
+            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, walls);
+            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nWalls, walls));
 
-            return new KeyValuePair<Point3d, Vector3d>(layoutPt, layoutDir);
+            var layoutPt = CalLayoutPt(pts, roomPtInfo.Item2, roomPtInfo.Item1);
+            var layoutDir = (roomPtInfo.Item1 - layoutPt).GetNormal();
+
+            LayoutModel layoutModel = new LayoutModel();
+            layoutModel.layoutPt = layoutPt;
+            layoutModel.layoutDir = layoutDir;
+            return layoutModel;
         }
 
         /// <summary>

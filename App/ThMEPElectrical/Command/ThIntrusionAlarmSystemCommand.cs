@@ -55,26 +55,20 @@ namespace ThMEPElectrical.Command
                     frameLst.Add(frame.Clone() as BlockReference);
                 }
 
-                List<Polyline> frames = new List<Polyline>();
                 foreach (var frameBlock in frameLst)
                 {
                     var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
                     if (frame != null)
                     {
-                        frames.Add(frame);
+                        continue;
                     }
-                }
 
-                var pt = frames.First().StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                frames = frames.Select(x =>
-                {
-                    //originTransformer.Transform(x);
-                    return ThMEPFrameService.Normalize(x);
-                }).ToList();
-                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
-                foreach (var outFrame in frames)
-                {
+                    var pt = frame.StartPoint;
+                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                    //originTransformer.Transform(frame);
+                    var outFrame = ThMEPFrameService.Normalize(frame);
+
+                    GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
@@ -83,15 +77,8 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
-                    foreach (var item in walls)
-                    {
-                        //acadDatabase.ModelSpace.Add(item);
-                    }
-
-                    //布置
-                    LayoutService layoutService = new LayoutService();
-                    layoutService.WallLayoutService(rooms, doors, columns, walls);
                 }
             }
         }

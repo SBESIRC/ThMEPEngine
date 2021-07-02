@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.Model;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm.DijkstraAlgorithm;
 using ThMEPEngineCore.Model;
@@ -19,42 +20,38 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         public double distance = 5000;
         double tol = 10;
 
-        public List<KeyValuePair<Point3d, Vector3d>> Layout(List<Line> lanes, List<Polyline> doors, List<ThIfcRoom> rooms)
+        public List<LayoutModel> Layout(List<Line> lanes, List<Polyline> doors, ThIfcRoom thRoom)
         {
-            List<KeyValuePair<Point3d, Vector3d>> resLayout = new List<KeyValuePair<Point3d, Vector3d>>();
-            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService(); 
-            foreach (var thRoom in rooms)
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = thRoom.Boundary as Polyline;
+            //获取需要的构建信息
+            var bufferRoom = room.Buffer(tol)[0] as Polyline;
+            var needDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
+            var doorPts = needDoors.Select(x => x.GetRectangleCenterPt()).ToList();
+            var nLanes = getLayoutStructureService.GetNeedLanes(lanes, room);
+
+            //计算延申线（用于计算最短路径）
+            var extendLines = CreateExtendLines(doorPts, nLanes);
+            var allLines = new List<Line>(nLanes);
+            allLines.AddRange(extendLines);
+            allLines = UtilService.GetNodedLines(allLines, room.Buffer(distance)[0] as Polyline);
+
+            //获取布置点位信息
+            var layoutInfo = GetLayoutPts(nLanes);
+
+            //计算布置点朝向
+            var layoutPtInfo = CalLayoutPtDir(layoutInfo, allLines, doorPts);
+
+            List<LayoutModel> models = new List<LayoutModel>(); 
+            foreach (var info in layoutPtInfo)
             {
-                var room = thRoom.Boundary as Polyline;
-                //获取需要的构建信息
-                var bufferRoom = room.Buffer(tol)[0] as Polyline;
-                var needDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
-                var doorPts = needDoors.Select(x => x.GetRectangleCenterPt()).ToList();
-                var nLanes = getLayoutStructureService.GetNeedLanes(lanes, room);
-
-                //计算延申线（用于计算最短路径）
-                var extendLines = CreateExtendLines(doorPts, nLanes);
-                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-                {
-                    foreach (var item in extendLines)
-                    {
-                        db.ModelSpace.Add(item);
-                    }
-                }
-                var allLines = new List<Line>(nLanes);
-                allLines.AddRange(extendLines);
-                allLines = UtilService.GetNodedLines(allLines, room.Buffer(distance)[0] as Polyline);
-
-                //获取布置点位信息
-                var layoutInfo = GetLayoutPts(nLanes);
-
-                //计算布置点朝向
-                var layoutPtInfo = CalLayoutPtDir(layoutInfo, allLines, doorPts);
-
-                resLayout.AddRange(layoutPtInfo);
+                LayoutModel layoutModel = new LayoutModel();
+                layoutModel.layoutPt = info.Key;
+                layoutModel.layoutDir = info.Value;
+                models.Add(layoutModel);
             }
 
-            return resLayout;
+            return models;
         }
 
         /// <summary>

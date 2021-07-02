@@ -17,51 +17,17 @@ namespace ThMEPElectrical.StructureHandleService
 {
     public class GetLayoutStructureService
     {
-        double tol = 10;
         double angle = 135;
         double layoutRange = 5000;
         double blindArea = 1250;
         double length = 200;
-
-        public List<LayoutInfoModel> GetStructureService(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls)
-        {
-            List<LayoutInfoModel> roomInfo = new List<LayoutInfoModel>();
-            foreach (var ifcRoom in rooms)
-            {
-                Polyline room = ifcRoom.Boundary as Polyline;
-                room.Closed = true;
-                var bufferRoom = room.Buffer(tol)[0] as Polyline;
-                var needDoors = GetNeedDoors(doors, bufferRoom);
-
-                foreach (var nDoor in needDoors)
-                {
-                    LayoutInfoModel layoutInfo = new LayoutInfoModel();
-                    var roomPtInfo = GetDoorCenterPointOnRoom(room, nDoor);
-                    var poly = GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2);
-                    if (poly != null)
-                    {
-                        var nCols = GetNeedColumns(columns, room, poly);
-                        var nWalls = GetNeedWalls(walls, room, poly);
-                        layoutInfo.room = room;
-                        layoutInfo.doorCenterPoint = roomPtInfo.Item1;
-                        layoutInfo.doorDir = roomPtInfo.Item2;
-                        layoutInfo.walls = nWalls;
-                        layoutInfo.colums = nCols;
-                        roomInfo.Add(layoutInfo);
-                    }
-                }
-            }
-
-            return roomInfo;
-        }
-
         /// <summary>
         /// 计算房间内能够布置摄像头的范围
         /// </summary>
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        private Polyline GetLayoutRange(Point3d pt, Vector3d dir)
+        public Polyline GetLayoutRange(Point3d pt, Vector3d dir)
         {
             var rotateAngle = (angle / 2) * Math.PI / 180;
             var dir1 = dir.RotateBy(rotateAngle, Vector3d.ZAxis);

@@ -88,21 +88,21 @@ namespace ThMEPElectrical.Command
                     lanes.AddRange(otherLanes);
 
                     //布置
-                    LayoutService layoutService = new LayoutService();
-                    var layoutInfo = layoutService.LaneLayoutService(lanes.SelectMany(x => x).ToList(), doors, rooms);
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        foreach (var item in layoutInfo)
-                        {
-                            var ep = item.Key + 200 * item.Value;
-                            Line line = new Line(item.Key, ep);
-                            //originTransformer.Reset(line);
-                            Circle circle = new Circle(ep, Vector3d.ZAxis, 100);
-                            //originTransformer.Reset(circle);
-                            db.ModelSpace.Add(line);
-                            db.ModelSpace.Add(circle);
-                        }
-                    }
+                    //LayoutService layoutService = new LayoutService();
+                    //var layoutInfo = layoutService.LaneLayoutService(lanes.SelectMany(x => x).ToList(), doors, rooms);
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in layoutInfo)
+                    //    {
+                    //        var ep = item.Key + 200 * item.Value;
+                    //        Line line = new Line(item.Key, ep);
+                    //        //originTransformer.Reset(line);
+                    //        Circle circle = new Circle(ep, Vector3d.ZAxis, 100);
+                    //        //originTransformer.Reset(circle);
+                    //        db.ModelSpace.Add(line);
+                    //        db.ModelSpace.Add(circle);
+                    //    }
+                    //}
                 }
             }
         }

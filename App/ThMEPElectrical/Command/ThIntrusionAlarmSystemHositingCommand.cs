@@ -84,9 +84,9 @@ namespace ThMEPElectrical.Command
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
 
-                    //布置
-                    LayoutService layoutService = new LayoutService();
-                    layoutService.HositingLayoutService(rooms, doors, columns, walls);
+                    ////布置
+                    //LayoutService layoutService = new LayoutService();
+                    //layoutService.HositingLayoutService(rooms, doors, columns, walls);
                 }
             }
         }

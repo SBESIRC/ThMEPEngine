@@ -86,17 +86,17 @@ namespace ThMEPElectrical.Command
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //布置
-                    LayoutService layoutService = new LayoutService();
-                    var layoutInfo = layoutService.ExitLayoutService(rooms, doors, columns, walls);
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        foreach (var item in layoutInfo)
-                        {
-                            Line line = new Line(item.Key, item.Key + 1000 * item.Value);
-                            originTransformer.Reset(line);
-                            db.ModelSpace.Add(line);
-                        }
-                    }
+                    //LayoutService layoutService = new LayoutService();
+                    //var layoutInfo = layoutService.ExitLayoutService(rooms, doors, columns, walls);
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in layoutInfo)
+                    //    {
+                    //        Line line = new Line(item.Key, item.Key + 1000 * item.Value);
+                    //        originTransformer.Reset(line);
+                    //        db.ModelSpace.Add(line);
+                    //    }
+                    //}
                 }
             }
         }
