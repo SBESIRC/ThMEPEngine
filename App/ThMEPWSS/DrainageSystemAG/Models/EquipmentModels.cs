@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.DrainageSystemAG.DataEngineVisitor;
 using ThMEPWSS.Model;
 
@@ -23,12 +25,16 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// </summary>
         public Dictionary<string, int> blockNames { get; }
         public EnumEquipmentType enumEquipmentType { get; }
-        public EquipmentDataEnginVisitor equipmentDataVisitor { get; }
+        public BlockReferenceDataEnginVisitor equipmentDataVisitor { get; }
         public EquipmentBlcokVisitorModel(EnumEquipmentType type, Dictionary<string, int> bNames = null)
         {
             this.blockNames = new Dictionary<string, int>();
             this.enumEquipmentType = type;
-            this.equipmentDataVisitor = new EquipmentDataEnginVisitor(bNames);
+            this.equipmentDataVisitor = new BlockReferenceDataEnginVisitor(bNames)
+            {
+                LayerFilter = new HashSet<string>(CurveXrefLayers()),
+            };
+
             if (null != bNames && bNames.Count > 0)
             {
                 foreach (var name in bNames)
@@ -38,6 +44,25 @@ namespace ThMEPWSS.DrainageSystemAG.Models
                     this.blockNames.Add(name.Key, name.Value);
                 }
             }
+        }
+        private  List<string> CurveXrefLayers()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                //return acadDatabase.Layers
+                //    .Where(o => IsVisibleLayer(o))
+                //    .Select(o => ThMEPXRefService.OriginalFromXref(o.Name))
+                //    .ToList();
+                return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
+                    .Select(o => o.Name)
+                    .ToList();
+            }
+        }
+
+        private bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
     }
     public class EquipmentBlcokModel
@@ -78,6 +103,26 @@ namespace ThMEPWSS.DrainageSystemAG.Models
 
     public enum EnumEquipmentType 
     {
+        /// <summary>
+        /// 其它
+        /// </summary>
+        [Description("其它")]
+        other =-999,
+        /// <summary>
+        /// 立管
+        /// </summary>
+        [Description("立管")]
+        riser = -998,
+        /// <summary>
+        /// 设备
+        /// </summary>
+        [Description("设备")]
+        equipment = -997,
+        /// <summary>
+        /// 建筑标高
+        /// </summary>
+        [Description("设备")]
+        buildingElevation = -996,
         /// <summary>
         /// 地漏
         /// </summary>
@@ -133,18 +178,5 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// </summary>
         [Description("烟道井")]
         flueWell = 101,
-    }
-    public enum EnumCreateEquipment 
-    {
-        /// <summary>
-        /// 地漏
-        /// </summary>
-        [Description("地漏")]
-        floorDrain = 0,
-        /// <summary>
-        /// 立管
-        /// </summary>
-        [Description("立管")]
-        riser = 1,
     }
 }

@@ -74,15 +74,15 @@ namespace ThMEPHVAC.Model
         public List<Merged_endline_Info> merged_endlines { get; set; }
         public List<ThDuctEdge<ThDuctVertex>> main_ducts { get; set; }
         public List<Special_graph_Info> special_shapes_info { get; set; }
-
+        public Point3d start_point { get; set; }
         // 用于内部传参
-        private string ui_duct_size;
-        private Line start_line;
         private double in_speed;
         private double air_volumn;
-        private Tolerance point_tor;
         private bool is_first;
         private bool endline_enable;
+        private string ui_duct_size;
+        private Line start_line;
+        private Tolerance point_tor;
         private HashSet<Line> line_set;
         private List<Endline_Info> lines_ptr;
         private Queue<double> endline_in_air_volume;
@@ -91,9 +91,9 @@ namespace ThMEPHVAC.Model
         public ThDuctPortsAnalysis(DBObjectCollection center_lines_,
                                    DBObjectCollection exclude_lines_,
                                    Point3d start_point_, 
-                                   ThDuctPortsParam in_param)
+                                   DuctPortsParam in_param)
         {
-            Init_param(center_lines_, in_param);
+            Init_param(center_lines_, in_param, start_point_);
             Get_start_line(center_lines_, start_point_, out Point3d search_point);
             if (!start_point_.IsEqualTo(start_line.StartPoint, point_tor) &&
                 !start_point_.IsEqualTo(start_line.EndPoint, point_tor))
@@ -114,21 +114,24 @@ namespace ThMEPHVAC.Model
             Reset_flag();
             Search_special_shape_info(search_point, start_line);
         }
-        private void Init_param(DBObjectCollection center_lines_, ThDuctPortsParam in_param)
+        private void Init_param(DBObjectCollection center_lines_, 
+                                DuctPortsParam in_param, 
+                                Point3d start_point_)
         {
-            ui_duct_size = in_param.in_duct_size;
-            air_volumn = in_param.air_volumn;
             endline_enable = false;
+            air_volumn = in_param.air_volumn;
+            ui_duct_size = in_param.in_duct_size;
+            in_speed = in_param.air_speed;
+            start_point = start_point_;
+            point_tor = new Tolerance(1.5, 1.5);
+            ui_duct_width = ThDuctPortsService.Get_width(in_param.in_duct_size);
             line_set = new HashSet<Line>();
             endline_in_air_volume = new Queue<double>();
             main_ducts = new List<ThDuctEdge<ThDuctVertex>>();
             merged_endlines = new List<Merged_endline_Info>();
             special_shapes_info = new List<Special_graph_Info>();
             spatial_index = new ThCADCoreNTSSpatialIndex(center_lines_);
-            point_tor = new Tolerance(1.5, 1.5);
-            in_speed = in_param.air_speed;
-            string[] s = in_param.in_duct_size.Split('x');
-            ui_duct_width = double.Parse(s[0]);
+            
         }
         private void Remove_endline_end_seg(DBObjectCollection center_lines_)
         {
@@ -445,7 +448,7 @@ namespace ThMEPHVAC.Model
             Point3d sp2 = l2.StartPoint;
             Point3d ep2 = l2.EndPoint;
             if ((sp1.IsEqualTo(sp2, point_tor) && ep1.IsEqualTo(ep2, point_tor)) ||
-                (sp1.IsEqualTo(ep2, point_tor) && ep1.IsEqualTo(sp1, point_tor)))
+                (sp1.IsEqualTo(ep2, point_tor) && ep1.IsEqualTo(sp2, point_tor)))
             {
                 return true;
             }

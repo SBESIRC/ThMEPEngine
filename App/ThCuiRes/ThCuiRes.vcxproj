@@ -263,6 +263,10 @@
     <Image Include="Images\THDKFPM_dark_large.ico" />
     <Image Include="Images\THHZXT_dark_small.ico" />    
     <Image Include="Images\THHZXT_dark_large.ico" />
+
+    <Image Include="Images\THLCDY_dark_small.ico" />    
+    <Image Include="Images\THLCDY_dark_large.ico" />
+
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

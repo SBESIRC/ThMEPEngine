@@ -46,6 +46,7 @@ namespace ThMEPWSS.Assistant
     }
     public class DrawingTransaction : IDisposable
     {
+        public bool? AbleToDraw = null;
         public static DrawingTransaction Cur { get; private set; }
         public AcadDatabase adb { get; }
         public FastBlock fbk { get; }
@@ -53,9 +54,8 @@ namespace ThMEPWSS.Assistant
         {
             this.adb = adb;
         }
-        public DrawingTransaction(AcadDatabase adb, bool createFbk)
+        public DrawingTransaction(AcadDatabase adb, bool createFbk) : this(adb)
         {
-            this.adb = adb;
             if (createFbk) this.fbk = FastBlock.Create(adb);
         }
         public DrawingTransaction()
@@ -67,18 +67,22 @@ namespace ThMEPWSS.Assistant
         {
             try
             {
-                if (adb != null)
+                if (AbleToDraw != false)
                 {
-                    DrawUtils.Draw(adb);
-                }
-                else
-                {
-                    DrawUtils.Draw();
+                    if (adb != null)
+                    {
+                        DrawUtils.Draw(adb);
+                    }
+                    else
+                    {
+                        DrawUtils.Draw();
+                    }
                 }
             }
             finally
             {
                 Cur = null;
+                DrawUtils.Dispose();
             }
         }
     }
@@ -473,13 +477,20 @@ namespace ThMEPWSS.Assistant
                 }
             });
         }
+        public static Line DrawLineSegmentLazy(GLineSegment seg,string layer)
+        {
+            var line = DrawLineSegmentLazy(seg);
+            line.ColorIndex = 256;
+            line.Layer = layer;
+            return line;
+        }
         public static Line DrawLineSegmentLazy(GLineSegment seg)
         {
             return DrawLineLazy(seg.StartPoint, seg.EndPoint);
         }
         public static List<Line> DrawLineSegmentsLazy(IEnumerable<GLineSegment> segs)
         {
-            var lines = segs.Select(seg=> new Line() { StartPoint = seg.StartPoint.ToPoint3d(), EndPoint = seg.EndPoint.ToPoint3d() }).ToList();
+            var lines = segs.Select(seg => new Line() { StartPoint = seg.StartPoint.ToPoint3d(), EndPoint = seg.EndPoint.ToPoint3d() }).ToList();
             DrawingQueue.Enqueue(adb =>
             {
                 foreach (var line in lines)
@@ -633,7 +644,7 @@ namespace ThMEPWSS.Assistant
                 r1.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r1.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
                 r2.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r2.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
             };
-            var r = GeoAlgorithm.GetGRect(pts);
+            var r = GeoAlgorithm.ToGRect(pts);
             var pt1 = GeoAlgorithm.MidPoint(r.LeftTop, r.LeftButtom).ToPoint3d();
             var pt2 = GeoAlgorithm.MidPoint(r.RightTop, r.RightButtom).ToPoint3d();
             return DrawLineLazy(pt1, pt2);

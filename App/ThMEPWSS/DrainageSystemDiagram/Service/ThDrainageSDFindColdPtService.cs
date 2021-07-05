@@ -20,8 +20,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDFindColdPtService
     {
-        
-
         public static void findCoolSupplyPt(List<ThToilateRoom> roomList, List<ThIfcSanitaryTerminalToilate> toilateList, out List<ThIfcSanitaryTerminalToilate> aloneToilate)
         {
             aloneToilate = new List<ThIfcSanitaryTerminalToilate>();
@@ -33,8 +31,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     continue;
                 }
 
-                List<Point3d> ptOnWall = new List<Point3d>();
-
                 var room = roomList.Where(x => x.toilate.Contains(terminal));
                 if (room.Count() == 0)
                 {
@@ -43,34 +39,41 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else
                 {
                     var wallList = room.First().wallList;
-                    var closeWall = findNearbyWall(wallList, terminal);
-                    var parallelWall = findParallelWall(closeWall, terminal);
-
-                    Line closestWall = null;
-                    if (parallelWall.Count > 1)
-                    {
-                        var parallelWallDistDict = parallelWall.ToDictionary(x => x, x => x.GetDistToPoint(terminal.BasePt, false));
-                        parallelWallDistDict = parallelWallDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-                        closestWall = parallelWallDistDict.First().Key;
-                    }
-                    else if (parallelWall.Count == 1)
-                    {
-                        closestWall = parallelWall[0];
-                    }
-
-                    if (closestWall != null)
-                    {
-                        //靠墙
-                        terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
-                    }
-                    else
-                    {   //岛
-                        terminal.SupplyCool.ForEach(x => ptOnWall.Add(x));
-                    }
-
+                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, DrainageSDCommon.TolToilateToWall);
                     terminal.SupplyCoolOnWall = ptOnWall;
                 }
             }
+        }
+
+        public static List<Point3d> findPtOnWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall)
+        {
+            List<Point3d> ptOnWall = new List<Point3d>();
+            var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
+            var parallelWall = findParallelWall(closeWall, terminal);
+
+            Line closestWall = null;
+            if (parallelWall.Count > 1)
+            {
+                var parallelWallDistDict = parallelWall.ToDictionary(x => x, x => x.GetDistToPoint(terminal.Boundary.GetPoint3dAt(1), false));
+                parallelWallDistDict = parallelWallDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+                closestWall = parallelWallDistDict.First().Key;
+            }
+            else if (parallelWall.Count == 1)
+            {
+                closestWall = parallelWall[0];
+            }
+
+            if (closestWall != null)
+            {
+                //靠墙
+                terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
+            }
+            else
+            {   //岛
+                terminal.SupplyCool.ForEach(x => ptOnWall.Add(x));
+            }
+
+            return ptOnWall;
         }
 
         private static List<Line> findParallelWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal)
@@ -80,13 +83,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 parallelWall = wallList.Where(wall =>
                {
-                   var wallDir = (wall.EndPoint - wall.StartPoint).GetNormal();
-                   var angle = wallDir.GetAngleTo(terminal.Dir);
+                   //var wallDir = (wall.EndPoint - wall.StartPoint).GetNormal();
+                   //var angle = wallDir.GetAngleTo(terminal.Dir);
+
+                   var ptOnWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
+                   var ptToWallDir = (terminal.SupplyCool[0] - ptOnWall).GetNormal() ;
+                   var angle = ptToWallDir.GetAngleTo(terminal.Dir);
+
                    var bReturn = false;
-                   if (Math.Abs(Math.Cos(angle)) <= Math.Cos(70 * Math.PI / 180))
+                   if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
                    {
                        bReturn = true;
                    }
+
                    return bReturn;
                }).ToList();
             }
@@ -94,12 +103,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
         }
 
 
-        private static List<Line> findNearbyWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal)
+        private static List<Line> findNearbyWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall)
         {
             List<Line> closeWall = new List<Line>();
             if (wallList.Count > 0)
             {
-                var ptLeftTop = terminal.BasePt;
+                var ptLeftTop = terminal.Boundary.GetPoint3dAt(1);
                 var ptRightTop = terminal.Boundary.GetPoint3dAt(2);
                 var tol = new Tolerance(10, 10);
 
@@ -110,8 +119,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                    var ptLeftWall = wall.GetClosestPointTo(ptLeftTop, true);
                    var ptRightWall = wall.GetClosestPointTo(ptRightTop, true);
 
-                   if (ptLeftTop.DistanceTo(ptLeftWall) <= DrainageSDCommon.TolToilateToWall ||
-                       ptRightTop.DistanceTo(ptRightWall) <= DrainageSDCommon.TolToilateToWall)
+                   if (ptLeftTop.DistanceTo(ptLeftWall) <= TolClosedWall ||
+                       ptRightTop.DistanceTo(ptRightWall) <= TolClosedWall)
                    {
 
                        var ptSupplyWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
@@ -119,8 +128,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                        {
                            bReturn = true;
                        }
-
-
                    }
 
                    return bReturn;

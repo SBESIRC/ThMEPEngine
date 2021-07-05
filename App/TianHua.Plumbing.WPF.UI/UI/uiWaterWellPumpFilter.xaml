@@ -24,7 +24,7 @@
             </Grid>
             <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
                 <Label Content="白名单:"/>
-                <TextBox Name="WhiteTextBox0" Height="23" TextWrapping="Wrap" Text="集水井" Margin="0,5,0,0"/>
+                <TextBox Name="WhiteTextBox0" Height="23" TextWrapping="Wrap" Text="A-Well-1" Margin="0,5,0,0"/>
                 <TextBox Name="WhiteTextBox1" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
                 <TextBox Name="WhiteTextBox2" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
             </StackPanel>

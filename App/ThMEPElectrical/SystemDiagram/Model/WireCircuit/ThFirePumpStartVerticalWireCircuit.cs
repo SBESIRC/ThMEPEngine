@@ -19,15 +19,18 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int currentIndex = 19;
             List<Entity> Result = new List<Entity>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
+            int PressureSwitchMinFloor = 0;//灭火系统流量开关最低楼层
             int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
+            int FireHydrantPumpMinFloor = 0;//消火栓泵最低楼层
             int FireHydrantPumpCount = 0;//消火栓泵个数
-            int SprayPumpCount = 0;//喷淋泵个数
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["灭火系统流量开关"] > 0)
                 {
+                    if(PressureSwitchMinFloor==0)
+                        PressureSwitchMinFloor= FloorNum + 1;
                     PressureSwitchMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFirePumpStartLine(currentIndex, FloorNum));
                 }
@@ -35,28 +38,40 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     FireHydrantPumpCount += AreaData.Data.BlockData.BlockStatistics["消火栓泵"];
                     FireHydrantPumpMaxFloor = FloorNum + 1;
+                    if (FireHydrantPumpMinFloor == 0)
+                        FireHydrantPumpMinFloor = FloorNum + 1;
                     Result.AddRange(DrawFireHydrantPumpLine(currentIndex, FloorNum));
-                }
-                if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
-                {
-                    SprayPumpCount += AreaData.Data.BlockData.BlockStatistics["喷淋泵"];
                 }
             }
             //都存在，才画
-            if (PressureSwitchMaxFloor > 0 && FireHydrantPumpMaxFloor > 0)
+            if (PressureSwitchMinFloor > 0)
             {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
-                Result.Add(Endline1);
-                //设置线型
-                Result.ForEach(o =>
+                if (FireHydrantPumpMinFloor > 0)
                 {
-                    o.Linetype = this.CircuitLinetype;
-                    o.Layer = this.CircuitLayer;
-                    o.ColorIndex = this.CircuitColorIndex;
-                });
+                    if (PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                        Result.Add(Endline1);
+                    }
+                    if (PressureSwitchMinFloor < FireHydrantPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0));
+                        Result.Add(Endline1);
+                    }
+                }
+                else
+                {
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                    Result.Add(Endline1);
+                }
             }
-            else
-                Result = new List<Entity>();
+            //设置线型
+            Result.ForEach(o =>
+            {
+                o.Linetype = this.CircuitLinetype;
+                o.Layer = this.CircuitLayer;
+                o.ColorIndex = this.CircuitColorIndex;
+            });
             if (FireHydrantPumpMaxFloor > 0)
             {
                 Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * FireHydrantPumpMaxFloor - 1900, 0))
@@ -67,16 +82,19 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 };
                 Result.Add(Endline2);
             }
-            if (FireHydrantPumpCount > 0 & SprayPumpCount > 0)
+            //画液位信号线路模块
+            if (FireCompartmentParameter.FixedPartType != 3)
             {
-                //画液位信号线路模块
-                if (FireCompartmentParameter.FixedPartType != 3)
+                if (FireHydrantPumpMinFloor > 0)
                 {
-                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FirePumpRoomCircuitModuleExcludingFireRoom);
-
+                    InsertBlockService.InsertFireHydrantPump(new Vector3d(0, OuterFrameLength * (FireHydrantPumpMinFloor - 1), 0));
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FireHydrantPumpManualControlCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FireHydrantPumpManualControlCircuitModuleExcludingFireRoom);
                     InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (19 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", FireHydrantPumpCount.ToString() } });
-                    InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
                 }
+                else if (PressureSwitchMaxFloor > 0)
+                {
+                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleExcludingFireRoom);
+                }              
             }
             return Result;
         }
@@ -94,6 +112,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
             Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 1200, 0));
             result.Add(Endline4);
+
+            Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+            result.Add(Endline5);
+
+            Line Endline6 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset -100, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+            result.Add(Endline6);
             return result;
         }
 

@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThDoorStoneLayerManager
+    public class ThDoorStoneLayerManager: ThDbLayerManager
     {
         public static List<string> XrefLayers(Database database)
         {
@@ -17,11 +17,6 @@ namespace ThMEPEngineCore.Service
                     .Select(o => o.Name)
                     .ToList();
             }
-        }
-
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
 
         private static bool IsDoorStoneLayer(string name)

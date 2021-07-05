@@ -242,7 +242,7 @@ namespace ThMEPWSS.Uitl
             public GRect GetGRect(Point3d basePt, bool bsPtIncluded)
             {
                 List<Point3d> pts = GetPoint3ds(basePt, bsPtIncluded);
-                return GeoAlgorithm.GetGRect(pts);
+                return GeoAlgorithm.ToGRect(pts);
             }
             private List<Point3d> GetPoint3ds(Point3d basePt, bool bsPtIncluded)
             {
@@ -641,6 +641,40 @@ namespace ThMEPWSS.Uitl
     }
     public struct GLineSegment
     {
+        public class EqualityComparer : IEqualityComparer<GLineSegment>
+        {
+            double radius;
+            public EqualityComparer(double radius)
+            {
+                this.radius = radius;
+            }
+            public bool Equals(GLineSegment x, GLineSegment y)
+            {
+                return x.StartPoint.GetDistanceTo(y.StartPoint) <= radius && x.EndPoint.GetDistanceTo(y.EndPoint) <= radius
+                    || x.StartPoint.GetDistanceTo(y.EndPoint) <= radius && x.EndPoint.GetDistanceTo(y.StartPoint) <= radius;
+            }
+
+            public int GetHashCode(GLineSegment obj)
+            {
+                return 0;
+            }
+        }
+        public GLineSegment TransformBy(Matrix2d leftSide)
+        {
+            return new GLineSegment(StartPoint.TransformBy(leftSide), EndPoint.TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(Matrix3d leftSide)
+        {
+            return new GLineSegment(StartPoint.ToPoint3d().TransformBy(leftSide), EndPoint.ToPoint3d().TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(ref Matrix2d leftSide)
+        {
+            return new GLineSegment(StartPoint.TransformBy(leftSide), EndPoint.TransformBy(leftSide));
+        }
+        public GLineSegment TransformBy(ref Matrix3d leftSide)
+        {
+            return new GLineSegment(StartPoint.ToPoint3d().TransformBy(leftSide), EndPoint.ToPoint3d().TransformBy(leftSide));
+        }
         public bool IsNull => Equals(this, default(GLineSegment));
         public GLineSegment(double x1, double y1, double x2, double y2)
         {
@@ -668,7 +702,7 @@ namespace ThMEPWSS.Uitl
         {
             get
             {
-                var dg = GeoAlgorithm.AngleToDegree((EndPoint - StartPoint).Angle);
+                var dg = (EndPoint - StartPoint).Angle.AngleToDegree();
                 if (dg < 0) dg += 360;
                 if (dg >= 360) dg -= 360;
                 return dg;
@@ -928,6 +962,11 @@ namespace ThMEPWSS.Uitl
                 yield return m;
             }
         }
+        public static IEnumerable<T> Yield<T>(this IEnumerable<T> source)
+        {
+            if (source == null) return Enumerable.Empty<T>();
+            return source;
+        }
         public static IEnumerable<T> YieldAfter<T>(this IEnumerable<T> souce, T item)
         {
             foreach (var m in souce)
@@ -1146,6 +1185,18 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static GRect ToGRect(this Point3dCollection pts)
+        {
+            if (pts.Count == 0)
+            {
+                return default;
+            }
+            var minX = pts.Cast<Point3d>().Select(p => p.X).Min();
+            var maxX = pts.Cast<Point3d>().Select(p => p.X).Max();
+            var minY = pts.Cast<Point3d>().Select(p => p.Y).Min();
+            var maxY = pts.Cast<Point3d>().Select(p => p.Y).Max();
+            return new GRect(minX, minY, maxX, maxY);
+        }
         public static Vector3d ToVector3d(this Point3d pt) => new Vector3d(pt.X, pt.Y, pt.Z);
         public static Vector2d ToVector2d(this Point2d pt) => new Vector2d(pt.X, pt.Y);
         public static Point2d ToLongPoint2d(this Point2d pt)
@@ -1160,16 +1211,13 @@ namespace ThMEPWSS.Uitl
         {
             return new Point2d(v.X, v.Y);
         }
-        public static bool IsParallelTo(this Vector3d vector, Vector3d other, double tol)
+
+        public static bool IsParallelTo(this GLineSegment first, GLineSegment second, double angleTol)
         {
-            double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
-            return (angle < tol) || ((180.0 - angle) < tol);
-        }
-        public static bool IsParallelTo(this GLineSegment first, GLineSegment second)
-        {
-            var firstVec = first.EndPoint - first.StartPoint;
-            var secondVec = second.EndPoint - second.StartPoint;
-            return firstVec.IsParallelTo(secondVec);
+            var v1 = first.EndPoint - first.StartPoint;
+            var v2 = second.EndPoint - second.StartPoint;
+            var angle = v1.GetAngleTo(v2);
+            return angle.EqualsTo(.0, angleTol) || angle.EqualsTo(180.0, angleTol) || angle.EqualsTo(360.0, angleTol);
         }
         public static bool EqualsTo(this double value1, double value2, double tollerance)
         {
@@ -1207,7 +1255,8 @@ namespace ThMEPWSS.Uitl
                                         (pt1.Z + pt2.Z) / 2.0);
             return midPoint;
         }
-        public static GRect GetGRect(IList<Point3d> pts)
+        public static GRect ToGRect
+            (IList<Point3d> pts)
         {
             if (pts.Count == 0) return default;
             GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
@@ -1606,6 +1655,11 @@ namespace ThMEPWSS.Uitl
                     pts.Add(bd.MinPoint);
                 }
             }
+            return GetExtend2d(out minX, out minY, out maxX, out maxY, pts);
+        }
+
+        public static bool GetExtend2d(out double minX, out double minY, out double maxX, out double maxY, Point3dCollection pts)
+        {
             if (pts.Count == 0)
             {
                 minX = minY = maxX = maxY = default;
@@ -1617,6 +1671,7 @@ namespace ThMEPWSS.Uitl
             maxY = pts.Cast<Point3d>().Select(p => p.Y).Max();
             return true;
         }
+
         static public void DrawLine(Point3d startPt, Point3d endPt, string layerName)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())

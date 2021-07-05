@@ -54,7 +54,7 @@
                                     FontSize="{TemplateBinding TitleFontSize}"
                                     FontWeight="{TemplateBinding TitleFontWeight}"
                                     Foreground="{TemplateBinding TitleForeground}" VerticalAlignment="Center"></TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="2">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="2" Margin="0">
                             <Button x:Name="btnMin" Width="28" Height="28" WindowChrome.IsHitTestVisibleInChrome="True" Focusable="False" Visibility="{Binding BtnMinimizeVisibility}" ToolTip="最小化窗体" >
                                 <Button.Template>
                                     <ControlTemplate>

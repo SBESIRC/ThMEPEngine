@@ -37,14 +37,16 @@ namespace ThMEPWSS.Hydrant.Service
                                 if (f.Attributes["Name"] as string == "Covered region")
                                 {
                                     if (f.Geometry is Polygon polygon)
-                                    {
-                                        coverArea=polygon.ToDbMPolygon();
-                                        islatedPolygons.Add(polygon.ToDbMPolygon());
+                                    {                                       
+                                        coverArea = ThHydrantUtils.MakeValid(polygon);                                        ;
+                                        islatedPolygons.Add(coverArea.Clone() as Entity);
                                     }
                                     else if (f.Geometry is MultiPolygon mPolygon)
                                     {
-                                        coverArea=mPolygon.ToDbMPolygon();
-                                        mPolygon.Geometries.Cast<Polygon>().ForEach(m => islatedPolygons.Add(m.ToDbMPolygon()));
+                                        coverArea = ThHydrantUtils.MakeValid(mPolygon);
+                                        mPolygon.Geometries
+                                        .Cast<Polygon>()
+                                        .ForEach(m => islatedPolygons.Add(ThHydrantUtils.MakeValid(m)));
                                     }
                                     else
                                     {
@@ -58,10 +60,13 @@ namespace ThMEPWSS.Hydrant.Service
                             }
                         }
                     });
-                    results.Add(Tuple.Create(coverArea, position, islatedPolygons));
+                    if(coverArea!=null)
+                    {
+                        results.Add(Tuple.Create(coverArea, position, islatedPolygons));
+                    }
                 }
             });            
             return results;
-        }
+        }        
     }
 }

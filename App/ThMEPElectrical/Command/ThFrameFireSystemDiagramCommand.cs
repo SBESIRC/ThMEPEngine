@@ -14,6 +14,7 @@ using ThMEPEngineCore.Model.Electrical;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPElectrical.Command
 {
@@ -30,25 +31,35 @@ namespace ThMEPElectrical.Command
                 using (var StoreysRecognitionEngine = new ThEStoreysRecognitionEngine())//楼层引擎
                 {
                     //选择区域
-                    var points = SelectFrame();
-                    if (points.Count == 0)
+                    Active.Editor.WriteLine("\n请选择楼层块");
+                    var result = Active.Editor.GetSelection();
+                    if (result.Status != PromptStatus.OK)
                     {
                         return;
                     }
+                    var objs = new ObjectIdCollection();
+                    objs = result.Value.GetObjectIds().ToObjectIdCollection();
 
                     //选择插入点
-                    var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
-                    if (ppr.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                    var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位");
+                    if (ppr.Status != PromptStatus.OK)
                     {
                         return;
                     }
 
+                    //选择区域
+                    var points = new Point3dCollection();
+
                     //楼层
-                    StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
+                    StoreysRecognitionEngine.RecognizeMS(acadDatabase.Database, objs);
                     if (StoreysRecognitionEngine.Elements.Count == 0)
                     {
                         return;
                     }
+
+                    //加载块集合配置文件白名单
+                    ThBlockConfigModel.Init();
+
                     //图块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
                     BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
@@ -68,9 +79,6 @@ namespace ThMEPElectrical.Command
                         Active.Editor.WriteLine("\n检测到有未正确命名的防火分区，请先手动命名");
                         return;
                     }
-
-                    //加载块集合配置文件白名单
-                    ThBlockConfigModel.Init();
 
                     //火灾自动报警系统diagram实例化
                     var diagram = new ThAutoFireAlarmSystemModel();
@@ -95,25 +103,6 @@ namespace ThMEPElectrical.Command
 
                     //画系统图
                     diagram.DrawSystemDiagram(ppr.Value.GetAsVector(), Active.Editor.UCS2WCS());
-                }
-            }
-        }
-        private Point3dCollection SelectFrame()
-        {
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window))
-            {
-                try
-                {
-                    pc.Collect();
-                    var frame = new Polyline();
-                    Point3dCollection winCorners = pc.CollectedPoints;
-                    frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                    frame.TransformBy(Active.Editor.UCS2WCS());
-                    return frame.Vertices();
-                }
-                catch
-                {
-                    return new Point3dCollection();
                 }
             }
         }

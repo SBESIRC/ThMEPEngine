@@ -1,12 +1,11 @@
 ﻿using System;
+using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
-using System.Linq;
-using NFox.Cad;
-using ThCADCore.NTS;
-using DotNetARX;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
@@ -52,31 +51,23 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
         {
-            var results = new List<ThRawIfcSpatialElementData>();
+            var curves = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var pline = new Polyline()
-                {
-                    Closed = true,
-                };
-                pline.CreatePolyline(polygon);
-                var filterObjs = spatialIndex.SelectCrossingPolygon(pline);
-                results = datas.Where(o => filterObjs.Contains(o.Geometry as Curve)).ToList();
+                curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
             else
             {
-                results = datas;
+                curves = objs;
             }
-            results.ForEach(o =>
+            curves = ThRoomOutlineSimplifier.MakeValid(curves);
+            if (curves.Count > 0)
             {
-                if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
-                {
-                    var room = ThIfcRoom.Create(polyline);
-                    Elements.Add(room);
-                }
-            });
+                var results = ThRoomOutlineSimplifier.Simplify(curves);
+                Elements.AddRange(results.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
+            }
         }
 
         public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)

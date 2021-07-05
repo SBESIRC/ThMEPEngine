@@ -121,7 +121,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockAliasName = "E-BFAS212",
                 BlockNameRemark = "手动火灾报警按钮(带消防电话插座)",
                 Index = 7,
-                CanHidden = true,
+                CanHidden = false,
                 Position = new Point3d(1500, 1500, 0),
                 ShowQuantity=true,
                 QuantityPosition=new Point3d(1850,1150,0)
@@ -145,7 +145,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockAliasName = "E-BFAS330",
                 BlockNameRemark = "火灾声光警报器",
                 Index = 7,
-                CanHidden = true,
+                CanHidden = false,
                 Position = new Point3d(1500, 800, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1850, 450, 0)
@@ -408,7 +408,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 UniqueName = "防排抽烟机",
                 BlockName = "E-BFAS522",
                 BlockAliasName = "E-BFAS522_16",
-                BlockNameRemark = "防排抽烟机",
+                BlockNameRemark = "防排烟风机",
                 Index = 16,
                 Position = new Point3d(1100, 1200, 0),
                 CanHidden = true,
@@ -627,14 +627,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
-                    },
-                    new ThBlockModel()
-                    {
-                        UniqueName = "消火栓泵直接启动信号线",
-                        BlockName = "消火栓泵直接启动信号线",
-                        BlockNameRemark = "消火栓泵直接启动信号线",
-                        Index = 19,
-                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });
@@ -678,14 +670,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
-                    },
-                    new ThBlockModel()
-                    {
-                        UniqueName = "喷淋泵直接启动信号线",
-                        BlockName = "喷淋泵直接启动信号线",
-                        BlockNameRemark = "喷淋泵直接启动信号线",
-                        Index = 20,
-                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });

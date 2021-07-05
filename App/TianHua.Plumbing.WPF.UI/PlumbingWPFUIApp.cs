@@ -11,6 +11,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
+        uiDrainageSysAboveGround uiAGSysDrain;
         public void Initialize()
         {
             uiFireHydrant = null;
@@ -28,6 +29,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void Terminate()
         {
         }
+
         [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
         public void THSSUI()
         {
@@ -37,6 +39,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             uiDrainage = new uiDrainageSystem();
             AcadApp.ShowModelessWindow(uiDrainage);
         }
+
         [CommandMethod("TIANHUACAD", "THDSPSXTSet", CommandFlags.Modal)]
         public void THSSUI2()
         {
@@ -81,26 +84,22 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-
-        //[CommandMethod("TIANHUACAD", "THFCSD", CommandFlags.Modal)]
-        public void ThCreateFireControlSystemDiagram()
+        /// <summary>
+        /// 排雨水平面	
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPYSPM", CommandFlags.Modal)]
+        public void ThDrainageSysAboveGround()
         {
-            var ui = new uiFireControlSystem();
-            AcadApp.ShowModelessWindow(ui);
+            if (uiAGSysDrain != null && uiAGSysDrain.IsLoaded)
+                return;
+            uiAGSysDrain = new uiDrainageSysAboveGround();
+            AcadApp.ShowModelessWindow(uiAGSysDrain);
         }
 
         /// <summary>
-        /// 地上标准层排水、雨水平面	
+        /// 冲洗点位
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THDSPSYSXT", CommandFlags.Modal)]
-        public void ThDrainageSysAboveGround()
-        {
-            var ui = new uiDrainageSysAboveGround();
-            AcadApp.ShowModelessWindow(ui);
-        }
-
         [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]
-
         public void THDXCX()
         {
             if (uiFlushPoint != null && uiFlushPoint.IsLoaded)
@@ -111,6 +110,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiFlushPoint);
         }
 
+        /// <summary>
+        /// 消火栓校核
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THXHSJH", CommandFlags.Modal)]
         public void THXHSJH()
         {

@@ -112,7 +112,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     FindCount += DataSummaryReturn.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(c => c.UniqueName == name).CoefficientOfExpansion;//计数*权重
                 });
-                DataSummaryReturn.BlockData.BlockStatistics[o.UniqueName] = FindCount / o.DependentStatisticalRule + 1;//向上缺省
+                DataSummaryReturn.BlockData.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
             });
             //与读取到的[消防水箱],[灭火系统压力开关]同一分区，默认数量为2
             if (DataSummaryReturn.BlockData.BlockStatistics["消防水池"] > 0 && DataSummaryReturn.BlockData.BlockStatistics["灭火系统压力开关"] > 0)

@@ -32,7 +32,7 @@ namespace ThMEPElectrical.Command
             ThBlockConfigModel.Init();
 
             //选择插入点
-            var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
+            var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位");
             if (ppr.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
             {
                 return;

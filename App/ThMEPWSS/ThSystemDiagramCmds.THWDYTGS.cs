@@ -30,6 +30,7 @@ namespace ThMEPWSS
         {
             //取框线
             Polyline frame = selectFrame();
+
             Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
             if (frame != null && frame.NumberOfVertices > 0)

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
@@ -47,6 +45,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //这里只是区分所属房间，就通用的获取归属房间信息
                         classify = GetBlockRoomClassifies(item.blockReferences, item.enumEquipmentType);
                         break;
+                    default:
+                        classify = GetBlockRoomClassifies(item.blockReferences, item.enumEquipmentType);
+                        break;
                 }
                 if (null != classify && classify.Count > 0)
                     retModels.AddRange(classify);
@@ -69,12 +70,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 if (room.roomTypeName != EnumRoomType.Balcony && room.roomTypeName != EnumRoomType.Corridor)
                     continue;
-                var roomPLine = room.outLine;
                 foreach (var block in riserClassify)
                 {
                     if (block.enumRoomType != EnumRoomType.Other)
                         continue;
-                    if (roomPLine.Contains(block.blockPosition))
+                    if (room.outLine.Contains(block.blockPosition))
                     {
                         block.enumRoomType = room.roomTypeName;
                         block.roomSpaceId = room.thIFCRoom.Uuid;
@@ -141,16 +141,26 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             washMachines.ForEach(c => { if (c != null) { retModels.Add(new EquipmentBlockSpace(c, enumEquipment)); } });
             foreach (var room in _roomModels)
             {
-                foreach (var item in retModels)
+                try 
                 {
-                    if (item.enumRoomType != EnumRoomType.Other)
+                    if (room.outLine.Area < 100)
                         continue;
-                    if (room.outLine.Contains(item.blockPosition))
+                    foreach (var item in retModels)
                     {
-                        item.enumRoomType = room.roomTypeName;
-                        item.roomSpaceId = room.thIFCRoom.Uuid;
+                        if (item.enumRoomType != EnumRoomType.Other)
+                            continue;
+                        if (room.outLine.Contains(item.blockCenterPoint) || room.outLine.Contains(item.blockPosition))
+                        {
+                            item.enumRoomType = room.roomTypeName;
+                            item.roomSpaceId = room.thIFCRoom.Uuid;
+                        }
                     }
                 }
+                catch (Exception ex) 
+                {
+                
+                }
+                
             }
             return retModels;
         }

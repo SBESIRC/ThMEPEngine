@@ -28,13 +28,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
     <Compile Include="Model\ThDuctPortsConstructor.cs" />
     <Compile Include="Model\ThDuctPortsDistribute.cs" />
     <Compile Include="Model\ThDuctPortsDraw.cs" />
+    <Compile Include="Model\ThDuctPortsDrawDim.cs" />
+    <Compile Include="Model\ThDuctPortsDrawService.cs" />
     <Compile Include="Model\ThDuctPortsFactory.cs" />
     <Compile Include="Model\ThDuctPortsJudger.cs" />
-    <Compile Include="Model\ThDuctPortsParam.cs" />
+    <Compile Include="Model\DuctPortsParam.cs" />
+    <Compile Include="Model\ThDuctPortsRecoder.cs" />
+    <Compile Include="Model\ThDuctPortsReDraw.cs" />
     <Compile Include="Model\ThDuctPortsService.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
     <Compile Include="Model\ThTee.cs" />

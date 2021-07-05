@@ -194,5 +194,9 @@ namespace ThMEPEngineCore.CAD
         {
             return pt.X + "," + pt.Y;
         }
+        public static bool DoubleEquals(double value1, double value2,double DOUBLE_DELTA = 1E-6)
+        {
+            return value1 == value2 || Math.Abs(value1 - value2) < DOUBLE_DELTA;
+        }
     }
 }

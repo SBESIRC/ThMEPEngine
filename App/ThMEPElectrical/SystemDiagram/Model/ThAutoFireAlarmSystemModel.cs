@@ -263,8 +263,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
                 //初始化系统图需要的图层/线型等信息
                 InsertBlockService.InsertDiagramLayerAndStyle();
-                //开启联动关闭排烟风机信号线绘画权限
+                //开启相关信号线绘画权限
                 ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = true;
+                ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump = true;
+                ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump = true;
 
                 List<Entity> DrawEntitys = new List<Entity>();
                 Dictionary<Point3d, ThBlockModel> dicBlockPoints = new Dictionary<Point3d, ThBlockModel>();
@@ -336,11 +338,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
+                double Rotation = 0.00;
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()
                .FirstOrDefault(b => !b.BlockTableRecord.IsNull && b.GetEffectiveName() == "AI-楼层框定E");
-                if (blkrefs.IsNull())
-                    return;
+                if (!blkrefs.IsNull())
+                {
+                    Rotation = blkrefs.Rotation;
+                }
                 InsertBlockService.ImportFireDistrictLayerAndStyle(db);
                 var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
                 List<Entity> DrawEntitys = new List<Entity>();
@@ -352,7 +357,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
                             var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
-                            newDBText.Rotation = blkrefs.Rotation;
+                            newDBText.Rotation = Rotation;
                             DrawEntitys.Add(newDBText);
                         }
                     });
@@ -489,13 +494,18 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     {
                         FindCount += BlockDataReturn.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
                     });
-                    BlockDataReturn.BlockStatistics[o.UniqueName] = FindCount / o.DependentStatisticalRule + 1;//向上缺省
+                    BlockDataReturn.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
                 });
                 //与读取到的[消防水箱],[灭火系统压力开关]同一分区，默认数量为2
                 if (BlockDataReturn.BlockStatistics["消防水池"] > 0 && BlockDataReturn.BlockStatistics["灭火系统压力开关"] > 0)
                 {
                     BlockDataReturn.BlockStatistics["消火栓泵"] = Math.Max(BlockDataReturn.BlockStatistics["消火栓泵"], 2);
                     BlockDataReturn.BlockStatistics["喷淋泵"] = Math.Max(BlockDataReturn.BlockStatistics["喷淋泵"], 2);
+                }
+                //有[消火栓泵],[喷淋泵]，默认一定至少有一个[灭火系统压力开关]
+                if (BlockDataReturn.BlockStatistics["消火栓泵"] > 0 || BlockDataReturn.BlockStatistics["喷淋泵"] > 0)
+                {
+                    BlockDataReturn.BlockStatistics["灭火系统压力开关"] = Math.Max(BlockDataReturn.BlockStatistics["灭火系统压力开关"], 1);
                 }
                 #endregion
             }

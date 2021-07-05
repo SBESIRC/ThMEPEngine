@@ -109,8 +109,8 @@ namespace ThControlLibraryWPF.CustomControl
         /// <summary>
         /// 当按钮不可用时，按钮的前景色（这是依赖属性）
         /// </summary>
-        public static readonly DependencyProperty DisabledForegroundProperty =
-            DependencyProperty.Register(" DisabledForeground", typeof(Brush), typeof(ImageButton), new PropertyMetadata(Brushes.Black));
+        public static readonly DependencyProperty DisabledForegroundProperty = 
+            DependencyProperty.Register("DisabledForeground", typeof(Brush), typeof(ImageButton), new PropertyMetadata(Brushes.Black));
         /// <summary>
         /// 当按钮不可用时，按钮的前景色
         /// </summary>

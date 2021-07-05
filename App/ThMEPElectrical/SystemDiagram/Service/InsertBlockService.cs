@@ -89,21 +89,9 @@ namespace ThMEPElectrical.SystemDiagram.Service
                         acadDatabase.Database.ImportBlock(BlockName);
                         ImportBlockSet.Add(BlockName);
                     }
-                    //消火栓泵直接启动信号线 和 喷淋泵直接启动信号线 比较特殊，无需扩大100倍
-                    if (BlockName.Contains("直接启动信号线"))
-                    {
-                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(1), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
-                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                        blkref.TransformBy(conversionMatrix);
-                        blkref.ExplodeToOwnerSpace();
-                        blkref.Erase();
-                    }
-                    else
-                    {
-                        var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
-                        var blkref = acadDatabase.Element<BlockReference>(objId, true);
-                        blkref.TransformBy(conversionMatrix);
-                    }
+                    var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
                 }
             }
         }
@@ -130,6 +118,74 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 blkref.TransformBy(conversionMatrix);
                 blkref.ExplodeToOwnerSpace();
                 blkref.Erase();
+            }
+        }
+
+        /// <summary>
+        /// 插入消火栓泵直接启动信号线
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="vector">偏移量</param>
+        public static void InsertFireHydrantPump(Vector3d vector)
+        {
+            if (ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    string BlockName = ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLine;
+                    acadDatabase.Database.ImportBlock(BlockName);
+                    var objId = acadDatabase.Database.InsertBlock(
+                        ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                        BlockName,
+                        new Point3d(3000 * 18, 0, 0).Add(offset),
+                        new Scale3d(),
+                        0,
+                        false,
+                        null);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
+                    var objs = new DBObjectCollection();
+                    blkref.Explode(objs);
+                    blkref.Erase();
+                    MLeader mLeader = objs[0] as MLeader;
+                    mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector.TransformBy(conversionMatrix)));
+                    acadDatabase.ModelSpace.Add(mLeader);
+                    ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入喷淋泵直接启动信号线
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="vector">偏移量</param>
+        public static void InsertSprinklerPump(Vector3d vector)
+        {
+            if (ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    string BlockName = ThAutoFireAlarmSystemCommon.SprinklerPumpDirectStartSignalLine;
+                    acadDatabase.Database.ImportBlock(BlockName);
+                    var objId = acadDatabase.Database.InsertBlock(
+                        ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                        BlockName,
+                        new Point3d(3000 * 19, 0, 0).Add(offset),
+                        new Scale3d(),
+                        0,
+                        false,
+                        null);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.TransformBy(conversionMatrix);
+                    var objs = new DBObjectCollection();
+                    blkref.Explode(objs);
+                    blkref.Erase();
+                    MLeader mLeader = objs[0] as MLeader;
+                    mLeader.SetFirstVertex(1, mLeader.GetFirstVertex(1).Add(vector.TransformBy(conversionMatrix)));
+                    acadDatabase.ModelSpace.Add(mLeader);
+                    ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump = false;
+                }
             }
         }
 

@@ -21,7 +21,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public string name { get; private set; }
         public int type { get; private set; } //1:大空间 0:小空间 -1：没有厕所
 
-        private List<string> typeName = new List<string>() { "工具间", "清洁间", "第三卫", "无障碍卫" };
+        private List<string> typeName = new List<string>() { "工具间", "清洁间", "第三卫", "无障碍卫","儿童" };
         public List<Point3d> outlinePtList { get; private set; }
         public ThToilateRoom(Polyline outline, string name, List<ThIfcSanitaryTerminalToilate> tolilate)
         {
@@ -29,22 +29,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             this.name = name;
             this.toilate = tolilate;
 
-            outlinePtList = getPT(this.outline);
+            outlinePtList = ThDrainageSDCommonService.getPT(this.outline);
             wallList = buildRoomWall();
             type = isLargeRoom();
         }
 
-        private List<Point3d> getPT(Polyline pl)
-        {
-            var ptList = new List<Point3d>();
-            for (int i = 0; i < pl.NumberOfVertices; i++)
-            {
-                var pt = pl.GetPoint3dAt(i % pl.NumberOfVertices);
-                ptList.Add(pt);
-            }
-
-            return ptList;
-        }
+ 
 
         private List<Line> buildRoomWall()
         {

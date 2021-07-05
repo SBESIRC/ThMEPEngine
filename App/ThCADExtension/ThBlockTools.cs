@@ -1,6 +1,8 @@
 ﻿using Linq2Acad;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 
 namespace ThCADExtension
 {
@@ -71,6 +73,44 @@ namespace ThCADExtension
                 trans.Commit();
             }
             return attributes; // 返回块参照的属性名和属性值
+        }
+
+        public static ObjectId AddBlockTableRecordDBEntity(Database database, string addBlockName, Point3d blockBasePoint, ObjectId[] entityIds, bool delEntity = false)
+        {
+            ObjectId blockId = ObjectId.Null;
+            if (string.IsNullOrEmpty(addBlockName) || null == entityIds || entityIds.Length < 1)
+                return blockId;
+            using (Transaction transaction = database.TransactionManager.StartTransaction())
+            {
+                BlockTable bt = (BlockTable)transaction.GetObject(database.BlockTableId,OpenMode.ForRead);
+                if (!bt.Has(addBlockName))
+                {
+                    //项目中没有相应的块，进行创建，如果已经有相应的块不进行创建
+                    bt.UpgradeOpen();
+                    //create new
+                    BlockTableRecord record = new BlockTableRecord();
+                    record.Name = addBlockName;
+                    record.Origin = blockBasePoint;
+                    bt.Add(record);
+                    transaction.AddNewlyCreatedDBObject(record, true);
+                }
+                blockId = bt[addBlockName];
+                transaction.Commit();
+            }
+            //copy the select entities to block by using deepclone.
+            ObjectIdCollection collection = new ObjectIdCollection(entityIds);
+            IdMapping mapping = new IdMapping();
+            database.DeepCloneObjects(collection, blockId, mapping, false);
+            if (!delEntity)
+                return blockId;
+            using (AcadDatabase acdb = AcadDatabase.Use(database))
+            {
+                foreach (var blId in entityIds)
+                {
+                    blId.Erase();
+                }
+            }
+            return blockId;
         }
     }
 }

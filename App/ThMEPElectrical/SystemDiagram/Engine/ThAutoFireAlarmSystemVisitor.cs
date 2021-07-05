@@ -43,18 +43,65 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             if (IsDistributionElement(blkref) && CheckLayerValid(blkref) && IsDistributeElementBlock(blkref))
             {
                 var dic = blkref.Id.GetAttributesInBlockReferenceEx();
-                var info = new ElementInfo()
+                if (IsRequiredElement(blkref, dic))
                 {
-                    Layer = blkref.Layer,
-                    Name = blkref.Name,
-                    AttNames = dic
-                };
-                elements.Add(new ThRawIfcDistributionElementData()
-                {
-                    Data = info,
-                    Geometry = blkref.GetTransformedCopy(matrix),
-                });
+                    var info = new ElementInfo()
+                    {
+                        Layer = blkref.Layer,
+                        Name = blkref.Name,
+                        AttNames = dic
+                    };
+                    elements.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Data = info,
+                        Geometry = blkref.GetTransformedCopy(matrix),
+                    });
+                }
             }
+        }
+
+        private bool IsRequiredElement(BlockReference blkref, List<KeyValuePair<string, string>> dic)
+        {
+            bool IsRequired = false;
+            ThBlockConfigModel.BlockConfig.ForEach(o =>
+            {
+                switch (o.StatisticMode)
+                {
+                    case StatisticType.BlockName:
+                        {
+                            if (o.BlockName == blkref.Name)
+                            {
+                                IsRequired = true;
+                                return;
+                            }
+                            break;
+                        }
+                    case StatisticType.Attributes:
+                        {
+                            dic.ForEach(keyvaluepair =>
+                            {
+                                if (o.StatisticAttNameValues.ContainsKey(keyvaluepair.Key) && o.StatisticAttNameValues[keyvaluepair.Key].Contains(keyvaluepair.Value))
+                                {
+                                    IsRequired = true;
+                                    return;
+                                }
+                            });
+                            break;
+                        }
+                    case StatisticType.NeedSpecialTreatment:
+                        {
+                            if (o.BlockName == blkref.Name)
+                            {
+                                IsRequired = true;
+                                return;
+                            }
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            });
+            return IsRequired;
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
@@ -71,7 +118,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         public override bool CheckLayerValid(Entity curve)
         {
-            return curve.Layer.Contains("E-");
+            return true;
         }
         
         private bool IsDistributeElementBlock(BlockReference blkref)

@@ -35,6 +35,20 @@
         public const string FlueShaftBlockName = "A-hole-4";                                    //烟道留洞图块名称
 
 
-        public const string FloorDrainBlockName = "地漏平面";                                   //地漏块名称--生成时用
+        public const string Layout_FloorDrainBlockName = "地漏平面";                                   //地漏块名称--生成时用
+        public const string Layout_PositionRiserBlockName = "带定位立管";                                       //带定位立管 （图纸比例 1:50  1:100使用）
+        public const string Layout_PositionRiser150BlockName = "带定位立管150";                                 //带定位立管 （图纸比例 1:150 使用）
+
+        public const string Layout_FloorDrainBlockWastLayerName = "W-DRAI-FLDR";                       //地漏图层名称 废水地漏（生成使用）
+        public const string Layout_FloorDrainBlockRainLayerName = "W-RAIN-EQPM";                       //地漏图层名称 雨水地漏（生成使用）
+        public const string Layout_WastWaterPipeLayerName = "W-DRAI-EQPM";                             //废水立管图层
+        public const string Layout_PipeRainDrainConnectLayerName = "W-RAIN-PIPE";                      //图层名称 连线图层-雨水地漏连接立管图层
+        public const string Layout_PipeWastDrainConnectLayerName = "W-DRAI-WAST-PIPE";                 //图层名称 连线图层-废水地漏连接立管图层
+        public const string Layout_PipeRainTextLayerName = "W-RAIN-NOTE";                              //图层名称 连线图层-编号图层
+        public const string Layout_PipeWastDrainTextLayerName = "W-DRAI-NOTE";                         //图层名称 连线图层-编号图层
+        public const string Layout_PipeCasingBlockName = "套管-AI";
+        public const string Layout_PipeCasingLayerName = "W-BUSH";
+
+        public const string Layout_TextStyle = "TH-STYLE3";
     }
 }

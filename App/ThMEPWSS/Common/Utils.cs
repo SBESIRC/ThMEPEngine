@@ -5,9 +5,6 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Model;
 
@@ -23,8 +20,10 @@ namespace ThMEPWSS.Common
             {
                 if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
                 {
-                    using AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false);//////////
-                    var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
+                    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+                    {
+                        var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
+                    }
                 }
             }
             while (true)
@@ -76,6 +75,15 @@ namespace ThMEPWSS.Common
             //var w = Autodesk.AutoCAD.ApplicationServices.Application.MainWindow;
             //var mi = w.GetType().GetMethod("Focus");
             //mi?.Invoke(w, null);
+        }
+        public static void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
 }

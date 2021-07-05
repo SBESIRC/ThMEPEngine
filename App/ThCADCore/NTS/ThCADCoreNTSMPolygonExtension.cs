@@ -4,10 +4,12 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -15,10 +17,19 @@ namespace ThCADCore.NTS
     {
         public static MPolygon ToDbMPolygon(this Polygon polygon)
         {
-            List<Curve> holes = new List<Curve>();
-            var shell = polygon.Shell.ToDbPolyline();
-            polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
-            return ThMPolygonTool.CreateMPolygon(shell, holes);
+            if (polygon.IsValid)
+            {
+                var holes = new List<Curve>();
+                var shell = polygon.Shell.ToDbPolyline();
+                if(shell.Area<=1.0) 
+                {
+                    //防止近视与线的闭合Polyline的问题
+                    return new MPolygon();
+                }
+                holes = polygon.Holes.Select(o=>o.ToDbPolyline()).Where(o=>o.Area>1.0).Cast<Curve>().ToList();
+                return ThMPolygonTool.CreateMPolygon(shell, holes);
+            }
+            return new MPolygon();
         }
 
         public static Geometry ToNTSGeometry(this MPolygon mPolygon)
@@ -129,6 +140,22 @@ namespace ThCADCore.NTS
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSGeometry());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+        }
+        public static DBObjectCollection MakeValid(this MPolygon mPolygon)
+        {
+            // zero-width buffer trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
+            // self-union trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
+            return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection();
+        }
+
+        public static DBObjectCollection Buffer(this MPolygon mPolygon, double length)
+        {
+            return mPolygon.ToNTSPolygon().Buffer(length, new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+            }).ToDbCollection();
         }
     }
 }

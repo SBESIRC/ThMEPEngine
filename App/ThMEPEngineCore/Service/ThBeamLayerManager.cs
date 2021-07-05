@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThBeamLayerManager
+    public class ThBeamLayerManager : ThDbLayerManager
     {
         /// <summary>
         /// 获取ModelSpace下的Beam图层
@@ -103,8 +103,10 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var layers = new List<string>();
-                acadDatabase.Layers.Where(m =>
-                {
+                acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
+                    .Where(m =>
+                    {
                     var layerName = ThStructureUtils.OriginalFromXref(m.Name).ToUpper();
                     return layerSuffix.Where(o =>
                     {
@@ -121,10 +123,6 @@ namespace ThMEPEngineCore.Service
                 }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
-        }
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
     }
 }

@@ -144,7 +144,7 @@
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="5.4.0" />
     <PackageReference Include="Catel.Core" Version="5.12.10" />
-    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.3.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

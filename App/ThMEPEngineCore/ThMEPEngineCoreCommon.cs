@@ -60,7 +60,7 @@ namespace ThMEPEngineCore
         // 全局公差
         public static double LOOSE_ZERO_LENGTH = 10.0;
         public static double LOOSE_PARALLEL_ANGLE = 1.0;
-        public static double LOOSE_CLOSED_POLYLINE = 100.0;
+        public const double LOOSE_CLOSED_POLYLINE = 100.0;
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
 
@@ -129,5 +129,10 @@ namespace ThMEPEngineCore
         public const double DoorStoneInterval=5.0;
         public const double DoorMaximumThick = 300;
         public const double DoorMinimumThick = 50;
+
+        /// <summary>
+        /// 圆形柱细化弧长
+        /// </summary>
+        public const double CircularColumnTessellateArcLength = 100.0;
     }
 }

@@ -66,18 +66,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //找主线虚拟点位
             var groupList = ThDrainageSDColdPtProcessService.classifyToilate(toilateList);
+            var islandPair = new Dictionary<string, (string, string)>();
+            islandPair = ThDrainageSDColdPtProcessService.mergeIsland(groupList);
 
-
-            var virtualPtList = ThDrainageSDGroupColdSupplyPtEngine.getVirtualPtOfGroup(supplyStart, groupList, roomList,out var ptForVirtualDict); 
+            var virtualPtList = ThDrainageSDGroupColdSupplyPtEngine.getVirtualPtOfGroup(supplyStart, groupList, islandPair, roomList, out var ptForVirtualDict, out var allToiInGroup);
             //debug drawing
             virtualPtList.ForEach(pt =>
             {
                 DrawUtils.ShowGeometry(pt.Pt, "l4virtualPt", 220, 30, 40, "C");
             });
 
-            //连支干管
-            var subBranchList = ThDrainageSDConnectSubService.linkGroupSub(groupList, ptForVirtualDict);
-            DrawUtils.ShowGeometry(subBranchList, "l5subBranch", 140, 35);
+            //防止穿自身，虚拟柱子
+            var virtualColumn = ThDrainageSDVirtualColumnEngine.getVirtualColumn(groupList, islandPair, allToiInGroup, ptForVirtualDict);
+            DrawUtils.ShowGeometry(virtualColumn, "l4virtualColumn", 12);
 
             var bDebug = false;
             if (bDebug == true)
@@ -88,6 +89,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //////找主线
             var forBranchJson = ThDrainageSDToGJsonService.buildArchiGeometry(archiExtractor);
             forBranchJson.AddRange(ThDrainageSDToGJsonService.buildVirtualColdPtGeomary(virtualPtList));
+            forBranchJson.AddRange(ThDrainageSDToGJsonService.buildVirtualColumn(virtualColumn, areaId));
+
+
 
             var forBranchJsonString = ThGeoOutput.Output(forBranchJson);
             string path3 = @"D:\project\2.drainage\jsonSample\2-3.input.geojson";
@@ -98,10 +102,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             File.WriteAllText(path4, branchOutput);
 
             var branchList = ThDrainageSDDeserializeGJsonService.getBranchLineList(branchOutput);
-
             DrawUtils.ShowGeometry(branchList, "l5branch", 150, 35);
 
-            
+            //连支干管
+            var subBranchList = ThDrainageSDConnectSubService.linkGroupSub(groupList, ptForVirtualDict, islandPair, branchList);
+            DrawUtils.ShowGeometry(subBranchList, "l5subBranch", 140, 35);
         }
     }
 }

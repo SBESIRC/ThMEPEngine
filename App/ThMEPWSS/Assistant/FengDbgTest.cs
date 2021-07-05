@@ -80,17 +80,7 @@ namespace ThMEPWSS.DebugNs
             public static void AddButton(string name, Action f)
             {
                 if (!Dbg.isDebugging) return;
-                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
-                {
-                    try
-                    {
-                        f?.Invoke();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        MessageBox.Show((ex.InnerException ?? ex).Message);
-                    }
-                });
+                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
             }
             private static void qt8ddf()
             {
@@ -117,6 +107,7 @@ namespace ThMEPWSS.DebugNs
 
                 if (false)
                 {
+                    AddButtons2(typeof(Sankaku1.qvjp9n));
                     AddButtons2(typeof(FengDbgTesting));
                     AddButtons2(typeof(quj50y));
                     AddButtons2(typeof(quin3c));
@@ -461,6 +452,12 @@ namespace ThMEPWSS.DebugNs
         {
             FengDbgTesting.AddLazyAction(name, f);
         }
+        public static void SaveToTempJsonFile(object obj)
+        {
+            var file = @"Y:\" + DateTime.Now.Ticks + ".json";
+            File.WriteAllText(file, obj.ToCadJson());
+            Dbg.PrintLine(file);
+        }
         public static void SaveToJsonFile(object obj)
         {
             var file = @"D:\DATA\temp\" + DateTime.Now.Ticks + ".json";
@@ -521,8 +518,7 @@ namespace ThMEPWSS.DebugNs
             ((Action)ctx["showCurrentLogWindow"])();
         }
         public static bool isDebugging => FengDbgTest.ctx != null;
-        public static bool __showXLabel => false;
-        //public static bool __showXLabel => true;
+
         public static void SetText(IEnumerable<string> lines)
         {
             if (!isDebugging) return;
@@ -760,6 +756,39 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             short targetColorIndex = 1;
             db.SetLayerColor(targetLayerName, targetColorIndex);
             return targetLayerName;
+        }
+        public static void UnlockCurrentLayer()
+        {
+            using var adb = AcadDatabase.Active();
+            var db = adb.Database;
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            foreach (var layerId in lt)
+            {
+                if (db.Clayer == layerId)
+                {
+                    LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+                    if (ltr != null)
+                    {
+                        if (ltr.IsFrozen)
+                        {
+                            ltr.IsFrozen = false;
+                        }
+                        if (ltr.IsLocked)
+                        {
+                            ltr.IsLocked = false;
+                        }
+                        if (ltr.IsPlottable)
+                        {
+                            ltr.IsPlottable = false;
+                        }
+                        if (ltr.IsOff)
+                        {
+                            ltr.IsOff = false;
+                        }
+                    }
+                    return;
+                }
+            }
         }
         public static void UpdateScreen()
         {
@@ -3577,7 +3606,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     var pl = EntityFactory.CreatePolyline(r.ToPoint3dCollection());
                     pls.Add(pl);
                 }
-                var si = new NTSSpatialIndex1(pls.ToCollection());
+                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(pls.ToCollection());
                 var lst = si.SelectCrossingPolygon(Dbg.SelectGRect().ToPoint3dCollection()).Cast<Entity>().ToList();
                 foreach (var e in lst)
                 {
@@ -3758,206 +3787,8 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             }
         }
 
-        public static void ExtendLineTest1()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var line = new Line() { StartPoint = Dbg.SelectPoint(), /*EndPoint = Dbg.SelectPoint()*/ };
-                line.Extend(false, Dbg.SelectPoint());
-                DU.DrawEntityLazy(line);
-            }
-        }
-
-        class SpacialIndexHelper
-        {
-            public void Create<T>(IList<T> ents) where T : Entity
-            {
-
-            }
-        }
-        public static void FixSpacialIndex2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                var si = new NTSSpatialIndex1(sv.CondensePipes.ToCollection());
-                var input = SelectPoints();
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                foreach (var e in si.SelectCrossingPolygon(range).Cast<Entity>())
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FixSpacialIndex1()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                ThCADCoreNTSService.Instance.ArcTessellationLength = 30;
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.VerticalPipeLines.ToCollection());
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.ConnectToRainPortSymbols.ToCollection());
-                var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.CondensePipes.ToCollection());
-                //var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(sv.VerticalPipes.ToCollection());
-                //var range = Dbg.SelectGRect().ToPoint3dCollection();
-                var input = SelectPoints();
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                foreach (var e in si.SelectCrossingPolygon(range).Cast<Entity>())
-                {
-                    Dbg.ShowWhere(e);
-                }
-                //foreach (var e in sv.FiltByRect(range, sv.CondensePipes))
-                //{
-                //    Dbg.ShowWhere(e);
-                //}
-                Dbg.PrintLine(sv.CondensePipes.Count);
 
 
-            }
-
-        }
-        public static void ExplodeTianZhengTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var o = Dbg.SelectEntity<Entity>(adb);
-                var objs = new DBObjectCollection();
-                o.Explode(objs);
-                Dbg.SetText(objs.Cast<Entity>().Select(e => e.GetType().ToString()));
-            }
-        }
-        public static void GetCondensePipesTest_MaybeBug()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var range = Dbg.SelectGRect().ToPoint3dCollection();
-                foreach (var e in sv.GetCondensePipes(range))
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FiltByRectTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var range = Dbg.SelectGRect().ToPoint3dCollection();
-                foreach (var e in sv.FiltByRect(range, sv.CondensePipes))
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-        public static void FindOutBrokenCondensePipesTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectData();
-                //foreach (var e in sv.WRainLines)
-                //{
-                //    var lb = sv.GetLabel(e);
-                //    if (lb != null)
-                //    {
-                //        //DU.DrawTextLazy(lb, sv.BoundaryDict[e].Center.ToPoint3d());
-                //    }
-                //    else
-                //    {
-                //        DU.DrawTextLazy("todo", sv.BoundaryDict[e].Center.ToPoint3d());
-                //    }
-                //}
-
-                var cps1 = new HashSet<Entity>();
-                var cps2 = new HashSet<Entity>();
-                foreach (var e in sv.CondensePipes)
-                {
-                    var lb = sv.GetLabel(e);
-                    if (lb != null)
-                    {
-                        //DU.DrawTextLazy(lb, sv.BoundaryDict[e].Center.ToPoint3d());
-                        cps1.Add(e);
-                    }
-                    else
-                    {
-                        //DU.DrawTextLazy("todo", sv.BoundaryDict[e].Center.ToPoint3d());
-                        cps2.Add(e);
-                    }
-                }
-                foreach (var e in cps2)
-                {
-                    var bd = sv.BoundaryDict[e];
-                    Entity ee = null;
-                    double dis = double.MaxValue;
-                    foreach (var c in cps1)
-                    {
-                        var d = GeoAlgorithm.Distance(sv.BoundaryDict[c].Center, bd.Center);
-                        if (d < dis)
-                        {
-                            dis = d;
-                            ee = c;
-                        }
-                    }
-                    if (ee != null && dis < 500)
-                    {
-                        if (sv.GetLabel(ee) == "NL1-3")
-                        {
-                            Dbg.ShowWhere(e);
-                        }
-                    }
-                }
-
-            }
-        }
 
         public static void RunThRainSystemDiagramCmd_NoRectSelection3_DrawFromJson_MyDrawing()
         {
@@ -4012,6 +3843,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
+            [Feng]
             public static void CollectEntitiesCodegen()
             {
                 Dbg.FocusMainWindow();
@@ -4025,6 +3857,27 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                             NewMethod3(e);
                         }
                     }
+                }
+            }
+            [Feng]
+            public static void ShowBoundary()
+            {
+                Dbg.FocusMainWindow();
+                using (var adb = AcadDatabase.Active())
+                {
+                    Dbg.BuildAndSetCurrentLayer(adb.Database);
+                    var e = Dbg.TrySelectEntity<Entity>(adb);
+                    DU.DrawRectLazy(e.Bounds.ToGRect());
+                    DU.Draw(adb);
+                }
+            }
+            [Feng]
+            public static void GetAllBlocks()
+            {
+                Dbg.FocusMainWindow();
+                using (var adb = AcadDatabase.Active())
+                {
+                    Dbg.SetText(adb.Blocks.Select(x => x.Name));
                 }
             }
             private static void NewMethod3(Entity e)
@@ -4060,7 +3913,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine($"{source}.OfType<BlockReference>().Where( e=>e.Layer=={e.Layer.ToJson()} && e.ObjectId.IsValid && e.GetEffectiveName()=={br.GetEffectiveName().ToJson()}) ");
                 }
             }
-
+            [Feng]
             public static void BlockReferenceToDataItemToJson()
             {
                 Dbg.FocusMainWindow();
@@ -4071,6 +3924,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(Dbg.SelectEntity<BlockReference>(adb).ToDataItem().ToJson());
                 }
             }
+            [Feng]
             public static void GetEntityBoundsGRectCadJson()
             {
                 Dbg.FocusMainWindow();
@@ -4081,6 +3935,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(Dbg.SelectEntity<Entity>(adb).Bounds.ToGRect().ToCadJson());
                 }
             }
+            [Feng]
             public static void GetEntityType()
             {
                 Dbg.FocusMainWindow();
@@ -4092,6 +3947,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.GetType().ToString());
                 }
             }
+            [Feng]
             public static void GetEntityLength()
             {
                 Dbg.FocusMainWindow();
@@ -4104,6 +3960,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(seg.Length.ToString());
                 }
             }
+            [Feng]
             public static void GetEntityBlockName()
             {
                 Dbg.FocusMainWindow();
@@ -4115,6 +3972,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Name);
                 }
             }
+            [Feng]
             public static void GetEntityBlockEffectiveName()
             {
                 Dbg.FocusMainWindow();
@@ -4126,7 +3984,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.GetEffectiveName());
                 }
             }
-
+            [Feng]
             public static void GetCircleRadius()
             {
                 Dbg.FocusMainWindow();
@@ -4138,6 +3996,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Radius.ToString());
                 }
             }
+            [Feng]
             public static void GetEntityLayer()
             {
                 Dbg.FocusMainWindow();
@@ -4149,6 +4008,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.Layer);
                 }
             }
+            [Feng]
             public static void GetTextStyleName()
             {
                 Dbg.FocusMainWindow();
@@ -4160,6 +4020,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     Dbg.PrintLine(e.TextStyleName);
                 }
             }
+            [Feng]
             public static void ScaleEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4171,6 +4032,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Scale(e, Dbg.SelectPoint(), 2);
                 }
             }
+            [Feng]
             public static void RotateEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4182,6 +4044,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Rotate(e, Dbg.SelectPoint(), GeoAlgorithm.AngleFromDegree(45));
                 }
             }
+            [Feng]
             public static void MoveEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4193,6 +4056,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Move(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
                 }
             }
+            [Feng]
             public static void CopyEntityTest()
             {
                 Dbg.FocusMainWindow();
@@ -4204,6 +4068,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     EntTools.Copy(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
                 }
             }
+            [Feng]
             public static void GetScaleFactors()
             {
                 Dbg.FocusMainWindow();
@@ -5646,90 +5511,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             }
         }
-        public static void ThRainSystemServiceTest3_OK()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-                foreach (var e1 in sv.VerticalPipeDBTexts)
-                {
-                    //Dbg.ShowWhere(e);
-                    foreach (var e2 in sv.VerticalPipeLines)
-                    {
-                        if (e2 is Line line)
-                        {
-                            var seg = line.ToGLineSegment();
-                            if (seg.IsHorizontal(10))
-                            {
-                                //Dbg.ShowWhere(e);
-                                var c1 = sv.BoundaryDict[e1].Center;
-                                var c2 = sv.BoundaryDict[e2].Center;
-                                if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
-                                {
-                                    //Dbg.ShowWhere(e1);
-                                    //Dbg.ShowWhere(e2);
-                                    dbTxtToHLineDict[e1] = e2;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                {
-                    var list = sv.VerticalPipeLines;
-                    var pairs = new List<KeyValuePair<int, int>>();
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        for (int j = i + 1; j < list.Count; j++)
-                        {
-                            var line1 = list[i] as Line;
-                            var line2 = list[j] as Line;
-                            if (line1 != null && line2 != null)
-                            {
-                                //var pline1 = ThRainSystemService.expandLine(line1, 10);
-                                //var pline2 = ThRainSystemService.expandLine(line2, 10);
-                                var pline1 = line1.Buffer(10);
-                                var pline2 = line2.Buffer(10);
-                                //if (ThRainSystemService.IsIntersects(pline1, pline2))
-                                if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
-                                {
-                                    pairs.Add(new KeyValuePair<int, int>(i, j));
-                                }
-                            }
-                        }
-                    }
 
-                    var dict = new ListDict<int>();
-                    var h = new BFSHelper()
-                    {
-                        Pairs = pairs.ToArray(),
-                        TotalCount = list.Count,
-                        Callback = (g, i) =>
-                        {
-                            dict.Add(g.root, i);
-                        },
-                    };
-                    h.BFS();
-                    groups = new List<List<Entity>>();
-                    dict.ForEach((_i, l) =>
-                    {
-                        groups.Add(l.Select(i => list[i]).ToList());
-                    });
-                    foreach (var g in groups)
-                    {
-                        DU.DrawBoundaryLazy(g.ToArray());
-                    }
-                }
-
-            }
-        }
         public static void ThCADCoreNTSSpatialIndexTest()
         {
             Dbg.FocusMainWindow();
@@ -5836,340 +5618,8 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
 
             }
         }
-        public static void spacial_test()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-
-                var lines = sv.VerticalPipeLines;
-                ThRainSystemService.GroupLinesBySpatialIndex(lines);
-            }
-        }
 
 
-
-        public static void spacial_test2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.FindShortConverters();
-                var lines = sv.VerticalPipeLines;
-                var pipes = sv.VerticalPipes;
-                var shortConverters = sv.AllShortConverters.ToList();
-                var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-                var linesGroup = new List<List<Entity>>();
-                var groups = new List<List<Entity>>();
-                var plDict = new Dictionary<Entity, Polyline>();
-                var lineToPipesDict = new ListDict<Entity>();
-                var pls1 = new List<Polyline>();
-                var pls2 = new List<Polyline>();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    var bd = sv.BoundaryDict[e];
-                    var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
-                    pls1.Add(pl);
-                    plDict[e] = pl;
-                }
-                foreach (var e in sv.VerticalPipeLines)
-                {
-                    var pl = (e as Line).Buffer(10);
-                    pls2.Add(pl);
-                    plDict[e] = pl;
-                }
-                var si = ThRainSystemService.BuildSpatialIndex(pls1);
-                foreach (var pl2 in pls2)
-                {
-                    foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
-                    {
-                        var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
-                        var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
-                        lineToPipesDict.Add(line, pipe);
-                    }
-                }
-                lineToPipesDict.ForEach((line, pipes) =>
-                {
-                    DU.DrawBoundaryLazy(line);
-                    DU.DrawBoundaryLazy(pipes.ToArray());
-                });
-                if (false)
-                {
-                    foreach (var e1 in sv.VerticalPipeLines)
-                    {
-                        foreach (var e2 in sv.VerticalPipes)
-                        {
-                            if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
-                            {
-                                lineToPipesDict.Add(e1, e2);
-                                //DU.DrawBoundaryLazy(e2);
-                                //DU.DrawRectLazy(sv.BoundaryDict[e2]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //public static void ThRainSystemServiceTest4_OK()
-        //{
-        //    Dbg.FocusMainWindow();
-        //    using (var adb = AcadDatabase.Active())
-        //    using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-        //    using (var tr = DrawUtils.DrawingTransaction)
-        //    {
-        //        var db = adb.Database;
-        //        Dbg.BuildAndSetCurrentLayer(db);
-        //        var sv = new ThRainSystemService() { adb = adb };
-        //        sv.InitCache();
-        //        sv.FindShortConverters();
-        //        var lines = sv.VerticalPipeLines;
-        //        var pipes = sv.VerticalPipes;
-        //        var shortConverters = sv.AllShortConverters.ToList();
-        //        var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-        //        var linesGroup = new List<List<Entity>>();
-        //        var groups = new List<List<Entity>>();
-        //        var plDict = new Dictionary<Entity, Polyline>();
-        //        var lineToPipesDict = new ListDict<Entity>();
-        //        foreach (var e1 in sv.VerticalPipeDBTexts)
-        //        {
-        //            foreach (var e2 in sv.VerticalPipeLines)
-        //            {
-        //                if (e2 is Line line)
-        //                {
-        //                    var seg = line.ToGLineSegment();
-        //                    if (seg.IsHorizontal(10))
-        //                    {
-        //                        var c1 = sv.BoundaryDict[e1].Center;
-        //                        var c2 = sv.BoundaryDict[e2].Center;
-        //                        if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
-        //                        {
-        //                            dbTxtToHLineDict[e1] = e2;
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        {
-        //            var pairs = new List<KeyValuePair<int, int>>();
-        //            //for (int i = 0; i < lines.Count; i++)
-        //            //{
-        //            //    for (int j = i + 1; j < lines.Count; j++)
-        //            //    {
-        //            //        var line1 = lines[i] as Line;
-        //            //        var line2 = lines[j] as Line;
-        //            //        if (line1 != null && line2 != null)
-        //            //        {
-        //            //            var pline1 = line1.Buffer(10);
-        //            //            var pline2 = line2.Buffer(10);
-        //            //            if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
-        //            //            {
-        //            //                pairs.Add(new KeyValuePair<int, int>(i, j));
-        //            //            }
-        //            //        }
-        //            //    }
-        //            //}
-        //            var bfs = lines.Select(e => (e as Line)?.Buffer(10)).ToList();
-        //            var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
-        //            for (int i = 0; i < bfs.Count; i++)
-        //            {
-        //                Polyline bf = bfs[i];
-        //                if (bf != null)
-        //                {
-        //                    var lst = si.SelectCrossingPolygon(bf).Cast<Polyline>().Select(e => bfs.IndexOf(e)).Where(j => i < j).ToList();
-        //                    lst.ForEach(j => pairs.Add(new KeyValuePair<int, int>(i, j)));
-        //                }
-        //            }
-
-        //            var dict = new ListDict<int>();
-        //            var h = new BFSHelper()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                TotalCount = lines.Count,
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_i, l) =>
-        //            {
-        //                linesGroup.Add(l.Select(i => lines[i]).ToList());
-        //            });
-        //        }
-        //        foreach (var g in linesGroup)
-        //        {
-        //            //DU.DrawBoundaryLazy(g.ToArray());
-        //            //if (GeoAlgorithm.GetBoundaryRect(g.ToArray()).ToJson() == "[-1556.47474123369,398855.075333649,852.092909549596,401109.883025958]")
-        //            if (Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(g.ToArray()).MinX) == -1556)
-        //            {
-        //                foreach (var e in g)
-        //                {
-        //                    //DU.DrawBoundaryLazy(e);
-        //                    //Dbg.ShowWhere(e);
-        //                    if (e is Line line)
-        //                    {
-        //                        //var l=DU.DrawLineLazy(line.StartPoint, line.EndPoint);
-        //                        //l.ColorIndex = 5;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var pls1 = new List<Polyline>();
-        //            var pls2 = new List<Polyline>();
-        //            foreach (var e in sv.VerticalPipes)
-        //            {
-        //                var bd = sv.BoundaryDict[e];
-        //                var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
-        //                plDict[e] = pl;
-        //                pls1.Add(pl);
-        //            }
-        //            foreach (var e in sv.VerticalPipeLines)
-        //            {
-        //                var pl = (e as Line).Buffer(10);
-        //                plDict[e] = pl;
-        //                pls2.Add(pl);
-        //            }
-        //            //foreach (var e1 in sv.VerticalPipeLines)
-        //            //{
-        //            //    foreach (var e2 in sv.VerticalPipes)
-        //            //    {
-        //            //        if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
-        //            //        {
-        //            //            lineToPipesDict.Add(e1, e2);
-        //            //            //DU.DrawBoundaryLazy(e2);
-        //            //            //DU.DrawRectLazy(sv.BoundaryDict[e2]);
-        //            //        }
-        //            //    }
-        //            //}
-        //            var si = ThRainSystemService.BuildSpatialIndex(pls1);
-        //            foreach (var pl2 in pls2)
-        //            {
-        //                foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
-        //                {
-        //                    var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
-        //                    var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
-        //                    lineToPipesDict.Add(line, pipe);
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var totalList = new List<Entity>();
-        //            totalList.AddRange(sv.VerticalPipeDBTexts);
-        //            totalList.AddRange(sv.VerticalPipes);
-        //            totalList.AddRange(sv.VerticalPipeLines);
-        //            var pairs = new List<KeyValuePair<Entity, Entity>>();
-        //            foreach (var kv in dbTxtToHLineDict) pairs.Add(kv);
-        //            //foreach (var kv in dbTxtToHLineDict)
-        //            //{
-        //            //    DU.DrawBoundaryLazy(new Entity[] { kv.Key, kv.Value });
-        //            //}
-        //            lineToPipesDict.ForEach((e, l) => { l.ForEach(o => pairs.Add(new KeyValuePair<Entity, Entity>(e, o))); });
-        //            //lineToPipesDict.ForEach((e, l) =>
-        //            //{
-        //            //    DU.DrawBoundaryLazy(e);
-        //            //    DU.DrawBoundaryLazy(l.ToArray());
-        //            //});
-        //            //return;
-        //            foreach (var g in linesGroup) for (int i = 1; i < g.Count; i++) pairs.Add(new KeyValuePair<Entity, Entity>(g[i - 1], g[i]));
-        //            var dict = new ListDict<Entity>();
-        //            var h = new BFSHelper2<Entity>()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                Items = totalList.ToArray(),
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_start, ents) =>
-        //            {
-        //                groups.Add(ents);
-        //            });
-        //            foreach (var g in groups)
-        //            {
-        //                //DU.DrawBoundaryLazy(g.ToArray());
-        //                sv.SortBy2DSpacePosition(
-        //                    g.Where(e => sv.VerticalPipes.Contains(e)).ToList(),
-        //                    g.Where(e => sv.VerticalPipeDBTexts.Contains(e)).ToList(),
-        //                    out List<Entity> targetPipes,
-        //                    out List<Entity> targetTexts);
-        //                if (targetPipes.Count == targetTexts.Count && targetTexts.Count > 0)
-        //                {
-        //                    //Dbg.PrintLine(targetTexts.Select(o => (o as DBText)?.TextString).ToJson());
-
-
-        //                    for (int i = 0; i < targetPipes.Count; i++)
-        //                    {
-        //                        var pipe = targetPipes[i];
-        //                        var dbT = targetTexts[i] as DBText;
-        //                        var t = dbT.TextString;
-        //                        Dbg.PrintLine(t);
-        //                        Dbg.PrintLine("has short cvt:" + shortConverters.Contains(pipe));
-        //                        if (t == "Y1L1-2")
-        //                        {
-        //                            //Dbg.PrintLine(scvts.Contains(pipe));
-        //                            Dbg.ShowWhere(pipe);
-        //                        }
-        //                    }
-        //                }
-        //            }
-
-        //        }
-
-        //    }
-        //    Dbg.FocusMainWindow();
-
-        //}
-        public static void SelectCrossingPolygonDemo(Point3dCollection pts, List<Entity> rst)
-        {
-            if (pts.Count >= 3)
-            {
-                var spacialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(rst.ToCollection());
-                rst = spacialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
-            }
-        }
-        public static void DisplayGroup()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                foreach (var lst in groups)
-                {
-                    if (lst.Contains(e))
-                    {
-                        //DU.DrawBoundaryLazy(lst.ToArray(), 2);
-                        foreach (var o in lst)
-                        {
-                            DU._DrawBoundary(db, o, 2);
-                        }
-                    }
-                }
-            }
-        }
-        static List<List<Entity>> groups;
 
         public static void ShowLineLength()
         {
@@ -6887,314 +6337,6 @@ namespace ThMEPWSS.DebugNs
 
 
 
-namespace ThMEPWSS.DebugNs
-{
-    using System;
-    using NFox.Cad;
-    using DotNetARX;
-    using Linq2Acad;
-    using System.Linq;
-    using ThCADExtension;
-    using Dreambuild.AutoCAD;
-    using System.Collections.Generic;
-    using NetTopologySuite.Geometries;
-    using NetTopologySuite.Index.Strtree;
-    using NetTopologySuite.Geometries.Prepared;
-    using Autodesk.AutoCAD.Geometry;
-    using Autodesk.AutoCAD.DatabaseServices;
-    using ThCADCore.NTS;
-
-    /// <summary>
-    /// 空间索引DB图元（去除空间重合的DB图元）
-    /// </summary>
-    public class NTSSpatialIndex1 : IDisposable
-    {
-        private STRtree<Geometry> Engine { get; set; }
-        public Dictionary<Geometry, DBObject> Geometries { get; set; }
-        public NTSSpatialIndex1(DBObjectCollection objs)
-        {
-            Geometries = new Dictionary<Geometry, DBObject>();
-            Update(objs, new DBObjectCollection());
-        }
-
-        public void Dispose()
-        {
-            //
-        }
-
-        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
-        }
-
-        private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
-        }
-
-        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            return objs.Cast<Entity>().Where(o => Contains(preparedGeometry, o)).ToCollection();
-        }
-
-        private bool Contains(IPreparedGeometry preparedGeometry, Entity entity)
-        {
-            return preparedGeometry.Contains(ToNTSGeometry(entity));
-        }
-
-        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
-        {
-            return preparedGeometry.Intersects(ToNTSGeometry(entity));
-        }
-
-        private Geometry ToNTSGeometry(DBObject obj)
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            {
-                if (obj is Line line)
-                {
-                    return line.ToNTSLineString();
-                }
-                else if (obj is Polyline polyline)
-                {
-                    return polyline.ToNTSLineString();
-                }
-                else if (obj is Arc arc)
-                {
-                    return arc.ToNTSGeometry();
-                }
-                else if (obj is Circle circle)
-                {
-                    //return circle.ToNTSGeometry();
-
-                    var length = ThCADCoreNTSService.Instance.ArcTessellationLength;
-                    var circum = 2 * Math.PI * circle.Radius;
-                    int num = (int)Math.Ceiling(circum / length);
-                    return circle.ToNTSPolygon(num < 6 ? 6 : num);
-
-                    //if (num >= 3)
-                    //{
-                    //    return circle.ToNTSPolygon(num);
-                    //}
-                    //else
-                    //{
-                    //    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    //}
-                }
-                else if (obj is MPolygon mPolygon)
-                {
-                    return mPolygon.ToNTSPolygon();
-                }
-                else if (obj is Entity entity)
-                {
-                    try
-                    {
-                        return entity.GeometricExtents.ToNTSPolygon();
-                    }
-                    catch
-                    {
-                        // 若异常抛出，则返回一个“空”的Polygon
-                        return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-        }
-
-        private Polygon ToNTSPolygon(DBObject obj)
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            {
-                if (obj is Polyline poly)
-                {
-                    return poly.ToNTSPolygon();
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 更新索引
-        /// </summary>
-        /// <param name="adds"></param>
-        /// <param name="removals"></param>
-        public void Update(DBObjectCollection adds, DBObjectCollection removals)
-        {
-            // 添加新的对象
-            adds.Cast<DBObject>().ForEachDbObject(o =>
-            {
-                var geometry = ToNTSGeometry(o);
-                if (!Geometries.Keys.Contains(geometry))
-                {
-                    Geometries.Add(geometry, o);
-                }
-            });
-            // 移除删除对象
-            Geometries.RemoveAll((k, v) => removals.Contains(v));
-
-            // 创建新的索引
-            Engine = new STRtree<Geometry>();
-            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
-        }
-
-        /// <summary>
-        /// Crossing selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
-        {
-            var geometry = ToNTSPolygon(polyline);
-            return CrossingFilter(
-                Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        public DBObjectCollection SelectCrossingPolygon(MPolygon mPolygon)
-        {
-            /*
-             * 线获取MPolygon外圈内所有的物体
-             * 减去洞内包括的物体
-             */
-            var loops = mPolygon.Loops();
-            var objs = SelectCrossingPolygon(loops[0]);
-            for (int i = 1; i < loops.Count; i++)
-            {
-                foreach (DBObject innerObj in SelectWindowPolygon(loops[i]))
-                {
-                    objs.Remove(innerObj);
-                }
-            }
-            return objs;
-        }
-
-        public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
-        {
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(polygon);
-            return SelectCrossingPolygon(pline);
-        }
-
-        /// <summary>
-        /// Crossing selection
-        /// </summary>
-        /// <param name="pt1"></param>
-        /// <param name="pt2"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
-        {
-            var extents = new Extents3d(pt1, pt2);
-            return SelectCrossingPolygon(extents.ToRectangle());
-        }
-
-        /// <summary>
-        /// Window selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
-        {
-            var geometry = ToNTSPolygon(polyline);
-            return WindowFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        /// <summary>
-        /// Fence Selection
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectFence(Polyline polyline)
-        {
-            var geometry = ToNTSGeometry(polyline);
-            return FenceFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        /// <summary>
-        /// Fence Selection
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectFence(Line line)
-        {
-            var geometry = ToNTSGeometry(line);
-            return FenceFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        public DBObjectCollection SelectAll()
-        {
-            var objs = new DBObjectCollection();
-            foreach (var item in Geometries.Values)
-            {
-                objs.Add(item);
-            }
-            return objs;
-        }
-
-        public void AddTag(DBObject obj, object tag)
-        {
-            if (Geometries.ContainsValue(obj))
-            {
-                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
-            }
-        }
-
-        public object Tag(DBObject obj)
-        {
-            if (!Geometries.ContainsValue(obj))
-            {
-                return null;
-            }
-            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
-        }
-
-        private DBObjectCollection Query(Envelope envelope)
-        {
-            var objs = new DBObjectCollection();
-            foreach (var geometry in Engine.Query(envelope))
-            {
-                if (Geometries.ContainsKey(geometry))
-                {
-                    objs.Add(Geometries[geometry]);
-                }
-            }
-            return objs;
-        }
-
-        /// <summary>
-        /// 最近的几个邻居
-        /// </summary>
-        /// <param name="curve"></param>
-        /// <returns></returns>
-        public DBObjectCollection NearestNeighbours(Curve curve, int num)
-        {
-            var geometry = ToNTSGeometry(curve);
-            var neighbours = Engine.NearestNeighbour(
-                geometry.EnvelopeInternal,
-                geometry,
-                new GeometryItemDistance(),
-                num)
-                .Where(o => !o.EqualsExact(geometry));
-            var objs = new DBObjectCollection();
-            foreach (var neighbour in neighbours)
-            {
-                objs.Add(Geometries[neighbour]);
-            }
-            return objs;
-        }
-    }
-}
 
 
 
@@ -14885,11 +14027,11 @@ namespace ThMEPWSS.DebugNs
                                     var bds = data.Labels.Select(pl => geoData.Labels[cadDataMain.Labels.IndexOf(pl)]).Select(x => x.Boundary).ToList();
                                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
+                                    var f1 = GeoFac.CreateContainsSelector(lineHGs);
                                     foreach (var bd in bds)
                                     {
                                         var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1000, 250);
-                                        var _lineHGs = f1(g);
+                                        var _lineHGs = f1(g.ToPolygon());
                                         var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
@@ -14959,7 +14101,7 @@ namespace ThMEPWSS.DebugNs
                     var bds = geoData.Labels.Select(x => x.Boundary).ToList();
                     var lineHs = lines.Where(x => x.IsHorizontal(10)).ToList();
                     var lineHGs = lineHs.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
-                    var f1 = GeoFac.CreateGRectContainsSelector(lineHGs);
+                    var f1 = GeoFac.CreateContainsSelector(lineHGs);
                     DU.Dispose();
                     var disList = new List<double>();
                     foreach (var bd in bds)
@@ -14969,7 +14111,7 @@ namespace ThMEPWSS.DebugNs
                             var e = DU.DrawRectLazy(g);
                             e.ColorIndex = 2;
                         }
-                        var _lineHGs = f1(g);
+                        var _lineHGs = f1(g.ToPolygon());
                         var f2 = GeoFac.NearestNeighbourGeometryF(_lineHGs);
                         var lineH = lineHGs.Select(lineHG => lineHs[lineHGs.IndexOf(lineHG)]).ToList();
                         var geo = f2(bd.Center.Expand(.1).ToGRect().ToPolygon());
@@ -16561,25 +15703,7 @@ namespace ThMEPWSS.DebugNs
                 });
             });
         }
-        [Feng("💰自定义空间索引")]
-        public static void qthme9()
-        {
 
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var line1 = Dbg.SelectEntity<Line>(adb);
-                var seg1 = line1.ToGLineSegment();
-                var si = GLineSegmentConnectionNTSSpacialIndex.Create(new GLineSegment[] { seg1 }, 10);
-                var lst = si.SelectCrossingGRect(Dbg.SelectGRect());
-                Dbg.PrintLine(lst.Count.ToString());
-            }
-        }
         public static void qtla9m(IList<Geometry> geos)
         {
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
@@ -16628,128 +15752,10 @@ namespace ThMEPWSS.DebugNs
             }
 
         }
-        public class GLineSegmentConnectionNTSSpacialIndex : NTSSpacialIndexAB<GLineSegment>
-        {
-            double radius;
-            protected GLineSegmentConnectionNTSSpacialIndex() : base() { }
-            public static GLineSegmentConnectionNTSSpacialIndex Create(IEnumerable<GLineSegment> lines, double radius)
-            {
-                var si = new GLineSegmentConnectionNTSSpacialIndex();
-                si.radius = radius;
-                foreach (var seg in lines)
-                {
-                    si.dict[si.ToNTSGeometry(seg)] = seg;
-                }
-                si.InitEngine();
-                return si;
-            }
-            public override Geometry ToNTSGeometry(GLineSegment seg)
-            {
-                var points1 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.StartPoint, this.radius));
-                var points2 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.EndPoint, this.radius));
-                var ring1 = new LinearRing(points1);
-                var ring2 = new LinearRing(points2);
-                var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
-                return geo;
-            }
-        }
-        public class GCircleNTSSpacialIndex : NTSSpacialIndexAB<GCircle>
-        {
-            protected GCircleNTSSpacialIndex() : base() { }
-            public static GCircleNTSSpacialIndex Create(IEnumerable<GCircle> lines)
-            {
-                var si = new GCircleNTSSpacialIndex();
-                foreach (var seg in lines)
-                {
-                    si.dict[si.ToNTSGeometry(seg)] = seg;
-                }
-                si.InitEngine();
-                return si;
-            }
-            public override Geometry ToNTSGeometry(GCircle circle)
-            {
-                var numPoints = 6;
-                // 获取圆的外接矩形
-                var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
-                {
-                    NumPoints = numPoints,
-                    Size = 2 * circle.Radius,
-                    Centre = circle.Center.ToNTSCoordinate(),
-                };
-                return shapeFactory.CreateCircle().Shell;
-            }
-        }
-
-
-        public abstract class NTSSpacialIndexAB<T>
-        {
-            public NetTopologySuite.Index.Strtree.STRtree<Geometry> Engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            public Dictionary<Geometry, T> dict = new Dictionary<Geometry, T>();
-            public void InitEngine()
-            {
-                if (dict.Keys.Count == 0) throw new System.Exception("索引数组为空");
-                dict.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
-            }
-            public static Polygon ToNTSPolygon(Polyline polyLine)
-            {
-                var geometry = polyLine.ToNTSLineString();
-                if (geometry is LinearRing ring)
-                {
-                    return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
-                }
-                else
-                {
-                    //return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-                    return null;
-                }
-            }
-            public List<T> SelectCrossingGRect(GRect gRect)
-            {
-                var geometry = ConvertToNTSPolygon(gRect);
-                if (geometry == null) return new List<T>();
-                return CrossingFilter(
-                    Query(geometry.EnvelopeInternal),
-                    ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry))
-                    .ToList();
-            }
-
-            public static Polygon ConvertToNTSPolygon(GRect gRect)
-            {
-                if (!gRect.IsValid) return null;
-                Coordinate[] points = GeoNTSConvertion.ConvertToCoordinateArray(gRect);
-                var ring = ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
-                var geometry = ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
-                return geometry;
-            }
 
 
 
-            public List<T> SelectCrossingPolygon(Polyline polyline)
-            {
-                var geometry = ToNTSPolygon(polyline);
-                if (geometry == null) return new List<T>();
-                return CrossingFilter(
-                    Query(geometry.EnvelopeInternal),
-                    ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry))
-                    .ToList();
-            }
-            public IEnumerable<T> CrossingFilter(IEnumerable<T> objs, NetTopologySuite.Geometries.Prepared.IPreparedGeometry preparedGeometry)
-            {
-                return objs.Where(o => Intersects(preparedGeometry, o));
-            }
-            public bool Intersects(NetTopologySuite.Geometries.Prepared.IPreparedGeometry preparedGeometry, T key)
-            {
-                return preparedGeometry.Intersects(ToNTSGeometry(key));
-            }
-            private IEnumerable<T> Query(Envelope envelope)
-            {
-                foreach (var geometry in Engine.Query(envelope))
-                {
-                    if (dict.TryGetValue(geometry, out T value)) yield return value;
-                }
-            }
-            public abstract Geometry ToNTSGeometry(T key);
-        }
+
 
         private static void NewMethod()
         {

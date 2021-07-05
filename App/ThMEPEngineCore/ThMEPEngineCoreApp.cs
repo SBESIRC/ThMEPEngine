@@ -25,6 +25,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BuildRoom.Interface;
 using NFox.Cad;
 using ThMEPEngineCore.LaneLine;
+using GeometryExtensions;
 
 namespace ThMEPEngineCore
 {
@@ -75,12 +76,20 @@ namespace ThMEPEngineCore
         public void ThExtractColumn()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
                 var options = new PromptKeywordOptions("\n选择处理方式");
                 options.Keywords.Add("提取", "E", "提取(E)");
@@ -103,14 +112,12 @@ namespace ThMEPEngineCore
                     return;
                 }
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
                 if(result2.StringResult == "识别")
                 {
                     if (result3.StringResult == "原始")
                     {
                         var engine = new ThColumnRecognitionEngine();
-                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Recognize(acadDatabase.Database, frame.Vertices());
                         engine.Elements.Select(o => o.Outline).ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
@@ -120,7 +127,7 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "平台")
                     {
                         var engine = new ThDB3ColumnRecognitionEngine();
-                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Recognize(acadDatabase.Database, frame.Vertices());
                         engine.Elements.Select(o => o.Outline).ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
@@ -131,10 +138,10 @@ namespace ThMEPEngineCore
                     {
                         var elements = new List<ThIfcBuildingElement>();
                         var engine1 = new ThColumnRecognitionEngine();
-                        engine1.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine1.Recognize(acadDatabase.Database, frame.Vertices());
                         elements.AddRange(engine1.Elements);
                         var engine2 = new ThDB3ColumnRecognitionEngine();
-                        engine2.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine2.Recognize(acadDatabase.Database, frame.Vertices());
                         elements.AddRange(engine2.Elements);
                         elements.Select(o => o.Outline)
                             .ToCollection()
@@ -149,19 +156,43 @@ namespace ThMEPEngineCore
                 }
                 else
                 {
-                    var engine = new ThDB3ColumnExtractionEngine();
-                    engine.Extract(acadDatabase.Database);
-                    var results = new DBObjectCollection();
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    if (result3.StringResult == "原始")
                     {
-                        results.Add(filterObj as Entity);
+                        var engine = new ThColumnExtractionEngine();
+                        engine.Extract(acadDatabase.Database, frame);
+                        engine.Results.Select(o => o.Geometry).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
                     }
-                    results.Cast<Entity>().ForEach(o =>
+                    else if (result3.StringResult == "平台")
                     {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.SetDatabaseDefaults();
-                    });
+                        var db3Engine = new ThDB3ColumnExtractionEngine();
+                        db3Engine.Extract(acadDatabase.Database, frame);
+                        db3Engine.Results.Select(o => o.Geometry).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
+                    else if (result3.StringResult == "全部")
+                    {
+                        var engine = new ThColumnExtractionEngine();
+                        engine.Extract(acadDatabase.Database, frame);
+                        engine.Results.Select(o => o.Geometry).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                        var db3Engine = new ThDB3ColumnExtractionEngine();
+                        db3Engine.Extract(acadDatabase.Database, frame);
+                        db3Engine.Results.Select(o => o.Geometry).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
                 }
             }
         }
@@ -170,12 +201,20 @@ namespace ThMEPEngineCore
         public void THExtractShearWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
                 var options = new PromptKeywordOptions("\n选择处理方式");
                 options.Keywords.Add("提取", "E", "提取(E)");
@@ -198,14 +237,12 @@ namespace ThMEPEngineCore
                     return;
                 }
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
                 if (result2.StringResult == "识别")
                 {
                     if (result3.StringResult == "原始")
                     {
                         var engine = new ThShearWallRecognitionEngine();
-                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Recognize(acadDatabase.Database, frame.Vertices());
                         engine.Elements.Select(o => o.Outline).ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
@@ -215,7 +252,7 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "平台")
                     {
                         var engine = new ThDB3ShearWallRecognitionEngine();
-                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Recognize(acadDatabase.Database, frame.Vertices());
                         engine.Elements.Select(o => o.Outline).ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
@@ -226,10 +263,10 @@ namespace ThMEPEngineCore
                     {
                         var elements = new List<ThIfcBuildingElement>();
                         var engine1 = new ThShearWallRecognitionEngine();
-                        engine1.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine1.Recognize(acadDatabase.Database, frame.Vertices());
                         elements.AddRange(engine1.Elements);
                         var engine2 = new ThDB3ShearWallRecognitionEngine();
-                        engine2.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine2.Recognize(acadDatabase.Database, frame.Vertices());
                         elements.AddRange(engine2.Elements);
                         elements.Select(o => o.Outline)
                             .ToCollection()
@@ -248,7 +285,7 @@ namespace ThMEPEngineCore
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
                     var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
                     {
                         results.Add(filterObj as Entity);
                     }
@@ -297,12 +334,20 @@ namespace ThMEPEngineCore
         public void THExtractArchWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
                 var options = new PromptKeywordOptions("\n选择处理方式");
                 options.Keywords.Add("提取", "E", "提取(E)");
@@ -314,12 +359,10 @@ namespace ThMEPEngineCore
                     return;
                 }
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
                 if (result2.StringResult == "识别")
                 {
                     var engine = new ThDB3ArchWallRecognitionEngine();
-                    engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                    engine.Recognize(acadDatabase.Database, frame.Vertices());
                     engine.Elements.Select(o => o.Outline).ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
@@ -332,7 +375,7 @@ namespace ThMEPEngineCore
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
                     var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
                     {
                         results.Add(filterObj as Entity);
                     }
@@ -375,14 +418,22 @@ namespace ThMEPEngineCore
         public void THExtractWindow()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var windowEngine = new ThDB3WindowRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var windowEngine = new ThDB3WindowRecognitionEngine();
                 windowEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 var objIds = new ObjectIdList();
                 windowEngine.Elements.ForEach(o =>
@@ -390,12 +441,14 @@ namespace ThMEPEngineCore
                     if (o.Outline is Curve curve)
                     {
                         var clone = curve.WashClone();
-                        clone.ColorIndex = 6;
-                        clone.SetDatabaseDefaults();
-                        objIds.Add(acadDatabase.ModelSpace.Add(clone));
+                        if(clone!=null)
+                        {
+                            clone.ColorIndex = 6;
+                            clone.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(clone));
+                        }
                     }
                 });
-                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
             }
         }
         [CommandMethod("TIANHUACAD", "ThExtractParkingStall", CommandFlags.Modal)]
@@ -560,112 +613,27 @@ namespace ThMEPEngineCore
             dbText.Height = 200;
             return dbText;
         }
-        [CommandMethod("TIANHUACAD", "ThExtractSpace", CommandFlags.Modal)]
-        public void ThExtractSpace()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var exportEngine = new ThGemometryExportEngine())
-            {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                exportEngine.Export(acadDatabase.Database, frame.Vertices());
-                var geos = new List<ThGeometry>();
-                var objIds = new ObjectIdList();
-                exportEngine.Spaces.ForEach(o =>
-                {
-                    o.Boundary.ColorIndex = 5;
-                    o.Boundary.SetDatabaseDefaults();
-                    objIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
-                    var geometry = new ThGeometry();
-                    geometry.Boundary = o.Boundary as Polyline;
-                    o.Properties.ForEach(p => geometry.Properties.Add(p.Key, p.Value));
-                    geos.Add(geometry);
-                });
-                if (objIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
-                }
-
-                // 输出GeoJson文件
-                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Line.geojson", Active.DocumentName))))
-                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
-                {
-                    Indentation = 4,
-                    IndentChar = ' ',
-                    Formatting = Formatting.Indented,
-                })
-                {
-                    var geoJsonWriter = new ThGeometryJsonWriter();
-                    geoJsonWriter.Write(geos, writer);
-                }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThExtractGeo", CommandFlags.Modal)]
-        public void ThExtractGeo()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
-            {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                //理政  CenterLine,Wall,Space   NameLayer="AD-NAME-ROOM"
-                //马力  建筑空间、停车区域、排水设施、墙、柱、阻挡物 NameLayer="空间名称"
-                //给排水大样图测试数据 建筑空间、柱(Db3)、给水点位、给水起点
-                //var extractors = new List<ThExtractorBase>()
-                //{
-                //    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                //    //通过停车区域的Space来制造阻挡物
-                //    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
-                //    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
-                //    new ThWaterSupplyPositionExtractor{ColorIndex=3},
-                //    new ThWaterSupplyStartExtractor{ColorIndex=4},
-                //    new ThToiletGroupExtractor { ColorIndex=5},
-                //};
-
-                var extractors = new List<ThExtractorBase>()
-                {
-                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
-                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=2},
-                    new ThShearWallExtractor{ColorIndex=3},
-                    new ThDrainageFacilityExtractor{ColorIndex=4},
-                };
-
-
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-
-                //extractEngine.Group((extractors[4] as ThToiletGroupExtractor).ToiletGroupId);
-
-                extractEngine.OutputGeo(Active.Document.Name);
-                extractEngine.Print(acadDatabase.Database);
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THExtractDoor", CommandFlags.Modal)]
         public void THExtractDoor()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var doorEngine = new ThDB3DoorRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                
+                var doorEngine = new ThDB3DoorRecognitionEngine();
                 doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 doorEngine.Elements.ForEach(o =>
                 {
@@ -673,6 +641,7 @@ namespace ThMEPEngineCore
                     o.Outline.SetDatabaseDefaults();
                     acadDatabase.ModelSpace.Add(o.Outline);
                 });
+
             }
         }
 
@@ -737,15 +706,22 @@ namespace ThMEPEngineCore
         public void THExtractRailing()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var railingRecognitionEngine = new ThRailingRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var railingRecognitionEngine = new ThRailingRecognitionEngine();
                 railingRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 railingRecognitionEngine.Elements.ForEach(o =>
                 {
@@ -759,17 +735,24 @@ namespace ThMEPEngineCore
         public void THExtractCornice()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var lineFootRecognitionEngine = new ThDB3CorniceRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                lineFootRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                lineFootRecognitionEngine.Elements.ForEach(o =>
+                ThDB3CorniceRecognitionEngine corniceRecognitionEngine = new ThDB3CorniceRecognitionEngine();
+                corniceRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                corniceRecognitionEngine.Elements.ForEach(o =>
                 {
                     var curve = o.Outline as Curve;
                     acadDatabase.ModelSpace.Add(curve.WashClone());
@@ -906,6 +889,34 @@ namespace ThMEPEngineCore
                 var engine = new ThAXISLineRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, nFrame.Vertices());
                 engine.Elements.Select(o => o.Outline).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractRoom", CommandFlags.Modal)]
+        public void THExtractRoom()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                var builder = new ThRoomBuilderEngine();
+                var rooms = builder.BuildFromMS(acadDatabase.Database, frame.Vertices());
+                rooms.Select(o => o.Boundary).ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();

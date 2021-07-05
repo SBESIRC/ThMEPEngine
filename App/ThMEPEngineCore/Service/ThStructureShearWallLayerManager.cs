@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThStructureShearWallLayerManager
+    public class ThStructureShearWallLayerManager: ThDbLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -29,11 +29,6 @@ namespace ThMEPEngineCore.Service
                     .Select(o => o.Name)
                     .ToList();
             }
-        }
-
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
 
         private static bool IsShearWallCurveLayer(string name)

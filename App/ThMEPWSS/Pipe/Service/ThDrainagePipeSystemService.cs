@@ -21,6 +21,10 @@
     using ThCADCore.NTS;
     using Autodesk.AutoCAD.Colors;
     using NetTopologySuite.Geometries;
+    using ThMEPWSS.DebugNs;
+    using ThMEPWSS.Assistant;
+    using ThMEPWSS.Pipe.Model;
+
     public class ThDrainageSystemServiceGeoCollector
     {
         public AcadDatabase adb;
@@ -33,6 +37,7 @@
         List<GRect> pipes => geoData.VerticalPipes;
         List<GRect> wrappingPipes => geoData.WrappingPipes;
         List<GRect> floorDrains => geoData.FloorDrains;
+        List<Point2d> sideFloorDrains => geoData.SideFloorDrains;
         List<GRect> waterPorts => geoData.WaterPorts;
         List<string> waterPortLabels => geoData.WaterPortLabels;
         List<GRect> storeys => geoData.Storeys;
@@ -127,7 +132,7 @@
         }
         public void CollectLabelLines()
         {
-            static bool f(string layer) => layer is "W-DRAI-EQPM" or "W-DRAI-NOTE" or "W-FRPT-NOTE" or "W-DRAI-DIMS" or "W-RAIN-NOTE";
+            static bool f(string layer) => layer is "W-DRAI-EQPM" or "W-DRAI-NOTE" or "W-FRPT-NOTE" or "W-DRAI-DIMS" or "W-RAIN-NOTE" or "W-RAIN-DIMS";
             foreach (var e in entities.OfType<Line>().Where(e => f(e.Layer) && e.Length > 0))
             {
                 labelLines.Add(e.ToGLineSegment());
@@ -223,13 +228,13 @@
                 pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer is "W-DRAI-PIEP-RISR" or "W-DRAI-EQPM" && e.ObjectId.IsValid && e.GetEffectiveName() == "A$C58B12E6E"));
                 pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer == "PIPE-喷淋" && e.ObjectId.IsValid && e.GetEffectiveName() == "A$C5E4A3C21"));
                 pps.AddRange(entities.OfType<Entity>().Where(e => e.Layer == "W-DRAI-EQPM" && e.GetRXClass().DxfName.ToUpper() == "TCH_PIPE"));//bounds是一个点，炸开后才能获取正确的bounds
-                pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer == "W-DRAI-EQPM" && e.ObjectId.IsValid && e.GetEffectiveName().Contains("$LIGUAN")));
+                pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer is "W-DRAI-EQPM" or "W-RAIN-EQPM" or "P-SEWR-SILO" && e.ObjectId.IsValid && e.GetEffectiveName().Contains("$LIGUAN")));
                 //pps.AddRange(entities.OfType<Entity>().Where(e => e.Layer == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$W-DRAI-EQPM" && e.GetRXClass().DxfName.ToUpper() == "TCH_PIPE"));
                 //pps.AddRange(entities.OfType<Circle>().Where(e => e.Layer == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$W-DRAI-EQPM"));
                 static GRect getRealBoundaryForPipe(Entity c)
                 {
                     var r = c.Bounds.ToGRect();
-                    if (!r.IsValid) r = GRect.Create(r.Center, 50);
+                    if (!r.IsValid) r = GRect.Create(r.Center, 55);
                     return r;
                 }
                 foreach (var pp in pps.Distinct())
@@ -242,7 +247,7 @@
         public void CollectCTexts()
         {
             {
-                foreach (var e in entities.OfType<Entity>().Where(e => e.Layer == "W-DRAI-DIMS" && e.GetRXClass().DxfName.ToUpper() == "TCH_VPIPEDIM"))
+                foreach (var e in entities.OfType<Entity>().Where(e => e.Layer is "W-DRAI-DIMS" or "W-RAIN-DIMS" && e.GetRXClass().DxfName.ToUpper() == "TCH_VPIPEDIM"))
                 {
                     var colle = e.ExplodeToDBObjectCollection();
                     {
@@ -291,6 +296,7 @@
             ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR"));
             //ents.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$W-FRPT-HYDT" && e.ObjectId.IsValid && e.GetEffectiveName() == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$地漏平面"));
             floorDrains.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
+            sideFloorDrains.AddRange(ents.Distinct().OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName() == "侧排地漏").Select(e => e.Bounds.ToGRect().Center));
         }
     }
     public partial class DrainageSystemDiagram
@@ -459,10 +465,7 @@
     {
         public static void TestDrawingDatasCreation(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas)
         {
-            Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateGeometrySelector;
-            Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
-            Func<List<Geometry>, List<List<Geometry>>> GG = GeoFac.GroupGeometries;
-            static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(lst => GeoFac.CreateGeometry(lst)).ToList();
+
             Dbg.AddLazyAction("画骨架", adb =>
             {
                 foreach (var s in geoData.Storeys)
@@ -548,519 +551,8 @@
             });
             Dbg.AddLazyAction("开始分析", adb =>
             {
-                foreach (var s in geoData.Storeys)
-                {
-                    var e = DU.DrawRectLazy(s).ColorIndex = 1;
-                }
-                var sb = new StringBuilder(8192);
-                var drDatas = new List<DrainageDrawingData>();
-                for (int storeyI = 0; storeyI < cadDatas.Count; storeyI++)
-                {
-                    sb.AppendLine($"===框{storeyI}===");
-                    var drData = new DrainageDrawingData();
-                    drData.Init();
-                    var item = cadDatas[storeyI];
+                CreateDrawingDatas(geoData, cadDataMain, cadDatas, out StringBuilder sb, out List<DrainageDrawingData> drDatas);
 
-                    {
-                        var maxDis = 8000;
-                        var angleTolleranceDegree = 1;
-                        var waterPortCvt = DrainageCadData.ConvertWaterPortsLargerF();
-                        var lines = GeoFac.AutoConn(item.DLines.Where(x => x.Length > 0).Distinct().ToList().Select(cadDataMain.DLines).ToList(geoData.DLines).ToList(),
-                            GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.FloorDrains).Concat(item.WaterPorts.Select(cadDataMain.WaterPorts).ToList(geoData.WaterPorts).Select(waterPortCvt)).ToList()),
-                            maxDis, angleTolleranceDegree).ToList();
-                        geoData.DLines.AddRange(lines);
-                        var dlineCvt = DrainageCadData.ConvertDLinesF();
-                        var _lines = lines.Select(dlineCvt).ToList();
-                        cadDataMain.DLines.AddRange(_lines);
-                        item.DLines.AddRange(_lines);
-                    }
-
-                    var lbDict = new Dictionary<Geometry, string>();
-                    var notedPipesDict = new Dictionary<Geometry, string>();
-                    var labelLinesGroup = GG(item.LabelLines);
-                    var labelLinesGeos = GeosGroupToGeos(labelLinesGroup);
-                    var labellinesf = F(labelLinesGeos);
-                    var shortTranslatorLabels = new HashSet<string>();
-                    var longTranslatorLabels = new HashSet<string>();
-                    var dlinesGroups = GG(item.DLines);
-                    var dlinesGeos = GeosGroupToGeos(dlinesGroups);
-                    var vlinesGroups = GG(item.VLines);
-                    var vlinesGeos = GeosGroupToGeos(vlinesGroups);
-                    var wrappingPipesf = F(item.WrappingPipes);
-                    {
-                        var f = F(item.VerticalPipes);
-                        foreach (var label in item.Labels)
-                        {
-                            if (!ThDrainageService.IsMaybeLabelText(geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text)) continue;
-                            var lst = labellinesf(label);
-                            if (lst.Count == 1)
-                            {
-                                var labelline = lst[0];
-                                if (f(GeoFac.CreateGeometry(label, labelline)).Count == 0)
-                                {
-                                    var lines = ExplodeGLineSegments(labelline);
-                                    var points = GeoFac.GetLabelLineEndPoints(lines, label);
-                                    if (points.Count == 1)
-                                    {
-                                        var pt = points[0];
-                                        var r = GRect.Create(pt, 50);
-                                        geoData.VerticalPipes.Add(r);
-                                        var pl = r.ToPolygon();
-                                        cadDataMain.VerticalPipes.Add(pl);
-                                        item.VerticalPipes.Add(pl);
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-
-
-                    DU.DrawTextLazy($"===框{storeyI}===", geoData.Storeys[storeyI].LeftTop);
-                    foreach (var o in item.LabelLines)
-                    {
-                        DU.DrawLineSegmentLazy(geoData.LabelLines[cadDataMain.LabelLines.IndexOf(o)]).ColorIndex = 1;
-                    }
-                    foreach (var pl in item.Labels)
-                    {
-                        var m = geoData.Labels[cadDataMain.Labels.IndexOf(pl)];
-                        var e = DU.DrawTextLazy(m.Text, m.Boundary.LeftButtom.ToPoint3d());
-                        e.ColorIndex = 2;
-                        var _pl = DU.DrawRectLazy(m.Boundary);
-                        _pl.ColorIndex = 2;
-                    }
-                    foreach (var o in item.VerticalPipes)
-                    {
-                        DU.DrawRectLazy(geoData.VerticalPipes[cadDataMain.VerticalPipes.IndexOf(o)]).ColorIndex = 3;
-                    }
-                    foreach (var o in item.FloorDrains)
-                    {
-                        DU.DrawRectLazy(geoData.FloorDrains[cadDataMain.FloorDrains.IndexOf(o)]).ColorIndex = 6;
-                    }
-                    foreach (var o in item.WaterPorts)
-                    {
-                        DU.DrawRectLazy(geoData.WaterPorts[cadDataMain.WaterPorts.IndexOf(o)]).ColorIndex = 7;
-                        DU.DrawTextLazy(geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(o)], o.GetCenter());
-                    }
-                    foreach (var o in item.WashingMachines)
-                    {
-                        var e = DU.DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)]).ColorIndex = 1;
-                    }
-                    foreach (var o in item.CleaningPorts)
-                    {
-                        var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
-                        if (false) DU.DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
-                        DU.DrawRectLazy(GRect.Create(m, 40));
-                    }
-                    {
-                        var cl = Color.FromRgb(0x91, 0xc7, 0xae);
-                        foreach (var o in item.WrappingPipes)
-                        {
-                            var e = DU.DrawRectLazy(geoData.WrappingPipes[cadDataMain.WrappingPipes.IndexOf(o)]);
-                            e.Color = cl;
-                        }
-                    }
-                    {
-                        var cl = Color.FromRgb(4, 229, 230);
-                        foreach (var o in item.DLines)
-                        {
-                            var e = DU.DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
-                        }
-                    }
-                    {
-                        var cl = Color.FromRgb(211, 213, 111);
-                        foreach (var o in item.VLines)
-                        {
-                            DU.DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
-                        }
-                    }
-
-
-                    //标注立管
-                    {
-                        {
-                            //通过引线进行标注
-                            var ok_ents = new HashSet<Geometry>();
-                            for (int i = 0; i < 3; i++)
-                            {
-                                //先处理最简单的case
-                                var ok = false;
-                                var labelsf = F(item.Labels.Except(ok_ents).ToList());
-                                var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
-                                foreach (var labelLinesGeo in labelLinesGeos)
-                                {
-                                    var labels = labelsf(labelLinesGeo);
-                                    var pipes = pipesf(labelLinesGeo);
-                                    if (labels.Count == 1 && pipes.Count == 1)
-                                    {
-                                        var lb = labels[0];
-                                        var pp = pipes[0];
-                                        var label = geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "";
-                                        if (ThDrainageService.IsMaybeLabelText(label))
-                                        {
-                                            lbDict[pp] = label;
-                                            ok_ents.Add(pp);
-                                            ok_ents.Add(lb);
-                                            ok = true;
-                                        }
-                                        else if (ThDrainageService.IsNotedLabel(label))
-                                        {
-                                            notedPipesDict[pp] = label;
-                                            ok_ents.Add(lb);
-                                            ok = true;
-                                        }
-                                    }
-                                }
-                                if (!ok) break;
-                            }
-
-                            for (int i = 0; i < 3; i++)
-                            {
-                                //再处理多个一起串的case
-                                var ok = false;
-                                var labelsf = F(item.Labels.Except(ok_ents).ToList());
-                                var pipesf = F(item.VerticalPipes.Except(ok_ents).ToList());
-                                foreach (var labelLinesGeo in labelLinesGeos)
-                                {
-                                    var labels = labelsf(labelLinesGeo);
-                                    var pipes = pipesf(labelLinesGeo);
-                                    if (labels.Count == pipes.Count && labels.Count > 0)
-                                    {
-                                        var labelsTxts = labels.Select(lb => geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? "").ToList();
-                                        if (labelsTxts.All(txt => ThDrainageService.IsMaybeLabelText(txt)))
-                                        {
-                                            pipes = ThRainSystemService.SortGeometrysBy2DSpacePosition(pipes).ToList();
-                                            labels = ThRainSystemService.SortGeometrysBy2DSpacePosition(labels).ToList();
-                                            for (int k = 0; k < pipes.Count; k++)
-                                            {
-                                                var pp = pipes[k];
-                                                var lb = labels[k];
-                                                var j = cadDataMain.Labels.IndexOf(lb);
-                                                var m = geoData.Labels[j];
-                                                var label = m.Text;
-                                                lbDict[pp] = label;
-                                            }
-                                            //OK，识别成功
-                                            ok_ents.AddRange(pipes);
-                                            ok_ents.AddRange(labels);
-                                            ok = true;
-                                        }
-                                    }
-                                }
-                                if (!ok) break;
-                            }
-
-                            {
-                                //对付擦边球case
-                                foreach (var label in item.Labels.Except(ok_ents).ToList())
-                                {
-                                    var lb = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text ?? "";
-                                    if (!ThDrainageService.IsMaybeLabelText(lb)) continue;
-                                    var lst = labellinesf(label);
-                                    if (lst.Count == 1)
-                                    {
-                                        var labelline = lst[0];
-                                        var lines = ExplodeGLineSegments(labelline);
-                                        var points = GeoFac.GetLabelLineEndPoints(lines, label);
-                                        if (points.Count == 1)
-                                        {
-                                            var pipes = F(item.VerticalPipes.Except(lbDict.Keys).ToList())(points[0].ToNTSPoint());
-                                            if (pipes.Count == 1)
-                                            {
-                                                var pp = pipes[0];
-                                                lbDict[pp] = lb;
-                                                ok_ents.Add(pp);
-                                                ok_ents.Add(label);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        (List<Geometry>, List<Geometry>) getPipes()
-                        {
-                            var pipes1 = new List<Geometry>(lbDict.Count);
-                            var pipes2 = new List<Geometry>(lbDict.Count);
-                            foreach (var pipe in item.VerticalPipes) if (lbDict.ContainsKey(pipe)) pipes1.Add(pipe); else pipes2.Add(pipe);
-                            return (pipes1, pipes2);
-                        }
-                        {
-                            //识别转管，顺便进行标注
-
-                            bool recognise1()
-                            {
-                                var ok = false;
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    var (pipes1, pipes2) = getPipes();
-                                    var pipes1f = F(pipes1);
-                                    var pipes2f = F(pipes2);
-                                    foreach (var dlinesGeo in dlinesGeos)
-                                    {
-                                        var lst1 = pipes1f(dlinesGeo);
-                                        var lst2 = pipes2f(dlinesGeo);
-                                        if (lst1.Count == 1 && lst2.Count > 0)
-                                        {
-                                            var pp1 = lst1[0];
-                                            var label = lbDict[pp1];
-                                            var c = pp1.GetCenter();
-                                            foreach (var pp2 in lst2)
-                                            {
-                                                var dis = c.GetDistanceTo(pp2.GetCenter());
-                                                if (10 < dis && dis <= MAX_SHORTTRANSLATOR_DISTANCE)
-                                                {
-                                                    //通气立管没有乙字弯
-                                                    if (!label.StartsWith("TL"))
-                                                    {
-                                                        shortTranslatorLabels.Add(label);
-                                                        lbDict[pp2] = label;
-                                                        ok = true;
-                                                    }
-                                                }
-                                                else if (dis > MAX_SHORTTRANSLATOR_DISTANCE)
-                                                {
-                                                    longTranslatorLabels.Add(label);
-                                                    lbDict[pp2] = label;
-                                                    ok = true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (!ok) break;
-                                }
-                                return ok;
-                            }
-                            bool recognise2()
-                            {
-                                var ok = false;
-                                for (int i = 0; i < 3; i++)
-                                {
-                                    var (pipes1, pipes2) = getPipes();
-                                    var pipes1f = F(pipes1);
-                                    foreach (var pp2 in pipes2)
-                                    {
-                                        var pps1 = pipes1f(pp2.ToGRect().Expand(5).ToGCircle(false).ToCirclePolygon(6));
-                                        var fs = new List<Action>();
-                                        foreach (var pp1 in pps1)
-                                        {
-                                            var label = lbDict[pp1];
-                                            //通气立管没有乙字弯
-                                            if (!label.StartsWith("TL"))
-                                            {
-                                                if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > 1)
-                                                {
-                                                    fs.Add(() =>
-                                                    {
-                                                        shortTranslatorLabels.Add(label);
-                                                        lbDict[pp2] = label;
-                                                        ok = true;
-                                                    });
-                                                }
-                                            }
-                                        }
-                                        if (fs.Count == 1) fs[0]();
-                                    }
-                                    if (!ok) break;
-                                }
-                                return ok;
-                            }
-                            for (int i = 0; i < 3; i++)
-                            {
-                                if (!(recognise1() && recognise2())) break;
-                            }
-                        }
-                        {
-                            var pipes1f = F(lbDict.Where(kv => kv.Value.StartsWith("TL")).Select(kv => kv.Key).ToList());
-                            var pipes2f = F(item.VerticalPipes.Where(p => !lbDict.ContainsKey(p)).ToList());
-                            foreach (var vlinesGeo in vlinesGeos)
-                            {
-                                var lst = pipes1f(vlinesGeo);
-                                if (lst.Count == 1)
-                                {
-                                    var pp1 = lst[0];
-                                    lst = pipes2f(vlinesGeo);
-                                    if (lst.Count == 1)
-                                    {
-                                        var pp2 = lst[0];
-                                        if (pp1.GetCenter().GetDistanceTo(pp2.GetCenter()) > MAX_SHORTTRANSLATOR_DISTANCE)
-                                        {
-                                            var label = lbDict[pp1];
-                                            longTranslatorLabels.Add(label);
-                                            lbDict[pp2] = label;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    string getLabel(Geometry pipe)
-                    {
-                        lbDict.TryGetValue(pipe, out string label);
-                        return label;
-                    }
-
-                    //关联地漏
-                    {
-                        var dict = new Dictionary<string, int>();
-                        var pipesf = GeoFac.CreateGeometrySelector(item.VerticalPipes);
-                        var gs = GeoFac.GroupGeometriesEx(dlinesGeos, item.FloorDrains);
-                        foreach (var g in gs)
-                        {
-                            var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
-                            var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
-                            if (!AllNotEmpty(fds, dlines)) continue;
-                            var pipes = pipesf(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
-                            foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
-                            {
-                                dict[lb] = fds.Count;
-                            }
-                        }
-                        sb.AppendLine("地漏：" + dict.ToJson());
-                        drData.FloorDrains = dict;
-                    }
-
-                    //关联清扫口
-                    {
-                        var f = GeoFac.CreateGeometrySelector(item.VerticalPipes);
-                        var hs = new HashSet<string>();
-                        var gs = GeoFac.GroupGeometries(dlinesGeos.Concat(item.CleaningPorts).ToList());
-                        foreach (var g in gs)
-                        {
-                            var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
-                            var ports = g.Where(pl => item.CleaningPorts.Contains(pl)).ToList();
-                            if (!AllNotEmpty(ports, dlines)) continue;
-                            var pipes = f(GeoFac.CreateGeometry(ports.Concat(dlines).ToList()));
-                            hs.AddRange(pipes.Select(getLabel).Where(lb => lb != null));
-                        }
-                        sb.AppendLine("清扫口：" + hs.ToJson());
-                        drData.CleaningPorts.AddRange(hs);
-                    }
-
-
-                    //排出方式
-                    {
-                        //获取排出编号
-
-                        var f1 = F(item.WaterPorts);
-
-                        var ok_ents = new HashSet<Geometry>();
-                        var d = new Dictionary<string, string>();
-                        var has_wrappingpipes = new HashSet<string>();
-
-                        {
-                            //先提取直接连接的
-                            var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
-                            foreach (var dlinesGeo in dlinesGeos)
-                            {
-                                var waterPorts = f1(dlinesGeo);
-                                if (waterPorts.Count == 1)
-                                {
-                                    var waterPort = waterPorts[0];
-                                    var pipes = f2(dlinesGeo);
-                                    ok_ents.AddRange(pipes);
-                                    foreach (var pipe in pipes)
-                                    {
-                                        if (lbDict.TryGetValue(pipe, out string label))
-                                        {
-                                            d[label] = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
-                                            if (wrappingPipesf(dlinesGeo).Any())
-                                            {
-                                                has_wrappingpipes.Add(label);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        {
-                            //再处理没直接连接的
-                            var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
-                            var radius = 10;
-                            var f5 = GeoFac.NearestNeighbourPoint3dF(item.WaterPorts);
-                            foreach (var dlinesGeo in dlinesGeos)
-                            {
-                                var segs = ExplodeGLineSegments(dlinesGeo);
-                                var pts = GeoFac.GetAlivePoints(segs.Distinct().ToList(), radius: radius);
-                                {
-                                    var _pts = pts.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
-                                    var killer = GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.WaterPorts).Concat(item.CleaningPorts).Concat(item.FloorDrains).Distinct().ToList());
-                                    pts = pts.Except(F(_pts)(killer).Select(_pts).ToList(pts)).ToList();
-                                }
-                                foreach (var pt in pts)
-                                {
-                                    var waterPort = f5(pt.ToPoint3d());
-                                    if (waterPort != null)
-                                    {
-                                        if (waterPort.GetCenter().GetDistanceTo(pt) <= 1500)
-                                        {
-                                            var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
-                                            foreach (var pipe in f2(dlinesGeo))
-                                            {
-                                                if (lbDict.TryGetValue(pipe, out string label))
-                                                {
-                                                    d[label] = waterPortLabel;
-                                                    ok_ents.Add(pipe);
-                                                    if (wrappingPipesf(dlinesGeo).Any())
-                                                    {
-                                                        has_wrappingpipes.Add(label);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        {
-                            sb.AppendLine("排出：" + d.ToJson());
-                            drData.Outlets = d;
-
-                            d.Join(lbDict, kv => kv.Key, kv => kv.Value, (kv1, kv2) =>
-                            {
-                                var num = kv1.Value;
-                                var pipe = kv2.Key;
-                                DU.DrawTextLazy(num, pipe.ToGRect().RightButtom);
-                                return 666;
-                            }).Count();
-                        }
-                        {
-                            sb.AppendLine("套管：" + has_wrappingpipes.ToJson());
-                            drData.WrappingPipes = has_wrappingpipes.ToList();
-                        }
-
-                    }
-
-                    //“仅31F顶层板下设置乙字弯”的处理（😉不处理）
-                    //标出所有的立管编号（看看识别成功了没）
-                    foreach (var pp in item.VerticalPipes)
-                    {
-                        lbDict.TryGetValue(pp, out string label);
-                        if (label != null)
-                        {
-                            DU.DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
-                        }
-                    }
-                    {
-                        sb.AppendLine("立管：" + lbDict.Values.Distinct().OrderBy(x => x).ToJson());
-                        drData.VerticalPipeLabels.AddRange(lbDict.Values.Distinct());
-                    }
-                    {
-                        var _longTranslatorLabels = longTranslatorLabels.Distinct().ToList();
-                        _longTranslatorLabels.Sort();
-                        sb.AppendLine("长转管:" + _longTranslatorLabels.JoinWith(","));
-                        drData.LongTranslatorLabels.AddRange(_longTranslatorLabels);
-                    }
-
-                    {
-                        var _shortTranslatorLabels = shortTranslatorLabels.ToList();
-                        _shortTranslatorLabels.Sort();
-                        sb.AppendLine("短转管:" + _shortTranslatorLabels.JoinWith(","));
-                        drData.ShortTranslatorLabels.AddRange(_shortTranslatorLabels);
-                    }
-                    drDatas.Add(drData);
-                }
                 Dbg.PrintText(sb.ToString());
                 Dbg.AddButton("Dbg.PrintText(drDatas.ToJson());", () => { Dbg.PrintText(drDatas.ToJson()); });
                 Dbg.AddButton("Dbg.SaveToJsonFile(drDatas);", () => { Dbg.SaveToJsonFile(drDatas); });
@@ -1072,6 +564,8 @@
                 });
             });
         }
+
+
     }
     public partial class DrainageSystemDiagram
     {
@@ -1160,7 +654,16 @@
 
             Dbg.Log(groups);
 
-            NewMethod6(basePoint, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, storeys, groups);
+            DrawVer1(new DrawingOption()
+            {
+                basePoint = basePoint,
+                OFFSET_X = OFFSET_X,
+                SPAN_X = SPAN_X,
+                HEIGHT = HEIGHT,
+                COUNT = COUNT,
+                storeys = storeys,
+                groups = groups
+            });
         }
 
         public class PipeCmpInfo : IEquatable<PipeCmpInfo>
@@ -1185,19 +688,565 @@
                 return this.IsWaterPortOutlet == other.IsWaterPortOutlet && PipeRuns.SequenceEqual(other.PipeRuns);
             }
         }
-        public static void draw8(List<DrainageDrawingData> drDatas, Point2d basePoint)
+        public class DrawingOption
         {
-            var q = drDatas.SelectMany(drData => drData.VerticalPipeLabels).Distinct();
-            //q = q.Where(lb => lb.StartsWith("PL"));
-            //q = q.Where(lb => lb.StartsWith("FL"));
-            //q = q.Where(lb => lb.StartsWith("TL"));
-            q = q.Where(lb => ThDrainageService.IsWantedLabelText(lb));
-            var labels = q.ToList();
-            var lst = new List<PipeCmpInfo>();
-            foreach (var label in labels)
+            public int maxStoreyIndex;
+            public string layer;
+            public Point2d basePoint;
+            public double OFFSET_X;
+            public double SPAN_X;
+            public double HEIGHT;
+            public double COUNT;
+            public List<string> storeys;
+            public bool drawStoreyLine = true;
+            public bool test;
+            public List<ThwPipeLineGroup> groups;
+            public DrawingOption Clone()
+            {
+                return (DrawingOption)MemberwiseClone();
+            }
+        }
+        public static void Start()
+        {
+            var file = @"D:\DATA\temp\637602373354770648.json";
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(file);
+
+            Dbg.FocusMainWindow();
+            //var range = Dbg.TrySelectRange();
+            //if (range == null) return;
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                //var storeys = ThRainSystemService.GetStoreys(range, adb);
+                //ThRainSystemService.FixStoreys(storeys);
+                ////Console.WriteLine(storeys.ToCadJson());
+                //var storeysItems = new List<StoreysItem>();
+                //foreach (var s in storeys)
+                //{
+                //    var item = new StoreysItem();
+                //    storeysItems.Add(item);
+                //    switch (s.StoreyType)
+                //    {
+                //        case ThMEPEngineCore.Model.Common.StoreyType.Unknown:
+                //            break;
+                //        case ThMEPEngineCore.Model.Common.StoreyType.LargeRoof:
+                //            {
+                //                item.Labels = new List<string>() { "RF" };
+                //            }
+                //            break;
+                //        case ThMEPEngineCore.Model.Common.StoreyType.SmallRoof:
+                //            break;
+                //        case ThMEPEngineCore.Model.Common.StoreyType.StandardStorey:
+                //        case ThMEPEngineCore.Model.Common.StoreyType.NonStandardStorey:
+                //            {
+                //                item.Ints = s.Storeys.OrderBy(x => x).ToList();
+                //                item.Labels = item.Ints.Select(x => x + "F").ToList();
+                //            }
+                //            break;
+                //        default:
+                //            break;
+                //    }
+                //}
+                //Console.WriteLine(storeysItems.ToCadJson());
+                //Dbg.SaveToJsonFile(storeysItems);
+                //return;
+
+                var storeysItems = Dbg.LoadFromJsonFile<List<StoreysItem>>(@"D:\DATA\temp\637604918755722721.json");
+                var pt = Dbg.SelectPoint().ToPoint2d();
+                Draw(drDatas, pt, storeysItems);
+            }
+        }
+        public class StoreysItem
+        {
+            public List<int> Ints;
+            public List<string> Labels;
+            public void Init()
+            {
+                Ints ??= new List<int>();
+                Labels ??= new List<string>();
+            }
+        }
+        public static void SortStoreys(List<string> storeys)
+        {
+            storeys.Sort((x, y) => GetScore(x) - GetScore(y));
+        }
+        public static int GetScore(string label)
+        {
+            if (label == null) return 0;
+            switch (label)
+            {
+                case "RF": return ushort.MaxValue;
+                case "RF+1": return ushort.MaxValue + 1;
+                case "RF+2": return ushort.MaxValue + 2;
+                default:
+                    {
+                        int.TryParse(label.Replace("F", ""), out int ret);
+                        return ret;
+                    }
+            }
+        }
+        public static void draw10()
+        {
+            //3号图纸比较好
+            Dbg.FocusMainWindow();
+            var range = Dbg.TrySelectRange();
+            if (range == null) return;
+            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
+
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+
+            var pt = point3D.ToPoint2d();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var storeys = ThRainSystemService.GetStoreys(range, adb);
+                ThRainSystemService.FixStoreys(storeys);
+                var storeysItems = GetStoreysItem(storeys);
+                var geoData = new DrainageGeoData();
+                geoData.Init();
+                DrainageService.CollectGeoData(range, adb, geoData);
+                ThDrainageService.PreFixGeoData(geoData);
+                ThDrainageService.ConnectLabelToLabelLine(geoData);
+                geoData.FixData();
+                var cadDataMain = DrainageCadData.Create(geoData);
+                var cadDatas = cadDataMain.SplitByStorey();
+                var roomData = DrainageService.CollectRoomData(adb);
+                DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out StringBuilder sb, out List<DrainageDrawingData> drDatas, roomData: roomData);
+                DU.Dispose();
+                if (!NoDraw)
+                {
+                    Draw(drDatas, pt, storeysItems);
+                }
+                else
+                {
+                    Dbg.SaveToTempJsonFile(drDatas);
+                    Dbg.SaveToTempJsonFile(storeysItems);
+                }
+            }
+        }
+        static bool NoDraw;
+        public static void draw13()
+        {
+            try
+            {
+                NoDraw = true;
+                draw11();
+            }
+            finally
+            {
+                NoDraw = false;
+            }
+        }
+
+
+
+        public static void draw12()
+        {
+            try
+            {
+                NoDraw = true;
+                draw10();
+            }
+            finally
+            {
+                NoDraw = false;
+            }
+        }
+
+        static bool isWantedStorey(string storey)
+        {
+            return GetScore(storey) < ushort.MaxValue;
+        }
+
+        public static void draw11()
+        {
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"Y:\637608341071873021.json");
+            var storeysItems = Dbg.LoadFromJsonFile<List<StoreysItem>>(@"Y:\637608341071892973.json");
+            Dbg.FocusMainWindow();
+            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
+            var pt = point3D.ToPoint2d();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                if (NoDraw)
+                {
+                    //Draw(drDatas, pt, storeysItems);
+                    //👻开始写分组逻辑
+
+                    //Console.WriteLine(storeysItems.ToCadJson());
+                    var allFls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("FL")));
+                    var allTls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("TL")));
+                    var allPls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => x.StartsWith("PL")));
+
+                    var storeys = new List<string>();
+                    foreach (var item in storeysItems)
+                    {
+                        item.Init();
+                        storeys.AddRange(item.Labels.Where(isWantedStorey));
+                    }
+                    storeys = storeys.Distinct().OrderBy(GetScore).ToList();
+                    var flstoreylist = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var fl in drDatas[i].VerticalPipeLabels.Where(x => x.StartsWith("FL")))
+                            {
+                                foreach (var s in item.Labels)
+                                {
+                                    flstoreylist.Add(new KeyValuePair<string, string>(fl, s));
+                                }
+                            }
+                        }
+                    }
+                    //Console.WriteLine(flstoreylist.ToCadJson());
+                    var pls = new HashSet<string>();
+                    var tls = new HashSet<string>();
+                    var pltlList = new List<PlTlStoreyItem>();
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        var item = storeysItems[i];
+                        foreach (var gp in drDatas[i].toiletGroupers)
+                        {
+                            if (gp.WLType == ThDrainageService.WLType.PL_TL && gp.PLs.Count == 1 && gp.TLs.Count == 1)
+                            {
+                                var pl = gp.PLs[0];
+                                var tl = gp.TLs[0];
+                                foreach (var s in item.Labels.Where(x => storeys.Contains(x)))
+                                {
+                                    var x = new PlTlStoreyItem() { pl = pl, tl = tl, storey = s };
+                                    pls.Add(pl);
+                                    tls.Add(tl);
+                                    pltlList.Add(x);
+                                }
+                            }
+                        }
+                    }
+                    var plstoreylist = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var pl in drDatas[i].VerticalPipeLabels.Where(x => x.StartsWith("PL")))
+                            {
+                                if (pls.Contains(pl)) continue;
+                                foreach (var s in item.Labels)
+                                {
+                                    flstoreylist.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    //Console.WriteLine(plstoreylist.ToCadJson());
+                    //Console.WriteLine(flstoreylist.ToCadJson());
+                    var tlMinMaxStoreyScoreDict = new Dictionary<string, KeyValuePair<int, int>>();
+                    foreach (var tl in tls)
+                    {
+                        int min = int.MaxValue;
+                        int max = int.MinValue;
+                        foreach (var item in pltlList)
+                        {
+                            if (item.tl == tl)
+                            {
+                                var s = GetScore(item.storey);
+                                if (s < min) min = s;
+                                if (s > max) max = s;
+                                tlMinMaxStoreyScoreDict[tl] = new KeyValuePair<int, int>(min, max);
+                            }
+                        }
+                    }
+                    //Console.WriteLine(tlMinMaxStoreyScoreDict.ToCadJson());
+                    //Console.WriteLine(pltlList.OrderBy(x => GetScore(x.storey)).ThenBy(x => x.pl).ToCadJson());
+                    var plLongTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var pl in drDatas[i].LongTranslatorLabels.Where(x => x.StartsWith("PL")))
+                                {
+                                    plLongTransList.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    var flLongTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var fl in drDatas[i].LongTranslatorLabels.Where(x => x.StartsWith("FL")))
+                                {
+                                    flLongTransList.Add(new KeyValuePair<string, string>(fl, s));
+                                }
+                            }
+                        }
+                    }
+                    var plShortTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var pl in drDatas[i].ShortTranslatorLabels.Where(x => x.StartsWith("PL")))
+                                {
+                                    plLongTransList.Add(new KeyValuePair<string, string>(pl, s));
+                                }
+                            }
+                        }
+                    }
+                    var flShortTransList = new List<KeyValuePair<string, string>>();
+                    {
+                        for (int i = 0; i < storeysItems.Count; i++)
+                        {
+                            var item = storeysItems[i];
+                            foreach (var s in item.Labels)
+                            {
+                                foreach (var fl in drDatas[i].ShortTranslatorLabels.Where(x => x.StartsWith("FL")))
+                                {
+                                    flLongTransList.Add(new KeyValuePair<string, string>(fl, s));
+                                }
+                            }
+                        }
+                    }
+                    var minS = storeys.Select(x => GetScore(x)).Min();
+                    var maxS = storeys.Select(x => GetScore(x)).Max();
+                    var countS = maxS - minS + 1;
+                    {
+                        var allstoreys = new List<int>();
+                        for (int storey = minS; storey <= maxS; storey++)
+                        {
+                            allstoreys.Add(storey);
+                        }
+                        var allStoreyLabels = allstoreys.Select(x => x + "F").ToList();
+                        bool hasLong(string label, string storey, PipeType pipeType)
+                        {
+                            if (pipeType == PipeType.FL)
+                            {
+                                return flLongTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            if (pipeType == PipeType.PL)
+                            {
+                                return plLongTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            throw new Exception();
+                        }
+                        bool hasShort(string label, string storey, PipeType pipeType)
+                        {
+                            if (pipeType == PipeType.FL)
+                            {
+                                return flShortTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            if (pipeType == PipeType.PL)
+                            {
+                                return plShortTransList.Any(x => x.Key == label && x.Value == storey);
+                            }
+                            throw new Exception();
+                        }
+                        string getWaterPortLabel(string label)
+                        {
+                            foreach (var drData in drDatas)
+                            {
+                                if (drData.Outlets.TryGetValue(label, out string value))
+                                {
+                                    return value;
+                                }
+                            }
+                            return null;
+                        }
+                        bool hasWaterPort(string label)
+                        {
+                            return getWaterPortLabel(label) != null;
+                        }
+                        var pipeInfoDict = new Dictionary<string, DrainageGroupingItem>();
+                        var flGroupingItems = new List<DrainageGroupingItem>();
+                        var plGroupingItems = new List<DrainageGroupingItem>();
+                        foreach (var fl in allFls)
+                        {
+                            var item = new DrainageGroupingItem();
+                            item.Label = fl;
+                            item.HasWaterPort = hasWaterPort(fl);
+                            item.WaterPortLabel = getWaterPortLabel(fl);
+                            item.Items = new List<DrainageGroupingItem.ValueItem>();
+                            foreach (var storey in allStoreyLabels)
+                            {
+                                item.Items.Add(new DrainageGroupingItem.ValueItem()
+                                {
+                                    Exist = true,
+                                    HasLong = hasLong(fl, storey, PipeType.FL),
+                                    HasShort = hasShort(fl, storey, PipeType.FL),
+                                });
+                            }
+                            flGroupingItems.Add(item);
+                            pipeInfoDict[fl] = item;
+                        }
+                        foreach (var pl in allPls)
+                        {
+                            var item = new DrainageGroupingItem();
+                            item.Label = pl;
+                            item.HasWaterPort = hasWaterPort(pl);
+                            item.WaterPortLabel = getWaterPortLabel(pl);
+                            item.Items = new List<DrainageGroupingItem.ValueItem>();
+                            foreach (var storey in allStoreyLabels)
+                            {
+                                item.Items.Add(new DrainageGroupingItem.ValueItem()
+                                {
+                                    Exist = true,
+                                    HasLong = hasLong(pl, storey, PipeType.PL),
+                                    HasShort = hasShort(pl, storey, PipeType.PL),
+                                });
+                            }
+                            plGroupingItems.Add(item);
+                            pipeInfoDict[pl] = item;
+                        }
+                        var pipeGroupItems = new List<DrainageGroupItem>();
+                        foreach (var g in flGroupingItems.GroupBy(x => x))
+                        {
+                            var outlets = g.Where(x => x.HasWaterPort).Select(x => x.WaterPortLabel).Distinct().ToList();
+                            var labels = g.Select(x => x.Label).Distinct().OrderBy(x => x).ToList();
+                            var item = new DrainageGroupItem()
+                            {
+                                Labels = labels,
+                                WaterPortLabels = outlets,
+                                Items = g.Key.Items.ToList(),
+                                PipeType = PipeType.FL,
+                            };
+                            pipeGroupItems.Add(item);
+                        }
+                        foreach (var g in plGroupingItems.GroupBy(x => x))
+                        {
+                            var outlets = g.Where(x => x.HasWaterPort).Select(x => x.WaterPortLabel).Distinct().ToList();
+                            var labels = g.Select(x => x.Label).Distinct().OrderBy(x=>x).ToList();
+                            var item = new DrainageGroupItem()
+                            {
+                                Labels = labels,
+                                WaterPortLabels = outlets,
+                                Items = g.Key.Items.ToList(),
+                                PipeType = PipeType.PL,
+                            };
+                            pipeGroupItems.Add(item);
+                        }
+                        Console.WriteLine(pipeGroupItems.ToCadJson());
+                    }
+                }
+                else
+                {
+                    Draw(drDatas, pt, storeysItems);
+                }
+            }
+        }
+        public class DrainageGroupItem
+        {
+            public List<string> Labels;
+            public List<string> WaterPortLabels;
+            public bool HasWaterPort => WaterPortLabels != null && WaterPortLabels.Count > 0;
+            public List<DrainageGroupingItem.ValueItem> Items;
+            public PipeType PipeType;
+        }
+        public class DrainageGroupingItem : IEquatable<DrainageGroupingItem>
+        {
+            public string Label;
+            public bool HasWaterPort;
+            public string WaterPortLabel;
+            public bool HasTL;
+            public struct ValueItem
+            {
+                public bool Exist;
+                public bool HasLong;
+                public bool HasShort;
+            }
+            public List<ValueItem> Items;
+            public override int GetHashCode()
+            {
+                return 0;
+            }
+            public bool Equals(DrainageGroupingItem other)
+            {
+                return this.HasWaterPort == other.HasWaterPort && this.Items.SequenceEqual(other.Items);
+            }
+        }
+        public enum PipeType
+        {
+            FL, PL,
+        }
+        public class Dict<K, V> where V : new()
+        {
+            public Dictionary<K, V> d = new Dictionary<K, V>();
+            public V this[K k]
+            {
+                get
+                {
+                    if (!d.TryGetValue(k, out V v))
+                    {
+                        v = new V();
+                        d[k] = v;
+                    }
+                    return v;
+                }
+                set
+                {
+                    d[k] = value;
+                }
+            }
+        }
+        public class PlTlStoreyItem
+        {
+            public string pl;
+            public string tl;
+            public string storey;
+        }
+
+        public static List<StoreysItem> GetStoreysItem(List<ThStoreysData> storeys)
+        {
+            var storeysItems = new List<StoreysItem>();
+            foreach (var s in storeys)
+            {
+                var item = new StoreysItem();
+                storeysItems.Add(item);
+                switch (s.StoreyType)
+                {
+                    case ThMEPEngineCore.Model.Common.StoreyType.Unknown:
+                        break;
+                    case ThMEPEngineCore.Model.Common.StoreyType.LargeRoof:
+                        {
+                            item.Labels = new List<string>() { "RF" };
+                        }
+                        break;
+                    case ThMEPEngineCore.Model.Common.StoreyType.SmallRoof:
+                        break;
+                    case ThMEPEngineCore.Model.Common.StoreyType.StandardStorey:
+                    case ThMEPEngineCore.Model.Common.StoreyType.NonStandardStorey:
+                        {
+                            item.Ints = s.Storeys.OrderBy(x => x).ToList();
+                            item.Labels = item.Ints.Select(x => x + "F").ToList();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return storeysItems;
+        }
+
+        public static void Draw(List<DrainageDrawingData> drDatas, Point2d basePoint, List<StoreysItem> storeysItems)
+        {
+            var allLabels = drDatas.SelectMany(drData => drData.VerticalPipeLabels).Where(lb => ThDrainageService.IsWantedLabelText(lb)).Distinct().ToList();
+            //var pipeLabels = allLabels.Where(lb => lb.StartsWith("FL")).OrderBy(x => x).ToList();
+            var pipeLabels = allLabels.Where(lb => lb.StartsWith("FL") || lb.StartsWith("PL")).OrderBy(x => x).ToList();
+
+            var pipesCmpInfos = new List<PipeCmpInfo>();
+            foreach (var label in pipeLabels)
             {
                 var info = new PipeCmpInfo();
-                lst.Add(info);
+                pipesCmpInfos.Add(info);
                 info.label = label;
                 info.PipeRuns = new List<PipeCmpInfo.PipeRunCmpInfo>();
                 for (int i = 0; i < drDatas.Count; i++)
@@ -1212,7 +1261,257 @@
                 }
                 info.IsWaterPortOutlet = drDatas.Any(x => x.Outlets.ContainsKey(label));
             }
-            var list = lst.GroupBy(x => x).ToList();
+            var list = pipesCmpInfos.GroupBy(x => x).ToList();
+            //Dbg.Log(lst.GroupBy(x => x).Select(x => new { k = x.Key, lst = x.ToList() }));
+            //return;
+
+            var OFFSET_X = 2500.0;
+            var SPAN_X = 6000.0;
+            //var HEIGHT = 1800.0;
+            var HEIGHT = 3000.0;
+            var COUNT = list.Count;
+            var STOREY_COUNT = drDatas.Count;
+
+
+
+            var pipeLineGroups = new List<ThwPipeLineGroup>();
+            var storeys = storeysItems.Where(x => x.Labels != null).SelectMany(x => x.Labels).ToList();
+            SortStoreys(storeys);
+            foreach (var g in list)
+            {
+                var info = g.Key;
+                var _labels = g.Select(x => x.label).ToList();
+                var label = g.Key.label;
+                var group = new ThwPipeLineGroup();
+                pipeLineGroups.Add(group);
+                var ppl = group.PL = new ThwPipeLine();
+                ppl.Label1 = label;
+                ppl.Comments = g.Select(x => x.label).ToList();
+                var runs = ppl.PipeRuns = new List<ThwPipeRun>();
+                for (int i = 0; i < drDatas.Count; i++)
+                {
+                    var drData = drDatas[i];
+
+                    foreach (var storey in storeysItems[i].Labels.Yield())
+                    {
+                        if (!isWantedStorey(storey)) continue;
+                        var run = new ThwPipeRun()
+                        {
+                            Storey = storey,
+                            HasShortTranslator = info.PipeRuns[i].HasShortTranslator,
+                            HasLongTranslator = info.PipeRuns[i].HasLongTranslator,
+                            IsShortTranslatorToLeftOrRight = true,
+                            IsLongTranslatorToLeftOrRight = true,
+                            HasCheckPoint = true,
+                            HasCleaningPort = info.PipeRuns[i].HasCleaningPort,
+                        };
+                        //如果有转管，那就加个清扫口
+                        if (run.HasLongTranslator || run.HasShortTranslator)
+                        {
+                            run.HasCleaningPort = true;
+                        }
+                        //针对pl，设置清扫口
+                        if (label.StartsWith("PL"))
+                        {
+                            run.HasCleaningPort = true;
+                            //只要有通气立管，就一定有横管
+                            run.HasHorizontalShortLine = true;
+                        }
+                        runs.Add(run);
+
+                        {
+                            {
+                                bool? flag = null;
+                                for (int i1 = ppl.PipeRuns.Count - 1; i1 >= 0; i1--)
+                                {
+                                    var r = ppl.PipeRuns[i1];
+                                    if (r.HasLongTranslator)
+                                    {
+                                        if (!flag.HasValue)
+                                        {
+                                            flag = label.StartsWith("PL") || label.StartsWith("FL");
+                                        }
+                                        else
+                                        {
+                                            flag = !flag.Value;
+                                        }
+                                        r.IsLongTranslatorToLeftOrRight = flag.Value;
+                                    }
+                                }
+                            }
+
+                            {
+                                if (drData.FloorDrains.TryGetValue(label, out int count))
+                                {
+                                    if (count > 0)
+                                    {
+                                        var hanging = run.LeftHanging = new Hanging();
+                                        hanging.FloorDrainsCount = count;
+                                        hanging.HasSCurve = true;
+                                    }
+                                }
+                                else if (label.StartsWith("FL"))
+                                {
+                                    var hanging = run.LeftHanging = new Hanging();
+                                    hanging.FloorDrainsCount = count;
+                                    hanging.HasDoubleSCurve = true;
+                                }
+                            }
+                            {
+                                var b = run.BranchInfo = new BranchInfo();
+                                if (label.StartsWith("PL") || label.StartsWith("FL"))
+                                {
+                                    b.MiddleLeftRun = true;
+                                }
+                                else if (label.StartsWith("TL"))
+                                {
+                                    b.BlueToLeftMiddle = true;
+                                }
+                            }
+                            {
+                                if (storey == "1F")
+                                {
+                                    var o = ppl.Output = new ThwOutput();
+                                    o.DN1 = "DN100";
+                                    o.HasWrappingPipe1 = g.Key.PipeRuns.FirstOrDefault().HasWrappingPipe;
+                                    var hs = new HashSet<string>();
+                                    foreach (var _label in g.Select(x => x.label))
+                                    {
+                                        if (drData.Outlets.TryGetValue(_label, out string well))
+                                        {
+                                            hs.Add(well);
+                                        }
+                                    }
+                                    o.DirtyWaterWellValues = hs.OrderBy(x => { long.TryParse(x, out long v); return v; }).ToList();
+                                    ppl.Comments.Add("===");
+                                    ppl.Comments.Add("outlets:");
+                                    ppl.Comments.AddRange(o.DirtyWaterWellValues);
+                                }
+
+                            }
+                        }
+                    }
+
+
+
+                }
+            }
+            var pipeLineGroups2 = new List<ThwPipeLineGroup>();
+
+
+            var maxStorey = storeys.Where(isWantedStorey).FindByMax(GetScore);
+            //var minStorey = storeys.Where(x => GetScore(x) < ).FindByMin(GetScore);
+            var minStorey = "3F";
+
+            Console.WriteLine(drDatas.Select(x => x.toiletGroupers).ToCadJson());
+
+
+            for (int j = 0; j < pipeLineGroups.Count; j++)
+            {
+                var group = new ThwPipeLineGroup();
+                pipeLineGroups2.Add(group);
+                var ttl = group.TL = new ThwPipeLine();
+                var runs = ttl.PipeRuns = new List<ThwPipeRun>();
+                for (int i = 0; i < pipeLineGroups[j].PL.PipeRuns.Count; i++)
+                {
+                    var run = new ThwPipeRun();
+                    runs.Add(run);
+                    run.Storey = pipeLineGroups[j].PL.PipeRuns[i].Storey;
+                    run.HasLongTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasLongTranslator;
+                    run.IsLongTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsLongTranslatorToLeftOrRight;
+                    run.HasShortTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasShortTranslator;
+                    run.IsShortTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsShortTranslatorToLeftOrRight;
+                }
+                for (int i = 0; i < runs.Count; i++)
+                {
+                    var run = runs[i];
+                    {
+                        var s = GetScore(run.Storey);
+                        var s1 = GetScore(maxStorey);
+                        var s2 = GetScore(minStorey);
+                        if (!(s1 >= s && s >= s2))
+                        {
+                            runs[i] = null;
+                            continue;
+                        }
+                    }
+                    var bi = run.BranchInfo = new BranchInfo();
+                    if (run.Storey == maxStorey)
+                    {
+                        bi.BlueToLeftFirst = true;
+                    }
+                    else if (run.Storey == minStorey)
+                    {
+                        bi.BlueToLeftLast = true;
+                    }
+                    else
+                    {
+                        bi.BlueToLeftMiddle = true;
+                    }
+                }
+            }
+            var maxStoreyIndex = storeys.IndexOf(maxStorey);
+
+            DrawVer1(new DrawingOption()
+            {
+                basePoint = basePoint,
+                OFFSET_X = OFFSET_X,
+                SPAN_X = SPAN_X,
+                HEIGHT = HEIGHT,
+                COUNT = COUNT,
+                storeys = storeys,
+                groups = pipeLineGroups,
+                layer = "W-DRAI-DOME-PIPE",
+                maxStoreyIndex = maxStoreyIndex,
+            });
+
+            if (pipeLineGroups2.Count > 0)
+            {
+                DrawVer1(new DrawingOption()
+                {
+                    basePoint = basePoint,
+                    OFFSET_X = OFFSET_X,
+                    SPAN_X = SPAN_X,
+                    HEIGHT = HEIGHT,
+                    COUNT = COUNT,
+                    storeys = storeys,
+                    groups = pipeLineGroups2,
+                    layer = "W-DRAI-EQPM",
+                    drawStoreyLine = false,
+                    test = true,
+                    maxStoreyIndex = maxStoreyIndex,
+                });
+            }
+        }
+        public static void draw8(List<DrainageDrawingData> drDatas, Point2d basePoint)
+        {
+            var q = drDatas.SelectMany(drData => drData.VerticalPipeLabels).Distinct();
+            //q = q.Where(lb => lb.StartsWith("PL"));
+            //q = q.Where(lb => lb.StartsWith("FL"));
+            //q = q.Where(lb => lb.StartsWith("TL"));
+            q = q.Where(lb => lb.StartsWith("PL") || lb.StartsWith("FL"));
+            q = q.Where(lb => ThDrainageService.IsWantedLabelText(lb));
+            var pipeLabels = q.OrderBy(x => x).ToList();
+            var pipesCmpInfos = new List<PipeCmpInfo>();
+            foreach (var label in pipeLabels)
+            {
+                var info = new PipeCmpInfo();
+                pipesCmpInfos.Add(info);
+                info.label = label;
+                info.PipeRuns = new List<PipeCmpInfo.PipeRunCmpInfo>();
+                for (int i = 0; i < drDatas.Count; i++)
+                {
+                    var drData = drDatas[i];
+                    var runInfo = new PipeCmpInfo.PipeRunCmpInfo();
+                    runInfo.HasShortTranslator = drData.ShortTranslatorLabels.Contains(label);
+                    runInfo.HasLongTranslator = drData.LongTranslatorLabels.Contains(label);
+                    runInfo.HasCleaningPort = drData.CleaningPorts.Contains(label);
+                    runInfo.HasWrappingPipe = drData.WrappingPipes.Contains(label);
+                    info.PipeRuns.Add(runInfo);
+                }
+                info.IsWaterPortOutlet = drDatas.Any(x => x.Outlets.ContainsKey(label));
+            }
+            var list = pipesCmpInfos.GroupBy(x => x).ToList();
             //Dbg.Log(lst.GroupBy(x => x).Select(x => new { k = x.Key, lst = x.ToList() }));
             //return;
 
@@ -1221,20 +1520,21 @@
             var HEIGHT = 1800.0;
             var COUNT = list.Count;
             var STOREY_COUNT = drDatas.Count;
-            var dy = HEIGHT - 1800.0;
             var storeys = Enumerable.Range(1, STOREY_COUNT).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-            var groups = new List<ThwPipeLineGroup>();
+
+
+            var pipeLineGroups = new List<ThwPipeLineGroup>();
 
             foreach (var g in list)
             {
                 var info = g.Key;
                 var label = g.Key.label;
                 var group = new ThwPipeLineGroup();
-                groups.Add(group);
+                pipeLineGroups.Add(group);
                 var ppl = group.PL = new ThwPipeLine();
                 ppl.Label1 = label;
                 ppl.Comments = g.Select(x => x.label).ToList();
-                ppl.PipeRuns = new List<ThwPipeRun>();
+                var runs = ppl.PipeRuns = new List<ThwPipeRun>();
                 for (int i = 0; i < drDatas.Count; i++)
                 {
                     var storey = storeys[i];
@@ -1249,7 +1549,7 @@
                         HasCheckPoint = true,
                         HasCleaningPort = info.PipeRuns[i].HasCleaningPort,
                     };
-                    ppl.PipeRuns.Add(run);
+                    runs.Add(run);
                     {
                         bool? flag = null;
                         for (int i1 = ppl.PipeRuns.Count - 1; i1 >= 0; i1--)
@@ -1289,7 +1589,14 @@
                     }
                     {
                         var b = run.BranchInfo = new BranchInfo();
-                        b.MiddleLeftRun = true;
+                        if (label.StartsWith("PL") || label.StartsWith("FL"))
+                        {
+                            b.MiddleLeftRun = true;
+                        }
+                        else if (label.StartsWith("TL"))
+                        {
+                            b.BlueToLeftMiddle = true;
+                        }
                     }
                     {
                         if (storey == "1F")
@@ -1297,15 +1604,15 @@
                             var o = ppl.Output = new ThwOutput();
                             o.DN1 = "DN100";
                             o.HasWrappingPipe1 = g.Key.PipeRuns.FirstOrDefault().HasWrappingPipe;
-                            Dbg.Log(g.Key);
-                            o.DirtyWaterWellValues = new List<string>();
+                            var hs = new HashSet<string>();
                             foreach (var _label in g.Select(x => x.label))
                             {
                                 if (drData.Outlets.TryGetValue(_label, out string well))
                                 {
-                                    o.DirtyWaterWellValues.Add(well);
+                                    hs.Add(well);
                                 }
                             }
+                            o.DirtyWaterWellValues = hs.OrderBy(x => { long.TryParse(x, out long v); return v; }).ToList();
                             ppl.Comments.Add("===");
                             ppl.Comments.Add("outlets:");
                             ppl.Comments.AddRange(o.DirtyWaterWellValues);
@@ -1316,9 +1623,72 @@
                 }
             }
 
-            Dbg.Log(groups);
+            var pipeLineGroups2 = new List<ThwPipeLineGroup>();
+            for (int j = 0; j < pipeLineGroups.Count; j++)
+            {
+                var group = new ThwPipeLineGroup();
+                pipeLineGroups2.Add(group);
+                var ttl = group.TL = new ThwPipeLine();
+                var runs = ttl.PipeRuns = new List<ThwPipeRun>();
+                for (int i = 0; i < drDatas.Count; i++)
+                {
+                    var storey = storeys[i];
+                    var drData = drDatas[i];
+                    var run = new ThwPipeRun();
+                    runs.Add(run);
+                    run.HasLongTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasLongTranslator;
+                    run.IsLongTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsLongTranslatorToLeftOrRight;
+                    run.HasShortTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasShortTranslator;
+                    run.IsShortTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsShortTranslatorToLeftOrRight;
+                }
+                for (int i = 0; i < runs.Count; i++)
+                {
+                    var run = runs[i];
+                    var bi = run.BranchInfo = new BranchInfo();
+                    if (i == runs.Count - 1)
+                    {
+                        bi.BlueToLeftFirst = true;
+                    }
+                    else if (i == 0)
+                    {
+                        bi.BlueToLeftLast = true;
+                    }
+                    else
+                    {
+                        bi.BlueToLeftMiddle = true;
+                    }
+                }
+            }
 
-            NewMethod6(basePoint, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, storeys, groups);
+
+            DrawVer1(new DrawingOption()
+            {
+                basePoint = basePoint,
+                OFFSET_X = OFFSET_X,
+                SPAN_X = SPAN_X,
+                HEIGHT = HEIGHT,
+                COUNT = COUNT,
+                storeys = storeys,
+                groups = pipeLineGroups,
+                layer = "W-DRAI-DOME-PIPE",
+            });
+
+            if (pipeLineGroups2.Count > 0)
+            {
+                DrawVer1(new DrawingOption()
+                {
+                    basePoint = basePoint,
+                    OFFSET_X = OFFSET_X,
+                    SPAN_X = SPAN_X,
+                    HEIGHT = HEIGHT,
+                    COUNT = COUNT,
+                    storeys = storeys,
+                    groups = pipeLineGroups2,
+                    layer = "W-DRAI-EQPM",
+                    drawStoreyLine = false,
+                    test = true,
+                });
+            }
         }
     }
 }

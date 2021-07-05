@@ -93,6 +93,7 @@
     <Compile Include="GeojsonExtractor\Service\ThExtractLineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractPolylineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractService.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThRoomBuildAreaService.cs" />
     <Compile Include="GeojsonExtractor\ThAILayerManager.cs" />
     <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
+    <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
@@ -212,6 +214,8 @@
     <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
+    <Compile Include="Service\ThRoomOutlineSimplifier.cs" />
+    <Compile Include="Service\ThShearWallSimplifer.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
     <Compile Include="Engine\ThDB3SlabExtractionVisitor.cs" />
@@ -229,13 +233,11 @@
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
-    <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3RoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallExtractionVisitor.cs" />
-    <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
     <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
@@ -389,7 +391,6 @@
     <Compile Include="Service\ThPositionTagsDbExtension.cs" />
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />
-    <Compile Include="Service\ThRoomDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
@@ -586,9 +587,9 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.3.0" />
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.3" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

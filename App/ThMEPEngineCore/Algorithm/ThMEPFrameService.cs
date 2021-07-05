@@ -47,9 +47,9 @@ namespace ThMEPEngineCore.Algorithm
             return poly;
         }
 
-        public static Polyline NormalizeEx(Polyline frame)
+        public static Polyline NormalizeEx(Polyline frame, double tolerance = ThMEPEngineCoreCommon.LOOSE_CLOSED_POLYLINE)
         {
-            if (IsClosed(frame))
+            if (IsClosed(frame, tolerance))
             {
                 return Normalize(frame);
             }
@@ -64,10 +64,10 @@ namespace ThMEPEngineCore.Algorithm
             return results.Cast<Polyline>().FindByMax(o => o.Area);
         }
 
-        public static bool IsClosed(Polyline frame)
+        public static bool IsClosed(Polyline frame, double tolerance)
         {
             // 支持真实闭合或视觉闭合
-            return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= ThMEPEngineCoreCommon.LOOSE_CLOSED_POLYLINE);
+            return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= tolerance);
         }
     }
 }

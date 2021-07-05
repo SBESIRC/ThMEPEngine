@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-   public class ThSlabLayerManager
+   public class ThSlabLayerManager: ThDbLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -17,10 +17,6 @@ namespace ThMEPEngineCore.Service
                     .Select(o => o.Name)
                     .ToList();
             }
-        }
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
         private static bool IsSlabLayerName(string name)
         {

@@ -12,26 +12,30 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsJudger
     {
-        private double align_limit;
         public List<Point2d> dir_align_points;
         public List<Point2d> ver_align_points;
+        private double align_limit;
+        private Point3d start_pos;
         private List<Line> v_grid_set;
         private List<Line> h_grid_set;
         private List<Line> crossing_v_grid_set; 
         private List<Line> crossing_h_grid_set;
         private ThCADCoreNTSSpatialIndex grid_spatial_index;
-        public ThDuctPortsJudger(List<Merged_endline_Info> endline, List<Endline_seg_Info> endline_segs)
+        public ThDuctPortsJudger(Point3d start_pos_,
+                                 List<Merged_endline_Info> endline, 
+                                 List<Endline_seg_Info> endline_segs)
         {
             align_limit = 500;
+            start_pos = start_pos_;
             dir_align_points = new List<Point2d>();
             ver_align_points = new List<Point2d>();
             v_grid_set = new List<Line>();
             h_grid_set = new List<Line>();
             crossing_v_grid_set = new List<Line>();
             crossing_h_grid_set = new List<Line>();
-
             Inner_shrink(endline_segs);
             var grid_lines = Get_grid_lines();
+            Move_to_org(grid_lines);
             if (grid_lines.Count > 0)
             {
                 grid_spatial_index = new ThCADCoreNTSSpatialIndex(grid_lines);
@@ -41,7 +45,14 @@ namespace ThMEPHVAC.Model
                 Adjust_end_endline_width(endline_segs);
             }
         }
-
+        private void Move_to_org(DBObjectCollection grid_lines)
+        {
+            var mat = Matrix3d.Displacement(-start_pos.GetAsVector());
+            foreach (Line l in grid_lines)
+            {
+                l.TransformBy(mat);
+            }
+        }
         private void Adjust_end_endline_width(List<Endline_seg_Info> endline_segs)
         {
             foreach (var merged_endline in endline_segs)

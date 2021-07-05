@@ -15,6 +15,10 @@
     using ThCADExtension;
     using NetTopologySuite.Geometries;
     using ThMEPWSS.DebugNs;
+    using NetTopologySuite.Operation.OverlayNG;
+    using NetTopologySuite.Operation.Overlay;
+    using NetTopologySuite.Algorithm;
+    using DU = ThMEPWSS.Assistant.DrawUtils;
     public class RainSystemDrawingData
     {
         public List<string> RoofLabels = new List<string>();
@@ -55,6 +59,87 @@ pt,
     }
     public static class GeoFac
     {
+        public class AngleDegreeParallelComparer : IEqualityComparer<double>
+        {
+            double tol;
+
+            public AngleDegreeParallelComparer(double tol)
+            {
+                this.tol = tol;
+            }
+
+            public static void FixAngleDegree(ref double v)
+            {
+                while (v < 0) v += 360;
+                while (v >= 360) v -= 360;
+            }
+            public bool Equals(double x, double y)
+            {
+                var v = x - y;
+                FixAngleDegree(ref v);
+                return v.EqualsTo(0, tol) || v.EqualsTo(360, tol);
+            }
+
+            public int GetHashCode(double obj)
+            {
+                return 0;
+            }
+        }
+        public static List<List<GLineSegment>> GroupParallelLines(List<GLineSegment> lines, double extend_distance, double collinear_gap_distance, double angle_tollerence = 1)
+        {
+            lines = lines.Where(x => x.IsValid).Distinct().ToList();
+            var lineGeos = lines.Select(x => x.ToLineString()).ToList();
+            var spatialIndex = GeoFac.CreateIntersectsSelector(lineGeos);
+            foreach (var line in lines)
+            {
+                var buffer = line.Extend(extend_distance).Buffer(collinear_gap_distance);
+                var objs = spatialIndex(buffer).Select(lineGeos).ToList(lines);
+                if (objs.Count > 1)
+                {
+                    var parallelLines = objs.Where(l => l.IsParallelTo(line, angle_tollerence)).ToList();
+                    if (parallelLines.Count > 1)
+                    {
+                        var angle = line.AngleDegree;
+                        var parallelLineGeos = parallelLines.Select(lines).ToList(lineGeos);
+
+                        var tagLines = parallelLineGeos.Where(l => l.UserData != null).ToList();
+                        var tag = parallelLineGeos.Select(l => l.UserData).FirstOrDefault(x => x != null) ?? new object();
+                        foreach (var l in parallelLineGeos)
+                        {
+                            if (l.UserData == null)
+                            {
+                                l.UserData = tag;
+                            }
+                            else if (l.UserData != tag)
+                            {
+                                var _tag = l.UserData;
+                                foreach (var _l in lineGeos.Where(x => x.UserData == _tag).ToList())
+                                {
+                                    _l.UserData = tag;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            var results = new List<List<GLineSegment>>();
+            foreach (var group in lineGeos.GroupBy(o => o.UserData))
+            {
+                if (group.Key == null)
+                {
+                    foreach (var o in group)
+                    {
+                        results.Add(new List<GLineSegment>() { lines[lineGeos.IndexOf(o)] });
+                    }
+                }
+                else
+                {
+                    results.Add(group.Select(lineGeos).ToList(lines));
+                }
+            }
+            return results;
+        }
+
         static readonly NetTopologySuite.Index.Strtree.GeometryItemDistance itemDist = new NetTopologySuite.Index.Strtree.GeometryItemDistance();
         public static List<Point2d> GetAlivePoints(List<GLineSegment> segs, double radius)
         {
@@ -92,14 +177,13 @@ pt,
             }
             return flags.ToList(points, true);
         }
-        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer)
+        public static List<Point2d> GetLabelLineEndPoints(List<GLineSegment> lines, Geometry killer, double radius = 5)
         {
-            var radius = 5;
             var points = GetAlivePoints(lines, radius);
             var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToGeometryList();
             var list = lines.Where(x => x.IsHorizontal(5)).Select(x => x.ToLineString()).ToGeometryList();
             list.Add(killer);
-            return points.Except(GeoFac.CreateGeometrySelector(pts)(GeoFac.CreateGeometry(list)).Select(pts).ToList(points)).ToList();
+            return points.Except(GeoFac.CreateIntersectsSelector(pts)(GeoFac.CreateGeometry(list)).Select(pts).ToList(points)).ToList();
         }
         public static Func<Point3d, Geometry> NearestNeighbourPoint3dF(List<Geometry> geos)
         {
@@ -382,6 +466,36 @@ pt,
             }
         }
         public static readonly NetTopologySuite.Utilities.GeometricShapeFactory GeometricShapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory);
+        public static List<GLineSegment> ToNodedLineSegments(IList<GLineSegment> lineSegments)
+        {
+            var arr = lineSegments.Where(x => x.IsValid).Distinct().Select(x => x.ToLineString()).ToArray();
+            if (arr.Length == 0) return new List<GLineSegment>();
+            var geo = OverlayNGRobust.Overlay(new MultiLineString(arr), null, SpatialFunction.Union);
+            static IEnumerable<GLineSegment> f(LineString ls)
+            {
+                var arr = ls.Coordinates.Select(x => x.ToPoint2d()).ToArray();
+                for (int i = 1; i < arr.Length; i++)
+                {
+                    var seg = new GLineSegment(arr[i - 1], arr[i]);
+                    if (seg.IsValid)
+                    {
+                        yield return seg;
+                    }
+                }
+            }
+            if (geo is LineString ls)
+            {
+                return f(ls).ToList();
+            }
+            else if (geo is MultiLineString mls)
+            {
+                return mls.Geometries.OfType<LineString>().SelectMany(ls => f(ls)).ToList();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
         public static List<Geometry> CreateGeometries(IList<GLineSegment> lineSegments, double radius, int numPoints = 6)
         {
             var ret = new List<Geometry>(lineSegments.Count);
@@ -403,6 +517,98 @@ pt,
         {
             var geos = CreateGeometries(lineSegments, radius, numPoints);
             return _GroupGeometriesToKVIndex(geos);
+        }
+        public class Extents2dCalculator
+        {
+            public double MinX;
+            public double MinY;
+            public double MaxX;
+            public double MaxY;
+            public static Extents2d Calc(IEnumerable<GLineSegment> segs)
+            {
+                var o = new Extents2dCalculator();
+                o.Update(segs);
+                return o.ToExtents2d();
+            }
+            public void Update(IEnumerable<GLineSegment> segs)
+            {
+                foreach (var seg in segs)
+                {
+                    Update(seg);
+                }
+            }
+            public void Update(GLineSegment seg)
+            {
+                Update(seg.StartPoint);
+                Update(seg.EndPoint);
+            }
+            public void Update(Point2d pt)
+            {
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public void Update(Point3d pt)
+            {
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public void Update(Extents2d ext)
+            {
+                var pt = ext.MinPoint;
+                if (MinX > pt.X) MinX = pt.X;
+                if (MinY > pt.Y) MinY = pt.Y;
+                pt = ext.MaxPoint;
+                if (MaxX < pt.X) MaxX = pt.X;
+                if (MaxY < pt.Y) MaxY = pt.Y;
+            }
+            public Extents2d ToExtents2d()
+            {
+                return new Extents2d(MinX, MinY, MaxY, MaxY);
+            }
+            public Extents3d ToExtents3d()
+            {
+                return new Extents3d(new Point3d(MinX, MinY, 0), new Point3d(MaxY, MaxY, 0));
+            }
+            public GRect ToGRect()
+            {
+                return new GRect(MinX, MinY, MaxY, MaxY);
+            }
+        }
+        public static GLineSegment GetCenterLine(List<GLineSegment> segs)
+        {
+            // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // 😀Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
+            if (segs.Count == 0) throw new ArgumentException();
+            if (segs.Count == 1) return segs[0];
+            var geo = MinimumDiameter.GetMinimumRectangle(new MultiLineString(segs.Select(x => x.ToLineString()).ToArray()));
+            var ls = (geo as Polygon)?.Shell ?? (geo as LineString);
+            var pts = ls.Coordinates.Select(x => x.ToPoint2d()).ToArray();
+            if (pts.Length == 2)
+            {
+                return new GLineSegment(pts[0], pts[1]);
+            }
+            return new GLineSegment(pts[0] + .5 * (pts[1] - pts[0]), pts[2] + .5 * (pts[3] - pts[2]));
+        }
+        public static GLineSegment GetCenterLine(List<GLineSegment> segs, double work_around)
+        {
+            if (work_around > 0)
+            {
+                var ext = Extents2dCalculator.Calc(segs);
+                var center = ext.GetCenter();
+                if (center.GetDistanceTo(Point2d.Origin) > work_around)
+                {
+                    var v = center.ToVector2d();
+                    var m1 = Matrix2d.Displacement(-v);
+                    var m2 = Matrix2d.Displacement(v);
+                    return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                }
+            }
+            return GetCenterLine(segs);
         }
         public static Geometry CreateGeometry(IEnumerable<Geometry> geomList)
         {
@@ -503,36 +709,21 @@ pt,
             };
             return shapeFactory.CreateCircle();
         }
-        public static Func<GRect, List<Geometry>> CreateGRectContainsSelector(List<Geometry> geos)
+        public static Func<Geometry, List<Geometry>> CreateContainsSelector(List<Geometry> geos)
         {
             if (geos.Count == 0) return r => new List<Geometry>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
+            return geo =>
             {
-                if (!r.IsValid) return new List<Geometry>();
-                var poly = new Polygon(r.ToLinearRing());
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
+                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
             };
         }
-        public static Func<GRect, List<Geometry>> CreateGRectSelector(List<Geometry> geos)
+        public static Func<Geometry, List<T>> CreateIntersectsSelector<T>(List<T> geos) where T : Geometry
         {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
-            {
-                if (!r.IsValid) return new List<Geometry>();
-                var poly = new Polygon(r.ToLinearRing());
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
-            };
-        }
-        public static Func<Geometry, List<Geometry>> CreateGeometrySelector(List<Geometry> geos)
-        {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
@@ -541,29 +732,15 @@ pt,
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
             };
         }
-        public static Func<LinearRing, List<Geometry>> CreateLinearRingSelector(List<Geometry> geos)
+        public static Func<T, List<T>> CreateSTRTreeSelector<T>(List<T> list, Func<T, Envelope> getEnvelope, Func<T, bool> test)
         {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return r =>
+            if (list.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            foreach (var item in list) engine.Insert(getEnvelope(item), item);
+            return item =>
             {
-                if (r == null) throw new ArgumentNullException();
-                var poly = new Polygon(r);
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
-            };
-        }
-        public static Func<Polygon, List<Geometry>> CreatePolygonSelector(List<Geometry> geos)
-        {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return poly =>
-            {
-                if (poly == null) throw new ArgumentNullException();
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(poly);
-                return engine.Query(poly.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
+                if (item == null) throw new ArgumentNullException();
+                return engine.Query(getEnvelope(item)).Where(g => test(g)).ToList();
             };
         }
         public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex(List<Geometry> geos)
@@ -588,7 +765,7 @@ pt,
             if (killer != null)
             {
                 var _pts = pts.Select(pt => pt.ToNTSPoint()).Cast<Geometry>().ToList();
-                var ptsf = CreateGeometrySelector(_pts);
+                var ptsf = CreateIntersectsSelector(_pts);
                 pts = ptsf(killer).Select(_pts).ToList(pts, reverse: true);
             }
             var gvs = new List<GVector>(pts.Count);
@@ -656,6 +833,7 @@ pt,
         public List<Geometry> WaterPorts;
         public List<Geometry> WashingMachines;
         public List<Geometry> CleaningPorts;
+        public List<Geometry> SideFloorDrains;
         public void Init()
         {
             Storeys ??= new List<Geometry>();
@@ -664,11 +842,12 @@ pt,
             DLines ??= new List<Geometry>();
             VLines ??= new List<Geometry>();
             VerticalPipes ??= new List<Geometry>();
-            WrappingPipes??= new List<Geometry>();
+            WrappingPipes ??= new List<Geometry>();
             FloorDrains ??= new List<Geometry>();
             WaterPorts ??= new List<Geometry>();
             WashingMachines ??= new List<Geometry>();
             CleaningPorts ??= new List<Geometry>();
+            SideFloorDrains ??= new List<Geometry>();
         }
         public static DrainageCadData Create(DrainageGeoData data)
         {
@@ -689,6 +868,7 @@ pt,
             o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
             o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
             o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
+            o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
             return o;
         }
 
@@ -701,7 +881,10 @@ pt,
         {
             return x => x.Buffer(bfSize);
         }
-
+        public static Func<Point2d, Point> ConvertSideFloorDrains()
+        {
+            return x => x.ToNTSPoint();
+        }
         public static Func<Point2d, Polygon> ConvertCleaningPortsF()
         {
             return x => new GCircle(x, 40).ToCirclePolygon(36);
@@ -766,13 +949,14 @@ pt,
             ret.AddRange(WaterPorts);
             ret.AddRange(WashingMachines);
             ret.AddRange(CleaningPorts);
+            ret.AddRange(SideFloorDrains);
             return ret;
         }
         public List<DrainageCadData> SplitByStorey()
         {
             var lst = new List<DrainageCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -788,6 +972,7 @@ pt,
                 o.WaterPorts.AddRange(objs.Where(x => this.WaterPorts.Contains(x)));
                 o.WashingMachines.AddRange(objs.Where(x => this.WashingMachines.Contains(x)));
                 o.CleaningPorts.AddRange(objs.Where(x => this.CleaningPorts.Contains(x)));
+                o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
                 lst.Add(o);
             }
             return lst;
@@ -879,7 +1064,7 @@ pt,
         {
             var lst = new List<RainSystemCadData>(this.Storeys.Count);
             if (this.Storeys.Count == 0) return lst;
-            var f = GeoFac.CreateGeometrySelector(GetAllEntities());
+            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
             foreach (var storey in this.Storeys)
             {
                 var objs = f(storey);
@@ -922,6 +1107,7 @@ pt,
         public List<string> WaterPortLabels;
         public List<GRect> WashingMachines;
         public List<Point2d> CleaningPorts;
+        public List<Point2d> SideFloorDrains;
         public void Init()
         {
             Storeys ??= new List<GRect>();
@@ -936,9 +1122,11 @@ pt,
             WaterPortLabels ??= new List<string>();
             WashingMachines ??= new List<GRect>();
             CleaningPorts ??= new List<Point2d>();
+            SideFloorDrains ??= new List<Point2d>();
         }
         public void FixData()
         {
+            Init();
             Storeys = Storeys.Where(x => x.IsValid).Distinct().ToList();
             Labels = Labels.Where(x => x.Boundary.IsValid).Distinct().ToList();
             LabelLines = LabelLines.Where(x => x.Length > 0).Distinct().ToList();

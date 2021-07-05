@@ -115,6 +115,26 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
+        /// 找到与门相交的房间
+        /// </summary>
+        /// <param name="door"></param>
+        /// <param name="rooms"></param>
+        /// <returns></returns>
+        public List<ThIfcRoom> GetNeedTHRooms(Polyline door, List<ThIfcRoom> rooms)
+        {
+            List<ThIfcRoom> needRooms = new List<ThIfcRoom>();
+            foreach (var room in rooms)
+            {
+                if (door.Intersects(room.Boundary))
+                {
+                    needRooms.Add(room);
+                }
+            }
+
+            return needRooms;
+        }
+
+        /// <summary>
         /// 找到需要的与房间相交的门
         /// </summary>
         /// <param name="doors"></param>
@@ -194,6 +214,25 @@ namespace ThMEPElectrical.StructureHandleService
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(lanes.ToCollection());
             var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
             return needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
+        }
+
+        /// <summary>
+        /// 获取空间内的车道线或者中心线
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<List<Line>> GetNeedLanes(List<List<Line>> lanes, Polyline room)
+        {
+            List<List<Line>> resLines = new List<List<Line>>();
+            foreach (var laneLst in lanes)
+            {
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(laneLst.ToCollection());
+                var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
+                resLines.Add(needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList());
+            }
+
+            return resLines; 
         }
 
         /// <summary>

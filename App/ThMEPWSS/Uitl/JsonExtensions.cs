@@ -90,9 +90,19 @@ namespace ThMEPWSS.JsonExtensionsNs
                 }
             }
         }
-        public static T Last<T>(this IList<T> source,int index)
+        public static T Last<T>(this IList<T> source, int index)
         {
             return source[source.Count - index];
+        }
+        public static Dictionary<T, int> ToCountDict<T>(this IEnumerable<T> source)
+        {
+            var d = new Dictionary<T, int>();
+            foreach (var item in source)
+            {
+                d.TryGetValue(item, out int value);
+                d[item] = value + 1;
+            }
+            return d;
         }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
@@ -268,6 +278,7 @@ namespace ThMEPWSS.CADExtensionsNs
         {
             return new Point3dCollection() { new Point3d(r.MinX, r.MinY, 0), new Point3d(r.MinX, r.MaxY, 0), new Point3d(r.MaxX, r.MaxY, 0), new Point3d(r.MaxX, r.MinY, 0) };
         }
+
         public static Line ToCadLine(this GLineSegment lineSegment)
         {
             return new Line() { StartPoint = lineSegment.StartPoint.ToPoint3d(), EndPoint = lineSegment.EndPoint.ToPoint3d() };
@@ -438,12 +449,20 @@ namespace ThMEPWSS.CADExtensionsNs
 
             return distance;
         }
-        public static double PolyLineLength(this Polyline thisLine,double flag = 500.0)
+        public static double PolyLineLength(this Polyline thisLine, double flag = 500.0)
         {
             double length = 0.0;
             length = thisLine.Length + (thisLine.NumberOfVertices - 2) * flag;
 
             return length;
+        }
+
+        public static bool PointOnLine(this Line thisLine, Point3d pt, bool extent, double tolerance)
+        {
+            var ptNearest = thisLine.GetClosestPointTo(pt, extent);
+
+            return (pt.DistanceTo(ptNearest) < tolerance);
+
         }
     }
 }

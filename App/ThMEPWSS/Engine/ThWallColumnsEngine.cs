@@ -18,11 +18,10 @@ namespace ThMEPWSS.Engine
         ThShearWallExtractionEngine shearWallEngine = new ThShearWallExtractionEngine();
         ThDB3ArchWallExtractionEngine archWallEngine = new ThDB3ArchWallExtractionEngine();
         /// <summary>
-        /// 获取墙、梁信息
+        /// 获取墙、柱信息
         /// </summary>
         public ThWallColumnsEngine() 
         {
-            ///这里获取时一次性获取图纸中的所有数据，后续不用每次都去获取图纸信息
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 columnEngine.Extract(acdb.Database);
@@ -48,10 +47,32 @@ namespace ThMEPWSS.Engine
             columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
             return columns;
         }
+        public List<Polyline> AllWalls() 
+        {
+            var dateEngine = new ThShearWallRecognitionEngine();
+            dateEngine.Recognize(shearWallEngine.Results, new Autodesk.AutoCAD.Geometry.Point3dCollection());
+            var walls = new List<Polyline>();
+            walls = dateEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            var objs = new DBObjectCollection();
+            walls.ForEach(x => objs.Add(x));
+            //获取建筑墙
+            var archDataEngine = new ThDB3ArchWallRecognitionEngine();
+            archDataEngine.Recognize(archWallEngine.Results, new Autodesk.AutoCAD.Geometry.Point3dCollection());
+            foreach (var o in archDataEngine.Elements)
+            {
+                if (o.Outline is Polyline wall)
+                {
+                    walls.Add(wall);
+                }
+            }
+            //ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            //walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+            return walls;
+        }
         public List<Polyline> GetShearWalls(Polyline polyline)
         {
-            var dateEngine = new ThColumnRecognitionEngine();
-            dateEngine.Recognize(columnEngine.Results, polyline.Vertices());
+            var dateEngine = new ThShearWallRecognitionEngine();
+            dateEngine.Recognize(shearWallEngine.Results, polyline.Vertices());
             var walls = new List<Polyline>();
             walls = dateEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             var objs = new DBObjectCollection();
@@ -77,8 +98,8 @@ namespace ThMEPWSS.Engine
         }
         public List<Polyline> GetArchShearWalls(Polyline polyline) 
         {
-            var dataEngine = new ThColumnRecognitionEngine();
-            dataEngine.Recognize(columnEngine.Results, polyline.Vertices());
+            var dataEngine = new ThShearWallRecognitionEngine();
+            dataEngine.Recognize(shearWallEngine.Results, polyline.Vertices());
             var walls = new List<Polyline>();
             walls = dataEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             var objs = new DBObjectCollection();

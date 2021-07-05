@@ -57,9 +57,11 @@
     <Compile Include="CommonConverter.cs" />
     <Compile Include="ControlUtils\CommonUtil.cs" />
     <Compile Include="ControlUtils\FindControlUtil.cs" />
+    <Compile Include="ControlUtils\FormUtil.cs" />
     <Compile Include="ControlUtils\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlUtils\UListItemData.cs" />
     <Compile Include="CustomControl\ImageButton.cs" />
+    <Compile Include="ModelCloneUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

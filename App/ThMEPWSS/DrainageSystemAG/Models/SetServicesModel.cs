@@ -19,7 +19,6 @@ namespace ThMEPWSS.DrainageSystemAG.Models
             balconyRiserPipeDiameter = EnumPipeDiameter.DN100;
             condensingRiserPipeDiameter = EnumPipeDiameter.DN50;
             roofRainRiserPipeDiameter = EnumPipeDiameter.DN100;
-            roofRainRiserPipeDiameter = EnumPipeDiameter.DN100;
             maxRoofGravityRainBucketRiserPipeDiameter = EnumPipeDiameter.DN100;
             maxRoofSideDrainRiserPipeDiameter = EnumPipeDiameter.DN100;
             minRoofGravityRainBucketRiserPipeDiameter = EnumPipeDiameter.DN100;

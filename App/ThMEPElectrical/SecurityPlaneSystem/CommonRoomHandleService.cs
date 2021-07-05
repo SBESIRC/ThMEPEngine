@@ -23,6 +23,21 @@ namespace ThMEPElectrical.SecurityPlaneSystem
             return roomInfo;
         }
 
+        public static List<string> HandleRoom(List<string> roomNames)
+        {
+            List<string> roomInfo = new List<string>();
+            var tableTree = ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree;
+            foreach (var treeNode in tableTree)
+            {
+                foreach (var roomName in roomNames)
+                {
+                    roomInfo.AddRange(GetNodeInfo(treeNode, roomName, false));
+                }
+            }
+
+            return roomInfo;
+        }
+
         /// <summary>
         /// 判断是否包含这个
         /// </summary>

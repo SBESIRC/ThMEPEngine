@@ -7,28 +7,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.DrainageSystemAG.Models;
 
 namespace ThMEPWSS.DrainageSystemAG.Services
 {
     public static class CreateBlockService
     {
-        public static List<ObjectId> CreateBlocks(this Database database, List<CreateBlockInfo> createBlockInfos)
+        public static List<CreateResult> CreateBlocks(this Database database, List<CreateBlockInfo> createBlockInfos)
         {
-            List<ObjectId> objIds = new List<ObjectId>();
+            List<CreateResult> createRes = new List<CreateResult>();
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 foreach (var item in createBlockInfos)
                 {
                     var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        item.layoutName,
+                        item.layerName,
                         item.blockName,
                         item.createPoint,
                         new Scale3d(item.scaleNum),
                         item.rotateAngle,
                         item.attNameValues);
-                    if (null == id)
+                    if (null == id || !id.IsValid)
                         continue;
                     if (null != item.dymBlockAttr && item.dymBlockAttr.Count > 0) 
                     {
@@ -39,10 +40,10 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                             id.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
                         }
                     }
-                    objIds.Add(id);
+                    createRes.Add(new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag));
                 }
             }
-            return objIds;
+            return createRes;
         }
         public static ObjectId CreateBlock(this Database database, Point3d pt, Vector3d layoutDir, double scaleNum, double rotateAngle, string layerName, string blockName, Dictionary<string, string> attNameValues)
         {
@@ -58,6 +59,60 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                     attNameValues);
                 return id;
             }
+        }
+
+        public static List<CreateResult> CreateBasicElement(this Database database,List<CreateBasicElement> basicElements) 
+        {
+            List<CreateResult> createResults = new List<CreateResult>();
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (var item in basicElements)
+                {
+                    var path = item.baseCurce;
+                    path.Layer = item.layerName;
+                    if (null != item.lineColor)
+                    {
+                        path.Color = item.lineColor;
+                        path.LineWeight = LineWeight.LineWeight050;
+                        path.CastShadows = true;
+                    }
+                    var id= acadDatabase.ModelSpace.Add(path);
+                    if (null == id || !id.IsValid)
+                        continue;
+                    createResults.Add(new CreateResult(id, item.baseCurce.StartPoint, EnumEquipmentType.other, item.floorId, ""));
+                }
+            }
+            return createResults;
+        }
+
+        public static List<CreateResult> CreateTextElement(this Database database, List<CreateDBTextElement> basicElements) 
+        {
+            var createResults = new List<CreateResult>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (var item in basicElements)
+                {
+                    var id = acadDatabase.ModelSpace.Add(item.dbText);
+                    if (null == id || !id.IsValid)
+                        continue;
+                    if (!string.IsNullOrEmpty(item.textStyle)) 
+                    {
+                        try 
+                        {
+                            var dbText = acadDatabase.Element<DBText>(id);
+                            DrawUtils.SetTextStyle(dbText, item.textStyle);
+                        }
+                        catch (Exception ex) 
+                        {
+                        
+                        }
+                        
+                    }
+                    createResults.Add(new CreateResult(id, item.dbText.Position, EnumEquipmentType.other, item.floorUid, ""));
+                }
+            }
+            return createResults;
         }
     }
     

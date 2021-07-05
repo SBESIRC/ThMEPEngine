@@ -14,46 +14,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
     {
         double angle = 45;
         double blockWidth = 300;
-        public ControllerModel LayoutController(List<Polyline> structs, Point3d doorPt, Vector3d doorDir)
+        public ControllerModel LayoutController(List<Polyline> structs, Polyline polylibe, Point3d doorPt, Vector3d doorDir)
         {
-            var layoutInfo = CalControllerLayoutPt(structs, doorDir, doorPt).First();
+            var layoutInfo = UtilService.CalLayoutInfo(structs, polylibe, doorDir, doorPt, angle, blockWidth).First();
             var controller = CalControllerInfo(layoutInfo, doorDir);
 
             return controller;
-        }
-
-        /// <summary>
-        /// 计算控制器布置点位
-        /// </summary>
-        /// <param name="structs"></param>
-        /// <param name="dir"></param>
-        /// <param name="doorPt"></param>
-        /// <returns></returns>
-        private Dictionary<Line, Point3d> CalControllerLayoutPt(List<Polyline> structs, Vector3d dir, Point3d doorPt)
-        {
-            Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
-            foreach (var str in structs)
-            {
-                var allLines = str.GetAllLinesInPolyline();
-                foreach (var line in allLines)
-                {
-                    var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                    if (!dir.IsParallelWithTolerance(lineDir, angle) && line.Length > blockWidth)
-                    {
-                        var pt = line.StartPoint.DistanceTo(doorPt) < line.EndPoint.DistanceTo(doorPt) ? line.StartPoint : line.EndPoint;
-                        var checkDir = (pt - doorPt).GetNormal();
-                        if (checkDir.DotProduct(lineDir) < 0)
-                        {
-                            lineDir = -lineDir;
-                        }
-
-                        var layoutPt = pt + lineDir * (blockWidth / 2);
-                        resLayoutInfo.Add(line, layoutPt);
-                    }
-                }
-            }
-
-            return resLayoutInfo.OrderBy(x => x.Value.DistanceTo(doorPt)).ToDictionary(x => x.Key, y => y.Value);
         }
 
         /// <summary>

@@ -89,8 +89,11 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThGuardToourSystemCommand.cs" />
+    <Compile Include="Command\ThInsertStoreyCommand.cs" />
     <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
     <Compile Include="Command\ThIntrusionAlarmSystemHositingCommand.cs" />
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
@@ -163,11 +166,18 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\HandleAccessControlRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutAccessControlService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayVisitorTalkService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\CommonRoomHandleService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
-    <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutStairwellsGTService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutOtherGTService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutWallMountingDetectorService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutMonitoringService.cs" />
@@ -218,6 +228,7 @@
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
@@ -256,9 +267,7 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SecurityPlaneSystem\AccessControlSystem\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

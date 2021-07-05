@@ -1,13 +1,14 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
+using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Geometries.Utilities;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADCore.NTS
 {
@@ -41,12 +42,21 @@ namespace ThCADCore.NTS
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon().Geometries);
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
             return curves.UnionGeometries().ToDbCollection();
+        }
+
+        public static DBObjectCollection BufferPolygons(this DBObjectCollection polygons, double distance)
+        {
+            var bufferPara = new BufferParameters()
+            {
+                JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre,
+            };
+            return polygons.ToNTSMultiPolygon().Buffer(distance, bufferPara).ToDbCollection();
         }
 
         public static Geometry Intersection(this DBObjectCollection curves, Curve curve)

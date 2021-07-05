@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThStructureColumnLayerManager
+    public class ThStructureColumnLayerManager : ThDbLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -31,22 +31,17 @@ namespace ThMEPEngineCore.Service
             }
         }
 
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-        }
-
         private static bool IsColumnCurveLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
 
-            // 图层名未包含S_BEAM
+            // 图层名未包含S_COLU
             if (!layerName.Contains("S_COLU"))
             {
                 return false;
             }
 
-            // 若图层名包含S_BEAM，
+            // 若图层名包含S_COLU，
             // 则继续判断是否包含HACH
             if (layerName.Contains("HACH"))
             {
