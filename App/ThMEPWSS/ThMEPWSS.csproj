@@ -37,6 +37,16 @@
     <Compile Include="Assistant\FengDbgTest.cs" />
     <Compile Include="Assistant\FengDbgTesting.cs" />
     <Compile Include="Assistant\FengKeys.cs" />
+    <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
+    <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThElectricWellService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThHydrantPipeLineService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThShearWallService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThStairsRoomService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThStructureColService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThStructureWallService.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThWindWellService.cs" />
     <Compile Include="Hydrant\Data\ThHydrantDoorOpeningExtractor.cs" />
     <Compile Include="Pipe\Service\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
@@ -161,7 +171,6 @@
     <Compile Include="HydrantConnectPipe\Service\ThCreateHydrantPathService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantBranchLineService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantDataManager.cs" />
-    <Compile Include="HydrantConnectPipe\Service\ThHydrantMainLineService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantPipeService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantService.cs" />
     <Compile Include="Hydrant\Data\ThExternalSpaceExtractor.cs" />

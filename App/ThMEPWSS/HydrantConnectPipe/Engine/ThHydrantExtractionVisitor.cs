@@ -34,8 +34,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
         public override bool IsDistributionElement(Entity entity)
         {
             if (entity is BlockReference reference)
-            {
-                if(reference.Layer == "室内消火栓平面")
+            {                
+                if (reference.GetEffectiveName() == "室内消火栓平面")
                 {
                     return true;
                 }
@@ -69,6 +69,22 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
             {
                 throw new NotSupportedException();
             }
+        }
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -14,5 +14,14 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
         {
             MainLines = new List<Line>();
         }
+
+        public static ThHydrantMainLine Create(List<Line> lines)
+        {
+            var mainLine = new ThHydrantMainLine
+            {
+                MainLines = lines
+            };
+            return mainLine;
+        }
     }
 }

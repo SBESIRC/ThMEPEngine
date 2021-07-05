@@ -35,7 +35,7 @@ namespace ThMEPEngineCore.Engine
             if (blockTableRecord.IsDynamicBlock)
             {
                 return false;
-            }
+            }            
 
             // 忽略图纸空间和匿名块
             if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)

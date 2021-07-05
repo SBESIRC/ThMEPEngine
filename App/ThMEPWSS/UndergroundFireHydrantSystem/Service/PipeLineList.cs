@@ -48,14 +48,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, null, 1000, 2);//打断部分 自动连接
-            foreach (var l in GLineConnectList)
+
+            var autConnectList = GeoFac.GroupParallelLines(GLineSegList, 1000, 5);
+            var tmpSegList = new List<GLineSegment>();
+            foreach (var l in autConnectList)
             {
-                GLineSegList.Add(l);
+                tmpSegList.Add(GeoFac.GetCenterLine(l));
             }
 
+                //var GLineConnectList = GeoFac.AutoConn(GLineSegList, null, 1000, 2);//打断部分 自动连接
+                //foreach (var l in GLineConnectList)
+                //{
+                //    GLineSegList.Add(l);
+                //}
+
             lineList = new List<Line>();//GLineSegment 转 line
-            foreach (var gl in GLineSegList)
+            foreach (var gl in tmpSegList)
             {
                 var pt1 = new Point3d(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3d(gl.EndPoint.X, gl.EndPoint.Y, 0);

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPWSS.HydrantConnectPipe.Engine;
 using ThMEPWSS.HydrantConnectPipe.Model;
 
@@ -20,20 +22,15 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var hydrantPipe = acadDb.ModelSpace.OfType<Entity>().Where(o => o.Layer == "W-FRPT-HYDT-EQPM").ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(hydrantPipe.ToCollection());
+                var hydrantPipe = acadDb.ModelSpace.OfType<Circle>().Where(o => o.Layer == "W-FRPT-HYDT-EQPM").ToList();
+                var map = new Dictionary<Polyline, Circle>();
+                hydrantPipe.ForEach(o => map.Add(o.ToRectangle(),o));
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
                 var dbObjects = spatialIndex.SelectCrossingPolygon(selectArea);
 
                 var rst = new List<ThHydrantPipe>();
-                foreach (var obj in dbObjects)
-                {
-                    if (obj is Circle)
-                    {
-                        var ent = obj as Entity;
-                        var blk = obj as Circle;
-                        rst.Add(ThHydrantPipe.Create(ent));
-                    }
-                }
+                dbObjects.Cast<Polyline>().ForEach(p=> rst.Add(ThHydrantPipe.Create(map[p])));
                 return rst;
             }
         }
@@ -46,7 +43,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 hydrantPipeEngine.RecognizeMS(database.Database, selectArea);//从本图上取数据
                 foreach (var element in hydrantPipeEngine.Datas)
                 {
-                    ThHydrantPipe fireHydrantPipe = ThHydrantPipe.Create(element.Geometry);
+                    ThHydrantPipe fireHydrantPipe = ThHydrantPipe.Create(element);
                     fireHydrantPipes.Add(fireHydrantPipe);
                 }
             }
