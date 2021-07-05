@@ -260,6 +260,12 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             floorLineVisitor.AddElementType(typeof(Polyline));
             externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalFloorLine, floorLineVisitor));
 
+            //添加设备线识别
+            var equmLineFilter = new ElementFilter(new FilterBase("AE-EQPM", EnumFilterType.IsContains));
+            var equmLineVisitor = new BasicElementVisitor(new List<ElementFilter> { equmLineFilter });
+            equmLineVisitor.AddElementType(typeof(Line));
+            equmLineVisitor.AddElementType(typeof(Polyline));
+            externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalEqumLine, equmLineVisitor));
         }
     }
     class ElementFilterModel 
@@ -286,5 +292,6 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         ExternalAreaText=104,
         ExternalWindowLine = 105,
         ExternalFloorLine =106,
+        ExternalEqumLine=107,
     }
 }
