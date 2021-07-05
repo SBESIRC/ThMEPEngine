@@ -68,7 +68,6 @@
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
-    <Compile Include="Engine\ThDB3ContourLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3RoomMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />

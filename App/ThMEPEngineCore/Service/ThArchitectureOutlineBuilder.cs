@@ -1,128 +1,161 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThArchitectureOutlineBuilder
     {
         //
-        public List<Polyline> Results { get; set; }
-        public Model Model { get; set; }
-        public ModelData Data { get; set; }
-        public ThArchitectureOutlineBuilder()
+        public List<Polyline> Results { get; private set; }
+        private DBObjectCollection _polygons { get; set; }
+        private const double ProOffsetDistance = 5.0;
+        private const double ProAREATOLERANCE = 1.0;
+        private const double PostOffsetDistance = -500.0;
+        private const double PostAREATOLERANCE = 5000000;
+        private const double PostBufferAREATOLERANCE = 0.0;
+        public ThArchitectureOutlineBuilder(DBObjectCollection polygons)
         {
-            Model = Model.MODELFIRST;
             Results = new List<Polyline>();
+            _polygons = polygons;
         }
 
         public void Build()
         {
-            var modelData = PrepareData();
-            var cleanData = PreProcess(modelData.MergeData());
-            cleanData = Buffer(cleanData);
+            //var cleanData = PreProcess(Polygons);
+            var cleanData = Buffer(_polygons, ProOffsetDistance);
             var results = Union(cleanData);
+            results = Buffer(results, -ProOffsetDistance);
+            FilterSmallArea(results, ProAREATOLERANCE);
             results = PostProcess(results);
+            //TODO : 取Shell
             Results = results.Cast<Polyline>().ToList();
         }
         private DBObjectCollection PostProcess(DBObjectCollection objs)
         {
-            //ToDo
-            return new DBObjectCollection();
+            var result = FilterSmallArea(objs, PostAREATOLERANCE);
+            result = Buffer(result, PostOffsetDistance);
+            FilterSmallArea(result, PostBufferAREATOLERANCE);
+            result = Buffer(result, -PostOffsetDistance);
+            return FilterSmallArea(result, PostBufferAREATOLERANCE);
         }
         private DBObjectCollection Union(DBObjectCollection objs)
         {
-            //ToDo
-            return new DBObjectCollection();
+            var result = objs.UnionPolygons();
+            return FilterSmallArea(result, ProAREATOLERANCE);
         }
-        private DBObjectCollection Buffer(DBObjectCollection objs)
+        private DBObjectCollection Buffer(DBObjectCollection objs,double disttance)
         {
-            //ToDo
-            return new DBObjectCollection();
+            return objs.Buffer(disttance);
         }
         private DBObjectCollection PreProcess(DBObjectCollection objs)
         {
-            //ToDo
-            return new DBObjectCollection();
-        }
-        private ModelData PrepareData()
+            var results = new DBObjectCollection();
+            results = objs;
+
+            return results;
+        }      
+        private DBObjectCollection FilterSmallArea(DBObjectCollection objs,double areaTolerance)
         {
-            if (Model== Model.MODELFIRST)
+            return objs.Cast<Entity>().Where(o =>
             {
-                return PrepareModel1Data();
-            }
-            else if (Model == Model.MODELSECOND)
-            {
-                return PrepareMode21Data();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private Model1Data PrepareModel1Data()
-        {
-            var data = new Model1Data();
-            //ToDo
-            return data;
-        }
-        private Model2Data PrepareMode21Data()
-        {
-            var data = new Model2Data();
-            //ToDo
-            return data;
+                if (o is Polyline polygon)
+                {
+                    return polygon.Area > areaTolerance;
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    return mPolygon.Area > areaTolerance;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }).ToCollection();
         }
     }
     public abstract class ModelData
     {
-        public List<Entity> ShearWalls { get; set; }
-        public List<Entity> ArchitectureWalls { get; set; }
-        public ModelData()
+        protected DBObjectCollection _shearWalls;
+        protected DBObjectCollection _columns; 
+        public ModelData(Database database, Point3dCollection polygon)
         {
-            ShearWalls = new List<Entity>();
-            ArchitectureWalls = new List<Entity>();
+            _shearWalls = new DBObjectCollection();
+            var shearWallEngine = new ThShearWallRecognitionEngine();
+            shearWallEngine.Recognize(database, polygon);
+            _shearWalls = shearWallEngine.Geometries;
+            _columns = new DBObjectCollection();
+            var columnEngine = new ThDB3ColumnRecognitionEngine();
+            columnEngine.Recognize(database, polygon);
+            _columns = columnEngine.Geometries;
         }
         public abstract DBObjectCollection MergeData();
     }
 
     public class Model1Data : ModelData
     {
-        public List<Polyline> Columns { get; set; }
-        public List<Polyline> Doors { get; set; }
-        public List<Polyline> Windows { get; set; }
-        public List<Polyline> Cornices { get; set; }
-        public Model1Data()
-        {            
-            Columns = new List<Polyline>();
-            Doors = new List<Polyline>(); 
-            Windows = new List<Polyline>();
-            Cornices = new List<Polyline>();
+        private readonly DBObjectCollection _archWall;
+        private readonly DBObjectCollection _doors;
+        private readonly DBObjectCollection _windows;
+        private readonly DBObjectCollection _cornices;
+        public Model1Data(Database database, Point3dCollection polygon) : base(database,polygon)
+        {
+            _archWall = new DBObjectCollection();
+            var archWallEngine = new ThDB3ArchWallRecognitionEngine();
+            archWallEngine.Recognize(database, polygon);
+            _archWall = archWallEngine.Geometries;
+            _doors = new DBObjectCollection();
+            var doorEngine = new ThDB3DoorRecognitionEngine();
+            doorEngine.Recognize(database, polygon);
+            _doors = archWallEngine.Geometries;
+            _windows = new DBObjectCollection();
+            var windowEngine = new ThDB3WindowRecognitionEngine();
+            windowEngine.Recognize(database, polygon);
+            _windows = archWallEngine.Geometries;
+            _cornices = new DBObjectCollection();
+            var corniceEngine = new ThDB3CorniceRecognitionEngine();
+            corniceEngine.Recognize(database, polygon);
+            _cornices = archWallEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
         {
-            throw new NotImplementedException();
+            var results = new DBObjectCollection();
+            _columns.Cast<Entity>().ForEach(o => results.Add(o));
+            _shearWalls.Cast<Entity>().ForEach(o => results.Add(o));
+            _archWall.Cast<Entity>().ForEach(o => results.Add(o));
+            _doors.Cast<Entity>().ForEach(o => results.Add(o));
+            _windows.Cast<Entity>().ForEach(o => results.Add(o));
+            _cornices.Cast<Entity>().ForEach(o => results.Add(o));
+            return results;
         }
     }
     public class Model2Data : ModelData
     {
-        public List<Entity> Beams { get; set; }
-        public Model2Data()
+        private readonly DBObjectCollection _beams;
+        public Model2Data(Database database, Point3dCollection polygon) : base(database,polygon)
         {
-            Beams = new List<Entity>();
+            _beams = new DBObjectCollection();
+            var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine();
+            beamEngine.Recognize(database, polygon);
+            _beams = beamEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
         {
-            throw new NotImplementedException();
+            var results = new DBObjectCollection();
+            _columns.Cast<Entity>().ForEach(o => results.Add(o));
+            _shearWalls.Cast<Entity>().ForEach(o => results.Add(o));
+            _beams.Cast<Entity>().ForEach(o => results.Add(o));
+            return results;
         }
-    }
-    public enum Model
-    {
-        MODELFIRST, 
-        MODELSECOND
     }
 }
