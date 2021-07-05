@@ -1,7 +1,5 @@
 ﻿using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
-using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -41,7 +39,7 @@ namespace ThMEPEngineCore.Engine
             if (IsBuildElement(hatch) && CheckLayerValid(hatch))
             {
                 // 暂时不支持有“洞”的填充
-                hatch.Boundaries().ForEachDbObject(o =>
+                hatch.Boundaries().ForEach(o =>
                 {
                     if (o is Polyline poly)
                     {
@@ -49,8 +47,8 @@ namespace ThMEPEngineCore.Engine
                         // 从而获得不同形状的矩形柱
                         // 考虑到多段线不能使用非比例的缩放
                         // 这里采用一个变通方法：
-                        //  将矩形柱转化成实线，缩放后再转回多段线
-                        if (poly.IsRectangle())
+                        //  将矩形柱转化成2d Solid，缩放后再转回多段线
+                        if (poly.NumberOfVertices <= 5)
                         {
                             var solid = poly.ToSolid();
                             solid.TransformBy(matrix);
