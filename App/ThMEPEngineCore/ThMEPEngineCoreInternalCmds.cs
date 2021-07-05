@@ -159,25 +159,6 @@ namespace ThMEPEngineCore
         }
 
 #if ACAD2016
-        [CommandMethod("TIANHUACAD", "THPREPAIR", CommandFlags.Modal)]
-        public void ThPRepair()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity e in ThMEPPolygonRepairService.Repair(poly))
-                {
-                    acadDatabase.ModelSpace.Add(e);
-                    e.SetDatabaseDefaults();
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THACLDDemoTest", CommandFlags.Modal)]
         public void THExtractAreaCenterLineDemoTest()
         {
