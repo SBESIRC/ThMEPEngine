@@ -1,12 +1,13 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Service;
+using NFox.Cad;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -61,12 +62,15 @@ namespace ThMEPEngineCore.Engine
             else
             {
                 curves = objs;
-            }
-            curves = ThRoomOutlineSimplifier.MakeValid(curves);
+            }               
             if (curves.Count > 0)
             {
-                var results = ThRoomOutlineSimplifier.Simplify(curves);
-                Elements.AddRange(results.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
+                var transformer = new ThMEPOriginTransformer(curves);
+                transformer.Transform(curves);
+                curves = ThRoomOutlineSimplifier.MakeValid(curves);
+                curves = ThRoomOutlineSimplifier.Simplify(curves);
+                transformer.Reset(curves);
+                Elements.AddRange(curves.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
             }
         }
 
@@ -74,5 +78,6 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotImplementedException();
         }
+
     }
 }
