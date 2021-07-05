@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemAG.DataEngine
@@ -11,7 +12,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         //List<BasicElementVisitor> externalVisitors;
         List<ElementFilterModel> basicModelSpaceVisitors;
         List<ElementFilterModel> externalVisitors;
-        public BasicElementEngine() 
+        public BasicElementEngine()
         {
             basicModelSpaceVisitors = new List<ElementFilterModel>();
             externalVisitors = new List<ElementFilterModel>();
@@ -26,10 +27,10 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     modelSpaceExtor.Accept(visitor.basicElementVisitor);
                 modelSpaceExtor.Extract(acdb.Database);
 
-                //ThBasicElementExtractor exExternalExtor = new ThBasicElementExtractor(EnumLoadDataSource.External);
-                //foreach (var visitor in externalVisitors)
-                //    exExternalExtor.Accept(visitor.basicElementVisitor);
-                //exExternalExtor.Extract(acdb.Database);
+                ThBasicElementExtractor exExternalExtor = new ThBasicElementExtractor(EnumLoadDataSource.External);
+                foreach (var visitor in externalVisitors)
+                    exExternalExtor.Accept(visitor.basicElementVisitor);
+                exExternalExtor.Extract(acdb.Database);
             }
         }
         public List<Entity> GetAllEntity()
@@ -59,42 +60,102 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             }
             return entities;
         }
-        public List<Entity> GetAllEntity(Polyline polyline) 
+        public List<Entity> GetAllEntity(Polyline polyline)
         {
             List<Entity> entities = new List<Entity>();
             entities.AddRange(GetModelSpaceEntity(polyline));
             entities.AddRange(GetExtractorEntity(polyline));
             return entities;
         }
-        public List<Entity> GetModelSpaceEntity(Polyline polyline) 
+        public Dictionary<EnumElementType, List<Entity>> GetAllTypeEntity(Polyline polyline, List<EnumElementType> filters = null)
         {
-            List<Entity> entities = new List<Entity>();
-            var ntsGeo = polyline.ToNTSPolygon();
-            foreach (var item in basicModelSpaceVisitors)
+            var resKeyValue = new Dictionary<EnumElementType, List<Entity>>();
+            var modelSpaceValues = GetModelSpaceTypeEntity(polyline, filters);
+            if (null != modelSpaceValues && modelSpaceValues.Count > 0) 
             {
-                if (item == null || item.basicElementVisitor == null || item.basicElementVisitor.Results == null || item.basicElementVisitor.Results.Count < 1)
-                    continue;
-                foreach (var entity in item.basicElementVisitor.Results)
+                foreach(var keyValue in modelSpaceValues) 
                 {
-                    var ent = entity.Geometry;
-                    if (ent is Entity entity1)
+                    if (keyValue.Value == null || keyValue.Value.Count < 1)
+                        continue;
+                    if(resKeyValue.Any(c=>c.Key == keyValue.Key)) 
                     {
-                        var entGeo = entity1.GeometricExtents.ToNTSPolygon();
-                        if (ntsGeo.Intersects(entGeo))
-                            entities.Add(entity1);
+                        var key = resKeyValue.Where(c => c.Key == keyValue.Key).FirstOrDefault().Key;
+                        resKeyValue[key].AddRange(keyValue.Value);
+                    }
+                    else 
+                    {
+                        resKeyValue.Add(keyValue.Key, keyValue.Value);
                     }
                 }
+            }
+            var extracotorValues = GetExtractorTypeEntity(polyline, filters);
+            if (null != extracotorValues && extracotorValues.Count > 0)
+            {
+                foreach (var keyValue in extracotorValues)
+                {
+                    if (keyValue.Value == null || keyValue.Value.Count < 1)
+                        continue;
+                    if (resKeyValue.Any(c => c.Key == keyValue.Key))
+                    {
+                        var key = resKeyValue.Where(c => c.Key == keyValue.Key).FirstOrDefault().Key;
+                        resKeyValue[key].AddRange(keyValue.Value);
+                    }
+                    else
+                    {
+                        resKeyValue.Add(keyValue.Key, keyValue.Value);
+                    }
+                }
+            }
+            return resKeyValue;
+        }
+        public List<Entity> GetModelSpaceEntity(Polyline polyline, List<EnumElementType> filters = null) 
+        {
+            List<Entity> entities = new List<Entity>();
+            var modelSpaceValues = GetModelSpaceTypeEntity(polyline, filters);
+            if (null == modelSpaceValues || modelSpaceValues.Count < 1)
+                return entities;
+            foreach (var keyValue in modelSpaceValues)
+            {
+                if (keyValue.Value == null || keyValue.Value.Count < 1)
+                    continue;
+                entities.AddRange(keyValue.Value);
             }
             return entities;
         }
-        public List<Entity> GetExtractorEntity(Polyline polyline)
+        public List<Entity> GetExtractorEntity(Polyline polyline, List<EnumElementType> filters = null)
         {
             List<Entity> entities = new List<Entity>();
+            var modelSpaceValues = GetExtractorTypeEntity(polyline, filters);
+            if (null == modelSpaceValues || modelSpaceValues.Count < 1)
+                return entities;
+            foreach (var keyValue in modelSpaceValues)
+            {
+                if (keyValue.Value == null || keyValue.Value.Count < 1)
+                    continue;
+                entities.AddRange(keyValue.Value);
+            }
+            return entities;
+        }
+
+        public Dictionary<EnumElementType, List<Entity>> GetModelSpaceTypeEntity(Polyline polyline, List<EnumElementType> filters = null)
+        {
+            return GetTypeEntity(polyline, basicModelSpaceVisitors, filters);
+        }
+        public Dictionary<EnumElementType, List<Entity>> GetExtractorTypeEntity(Polyline polyline,List<EnumElementType> filters=null) 
+        {
+            return GetTypeEntity(polyline, externalVisitors, filters);
+        }
+        Dictionary<EnumElementType, List<Entity>> GetTypeEntity(Polyline polyline, List<ElementFilterModel> elementFilters, List<EnumElementType> filters = null)
+        {
+            var resKeyValue = new Dictionary<EnumElementType, List<Entity>>();
             var ntsGeo = polyline.ToNTSPolygon();
-            foreach (var item in externalVisitors)
+            foreach (var item in elementFilters)
             {
                 if (item == null || item.basicElementVisitor == null || item.basicElementVisitor.Results == null || item.basicElementVisitor.Results.Count < 1)
                     continue;
+                if (filters != null && filters.Count > 0 && !filters.Any(c => c == item.elementType))
+                    continue;
+                var entities = new List<Entity>();
                 foreach (var entity in item.basicElementVisitor.Results)
                 {
                     var ent = entity.Geometry;
@@ -105,8 +166,11 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                             entities.Add(entity1);
                     }
                 }
+                if (null == entities || entities.Count < 1)
+                    continue;
+                resKeyValue.Add(item.elementType, entities);
             }
-            return entities;
+            return resKeyValue;
         }
         void InitModelSpaceLayerFilters() 
         {
@@ -175,6 +239,27 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             dimVisitor.AddElementType(typeof(Dimension));
             externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalDimension, dimVisitor));
 
+            //添加面积文字识别
+            var areaFilter = new ElementFilter(new FilterBase("AD-AREA-USNO", EnumFilterType.IsContains));
+            var areaVisitor = new BasicElementVisitor(new List<ElementFilter> { areaFilter });
+            areaVisitor.AddElementType(typeof(DBText));
+            areaVisitor.AddElementType(typeof(MText));
+            externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalAreaText, areaVisitor));
+
+            //添加窗线识别
+            var windowLineFilter = new ElementFilter(new FilterBase("AE-WIND", EnumFilterType.IsContains));
+            var windowLineVisitor = new BasicElementVisitor(new List<ElementFilter> { windowLineFilter });
+            windowLineVisitor.AddElementType(typeof(Line));
+            windowLineVisitor.AddElementType(typeof(Polyline));
+            externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalWindowLine, windowLineVisitor));
+
+            //添加楼板线的识别
+            var floorLineFilter = new ElementFilter(new FilterBase("AE-FLOR", EnumFilterType.IsContains));
+            var floorLineVisitor = new BasicElementVisitor(new List<ElementFilter> { floorLineFilter });
+            floorLineVisitor.AddElementType(typeof(Line));
+            floorLineVisitor.AddElementType(typeof(Polyline));
+            externalVisitors.Add(new ElementFilterModel(EnumElementType.ExternalFloorLine, floorLineVisitor));
+
         }
     }
     class ElementFilterModel 
@@ -198,5 +283,8 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         ExternalLineAxis=101,
         ExternalCircleAxis=102,
         ExternalDimension=103,
+        ExternalAreaText=104,
+        ExternalWindowLine = 105,
+        ExternalFloorLine =106,
     }
 }

@@ -22,25 +22,35 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             {
                 foreach (var item in createBlockInfos)
                 {
-                    var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                    
+                    try
+                    {
+                        var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         item.layerName,
                         item.blockName,
                         item.createPoint,
                         new Scale3d(item.scaleNum),
                         item.rotateAngle,
                         item.attNameValues);
-                    if (null == id || !id.IsValid)
-                        continue;
-                    if (null != item.dymBlockAttr && item.dymBlockAttr.Count > 0) 
-                    {
-                        foreach (var dyAttr in item.dymBlockAttr) 
+                        if (null == id || !id.IsValid)
+                            continue;
+                        if (null != item.dymBlockAttr && item.dymBlockAttr.Count > 0)
                         {
-                            if (dyAttr.Key == null || dyAttr.Value == null)
-                                continue;
-                            id.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
+                            foreach (var dyAttr in item.dymBlockAttr)
+                            {
+                                if (dyAttr.Key == null || dyAttr.Value == null)
+                                    continue;
+                                id.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
+                            }
                         }
+                        createRes.Add(new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag));
                     }
-                    createRes.Add(new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag));
+                    catch (Exception ex) 
+                    { 
+                    
+                    }
+                    
+                    
                 }
             }
             return createRes;
@@ -69,18 +79,26 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             {
                 foreach (var item in basicElements)
                 {
-                    var path = item.baseCurce;
-                    path.Layer = item.layerName;
-                    if (null != item.lineColor)
+                    try
                     {
-                        path.Color = item.lineColor;
-                        path.LineWeight = LineWeight.LineWeight050;
-                        path.CastShadows = true;
+                        var path = item.baseCurce;
+                        path.Layer = item.layerName;
+                        if (null != item.lineColor)
+                        {
+                            path.Color = item.lineColor;
+                            path.LineWeight = LineWeight.LineWeight050;
+                            path.CastShadows = true;
+                        }
+                        var id = acadDatabase.ModelSpace.Add(path);
+                        if (null == id || !id.IsValid)
+                            continue;
+                        createResults.Add(new CreateResult(id, item.baseCurce.StartPoint, EnumEquipmentType.other, item.floorId, ""));
                     }
-                    var id= acadDatabase.ModelSpace.Add(path);
-                    if (null == id || !id.IsValid)
-                        continue;
-                    createResults.Add(new CreateResult(id, item.baseCurce.StartPoint, EnumEquipmentType.other, item.floorId, ""));
+                    catch (Exception ex) 
+                    { 
+                    
+                    }
+                    
                 }
             }
             return createResults;
@@ -93,23 +111,22 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             {
                 foreach (var item in basicElements)
                 {
-                    var id = acadDatabase.ModelSpace.Add(item.dbText);
-                    if (null == id || !id.IsValid)
-                        continue;
-                    if (!string.IsNullOrEmpty(item.textStyle)) 
+                    try
                     {
-                        try 
+                        var id = acadDatabase.ModelSpace.Add(item.dbText);
+                        if (null == id || !id.IsValid)
+                            continue;
+                        if (!string.IsNullOrEmpty(item.textStyle))
                         {
                             var dbText = acadDatabase.Element<DBText>(id);
                             DrawUtils.SetTextStyle(dbText, item.textStyle);
                         }
-                        catch (Exception ex) 
-                        {
-                        
-                        }
-                        
+                        createResults.Add(new CreateResult(id, item.dbText.Position, EnumEquipmentType.other, item.floorUid, ""));
                     }
-                    createResults.Add(new CreateResult(id, item.dbText.Position, EnumEquipmentType.other, item.floorUid, ""));
+                    catch (Exception ex)
+                    {
+
+                    }
                 }
             }
             return createResults;

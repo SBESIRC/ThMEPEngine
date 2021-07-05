@@ -150,7 +150,12 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             else if (cElem.baseCurce is Circle)
             {
-
+                var circle = (Circle)cElem.baseCurce;
+                var center = circle.Center;
+                var moveVecotor = center - oldBasePoint;
+                var newCenter = newBasePoint + moveVecotor;
+                var newCircle = new Circle(newCenter, circle.Normal, circle.Radius);
+                basicElement = new CreateBasicElement(floorId, newCircle, cElem.layerName, cElem.belongBlockId, cElem.curveTag, cElem.lineColor);
             }
             return basicElement;
         }

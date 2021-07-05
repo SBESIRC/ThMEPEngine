@@ -1,15 +1,15 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
+    /// <summary>
+    /// 复制数据其它楼层框线
+    /// </summary>
     class CopyToOtherFloor
     {
         private List<CreateBlockInfo> _thisFloorBlocks;

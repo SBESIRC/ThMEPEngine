@@ -54,6 +54,24 @@ namespace ThMEPWSS.Common
             return avgPoint;
         }
         /// <summary>
+        /// 判断点在直线上
+        /// +---------------------------+
+        ///     outTolerance|            
+        ///                 +
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="linePoint"></param>
+        /// <param name="lineDirection"></param>
+        /// <param name="outTolerance"></param>
+        /// <returns></returns>
+        public static bool PointInLine(this Point3d point, Point3d linePoint, Vector3d lineDirection, double outTolerance = 1) 
+        {
+            var prjPoint = point.PointToLine(linePoint, lineDirection);
+            if (prjPoint.DistanceTo(point) > outTolerance)
+                return false;
+            return true;
+        }
+        /// <summary>
         /// 点是否在线段上
         ///   extendTolerance
         /// + | --------------------------- | +
@@ -84,10 +102,8 @@ namespace ThMEPWSS.Common
         /// <returns></returns>
         public static bool PointInLineSegment(this Point3d point, Point3d startPoint,Point3d endPoint,double extendTolerance=1,double outTolerance=1)
         {
-            if (extendTolerance < 0)
-                extendTolerance = 0;
-            if (outTolerance < 0)
-                outTolerance = 0;
+            extendTolerance = extendTolerance < 0?0:extendTolerance;
+            outTolerance = outTolerance<0? 0:extendTolerance;
             var lineDir = (endPoint - startPoint).GetNormal();
             var prjPoint = point.PointToLine(startPoint, lineDir);
             if (prjPoint.DistanceTo(point) > outTolerance)
@@ -184,7 +200,7 @@ namespace ThMEPWSS.Common
             var sqrLen1 = D1.X * D1.X + D1.Y * D1.Y;
             var sqlEpsilon = 1;
             //有一个交点
-            if (sqrKross > sqlEpsilon * sqrLen0 * sqrLen1)
+            if (sqrKross >= sqlEpsilon * sqrLen0 * sqrLen1)
             {
                 var s = (E.X * D1.Y - E.Y * D1.X) / kross;
                 intersectionPoint = P0 + s * D0;

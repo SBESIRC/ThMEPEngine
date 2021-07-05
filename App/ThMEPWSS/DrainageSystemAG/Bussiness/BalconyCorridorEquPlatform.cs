@@ -20,7 +20,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         double _floorDrainBalconyPipeNearDistance = 600;// 地漏找阳台立管范围
         double _floorDrainEqumPipeNearDistance = 2500;//地漏找设备平台立管范围
         double _pipeCasingLength = 100;//套管长度
-        double _pipeConnectLineCornerRange = 200;//地漏和立管连线需要转角的距离范围
         double _balconyRoomFindNearRoomDistance = 600;//阳台外扩找靠近房间距离
         double _balconyAddPipeFindNearWallDistance = 100;//阳台添加立管时获取添加点外扩找墙距离
         double _balconyAddPipeCenterNearWallDistance = 100;//阳台添加立管中心距墙距离
@@ -75,7 +74,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 foreach (var room in otherRooms) 
                 {
-                    if (room == null || room.roomTypeName == EnumRoomType.Balcony || room.roomTypeName == EnumRoomType.Corridor || room.roomTypeName == EnumRoomType.equipmentPlatform)
+                    if (room == null || room.roomTypeName == EnumRoomType.Balcony || room.roomTypeName == EnumRoomType.Corridor || room.roomTypeName == EnumRoomType.EquipmentPlatform)
                         continue;
                     if (room.outLine.Area < 2 * 1000000)
                         continue;
@@ -141,7 +140,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 if (item == null || item.enumEquipmentType != EnumEquipmentType.floorDrain)
                     continue;
-                if (item.enumRoomType != EnumRoomType.equipmentPlatform && item.enumRoomType != EnumRoomType.Other)
+                if (item.enumRoomType != EnumRoomType.EquipmentPlatform && item.enumRoomType != EnumRoomType.Other)
                     continue;
                 EquipmentBlockSpace lnPipe = null;
                 EquipmentBlockSpace ytPipe = null;
@@ -292,8 +291,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 else 
                 {
                     //以立管为中心，做lineDir为X轴，垂直方向为Y轴，将其它的点位根据 距离轴
-                    var lines = CenterConnect(pipe.blockCenterPoint, lineDir, otherBlocks.Select(c=>c.blockCenterPoint).ToList());
-                    if (null != lines && lines.Count > 0) 
+                    var connectPipe = new PipeDrainConnect(pipe.blockCenterPoint, otherBlocks.Select(c => c.blockCenterPoint).ToList());
+                    var lines = connectPipe.PipeDrainConnectByMainAxis(lineDir);
+                    if (null != lines && lines.Count > 0)
                         pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
                 }
                 return;
@@ -318,7 +318,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var targetPipes = new List<EquipmentBlockSpace>();
             foreach (var pipe in _riserPipe) 
             {
-                if (pipe.enumRoomType == EnumRoomType.Other || pipe.enumRoomType == EnumRoomType.equipmentPlatform)
+                if (pipe.enumRoomType == EnumRoomType.Other || pipe.enumRoomType == EnumRoomType.EquipmentPlatform)
                 { 
                     if(pipe.enumEquipmentType == EnumEquipmentType.balconyRiser)
                         targetPipes.Add(pipe);
@@ -339,7 +339,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             pipeRelation.connectBlockIds.AddRange(connectSpaceEqum.Select(c=>c.uid).ToList());
 
             //房间轮廓取obb
-            var obbPline = balcCorrRoom.GetRoomOBBPolyline();
+            var obbPline = balcCorrRoom.outLine; //balcCorrRoom.GetRoomOBBPolyline();
             var nearLine = NearRoomLine(obbPline, nearPipe.blockCenterPoint);
             var points = connectSpaceEqum.Select(c => c.blockCenterPoint).ToList();
             Point3d crossPoint = new Point3d();
@@ -347,16 +347,19 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (nearLine == null)
             {
                 //不能直接穿过，根据点位信息，进一步计算弯折信息
+                obbPline = balcCorrRoom.GetRoomOBBPolyline();
                 var orderPts = PointVectorUtil.PointsOrderByDirection(points, lineDir, nearPipe.blockCenterPoint);
                 var nearPoint = orderPts.OrderBy(c => c.Value).FirstOrDefault().Key;
                 var roomNearLine = NearRoomLine(obbPline, nearPoint, lineDir);
                 crossPoint = nearPoint.PointToLine(roomNearLine);
                 outDir = (crossPoint - nearPoint).GetNormal();
-                var lines = CenterConnect(crossPoint, lineDir, points, true);
+                var connectPipeInner = new PipeDrainConnect(crossPoint, points);
+                var lines = connectPipeInner.PipeDrainConnectByMainAxis(outDir);
                 if (null != lines && lines.Count > 0)
                 {
                     pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                    var pipeLines = CenterConnect(crossPoint, lineDir, new List<Point3d> { nearPipe.blockCenterPoint }); 
+                    var connectPipeOut = new PipeDrainConnect(crossPoint, new List<Point3d> { nearPipe.blockCenterPoint });
+                    var pipeLines = connectPipeOut.PipeDrainConnectByMainAxis(outDir);
                     if (null != lines && lines.Count > 0)
                         pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
                 }
@@ -365,9 +368,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 //可以直接穿过,根据穿过的线
                 crossPoint = nearPipe.blockCenterPoint.PointToLine(nearLine);
-                //var dir = (crossPoint - nearPipe.blockCenterPoint).GetNormal();
                 outDir = (nearPipe.blockCenterPoint -crossPoint).GetNormal();
-                var lines = CenterConnect(crossPoint, lineDir, points,true);
+
+                var connectPipe = new PipeDrainConnect(crossPoint,points);
+                var lines = connectPipe.PipeDrainConnectByMainAxis(outDir);
+                //var lines = CenterConnect(crossPoint, lineDir, points,true);
                 if (null != lines && lines.Count > 0)
                 {
                     pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
@@ -421,6 +426,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
             }
             var orderPoints = PointVectorUtil.PointsOrderByDirection(targetLines.Select(c => c.Value).ToList(), roomXAxis,false, nearPoint);
+            if (orderPoints.Count < 1)
+                return false;
             var firstPoint = orderPoints.FirstOrDefault();
             var lastPoint = orderPoints.LastOrDefault();
             if (null != nearRoom)
@@ -441,23 +448,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             //两侧都不能放置,随便放置一侧
             if (firstDis > _balconyPipeMaxRadius*2 && lastDis > _balconyPipeMaxRadius * 2)
             {
-                if (CanAddPipe(firstPoint, roomXAxis, yAxis, out centerPoint))
-                {}
-                else if (CanAddPipe(lastPoint, roomXAxis.Negate(), yAxis, out centerPoint))
-                {}
+                if (CanAddPipe(firstPoint, roomXAxis, yAxis, out centerPoint)) {}
+                else if (CanAddPipe(lastPoint, roomXAxis.Negate(), yAxis, out centerPoint)) {}
                 else 
                 {
                     if (firstDis < lastDis)
-                    {
                         centerPoint = firstPoint + roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-                    }
                     else 
-                    {
                         centerPoint = lastPoint - roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-                    }
                 }
             }
-            else if (firstDis > _balconyPipeMaxRadius * 2)
+            else if (firstDis > _balconyPipeMaxRadius*1.5)
             {
                 centerPoint = firstPoint + roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
             }
@@ -476,7 +477,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             else 
             {
-                var lines = CenterConnect(centerPoint, roomXAxis, points);
+                var connectPipeInner = new PipeDrainConnect(centerPoint, points);
+                //var lines = CenterConnect(centerPoint, roomXAxis, points);
+                var lines = connectPipeInner.PipeDrainConnectByMainAxis(roomXAxis);
                 if (null != lines && lines.Count > 0)
                     addPipeRelation.pipeEquipmentConnectLines.AddRange(lines);
             }
@@ -550,411 +553,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return nearLine;
         }
-        List<Line> CenterConnect(Point3d center,Vector3d xAxis, List<Point3d> connectPoint) 
-        {
-            var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
-            var cos45 = Math.Cos(Math.PI / 4);
-            var xPoints = new List<Point3d>();
-            var yPoints = new List<Point3d>();
-            List<Line> lines = new List<Line>();
-            foreach (var point in connectPoint)
-            {
-                var prjXAxis = point.PointToLine(center, xAxis);
-                var prjYAxis = point.PointToLine(center, yAxis);
-                var disToXAxis = prjXAxis.DistanceTo(point);
-                var disToYAxis = prjYAxis.DistanceTo(point);
-                var xDis = prjXAxis.DistanceTo(center) + disToXAxis;
-                var yDis = prjYAxis.DistanceTo(center) + disToYAxis;
-                var tempYAxis = (center - prjYAxis).GetNormal();
-                var tempXAxis = (center - prjXAxis).GetNormal();
-                var dir = (center - point).GetNormal();
-                var dot = dir.DotProduct(xAxis);
-                if (disToXAxis < 10)
-                {
-                    //离X轴很近,直接使用投影点
-                    if (xPoints.Any(c => c.DistanceTo(prjXAxis) < 1))
-                        continue;
-                    xPoints.Add(prjXAxis);
-                }
-                else if (disToYAxis < 10) 
-                {
-                    //离Y轴很近,直接使用投影点
-                    if (yPoints.Any(c => c.DistanceTo(prjYAxis) < 1))
-                        continue;
-                    yPoints.Add(prjYAxis);
-                }
-                else if (xDis <= yDis)
-                {
-                    //点连到X轴上，判断是否需要45度角连接
-                    if (Math.Abs(dot) > cos45)
-                    {
-                        //45度连接,计算角度连接点
-                        var createPoint = prjXAxis + tempXAxis.MultiplyBy(disToXAxis);
-                        if (disToXAxis > _pipeConnectLineCornerRange)
-                        {
-                            createPoint = prjXAxis + tempXAxis.MultiplyBy(_pipeConnectLineCornerRange);
-                            var point1 = prjXAxis - tempYAxis.MultiplyBy(_pipeConnectLineCornerRange);
-                            lines.Add(new Line(point1, createPoint));
-                            lines.Add(new Line(point, point1));
-                        }
-                        else 
-                        {
-                            lines.Add(new Line(point,createPoint));
-                        }
-                        if (xPoints.Any(c => c.DistanceTo(createPoint) < 1))
-                            continue;
-                        xPoints.Add(createPoint);
-                    }
-                    else 
-                    {
-                        //和X轴角度>45度,直接连接立管
-                        lines.Add(new Line(point, center));
-                        if (xPoints.Any(c => c.DistanceTo(center) < 1))
-                            continue;
-                        xPoints.Add(center);
-                    }
-                }
-                else
-                {
-                    //点连到Y轴上
-                    if (Math.Abs(dot) > cos45)
-                    {
-                        //和Y轴角度>45度，直接连接立管
-                        lines.Add(new Line(point, center));
-                        if (yPoints.Any(c => c.DistanceTo(center) < 1))
-                            continue;
-                        yPoints.Add(center);
-                    }
-                    else 
-                    {
-                        //45度连接
-                        var createPoint = prjYAxis + tempYAxis.MultiplyBy(disToYAxis);
-                        if (disToYAxis > _pipeConnectLineCornerRange)
-                        {
-                            createPoint = prjYAxis + tempYAxis.MultiplyBy(_pipeConnectLineCornerRange);
-                            var point1 = prjYAxis - tempXAxis.MultiplyBy(_pipeConnectLineCornerRange);
-                            lines.Add(new Line(point1, createPoint));
-                            lines.Add(new Line(point, point1));
-                        }
-                        else 
-                        {
-                            lines.Add(new Line(point, createPoint));
-                        }
-                        if (yPoints.Any(c => c.DistanceTo(createPoint) < 1))
-                            continue;
-                        yPoints.Add(createPoint);
-                    }
-                }
-            }
-            //主线的计算，这里没有考虑线的方向
-            if (yPoints.Count > 0) 
-            {
-                if (!yPoints.Any(c => c.IsEqualTo(center, new Tolerance(1, 1))))
-                    yPoints.Add(center);
-                //y轴上有点，计算y轴的线
-                var disOrder = PointVectorUtil.PointsOrderByDirection(yPoints, yAxis,false, center);
-                for(int i = 0; i < disOrder.Count-1; i++) 
-                {
-                    lines.Add(new Line(disOrder[i], disOrder[i+1]));
-                }
-
-            }
-            if (xPoints.Count > 0) 
-            {
-                if (!xPoints.Any(c => c.IsEqualTo(center, new Tolerance(1, 1))))
-                    xPoints.Add(center);
-                //x轴上有点，计算x轴的线
-                var disOrder = PointVectorUtil.PointsOrderByDirection(xPoints, xAxis, false, center);
-                for (int i = 0; i < disOrder.Count - 1; i++)
-                {
-                    lines.Add(new Line(disOrder[i], disOrder[i + 1]));
-                }
-            }
-            return lines;
-        }
-        List<Line> CenterConnectNew(Point3d center, Vector3d xAxis, List<Point3d> connectPoint,Vector3d mainAxis)
-        {
-            var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
-            var cos45 = Math.Cos(Math.PI / 4);
-            var xPoints = new List<Point3d>();
-            var yPoints = new List<Point3d>();
-            List<Line> lines = new List<Line>();
-            Dictionary<Point3d, Point3d> pointConnect = new Dictionary<Point3d, Point3d>();
-            //Step1，根据X，Y轴确定确定主轴
-            List<Point3d> pointInXAxis = new List<Point3d>();
-            List<Point3d> pointInYAxis = new List<Point3d>();
-            foreach (var point in connectPoint)
-            {
-                var prjXAxis = point.PointToLine(center, xAxis);
-                var prjYAxis = point.PointToLine(center, yAxis);
-                if (prjXAxis.DistanceTo(point) < 5)
-                {
-                    //离X轴很近,直接使用投影点
-                    if (pointInXAxis.Any(c => c.DistanceTo(prjXAxis) < 1))
-                        continue;
-                    pointInXAxis.Add(prjXAxis);
-                }
-                else if (prjYAxis.DistanceTo(point) < 5)
-                {
-                    //离Y轴很近,直接使用投影点
-                    if (pointInYAxis.Any(c => c.DistanceTo(prjYAxis) < 1))
-                        continue;
-                    pointInYAxis.Add(prjYAxis);
-                }
-            }
-            //Step2, 确定主轴
-            double mainAxisDis = 0.0;
-            bool mainIsXAxis = false;
-            var viceAxis = new Vector3d();
-            if (pointInXAxis.Count < 1 && pointInYAxis.Count < 1)
-            {
-                //X,Y上都没有相应的点位
-            }
-            else if (pointInXAxis.Count > 0 && pointInYAxis.Count > 0)
-            {
-                //X,Y上都有
-                if (pointInXAxis.Count > pointInYAxis.Count)
-                    mainIsXAxis = true;
-                else 
-                    mainIsXAxis = false;
-            }
-            else if (pointInXAxis.Count > 0)
-            {
-                //仅X轴上有
-                mainIsXAxis = true;
-            }
-            else 
-            {
-                //仅Y轴方向上有
-                mainIsXAxis = false;
-            }
-            var axisPoints = new List<Point3d>();
-            var notConnectPoints =new List<Point3d>();
-            if (mainIsXAxis)
-            {
-                if (pointInXAxis.Count > 0) 
-                {
-                    mainAxisDis = pointInXAxis.OrderByDescending(c => c.DistanceTo(center)).FirstOrDefault().DistanceTo(center);
-                    axisPoints.AddRange(pointInXAxis);
-                }
-            }
-            else 
-            {
-                if (pointInYAxis.Count > 0)
-                {
-                    axisPoints.AddRange(pointInYAxis);
-                    mainAxisDis = pointInYAxis.OrderByDescending(c => c.DistanceTo(center)).FirstOrDefault().DistanceTo(center);
-                }
-            }
-            foreach (var point in connectPoint)
-            {
-                if (notConnectPoints.Any(c => c.DistanceTo(point) < 1))
-                    continue;
-                if (axisPoints.Any(c => c.DistanceTo(point) < 1))
-                    continue;
-                notConnectPoints.Add(point);
-            }
-            List<Line> hisLines = new List<Line>();
-            List<Point3d> hisPoints = new List<Point3d>();
-            List<Point3d> directConnPoints = new List<Point3d>();
-            if (axisPoints.Count < 1)
-            {
-                //第一步获取直连的点位
-                directConnPoints.AddRange(axisPoints);
-                foreach (var point in axisPoints)
-                {
-                    List<Point3d> prjPoints = new List<Point3d>();
-                    foreach (var cPoint in notConnectPoints)
-                    {
-                        if (hisPoints.Any(c => c.DistanceTo(cPoint) < 1))
-                            continue;
-                        var prjAxis = cPoint.PointToLine(center, mainAxis);
-                        if (prjAxis.DistanceTo(point) < 1)
-                        {
-                            //可以直接连到主线
-                            hisPoints.Add(point);
-                            prjPoints.Add(point);
-                        }
-                    }
-                    if (prjPoints.Count < 1)
-                        continue;
-                    var pointOrders = PointVectorUtil.PointsOrderByDirection(prjPoints, viceAxis, point);
-                    var maxPoints = pointOrders.Where(c => c.Value > 0).OrderBy(c => c.Value).Select(c => c.Key).ToList();
-                    var minPoints = pointOrders.Where(c => c.Value < 0).OrderByDescending(c => c.Value).Select(c => c.Key).ToList();
-                    if (maxPoints.Count > 0)
-                    {
-                        for (int i = maxPoints.Count - 1; i > 1; i--)
-                        {
-                            hisLines.Add(new Line(maxPoints[i], maxPoints[i - 1]));
-                        }
-                        hisLines.Add(new Line(maxPoints.First(), point));
-                    }
-                    if (minPoints.Count > 0)
-                    {
-                        for (int i = minPoints.Count - 1; i > 1; i--)
-                        {
-                            hisLines.Add(new Line(minPoints[i], minPoints[i - 1]));
-                        }
-                        hisLines.Add(new Line(minPoints.First(), point));
-                    }
-                }
-            }
-            notConnectPoints = notConnectPoints.Where(c => !hisPoints.Any(x => x.DistanceTo(c) < 1)).ToList();
-            var notConnectPointsOrder = PointVectorUtil.PointsOrderByDirection(notConnectPoints, mainAxis, center);
-            Dictionary<double, List<Point3d>> groupNotConnectPoints = new Dictionary<double, List<Point3d>>();
-            foreach (var keyValue in notConnectPointsOrder) 
-            {
-                double key = double.MinValue;
-                foreach (var hisKeyValue in groupNotConnectPoints) 
-                {
-                    if (Math.Abs(hisKeyValue.Key - keyValue.Value) < 5)
-                    {
-                        key = hisKeyValue.Key;
-                        break;
-                    }
-                }
-                if (key == double.MinValue)
-                {
-                    groupNotConnectPoints.Add(keyValue.Value, new List<Point3d> { keyValue.Key });
-                }
-                else 
-                {
-                    groupNotConnectPoints[key].Add(keyValue.Key);
-                }
-            }
-            groupNotConnectPoints = groupNotConnectPoints.OrderByDescending(c => c.Value.Count).ToDictionary(c=>c.Key,x=>x.Value);
-            foreach (var keyValue in groupNotConnectPoints) 
-            {
-                if (keyValue.Value.Count < 1)
-                    continue;
-            }
-            return lines;
-        }
-        List<Line> CenterConnect(Point3d center, Vector3d xAxis, List<Point3d> connectPoint,bool onlyX)
-        {
-            var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
-            var cos45 = Math.Cos(Math.PI / 4);
-            var xPoints = new List<Point3d>();
-            var yPoints = new List<Point3d>();
-            List<Line> lines = new List<Line>();
-            foreach (var point in connectPoint)
-            {
-                var prjXAxis = point.PointToLine(center, xAxis);
-                var prjYAxis = point.PointToLine(center, yAxis);
-                var disToXAxis = prjXAxis.DistanceTo(point);
-                var disToYAxis = prjYAxis.DistanceTo(point);
-                var xDis = prjXAxis.DistanceTo(center) + disToXAxis;
-                var yDis = prjYAxis.DistanceTo(center) + disToYAxis;
-                var tempYAxis = (center - prjYAxis).GetNormal();
-                var tempXAxis = (center - prjXAxis).GetNormal();
-                var dir = (center - point).GetNormal();
-                var dot = dir.DotProduct(xAxis);
-                if (disToXAxis < 10)
-                {
-                    //离X轴很近,直接使用投影点
-                    if (xPoints.Any(c => c.DistanceTo(prjXAxis) < 1))
-                        continue;
-                    xPoints.Add(prjXAxis);
-                }
-                else if (disToYAxis < 10)
-                {
-                    //离Y轴很近,直接使用投影点
-                    if (yPoints.Any(c => c.DistanceTo(prjYAxis) < 1))
-                        continue;
-                    yPoints.Add(prjYAxis);
-                }
-                else if (!onlyX && xDis <= yDis)
-                {
-                    //点连到X轴上，判断是否需要45度角连接
-                    if (Math.Abs(dot) > cos45)
-                    {
-                        //45度连接,计算角度连接点
-                        var createPoint = prjXAxis + tempXAxis.MultiplyBy(disToXAxis);
-                        if (disToXAxis > _pipeConnectLineCornerRange)
-                        {
-                            var dis = _pipeConnectLineCornerRange < disToYAxis ? _pipeConnectLineCornerRange : disToYAxis;
-                            createPoint = prjXAxis + tempXAxis.MultiplyBy(dis);
-                            var point1 = prjXAxis - tempYAxis.MultiplyBy(dis);
-                            lines.Add(new Line(point1, createPoint));
-                            lines.Add(new Line(point, point1));
-                        }
-                        else
-                        {
-                            lines.Add(new Line(point, createPoint));
-                        }
-                        if (xPoints.Any(c => c.DistanceTo(createPoint) < 1))
-                            continue;
-                        xPoints.Add(createPoint);
-                    }
-                    else
-                    {
-                        //和X轴角度>45度,直接连接立管
-                        lines.Add(new Line(point, center));
-                        if (xPoints.Any(c => c.DistanceTo(center) < 1))
-                            continue;
-                        xPoints.Add(center);
-                    }
-                }
-                else
-                {
-                    //点连到Y轴上
-                    if (Math.Abs(dot) < cos45)
-                    {
-                        //和Y轴角度>45度，直接连接立管
-                        lines.Add(new Line(point, center));
-                        if (yPoints.Any(c => c.DistanceTo(center) < 1))
-                            continue;
-                        yPoints.Add(center);
-                    }
-                    else
-                    {
-                        //45度连接
-                        var createPoint = prjYAxis + tempYAxis.MultiplyBy(disToYAxis);
-                        if (disToYAxis > _pipeConnectLineCornerRange)
-                        {
-                            var dis = _pipeConnectLineCornerRange < disToXAxis ? _pipeConnectLineCornerRange : disToXAxis;
-                            createPoint = prjYAxis + tempYAxis.MultiplyBy(dis);
-                            var point1 = prjYAxis - tempXAxis.MultiplyBy(dis);
-                            lines.Add(new Line(point1, createPoint));
-                            lines.Add(new Line(point, point1));
-                        }
-                        else
-                        {
-                            lines.Add(new Line(point, createPoint));
-                        }
-                        if (yPoints.Any(c => c.DistanceTo(createPoint) < 1))
-                            continue;
-                        yPoints.Add(createPoint);
-                    }
-                }
-            }
-            //主线的计算，这里没有考虑线的方向
-            if (yPoints.Count > 0)
-            {
-                if (!yPoints.Any(c => c.IsEqualTo(center, new Tolerance(1, 1))))
-                    yPoints.Add(center);
-                //y轴上有点，计算y轴的线
-                var disOrder = PointVectorUtil.PointsOrderByDirection(yPoints, yAxis, false, center);
-                for (int i = 0; i < disOrder.Count - 1; i++)
-                {
-                    lines.Add(new Line(disOrder[i], disOrder[i + 1]));
-                }
-
-            }
-            if (xPoints.Count > 0)
-            {
-                if (!xPoints.Any(c => c.IsEqualTo(center, new Tolerance(1, 1))))
-                    xPoints.Add(center);
-                //x轴上有点，计算x轴的线
-                var disOrder = PointVectorUtil.PointsOrderByDirection(xPoints, xAxis, false, center);
-                for (int i = 0; i < disOrder.Count - 1; i++)
-                {
-                    lines.Add(new Line(disOrder[i], disOrder[i + 1]));
-                }
-            }
-            return lines;
-        }
-
         void PipeRelationToLayoutLine() 
         {
             if (null == _pipeConnectRelations || _pipeConnectRelations.Count < 1)
@@ -1008,10 +606,20 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             string blockName = SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150 ? ThWSSCommon.Layout_PositionRiser150BlockName : ThWSSCommon.Layout_PositionRiserBlockName;
             string flDim = SetServicesModel.Instance.balconyWasteWaterRiserPipeDiameter.ToString();
             string rainDim = SetServicesModel.Instance.balconyRiserPipeDiameter.ToString();
+            string corrDim = SetServicesModel.Instance.condensingRiserPipeDiameter.ToString();
             foreach (var item in _pipeConnectRelations)
             {
+                var pipeBlock = _riserPipe.Where(c => c.uid.Equals(item.pipeBlockUid)).FirstOrDefault();
                 var createPoint = item.pipeCenterPoint;
-                if (item.isWasteWaterPipe)
+                if (pipeBlock != null && pipeBlock.enumEquipmentType == EnumEquipmentType.condensateRiser)
+                {
+                    //冷凝立管转换
+                    var block = new CreateBlockInfo(_floorId, blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, createPoint, EnumEquipmentType.condensateRiser);
+                    block.tag = "NL";
+                    block.dymBlockAttr.Add("可见性1", corrDim);
+                    createBlockInfos.Add(block);
+                }
+                else if (item.isWasteWaterPipe)
                 {
                     //废水立管
                     var block = new CreateBlockInfo(_floorId,blockName, ThWSSCommon.Layout_WastWaterPipeLayerName, createPoint,EnumEquipmentType.balconyRiser);
@@ -1037,7 +645,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     continue;
                 var block = new CreateBlockInfo(_floorId,blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, pipe.blockCenterPoint, EnumEquipmentType.condensateRiser);
                 block.tag = "NL";
-                block.dymBlockAttr.Add("可见性1", rainDim);
+                block.dymBlockAttr.Add("可见性1", corrDim);
                 createBlockInfos.Add(block);
             }
         }

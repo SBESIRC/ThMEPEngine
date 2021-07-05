@@ -13,6 +13,9 @@ using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
+    /// <summary>
+    /// 屋面排布计算逻辑
+    /// </summary>
     class RoofLayout
     {
         List<RoofPointInfo> _roofWaterBuckets = new List<RoofPointInfo>();
@@ -100,18 +103,22 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         }
         public List<CreateBlockInfo> RoofLayoutResult(FloorFramed livingFloor, List<CreateBlockInfo> copyBlocks) 
         {
+            //小屋面数据只到大屋面
             var retRes = new List<CreateBlockInfo>();
             var maxRoofConvert = MaxRoofPipeConvert();
-            if (maxRoofConvert.Count > 0)
-                retRes.AddRange(maxRoofConvert);
+            //if (maxRoofConvert.Count > 0)
+            //    retRes.AddRange(maxRoofConvert);
             var minToMaxRoofs = MinRoofToMaxRoof();
             if (minToMaxRoofs.Count > 0)
                 retRes.AddRange(minToMaxRoofs);
+            //var copyToLiving = CopyY1LToLivingFloor(livingFloor, retRes);
+            //if (copyToLiving.Count > 0)
+            //    retRes.AddRange(copyToLiving);
+            var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
+            if (copyMaxRoofPipeToLiving.Count > 0)
+                retRes.AddRange(copyMaxRoofPipeToLiving);
 
-            var copyToLiving = CopyY1LToLivingFloor(livingFloor, retRes);
-            if (copyToLiving.Count > 0)
-                retRes.AddRange(copyToLiving);
-
+            //将住人屋面的部分立管复制到屋面
             var copyAddBlocks = CopyPipeToMaxRoof(copyBlocks, livingFloor.datumPoint);
             if (copyAddBlocks.Count > 0)
                 retRes.AddRange(copyAddBlocks);

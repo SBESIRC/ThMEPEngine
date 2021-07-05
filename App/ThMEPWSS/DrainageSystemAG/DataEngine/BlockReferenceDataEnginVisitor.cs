@@ -11,9 +11,11 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
     public class BlockReferenceDataEnginVisitor : ThDistributionElementExtractionVisitor
     {
         protected Dictionary<string, int> blockNames;
-        public BlockReferenceDataEnginVisitor(Dictionary<string, int> bNames) 
+        protected bool isLayerName;
+        public BlockReferenceDataEnginVisitor(Dictionary<string, int> bNames,bool isLayerName) 
         {
             blockNames = new Dictionary<string, int>();
+            this.isLayerName = isLayerName;
             if (null != bNames && bNames.Count > 0)
             {
                 foreach (var name in bNames)
@@ -61,22 +63,32 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                 return false;
             if (entity is BlockReference blockObj)
             {
-                var name = ThMEPXRefService.OriginalFromXref(blockObj.GetEffectiveName());
                 bool isAdd = false;
+                var name = ThMEPXRefService.OriginalFromXref(blockObj.GetEffectiveName());
+                if (this.isLayerName)
+                    name = ThMEPXRefService.OriginalFromXref(blockObj.Layer); 
                 foreach (var keyValue in this.blockNames)
                 {
                     if (isAdd)
                         break;
                     if (string.IsNullOrEmpty(keyValue.Key))
                         continue;
-                    if (keyValue.Value == 1)
+                    string[] allNames = keyValue.Key.Split(',');
+                    isAdd = true;
+                    for (int i = 0; i < allNames.Length; i++) 
                     {
-                        //包含
-                        isAdd = name.Contains(keyValue.Key);
-                    }
-                    else
-                    {
-                        isAdd = name.Equals(keyValue.Key);
+                        if (!isAdd)
+                            break;
+                        string checkName = allNames[i];
+                        if (keyValue.Value == 1)
+                        {
+                            //包含
+                            isAdd = name.Contains(checkName);
+                        }
+                        else
+                        {
+                            isAdd = name.Equals(checkName);
+                        }
                     }
                 }
                 return isAdd;
@@ -88,9 +100,10 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
         {
             if (CheckLayerValid(blkref) && IsDistributionElement(blkref))
             {
+                var copy = blkref.GetTransformedCopy(matrix);
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
-                    Geometry = blkref.GetTransformedCopy(matrix),
+                    Geometry = copy
                 });
             }
         }
@@ -107,9 +120,5 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                 throw new NotSupportedException();
             }
         }
-        //public override bool CheckLayerValid(Entity curve)
-        //{
-        //    return true;
-        //}
     }
 }

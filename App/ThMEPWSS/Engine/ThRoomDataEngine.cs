@@ -87,7 +87,7 @@ namespace ThMEPWSS.Engine
                     var roomGeo = room.Boundary.ToNTSPolygon();
                     if (originTransformer != null)
                     {
-
+                        //偏移数据，暂时不处理
                     }
                     else 
                     {
@@ -145,8 +145,25 @@ namespace ThMEPWSS.Engine
                     //进一步判断是否有和预留管道井合并的,这里不考虑融合后继续合并其它空间的问题
                     if (null != tubeFlueWellRooms && tubeFlueWellRooms.Count > 0)
                     {
+                        //优先找烟道，有些烟道和管道井离的很近，如果可以合并，认为是管道井
                         foreach (var tfRoom in tubeFlueWellRooms)
                         {
+                            if (tfRoom.roomTypeName != EnumRoomType.FlueWell)
+                                continue;
+                            if (hisIds.Any(c => c.Equals(tfRoom.thIFCRoom.Uuid)))
+                                continue;
+                            var thOutLine = tfRoom.outLine.ToNTSPolygon();
+                            if (ntsPLine.Intersects(thOutLine) || ntsPLine.Crosses(thOutLine))
+                            {
+                                pRoom.roomTypeName = tfRoom.roomTypeName;
+                                pRoom.outLine = ntsPLine.Union(thOutLine).ToDbCollection().ToNTSMultiPolygon().ToDbPolylines().FirstOrDefault();
+                                hisIds.Add(tfRoom.thIFCRoom.Uuid);
+                            }
+                        }
+                        foreach (var tfRoom in tubeFlueWellRooms)
+                        {
+                            if (tfRoom.roomTypeName != EnumRoomType.TubeWell)
+                                continue;
                             if (hisIds.Any(c => c.Equals(tfRoom.thIFCRoom.Uuid)))
                                 continue;
                             var thOutLine = tfRoom.outLine.ToNTSPolygon();
@@ -186,7 +203,7 @@ namespace ThMEPWSS.Engine
                 foreach (var item in tubeBlocks)
                 {
                     var room = new RoomModel();
-                    room.thIFCRoom = ThIfcRoom.Create(item);
+                    room.thIFCRoom = ThIfcRoom.Create(item.GeometricExtents.ToNTSPolygon().ToDbEntity());
                     room.outLine = room.thIFCRoom.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
                     if (room.outLine.Area < 10)
                         continue;
@@ -223,7 +240,7 @@ namespace ThMEPWSS.Engine
                     continue;
                 if (item.roomTypeName != EnumRoomType.Other)
                 {
-                    //tubeRooms.Add(item);
+                    tubeRooms.Add(item);
                     continue;
                 }
                 var area = item.outLine.Area;
@@ -270,17 +287,14 @@ namespace ThMEPWSS.Engine
         {
             //1)	包含“卫生间” //2)	包含“主卫” //3)	包含“次卫”
             //4)	包含“客卫” //5)	单字“卫” //6)	包含“洗手间” //7)	卫 + 阿拉伯数字
+            var roomNameContains = new List<string>
+            {
+                "卫生间","主卫","公卫",
+                "次卫","客卫","洗手间",
+            };
             if (string.IsNullOrEmpty(roomName))
                 return false;
-            if (roomName.Contains("卫生间"))
-                return true;
-            if (roomName.Contains("主卫"))
-                return true;
-            if (roomName.Contains("次卫"))
-                return true;
-            if (roomName.Contains("客卫"))
-                return true;
-            if (roomName.Contains("洗手间"))
+            if (roomNameContains.Any(c=>roomName.Contains(c)))
                 return true;
             if (roomName.Equals("卫"))
                 return true;
@@ -289,11 +303,10 @@ namespace ThMEPWSS.Engine
         private bool IsKitchen(string roomName)
         {
             //1)	包含“厨房” //2)	单字“厨” //3)	包含“西厨”
+            var roomNameContains = new List<string>{"厨房","西厨"};
             if (string.IsNullOrEmpty(roomName))
                 return false;
-            if (roomName.Contains("厨房"))
-                return true;
-            if (roomName.Contains("西厨"))
+            if (roomNameContains.Any(c => roomName.Contains(c)))
                 return true;
             if (roomName.Equals("厨"))
                 return true;
@@ -302,17 +315,19 @@ namespace ThMEPWSS.Engine
         private bool IsBalcony(string roomName)
         {
             //包含阳台
+            var roomNameContains = new List<string> { "阳台" };
             if (string.IsNullOrEmpty(roomName))
                 return false;
-            if (roomName.Contains("阳台"))
+            if (roomNameContains.Any(c => roomName.Contains(c)))
                 return true;
             return false;
         }
         private bool IsCorridor(string roomName)
         {
+            var roomNameContains = new List<string> { "连廊" };
             if (string.IsNullOrEmpty(roomName))
                 return false;
-            if (roomName.Contains("连廊"))
+            if (roomNameContains.Any(c => roomName.Contains(c)))
                 return true;
             return false;
         }

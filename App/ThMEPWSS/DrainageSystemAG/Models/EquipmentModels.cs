@@ -26,11 +26,13 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public Dictionary<string, int> blockNames { get; }
         public EnumEquipmentType enumEquipmentType { get; }
         public BlockReferenceDataEnginVisitor equipmentDataVisitor { get; }
-        public EquipmentBlcokVisitorModel(EnumEquipmentType type, Dictionary<string, int> bNames = null)
+        public bool isLayerName { get; }
+        public EquipmentBlcokVisitorModel(EnumEquipmentType type, Dictionary<string, int> bNames = null,bool islayerName=false)
         {
             this.blockNames = new Dictionary<string, int>();
             this.enumEquipmentType = type;
-            this.equipmentDataVisitor = new BlockReferenceDataEnginVisitor(bNames)
+            this.isLayerName = isLayerName;
+            this.equipmentDataVisitor = new BlockReferenceDataEnginVisitor(bNames,islayerName)
             {
                 LayerFilter = new HashSet<string>(CurveXrefLayers()),
             };
@@ -121,8 +123,23 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// <summary>
         /// 建筑标高
         /// </summary>
-        [Description("设备")]
+        [Description("建筑标高")]
         buildingElevation = -996,
+        /// <summary>
+        /// 空调外机
+        /// </summary>
+        [Description("空调外机")]
+        airConditioningOutMachine =-995,
+        /// <summary>
+        /// 门
+        /// </summary>
+        [Description("门")]
+        door =-994,
+        /// <summary>
+        /// 楼梯
+        /// </summary>
+        [Description("楼梯")]
+        stairs = -993,
         /// <summary>
         /// 地漏
         /// </summary>

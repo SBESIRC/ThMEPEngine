@@ -79,14 +79,15 @@
     <Compile Include="DrainageSystemAG\Bussiness\ClassifyEqumBlockByRoomSpace.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\CopyToOtherFloor.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\FloorDrainConvert.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\PipelineLabel.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\PipeDrainConnect.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\PipeLineLabelLayout.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RoomKitchenToiletLayout.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementVisitor.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BlockReferenceDataEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BlockReferenceDataEnginVisitor.cs" />
-    <Compile Include="DrainageSystemAG\DataEngine\OtherDataEngine.cs" />
+    <Compile Include="DrainageSystemAG\DataEngine\DoorWindowEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\ThBasicElementExtractor.cs" />
     <Compile Include="DrainageSystemAG\DrainSysAGCommon.cs" />
     <Compile Include="DrainageSystemAG\Models\CreateBlockElement.cs" />

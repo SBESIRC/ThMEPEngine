@@ -134,16 +134,35 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             chimneyNames.Add(ThWSSCommon.FlueShaftBlockName, 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.flueWell, chimneyNames));
 
+
             //获取设备图块
             Dictionary<string, int> equipmentNames = new Dictionary<string, int>();
             equipmentNames.Add("AE-EQPM", 1);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.equipment, equipmentNames));
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.equipment, equipmentNames, true));
 
 
             //获取建筑标高图块
             Dictionary<string, int> buildingElevationNames = new Dictionary<string, int>();
             buildingElevationNames.Add("AD-LEVL-HIGH", 1);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.buildingElevation, buildingElevationNames));
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.buildingElevation, buildingElevationNames, true));
+
+            //获取空调外机图块
+            Dictionary<string, int> airOutMachineNames = new Dictionary<string, int>();
+            airOutMachineNames.Add("H-AC-2", 1);
+            airOutMachineNames.Add("H-AC-3", 1);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.airConditioningOutMachine, airOutMachineNames, true));
+
+            //获取门的图块
+            Dictionary<string, int> doorNames = new Dictionary<string, int>();
+            doorNames.Add("A-door-", 1);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.door, doorNames));
+
+            /* 楼梯块目前有问题，暂时不获取
+            //获取楼梯块
+            Dictionary<string, int> stairsNames = new Dictionary<string, int>();
+            stairsNames.Add("楼梯,DB", 1);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.stairs, stairsNames));
+            */
         }
 
     }
