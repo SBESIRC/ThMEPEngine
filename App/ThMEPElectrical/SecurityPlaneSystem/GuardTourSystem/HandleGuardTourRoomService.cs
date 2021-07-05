@@ -12,21 +12,16 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
         static string roomNameColumn = "房间名称";
         static string insideRoomColumn = "房间内";
         static string outsideRoomColumn = "房间外";
-        public static List<string> GTRooms = new List<string>()
-        {
-            "车库",
-        };
-
-        public static List<string> otherRooms = new List<string>()
-        {
-            "楼梯",
-        };
+        static string floorColumn = "楼层";
+        public static List<RoomInfoModel> GTRooms = new List<RoomInfoModel>();      //房间内是否需要布置
+        public static List<RoomInfoModel> otherRooms = new List<RoomInfoModel>();   //房间外是否要布置
 
         public static void HandleRoomInfo(DataTable table)
         {
             string columnName = null;
             string insideRoom = null;
             string outsideRoom = null;
+            string floor = null;
             foreach (DataColumn column in table.Columns)
             {
                 if (column.ColumnName.Contains(roomNameColumn))
@@ -41,6 +36,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
                 {
                     outsideRoom = column.ColumnName;
                 }
+                else if (column.ColumnName.Contains(floorColumn))
+                {
+                    floor = column.ColumnName;
+                }
             }
 
             if (columnName != null)
@@ -50,16 +49,35 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
                 foreach (DataRow row in table.Rows)
                 {
                     var roomNames = CommonRoomHandleService.HandleRoom(row[columnName].ToString());
+                    RoomInfoModel roomInfoModel = new RoomInfoModel();
+                    roomInfoModel.roomName = roomNames;
+                    if (row[floor].ToString() != "All")
+                    {
+                        roomInfoModel.floor = row[floor].ToString();
+                    }
                     if (row[insideRoom].ToString() == "是")
                     {
-                        GTRooms.AddRange(roomNames);
+                        GTRooms.Add(roomInfoModel);
                     }
                     if (row[outsideRoom].ToString() == "是")
                     {
-                        otherRooms.AddRange(roomNames);
+                        otherRooms.Add(roomInfoModel);
                     }
                 }
             }
         }
+    }
+
+    public class RoomInfoModel
+    {
+        /// <summary>
+        /// 房间名
+        /// </summary>
+        public List<string> roomName { get; set; }
+
+        /// <summary>
+        /// 楼层名
+        /// </summary>
+        public string floor { get; set; }
     }
 }

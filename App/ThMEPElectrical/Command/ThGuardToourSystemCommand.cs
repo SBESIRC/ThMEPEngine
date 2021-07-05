@@ -88,9 +88,12 @@ namespace ThMEPElectrical.Command
                     var lanes = getPrimitivesService.GetLanes(outFrame, out List<List<Line>> otherLanes);
                     lanes.AddRange(otherLanes);
 
+                    //获取楼层信息
+                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
+
                     //布置
                     LayoutGuardTourService layoutService = new LayoutGuardTourService();
-                    var layoutInfo = layoutService.Layout(rooms, doors, columns, walls, lanes);
+                    var layoutInfo = layoutService.Layout(rooms, doors, columns, walls, lanes, floor);
                     using (AcadDatabase db = AcadDatabase.Active())
                     {
                         foreach (var item in layoutInfo)

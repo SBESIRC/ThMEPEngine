@@ -7,8 +7,6 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService;
@@ -83,10 +81,21 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
                     //布置
                     LayoutAccessControlService layoutService = new LayoutAccessControlService();
-                    layoutService.LayoutFactory(rooms, doors, columns, walls);
+                    var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, floor);
+
+                    using (AcadDatabase db = AcadDatabase.Active())
+                    {
+                        foreach (var item in layoutInfo)
+                        {
+                            Line line = new Line(item.layoutPt, item.layoutPt + 1000 * item.layoutDir);
+                            //originTransformer.Reset(line);
+                            db.ModelSpace.Add(line);
+                        }
+                    }
                 }
             }
         }

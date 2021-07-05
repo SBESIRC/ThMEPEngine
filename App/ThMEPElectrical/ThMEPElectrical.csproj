@@ -95,12 +95,10 @@
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
     <Compile Include="Command\ThInsertStoreyCommand.cs" />
     <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
-    <Compile Include="Command\ThIntrusionAlarmSystemHositingCommand.cs" />
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
-    <Compile Include="Command\ThVideoMonitoringSystemWithLaneCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />

@@ -27,7 +27,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 var stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferSRoom);
                 var thRoom = room.Boundary as Polyline;
                 var bufferRoom = thRoom.Buffer(5)[0] as Polyline;
-                stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
+                stairDoors = getLayoutStructureService.GetNeedDoors(stairDoors, bufferRoom);
 
                 foreach (var sDoor in stairDoors)
                 {

@@ -19,15 +19,6 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThVMLSystem", CommandFlags.Modal)]
-        public void ThVideoMLSystem()
-        {
-            using (var cmd = new ThVideoMonitoringSystemWithLaneCommand())
-            {
-                cmd.Execute();
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThIASystem", CommandFlags.Modal)]
         public void ThIntrusionAlarmSystem()
         {
@@ -37,10 +28,19 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThIAHSystem", CommandFlags.Modal)]
-        public void ThIntrusionAlarmHositingSystem()
+        [CommandMethod("TIANHUACAD", "ThGTSystem", CommandFlags.Modal)]
+        public void ThGuardToourSystem()
         {
-            using (var cmd = new ThIntrusionAlarmSystemHositingCommand())
+            using (var cmd = new ThGuardToourSystemCommand())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThACSystem", CommandFlags.Modal)]
+        public void ThAccessControlSystem()
+        {
+            using (var cmd = new ThAccessControlSystemCommand())
             {
                 cmd.Execute();
             }

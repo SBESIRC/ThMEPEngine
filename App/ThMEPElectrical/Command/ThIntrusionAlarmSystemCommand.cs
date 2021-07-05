@@ -79,6 +79,9 @@ namespace ThMEPElectrical.Command
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
                     var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
+                    //布置
+                    LayoutFactoryService layoutService = new LayoutFactoryService();
+                    layoutService.LayoutFactory(rooms, doors, columns, walls, floor);
                 }
             }
         }

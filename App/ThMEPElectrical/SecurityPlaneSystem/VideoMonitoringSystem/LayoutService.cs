@@ -9,6 +9,7 @@ using ThMEPElectrical.StructureHandleService;
 using ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService;
 using ThMEPEngineCore.Model;
 using System.Linq;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
@@ -16,7 +17,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
     {
         LayoutVideo layoutVideo = new LayoutVideo();
         LayoutVideoByLine layoutVideoByLine = new LayoutVideoByLine();
-        public void LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes)
+        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes, ThStoreys floor)
         {
             HandleVideoMonitoringRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.accessControlSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
@@ -34,14 +35,14 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 {
                     if (!readyRooms.Contains(connectRooms[0]))
                     {
-                        var layoutType = CalNoCennectRoom(connectRooms[0]);
+                        var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                         models.AddRange(DoLayout(layoutType, connectRooms[0], door, doors, columns, walls, lanes));
                         readyRooms.Add(connectRooms[0]);
                     }
                 }
                 else if (connectRooms.Count >= 2)
                 {
-                    if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], out LayoutType layoutAType, out LayoutType layoutBType))
+                    if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
                         if (!readyRooms.Contains(connectRooms[0]))
                         {
@@ -54,7 +55,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                             readyRooms.Add(connectRooms[1]);
                         }
                     }
-                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], out layoutAType, out layoutBType))
+                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
                         if (!readyRooms.Contains(connectRooms[0]))
                         {
@@ -69,6 +70,8 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                     }
                 }
             }
+
+            return models;
         }
 
         /// <summary>
@@ -178,16 +181,19 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// </summary>
         /// <param name="connectRoom"></param>
         /// <returns></returns>
-        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom)
+        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
             var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
                 {
-                    if (roomAInfo.connectType == ConnectType.NoCennect || roomAInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                     {
-                        return roomAInfo.roomAHandle;
+                        if (roomAInfo.connectType == ConnectType.NoCennect || roomAInfo.connectType == ConnectType.AllConnect)
+                        {
+                            return roomAInfo.roomAHandle;
+                        }
                     }
                 }
             }
@@ -196,9 +202,12 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             {
                 foreach (var roomBInfo in roomBInfos)
                 {
-                    if (roomBInfo.connectType == ConnectType.NoCennect || roomBInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomBInfo.floorName) || roomBInfo.floorName == floor)
                     {
-                        return roomBInfo.roomBHandle;
+                        if (roomBInfo.connectType == ConnectType.NoCennect || roomBInfo.connectType == ConnectType.AllConnect)
+                        {
+                            return roomBInfo.roomBHandle;
+                        }
                     }
                 }
             }
@@ -214,7 +223,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// <param name="roomAType"></param>
         /// <param name="roomBType"></param>
         /// <returns></returns>
-        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, out LayoutType roomAType, out LayoutType roomBType)
+        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
         {
             roomAType = LayoutType.Nothing;
             roomBType = LayoutType.Nothing;
@@ -225,19 +234,22 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             {
                 foreach (var roomAInfo in roomAInfos)
                 {
-                    if (roomAInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                     {
-                        roomAType = roomAInfo.roomAHandle;
-                        roomBType = roomAInfo.roomBHandle;
-                        findRule = true;
-                    }
-                    else if (roomAInfo.connectType == ConnectType.Normal)
-                    {
-                        if (roomAInfo.roomB.Contains(roomB.Name))
+                        if (roomAInfo.connectType == ConnectType.AllConnect)
                         {
                             roomAType = roomAInfo.roomAHandle;
                             roomBType = roomAInfo.roomBHandle;
                             findRule = true;
+                        }
+                        else if (roomAInfo.connectType == ConnectType.Normal)
+                        {
+                            if (roomAInfo.roomB.Contains(roomB.Name))
+                            {
+                                roomAType = roomAInfo.roomAHandle;
+                                roomBType = roomAInfo.roomBHandle;
+                                findRule = true;
+                            }
                         }
                     }
                 }
