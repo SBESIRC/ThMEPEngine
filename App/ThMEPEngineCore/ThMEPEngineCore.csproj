@@ -68,6 +68,7 @@
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ContourLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3RoomMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
+    <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
