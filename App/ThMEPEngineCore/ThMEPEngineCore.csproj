@@ -513,6 +513,7 @@
     <Compile Include="Temp\ThWaterSupplyStartExtractor.cs" />
     <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
+    <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
