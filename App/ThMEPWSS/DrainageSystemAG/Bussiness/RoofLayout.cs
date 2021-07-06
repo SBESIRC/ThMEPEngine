@@ -23,7 +23,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<FloorFramed> _maxRoofFloors;
         List<FloorFramed> _minRoofFloors;
         ThRoomDataEngine _roomEngine;
-        public RoofLayout(List<FloorFramed> roofFloors, BlockReferenceDataEngine equipmentData,ThRoomDataEngine roomEngine) 
+        public RoofLayout(List<FloorFramed> roofFloors, BlockReferenceDataEngine equipmentData,ThRoomDataEngine roomEngine, BasicElementEngine basicElementEngine) 
         {
             _roomEngine = roomEngine;
             _roofFloors = new List<FloorFramed>();
@@ -41,10 +41,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     _maxRoofFloors.Add(floor);
                 else
                     _minRoofFloors.Add(floor);
-                var plEquipment = equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
+                var plEquipment = DrainSysAGCommon.GetFloorBlocks(floor, equipmentData, basicElementEngine); //equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
                 if (plEquipment == null || plEquipment.Count < 1)
                     continue;
-               
+
+                var tempRooWaterBuckets = new List<RoofPointInfo>();
                 foreach (var item in plEquipment)
                 {
                     if (null == item || (item.enumEquipmentType != EnumEquipmentType.gravityRainBucket && item.enumEquipmentType != EnumEquipmentType.sideRainBucket))
@@ -67,7 +68,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                             {
                                 var cir = entity as Circle;
                                 var center = new Point3d(cir.Center.X, cir.Center.Y, 0);
-                                _roofWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
+                                tempRooWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
                                 break;
 
                             }
@@ -75,11 +76,20 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                             {
                                 var arc = entity as Arc;
                                 var center = new Point3d(arc.Center.X, arc.Center.Y, 0);
-                                _roofWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
+                                var testPoint = center.TransformBy(mcs2wcs);
+                                tempRooWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
                                 break;
                             }
                         }
                     }
+                }
+
+                //有定位点偏移的，进一步过滤
+                foreach (var item in tempRooWaterBuckets) 
+                {
+                    if (!roofFloors.Any(c => c.outPolyline.Contains(item.centerPoint)))
+                        continue;
+                    _roofWaterBuckets.Add(item);
                 }
             }
         }

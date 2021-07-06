@@ -113,6 +113,9 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                 {
                     if (string.IsNullOrEmpty(item))
                         continue;
+                    var currentStyle = currentDb.TextStyles.ElementOrDefault(item);
+                    if (null != currentStyle)
+                        continue;
                     var style = blockDb.TextStyles.ElementOrDefault(item);
                     if (style == null)
                         continue;

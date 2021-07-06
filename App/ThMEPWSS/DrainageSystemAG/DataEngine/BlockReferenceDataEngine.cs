@@ -51,9 +51,11 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     if (null == obj)
                         continue;
                     BlockReference block = obj.Geometry as BlockReference;
+                    
                     if (null == block)
                         continue;
-                    var pointP = new Point3d(block.Position.X, block.Position.Y, 0);
+                    var centerPoint = block.GeometricExtents.CenterPoint();
+                    var pointP = new Point3d(centerPoint.X, centerPoint.Y, 0);
                     if (polyline.Contains(pointP))
                     {
                         blcokModel.blockReferences.Add(block);
@@ -85,6 +87,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
             //floorDrainNames.Add("地漏", 1);
             floorDrainNames.Add("W-drain", 2);
+            floorDrainNames.Add("地漏平面", 2);
+            floorDrainNames.Add("地漏-阳台、空调", 2);
+            floorDrainNames.Add("地漏-卫", 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_1, 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_2, 2);
             floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_3, 2);
@@ -100,28 +105,34 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             Dictionary<string, int> gravityRainBucketNames = new Dictionary<string, int>();
             gravityRainBucketNames.Add(ThWSSCommon.GravityFlowRainBucketBlockName_Contain, 1);
             gravityRainBucketNames.Add(ThWSSCommon.GravityFlowRainBucketBlockName, 2);
+            gravityRainBucketNames.Add("ffdsf", 2);
+            gravityRainBucketNames.Add("W-drain-51", 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.gravityRainBucket, gravityRainBucketNames));
 
             //侧入式雨水斗 - 块名称过滤
             Dictionary<string, int> sideRainBucketNames = new Dictionary<string, int>();
             sideRainBucketNames.Add(ThWSSCommon.SideRainBucketBlockName_1, 2);
             sideRainBucketNames.Add(ThWSSCommon.SideRainBucketBlockName_2, 2);
+            sideRainBucketNames.Add("W-drain-21", 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel( EnumEquipmentType.sideRainBucket, sideRainBucketNames));
 
             //阳台立管 - 块名称过滤
             Dictionary<string, int> balconyRiserNames = new Dictionary<string, int>();
             balconyRiserNames.Add(ThWSSCommon.BalconyRiserBlockName, 2);
+            balconyRiserNames.Add("阳台立管", 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.balconyRiser, balconyRiserNames));
 
             //屋面雨水立管 - 块名称过滤
             Dictionary<string, int> roofRiserNames = new Dictionary<string, int>();
             roofRiserNames.Add(ThWSSCommon.RoofRainwaterRiserBlockName, 2);
+            roofRiserNames.Add("屋面雨水", 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.roofRainRiser, roofRiserNames));
 
             //冷凝水立管 - 块名称过滤
             Dictionary<string, int> condensateRiserNames = new Dictionary<string, int>();
             condensateRiserNames.Add(ThWSSCommon.CondensateRiserBlockName_1, 2);
             condensateRiserNames.Add(ThWSSCommon.CondensateRiserBlockName_2, 2);
+            condensateRiserNames.Add("冷凝", 2);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.condensateRiser, condensateRiserNames));
 
             //水管井留洞 - 块名称过滤

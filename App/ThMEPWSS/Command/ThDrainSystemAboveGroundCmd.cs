@@ -103,7 +103,7 @@ namespace ThMEPWSS.Command
                 InitData(acdb.Database);
 
                 var allRooms = _roomEngine.GetAllRooms(livingHighestFloor.blockOutPointCollection);
-                _floorBlockEqums = _blockReferenceData.GetPolylineEquipmentBlocks(livingHighestFloor.outPolyline);
+                _floorBlockEqums = DrainSysAGCommon.GetFloorBlocks(livingHighestFloor,_blockReferenceData,_basicElementEngine);
                 var tubeBlocks = new List<BlockReference>();
                 var flueBlocks = new List<BlockReference>();
                 foreach (var item in _floorBlockEqums)
@@ -232,12 +232,11 @@ namespace ThMEPWSS.Command
             }
             catch (Exception ex){ }
         }
-        
         void RoofPipeLabelLayout(double midY) 
         {
             //屋面数据处理
             //有大屋面时，找到住人顶层的所有污废立管（PL）和废水立管（FL）。将所有的立管和编号标注根据基点复制到大屋面。
-            var roofLayout = new RoofLayout(roofFloors, _blockReferenceData, _roomEngine);
+            var roofLayout = new RoofLayout(roofFloors, _blockReferenceData, _roomEngine,_basicElementEngine);
             var copyToRoofBlocks = new List<CreateBlockInfo>();
             if (roofLayout.HaveMaxRoof())
             {
@@ -329,6 +328,7 @@ namespace ThMEPWSS.Command
             pipelineLabel.AddObstacleEntitys(_allWalls);
             pipelineLabel.AddObstacleEntitys(_allColumns);
             LabelLayout(pipelineLabel, livingHighestFloor, _floorBlockEqums);
+            //testLines.AddRange(pipelineLabel._obstacleCreateEntities);
         }
        
 

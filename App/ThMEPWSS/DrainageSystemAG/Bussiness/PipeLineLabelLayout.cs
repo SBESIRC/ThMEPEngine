@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
@@ -28,8 +29,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _pipeLabelNearDistance = 500;//文字距离立管最短距离
         private double _pipeLabelMaxDistance = 2000;//文字距离立管最大距离
         private double _pipeLavelDirectionMoveStep = 200;//文字沿着线方向移动步长
-        private double _pipeLabelXDirectionMaxDistance = 1000;//文字X轴方向距离主线的最大距离
-        private double _pipeLalelXDirectionMoveStep = 200;//文字沿着X轴方向移动的步长
+        private double _pipeLabelXDirectionMaxDistance = 200;//文字X轴方向距离主线的最大距离
+        private double _pipeLalelXDirectionMoveStep = 100;//文字沿着X轴方向移动的步长
 
         private double _labelTextYSpace = 150;
         private double _labelTextXSpace = 100;
@@ -279,7 +280,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 var thisLinePipes = new List<LablePipe>();
                 thisLinePipes.AddRange(listPipe);
-
                 var centerPoint = PointVectorUtil.PointsAverageValue(thisLinePipes.Select(c => c.pipeCenterPoint).ToList());
                 GetTextHeightWidth(thisLinePipes, out double textHeight, out double textWidth);
                 textHeight += thisLinePipes.Count * _labelTextYSpace;
@@ -323,7 +323,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (pipe.pipeAttrTag.ToUpper().Equals("FL") || pipe.pipeAttrTag.ToUpper().Equals("PL") || pipe.pipeAttrTag.ToUpper().Equals("TL"))
                         txtLayer = ThWSSCommon.Layout_PipeWastDrainTextLayerName;
                     var textCreatePoint = textStartPoint + Vector3d.YAxis.MultiplyBy(_labelTextYSpace/3) +Vector3d.XAxis.MultiplyBy(_labelTextXSpace/2);
-                    var text = CreateDBText(pipe.pipeNumText, textCreatePoint, txtLayer);
+                    var text = CreateDBText(pipe.pipeNumText, textCreatePoint, txtLayer, ThWSSCommon.Layout_TextStyle);
 
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
                     var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), ThWSSCommon.Layout_FloorDrainBlockRainLayerName, pipe.createBlockUid, "LG_BSLJX");
@@ -441,7 +441,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             width = 0;
             foreach (var item in lablePipes) 
             {
-                var text = CreateDBText(item.pipeNumText, item.pipeCenterPoint,"");
+                var text = CreateDBText(item.pipeNumText, item.pipeCenterPoint,"",ThWSSCommon.Layout_TextStyle);
                 var maxPoint = text.GeometricExtents.MaxPoint;
                 var minPoint = text.GeometricExtents.MinPoint;
                 var xDis =Math.Abs(maxPoint.X - minPoint.X);
@@ -625,7 +625,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             return idNums;
         }
 
-        DBText CreateDBText(string str, Point3d position,string layerName)
+        DBText CreateDBText(string str, Point3d position,string layerName,string styleName)
         {
             double height = _textHeight1_50;
             switch (SetServicesModel.Instance.drawingScale)
@@ -640,7 +640,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     height = _textHeight1_150;
                     break;
             }
-            DBText infortext = new DBText()
+            DBText infotext = new DBText()
             {
                 TextString = str,
                 Height = height,
@@ -651,8 +651,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 Rotation = 0,
             };
             if (!string.IsNullOrEmpty(layerName))
-                infortext.Layer = layerName;
-            return infortext;
+                infotext.Layer = layerName;
+            if (!string.IsNullOrEmpty(styleName)) 
+            {
+                var styleId = DrawUtils.GetTextStyleId(styleName);
+                if (null != styleId && styleId.IsValid) 
+                {
+                    infotext.TextStyleId = styleId;
+                }
+            }
+            return infotext;
         }
 
         List<LablePipe> GetLinePipe(Point3d basePoint,List<LablePipe> areaAllPipe,Vector3d orderDir,double dirTolerance,double outTolerance)
