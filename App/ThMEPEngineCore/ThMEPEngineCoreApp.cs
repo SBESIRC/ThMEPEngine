@@ -711,6 +711,8 @@ namespace ThMEPEngineCore
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
+
+
                 ThDB3CorniceRecognitionEngine corniceRecognitionEngine = new ThDB3CorniceRecognitionEngine();
                 corniceRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 corniceRecognitionEngine.Elements.ForEach(o =>
@@ -882,6 +884,74 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();
                 });
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractContourLine", CommandFlags.Modal)]
+        public void THExtractContourLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var options = new PromptKeywordOptions("\n选择处理模式");
+                options.Keywords.Add("模式1", "F", "模式一(F)");
+                options.Keywords.Add("模式2", "S", "模式二(S)");
+                options.Keywords.Default = "模式1";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                if (result2.StringResult == "模式1")
+                {
+                    //var selectRes = Active.Editor.GetSelection();
+                    //var testDatas = new DBObjectCollection();
+                    //if (selectRes.Status == PromptStatus.OK)
+                    //{
+                    //    testDatas = selectRes.Value.GetObjectIds()
+                    //        .Select(o => acadDatabase.Element<Curve>(o).Clone() as Curve)
+                    //        .ToCollection();
+                    //}
+                    //else
+                    //{
+                    //    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
+                    //    testDatas = data.MergeData();
+                    //}
+                    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    //检测为空的情况
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+                else
+                {
+                    var data = new Model2Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
             }
         }
     }

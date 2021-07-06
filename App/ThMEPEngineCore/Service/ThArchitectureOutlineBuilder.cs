@@ -5,8 +5,6 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
 
@@ -16,11 +14,11 @@ namespace ThMEPEngineCore.Service
     {
         //
         public List<Polyline> Results { get; private set; }
-        private DBObjectCollection _polygons { get; set; }
+        private DBObjectCollection _polygons;
         private const double ProOffsetDistance = 5.0;
         private const double ProAREATOLERANCE = 1.0;
         private const double PostOffsetDistance = -500.0;
-        private const double PostAREATOLERANCE = 5000000;
+        private const double PostAREATOLERANCE = 5000000.0;
         private const double PostBufferAREATOLERANCE = 0.0;
         public ThArchitectureOutlineBuilder(DBObjectCollection polygons)
         {
@@ -30,20 +28,35 @@ namespace ThMEPEngineCore.Service
 
         public void Build()
         {
+            if(_polygons.Count==0 || _polygons is null)
+            {
+                return;
+            }            
             //var cleanData = PreProcess(Polygons);
+            var results = new DBObjectCollection();
             var cleanData = Buffer(_polygons, ProOffsetDistance);
-            var results = Union(cleanData);
-            results = Buffer(results, -ProOffsetDistance);
-            FilterSmallArea(results, ProAREATOLERANCE);
-            results = PostProcess(results);
-            //TODO : 取Shell
-            Results = results.Cast<Polyline>().ToList();
+            cleanData = Union(cleanData);
+            cleanData.Cast<Entity>().ForEach(o =>
+            {
+                cleanData.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
+                cleanData.Remove(o);
+            });
+            cleanData = Union(cleanData);
+            cleanData.Cast<Entity>().ForEach(o =>
+            {
+                cleanData.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
+                cleanData.Remove(o);
+            });
+            cleanData = Buffer(cleanData, -ProOffsetDistance);
+            cleanData = FilterSmallArea(cleanData, ProAREATOLERANCE);
+            cleanData = PostProcess(cleanData);
+            Results = cleanData.Cast<Polyline>().ToList();
         }
         private DBObjectCollection PostProcess(DBObjectCollection objs)
         {
             var result = FilterSmallArea(objs, PostAREATOLERANCE);
             result = Buffer(result, PostOffsetDistance);
-            FilterSmallArea(result, PostBufferAREATOLERANCE);
+            result = FilterSmallArea(result, PostBufferAREATOLERANCE);
             result = Buffer(result, -PostOffsetDistance);
             return FilterSmallArea(result, PostBufferAREATOLERANCE);
         }
@@ -54,7 +67,7 @@ namespace ThMEPEngineCore.Service
         }
         private DBObjectCollection Buffer(DBObjectCollection objs,double disttance)
         {
-            return objs.Buffer(disttance);
+            return objs.BufferPolygons(disttance);
         }
         private DBObjectCollection PreProcess(DBObjectCollection objs)
         {
@@ -115,15 +128,15 @@ namespace ThMEPEngineCore.Service
             _doors = new DBObjectCollection();
             var doorEngine = new ThDB3DoorRecognitionEngine();
             doorEngine.Recognize(database, polygon);
-            _doors = archWallEngine.Geometries;
+            _doors = doorEngine.Geometries;
             _windows = new DBObjectCollection();
             var windowEngine = new ThDB3WindowRecognitionEngine();
             windowEngine.Recognize(database, polygon);
-            _windows = archWallEngine.Geometries;
+            _windows = windowEngine.Geometries;
             _cornices = new DBObjectCollection();
             var corniceEngine = new ThDB3CorniceRecognitionEngine();
             corniceEngine.Recognize(database, polygon);
-            _cornices = archWallEngine.Geometries;
+            _cornices = corniceEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
