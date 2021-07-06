@@ -80,7 +80,7 @@ namespace ThMEPElectrical.StructureHandleService
                 roomEngine.ExtractFromMS(acdb.Database);
                 //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var markEngine = new ThRoomOutlineExtractionEngine();
+                var markEngine = new ThRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
                 //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
@@ -88,7 +88,7 @@ namespace ThMEPElectrical.StructureHandleService
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markRecEngine = new ThRoomMarkRecognitionEngine();
-                markRecEngine.Recognize(markEngine.Results.Cast<ThRawIfcAnnotationElementData>().ToList(), polyline.Vertices());
+                markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
                  var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);

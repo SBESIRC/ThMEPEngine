@@ -26,28 +26,29 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem
             string roomBEvent = null;
             foreach (DataColumn column in table.Columns)
             {
-                if (column.ColumnName.Contains(roomAColumn))
+                if (column.ColumnName == roomAColumn)
                 {
                     roomA = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomBColumn))
+                else if (column.ColumnName == roomBColumn)
                 {
                     roomB = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(floorColumn))
+                else if (column.ColumnName == floorColumn)
                 {
                     floor = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomAEventsColumn))
+                else if (column.ColumnName == roomAEventsColumn)
                 {
                     roomAEvent = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomBEventsColumn))
+                else if (column.ColumnName == roomBEventsColumn)
                 {
                     roomBEvent = column.ColumnName;
                 }
             }
 
+            GTRooms.Clear();
             foreach (DataRow row in table.Rows)
             {
                 var roomANames = CommonRoomHandleService.HandleRoom(row[roomA].ToString());
@@ -113,19 +114,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem
             {
                 return LayoutType.AlongLineGunCameraWithShield;
             }
-            else if (typeString.Contains("入口覆盖-枪式摄像机"))
+            else if (typeString.Contains("入口控制-枪式摄像机"))
             {
                 return LayoutType.EntranceGunCamera;
             }
-            else if (typeString.Contains("入口覆盖-半球摄像机"))
+            else if (typeString.Contains("入口控制-半球摄像机"))
             {
                 return LayoutType.EntranceDomeCamera;
             }
-            else if (typeString.Contains("入口覆盖-枪式摄像机（带室内防护罩）"))
+            else if (typeString.Contains("入口控制-枪式摄像机（带室内防护罩）"))
             {
                 return LayoutType.EntranceGunCameraWithShield;
             }
-            else if (typeString.Contains("入口覆盖-人脸识别摄像机"))
+            else if (typeString.Contains("入口控制-人脸识别摄像机"))
             {
                 return LayoutType.EntranceFaceRecognitionCamera;
             }

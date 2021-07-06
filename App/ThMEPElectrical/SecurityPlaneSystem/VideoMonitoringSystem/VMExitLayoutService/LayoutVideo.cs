@@ -24,13 +24,20 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomPtInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
             var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2);
-            if (poly != null)
+            if (poly == null)
             {
                 return null;
             }
             var nCols = getLayoutStructureService.GetNeedColumns(columns, room, poly);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, room, poly);
-
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                db.ModelSpace.Add(poly);
+                foreach (var item in nWalls)
+                {
+                    db.ModelSpace.Add(item);
+                }
+            }
             //计算布置点位
             var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, walls);
             pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nWalls, walls));
@@ -123,7 +130,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 }
             }
 
-            return pts;
+            return pts.Distinct().ToList();
         }
 
         /// <summary>

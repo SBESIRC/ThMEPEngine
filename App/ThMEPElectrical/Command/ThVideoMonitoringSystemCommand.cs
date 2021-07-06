@@ -99,9 +99,12 @@ namespace ThMEPElectrical.Command
                     {
                         foreach (var item in layoutInfo)
                         {
-                            Line line = new Line(item.layoutPt, item.layoutPt + 1000 * item.layoutDir);
+                            var endPt = item.layoutPt + 1000 * item.layoutDir;
+                            Line line = new Line(item.layoutPt, endPt);
+                            Circle circle = new Circle(endPt, Vector3d.ZAxis, 200);
                             //originTransformer.Reset(line);
                             db.ModelSpace.Add(line);
+                            db.ModelSpace.Add(circle);
                         }
                     }
                 }

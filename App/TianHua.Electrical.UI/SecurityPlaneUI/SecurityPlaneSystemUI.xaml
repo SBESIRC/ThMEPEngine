@@ -6,7 +6,7 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
                     SizeToContent="WidthAndHeight"
                     mc:Ignorable="d"
-                    Title="安放平面布置">
+                    Title="安防平面布置">
     <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -25,7 +25,7 @@
             <Label Content="配置原则：" VerticalContentAlignment="Center"  Focusable="False"></Label>
             <ComboBox Height="22" Width="180" TabIndex="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
         </StackPanel>
-        <TabControl Grid.Row="1" Name="TabControl1" HorizontalAlignment="Left" Height="337" Margin="10,5,10,0" VerticalAlignment="Top" Width="572">
+        <TabControl Name="SecurityPlaneTab" Grid.Row="1" HorizontalAlignment="Left" Height="337" Margin="10,5,10,0" VerticalAlignment="Top" Width="572">
             <TabItem Header="视频监控系统">
                 <DataGrid x:Name="VideoMonitoringGrid" />
             </TabItem>
@@ -56,7 +56,7 @@
             <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,5" VerticalAlignment="Bottom">
                 <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
-                <cus:ImageButton IsTabStop="True" TabIndex="4" Content="一键布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
+                <cus:ImageButton IsTabStop="True" TabIndex="4" Content="一键布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnLayout_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="5" Content="自动连线" x:Name="btnAutoConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
             </StackPanel>
         </Grid>
