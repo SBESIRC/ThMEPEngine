@@ -30,11 +30,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if (!o.Tags.Contains(o.Name))
-                {
-                    o.Tags.Add(o.Name);
-                }
-                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, string.Join(";", o.Tags.ToArray()));
+                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Name);
                 var privacy = CheckPrivate(o);
                 if (privacy != Privacy.Unknown)
                 {
@@ -52,20 +48,20 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 using (var roomEngine = new ThRoomBuilderEngine())
                 {
                     Rooms = roomEngine.BuildFromMS(database, pts);
-                    Clean();                    
+                    Clean();
+                    Rooms.ForEach(o =>
+                    {
+                        if(string.IsNullOrEmpty(o.Name) && o.Tags.Count>0)
+                        {
+                            o.Name = string.Join(";", o.Tags.ToArray());
+                        }
+                    });
                 }
             }
             else
             {
                 //TODO
             }
-#if DEBUG
-            if(Rooms.Count> 0 )
-            {
-                var entities = ThRoomBuildAreaService.BuildArea(Rooms.Select(o => o.Boundary as Polyline).ToList());
-                Rooms = entities.Select(o => ThIfcRoom.Create(o)).ToList();
-            }
-#endif
         }
         private void Clean()
         {            

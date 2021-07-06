@@ -30,10 +30,6 @@ namespace ThMEPWSS.FlushPoint.Service
             {
                 var tags = o.Tags.Contains(o.Name) ? o.Tags : o.Tags.Append(o.Name);
                 o.Name = string.Join(";", tags.ToArray());
-                if(o.Name.Contains("隔油"))
-                {
-
-                }
                 // 检查房间名称是否是停车区域
                 if (o.Tags.Append(o.Name).ToList().Where(n => IsParkingStallArea(n)).Any())
                 {

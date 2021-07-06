@@ -35,9 +35,17 @@ namespace ThMEPWSS.FlushPoint.Service
                 var cornerPt = new Point3d(pt.X + leaderXForwardLength, pt.Y + leaderYForwardLength, 0.0);
                 var firstLine = new Line(pt, cornerPt);
                 firstLine.Layer = LayoutData.WaterSupplyMarkLayerName;
+                firstLine.ColorIndex = (int)ColorIndex.BYLAYER;
+                firstLine.Linetype = "ByLayer";
+                firstLine.LineWeight = LineWeight.ByLayer;
+
+
                 var textWidth = GetTextWidth(content);
                 var secondLine = new Line(cornerPt, new Point3d(cornerPt.X + textWidth, cornerPt.Y, 0));
                 secondLine.Layer = LayoutData.WaterSupplyMarkLayerName;
+                secondLine.ColorIndex = (int)ColorIndex.BYLAYER;
+                secondLine.Linetype = "ByLayer";
+                secondLine.LineWeight = LineWeight.ByLayer;
 
                 var dbText = new DBText();
                 dbText.Position = cornerPt;
@@ -46,6 +54,10 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.Layer = LayoutData.WaterSupplyMarkLayerName;
                 dbText.WidthFactor = LayoutData.WaterSupplyMarkWidthFactor;
                 dbText.TextStyleId = acadDb.TextStyles.ElementOrDefault(LayoutData.WaterSupplyMarkStyle).ObjectId;
+                dbText.ColorIndex = (int)ColorIndex.BYLAYER;
+                dbText.Linetype = "ByLayer";
+                dbText.LineWeight = LineWeight.ByLayer;
+
                 acadDb.ModelSpace.Add(firstLine);
                 acadDb.ModelSpace.Add(secondLine);
                 acadDb.ModelSpace.Add(dbText);
