@@ -38,7 +38,6 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.ThBlockConvertCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThMEPElectricalApp))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAutoFireAlarmSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]

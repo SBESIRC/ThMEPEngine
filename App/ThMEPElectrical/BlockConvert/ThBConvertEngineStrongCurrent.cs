@@ -46,11 +46,11 @@ namespace ThMEPElectrical.BlockConvert
             {
                 if (ThBConvertUtils.IsFirePower(srcBlockReference))
                 {
-                    blkRef.SetDynBlockValue("可见性", ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY);
+                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
                 }
                 else
                 {
-                    blkRef.SetDynBlockValue("可见性", ThBConvertCommon.PROPERTY_NON_FIRE_POWER_SUPPLY);
+                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.BlockTransformToHostDwg);
+                blockReference.TransformBy(srcBlockReference.BlockTransform.PreMultiplyBy(srcBlockReference.MCS2WCS));
             }
         }
 

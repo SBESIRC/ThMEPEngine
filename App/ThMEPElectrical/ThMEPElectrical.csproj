@@ -234,7 +234,6 @@
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
-    <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
     <Compile Include="ThMEPCommon.cs" />

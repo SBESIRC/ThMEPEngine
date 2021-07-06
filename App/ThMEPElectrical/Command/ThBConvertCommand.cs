@@ -20,15 +20,28 @@ namespace ThMEPElectrical.Command
 {
     public class ThBConvertCommand : IAcadCommand, IDisposable
     {
+        /// <summary>
+        /// 模式
+        /// </summary>
         public ConvertMode Mode { get; set; }
+
+        /// <summary>
+        /// 专业
+        /// </summary>
+        public ConvertCategory Category { get; set; }
+
+        /// <summary>
+        /// 图纸比例
+        /// </summary>
+        public double Scale { get; set; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="mode"></param>
-        public ThBConvertCommand(ConvertMode mode)
+        public ThBConvertCommand()
         {
-            Mode = mode;
+            //
         }
 
         public void Dispose()
@@ -43,21 +56,20 @@ namespace ThMEPElectrical.Command
 
         private ThBConvertEngine CreateConvertEngine(ConvertMode mode)
         {
-            switch (mode)
+            if ((mode & ConvertMode.STRONGCURRENT) != 0)
             {
-                case ConvertMode.STRONGCURRENT:
-                    return new ThBConvertEngineStrongCurrent();
-                case ConvertMode.WEAKCURRENT:
-                    return new ThBConvertEngineWeakCurrent();
-                default:
-                    throw new NotSupportedException();
+                return new ThBConvertEngineStrongCurrent();
             }
+            if ((mode & ConvertMode.WEAKCURRENT) != 0)
+            {
+                return new ThBConvertEngineWeakCurrent();
+            }
+            throw new NotSupportedException();
         }
 
         public void Execute()
         {
             using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (ThBConvertEngine engine = CreateConvertEngine(Mode))
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
                 try
@@ -83,7 +95,7 @@ namespace ThMEPElectrical.Command
 
                     // 获取目标图块名
                     var srcNames = new List<String>();
-                    manager.Rules.Where(o => o.Mode == Mode).ForEach(o =>
+                    manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
                     {
                         var block = o.Transformation.Item1;
                         srcNames.Add(block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
@@ -105,21 +117,27 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    foreach (var rule in manager.Rules.Where(o => o.Mode == Mode))
+                    var prefix = Category == ConvertCategory.WSS ? "W" : "H";
+                    foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
                         var block = rule.Transformation.Item1;
                         var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
                         srcBlocks.Select(o => o.Data as ThBlockReferenceData)
+                            //.Where(o => o.Database.Filename.StartsWith(prefix))
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
                             .ForEach(o =>
                             {
-                                try
+                                // 重置Mode用的Mask
+                                ConvertMode mask = ConvertMode.ALL;
+
+                                while (Mode != 0)
                                 {
                                     // 获取转换后的块信息
                                     ThBlockConvertBlock transformedBlock = null;
-                                    if (Mode == ConvertMode.STRONGCURRENT)
+                                    if ((Mode & ConvertMode.STRONGCURRENT) != 0)
                                     {
+                                        mask = ConvertMode.STRONGCURRENT;
                                         if (string.IsNullOrEmpty(visibility))
                                         {
                                             // 当配置表中可见性为空时，则按图块名转换
@@ -137,8 +155,9 @@ namespace ThMEPElectrical.Command
                                             throw new NotSupportedException();
                                         }
                                     }
-                                    else if (Mode == ConvertMode.WEAKCURRENT)
+                                    else if ((Mode & ConvertMode.WEAKCURRENT) != 0)
                                     {
+                                        mask = ConvertMode.WEAKCURRENT;
                                         if (o.CurrentVisibilityStateValue() == visibility)
                                         {
                                             transformedBlock = manager.TransformRule(
@@ -150,83 +169,66 @@ namespace ThMEPElectrical.Command
                                     {
                                         throw new NotSupportedException();
                                     }
-                                    if (transformedBlock == null)
+
+                                    // 转换
+                                    if (transformedBlock != null)
                                     {
-                                        return;
-                                    }
+                                        // 导入目标图块
+                                        var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
+                                        var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
 
-                                    // 转换后块的名字
-                                    // 在当前图纸中查找是否存在新的块定义
-                                    // 若不存在，则插入新的块定义；
-                                    // 若存在，则保持现有的块定义
-                                    string targetBlockName = null;
-                                    if (Mode == ConvertMode.STRONGCURRENT)
-                                    {
-                                        targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                                    }
-                                    else if (Mode == ConvertMode.WEAKCURRENT)
-                                    {
-                                        targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                                    }
-                                    else
-                                    {
-                                        throw new NotSupportedException();
-                                    }
+                                        // 插入新的块引用
+                                        var scale = new Scale3d(Scale);
+                                        var engine = CreateConvertEngine(Mode);
+                                        var objId = engine.Insert(targetBlockName, scale, o);
 
-                                    // 导入目标图块
-                                    var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                                        // 将新插入的块引用调整到源块引用所在的位置
+                                        engine.TransformBy(objId, o);
 
-                                    // 插入新的块引用
-                                    var scale = new Scale3d(100.0);
-                                    var objId = engine.Insert(targetBlockName, scale, o);
+                                        // 微调
+                                        engine.Adjust(objId, o);
 
-                                    // 将新插入的块引用调整到源块引用所在的位置
-                                    engine.TransformBy(objId, o);
+                                        // 设置动态块可见性
+                                        engine.SetVisibilityState(objId, o);
 
-                                    // 微调
-                                    engine.Adjust(objId, o);
+                                        // 将源块引用的属性“刷”到新的块引用
+                                        engine.MatchProperties(objId, o);
 
-                                    // 设置动态块可见性
-                                    engine.SetVisibilityState(objId, o);
-
-                                    // 将源块引用的属性“刷”到新的块引用
-                                    engine.MatchProperties(objId, o);
-
-                                    // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
-                                    // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
-                                    var refIds = new ObjectIdCollection();
-                                    if (rule.Explodable())
-                                    {
-                                        var blkref = currentDb.Element<BlockReference>(objId, true);
-
-                                        // 
-                                        void handler(object s, ObjectEventArgs e)
+                                        // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
+                                        // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
+                                        var refIds = new ObjectIdCollection();
+                                        if (rule.Explodable())
                                         {
-                                            if (e.DBObject is BlockReference reference)
+                                            var blkref = currentDb.Element<BlockReference>(objId, true);
+
+                                            // 
+                                            void handler(object s, ObjectEventArgs e)
                                             {
-                                                refIds.Add(e.DBObject.ObjectId);
+                                                if (e.DBObject is BlockReference reference)
+                                                {
+                                                    refIds.Add(e.DBObject.ObjectId);
+                                                }
                                             }
+                                            currentDb.Database.ObjectAppended += handler;
+                                            blkref.ExplodeToOwnerSpace();
+                                            currentDb.Database.ObjectAppended -= handler;
+
+                                            blkref.Erase();
                                         }
-                                        currentDb.Database.ObjectAppended += handler;
-                                        blkref.ExplodeToOwnerSpace();
-                                        currentDb.Database.ObjectAppended -= handler;
+                                        else
+                                        {
+                                            refIds.Add(objId);
+                                        }
 
-                                        blkref.Erase();
-                                    }
-                                    else
-                                    {
-                                        refIds.Add(objId);
+                                        // 设置块引用的数据库属性
+                                        refIds.Cast<ObjectId>().ForEach(b =>
+                                        {
+                                            engine.SetDatbaseProperties(b, o);
+                                        });
                                     }
 
-                                    // 设置块引用的数据库属性
-                                    refIds.Cast<ObjectId>().ForEach(b =>
-                                    {
-                                        engine.SetDatbaseProperties(b, o);
-                                    });
-                                }
-                                catch
-                                {
-                                    return;
+                                    // 重置Mode
+                                    Mode ^= mask;
                                 }
                             });
                     }

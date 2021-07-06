@@ -1,5 +1,6 @@
-﻿using ThCADExtension;
+﻿using System;
 using System.Text.RegularExpressions;
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -19,7 +20,28 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 全部
         /// </summary>
-        ALL = (WEAKCURRENT | STRONGCURRENT),
+        ALL = WEAKCURRENT | STRONGCURRENT,
+    }
+
+    /// <summary>
+    /// 转换专业
+    /// </summary>
+    public enum ConvertCategory
+    {
+        /// <summary>
+        /// 给排水
+        /// </summary>
+        WSS = 1,
+
+        /// <summary>
+        /// 暖通
+        /// </summary>
+        HVAC = 2,
+
+        /// <summary>
+        /// 所有
+        /// </summary>
+        ALL = WSS | HVAC,
     }
 
     public static class ThBConvertUtils
@@ -85,11 +107,20 @@ namespace ThMEPElectrical.BlockConvert
             value = blockReference.StringValue(ThBConvertCommon.PROPERTY_POWER_VOLTAGE);
             if (!double.TryParse(value, out double voltage))
             {
-                // 2.如无，则采用默认值380
-                voltage = ThBConvertCommon.default_voltage;
+                // 2.如无，当”电量”的值大于等于0.55时采用默认值380，小于0.55时采用220
+                voltage = (quantity >= 0.55) ? 380 : 220;
             }
 
-            return string.Format("{0}kW {1}V", quantity.ToString(), voltage.ToString());
+            // 电压等级默认为380V
+            // 当电压等级为默认值时，相应字段可以省略
+            if (Math.Abs(voltage - 380.0) < 0.0000001)
+            {
+                return string.Format("{0}kW", quantity.ToString(), voltage.ToString());
+            }
+            else
+            {
+                return string.Format("{0}kW {1}V", quantity.ToString(), voltage.ToString());
+            }
         }
 
         /// <summary>
@@ -118,7 +149,7 @@ namespace ThMEPElectrical.BlockConvert
             }
 
             // 定频
-            // 1.优先从属性"定频", "变频", "双速"中提取
+            // 1.优先从属性"定频", "变频", "双速"，"变频、双速或定频"中提取
             // 2.如无，则采用默认值定频
             string frequency = blockReference.StringValue(ThBConvertCommon.PROPERTY_FIXED_FREQUENCY);
             if (string.IsNullOrEmpty(frequency))
@@ -131,10 +162,23 @@ namespace ThMEPElectrical.BlockConvert
             }
             if (string.IsNullOrEmpty(frequency))
             {
+                frequency = blockReference.StringValue(ThBConvertCommon.PROPERTY_ALL_FREQUENCY);
+            }
+            if (string.IsNullOrEmpty(frequency))
+            {
                 frequency = ThBConvertCommon.PROPERTY_FIXED_FREQUENCY;
             }
 
-            return string.Format("{0}({1})", name, frequency);
+            // 设备工作频率默认为定频
+            // 当工作频率为默认值时，相应字段可以省略
+            if (frequency == ThBConvertCommon.PROPERTY_FIXED_FREQUENCY)
+            {
+                return string.Format("{0}", name, frequency);
+            }
+            else
+            {
+                return string.Format("{0}({1})", name, frequency);
+            }
         }
 
         /// <summary>
@@ -147,9 +191,9 @@ namespace ThMEPElectrical.BlockConvert
             string name = blockReference.StringValue(ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY);
             if (string.IsNullOrEmpty(name))
             {
-                return name == "消防电源";
+                name = blockReference.StringValue(ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY2);
             }
-            return false;
+            return name == ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER;
         }
 
         /// <summary>
