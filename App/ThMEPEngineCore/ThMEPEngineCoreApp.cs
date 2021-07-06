@@ -1,5 +1,6 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.IO;
@@ -8,24 +9,19 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using ThMEPEngineCore.IO.GeoJSON;
-using Autodesk.AutoCAD.EditorInput;
-using ThMEPEngineCore.BuildRoom.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.BuildRoom.Interface;
-using NFox.Cad;
 using ThMEPEngineCore.LaneLine;
-using GeometryExtensions;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.IO.GeoJSON;
 
 namespace ThMEPEngineCore
 {
@@ -642,41 +638,6 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(o.Outline);
                 });
 
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THPICKROOM", CommandFlags.Modal)]
-        public void ThPickRoom()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
-            {
-                var result1 = Active.Editor.GetEntity("\n选择框线");
-                if (result1.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetPoint("\n选取房间内一点");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var data = new ThBuildRoomDataService();
-                var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
-                data.Build(acadDatabase.Database, nFrame.Vertices());
-                roomBuilder.Build(data);
-                roomBuilder.Outlines
-                    .Where(r => r.IsContains(result2.Value))
-                    .ForEach(r =>
-                    {
-                        acadDatabase.ModelSpace.Add(r);
-                        r.SetDatabaseDefaults();
-                        r.Layer = "AD-AREA-OUTL";
-                        r.ColorIndex = (int)ColorIndex.BYLAYER;
-                    });
             }
         }
 
