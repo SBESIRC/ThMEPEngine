@@ -302,6 +302,87 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
+        public void THLPDCDemoTest()
+        {
+            //Lightning Protection Down Conductors Test Data(防雷保护引下线)
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                else
+                {
+                    return;
+                }
+                var extractors = new List<ThExtractorBase>()
+                {
+                    new ThStoreyExtractor()
+                    {
+                        ColorIndex=1,
+                        GroupSwitch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThArchitectureOutlineExtractor()
+                    {
+                        ColorIndex=2,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThOuterOtherColumnExtractor()
+                    {
+                        ColorIndex=3,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false
+                    },
+                    new ThOuterOtherShearWallExtractor()
+                    {
+                        ColorIndex=4,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false
+                    },
+                    new ThBeamExtractor()
+                    {
+                        ColorIndex =5,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThLightningReceivingBeltExtractor
+                    {
+                        ColorIndex=6,
+                        GroupSwitch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                };
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
+                string geoContent = extractEngine.OutputGeo();
+                var dclLayoutEngine = new ThDCLayoutEngineMgd();
+                var data = new ThDCDataMgd();
+                data.ReadFromContent(geoContent);
+                var param = new ThDCParamMgd(1);
+                var result = dclLayoutEngine.Run(data, param);
+                var parseResults = ThDclResultParseService.Parse(result);
+                var printService = new ThDclPrintService(acadDatabase.Database, "AI-DCL");
+                printService.Print(parseResults);
+                //extractEngine.OutputGeo(Active.Document.Name);
+                //extractEngine.Print(acadDatabase.Database);
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THROUTEMAINPIPE", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
@@ -447,87 +528,6 @@ namespace ThMEPEngineCore
             }
         }
 #endif
-        [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
-        public void THLPDCDemoTest()
-        {
-            //Lightning Protection Down Conductors Test Data(防雷保护引下线)
-            using (var acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
-            {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                else
-                {
-                    return;
-                }
-                var extractors = new List<ThExtractorBase>()
-                {
-                    new ThStoreyExtractor()
-                    {
-                        ColorIndex=1,
-                        GroupSwitch=false,
-                        UseDb3Engine=true,
-                        IsolateSwitch=false,
-                    },
-                    new ThArchitectureOutlineExtractor()
-                    {
-                        ColorIndex=2,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThOuterOtherColumnExtractor()
-                    {
-                        ColorIndex=3,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false
-                    },
-                    new ThOuterOtherShearWallExtractor()
-                    {
-                        ColorIndex=4,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false
-                    },
-                    new ThBeamExtractor()
-                    {
-                        ColorIndex =5,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThLightningReceivingBeltExtractor
-                    {
-                        ColorIndex=6,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                };
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
-                string geoContent = extractEngine.OutputGeo();
-                var dclLayoutEngine = new ThDCLayoutEngineMgd();
-                var data = new ThDCDataMgd();
-                data.ReadFromContent(geoContent);                
-                var param = new ThDCParamMgd(1);
-                var result = dclLayoutEngine.Run(data, param);
-                var parseResults = ThDclResultParseService.Parse(result);
-                var printService = new ThDclPrintService(acadDatabase.Database,"AI-DCL");
-                printService.Print(parseResults);
-                //extractEngine.OutputGeo(Active.Document.Name);
-                //extractEngine.Print(acadDatabase.Database);
-            }
-        }       
-
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
