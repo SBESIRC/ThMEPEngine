@@ -907,34 +907,20 @@ namespace ThMEPEngineCore
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
                 var options = new PromptKeywordOptions("\n选择处理模式");
-                options.Keywords.Add("模式1", "F", "模式一(F)");
-                options.Keywords.Add("模式2", "S", "模式二(S)");
-                options.Keywords.Default = "模式1";
+                options.Keywords.Add("建筑模式", "A", "建筑模式(A)");
+                options.Keywords.Add("结构模式", "S", "结构模式(S)");
+                options.Keywords.Default = "结构模式";
                 var result2 = Active.Editor.GetKeywords(options);
                 if (result2.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                if (result2.StringResult == "模式1")
+                if (result2.StringResult == "建筑模式")
                 {
-                    //var selectRes = Active.Editor.GetSelection();
-                    //var testDatas = new DBObjectCollection();
-                    //if (selectRes.Status == PromptStatus.OK)
-                    //{
-                    //    testDatas = selectRes.Value.GetObjectIds()
-                    //        .Select(o => acadDatabase.Element<Curve>(o).Clone() as Curve)
-                    //        .ToCollection();
-                    //}
-                    //else
-                    //{
-                    //    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
-                    //    testDatas = data.MergeData();
-                    //}
                     var data = new Model1Data(acadDatabase.Database, frame.Vertices());
                     var builder = new ThArchitectureOutlineBuilder(data.MergeData());
                     builder.Build();
-                    //检测为空的情况
                     builder.Results.Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);

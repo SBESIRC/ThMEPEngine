@@ -12,7 +12,6 @@ namespace ThMEPEngineCore.Service
 {
     public class ThArchitectureOutlineBuilder
     {
-        //
         public List<Polyline> Results { get; private set; }
         private DBObjectCollection _polygons;
         private const double ProOffsetDistance = 5.0;
@@ -20,6 +19,7 @@ namespace ThMEPEngineCore.Service
         private const double PostOffsetDistance = -500.0;
         private const double PostAREATOLERANCE = 5000000.0;
         private const double PostBufferAREATOLERANCE = 0.0;
+        private const double ExpansionJointLength = 151.0;
         public ThArchitectureOutlineBuilder(DBObjectCollection polygons)
         {
             Results = new List<Polyline>();
@@ -31,9 +31,9 @@ namespace ThMEPEngineCore.Service
             if(_polygons.Count==0 || _polygons is null)
             {
                 return;
-            }            
+            }
             //var cleanData = PreProcess(Polygons);
-            var results = new DBObjectCollection();
+            //认为里面的数据均已进行了Simplifier的处理
             var cleanData = Buffer(_polygons, ProOffsetDistance);
             cleanData = Union(cleanData);
             cleanData.Cast<Entity>().ForEach(o =>
@@ -58,6 +58,8 @@ namespace ThMEPEngineCore.Service
             result = Buffer(result, PostOffsetDistance);
             result = FilterSmallArea(result, PostBufferAREATOLERANCE);
             result = Buffer(result, -PostOffsetDistance);
+            result = Buffer(result, ExpansionJointLength);
+            result = Buffer(result, -ExpansionJointLength);
             return FilterSmallArea(result, PostBufferAREATOLERANCE);
         }
         private DBObjectCollection Union(DBObjectCollection objs)
@@ -102,13 +104,18 @@ namespace ThMEPEngineCore.Service
         public ModelData(Database database, Point3dCollection polygon)
         {
             _shearWalls = new DBObjectCollection();
-            var shearWallEngine = new ThShearWallRecognitionEngine();
+            var shearWallEngine = new ThDB3ShearWallRecognitionEngine();
             shearWallEngine.Recognize(database, polygon);
             _shearWalls = shearWallEngine.Geometries;
             _columns = new DBObjectCollection();
             var columnEngine = new ThDB3ColumnRecognitionEngine();
             columnEngine.Recognize(database, polygon);
             _columns = columnEngine.Geometries;
+        }
+        protected ModelData()
+        {
+            _shearWalls = new DBObjectCollection();
+            _columns = new DBObjectCollection();
         }
         public abstract DBObjectCollection MergeData();
     }
@@ -154,12 +161,13 @@ namespace ThMEPEngineCore.Service
     public class Model2Data : ModelData
     {
         private readonly DBObjectCollection _beams;
-        public Model2Data(Database database, Point3dCollection polygon) : base(database,polygon)
+        public Model2Data(Database database, Point3dCollection polygon)
         {
             _beams = new DBObjectCollection();
-            var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine();
-            beamEngine.Recognize(database, polygon);
-            _beams = beamEngine.Geometries;
+            var beamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
+            _beams = beamEngine.BeamEngine.Geometries;
+            _shearWalls = beamEngine.ShearWallEngine.Geometries;
+            _columns = beamEngine.ColumnEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()

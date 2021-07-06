@@ -17,9 +17,9 @@ namespace ThMEPEngineCore.Engine
         public List<ThSingleBeamLink> SingleBeamLinks { get; set; } = new List<ThSingleBeamLink>();
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
 
-        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThDB3ColumnRecognitionEngine ColumnEngine { get; private set; }
         public ThBuildingElementRecognitionEngine BeamEngine { get; private set; }
-        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
+        public ThDB3ShearWallRecognitionEngine ShearWallEngine { get; private set; }
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
 
         public ThBeamConnectRecogitionEngine()
@@ -45,11 +45,11 @@ namespace ThMEPEngineCore.Engine
         private void Preprocess(Database database, Point3dCollection polygon)
         {
             // 启动柱识别引擎
-            ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine = new ThDB3ColumnRecognitionEngine();
             ColumnEngine.Recognize(database, polygon);
 
             // 启动墙识别引擎
-            ShearWallEngine = new ThShearWallRecognitionEngine();
+            ShearWallEngine = new ThDB3ShearWallRecognitionEngine();
             ShearWallEngine.Recognize(database, polygon);
 
             // 启动梁识别引擎

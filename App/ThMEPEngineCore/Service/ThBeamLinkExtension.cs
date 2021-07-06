@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Service
     public class ThBeamLinkExtension
     {
         public ThBeamConnectRecogitionEngine ConnectionEngine { get; set; }
-        private ThColumnRecognitionEngine ColumnEngine
+        private ThDB3ColumnRecognitionEngine ColumnEngine
         {
             get
             {
@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.Service
                 return ConnectionEngine.BeamEngine;
             }
         }
-        private ThShearWallRecognitionEngine ShearWallEngine
+        private ThDB3ShearWallRecognitionEngine ShearWallEngine
         {
             get
             {
