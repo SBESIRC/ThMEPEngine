@@ -14,12 +14,14 @@ namespace ThMEPWSS.FlushPoint.Service
         private List<ThIfcRoom> Rooms { get; set; }
         private double OffsetDis { get; set; }
         private DBObjectCollection ParkingStalls { get; set; }
+        private List<string> NecessaryArrangeSpaceNames { get; set; }
         public ThRoomNameResetService(List<ThIfcRoom> rooms, DBObjectCollection parkingStalls)
         {
             Rooms = rooms;
             OffsetDis = 500.0;
             ParkingStalls = parkingStalls;
             ParkingStallNames = new List<string>() { "停车", "汽车", "车库", "地库", "地下车库" };
+            NecessaryArrangeSpaceNames = new List<string>() { "隔油", "水泵", "泵房" , "垃圾" }; // 持续丰富
         }
         public void Reset()
         {
@@ -28,6 +30,11 @@ namespace ThMEPWSS.FlushPoint.Service
             {
                 var tags = o.Tags.Contains(o.Name) ? o.Tags : o.Tags.Append(o.Name);
                 o.Name = string.Join(";", tags.ToArray());
+                if(o.Name.Contains("隔油"))
+                {
+
+                }
+                // 检查房间名称是否是停车区域
                 if (o.Tags.Append(o.Name).ToList().Where(n => IsParkingStallArea(n)).Any())
                 {
                     o.Name = "停车区域";
@@ -42,11 +49,29 @@ namespace ThMEPWSS.FlushPoint.Service
                         o.Name = "停车区域";
                     }
                 }
+                // 检查房间名称是否是必布空间名称
+                if(!o.Name.Contains("停车区域"))
+                {
+                    if(!IsNecessaryArrangeRoomName(o.Name))
+                    {
+                        // 如果不是停车区域，也不是必布空间名称,默认为其他空间
+                        o.Name = "";
+                    }
+                    else
+                    {
+                        // 保留房间名称
+                    }
+                }
             });
         }
         private bool IsParkingStallArea(string name)
         {
             return ParkingStallNames.Where(o => name.Contains(o)).Any();
+        }
+
+        private bool IsNecessaryArrangeRoomName(string name)
+        {
+            return NecessaryArrangeSpaceNames.Where(o => name.Contains(o)).Any();
         }
     }
 }
