@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using NetTopologySuite.Geometries;
 
 #if ACAD2016
 using CLI;
@@ -236,7 +237,7 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
-
+       
         [CommandMethod("TIANHUACAD", "ThRLPDemoTest", CommandFlags.Modal)]
         public void ThRLPDemoTest()
         {
@@ -450,7 +451,7 @@ namespace ThMEPEngineCore
         public void THLPDCDemoTest()
         {
             //Lightning Protection Down Conductors Test Data(防雷保护引下线)
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var acadDatabase = AcadDatabase.Active())
             using (var extractEngine = new ThExtractGeometryEngine())
             {
                 var per = Active.Editor.GetEntity("\n选择一个框线");
@@ -513,10 +514,21 @@ namespace ThMEPEngineCore
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
                 extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
-                extractEngine.OutputGeo(Active.Document.Name);
-                extractEngine.Print(acadDatabase.Database);
+                string geoContent = extractEngine.OutputGeo();
+                var dclLayoutEngine = new ThDCLayoutEngineMgd();
+                var data = new ThDCDataMgd();
+                data.ReadFromContent(geoContent);                
+                var param = new ThDCParamMgd(1);
+                var result = dclLayoutEngine.Run(data, param);
+                var parseResults = ThDclResultParseService.Parse(result);
+                var printService = new ThDclPrintService(acadDatabase.Database,"AI-DCL");
+                printService.Print(parseResults);
+                //extractEngine.OutputGeo(Active.Document.Name);
+                //extractEngine.Print(acadDatabase.Database);
             }
-        }
+        }       
+
+
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
         {
