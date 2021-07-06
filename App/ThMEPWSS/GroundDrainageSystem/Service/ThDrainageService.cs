@@ -66,8 +66,32 @@
         public Dictionary<string, string> Outlets;
         public HashSet<string> WrappingPipes;
         public List<ThDrainageService.WLGrouper.ToiletGrouper> toiletGroupers;
-        public HashSet<string> mustHaveFloorDrains;
-        public HashSet<string> mustHaveBasin;
+
+        //1)	必然负担一个洗涤盆下水点。不用读图上任何信息；
+        //2)	若厨房内存在任何地漏图块或洗衣机图块（图块名称包含A-Toilet-9），则必然负担一个地漏下水点。
+        //最多同时负担一个洗涤盆下水店和一个地漏下水点。
+        public HashSet<string> KitchenOnlyFls;
+
+        //1)	图层名称包含“W-DRAI-EPQM”且半径大于40的圆视为洗手台下水点
+        //2)	地漏图块视为地漏下水点
+        public HashSet<string> BalconyOnlyFLs;
+
+        //综合厨房和阳台的点位
+        public HashSet<string> KitchenAndBalconyFLs;
+
+        //FL+TL
+        //若FL附近300的范围内存在TL且该TL不属于PL，则将FL与TL设为一组。系统图上和PL+TL的唯一区别是废水管要表达卫生洁具。
+        public HashSet<string> MustHaveCleaningPort;
+
+        //6.3.8	水管井的FL
+        //若FL在水管井中，则认为该FL在出现的每层都安装了一个地漏。
+        //水管井的判断：
+        //空间名称为“水”、包含“水井”或“水管井”（持续更新）。
+        public HashSet<string> WaterPipeWellFLs;
+
+        public HashSet<string> MustHaveFloorDrains;
+
+
         public void Init()
         {
             VerticalPipeLabels ??= new HashSet<string>();
@@ -78,8 +102,12 @@
             Outlets ??= new Dictionary<string, string>();
             WrappingPipes ??= new HashSet<string>();
             toiletGroupers ??= new List<ThDrainageService.WLGrouper.ToiletGrouper>();
-            mustHaveFloorDrains = new HashSet<string>();
-            mustHaveBasin = new HashSet<string>();
+            KitchenOnlyFls ??= new HashSet<string>();
+            BalconyOnlyFLs ??= new HashSet<string>();
+            KitchenAndBalconyFLs ??= new HashSet<string>();
+            MustHaveCleaningPort ??= new HashSet<string>();
+            MustHaveFloorDrains ??= new HashSet<string>();
+            WaterPipeWellFLs ??= new HashSet<string>();
         }
     }
 
@@ -180,6 +208,7 @@
             cl.CollectWaterPorts();
             cl.CollectFloorDrains();
             cl.CollectCleaningPorts();
+            cl.CollectWashingMachines();
             cl.CollectStoreys(range);
         }
 
@@ -289,7 +318,7 @@
             }
         }
 
-        const double MAX_SHORTTRANSLATOR_DISTANCE = 150;
+        const double MAX_SHORTTRANSLATOR_DISTANCE = 300;//150;
 
         public static void CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out StringBuilder sb, out List<DrainageDrawingData> drDatas, List<KeyValuePair<string, Geometry>> roomData = null)
         {
@@ -338,8 +367,10 @@
                 var vlinesGroups = GG(item.VLines);
                 var vlinesGeos = GeosGroupToGeos(vlinesGroups);
                 var wrappingPipesf = F(item.WrappingPipes);
+
+                //自动补上缺失的立管
                 {
-                    var f = F(item.VerticalPipes);
+                    var pipesf = F(item.VerticalPipes);
                     foreach (var label in item.Labels)
                     {
                         if (!ThDrainageService.IsMaybeLabelText(geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text)) continue;
@@ -347,18 +378,19 @@
                         if (lst.Count == 1)
                         {
                             var labelline = lst[0];
-                            if (f(GeoFac.CreateGeometry(label, labelline)).Count == 0)
+                            if (pipesf(GeoFac.CreateGeometry(label, labelline)).Count == 0)
                             {
                                 var lines = ExplodeGLineSegments(labelline);
                                 var points = GeoFac.GetLabelLineEndPoints(lines.Distinct(new GLineSegment.EqualityComparer(5)).ToList(), label, radius: 5);
                                 if (points.Count == 1)
                                 {
                                     var pt = points[0];
-                                    var r = GRect.Create(pt, 50);
+                                    var r = GRect.Create(pt, 55);
                                     geoData.VerticalPipes.Add(r);
                                     var pl = r.ToPolygon();
                                     cadDataMain.VerticalPipes.Add(pl);
                                     item.VerticalPipes.Add(pl);
+                                    DU.DrawTextLazy("脑补的", pl.GetCenter());
                                 }
                             }
                         }
@@ -686,18 +718,40 @@
                 //关联地漏
                 {
                     var dict = new Dictionary<string, int>();
-                    var pipesf = GeoFac.CreateIntersectsSelector(item.VerticalPipes);
-                    var gs = GeoFac.GroupGeometriesEx(dlinesGeos, item.FloorDrains);
-                    foreach (var g in gs)
                     {
-                        var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
-                        var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
-                        if (!AllNotEmpty(fds, dlines)) continue;
-                        var pipes = pipesf(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
-                        foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
+                        var pipesf = GeoFac.CreateIntersectsSelector(item.VerticalPipes);
+                        var gs = GeoFac.GroupGeometriesEx(dlinesGeos, item.FloorDrains);
+                        foreach (var g in gs)
                         {
-                            dict[lb] = fds.Count;
+                            var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
+                            var dlines = g.Where(pl => dlinesGeos.Contains(pl)).ToList();
+                            if (!AllNotEmpty(fds, dlines)) continue;
+                            var pipes = pipesf(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
+                            foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
+                            {
+                                dict[lb] = fds.Count;
+                            }
                         }
+                    }
+                    {
+                        //如果地漏没连dline，那么以中心500范围内对应最近的立管
+                        var pipesf = F(item.VerticalPipes);
+                        foreach (var fd in item.FloorDrains.Except(F(item.FloorDrains)(G(item.DLines))))
+                        {
+                            foreach (var pipe in pipesf(new GCircle(fd.GetCenter(), 500).ToCirclePolygon(6)))
+                            {
+                                if (lbDict.TryGetValue(pipe, out string label))
+                                {
+                                    dict.TryGetValue(label, out int count);
+                                    if (count == 0)
+                                    {
+                                        dict[label] = 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                     }
                     sb.AppendLine("地漏：" + dict.ToJson());
                     drData.FloorDrains = dict;
@@ -725,48 +779,57 @@
                 {
                     //获取排出编号
 
-                    var f1 = F(item.WaterPorts);
-
                     var ok_ents = new HashSet<Geometry>();
                     var outletd = new Dictionary<string, string>();
                     var has_wrappingpipes = new HashSet<string>();
                     var portd = new Dictionary<Geometry, string>();
                     {
-                        //先提取直接连接的
-                        var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
-                        foreach (var dlinesGeo in dlinesGeos)
+                        void collect(Func<Geometry, List<Geometry>> waterPortsf, Func<Geometry, string> getWaterPortLabel)
                         {
-                            var waterPorts = f1(dlinesGeo);
-                            if (waterPorts.Count == 1)
+                            var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
+                            foreach (var dlinesGeo in dlinesGeos)
                             {
-                                var waterPort = waterPorts[0];
-                                var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
-                                portd[dlinesGeo] = waterPortLabel;
-                                //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
-                                var pipes = f2(dlinesGeo);
-                                ok_ents.AddRange(pipes);
-                                foreach (var pipe in pipes)
+                                var waterPorts = waterPortsf(dlinesGeo);
+                                if (waterPorts.Count == 1)
                                 {
-                                    if (lbDict.TryGetValue(pipe, out string label))
+                                    var waterPort = waterPorts[0];
+                                    var waterPortLabel = getWaterPortLabel(waterPort);
+                                    portd[dlinesGeo] = waterPortLabel;
+                                    //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
+                                    var pipes = f2(dlinesGeo);
+                                    ok_ents.AddRange(pipes);
+                                    foreach (var pipe in pipes)
                                     {
-                                        outletd[label] = waterPortLabel;
-                                        var wrappingpipes = wrappingPipesf(dlinesGeo);
-                                        if (wrappingpipes.Count > 0)
+                                        if (lbDict.TryGetValue(pipe, out string label))
                                         {
-                                            has_wrappingpipes.Add(label);
-                                        }
-                                        foreach (var wp in wrappingpipes)
-                                        {
-                                            portd[wp] = waterPortLabel;
-                                            DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
+                                            outletd[label] = waterPortLabel;
+                                            var wrappingpipes = wrappingPipesf(dlinesGeo);
+                                            if (wrappingpipes.Count > 0)
+                                            {
+                                                has_wrappingpipes.Add(label);
+                                            }
+                                            foreach (var wp in wrappingpipes)
+                                            {
+                                                portd[wp] = waterPortLabel;
+                                                DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
+                        //先提取直接连接的
+                        collect(F(item.WaterPorts), waterPort => geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)]);
+                        //再处理挨得特别近但就是没连接的
+                        {
+                            var spacialIndex = item.WaterPorts.Select(cadDataMain.WaterPorts).ToList();
+                            var waterPorts = spacialIndex.ToList(geoData.WaterPorts).Select(x => x.Expand(400).ToPolygon()).Cast<Geometry>().ToList();
+                            collect(F(waterPorts), waterPort => geoData.WaterPortLabels[spacialIndex[waterPorts.IndexOf(waterPort)]]);
+                        }
                     }
                     {
-                        //再处理没直接连接的
+                        //再处理挨得有点远没直接连接的
                         var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
                         var radius = 10;
                         var f5 = GeoFac.NearestNeighbourPoint3dF(item.WaterPorts);
@@ -786,6 +849,7 @@
                                 {
                                     if (waterPort.GetCenter().GetDistanceTo(pt) <= 1500)
                                     {
+                                        Dbg.ShowXLabel(pt);
                                         var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
                                         portd[dlinesGeo] = waterPortLabel;
                                         //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
@@ -814,7 +878,7 @@
                     }
                     {
                         //给套管做标记
-                        var wpf=F(item.WrappingPipes.Where(wp => !portd.ContainsKey(wp)).ToList());
+                        var wpf = F(item.WrappingPipes.Where(wp => !portd.ContainsKey(wp)).ToList());
                         foreach (var dlinesGeo in dlinesGeos)
                         {
                             if (!portd.TryGetValue(dlinesGeo, out string v)) continue;
@@ -832,12 +896,12 @@
                         //再处理通过套管来连接的
                         foreach (var wp in item.WrappingPipes)
                         {
-                            if(portd.TryGetValue(wp,out string v))
+                            if (portd.TryGetValue(wp, out string v))
                             {
                                 var pipes = pipesf(wp);
                                 foreach (var pipe in pipes)
                                 {
-                                    if(lbDict.TryGetValue(pipe, out string label))
+                                    if (lbDict.TryGetValue(pipe, out string label))
                                     {
                                         if (!outletd.ContainsKey(label))
                                         {
@@ -886,6 +950,7 @@
                     var pls = new List<Geometry>();
                     var dls = new List<Geometry>();
                     var tls = new List<Geometry>();
+                    var fls = new List<Geometry>();
                     foreach (var kv in lbDict)
                     {
                         if (kv.Value.StartsWith("PL"))
@@ -900,20 +965,26 @@
                         {
                             tls.Add(kv.Key);
                         }
+                        else if (kv.Value.StartsWith("FL"))
+                        {
+                            fls.Add(kv.Key);
+                        }
                     }
-                    var lst = ThDrainageService.WLGeoGrouper.ToiletGrouper.DoGroup(pls, tls, dls);
+                    var lst = ThDrainageService.WLGeoGrouper.ToiletGrouper.DoGroup(pls, tls, dls, fls);
                     var toiletGroupers = new List<ThDrainageService.WLGrouper.ToiletGrouper>();
                     foreach (var itm in lst)
                     {
                         var _pls = itm.PLs.Join(lbDict, x => lbDict[x], x => x.Value, (x, y) => y.Value).Distinct().ToList();
                         var _tls = itm.TLs.Join(lbDict, x => lbDict[x], x => x.Value, (x, y) => y.Value).Distinct().ToList();
                         var _dls = itm.DLs.Join(lbDict, x => lbDict[x], x => x.Value, (x, y) => y.Value).Distinct().ToList();
+                        var _fls = itm.FLs.Join(lbDict, x => lbDict[x], x => x.Value, (x, y) => y.Value).Distinct().ToList();
                         var m = new ThDrainageService.WLGrouper.ToiletGrouper()
                         {
                             WLType = itm.WLType,
                             PLs = _pls,
                             TLs = _tls,
                             DLs = _dls,
+                            FLs = _fls,
                         };
                         m.Init();
                         toiletGroupers.Add(m);
@@ -934,7 +1005,7 @@
                             hs.AddRange(f(kv.Value).Select(x => lbDict[x]));
                         }
                     }
-                    drData.mustHaveFloorDrains.AddRange(hs);
+                    drData.WaterPipeWellFLs.AddRange(hs);
                 }
 
 
@@ -956,23 +1027,43 @@
 
                     //1)	必然负担一个洗涤盆下水点。不用读图上任何信息；
                     //2)	若厨房内存在任何地漏图块或洗衣机图块（图块名称包含A-Toilet-9），则必然负担一个地漏下水点。
+                    //最多同时负担一个洗涤盆下水店和一个地漏下水点。
                     var _fls1 = DrainageService.GetKitchenOnlyFLs(fls, kitchens, nonames, balconys, pts);
                     foreach (var fl in _fls1)
                     {
                         var label = lbDict[fl];
-                        drData.mustHaveBasin.Add(label);
-                        drData.mustHaveFloorDrains.Add(label);
+                        drData.KitchenOnlyFls.Add(label);
                     }
+                    var _fls4 = DrainageService.GetFLsWhereSupportingFloorDrainUnderWaterPoint(fls, kitchens, item.FloorDrains, item.WashingMachines);
+                    foreach (var fl in _fls4)
+                    {
+                        var label = lbDict[fl];
+                        drData.MustHaveFloorDrains.Add(label);
+                    }
+
                     var _fls2 = DrainageService.GetBalconyOnlyFLs(fls, kitchens, nonames, balconys, pts);
+                    //1)	图层名称包含“W-DRAI-EPQM”且半径大于40的圆视为洗手台下水点
+                    //2)	地漏图块视为地漏下水点
                     foreach (var fl in _fls2)
                     {
                         var label = lbDict[fl];
+                        drData.BalconyOnlyFLs.Add(label);
                     }
+
+                    //综合厨房和阳台的点位
                     var _fls3 = DrainageService.GetKitchenAndBalconyBothFLs(fls, kitchens, nonames, balconys, pts);
                     foreach (var fl in _fls3)
                     {
                         var label = lbDict[fl];
+                        drData.KitchenAndBalconyFLs.Add(label);
                     }
+                    foreach (var fl in _fls3)
+                    {
+                        var label = lbDict[fl];
+                        drData.MustHaveFloorDrains.Add(label);
+                    }
+
+
                 }
 
 
@@ -1185,6 +1276,10 @@
         public static double LONG_TRANSLATOR_HEIGHT1 = 780;
         public static double CHECKPOINT_OFFSET_Y = 580;
         public static readonly Point2d[] LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS = new Point2d[] { new Point2d(0, 0), new Point2d(-200, 200), new Point2d(-200, 500), new Point2d(-79, 621), new Point2d(1029, 621), new Point2d(1150, 741), new Point2d(1150, 1021) };
+        public static void DrawStoreyLine(string label, Point2d basePt, double lineLen)
+        {
+            DrawStoreyLine(label, basePt.ToPoint3d(), lineLen);
+        }
         public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
         {
             {
@@ -1929,7 +2024,7 @@ cb: br =>
         }
         public enum WLType
         {
-            PL, PL_TL, PL_DL, PL_TL_DL,
+            PL, PL_TL, PL_DL, PL_TL_DL, FL, FL_TL,
         }
         public class WLGeoGrouper
         {
@@ -1947,62 +2042,14 @@ cb: br =>
                     DLs ??= new List<Geometry>();
                     FLs ??= new List<Geometry>();
                 }
-                public static List<ToiletGrouper> CollectFLTLs(List<ToiletGrouper> group, List<Geometry> FLs, List<Geometry> TLs)
-                {
-                    //6.3.5	废水立管（FL）+通气立管（TL）
-                    //若FL附近300的范围内存在TL且该THL不属于PL，则将FL与TL设为一组。系统图上和PL+TL的唯一区别是废水管要表达卫生洁具。
-                    var tls = new List<Geometry>();
-                    foreach (var item in group)
-                    {
-                        if (item.PLs.Count > 0 && item.TLs.Count > 0)
-                        {
-                            tls.AddRange(item.TLs);
-                        }
-                    }
-                    var list = new List<ToiletGrouper>();
-                    List<Geometry> _tls = null;
-                    foreach (var fl in FLs)
-                    {
-                        _tls ??= TLs.Except(tls).ToList();
-                        var f = GeoFac.CreateIntersectsSelector(_tls);
-                        var range = GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), 300, 36);
-                        var lst = f(range);
-                        if (lst.Count > 0)
-                        {
-                            tls.AddRange(lst);
-                            _tls = null;
-                            var item = new ToiletGrouper();
-                            list.Add(item);
-                            item.Init();
-                            item.FLs.Add(fl);
-                            item.TLs.AddRange(lst);
-                        }
-                    }
-                    return list;
-                }
-                public static List<Geometry> GetWaterPipeWellFLs(List<KeyValuePair<string, Geometry>> roomData, List<Geometry> FLs)
-                {
-                    //若FL在水管井中，则认为该FL在出现的每层都安装了一个地漏。
-                    //水管井的判断：
-                    //空间名称为“水”、包含“水井”或“水管井”（持续更新）。
-                    var rooms = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (kv.Key == "水" || kv.Key.Contains("水井") || kv.Key.Contains("水管井"))
-                        {
-                            rooms.Add(kv.Value);
-                        }
-                    }
-                    return GeoFac.CreateIntersectsSelector(FLs)(GeoFac.CreateGeometry(rooms));
-                }
-                public static List<ToiletGrouper> DoGroup(List<Geometry> PLs, List<Geometry> TLs, List<Geometry> DLs)
+                public static List<ToiletGrouper> DoGroup(List<Geometry> PLs, List<Geometry> TLs, List<Geometry> DLs, List<Geometry> FLs)
                 {
                     var list = new List<ToiletGrouper>();
                     var ok_pipes = new HashSet<Geometry>();
                     foreach (var pl in PLs)
                     {
                         ok_pipes.Add(pl);
-                        var range = GeoFac.CreateCirclePolygon(pl.GetCenter().ToPoint3d(), 300, 12);
+                        var range = GeoFac.CreateCirclePolygon(pl.GetCenter(), 300, 12);
                         //在每一根PL的每一层300范围内找TL
                         var tls = GeoFac.CreateIntersectsSelector(TLs.Except(ok_pipes).ToList())(range);
                         ok_pipes.AddRange(tls);
@@ -2034,6 +2081,26 @@ cb: br =>
                         else
                         {
                             throw new System.Exception(nameof(ToiletGrouper));
+                        }
+                    }
+                    foreach (var fl in FLs)
+                    {
+                        ok_pipes.Add(fl);
+                        var o = new ToiletGrouper();
+                        list.Add(o);
+                        o.Init();
+                        o.FLs.Add(fl);
+                        //在每一根FL的每一层300范围内找TL
+                        var range = GeoFac.CreateCirclePolygon(fl.GetCenter(), 300, 12);
+                        var tls = GeoFac.CreateIntersectsSelector(TLs.Except(ok_pipes).ToList())(range);
+                        ok_pipes.AddRange(tls);
+                        if (tls.Count == 0)
+                        {
+                            o.WLType = WLType.FL;
+                        }
+                        else
+                        {
+                            o.WLType = WLType.FL_TL;
                         }
                     }
                     return list;

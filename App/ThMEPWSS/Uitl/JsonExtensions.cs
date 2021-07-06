@@ -104,6 +104,14 @@ namespace ThMEPWSS.JsonExtensionsNs
             }
             return d;
         }
+        public static bool SeqEqual<T>(this IList<T> source, IList<T> target)
+        {
+            return source == target || (source != null && target != null && source.Count == target.Count && source.SequenceEqual(target));
+        }
+        public static bool SeqEqual<T>(this IEnumerable<T> source, IEnumerable<T> target)
+        {
+            return source == target || (source != null && target != null && source.SequenceEqual(target));
+        }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
             for (int i = 0; i < source.Count; i++)

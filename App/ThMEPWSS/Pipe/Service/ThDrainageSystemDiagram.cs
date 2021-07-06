@@ -20,6 +20,24 @@ namespace ThMEPWSS.Pipe.Service
 
     public partial class DrainageSystemDiagram
     {
+        public static void draw14(Point2d basePoint)
+        {
+            var OFFSET_X = 2500.0;
+            var SPAN_X = 5500.0;
+            var HEIGHT = 1800.0;
+            //var HEIGHT = 5000.0;
+            var COUNT = 20;
+
+            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+            for (int i = 0; i < storeys.Count; i++)
+            {
+                var storey = storeys[i];
+                var bsPt1 = basePoint.OffsetY(HEIGHT * i);
+                DrawStoreyLine(storey, basePoint, lineLen);
+            }
+            var outputStartPointOffsets = new Vector2d[COUNT];
+        }
         public static void draw1(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
