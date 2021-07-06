@@ -68,13 +68,29 @@ namespace ThCADCore.NTS
         {
             return polygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
         }
+
         public static bool Intersects(this AcPolygon polygon, Entity entity)
         {
             return polygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());
         }
+
+        public static AcPolygon OBB(this AcPolygon polygon)
+        {
+            // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
+            var center = polygon.GetCentroidPoint();
+            var vector = center.GetVectorTo(Point3d.Origin);
+            var matrix = Matrix3d.Displacement(vector);
+            polygon.TransformBy(matrix);
+            var result = polygon.GetMinimumRectangle();
+            result.TransformBy(matrix.Inverse());
+            return result;
+        }
+
         public static bool IsRectangle(this AcPolygon polygon)
         {
-            return polygon.ToNTSPolygon().IsRectangle;
+            return polygon.IsSimilar(OBB(polygon), 0.99);
         }
 
         public static Point3d GetCentroidPoint(this AcPolygon polygon)
@@ -101,7 +117,7 @@ namespace ThCADCore.NTS
             return polyFirst.ToNTSPolygon().Intersection(polySec.ToNTSPolygon())
                 .ToDbCollection()
                 .Cast<Entity>()
-                .Where(o => o is Polyline)
+                .Where(o => o is AcPolygon)
                 .ToCollection();
         }
     }
