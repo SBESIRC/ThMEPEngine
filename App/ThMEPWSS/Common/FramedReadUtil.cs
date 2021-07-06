@@ -86,25 +86,34 @@ namespace ThMEPWSS.Common
         public static List<FloorFramed> FloorFramedOrder(List<FloorFramed> orderFloors,bool isDes)
         {
             var resFloors = new List<FloorFramed>();
-            var tempFramed = orderFloors.OrderBy(c => c.startFloorOrder).ToList();
+            var tempFramed = orderFloors.OrderBy(c => c.endFloorOrder).ToList();
             if(isDes)
-                tempFramed = orderFloors.OrderByDescending(c => c.startFloorOrder).ToList();
+                tempFramed = orderFloors.OrderByDescending(c => c.endFloorOrder).ToList();
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("小屋面")).ToList());
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("大屋面")).ToList());
-            foreach (var item in tempFramed)
+            //foreach (var item in tempFramed)
+            //{
+            //    if (item.floorType.Contains("屋面"))
+            //        continue;
+            //    if (item.floorType.Contains("非标"))
+            //        continue;
+            //    resFloors.Add(item);
+            //}
+            //foreach (var item in tempFramed)
+            //{
+            //    if (item.floorType.Contains("屋面"))
+            //        continue;
+            //    if (!item.floorType.Contains("非标"))
+            //        continue;
+            //    resFloors.Add(item);
+            //}
+            foreach (var item in tempFramed) 
             {
                 if (item.floorType.Contains("屋面"))
                     continue;
-                if (item.floorType.Contains("非标"))
-                    continue;
                 resFloors.Add(item);
             }
-            foreach (var item in tempFramed)
-            {
-                if (!item.floorType.Contains("非标"))
-                    continue;
-                resFloors.Add(item);
-            }
+                
             return resFloors;
         }
         public static List<Line> FloorFrameSpliteLines(FloorFramed floorFramed) 

@@ -133,7 +133,15 @@ namespace ThMEPEngineCore.CAD
             var ang = Vector3d.XAxis.GetAngleTo(mText.Direction, mText.Normal);
             Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * ang, mText.Normal, mText.Location);
             var newText = mText.GetTransformedCopy(clockwiseMat) as MText;
-            var obb = newText.GeometricExtents.ToRectangle();
+
+            var objs = new DBObjectCollection();
+            newText.Explode(objs);
+            var extents = new Extents3d();
+            objs.Cast<DBText>().ForEach(o =>
+            {
+                extents.AddExtents(o.GeometricExtents);
+            });
+            var obb = extents.ToRectangle();
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(ang, mText.Normal, mText.Location);
             obb.TransformBy(counterClockwiseMat);
             return obb;
