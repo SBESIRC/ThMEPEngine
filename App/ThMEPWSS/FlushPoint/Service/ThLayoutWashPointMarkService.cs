@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using DotNetARX;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -23,7 +24,7 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         public void Layout()
         {
-            Import();
+            SetDatabaseDefaults();
             var codeDic = BuildPointCode();
             codeDic.ForEach(o => DrawMark(o.Key,o.Value));
         }
@@ -43,8 +44,8 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.TextString = content;
                 dbText.Height = textSize;
                 dbText.Layer = LayoutData.WaterSupplyMarkLayerName;
-                dbText.TextStyleId = acadDb.TextStyles.Element(LayoutData.WaterSupplyMarkStyle).Id;
                 dbText.WidthFactor = LayoutData.WaterSupplyMarkWidthFactor;
+                dbText.TextStyleId = acadDb.TextStyles.ElementOrDefault(LayoutData.WaterSupplyMarkStyle).ObjectId;
                 acadDb.ModelSpace.Add(firstLine);
                 acadDb.ModelSpace.Add(secondLine);
                 acadDb.ModelSpace.Add(dbText);
@@ -63,12 +64,24 @@ namespace ThMEPWSS.FlushPoint.Service
             }
             return result;
         }
-        private void Import()
+        private void SetDatabaseDefaults()
         {
             using (var currentDb = AcadDatabase.Use(LayoutData.Db))
             using (var blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WaterSupplyMarkLayerName), false);
+                currentDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(LayoutData.WaterSupplyMarkStyle), false);
+                SetLayerDefaults(LayoutData.WaterSupplyMarkLayerName);
+            }
+        }
+        private void SetLayerDefaults(string name)
+        {
+            using (var currentDb = AcadDatabase.Active())
+            {
+                currentDb.Database.UnOffLayer(name);
+                currentDb.Database.UnLockLayer(name);
+                currentDb.Database.UnPrintLayer(name);
+                currentDb.Database.UnFrozenLayer(name);
             }
         }
         private double GetTextWidth(string content)

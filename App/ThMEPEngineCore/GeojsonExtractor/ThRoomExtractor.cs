@@ -60,8 +60,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 //TODO
             }
 #if DEBUG
-            var entities = ThRoomBuildAreaService.BuildArea(Rooms.Select(o => o.Boundary as Polyline).ToList());
-            Rooms = entities.Select(o => ThIfcRoom.Create(o)).ToList();
+            if(Rooms.Count> 0 )
+            {
+                var entities = ThRoomBuildAreaService.BuildArea(Rooms.Select(o => o.Boundary as Polyline).ToList());
+                Rooms = entities.Select(o => ThIfcRoom.Create(o)).ToList();
+            }
 #endif
         }
         private void Clean()

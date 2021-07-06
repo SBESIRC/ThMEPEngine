@@ -4,7 +4,6 @@ using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore;
 using ThMEPWSS.Command;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
@@ -47,24 +46,28 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         private Dictionary<Point3d, BlockReference> Print(Dictionary<Point3d, Vector3d> ptDic)
         {
-            ImportBlock(); //导入块
-            CreateLayer();
+            SetDatabaseDefaults();
             return InsertBlock(ptDic); //根据点位，插块
         }
-        private void ImportBlock()
+        private void SetDatabaseDefaults()
         {
             using (var currentDb = AcadDatabase.Active())
             using (var blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WashPointLayerName), false);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WaterSupplyMarkLayerName), false);
+                SetLayerDefaults(LayoutData.WashPointLayerName);
             }
         }
-        private void CreateLayer()
+        private void SetLayerDefaults(string name)
         {
-            LayoutData.Db.CreateAILayer(LayoutData.WashPointLayerName, (short)ColorIndex.BYLAYER);
-            LayoutData.Db.CreateAILayer(LayoutData.WaterSupplyMarkLayerName, (short)ColorIndex.BYLAYER);
+            using (var currentDb = AcadDatabase.Active())
+            {
+                currentDb.Database.UnOffLayer(name);
+                currentDb.Database.UnLockLayer(name);
+                currentDb.Database.UnPrintLayer(name);
+                currentDb.Database.UnFrozenLayer(name);
+            }
         }
         private void BuildSpatialIndex()
         {
@@ -225,7 +228,7 @@ namespace ThMEPWSS.FlushPoint.Service
         /// </summary>
         public string WaterSupplyMarkLayerName { get; set; }
         /// <summary>
-        /// 冲洗点位标注文字的图层名称
+        /// 冲洗点位标注文字的样式名称
         /// </summary>
         public string WaterSupplyMarkStyle { get; set; }
         /// <summary>
