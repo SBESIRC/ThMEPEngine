@@ -46,50 +46,95 @@ namespace ThCADExtension
                     }
 
                     // 暂时只处理线和圆弧组合的情况
-                    var segments = new PolylineSegmentCollection();
-                    foreach (Curve2d cv in hatchLoop.Curves)
+                    if (hatchLoop.Curves.Count == 2)
                     {
-                        LineSegment2d line2d = cv as LineSegment2d;
-                        CircularArc2d arc2d = cv as CircularArc2d;
-                        EllipticalArc2d ellipse2d = cv as EllipticalArc2d;
-                        NurbCurve2d spline2d = cv as NurbCurve2d;
-                        if (line2d != null)
+                        var circle = ToCircle(hatchLoop.Curves);
+                        if (circle.Area <= 1e-6)
                         {
-                            segments.Add(new PolylineSegment(line2d));
-                        }
-                        else if (arc2d != null)
-                        {
-                            segments.Add(new PolylineSegment(arc2d));
+                            curves.Add(ToPolyline(hatchLoop.Curves,tolerance));
                         }
                         else
                         {
-                            throw new NotSupportedException();
+                            curves.Add(circle);
                         }
-                        //else if (ellipse2d != null)
-                        //{
-                        //    var eclipse = ellipse2d.ToCurve();
-                        //    segments.AddRange(new PolylineSegmentCollection(eclipse));
-                        //}
-                        //else if (spline2d != null)
-                        //{
-                        //    var poly = spline2d.ToCurve().ToPolyline() as Polyline;
-                        //    segments.AddRange(new PolylineSegmentCollection(poly));
-                        //}
-                        //else
-                        //{
-                        //    throw new NotSupportedException();
-                        //}
                     }
-                    segments.Join();
-                    var newPoly = segments.ToPolyline();
-                    if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint,new Tolerance(tolerance, tolerance)))
+                    else
                     {
-                        newPoly.Closed = true;
+                        curves.Add(ToPolyline(hatchLoop.Curves, tolerance));
                     }
-                    curves.Add(newPoly);
                 }
             }
             return curves;
+        }
+        private static Circle ToCircle(Curve2dCollection curve2ds)
+        {
+            var first = curve2ds[0];
+            var second = curve2ds[1];
+            if(first is CircularArc2d firstArc && second is CircularArc2d secondArc)
+            {
+                if(firstArc.StartPoint.GetDistanceTo(secondArc.StartPoint)<=1.0 &&
+                    firstArc.EndPoint.GetDistanceTo(secondArc.EndPoint) <= 1.0)
+                {
+                    return new Circle(new Point3d(firstArc.Center.X,firstArc.Center.Y,0),Vector3d.ZAxis,firstArc.Radius);
+                }
+                else if(firstArc.StartPoint.GetDistanceTo(secondArc.EndPoint) <= 1.0 &&
+                    firstArc.EndPoint.GetDistanceTo(secondArc.StartPoint) <= 1.0)
+                {
+                    return new Circle(new Point3d(firstArc.Center.X, firstArc.Center.Y, 0), Vector3d.ZAxis, firstArc.Radius);
+                }
+                else
+                {
+                    return new Circle();
+                }
+            }
+            else
+            {
+                return new Circle();
+            }
+        }
+        private static Polyline ToPolyline(Curve2dCollection curve2ds, double tolerance = 1e-4)
+        {
+            var segments = new PolylineSegmentCollection();
+            foreach (Curve2d cv in curve2ds)
+            {
+                LineSegment2d line2d = cv as LineSegment2d;
+                CircularArc2d arc2d = cv as CircularArc2d;
+                EllipticalArc2d ellipse2d = cv as EllipticalArc2d;
+                NurbCurve2d spline2d = cv as NurbCurve2d;
+                if (line2d != null)
+                {
+                    segments.Add(new PolylineSegment(line2d));
+                }
+                else if (arc2d != null)
+                {
+                    segments.Add(new PolylineSegment(arc2d));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+                //else if (ellipse2d != null)
+                //{
+                //    var eclipse = ellipse2d.ToCurve();
+                //    segments.AddRange(new PolylineSegmentCollection(eclipse));
+                //}
+                //else if (spline2d != null)
+                //{
+                //    var poly = spline2d.ToCurve().ToPolyline() as Polyline;
+                //    segments.AddRange(new PolylineSegmentCollection(poly));
+                //}
+                //else
+                //{
+                //    throw new NotSupportedException();
+                //}
+            }
+            segments.Join();
+            var newPoly = segments.ToPolyline();
+            if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint, new Tolerance(tolerance, tolerance)))
+            {
+                newPoly.Closed = true;
+            }
+            return newPoly;
         }
     }
 }
