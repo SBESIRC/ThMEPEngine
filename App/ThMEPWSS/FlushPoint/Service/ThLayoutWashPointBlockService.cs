@@ -207,6 +207,10 @@ namespace ThMEPWSS.FlushPoint.Service
                     var objId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
                         LayoutData.WashPointLayerName, LayoutData.WashPointBlkName,
                         o.Key, new Scale3d(1.0, 1.0, 1.0), rad);
+                    var br = acadDb.Element<BlockReference>(objId);
+                    br.ColorIndex = (int)ColorIndex.BYLAYER;
+                    br.Linetype = "ByLayer";
+                    br.LineWeight = LineWeight.ByLayer;
                     results.Add(o.Key, acadDb.Element<BlockReference>(objId));
                 });
                 return results;
