@@ -7,6 +7,7 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -34,7 +35,21 @@ namespace ThMEPEngineCore.Engine
 
         public void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
         {
+            BuildArea(rooms);
             SpaceMatchText(BuildTextContainers(marks, rooms));
+        }
+
+        private List<ThIfcRoom> BuildArea(List<ThIfcRoom> rooms)
+        {
+            if(rooms.Count>0)
+            {
+                var objs = rooms.Select(o => o.Boundary).ToCollection();                
+                objs = objs.BuildArea();
+                objs = objs.FilterSmallArea(1.0);
+                rooms.Clear();
+                objs.Cast<Entity>().ForEach(o => rooms.Add(ThIfcRoom.Create(o)));
+            }
+            return rooms;
         }
 
         private Dictionary<ThIfcTextNote, List<ThIfcRoom>> BuildTextContainers(
