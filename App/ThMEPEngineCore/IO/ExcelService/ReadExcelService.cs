@@ -1,13 +1,12 @@
-﻿using System;
+﻿using System.IO;
 using System.Data;
-using System.IO;
-using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace TianHua.Electrical.UI.Service
+namespace ThMEPEngineCore.IO.ExcelService
 {
-    public class ExcelSrevice
+    public class ReadExcelService
     {
         public DataSet ReadExcelToDataSet(string fileName, bool isFirstLineColumnName)
         {

@@ -1,21 +1,13 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using ThCADExtension;
-using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Service;
-using ThMEPLighting.ServiceModels;
-using TianHua.Electrical.UI.Service;
+using ThMEPEngineCore.IO.ExcelService;
 
 namespace TianHua.Electrical.UI.SecurityPlaneUI
 {
@@ -72,7 +64,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// <returns></returns>
         private DataSet GetExcelContent()
         {
-            ExcelSrevice excelSrevice = new ExcelSrevice();
+            ReadExcelService excelSrevice = new ReadExcelService();
             return excelSrevice.ReadExcelToDataSet(url, true);
         }
 
