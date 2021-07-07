@@ -46,6 +46,9 @@ namespace ThMEPEngineCore.Service
                         br.LayerId = layerId;
                         br.DowngradeOpen();
                     }
+                    var text =  o.CreateText();
+                    text.Layer = LayerName;
+                    currentDb.ModelSpace.Add(text);
                 });
             }
         }

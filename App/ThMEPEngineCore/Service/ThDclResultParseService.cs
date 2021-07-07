@@ -7,6 +7,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -90,5 +91,22 @@ namespace ThMEPEngineCore.Service
         /// DISRUPT表示竖向构件不贯通，是通过横梁找到新的竖向构件布置的位点
         /// </summary>
         public string Cond { get; set; } = "";
+
+        public MText CreateText()
+        {
+            var text = new MText();            
+            text.Location = this.Position;
+            text.Contents =
+                "Class" + Class + "\n" +
+                "Floor" + Floor + "\n" +
+                "Id" + Id + "\n" +
+                "Pinned" + Pinned + "\n" +
+                "Cond" + Cond;
+            text.Width = 50;
+            text.Linetype = "ByLayer";
+            text.ColorIndex = (int)ColorIndex.BYLAYER;
+            text.LineWeight = LineWeight.ByLayer;
+            return text;
+        }
     }
 }
