@@ -711,6 +711,8 @@ namespace ThMEPEngineCore
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
+
+
                 ThDB3CorniceRecognitionEngine corniceRecognitionEngine = new ThDB3CorniceRecognitionEngine();
                 corniceRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 corniceRecognitionEngine.Elements.ForEach(o =>
@@ -882,6 +884,60 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();
                 });
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractContourLine", CommandFlags.Modal)]
+        public void THExtractContourLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var options = new PromptKeywordOptions("\n选择处理模式");
+                options.Keywords.Add("建筑模式", "A", "建筑模式(A)");
+                options.Keywords.Add("结构模式", "S", "结构模式(S)");
+                options.Keywords.Default = "结构模式";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                if (result2.StringResult == "建筑模式")
+                {
+                    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+                else
+                {
+                    var data = new Model2Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
             }
         }
     }
