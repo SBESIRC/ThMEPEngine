@@ -1,5 +1,4 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -7,7 +6,6 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Interface;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
@@ -136,7 +134,7 @@ namespace ThMEPEngineCore.Service
             var results = new DBObjectCollection();
             polygons = MakeValid(polygons);
             polygons = DPSimplify(polygons);
-            polygons=FilterSmallAreas(polygons);
+            polygons= polygons.FilterSmallArea(1.0);
             polygons.Cast<Polyline>().ForEach(o =>
             {
                 if(o.IsRectangle())
@@ -165,7 +163,7 @@ namespace ThMEPEngineCore.Service
             var results = new DBObjectCollection();
             polygons = MakeValid(polygons);
             polygons = DPSimplify(polygons);
-            polygons = FilterSmallAreas(polygons);
+            polygons = polygons.FilterSmallArea(1.0);
             polygons.Cast<Polyline>().ForEach(o =>
             {
                 var converter = new ThRectangleConverter(o);
@@ -213,25 +211,6 @@ namespace ThMEPEngineCore.Service
                 }
             }
             return results;
-        }
-
-        private DBObjectCollection FilterSmallAreas(DBObjectCollection objs)
-        {
-            return objs.Cast<Entity>().Where(o =>
-            {
-                if(o is Polyline polygon)
-                {
-                    return polygon.Area >= 1.0;
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    return mPolygon.Area >= 1.0;
-                }
-                else
-                {
-                    return false;
-                }
-            }).ToCollection();
         }
     }
 }
