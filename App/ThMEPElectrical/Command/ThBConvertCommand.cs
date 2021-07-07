@@ -128,14 +128,13 @@ namespace ThMEPElectrical.Command
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
                             .ForEach(o =>
                             {
-                                // 重置Mode用的Mask
-                                ConvertMode mask = ConvertMode.ALL;
-
-                                while (Mode != 0)
+                                ConvertMode mode = Mode;
+                                while (mode != 0)
                                 {
                                     // 获取转换后的块信息
+                                    ConvertMode mask = ConvertMode.ALL;
                                     ThBlockConvertBlock transformedBlock = null;
-                                    if ((Mode & ConvertMode.STRONGCURRENT) != 0)
+                                    if ((mode & ConvertMode.STRONGCURRENT) != 0)
                                     {
                                         mask = ConvertMode.STRONGCURRENT;
                                         if (string.IsNullOrEmpty(visibility))
@@ -155,7 +154,7 @@ namespace ThMEPElectrical.Command
                                             throw new NotSupportedException();
                                         }
                                     }
-                                    else if ((Mode & ConvertMode.WEAKCURRENT) != 0)
+                                    else if ((mode & ConvertMode.WEAKCURRENT) != 0)
                                     {
                                         mask = ConvertMode.WEAKCURRENT;
                                         if (o.CurrentVisibilityStateValue() == visibility)
@@ -179,7 +178,7 @@ namespace ThMEPElectrical.Command
 
                                         // 插入新的块引用
                                         var scale = new Scale3d(Scale);
-                                        var engine = CreateConvertEngine(Mode);
+                                        var engine = CreateConvertEngine(mode);
                                         var objId = engine.Insert(targetBlockName, scale, o);
 
                                         // 将新插入的块引用调整到源块引用所在的位置
@@ -228,7 +227,7 @@ namespace ThMEPElectrical.Command
                                     }
 
                                     // 重置Mode
-                                    Mode ^= mask;
+                                    mode ^= mask;
                                 }
                             });
                     }
