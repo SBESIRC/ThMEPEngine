@@ -237,9 +237,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NPOI">
-      <Version>2.5.3</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
