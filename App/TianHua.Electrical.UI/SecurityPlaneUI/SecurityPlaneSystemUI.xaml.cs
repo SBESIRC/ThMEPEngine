@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Service;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.IO.ExcelService;
 
 namespace TianHua.Electrical.UI.SecurityPlaneUI
@@ -55,6 +56,10 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 {
                     ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable = table;
                 }
+            }
+            if (ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable != null)
+            {
+                ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree = RoomConfigTreeService.CreateRoomTree(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable);
             }
         }
 

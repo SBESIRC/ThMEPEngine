@@ -4,6 +4,8 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Service;
+using ThMEPEngineCore.Config;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
 {
@@ -48,7 +50,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
                 otherRooms.Clear();
                 foreach (DataRow row in table.Rows)
                 {
-                    var roomNames = CommonRoomHandleService.HandleRoom(row[columnName].ToString());
+                    var roomNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[columnName].ToString());
                     RoomInfoModel roomInfoModel = new RoomInfoModel();
                     roomInfoModel.roomName = roomNames;
                     if (row[floor].ToString() != "All")

@@ -171,7 +171,6 @@
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
-    <Compile Include="SecurityPlaneSystem\CommonRoomHandleService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
