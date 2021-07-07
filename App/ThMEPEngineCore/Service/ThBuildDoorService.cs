@@ -90,12 +90,11 @@ namespace ThMEPEngineCore.Service
             var results = new List<Polyline>();
             doorPairs.ForEach(o =>
             {
-                //o.Item1->左边门垛线，o.Item2->左边相邻元素边线,o.Item3->右边门垛线，o.Item4->右边相邻元素边线
-                //门垛的长度、领边的长度、最长边长度
-                var center = GetCenter(o.Item1, o.Item3); //通过两边门垛线，获取中心线
-                var width = GetWidth( Math.Max(o.Item1.Length, o.Item3.Length), 
+                //用矩形框框住门垛的两根线
+                var poly = ToOBB(o.Item1, o.Item3);
+                var width = GetWidth(Math.Max(o.Item1.Length, o.Item3.Length),
                     o.Item2.Length, o.Item4.Length);
-                results.Add(ThDrawTool.ToRectangle(center.StartPoint, center.EndPoint, width));
+                results.Add(BufferCenter(poly, width));
             });
             return results;
         }
@@ -194,10 +193,48 @@ namespace ThMEPEngineCore.Service
             return false;
         }
         private bool IsValid(Line first, Line second, double length)
+        {            
+            if (!(first.Length > 0 && second.Length > 0.0))
+            {
+                return false;
+            }
+            if (!ThDoorUtils.IsValidAngle(first.LineDirection(), second.LineDirection()))
+            {
+                return false;
+            }
+            return Math.Abs(first.Distance(second) - length) <= 55.0; //5.0用于解决小于点误差, 50对应于标注值可能需要加100
+        }
+        private Polyline ToOBB(Line left,Line right)
         {
-            return first.Length>0 && second.Length>0.0 &&
-                first.IsParallelToEx(second) &&
-                Math.Abs(first.Distance(second) - length) <= 2.0; //2.0用于解决小于点误差
+            //ToDO
+            var pts = new Point3dCollection();
+            pts.Add(left.StartPoint);
+            pts.Add(left.EndPoint);
+            if(left.LineDirection().DotProduct(right.LineDirection())>0)
+            {
+                pts.Add(right.EndPoint);
+                pts.Add(right.StartPoint);
+            }
+            else
+            {
+                pts.Add(right.StartPoint);
+                pts.Add(right.EndPoint);
+            }
+            var poly = pts.CreatePolyline();
+            return poly.OBB();
+        }
+        /// <summary>
+        /// 取矩形较长的中心线，绘制一定宽度的矩形
+        /// </summary>
+        /// <param name="rectangle">矩形Polyline</param>
+        /// <param name="width">矩形宽带</param>
+        /// <returns>返回矩形Polyline</returns>
+        private Polyline BufferCenter(Polyline rectangle, double width)
+        {
+            List<Line> lines = rectangle.ToLines();
+            lines = lines.OrderBy(o=>o.Length).ToList(); 
+            var center = GetCenter(lines[1], lines[2]);
+            return center.Buffer(width / 2);
         }
     }
 }

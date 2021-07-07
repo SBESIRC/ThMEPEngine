@@ -9,7 +9,7 @@ namespace ThMEPEngineCore.Service
 {
     public class ThDoorUtils
     {
-        private static double AngleTolerance = 3.0;
+        private static double AngleTolerance = 10.0;
         public static bool IsQualified(Line neighborLine, Line doorStoneLine)
         {
             //两直线夹角在一定范围内、间距小于间隔距离、门垛线的投影点要在相邻线上
@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Service
                 return line.Length;
             }
         }
-        private static bool IsValidAngle(Vector3d vec1, Vector3d vec2)
+        public static bool IsValidAngle(Vector3d vec1, Vector3d vec2)
         {
             var rad = vec1.GetAngleTo(vec2);
             var ang = (rad / Math.PI) * 180.0;
