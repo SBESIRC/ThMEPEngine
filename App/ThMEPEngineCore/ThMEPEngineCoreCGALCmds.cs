@@ -1,4 +1,4 @@
-﻿#if ACAD2016
+﻿#if ACAD_ABOVE_2016
 using System;
 using System.IO;
 using System.Linq;

@@ -1,7 +1,5 @@
-﻿#if ACAD2016
-using AcHelper;
+﻿#if ACAD_ABOVE_2016
 using System.IO;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;

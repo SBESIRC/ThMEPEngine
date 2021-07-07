@@ -1,33 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
+using Linq2Acad;
+using ThCADExtension;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using Linq2Acad;
-
-using ThCADExtension;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
 using ThMEPWSS.DrainageSystemDiagram;
-
-
 
 namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
         [CommandMethod("TIANHUACAD", "THWDYTGS", CommandFlags.Modal)]
-#if ACAD2016
         public void ThRouteMainPipe()
         {
+#if ACAD_ABOVE_2016
             //取框线
             Polyline frame = selectFrame();
 
@@ -94,8 +85,8 @@ namespace ThMEPWSS
             }
 
             ThConnectToilateEngine.ThConnectEngine(archiExtractor, terminalList);
-        }
 #endif
+        }
 
         private static Polyline selectFrame()
         {
