@@ -146,7 +146,7 @@
       <Name>ThMEPElectrical</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-      <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
