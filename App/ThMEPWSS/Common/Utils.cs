@@ -71,10 +71,9 @@ namespace ThMEPWSS.Common
         {
 #if ACAD_ABOVE_2014
             Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+#else
+FocusToCAD();
 #endif
-            //var w = Autodesk.AutoCAD.ApplicationServices.Application.MainWindow;
-            //var mi = w.GetType().GetMethod("Focus");
-            //mi?.Invoke(w, null);
         }
         public static void FocusToCAD()
         {

@@ -24,7 +24,7 @@ namespace ThMEPWSS.Common
         static readonly string floorBlockName = "楼层框定";
         public static List<FloorFramed> ReadAllFloorFramed()
         {
-            //楼层框定是动态块，目前的提取引擎不支持动态块的提前
+            //楼层框定是动态块，目前的提取引擎不支持动态块的提取
             //这里楼层框定一般不在其它块中，这里就不继续遍历块去找
             List<FloorFramed> resFloors = new List<FloorFramed>();
             Active.Document.LockDocument();
@@ -57,7 +57,7 @@ namespace ThMEPWSS.Common
                     {
                         AllowDuplicates = false,
                         MessageForAdding = "请选择楼层框线",
-                        RejectObjectsOnLockedLayers = true,
+                        //RejectObjectsOnLockedLayers = true,
                     };
                     var dxfNames = new string[]
                     {

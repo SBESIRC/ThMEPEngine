@@ -766,17 +766,43 @@ namespace ThMEPWSS.DebugNs
                 yield return GeoFac.GetCenterLine(g);
             }
         }
-        [Feng("draw14")]
-        public static void qvsvsx()
+        [Feng("draw16")]
+        public static void draw16()
+        {
+            try
+            {
+                var vm = new ThMEPWSS.Diagram.ViewModel.DrainageSystemDiagramViewModel();
+                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = vm, };
+                ThDrainageService.CollectFloorListDatasEx();
+                DrainageSystemDiagram.DrawDrainageSystemDiagram(vm);
+            }
+            finally
+            {
+                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
+            }
+        }
+        [Feng("draw15")]
+        public static void draw15()
+        {
+            DrainageSystemDiagram.DrawDrainageSystemDiagram();
+        }
+        [Feng("qvvcmm")]
+        public static void qvvcmm()
         {
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
             using (var tr = new DrawingTransaction(adb))
             {
-                var pt = Dbg.SelectPoint().ToPoint2d();
-                DrainageSystemDiagram.draw14(pt);
+                var offsetY = 2000.0;
+                var pt = Dbg.SelectPoint();
+                DrainageSystemDiagram.DrawAiringSymbol(pt.ToPoint2d(), offsetY);
             }
+        }
+        [Feng("draw14")]
+        public static void qvsvsx()
+        {
+            DrainageSystemDiagram.draw14();
         }
         [Feng("draw13")]
         public static void qvk1j8()
@@ -793,7 +819,7 @@ namespace ThMEPWSS.DebugNs
         {
             DrainageSystemDiagram.draw11();
         }
-      
+
         [Feng("qvkdxw")]
         public static void qvkdxw()
         {
@@ -2716,7 +2742,7 @@ namespace ThMEPWSS.DebugNs
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb, true))
+            using (var tr = DrawingTransaction.CreateWithFbk(adb))
             {
                 var pt = Dbg.SelectPoint();
                 var fbk = FastBlock.Create(adb);

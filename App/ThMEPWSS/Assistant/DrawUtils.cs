@@ -46,18 +46,24 @@ namespace ThMEPWSS.Assistant
     }
     public class DrawingTransaction : IDisposable
     {
+        public bool NoDraw;
         public bool? AbleToDraw = null;
         public static DrawingTransaction Cur { get; private set; }
-        public AcadDatabase adb { get; }
-        public FastBlock fbk { get; }
+        public AcadDatabase adb { get; private set; }
+        public FastBlock fbk { get; private set; }
         public DrawingTransaction(AcadDatabase adb) : this()
         {
             this.adb = adb;
         }
-        public DrawingTransaction(AcadDatabase adb, bool createFbk) : this(adb)
+        public DrawingTransaction(AcadDatabase adb,bool noDraw) : this()
         {
-            if (createFbk) this.fbk = FastBlock.Create(adb);
+            this.adb = adb;
+            this.NoDraw = noDraw;
         }
+        public static DrawingTransaction CreateWithFbk(AcadDatabase adb)=> new DrawingTransaction(adb)
+        {
+            fbk = FastBlock.Create(adb)
+        };
         public DrawingTransaction()
         {
             DrawUtils.DrawingQueue.Clear();
@@ -67,15 +73,18 @@ namespace ThMEPWSS.Assistant
         {
             try
             {
-                if (AbleToDraw != false)
+                if (!NoDraw)
                 {
-                    if (adb != null)
+                    if (AbleToDraw != false)
                     {
-                        DrawUtils.Draw(adb);
-                    }
-                    else
-                    {
-                        DrawUtils.Draw();
+                        if (adb != null)
+                        {
+                            DrawUtils.Draw(adb);
+                        }
+                        else
+                        {
+                            DrawUtils.Draw();
+                        }
                     }
                 }
             }
@@ -477,7 +486,7 @@ namespace ThMEPWSS.Assistant
                 }
             });
         }
-        public static Line DrawLineSegmentLazy(GLineSegment seg,string layer)
+        public static Line DrawLineSegmentLazy(GLineSegment seg, string layer)
         {
             var line = DrawLineSegmentLazy(seg);
             line.ColorIndex = 256;

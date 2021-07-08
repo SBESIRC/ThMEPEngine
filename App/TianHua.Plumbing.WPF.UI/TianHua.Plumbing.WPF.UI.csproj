@@ -115,9 +115,15 @@
       <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\DrainageSystemUI.xaml.cs">
+      <DependentUpon>DrainageSystemUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiRainSystem.xaml.cs">
       <DependentUpon>uiRainSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\DrainageSystemParamsUI.xaml.cs">
+      <DependentUpon>DrainageSystemParamsUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiRainSystemParams.xaml.cs">
       <DependentUpon>uiRainSystemParams.xaml</DependentUpon>
@@ -190,9 +196,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\DrainageSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiRainSystem.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="UI\DrainageSystemParamsUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\uiRainSystemParams.xaml">
       <SubType>Designer</SubType>
