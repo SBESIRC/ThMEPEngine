@@ -22,7 +22,7 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageSDGroupColdSupplyPtEngine
+    public class ThDrainageSDVirtualPtEngine
     {
         public static List<ThToilateGJson> getVirtualPtOfGroup(Point3d supplyStart, Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, List<ThToilateRoom> roomList, out Dictionary<ThIfcSanitaryTerminalToilate, Point3d> virtualPtDict, out Dictionary<string, List<ThIfcSanitaryTerminalToilate>> allToiInGroup)
         {
@@ -35,18 +35,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var cost = ThDrainageSDShortestPathService.createGraphForArea(roomList, out var allPtGraph);
 
             ////debug drawing
-            int inf = 1000000;
-            for (int i = 0; i < cost.GetLength(0); i++)
-            {
-                for (int j = i; j < cost.GetLength(0); j++)
-                {
-                    if (cost[i, j] > 0 && cost[i, j] < inf)
-                    {
-                        var l = new Line(allPtGraph[i], allPtGraph[j]);
-                        DrawUtils.ShowGeometry(l, "l2graph");
-                    }
-                }
-            }
+            //int inf = 1000000;
+            //for (int i = 0; i < cost.GetLength(0); i++)
+            //{
+            //    for (int j = i; j < cost.GetLength(0); j++)
+            //    {
+            //        if (cost[i, j] > 0 && cost[i, j] < inf)
+            //        {
+            //            var l = new Line(allPtGraph[i], allPtGraph[j]);
+            //            DrawUtils.ShowGeometry(l, "l2graph");
+            //        }
+            //    }
+            //}
             ///////
 
             //每一个点 找最短路径
@@ -92,16 +92,16 @@ namespace ThMEPWSS.DrainageSystemDiagram
                             var path = ThDrainageSDShortestPathService.ShortestPath(cost, start, end);
 
                             double dist = 0;
+
                             var l = new Polyline();
                             l.AddVertexAt(l.NumberOfVertices, allPtGraph[path[0]].ToPoint2d(), 0, 0, 0);
                             for (int p = 1; p < path.Count; p++)
                             {
                                 dist = dist + cost[path[p - 1], path[p]];
-                                //debug drawing
                                 l.AddVertexAt(l.NumberOfVertices, allPtGraph[path[p]].ToPoint2d(), 0, 0, 0);
                             }
-                            //debug drawing
-                            DrawUtils.ShowGeometry(l, "l3shortPath", 20);
+                            ////debug drawing
+                            //DrawUtils.ShowGeometry(l, "l3shortPath", 20);
 
                             ptDistDict.Add(room.toilate[i].SupplyCoolOnBranch[j], dist);
                         }
@@ -301,7 +301,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 //moveDir = new Vector3d(0, 0, 0);
             }
 
-            ptTemp = pt + moveDir * DrainageSDCommon.MovedLength;
+            ptTemp = pt + moveDir * ThDrainageSDCommon.MovedLength;
 
             movedPt = new(toilate, ptTemp);
 

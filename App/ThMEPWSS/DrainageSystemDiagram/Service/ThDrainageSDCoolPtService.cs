@@ -18,7 +18,7 @@ using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageSDFindColdPtService
+    public class ThDrainageSDCoolPtService
     {
         public static void findCoolSupplyPt(List<ThToilateRoom> roomList, List<ThIfcSanitaryTerminalToilate> toilateList, out List<ThIfcSanitaryTerminalToilate> aloneToilate)
         {
@@ -26,11 +26,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             foreach (var terminal in toilateList)
             {
-                if (terminal.SupplyCool.Count == 0)
-                {
-                    continue;
-                }
-
                 var room = roomList.Where(x => x.toilate.Contains(terminal));
                 if (room.Count() == 0)
                 {
@@ -39,7 +34,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else
                 {
                     var wallList = room.First().wallList;
-                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, DrainageSDCommon.TolToilateToWall);
+                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToilateToWall);
                     terminal.SupplyCoolOnWall = ptOnWall;
                 }
             }

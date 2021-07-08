@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public static class DrainageSDCommon
+    public static class ThDrainageSDCommon
     {
         public static string LDrainageGivenSD = "卫生间分组";
         public static string ProAreaId = "AreaId";
@@ -38,5 +38,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static int SublinkLength = 400;
         public static int MovedLength = 200;
         public static string islandTag = "island";
+
+        public static string Layer_CoolPipe = "W-WSUP-COOL-PIPE-AI";
     }
 }

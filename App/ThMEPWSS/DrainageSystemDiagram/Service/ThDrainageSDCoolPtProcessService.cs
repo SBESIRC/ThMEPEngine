@@ -13,7 +13,7 @@ using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageSDColdPtProcessService
+    public class ThDrainageSDCoolPtProcessService
     {
 
         public static Dictionary<string, List<ThIfcSanitaryTerminalToilate>> classifyToilate(List<ThIfcSanitaryTerminalToilate> toilateList)
@@ -34,16 +34,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
 
-            //debug draw
-            for (int i = 0; i < groupToilate.Count(); i++)
-            {
-                groupToilate.ElementAt(i).Value.ForEach(toilate =>
-                 {
-                     toilate.SupplyCoolOnWall.ForEach(x => DrawUtils.ShowGeometry(x, "l0group", (Int16)(i % 6), 25, 40, "C"));
-                 });
-            }
-
-
             return groupToilate;
 
         }
@@ -60,7 +50,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             Dictionary<string, (string, string)> mergeIslandGroup = new Dictionary<string, (string, string)> ();
 
-            var islandGroup = groupList.Where(x => x.Key.Contains(DrainageSDCommon.islandTag)).ToList();
+            var islandGroup = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.islandTag)).ToList();
             
             for (int i = 0; i < islandGroup.Count; i++)
             {
@@ -140,8 +130,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     convexIdx = i;
                 }
             }
-            DrawUtils.ShowGeometry(convexPt, "l0convex", 3, 25, 20, "S");
-
+           
             Vector3d preConvex = pl.GetPoint3dAt((convexIdx - 1) % pl.NumberOfVertices) - convexPt;
             Vector3d nextConvex = pl.GetPoint3dAt((convexIdx + 1) % pl.NumberOfVertices) - convexPt;
             var a = preConvex.CrossProduct(nextConvex);
