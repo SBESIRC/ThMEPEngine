@@ -49,7 +49,7 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.BlockTransform.PreMultiplyBy(srcBlockReference.MCS2WCS));
+                blockReference.TransformBy(srcBlockReference.MCS2WCS);
             }
         }
 
