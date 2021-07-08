@@ -645,14 +645,22 @@ namespace ThMEPEngineCore
         public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThDB3SlabRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                ThDB3SlabRecognitionEngine floorEngine = new ThDB3SlabRecognitionEngine();
                 floorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 floorEngine.Elements.ForEach(o =>
                 {
@@ -662,6 +670,7 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
 
         [CommandMethod("TIANHUACAD", "THExtractRailing", CommandFlags.Modal)]
         public void THExtractRailing()
