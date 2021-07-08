@@ -35,6 +35,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" Guid="{5B689620-B2C7-4D1B-A16D-E8072889B76A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\RestSharp.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" Guid="{3F937311-9641-4E7F-AA45-D5A727D60F26}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" Guid="{A50747C1-46E5-4D4F-8FDB-44C25BBE1259}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" Guid="{9E2583FD-03F1-4836-972F-5FFA6FCD45E0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" Guid="{5292C98D-05A6-44AB-82A9-913B6283CC4A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OpenXmlFormats.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -68,6 +80,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" Guid="{C12A5181-7DB1-4A08-A67F-311B8FD0DC31}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\RestSharp.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Debug" Guid="{F8633677-0200-4755-BCE7-B0455DB125D8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Debug" Guid="{661989BE-AC64-4D99-9F3B-4AFB213F7C56}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Debug" Guid="{C335BDE0-E536-4ED0-9AD4-AC2A6AB714B6}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Debug" Guid="{F6AE14B1-462B-4E17-B751-542219493E14}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OpenXmlFormats.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -100,6 +124,18 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" Guid="{31F3CF65-CC06-42B5-BAEF-9A722C034F78}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\RestSharp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_Debug" Guid="{73E3E359-138E-40F5-9D71-CEC4E086D38B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Debug" Guid="{F1DD4456-43B4-479B-89B9-4F481BF9E8A4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Debug" Guid="{E7669870-D1A9-44AA-92F2-C4C25603A6D9}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" Guid="{7F40AEE7-9DE0-4DE0-A387-183B541ECF36}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NPOI.OpenXmlFormats.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -135,6 +171,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" Guid="{1766ED68-7672-477C-8353-178F681C179D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\RestSharp.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" Guid="{BE7D5587-0764-4C4E-A225-3AA81B5D18D1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" Guid="{0FCBA3CA-D8F2-4EB7-A932-67FDEB081260}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" Guid="{0DBE0778-0100-43C2-B952-B0767EF7056B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" Guid="{21ACB337-C860-4F60-B538-1BDB0693CF1C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OpenXmlFormats.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -168,6 +216,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Release" Guid="{2C960364-40B3-4D5F-AA33-4CFF750B40B2}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\RestSharp.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Release" Guid="{34BE1452-6875-433A-A976-787958351993}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Release" Guid="{74C1243D-B96D-485A-8AF9-AAE460481959}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Release" Guid="{96EDEEAD-2462-4946-ADB8-5B6472CB883E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Release" Guid="{30D6430E-5959-4D1F-9025-7D512EAF7304}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OpenXmlFormats.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -200,6 +260,18 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" Guid="{0CA94593-1388-485E-9E0D-8EC29AF85F2C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\RestSharp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_Release" Guid="{3AD1B95B-ED60-4C47-B1AC-21E14CE6C093}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NPOI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Release" Guid="{781ADEFB-9E41-4D83-8EC0-809D541E7169}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NPOI.OOXML.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Release" Guid="{BFA6B182-B3C6-4A4F-883E-63E9928E4DA5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NPOI.OpenXml4Net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" Guid="{616DE045-5BBF-4812-B1D7-FF72E50EAE8A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NPOI.OpenXmlFormats.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -238,6 +310,18 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -270,6 +354,18 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXml4Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OOXML_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXml4Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
