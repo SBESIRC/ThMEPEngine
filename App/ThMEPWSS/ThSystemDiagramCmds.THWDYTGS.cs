@@ -18,7 +18,7 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "THWDYTGS", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
-#if ACAD_ABOVE_2016
+#if (ACAD2016 || ACAD2018)
             //取框线
             Polyline frame = selectFrame();
 

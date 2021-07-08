@@ -6,7 +6,7 @@ using ThMEPWSS.ViewModel;
 using ThMEPWSS.FlushPoint.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 
-#if ACAD_ABOVE_2016
+#if (ACAD2016 || ACAD2018)
 using CLI;
 using Linq2Acad;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace ThMEPWSS.Command
         {
         }
 
-#if ACAD_ABOVE_2016
+#if (ACAD2016 || ACAD2018)
         public void Execute()
         {
             using (var lockDoc = Active.Document.LockDocument())

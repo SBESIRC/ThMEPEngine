@@ -1,4 +1,4 @@
-﻿#if ACAD_ABOVE_2016
+﻿#if (ACAD2016 || ACAD2018)
 using CLI;
 using System;
 using System.Linq;
@@ -17,7 +17,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.Hydrant.Service
 {
-#if ACAD_ABOVE_2016
+#if (ACAD2016 || ACAD2018)
     public class ThCheckFireExtinguisherService : ICheck
     {
 
