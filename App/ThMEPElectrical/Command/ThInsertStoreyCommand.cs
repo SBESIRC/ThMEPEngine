@@ -3,21 +3,28 @@ using AcHelper;
 using Linq2Acad;
 using ThCADExtension;
 using AcHelper.Commands;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using GeometryExtensions;
 
 namespace ThMEPElectrical.Command
 {
-
+    // https://spiderinnet1.typepad.com/blog/2012/02/autocad-net-entityjig-jig-attributes-of-block-insertblockreference.html
     // https://spiderinnet1.typepad.com/blog/2012/02/autocad-net-entityjig-honor-ucs-when-inserting-block-insertblockreference.html
     public class ThStoreyBlockJig : EntityJig
     {
+        private const double DblTol = 0.0001;
+
         private Point3d mPosition;
 
-        public ThStoreyBlockJig(BlockReference br) : base(br)
+        private Dictionary<AttributeReference, AttributeDefinition> mRef2DefMap;
+
+        public ThStoreyBlockJig(BlockReference br, Dictionary<AttributeReference, AttributeDefinition> dict) 
+            : base(br)
         {
+            mRef2DefMap = dict;
             br.TransformBy(Active.Editor.UCS2WCS());
         }
 
@@ -36,7 +43,7 @@ namespace ThMEPElectrical.Command
             {
                 return SamplerStatus.Cancel;
             }
-            if (prResult.Value.Equals(mPosition))
+            if (prResult.Value.IsEqualTo(mPosition, new Tolerance(DblTol, DblTol)))
             {
                 return SamplerStatus.NoChange;
             }
@@ -51,6 +58,12 @@ namespace ThMEPElectrical.Command
         {
             var br = (BlockReference)Entity;
             br.Position = mPosition;
+
+            foreach (var ar2ad in mRef2DefMap)
+            {
+                ar2ad.Key.SetAttributeFromBlock(ar2ad.Value, br.BlockTransform);
+            }
+
             return true;
         }
     }
@@ -69,12 +82,33 @@ namespace ThMEPElectrical.Command
             {
                 var block = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-楼层框定E"), false);
                 var br = new BlockReference(Point3d.Origin, block.Item.ObjectId);
-                var jig = new ThStoreyBlockJig(br);
-                var pr = Active.Editor.Drag(jig);
-                if (pr.Status == PromptStatus.OK)
+                currentDb.ModelSpace.Add(br);
+
+                var dict = new Dictionary<AttributeReference, AttributeDefinition>();
+                if (block.Item.HasAttributeDefinitions)
                 {
-                    currentDb.ModelSpace.Add(br);
-                    br.SetDatabaseDefaults();
+                    foreach (ObjectId id in block.Item)
+                    {
+                        DBObject obj = currentDb.Element<DBObject>(id);
+                        if (obj is AttributeDefinition)
+                        {
+                            AttributeDefinition ad = obj as AttributeDefinition;
+                            AttributeReference ar = new AttributeReference();
+                            ar.SetAttributeFromBlock(ad, br.BlockTransform);
+
+                            br.AttributeCollection.AppendAttribute(ar);
+                            currentDb.AddNewlyCreatedDBObject(ar);
+
+                            dict.Add(ar, ad);
+                        }
+                    }
+                }
+
+                var jig = new ThStoreyBlockJig(br, dict);
+                var pr = Active.Editor.Drag(jig);
+                if (pr.Status != PromptStatus.OK)
+                {
+                    currentDb.DiscardChanges();
                 }
             }
         }
