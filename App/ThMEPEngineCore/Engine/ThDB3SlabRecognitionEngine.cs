@@ -31,8 +31,6 @@ namespace ThMEPEngineCore.Engine
         {
             var engine = new ThDB3SlabExtractionEngine();
             engine.Extract(database);
-            ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(
-                engine.Results.Select(o => o.Geometry).ToList(), AcHelper.Active.Database, 1);
             Recognize(engine.Results, polygon);
         }
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
