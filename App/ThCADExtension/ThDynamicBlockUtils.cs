@@ -82,7 +82,11 @@ namespace ThCADExtension
         public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
         {
             var visibility = blockReference.CurrentVisibilityStateValue();
-            return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+            if (!string.IsNullOrEmpty(visibility))
+            {
+                return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+            }
+            return new ObjectIdCollection();
         }
 
         /// <summary>
@@ -113,7 +117,7 @@ namespace ThCADExtension
             var properties = blockReference.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
                 .Where(o => o.PropertyName == "可见性" || o.PropertyName == "可见性1");
-            return properties.First().Value as string;
+            return properties.Any() ? properties.First().Value as string : "";
         }
 
         // Reference:
