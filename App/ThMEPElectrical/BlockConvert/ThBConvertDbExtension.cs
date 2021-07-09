@@ -31,9 +31,11 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(br.Database))
             {
-                // 业务需求: 去除在“DEFPOINTS”上的图元
+                // 业务需求:
+                // 只考虑Curve
+                // 去除在“DEFPOINTS”上的图元
                 var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
-                var entities = blockTableRecord.GetEntities().Where(e => e.Layer != "DEFPOINTS");
+                var entities = blockTableRecord.GetEntities().Where(e => e.Layer != "DEFPOINTS").Where(e => e is Curve);
                 var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
                 rectangle.TransformBy(ecs2Wcs);
                 return rectangle;

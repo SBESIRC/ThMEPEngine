@@ -142,22 +142,18 @@ namespace ThMEPElectrical.Command
                                             // 当配置表中可见性为空时，则按图块名转换
                                             transformedBlock = manager.TransformRule(srcName);
                                         }
-                                        else if (o.CurrentVisibilityStateValue() == visibility)
+                                        else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
                                         {
                                             // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
                                             transformedBlock = manager.TransformRule(
                                                 srcName,
                                                 o.CurrentVisibilityStateValue());
                                         }
-                                        else
-                                        {
-                                            throw new NotSupportedException();
-                                        }
                                     }
                                     else if ((mode & ConvertMode.WEAKCURRENT) != 0)
                                     {
                                         mask = ConvertMode.WEAKCURRENT;
-                                        if (o.CurrentVisibilityStateValue() == visibility)
+                                        if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
                                         {
                                             transformedBlock = manager.TransformRule(
                                                 srcName,
