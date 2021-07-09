@@ -645,14 +645,22 @@ namespace ThMEPEngineCore
         public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThDB3SlabRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                ThDB3SlabRecognitionEngine floorEngine = new ThDB3SlabRecognitionEngine();
                 floorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 floorEngine.Elements.ForEach(o =>
                 {
@@ -933,6 +941,80 @@ namespace ThMEPEngineCore
                     var builder = new ThArchitectureOutlineBuilder(data.MergeData());
                     builder.Build();
                     builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDB3ExtractRoom", CommandFlags.Modal)]
+        public void THDB3ExtractRoom()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+
+                //var selectRes = Active.Editor.GetSelection();
+                //var testDatas = new DBObjectCollection();
+                //if (selectRes.Status == PromptStatus.OK)
+                //{
+                //    var Datas = selectRes.Value.GetObjectIds()
+                //        .Select(o => acadDatabase.Element<Curve>(o).Clone() as Curve)
+                //        .ToCollection();
+                //    Datas.Polygonize().ForEach(o =>
+                //    {
+                //        foreach(DBObject obj in o.ToDbCollection())
+                //        {
+                //            testDatas.Add(obj);
+                //        }
+                //    });
+                //    Datas = Datas.FilterSmallArea(10.0);
+                //    testDatas = testDatas.FilterSmallArea(10.0);
+                //}
+                //else
+                //{
+                //    var data = new Roomdata(acadDatabase.Database, frame.Vertices());
+                //    data.Deburring();
+                //    testDatas = data.MergeData();
+                //}
+                Roomdata data = new Roomdata(acadDatabase.Database, frame.Vertices());
+                data.Deburring();
+                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
+                if (builder.Count == 0)
+                    return;
+                //从CAD中获取点
+
+                var ptList = new List<Point3d>();
+                while(true)
+                {
+                    var ptRes = Active.Editor.GetPoint("\n选择房间内的一点");
+                    if(ptRes.Status==PromptStatus.OK)
+                    {
+                        ptList.Add(ptRes.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if(ptList.Count>0)
+                {
+                    builder.Build(ptList).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.SetDatabaseDefaults();
