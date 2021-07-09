@@ -5,6 +5,7 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -60,13 +61,35 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.BlockTransform.PreMultiplyBy(srcBlockReference.MCS2WCS));
+                blockReference.TransformBy(srcBlockReference.MCS2WCS);
             }
         }
 
         public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
-            //
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                // 对于离心风机或者轴流风机，调整到它的设备基点
+                double position_x = 0, position_y = 0;
+                var dynamicProperties = srcBlockReference.CustomProperties;
+                if (dynamicProperties != null)
+                {
+                    if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
+                    {
+                        position_x = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
+                    }
+                    if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y))
+                    {
+                        position_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                    }
+                }
+                var offset = new Vector3d(position_x, position_y, 0);
+                if (!offset.IsZeroLength())
+                {
+                    blockReference.TransformBy(Matrix3d.Displacement(offset));
+                }
+            }
         }
 
         private void FillProperties(ThBlockReferenceData target, ThBlockReferenceData source)

@@ -79,15 +79,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var tempLine = new Line(orderPts.First(), orderPts.Last());
             var vPtOnTempLine = tempLine.GetClosestPointTo(vPt, true);
 
-            if (tempLine.ToCurve3d().IsOn(vPtOnTempLine, tol) == false || vPt.DistanceTo(vPtOnTempLine) > DrainageSDCommon.MovedLength)
+            if (tempLine.ToCurve3d().IsOn(vPtOnTempLine, tol) == false || vPt.DistanceTo(vPtOnTempLine) > ThDrainageSDCommon.MovedLength)
             {
                 var sPt = orderPts.OrderBy(x => x.DistanceTo(vPt)).First();
                 var line = new Line(vPt, sPt);
 
-                if (branchList.Where(x => x.Overlaps(line)).Count() == 0)
-                {
-                    subBranch.Add(line);
-                }
+                //if (branchList.Where(x => x.Overlaps(line)).Count() == 0)
+                //{
+                //    subBranch.Add(line);
+                //}
+
+                subBranch.Add(line);
             }
 
             return subBranch;

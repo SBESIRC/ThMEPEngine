@@ -67,7 +67,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                geometry.Properties.Add(DrainageSDCommon.ProAreaId,AreaId);
+                geometry.Properties.Add(ThDrainageSDCommon.ProAreaId,AreaId);
 
                 if (o.Geometry is DBPoint polyline)
                 {

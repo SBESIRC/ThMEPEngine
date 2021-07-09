@@ -27,6 +27,7 @@ namespace ThCADExtension
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
+            MCS2WCS = BlockTransform;
         }
         public ThBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
         {
@@ -39,6 +40,7 @@ namespace ThCADExtension
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
+            MCS2WCS = BlockTransform.PreMultiplyBy(transfrom);
         }
     }
 }

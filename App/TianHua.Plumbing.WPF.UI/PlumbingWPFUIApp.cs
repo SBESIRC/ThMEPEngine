@@ -16,7 +16,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
-            if (ThHydrantProtectionRadiusCmd.FireHydrantVM==null)
+            if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
             }
@@ -81,6 +81,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             if (ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext != null) return;
             var ui = new uiRainSystem();
+            AcadApp.ShowModelessWindow(ui);
+        }
+        /// <summary>
+        /// 地上排水系统图
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPSXTT", CommandFlags.Modal)]
+        public void ThCreateDrainageSystemDiagram()
+        {
+            if (ThMEPWSS.Pipe.Service.ThDrainageService.commandContext != null) return;
+            var ui = new DrainageSystemUI();
             AcadApp.ShowModelessWindow(ui);
         }
 

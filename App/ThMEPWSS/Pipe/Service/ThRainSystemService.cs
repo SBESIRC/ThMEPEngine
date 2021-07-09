@@ -2813,6 +2813,10 @@ new Point2d(maxX, minY)
                 return arr;
             }
         }
+        public static List<ThStoreysData> GetStoreys(Geometry range, AcadDatabase adb, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
+        {
+            return ctx.StoreyContext.thStoreysDatas;
+        }
         public static List<ThStoreysData> GetStoreys(Point3dCollection range, AcadDatabase adb)
         {
             var storeysRecEngine = new ThStoreysRecognitionEngine();
@@ -2832,6 +2836,7 @@ new Point2d(maxX, minY)
             FixStoreys(storeys);
             return storeys;
         }
+
         public static void FixStoreys(List<ThStoreysData> storeys)
         {
             var lst1 = storeys.Where(s => s.Storeys.Count == 1).Select(s => s.Storeys[0]).ToList();
@@ -2845,7 +2850,6 @@ new Point2d(maxX, minY)
         }
         public class StoreyContext
         {
-            public ThStoreysRecognitionEngine Engine;
             public List<ThStoreysData> thStoreysDatas;
             public List<ThMEPEngineCore.Model.Common.ThStoreys> thStoreys;
             public List<ObjectId> GetObjectIds()
@@ -2878,7 +2882,6 @@ new Point2d(maxX, minY)
             var storeysRecEngine = new ThStoreysRecognitionEngine();
             storeysRecEngine.Recognize(adb.Database, range);
             var storeys = new List<ThStoreysData>();
-            ctx.Engine = storeysRecEngine;
             ctx.thStoreys = storeysRecEngine.Elements.OfType<ThMEPEngineCore.Model.Common.ThStoreys>().ToList();
             foreach (var s in ctx.thStoreys)
             {
@@ -5001,6 +5004,22 @@ new Point2d(maxX, minY)
                    orderby bd.MinX ascending
                    orderby bd.MaxY descending
                    select e;
+        }
+        public static object CloneObj(object value)
+        {
+            var memoryStream = new MemoryStream();
+            var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            formatter.Serialize(memoryStream, value);
+            memoryStream.Position = 0;
+            return formatter.Deserialize(memoryStream);
+        }
+        public static T Clone<T>(T value)
+        {
+            var memoryStream = new MemoryStream();
+            var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            formatter.Serialize(memoryStream, value);
+            memoryStream.Position = 0;
+            return (T)formatter.Deserialize(memoryStream);
         }
         public IEnumerable<T> SortEntitiesBy2DSpacePosition<T>(IEnumerable<T> list) where T : Entity
         {

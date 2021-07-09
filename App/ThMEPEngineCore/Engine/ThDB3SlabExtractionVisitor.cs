@@ -16,6 +16,10 @@ namespace ThMEPEngineCore.Engine
             {
                 elements.AddRange(Handle(polyline, matrix));
             }
+            else if(dbObj is Line line)
+            {
+                elements.AddRange(Handle(line, matrix));
+            }
         }
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -34,6 +38,18 @@ namespace ThMEPEngineCore.Engine
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
+                clone.TransformBy(matrix);
+                curves.Add(clone);
+            }
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
+        }
+
+        private List<ThRawIfcBuildingElementData> Handle(Line line, Matrix3d matrix)
+        {
+            List<Curve> curves = new List<Curve>();
+            if (IsBuildElement(line) && CheckLayerValid(line))
+            {
+                var clone = line.WashClone();
                 clone.TransformBy(matrix);
                 curves.Add(clone);
             }

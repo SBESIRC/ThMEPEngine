@@ -17,27 +17,13 @@ namespace ThMEPWSS.Pipe.Service
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
     using Linq2Acad;
     using ThMEPWSS.Assistant;
+    using ThMEPWSS.Diagram.ViewModel;
+    using DotNetARX;
+    using NetTopologySuite.Geometries;
 
     public partial class DrainageSystemDiagram
     {
-        public static void draw14(Point2d basePoint)
-        {
-            var OFFSET_X = 2500.0;
-            var SPAN_X = 5500.0;
-            var HEIGHT = 1800.0;
-            //var HEIGHT = 5000.0;
-            var COUNT = 20;
 
-            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-            for (int i = 0; i < storeys.Count; i++)
-            {
-                var storey = storeys[i];
-                var bsPt1 = basePoint.OffsetY(HEIGHT * i);
-                DrawStoreyLine(storey, basePoint, lineLen);
-            }
-            var outputStartPointOffsets = new Vector2d[COUNT];
-        }
         public static void draw1(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
@@ -399,6 +385,8 @@ namespace ThMEPWSS.Pipe.Service
                 //});
             }
         }
+
+
 
         public static ThwPipeLineGroup GenThwPipeLineGroup(List<string> storeys)
         {
@@ -1553,6 +1541,62 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
         }
+        public static void DrawAiringSymbol(Point2d pt, bool canPeopleBeOnRoof)
+        {
+            var offsetY = canPeopleBeOnRoof ? 500.0 : 2000.0;
+            DrawAiringSymbol(pt, offsetY);
+        }
+        public static void DrawAiringSymbol(Point2d pt, double offsetY)
+        {
+            DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: "W-DRAI-DOME-PIPE", cb: br =>
+            {
+                br.ObjectId.SetDynBlockValue("距离1", offsetY);
+                br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
+            });
+        }
+        public static ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext commandContext { get => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext; set => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = value; }
+        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
+        {
+            Dbg.FocusMainWindow();
+            if (commandContext == null) return;
+            if (commandContext.StoreyContext == null) return;
+            if (commandContext.StoreyContext.thStoreysDatas == null) return;
+            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb, true))
+            {
+                DU.Dispose();
+                var storeys = commandContext.StoreyContext.thStoreysDatas;
+                List<StoreysItem> storeysItems;
+                List<DrainageDrawingData> drDatas;
+                var range = commandContext.range;
+                if (range != null)
+                {
+                    if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: true)) return;
+                }
+                else
+                {
+                    if (!CollectDrainageData(GeoFac.CreateGeometryEx(storeys.Select(x => x.Boundary.ToPolygon()).Cast<Geometry>().ToList()), adb, out storeysItems, out drDatas, commandContext, noWL: true)) return;
+                }
+                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
+                var allNumStoreyLabels = allNumStoreys.Select(i => i + "F").ToList();
+                var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
+                var start = allStoreys.Count - 1;
+                var end = 0;
+                var OFFSET_X = 2500.0;
+                var SPAN_X = 5500.0 + 500;
+                var HEIGHT = viewModel?.Params?.StoreySpan ?? 1800.0;
+                var COUNT = pipeGroupItems.Count;
+                var dy = HEIGHT - 1800.0;
+                var __dy = 300;
+                DU.Dispose();
+                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
+                DU.Draw(adb);
+            }
+        }
+
         public static void draw2(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
@@ -1733,6 +1777,8 @@ namespace ThMEPWSS.Pipe.Service
 
 
         }
+
+
     }
 }
 namespace ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs
@@ -1743,6 +1789,13 @@ namespace ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsN
         public static int ToRatioInt(this double value, int nominator, int denominator)
         {
             return Convert.ToInt32(value / denominator * nominator);
+        }
+    }
+    public static class _IntConvertionNs
+    {
+        public static bool InRange(this int value, int min, int max)
+        {
+            return min <= value && value <= max;
         }
     }
 }
