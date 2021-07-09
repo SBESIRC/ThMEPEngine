@@ -9,7 +9,6 @@ namespace ThCADExtension
     {
         public double Rotation { get; set; }
         public Point3d Position { get; set; }
-        public Extents3d Extents { get; set; }
         public string BlockLayer { get; set; }
         public string EffectiveName { get; set; }
         public Database Database { get; set; }

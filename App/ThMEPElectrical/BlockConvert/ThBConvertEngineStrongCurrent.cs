@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -67,10 +68,14 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
+            AdjustPositionWithOBB(blkRef, srcBlockReference);
+        }
+
+        private void AdjustPositionWithBasePoint(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                // 对于离心风机或者轴流风机，调整到它的设备基点
                 double position_x = 0, position_y = 0;
                 var dynamicProperties = srcBlockReference.CustomProperties;
                 if (dynamicProperties != null)
@@ -89,6 +94,16 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     blockReference.TransformBy(Matrix3d.Displacement(offset));
                 }
+            }
+        }
+
+        private void AdjustPositionWithOBB(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var offset = blockReference.Position.GetVectorTo(srcBlockData.GetCentroidPoint());
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
