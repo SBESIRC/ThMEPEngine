@@ -28,19 +28,21 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             {
                 return null;
             }
-            var nCols = getLayoutStructureService.GetNeedColumns(columns, room, poly);
-            var nWalls = getLayoutStructureService.GetNeedWalls(walls, room, poly);
+            var bufferRoom = room.Buffer(10)[0] as Polyline;
+            var nCols = getLayoutStructureService.GetNeedColumns(columns, bufferRoom, poly);
+            var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom, poly);
             using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
-                db.ModelSpace.Add(poly);
-                foreach (var item in nWalls)
-                {
-                    db.ModelSpace.Add(item);
-                }
+                //db.ModelSpace.Add(poly);
+                //foreach (var item in nWalls)
+                //{
+                //    db.ModelSpace.Add(item);
+                //}
             }
             //计算布置点位
-            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, walls);
-            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nWalls, walls));
+            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls);
+            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls));
+            pts = pts.Where(x => poly.Contains(x) && room.Contains(x)).ToList();
 
             var layoutPt = CalLayoutPt(pts, roomPtInfo.Item2, roomPtInfo.Item1);
             var layoutDir = (roomPtInfo.Item1 - layoutPt).GetNormal();
@@ -116,15 +118,17 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             foreach (var wall in walls)
             {
                 var bufferWall = wall.Buffer(bufferWidth)[0] as Polyline;
-                var allPts = bufferWall.Vertices();
+                var allPts = wall.Vertices();
                 foreach (Point3d pt in allPts)
                 {
-                    var checkLine = new Line(pt, doorPt);
-                    if (CheckIntersectWithStruc(checkLine, walls, columns))
+                    var allLines = UtilService.GetAllLinesInPolyline(bufferWall);
+                    var interPts = allLines.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).ToList();
+                    if (CheckIntersectWithStruc(new Line(interPts[0], doorPt), walls, columns))
                     {
-                        var allLines = UtilService.GetAllLinesInPolyline(bufferWall);
-                        var interPts = allLines.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).ToList();
                         pts.Add(interPts[0]);
+                    }
+                    if (CheckIntersectWithStruc(new Line(interPts[1], doorPt), walls, columns))
+                    {
                         pts.Add(interPts[1]);
                     }
                 }

@@ -22,6 +22,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 
         public List<LayoutModel> Layout(List<Line> lanes, List<Polyline> doors, ThIfcRoom thRoom)
         {
+            List<LayoutModel> models = new List<LayoutModel>();
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var room = thRoom.Boundary as Polyline;
             //获取需要的构建信息
@@ -29,6 +30,10 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var needDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
             var doorPts = needDoors.Select(x => x.GetRectangleCenterPt()).ToList();
             var nLanes = getLayoutStructureService.GetNeedLanes(lanes, room);
+            if (nLanes.Count <= 0)
+            {
+                return models;
+            }
 
             //计算延申线（用于计算最短路径）
             var extendLines = CreateExtendLines(doorPts, nLanes);
@@ -42,7 +47,6 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             //计算布置点朝向
             var layoutPtInfo = CalLayoutPtDir(layoutInfo, allLines, doorPts);
 
-            List<LayoutModel> models = new List<LayoutModel>(); 
             foreach (var info in layoutPtInfo)
             {
                 LayoutModel layoutModel = new LayoutModel();

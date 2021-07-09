@@ -25,7 +25,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
 
             //沿线均布布置模式
-            var layoutRooms = GeLayoutRooms(rooms);
+            var layoutRooms = GetLayoutRooms(rooms);
             foreach (var lRoom in layoutRooms)
             {
                 var layoutVByLine = layoutVideoByLine.Layout(lanes, doors, lRoom.Key);
@@ -53,7 +53,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
                     }
-                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
+                    if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
@@ -218,28 +218,27 @@ namespace ThMEPElectrical.VideoMonitoringSystem
 
             bool findRule = false;
             var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Contains(y))).ToList();
-            if (roomAInfos.Count > 0)
+            foreach (var roomAInfo in roomAInfos)
             {
-                foreach (var roomAInfo in roomAInfos)
+                if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                 {
-                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
+                    if (CheckEntranceLayout(roomAInfo.roomAHandle))
                     {
-                        if (CheckEntranceLayout(roomAInfo.roomAHandle))
+                        if (roomAInfo.connectType == ConnectType.AllConnect)
                         {
-                            if (roomAInfo.connectType == ConnectType.AllConnect)
+                            roomAType = roomAInfo.roomAHandle;
+                            roomBType = roomAInfo.roomBHandle;
+                            findRule = true;
+                            break;
+                        }
+                        else if (roomAInfo.connectType == ConnectType.Normal)
+                        {
+                            if (roomB.Tags.Any(y => roomAInfo.roomB.Contains(y)))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;
                                 findRule = true;
-                            }
-                            else if (roomAInfo.connectType == ConnectType.Normal)
-                            {
-                                if (roomB.Tags.Any(y => roomAInfo.roomA.Contains(y)))
-                                {
-                                    roomAType = roomAInfo.roomAHandle;
-                                    roomBType = roomAInfo.roomBHandle;
-                                    findRule = true;
-                                }
+                                break;
                             }
                         }
                     }
@@ -283,7 +282,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// </summary>
         /// <param name="rooms"></param>
         /// <returns></returns>
-        private Dictionary<ThIfcRoom, LayoutType> GeLayoutRooms(List<ThIfcRoom> rooms)
+        private Dictionary<ThIfcRoom, LayoutType> GetLayoutRooms(List<ThIfcRoom> rooms)
         {
             var needRoomNames = HandleVideoMonitoringRoomService.GTRooms.Where(x => x.roomAHandle == LayoutType.AlongLineDomeCamera ||
                 x.roomAHandle == LayoutType.AlongLineGunCamera ||
@@ -295,7 +294,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             {
                 foreach (var nRName in needRoomNames)
                 {
-                    if (nRName.roomA.Contains(room.Name))
+                    if (room.Tags.Any(x=> nRName.roomA.Contains(x)))
                     {
                         needRooms.Add(room, nRName.roomAHandle);
                         break;

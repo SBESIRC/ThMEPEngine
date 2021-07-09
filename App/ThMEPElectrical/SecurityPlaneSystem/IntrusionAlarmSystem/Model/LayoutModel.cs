@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model
 {
@@ -13,6 +14,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model
         public Point3d LayoutPoint { get; set; }
 
         public Vector3d LayoutDir { get; set; }
+
+        public ThIfcRoom Room { get; set; }
     }
 
     /// <summary>

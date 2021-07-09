@@ -17,7 +17,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
-        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表.xlsx");
+        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表0625.xlsx");
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
@@ -50,6 +50,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.GuardTourSystem))
                 {
+                    GuardTourGrid.ItemsSource = table.DefaultView;
                     ThElectricalUIService.Instance.Parameter.guardTourSystemTable = table;
                 }   
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.RoomNameControl))

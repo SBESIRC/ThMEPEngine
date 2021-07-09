@@ -64,7 +64,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem
                 {
                     roomInfo.floorName = row[floor].ToString();
                 }
-                roomInfo.connectType = GetConnectType(row[roomBEvent].ToString());
+                roomInfo.connectType = GetConnectType(row[roomB].ToString());
 
                 GTRooms.Add(roomInfo);
             }

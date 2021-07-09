@@ -181,10 +181,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
         public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Polyline polyline, Vector3d dir, Point3d doorPt, double angle, double blockWidth)
         {
             Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
-            var bufferPolyline = polyline.Buffer(5)[0] as Polyline;
+            //var bufferPolyline = polyline.Buffer(5)[0] as Polyline;
             foreach (var str in structs)
             {
-                var allLines = str.GetAllLinesInPolyline().Where(x => bufferPolyline.Intersects(x)).ToList();
+                var allLines = str.GetAllLinesInPolyline()/*.Where(x => bufferPolyline.Intersects(x))*/.ToList();
                 foreach (var line in allLines)
                 {
                     var lineDir = (line.EndPoint - line.StartPoint).GetNormal();

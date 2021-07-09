@@ -26,6 +26,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             //计算门信息
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
+            var otherDoorPt = doorCenterPt - roomDoorInfo.Item2 * (roomDoorInfo.Item4 / 2);
 
             //获取构建信息
             var bufferRoom = room.Buffer(5)[0] as Polyline;
@@ -35,8 +37,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
             accessControlModels.Add(CalLayoutButton(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
-            accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, -roomDoorInfo.Item2, roomDoorInfo.Item1));
-            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1));
+            accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, -roomDoorInfo.Item2, otherDoorPt));
+            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt));
 
             return accessControlModels;
         }

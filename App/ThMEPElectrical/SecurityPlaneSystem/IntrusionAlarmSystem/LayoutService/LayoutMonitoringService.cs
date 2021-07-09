@@ -26,13 +26,14 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             {
                 return layoutModels;
             }
-
+            
             //计算门信息
             var doorInfo = layoutStructureService.GetDoorCenterPointOnRoom(room, door);
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
             var controller = layoutControllerService.LayoutController(structs, room, doorInfo.Item1, doorInfo.Item2);
+            controller.Room = thRoom;
 
             //布置探测器
             LayoutHositingDetectorService layoutHositingDetectorService = new LayoutHositingDetectorService();
@@ -41,11 +42,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             layoutModels.Add(controller);
             if (isInfrared)
             {
-                layoutModels.Add(detector as InfraredHositingDetectorModel);
+                layoutModels.Add(new InfraredHositingDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
             }
             else
             {
-                layoutModels.Add(detector as DoubleHositingDetectorModel);
+                layoutModels.Add(new DoubleHositingDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
             }
             return layoutModels;
         }
@@ -64,6 +65,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             List<LayoutModel> layoutModels = new List<LayoutModel>();
             GetLayoutStructureService layoutStructureService = new GetLayoutStructureService();
             var structs = layoutStructureService.CalLayoutStruc(door, columns, walls);
+            if (structs.Count <= 0)
+            {
+                return layoutModels;
+            }
 
             //计算门信息
             var doorInfo = layoutStructureService.GetDoorCenterPointOnRoom(room, door);
@@ -71,6 +76,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
             var controller = layoutControllerService.LayoutController(structs, room, doorInfo.Item1, doorInfo.Item2);
+            controller.Room = thRoom;
 
             //布置探测器
             LayoutWallMountingDetectorService wallMountingDetectorService = new LayoutWallMountingDetectorService();
@@ -79,11 +85,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             layoutModels.Add(controller);
             if (isInfrared)
             {
-                layoutModels.Add(detector as InfraredWallDetectorModel);
+                layoutModels.Add(new InfraredWallDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
             }
             else
             {
-                layoutModels.Add(detector as DoubleWallDetectorModel);
+                layoutModels.Add(new DoubleWallDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
             }
             return layoutModels;
         }
