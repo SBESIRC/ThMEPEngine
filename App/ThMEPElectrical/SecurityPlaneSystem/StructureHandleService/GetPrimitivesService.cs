@@ -89,7 +89,7 @@ namespace ThMEPElectrical.StructureHandleService
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markRecEngine = new ThRoomMarkRecognitionEngine();
                 markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
-                 var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
+                var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);
 

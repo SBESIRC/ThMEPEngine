@@ -100,13 +100,28 @@ namespace ThMEPEngineCore.Engine
             {
                 if (o.Value.Count > 0)
                 {
-                    var smallestAreaRoom = o.Value.OrderBy(v=>(v.Boundary as Polyline).Area).First();
+                    var smallestAreaRoom = o.Value.OrderBy(v=> RoomArea(v)).First();
                     if (smallestAreaRoom.Tags.IndexOf(o.Key.Text) < 0)
                     {
                         smallestAreaRoom.Tags.Add(o.Key.Text);
                     }
                 }
             });
+        }
+        private double RoomArea(ThIfcRoom room)
+        {
+            if(room.Boundary is Polyline polyline)
+            {
+                return polyline.Area;
+            }
+            else if(room.Boundary is MPolygon mPolygon)
+            {
+                return mPolygon.Area;
+            }    
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

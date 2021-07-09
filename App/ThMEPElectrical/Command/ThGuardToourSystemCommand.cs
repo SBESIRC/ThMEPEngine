@@ -69,7 +69,7 @@ namespace ThMEPElectrical.Command
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frames = frames.Select(x =>
                 {
-                    originTransformer.Transform(x);
+                    //originTransformer.Transform(x);
                     return ThMEPFrameService.Normalize(x);
                 }).ToList();
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
@@ -99,7 +99,7 @@ namespace ThMEPElectrical.Command
                         foreach (var item in layoutInfo)
                         {
                             Line line = new Line(item.Item1, item.Item1 + 1000 * item.Item2);
-                            originTransformer.Reset(line);
+                            //originTransformer.Reset(line);
                             db.ModelSpace.Add(line);
                         }
                     }
