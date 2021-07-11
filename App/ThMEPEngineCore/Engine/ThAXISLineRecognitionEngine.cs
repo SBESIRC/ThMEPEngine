@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
             List<Curve> curves = new List<Curve>();
-            var objs = datas.Select(o => o.Geometry).ToCollection();
+            var objs = datas.Select(o => o.Geometry).Where(o => o is Line).ToCollection();
             if (polygon.Count > 0)
             {
                 ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
