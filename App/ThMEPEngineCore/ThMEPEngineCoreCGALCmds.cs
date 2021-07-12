@@ -186,6 +186,13 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
+                var levelIndex = 3;
+                var ner = Active.Editor.GetInteger("\n输入防雷等级类别<三类>");
+                if(ner.Status == PromptStatus.OK)
+                {
+                    levelIndex = ner.Value;
+                }
+
                 var extractors = new List<ThExtractorBase>()
                 {
                     new ThStoreyExtractor()
@@ -235,15 +242,15 @@ namespace ThMEPEngineCore
                 extractEngine.Extract(acadDatabase.Database, pts);
                 extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
                 string geoContent = extractEngine.OutputGeo();
+                extractEngine.OutputGeo(Active.Document.Name);
                 var dclLayoutEngine = new ThDCLayoutEngineMgd();
                 var data = new ThDCDataMgd();
                 data.ReadFromContent(geoContent);
-                var param = new ThDCParamMgd(1);
+                var param = new ThDCParamMgd(levelIndex);
                 var result = dclLayoutEngine.Run(data, param);
                 var parseResults = ThDclResultParseService.Parse(result);
                 var printService = new ThDclPrintService(acadDatabase.Database, "AI-DCL");
                 printService.Print(parseResults);
-                //extractEngine.OutputGeo(Active.Document.Name);
                 //extractEngine.Print(acadDatabase.Database);
             }
         }

@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -76,7 +77,6 @@ namespace ThMEPEngineCore.Engine
             return results;
         }
 
-
         private List<ThRawIfcDistributionElementData> DoExtract(BlockReference blockReference, Matrix3d matrix, 
             ThDistributionElementExtractionVisitor visitor)
         {
@@ -88,8 +88,16 @@ namespace ThMEPEngineCore.Engine
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
                     {
-                        // 提取图元信息                        
-                        foreach (var objId in blockTableRecord)
+                        var data = new ThBlockReferenceData(blockReference.ObjectId);
+                        var objs = data.VisibleEntities();
+                        if (objs.Count == 0)
+                        {
+                            foreach (var objId in blockTableRecord)
+                            {
+                                objs.Add(objId);
+                            }
+                        }
+                        foreach (ObjectId objId in objs)
                         {
                             var dbObj = acadDatabase.Element<Entity>(objId);
                             if (dbObj is BlockReference blockObj)

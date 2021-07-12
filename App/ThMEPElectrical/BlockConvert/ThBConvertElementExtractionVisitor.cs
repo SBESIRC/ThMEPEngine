@@ -71,6 +71,16 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
+            // 不支持图纸空间
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
             return true;
         }
     }

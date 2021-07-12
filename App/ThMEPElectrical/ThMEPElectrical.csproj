@@ -46,6 +46,7 @@
     <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="BlockConvert\ThBlockReferenceDataExtension.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
     <Compile Include="Broadcast\Service\PrintBlindAreaService.cs" />
