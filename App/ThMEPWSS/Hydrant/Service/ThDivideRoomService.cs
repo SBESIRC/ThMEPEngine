@@ -88,7 +88,7 @@ namespace ThMEPWSS.Hydrant.Service
             results = ClearZeroPolygon(results); //清除面积为零
             results = DuplicatedRemove(results); //去重
             var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
-            return bufferDic.Where(o => first.IsContains(o.Value)).Select(o => o.Key).ToCollection();
+            return bufferDic.Where(o => first.IsContains(o.Value) && other.IsContains(o.Value)).Select(o => o.Key).ToCollection();
         }
         private DBObjectCollection Subtraction(Entity entity,DBObjectCollection objs)
         {
