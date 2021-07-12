@@ -40,14 +40,10 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Properties.Add(GroupIdPropertyName, "");
-                if (o is Polyline polyline && polyline.IsRectangle())
+                if(o is Polyline polyline)
                 {
                     var centerPt = ThGeometryTool.GetMidPt(polyline.GetPoint3dAt(0), polyline.GetPoint3dAt(2));
                     geometry.Boundary = new DBPoint(centerPt);
-                }
-                else
-                {
-                    geometry.Boundary = o;
                 }
                 geos.Add(geometry);
             });
