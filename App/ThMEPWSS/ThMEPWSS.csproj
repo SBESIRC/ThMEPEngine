@@ -49,6 +49,7 @@
     <Compile Include="HydrantConnectPipe\Service\ThStructureWallService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThWindWellService.cs" />
     <Compile Include="Hydrant\Data\ThHydrantDoorOpeningExtractor.cs" />
+    <Compile Include="Hydrant\Service\ThStopWatchService.cs" />
     <Compile Include="Pipe\Service\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
