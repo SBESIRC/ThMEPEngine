@@ -46,6 +46,9 @@ namespace ThMEPEngineCore.Engine
             //墙和门再buffer以便形成房间洞
             _door = _door.BufferPolygons(BufferDistance);
             _wall = _wall.BufferPolygons(BufferDistance);
+            //窗和线脚也可能出现没有完全搭接的情况
+            _window = _window.BufferPolygons(BufferDistance);
+            _cornice = _cornice.BufferPolygons(BufferDistance);
         }
 
         /// <summary>
