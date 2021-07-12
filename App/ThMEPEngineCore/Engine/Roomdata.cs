@@ -4,6 +4,7 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -43,12 +44,16 @@ namespace ThMEPEngineCore.Engine
             //墙和楼板去毛皮
             _wall = _wall.BufferPolygons(-WallBufferDistance).BufferPolygons(WallBufferDistance);
             _slab = _slab.BufferPolygons(-SlabBufferDistance).BufferPolygons(SlabBufferDistance);
+            //对面积为0的Polyline进行处理
+            _slab = _slab.BufferZeroPolyline();
+            _cornice = _cornice.BufferZeroPolyline();
             //墙和门再buffer以便形成房间洞
             _door = _door.BufferPolygons(BufferDistance);
             _wall = _wall.BufferPolygons(BufferDistance);
             //窗和线脚也可能出现没有完全搭接的情况
             _window = _window.BufferPolygons(BufferDistance);
             _cornice = _cornice.BufferPolygons(BufferDistance);
+            _slab = _slab.BufferPolygons(BufferDistance);
         }
 
         /// <summary>

@@ -216,5 +216,25 @@ namespace ThMEPEngineCore.CAD
                 }
             }).ToCollection();
         }
+        public static DBObjectCollection BufferZeroPolyline(this DBObjectCollection objectCollection, double distance=0.1)
+        {
+            DBObjectCollection result = new DBObjectCollection();
+            foreach(DBObject obj in objectCollection)
+            {
+                if(obj is Polyline polyline && DoubleEquals(polyline.Area,0.0))
+                {
+                    var temp = polyline.Buffer(distance/2);
+                    foreach(DBObject dBObject in temp)
+                    {
+                        result.Add(dBObject);
+                    }
+                }
+                else
+                {
+                    result.Add(obj);
+                }
+            }
+            return result;
+        }
     }
 }

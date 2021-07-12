@@ -949,58 +949,5 @@ namespace ThMEPEngineCore
                 }
             }
         }
-
-        [CommandMethod("TIANHUACAD", "THPickRoom", CommandFlags.Modal)]
-        public void THDB3ExtractRoom()
-        {
-            using (var acadDb = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                //提取数据+封面
-                Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
-                //Roomdata构造函数非常慢，可能是其他元素提取导致的
-                data.Deburring();
-                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
-
-                if (builder.Count == 0)
-                    return;
-                //从CAD中获取点
-                builder.CloseAndFilter();
-
-                //交互+获取房间
-                var selectPts = new List<Point3d>();
-                while (true)
-                {
-                    var ppo = new PromptPointOptions("\n选择房间内的一点");
-                    ppo.AllowNone = true;
-                    ppo.AllowArbitraryInput = true;
-                    var ptRes = Active.Editor.GetPoint(ppo);
-                    if (ptRes.Status == PromptStatus.OK)
-                    {
-                        builder.Build(ptRes.Value).Cast<Entity>().ForEach(o =>
-                        {
-                            acadDb.ModelSpace.Add(o);
-                            o.SetDatabaseDefaults();
-                        });
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-        }
     }
 }

@@ -46,7 +46,8 @@ namespace ThMEPEngineCore.Engine
                 return result;
             result.Add(MinPolyline);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(_data);
-            foreach(DBObject dbObj in spatialIndex.SelectWindowPolygon(MinPolyline))
+            var bufferService = new Service.ThNTSBufferService();
+            foreach(DBObject dbObj in spatialIndex.SelectWindowPolygon(bufferService.Buffer(MinPolyline,-0.01))) //解决NTS共边导致的错误
             {
                 result.Add(dbObj);
             }
