@@ -7,8 +7,8 @@
              xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
-                    Title="消火栓校核" SizeToContent="Manual" Height="325" 
-                    Width="180" MaxWidth="180" MaxHeight="330"
+                    Title="消火栓校核" SizeToContent="Manual" Height="280" 
+                    Width="168" MaxWidth="180" MaxHeight="330"
              mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -22,7 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
             <Grid>
@@ -43,7 +43,7 @@
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Margin="0,5" Name="spFireHydrantPanel" Visibility="Hidden">
+        <StackPanel Grid.Row="1" Name="spFireHydrantPanel" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -93,7 +93,7 @@
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Margin="0,5" Name="spFireExtinguisherPanel" Visibility="Visible">
+        <StackPanel Grid.Row="1" Name="spFireExtinguisherPanel" Visibility="Visible">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -135,7 +135,7 @@
                                  ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                  Checked="rbSelf_Checked" Unchecked="rbSelf_Unchecked">
                     </RadioButton>
-                    <TextBox x:Name="tbSelfValue" Width="50" Margin="20,0"
+                    <TextBox x:Name="tbSelfValue" Width="60" Margin="15,0"
                              InputMethod.IsInputMethodEnabled="False" PreviewTextInput ="TextBox_PreviewTextInput" 
                              PreviewKeyDown="TextBox_PreviewKeyDown"  TextChanged="TextBox_TextChanged">
                         <Binding Path="Parameter.SelfLength" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
@@ -144,11 +144,11 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <TextBlock Margin="-15,0" Text="米"></TextBlock>
+                    <TextBlock Margin="-10,0" Text="米"></TextBlock>
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="2" Margin="0,5">
+        <StackPanel Grid.Row="2" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"></RowDefinition>
@@ -158,8 +158,8 @@
                           IsChecked="{Binding Parameter.IsShowCheckResult,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Checked="chkShowResult_Checked" Unchecked="chkShowResult_Unchecked"></CheckBox>
-                <Button Grid.Row="1" Margin="0,0,10,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
-                        Width="50" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
+                <Button Grid.Row="1" Margin="0,0,6,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
+                        Width="65" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
             </Grid>
         </StackPanel>
     </Grid>

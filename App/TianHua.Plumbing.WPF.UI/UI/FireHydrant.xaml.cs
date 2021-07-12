@@ -20,13 +20,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             if(rbFireHydrant.IsChecked ==true)
             {
-                this.Height = 250;
+                this.Height = 240;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Visible;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Hidden;
             }
             else
             {
-                this.Height = 320;
+                this.Height = 290;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Hidden;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Visible;
             }
@@ -36,13 +36,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             if (rbFireExtinguisher.IsChecked == true)
             {
-                this.Height = 320;
+                this.Height = 290;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Visible;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Hidden;
             }
             else
             {
-                this.Height = 250;
+                this.Height = 240;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Hidden;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Visible;
             }
