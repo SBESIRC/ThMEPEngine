@@ -76,10 +76,10 @@ namespace ThMEPWSS.Command
 
                 var washPara = BuildWashParam(); //UI参数
                 var geoContent = ThGeoOutput.Output(geos); //数据
-                var washData = new ThWashGeoData();
+                var washData = new ThWashGeoDataMgd();
                 washData.ReadFromContent(geoContent);
 
-                var washPointEngint = new ThWashPointLayoutEngine();
+                var washPointEngint = new ThWashPointLayoutEngineMgd();
                 double[] points = washPointEngint.Layout(washData, washPara);
                 var washPoints = ThFlushPointUtils.GetPoints(points);
 
@@ -123,9 +123,9 @@ namespace ThMEPWSS.Command
                 ThPointIdentificationService.LayoutInfo = layoutInfo;
             }
         }
-        private ThWashParam BuildWashParam()
+        private ThWashParamMgd BuildWashParam()
         {
-            var washPara = new ThWashParam();
+            var washPara = new ThWashParamMgd();
             // 保护半径
             washPara.R = (int)FlushPointVM.Parameter.ProtectRadius;
             // 建筑空间（隔油池、水泵房、垃圾房等）

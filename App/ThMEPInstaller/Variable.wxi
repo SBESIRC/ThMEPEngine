@@ -25,8 +25,8 @@
   <?define Dotfuscated = "." ?>
   <!-- DevExpress version suffix -->
   <?define DevExpressVersionSuffix = "v17.2" ?>
+  <!-- GTE Path -->
+  <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
   <!-- CGAL path -->
   <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
-  <!-- GDAL path -->
-  <?define GDALPath = "$(var.ProjectDir)\..\..\Externals\GDAL" ?>
 </Include>
