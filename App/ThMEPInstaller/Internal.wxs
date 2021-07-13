@@ -49,7 +49,7 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v120\CppLibrary.v16.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" Guid="{C6DC3928-534D-4D14-B7C4-652A08D0A8EE}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v140\ManagedLibrary.v16.dll" />
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v120\ManagedLibrary.v16.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -71,18 +71,18 @@
             <?if $(var.Configuration) = Debug ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" />
             <?endif?>
         </ComponentGroup>

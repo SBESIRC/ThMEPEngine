@@ -52,13 +52,13 @@
         <ComponentGroup Id="ProductComponentsAppCGAL">
             <?if $(var.Configuration) = Debug ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Release" />
             <?endif?>
         </ComponentGroup>
