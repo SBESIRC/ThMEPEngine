@@ -28,6 +28,33 @@ namespace ThMEPElectrical
         public const string PROTECTAREA_LAYER_NAME = "E-FD-PR";
         public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
 
+        //安放平面
+        //----视频监控系统
+        public const string VM_LAYER_NAME = "E-VSCS-DEVC";                              //视频监控系统放置图层
+        public const string GUNCAMERA_BLOCK_NAME = "E-BVSCS110";                        //枪式摄像机图块
+        public const string PANTILTCAMERA_BLOCK_NAME = "E-BVSCS111";                    //云台摄像机图块
+        public const string DOMECAMERA_SHILED_BLOCK_NAME = "E-BVSCS210";                //半球摄像机保护罩图块
+        public const string GUNCAMERA_SHIELD_BLOCK_NAME = "E-VSCS-DEVC";                //枪式摄像机保护罩图块
+        public const string FACERECOGNITIONCAMERA_BLOCK_NAME = "E-BVSCS110-Bio";        //人脸识别摄像机图块
+        //----出入口控制系统
+        public const string AC_LAYER_NAME = "E-ACS-DEVC";                               //出入口控制系统放置图层
+        public const string BUTTON_BLOCK_NAME = "E-BACS51";                             //电锁按钮图块
+        public const string ELECTRICLOCK_BLOCK_NAME = "E-BACS21";                       //电锁图块
+        public const string INTERCOM_BLOCK_NAME = "E-BACS01";                           //出入口对讲门口机图块
+        public const string CARDREADER_BLOCK_NAME = "E-BACS41";                         //读卡器图块
+        //----入侵报警系统                                                              
+        public const string IA_LAYER_NAME = "E-IAS-DEVC";                               //入侵报警系统放置图层
+        public const string CONTROLLER_BLOCK_NAME = "E-BIAS010";                        //入侵报警控制器
+        public const string INFRAREDWALLDETECTOR_BLOCK_NAME = "E-BIAS110";              //被动红外幕帘式入侵探测器
+        public const string DOUBLEDETECTOR_BLOCK_NAME = "E-BIAS120";                    //被动红外微波双鉴移动探测器(空间)
+        public const string INFRAREDHOSITINGDETECTOR_BLOCK_NAME = "E-BIAS111";          //被动红外幕帘式入侵探测器
+        public const string DISABLEDALARM_BLOCK_NAME = "E-BIAS200";                     //残卫报警按钮
+        public const string SOUNDLIGHTALARM_BLOCK_NAME = "E-BIAS020";                   //残卫声光报警器
+        public const string EMERGENCYALARM_BLOCK_NAME = "E-BIAS201";                    //紧急报警按钮
+        //----电子巡更系统
+        public const string GT_LAYER_NAME = "E-GTS-DEVC";                               //入侵报警系统放置图层
+        public const string TIMERECORDER_BLOCK_NAME = "E-BGTS10";                        //入侵报警控制器
+
         // 图层
         public const short LANELINE_LAYER_COLORINDEX = 2;
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";

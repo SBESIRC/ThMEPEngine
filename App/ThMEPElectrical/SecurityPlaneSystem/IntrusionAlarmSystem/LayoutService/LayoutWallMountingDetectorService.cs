@@ -14,7 +14,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
     public class LayoutWallMountingDetectorService
     {
-        double blockWidth = 300;
+        double blockWidth = 400;
+        double blockLength = 400;
         double angle = 10;
         public DetectorModel LayoutDetector(Point3d doorPt, Vector3d doorDir, Polyline door, double doorLength, List<Polyline> columns, List<Polyline> walls, ControllerModel controller)
         {
@@ -49,7 +50,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             DetectorModel detector = new DetectorModel();
             var detectorLayoutDir = CalDetectorLayoutDir(doorPt, layoutPt.Value, doorDir);
             detector.LayoutDir = detectorLayoutDir;
-            detector.LayoutPoint = layoutPt.Value;
+            detector.LayoutPoint = layoutPt.Value + detectorLayoutDir * (blockLength / 3);
 
             return detector;
         }

@@ -2,6 +2,7 @@
 using AcHelper.Commands;
 using System.Data;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using ThCADExtension;
@@ -17,7 +18,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
-        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表0625.xlsx");
+        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表0628.xlsx");
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
@@ -87,6 +88,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             //发送命令
             if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
             {
+                if (!CheckVMSystem()) return;
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THVMSYSTEM");
             }
             else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem)
@@ -99,10 +101,77 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             }
             else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.GuardTourSystem)
             {
+                if (!CheckGTSystem()) return;
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THGTSYSTEM");
             }
 
             this.Close();
+        }
+
+        /// <summary>
+        /// 检查视频监控系统输入
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckVMSystem()
+        {
+            if (!CheckTextBoxValue(videoDistance.Text))
+            {
+                MessageBox.Show("摄像机均布间距不能为空且必须为数字");
+                return false;
+            }
+            if (!CheckTextBoxValue(videoBlindArea.Text))
+            {
+                MessageBox.Show("摄像机纵向盲区距离不能为空且必须为数字");
+                return false;
+            }
+            if (!CheckTextBoxValue(videaMaxArea.Text))
+            {
+                MessageBox.Show("摄像机最大成像距离不能为空且必须为数字");
+                return false;
+            }
+
+            ThElectricalUIService.Instance.Parameter.videoDistance = double.Parse(videoDistance.Text);
+            ThElectricalUIService.Instance.Parameter.videoBlindArea = double.Parse(videoBlindArea.Text);
+            ThElectricalUIService.Instance.Parameter.videaMaxArea = double.Parse(videaMaxArea.Text);
+
+            return true;
+        }
+
+        /// <summary>
+        /// 检查电子巡更系统输入
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckGTSystem()
+        {
+            if (!CheckTextBoxValue(gtDistance.Text))
+            {
+                MessageBox.Show("电子巡更系统排布间距不能为空且必须为数字");
+                return false;
+            }
+
+            ThElectricalUIService.Instance.Parameter.gtDistance = double.Parse(gtDistance.Text);
+            return true;
+        }
+
+        /// <summary>
+        /// 检验textbox
+        /// </summary>
+        private bool CheckTextBoxValue(string textString)
+        {
+            if (string.IsNullOrEmpty(textString))
+            {
+                return false;
+            }
+
+            Match m = Regex.Match(textString, @"^[0-9]*$");   // 匹配正则表达式
+            if (!m.Success)   // 输入的不是数字
+            {
+                return false;
+            }
+            else   // 输入的是数字
+            {
+                return true;
+            }
         }
 
         /// <summary>

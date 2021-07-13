@@ -32,7 +32,6 @@ namespace ThMEPElectrical.Broadcast.Service
             return new Point3d((maxX + minX) / 2, (maxY + minY) / 2, 0);
         }
 
-
         /// <summary>
         /// 扩张line成polyline
         /// </summary>

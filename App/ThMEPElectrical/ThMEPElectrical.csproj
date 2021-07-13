@@ -176,6 +176,7 @@
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutOtherGTService.cs" />
+    <Compile Include="SecurityPlaneSystem\InsertBlockService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\HandleIntrusionAlarmRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutDisabledToiletService.cs" />

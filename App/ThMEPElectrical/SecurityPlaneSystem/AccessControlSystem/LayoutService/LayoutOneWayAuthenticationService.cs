@@ -15,8 +15,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutOneWayAuthenticationService
     {
-        double buttunWidth = 300;
+        double buttunWidth = 400;
         double cardReaderWidth = 400;
+        double cardReaderLength = 500;
         double angle = 45;
 
         public List<AccessControlModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
@@ -38,7 +39,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
             accessControlModels.Add(CalLayoutButton(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
             accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, -roomDoorInfo.Item2, otherDoorPt));
-            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt));
+            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item2));
 
             return accessControlModels;
         }
@@ -61,8 +62,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             }
 
             Buttun buttun = new Buttun();
-            buttun.layoutPt = layoutInfo.Value;
             buttun.layoutDir = dir;
+            buttun.layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
 
             return buttun;
         }
@@ -72,9 +73,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// </summary>
         /// <param name="pt"></param>
         /// <returns></returns>
-        private ElectricLock CalLayoutElectricLock(Point3d pt)
+        private ElectricLock CalLayoutElectricLock(Point3d pt, Vector3d dir)
         {
             ElectricLock electricLock = new ElectricLock();
+            electricLock.layoutDir = dir;
             electricLock.layoutPt = pt;
             return electricLock;
         }
@@ -98,8 +100,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             }
 
             CardReader cardReader = new CardReader();
-            cardReader.layoutPt = layoutInfo.Value;
             cardReader.layoutDir = dir;
+            cardReader.layoutPt = layoutInfo.Value + dir * (cardReaderLength / 2);
 
             return cardReader;
         }

@@ -99,6 +99,12 @@ namespace ThCADExtension
         }
 
         // 电气地库应急照明图块
+        public static string ElectricalSecurityPlaneDwgPath()
+        {
+            return Path.Combine(SupportPath(), "安防图例模板.dwg");
+        }
+
+        // 电气地库应急照明图块
         public static string LightingEmgLightDwgPath()
         {
             return Path.Combine(SupportPath(), "地库应急照明图块.dwg");

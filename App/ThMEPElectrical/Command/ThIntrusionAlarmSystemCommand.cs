@@ -17,6 +17,8 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
+using ThMEPElectrical.SecurityPlaneSystem;
 
 namespace ThMEPElectrical.Command
 {
@@ -84,18 +86,69 @@ namespace ThMEPElectrical.Command
                     LayoutFactoryService layoutService = new LayoutFactoryService();
                     var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, floor);
 
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        foreach (var item in layoutInfo)
-                        {
-                            var endPt = item.LayoutPoint + 500 * item.LayoutDir;
-                            Line line = new Line(item.LayoutPoint, endPt);
-                            Circle circle = new Circle(endPt, Vector3d.ZAxis, 100);
-                            //originTransformer.Reset(line);
-                            db.ModelSpace.Add(line);
-                            db.ModelSpace.Add(circle);
-                        }
-                    }
+                    //插入图块
+                    InsertBlock(layoutInfo, originTransformer);
+
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in layoutInfo)
+                    //    {
+                    //        var endPt = item.LayoutPoint + 500 * item.LayoutDir;
+                    //        Line line = new Line(item.LayoutPoint, endPt);
+                    //        Circle circle = new Circle(endPt, Vector3d.ZAxis, 100);
+                    //        //originTransformer.Reset(line);
+                    //        db.ModelSpace.Add(line);
+                    //        db.ModelSpace.Add(circle);
+                    //    }
+                    //}
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入图块
+        /// </summary>
+        /// <param name="layoutModels"></param>
+        /// <param name="originTransformer"></param>
+        private void InsertBlock(List<LayoutModel> layoutModels, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var model in layoutModels)
+            {
+                var pt = model.LayoutPoint;
+                //originTransformer.Reset(ref pt);
+
+                double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.LayoutDir, Vector3d.ZAxis);
+                if (model is ControllerModel)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.CONTROLLER_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is InfraredWallDetectorModel)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is DoubleWallDetectorModel)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is InfraredHositingDetectorModel)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is DoubleHositingDetectorModel)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is SoundLightAlarm)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.SOUNDLIGHTALARM_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is DisabledAlarmButtun)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DISABLEDALARM_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is EmergencyAlarmButton)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.EMERGENCYALARM_BLOCK_NAME, pt, rotateAngle, 100);
                 }
             }
         }

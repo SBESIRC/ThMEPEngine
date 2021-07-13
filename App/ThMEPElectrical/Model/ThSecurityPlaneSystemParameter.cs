@@ -31,6 +31,11 @@ namespace ThMEPElectrical.Model
         public double videaMaxArea { get; set; }
 
         /// <summary>
+        /// 电子巡更系统排布间距
+        /// </summary>
+        public double gtDistance { get; set; }
+
+        /// <summary>
         /// 出入口控制系统配置表
         /// </summary>
         public DataTable accessControlSystemTable { get; set; }

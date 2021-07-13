@@ -16,6 +16,9 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 {
     public class LayoutVideo
     {
+        public double angle = 135;
+        public double layoutRange = 5000;
+        public double blindArea = 1250;
         double bufferWidth = 300;
         public LayoutModel Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> walls, List<Polyline> columns)
         {
@@ -23,7 +26,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             //找到可布置构建
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomPtInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
-            var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2);
+            var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2, angle, layoutRange, blindArea);
             if (poly == null)
             {
                 return null;
@@ -31,14 +34,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var bufferRoom = room.Buffer(10)[0] as Polyline;
             var nCols = getLayoutStructureService.GetNeedColumns(columns, bufferRoom, poly);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom, poly);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                //db.ModelSpace.Add(poly);
-                //foreach (var item in nWalls)
-                //{
-                //    db.ModelSpace.Add(item);
-                //}
-            }
+           
             //计算布置点位
             var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls);
             pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls));

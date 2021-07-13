@@ -167,8 +167,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                     xDir.Z, yDir.Z, zDir.Z, 0,
                     0.0, 0.0, 0.0, 1.0});
 
-            var orderPts = pts.Select(x => x.TransformBy(matrix)).ToList();
-            return orderPts;
+            var orderPts = pts.Select(x => x.TransformBy(matrix.Inverse())).OrderBy(x => x.X).ToList();
+            return orderPts.Select(x => x.TransformBy(matrix)).ToList();
         }
 
         /// <summary>
@@ -204,6 +204,29 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
             }
 
             return resLayoutInfo.OrderBy(x => x.Value.DistanceTo(doorPt)).ToDictionary(x => x.Key, y => y.Value);
+        }
+
+        /// <summary>
+        /// 扩张line成polyline
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public static Polyline ExpandLine(Line line, double distance, double tol = 0)
+        {
+            Vector3d lineDir = line.Delta.GetNormal();
+            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
+            Point3d p1 = line.StartPoint + lineDir * tol + moveDir * distance;
+            Point3d p2 = line.EndPoint - lineDir * tol + moveDir * distance;
+            Point3d p3 = line.EndPoint - lineDir * tol - moveDir * distance;
+            Point3d p4 = line.StartPoint + lineDir * tol - moveDir * distance;
+
+            Polyline polyline = new Polyline() { Closed = true };
+            polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, p2.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
+            return polyline;
         }
     }
 }

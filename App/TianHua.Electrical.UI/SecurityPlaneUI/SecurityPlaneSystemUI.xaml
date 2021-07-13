@@ -52,13 +52,13 @@
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Content="摄像机均布间距："></Label>
-            <TextBox Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1" />
+            <TextBox Name="videoDistance" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1" />
             <Label Grid.Row="1" Grid.Column="0" Content="摄像机纵向盲区距离："></Label>
-            <TextBox Grid.Row="1" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="2" />
+            <TextBox x:Name="videoBlindArea" Grid.Row="1" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="2" />
             <Label Grid.Row="2" Grid.Column="0" Content="摄像机最大成像距离：" VerticalContentAlignment="Center"></Label>
-            <TextBox Grid.Row="2" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3" />
+            <TextBox Name="videaMaxArea" Grid.Row="2" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3" />
             <Label Grid.Row="3" Grid.Column="0" Content="电子巡更排布间距：" VerticalContentAlignment="Center"></Label>
-            <TextBox Grid.Row="3" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3" />
+            <TextBox x:Name="gtDistance" Grid.Row="3" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3" />
             <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,5" VerticalAlignment="Bottom">
                 <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>

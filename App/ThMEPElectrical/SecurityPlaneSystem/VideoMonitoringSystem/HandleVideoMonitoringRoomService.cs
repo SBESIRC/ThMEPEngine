@@ -100,35 +100,51 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem
             {
                 return LayoutType.Nothing;
             }
-            else if (typeString.Contains("沿线均布-枪式摄像机"))
+            else if (typeString == "沿线均布-枪式摄像机")
             {
                 return LayoutType.AlongLineGunCamera;
             }
-            else if (typeString.Contains("沿线均布-云台摄像机"))
+            else if (typeString == "沿线均布-云台摄像机")
             {
                 return LayoutType.AlongLinePanTiltCamera;
             }
-            else if (typeString.Contains("沿线均布-半球摄像机"))
+            else if (typeString == "沿线均布-半球摄像机")
             {
                 return LayoutType.AlongLineDomeCamera;
             }
-            else if (typeString.Contains("沿线均布-枪式摄像机（带室内防护罩）"))
+            else if (typeString == "沿线均布-枪式摄像机（带室内防护罩）")
             {
                 return LayoutType.AlongLineGunCameraWithShield;
             }
-            else if (typeString.Contains("入口控制-枪式摄像机"))
+            else if (typeString == "入口控制-枪式摄像机")
             {
                 return LayoutType.EntranceGunCamera;
             }
-            else if (typeString.Contains("入口控制-半球摄像机"))
+            else if (typeString == "入口控制-枪式摄像机（翻转）")
+            {
+                return LayoutType.EntranceGunCamera;
+            }
+            else if (typeString == "入口覆盖-半球摄像机")
             {
                 return LayoutType.EntranceDomeCamera;
             }
-            else if (typeString.Contains("入口控制-枪式摄像机（带室内防护罩）"))
+            else if (typeString == "入口覆盖-半球摄像机（翻转）")
+            {
+                return LayoutType.EntranceDomeCamera;
+            }
+            else if (typeString == "入口覆盖-枪式摄像机（带室内防护罩）")
             {
                 return LayoutType.EntranceGunCameraWithShield;
             }
-            else if (typeString.Contains("入口控制-人脸识别摄像机"))
+            else if (typeString == "入口覆盖-枪式摄像机（带室内防护罩）（翻转）")
+            {
+                return LayoutType.EntranceGunCameraWithShield;
+            }
+            else if (typeString == "入口覆盖-人脸识别摄像机")
+            {
+                return LayoutType.EntranceFaceRecognitionCamera;
+            }
+            else if (typeString == "入口覆盖-人脸识别摄像机（翻转）")
             {
                 return LayoutType.EntranceFaceRecognitionCamera;
             }

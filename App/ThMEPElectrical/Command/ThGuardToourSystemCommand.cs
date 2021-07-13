@@ -2,6 +2,7 @@
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using System;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService;
 using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.StructureHandleService;
@@ -94,16 +96,42 @@ namespace ThMEPElectrical.Command
                     //布置
                     LayoutGuardTourService layoutService = new LayoutGuardTourService();
                     var layoutInfo = layoutService.Layout(rooms, doors, columns, walls, lanes, floor);
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        foreach (var item in layoutInfo)
-                        {
-                            Line line = new Line(item.Item1, item.Item1 + 1000 * item.Item2);
-                            //originTransformer.Reset(line);
-                            db.ModelSpace.Add(line);
-                        }
-                    }
+
+                    //插入图块
+                    InsertBlock(layoutInfo, originTransformer);
+
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in layoutInfo)
+                    //    {
+                    //        Line line = new Line(item.Item1, item.Item1 + 1000 * item.Item2);
+                    //        //originTransformer.Reset(line);
+                    //        db.ModelSpace.Add(line);
+                    //    }
+                    //}
                 }
+            }
+        }
+
+        /// <summary>
+        /// 插入图块
+        /// </summary>
+        /// <param name="layoutModels"></param>
+        /// <param name="originTransformer"></param>
+        private void InsertBlock(List<(Point3d, Vector3d)> layoutModels, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var model in layoutModels)
+            {
+                var pt = model.Item1;
+                //originTransformer.Reset(ref pt);
+
+                var dir = model.Item2;
+                if (dir.Y < 0)
+                {
+                    dir = new Vector3d(dir.X, -dir.Y, 0);
+                }
+                double rotateAngle = Vector3d.YAxis.GetAngleTo(dir, Vector3d.ZAxis);
+                InsertBlockService.InsertBlock(ThMEPCommon.GT_LAYER_NAME, ThMEPCommon.TIMERECORDER_BLOCK_NAME, pt, rotateAngle, 100);
             }
         }
     }

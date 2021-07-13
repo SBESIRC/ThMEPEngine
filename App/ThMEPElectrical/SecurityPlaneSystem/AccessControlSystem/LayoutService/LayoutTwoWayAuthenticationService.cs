@@ -16,6 +16,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
     public class LayoutTwoWayAuthenticationService
     {
         double cardReaderWidth = 400;
+        double cardReaderLength = 500;
         double angle = 45;
         public List<AccessControlModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
@@ -34,7 +35,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1));
+            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1, roomDoorInfo.Item2));
             accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
             accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, -roomDoorInfo.Item2, otherDoorPt));
 
@@ -46,9 +47,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// </summary>
         /// <param name="pt"></param>
         /// <returns></returns>
-        private ElectricLock CalLayoutElectricLock(Point3d pt)
+        private ElectricLock CalLayoutElectricLock(Point3d pt, Vector3d dir)
         {
             ElectricLock electricLock = new ElectricLock();
+            electricLock.layoutDir = dir;
             electricLock.layoutPt = pt;
             return electricLock;
         } 
@@ -72,8 +74,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             }
 
             CardReader cardReader = new CardReader();
-            cardReader.layoutPt = layoutInfo.Value;
             cardReader.layoutDir = dir;
+            cardReader.layoutPt = layoutInfo.Value + dir * (cardReaderLength / 2);
 
             return cardReader;
         }

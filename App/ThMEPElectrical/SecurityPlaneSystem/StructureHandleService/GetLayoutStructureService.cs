@@ -17,9 +17,6 @@ namespace ThMEPElectrical.StructureHandleService
 {
     public class GetLayoutStructureService
     {
-        double angle = 135;
-        double layoutRange = 5000;
-        double blindArea = 1250;
         double length = 200;
         /// <summary>
         /// 计算房间内能够布置摄像头的范围
@@ -27,7 +24,7 @@ namespace ThMEPElectrical.StructureHandleService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        public Polyline GetLayoutRange(Point3d pt, Vector3d dir)
+        public Polyline GetLayoutRange(Point3d pt, Vector3d dir, double angle, double layoutRange, double blindArea)
         {
             var rotateAngle = (angle / 2) * Math.PI / 180;
             var dir1 = dir.RotateBy(rotateAngle, Vector3d.ZAxis);
@@ -210,7 +207,12 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(laneLst.ToCollection());
                 var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
-                resLines.Add(needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList());
+                var trimLanes = needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
+                if (trimLanes.Count() > 0)
+                {
+                    resLines.Add(trimLanes);
+                }
+
             }
 
             return resLines; 

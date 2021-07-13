@@ -21,6 +21,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         {
             //填充数据
             HandleVideoMonitoringRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable);
+            
+            //设置参数
+            layoutVideo.blindArea = ThElectricalUIService.Instance.Parameter.videoBlindArea;
+            layoutVideo.layoutRange = ThElectricalUIService.Instance.Parameter.videaMaxArea;
+            layoutVideoByLine.distance = ThElectricalUIService.Instance.Parameter.videoDistance;
             List<LayoutModel> models = new List<LayoutModel>();
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
 
@@ -86,6 +91,13 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 case LayoutType.EntranceFaceRecognitionCamera:
                     layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
                     break;
+                case LayoutType.EntranceGunCameraFlip:
+                case LayoutType.EntranceDomeCameraFlip:
+                case LayoutType.EntranceGunCameraWithShieldFlip:
+                case LayoutType.EntranceFaceRecognitionCameraFlip:
+                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
+                    layoutModel.ForEach(x => x.layoutDir = -x.layoutDir);
+                    break;
                 case LayoutType.AlongLineGunCamera:
                 case LayoutType.AlongLinePanTiltCamera:
                 case LayoutType.AlongLineDomeCamera:
@@ -108,6 +120,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             List<LayoutModel> resModels = new List<LayoutModel>();
             switch (layoutType)
             {
+                case LayoutType.EntranceGunCameraFlip:
                 case LayoutType.EntranceGunCamera:
                 case LayoutType.AlongLineGunCamera:
                     layoutModels.ForEach(x =>
@@ -127,6 +140,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(panTiltCameraModel);
                     });
                     break;
+                case LayoutType.EntranceDomeCameraFlip:
                 case LayoutType.EntranceDomeCamera:
                 case LayoutType.AlongLineDomeCamera:
                     layoutModels.ForEach(x =>
@@ -137,6 +151,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(domeCameraModel);
                     });
                     break;
+                case LayoutType.EntranceGunCameraWithShieldFlip:
                 case LayoutType.EntranceGunCameraWithShield:
                 case LayoutType.AlongLineGunCameraWithShield:
                     layoutModels.ForEach(x =>
@@ -147,6 +162,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(gunCameraWithShieldModel);
                     });
                     break;
+                case LayoutType.EntranceFaceRecognitionCameraFlip:
                 case LayoutType.EntranceFaceRecognitionCamera:
                     layoutModels.ForEach(x =>
                     {

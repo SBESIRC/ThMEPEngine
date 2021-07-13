@@ -21,7 +21,14 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
             var otherRooms = rooms.Where(x => HandleGuardTourRoomService.otherRooms.Any(y => x.Tags.Any(z => y.roomName.Contains(z)))).ToList();
 
             List<(Point3d, Vector3d)> layoutInfo = new List<(Point3d, Vector3d)>();
+            //房间外需要布置的房间
+            LayoutOtherGTService layoutStairwellsGTService = new LayoutOtherGTService();
+            var layoutPts = layoutStairwellsGTService.Layout(otherRooms, doors, columns, walls);
+            layoutInfo.AddRange(layoutPts.Select(x => x.Value));
+
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            LayoutGTAlongLaneService layoutGTAlongLaneService = new LayoutGTAlongLaneService();
+            layoutGTAlongLaneService.layoutSpace = ThElectricalUIService.Instance.Parameter.gtDistance;
             foreach (var thRoom in rooms)
             {
                 var roomInfo = HandleGuardTourRoomService.GTRooms.Where(y => thRoom.Tags.Any(x => y.roomName.Contains(x)) &&
@@ -34,16 +41,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 var room = thRoom.Boundary as Polyline;
                 var bufferRoom = room.Buffer(5)[0] as Polyline;
                 var nDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
-                var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
+                var nColumns = getLayoutStructureService.GetNeedColumns(columns, room);
                 var nLanes = getLayoutStructureService.GetNeedLanes(lanes, bufferRoom);
+                var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
+                var nLayoutPts = layoutPts.Where(x => nDoors.Contains(x.Key)).Select(x => x.Value.Item1).ToList();
 
-                LayoutOtherGTService layoutStairwellsGTService = new LayoutOtherGTService();
-                var layoutPts = layoutStairwellsGTService.Layout(thRoom, otherRooms, nDoors, columns, walls);
+                //筛出不和墙相交的柱
+                nColumns = nColumns.Where(x => {
+                    Point3dCollection pts = new Point3dCollection();
+                    room.IntersectWith(x, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    if (pts.Count > 0) return false;
+                    bufferRoom.IntersectWith(x, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    if (pts.Count > 0) return false;
+                    return true;
+                }).ToList();
+                var laneLayoutPts = layoutGTAlongLaneService.Layout(nLanes, nColumns, nWalls, nLayoutPts);
 
-                LayoutGTAlongLaneService layoutGTAlongLaneService = new LayoutGTAlongLaneService();
-                var laneLayoutPts = layoutGTAlongLaneService.Layout(lanes, columns, layoutPts.Select(x => x.Item1).ToList());
-
-                layoutInfo.AddRange(layoutPts);
                 layoutInfo.AddRange(laneLayoutPts);
             }
 
