@@ -1,50 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<?include Variable.wxi ?>
-	<Fragment>
-		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Debug" Guid="{039A5964-2BA1-4E42-ACD1-080ADA269155}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_GMP_Debug" KeyPath="yes" Source="$(var.CGALPath)\4.12.0\libgmp-10.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" Guid="{F58B64B7-83A2-483F-A492-65A08F652D5E}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MPFR_Debug" KeyPath="yes" Source="$(var.CGALPath)\4.12.0\libmpfr-4.dll" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-		</DirectoryRef>
-		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Release" Guid="{49A8EAFD-826B-45F9-A717-F9C4049AED7B}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_GMP_Release" KeyPath="yes" Source="$(var.CGALPath)\4.12.0\libgmp-10.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" Guid="{CC076EE6-7AD3-45E0-AAD6-12728D695089}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MPFR_Release" KeyPath="yes" Source="$(var.CGALPath)\4.12.0\libmpfr-4.dll" />
-			</Component>
-		</DirectoryRef>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
-		</DirectoryRef>
-		<?endif?>
-	</Fragment>
-	<Fragment>
-		<ComponentGroup Id="ProductComponentsAppCGAL">
-			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" />
-			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" />
-			<?endif?>
-		</ComponentGroup>
-	</Fragment>
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Debug" Guid="{039A5964-2BA1-4E42-ACD1-080ADA269155}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_GMP_Debug" KeyPath="yes" Source="$(var.CGALPath)\libgmp-10.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" Guid="{F58B64B7-83A2-483F-A492-65A08F652D5E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MPFR_Debug" KeyPath="yes" Source="$(var.CGALPath)\libmpfr-4.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Debug" Guid="{DA6DFCEC-FA19-42EF-B1E1-D401D7CB5D2C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_GMP_Debug" KeyPath="yes" Source="$(var.CGALPath)\libgmp-10.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Debug" Guid="{36FEE2F8-E0CF-48DC-B2EB-54A2E45D2A3A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MPFR_Debug" KeyPath="yes" Source="$(var.CGALPath)\libmpfr-4.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Release" Guid="{49A8EAFD-826B-45F9-A717-F9C4049AED7B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_GMP_Release" KeyPath="yes" Source="$(var.CGALPath)\libgmp-10.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" Guid="{CC076EE6-7AD3-45E0-AAD6-12728D695089}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MPFR_Release" KeyPath="yes" Source="$(var.CGALPath)\libmpfr-4.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Release" Guid="{FD52C57B-782B-441E-81F8-55D725D55E14}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_GMP_Release" KeyPath="yes" Source="$(var.CGALPath)\libgmp-10.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Release" Guid="{4E57A563-9756-4483-9068-5EE6748E6843}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MPFR_Release" KeyPath="yes" Source="$(var.CGALPath)\libmpfr-4.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppCGAL">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_GMP_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MPFR_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_GMP_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MPFR_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
 </Wix>
