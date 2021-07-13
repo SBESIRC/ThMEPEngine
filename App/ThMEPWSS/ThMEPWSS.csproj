@@ -37,7 +37,8 @@
     <Compile Include="Assistant\FengDbgTest.cs" />
     <Compile Include="Assistant\FengDbgTesting.cs" />
     <Compile Include="Assistant\FengKeys.cs" />
-    <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDPositionDimEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />

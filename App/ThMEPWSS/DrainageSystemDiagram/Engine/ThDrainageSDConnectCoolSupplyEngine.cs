@@ -37,7 +37,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //确定每个厕所在墙上的给水点位
             ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toilateList, out var aloneToilate);
-            //toilateList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
+            toilateList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
 
             ///////////收缩外框
             //ThDrainageSDRoomService.shrinkRoom(archiExtractor);
@@ -70,6 +70,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //找主线虚拟点位
             var groupList = ThDrainageSDCoolPtProcessService.classifyToilate(toilateList);
+            ThDrainageSDCoolPtProcessService.classifySmallRoomGroup(ref groupList,roomList);
+
             var islandPair = ThDrainageSDCoolPtProcessService.mergeIsland(groupList);
           
             var virtualPtList = ThDrainageSDVirtualPtEngine.getVirtualPtOfGroup(supplyStart, groupList, islandPair, roomList, out var ptForVirtualDict, out var allToiInGroup);
@@ -113,11 +115,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             ptOnWall.Add(supplyStart);
             ThDrainageSDCleanLineService.cleanNoUseLines(ptOnWall, ref lines);
 
+            dataSet.roomList = roomList;
             dataSet.TerminalList = toilateList;
             dataSet.IslandPair = islandPair;
             dataSet.GroupList = groupList;
             dataSet.SupplyCoolStart = supplyStart;
             dataSet.Pipes = lines;
+
 
             return lines;
         }

@@ -22,6 +22,11 @@ namespace ThMEPWSS
             //取框线
             Polyline frame = selectFrame();
 
+            if (frame == null || frame.NumberOfVertices == 0)
+            {
+                return;
+            }
+
             Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
             if (frame != null && frame.NumberOfVertices > 0)
@@ -93,14 +98,15 @@ namespace ThMEPWSS
 
             ThDrainageSDTreeService.buildPipeTree(dataSet);
 
-            var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
-            allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l31ShutValves", 50, 35, 200));
+            //var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
+            //allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l31ShutValves", 50, 35, 200));
 
-            var allDims = ThDrainageSDPositionDimEngine.getPositionDim(dataSet);
-            allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
+            var allDims = ThDrainageSDDimEngine.getDim(dataSet);
+            //allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
 
 
 
+            //ThDrainageSDPositionDimEngine.positionDimTry(dataSet.PipeTreeRoot);
 
 #endif        
         }
@@ -175,10 +181,11 @@ namespace ThMEPWSS
             var supplyStartExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDColdWaterSupplyStartExtractor)) as ThDrainageSDColdWaterSupplyStartExtractor;
             var supplyStart = (supplyStartExtractor.ColdWaterSupplyStarts[0].Geometry as DBPoint).Position;
 
+            //清理线和线头
+            //var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allPipeOri);
+            var nodes = ThDrainageSDTreeService.buildPipeTreeTest(allPipeOri, supplyStart);
 
-            var nodes = ThDrainageSDTreeService.buildPipeTree(allPipeOri, supplyStart);
-
-            ThDrainageSDPositionDimEngine.positionDimTry(nodes);
+            // ThDrainageSDDimEngine.positionDimTry(nodes);
 
         }
 

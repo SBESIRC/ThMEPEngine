@@ -127,7 +127,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     //Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
 
-                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.SublinkLength;
+                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.LengthSublink;
 
                     toilate.SupplyCoolOnBranch.Add(subLinkEndPt);
                     //toilate.Dir = gj.Direction;

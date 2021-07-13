@@ -35,14 +35,43 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        public static ThDrainageSDTreeNode buildPipeTree(List<Line> allLines, Point3d supplyStart)
+        private static ThDrainageSDTreeNode buildPipeTree(List<Line> allLines, Point3d supplyStart)
+        {
+            var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
+            
+            var root = buildTree(lines, supplyStart);
+   
+            travelTree(root, "l063tree");
+         
+            return root;
+        }
+
+        public static ThDrainageSDTreeNode buildPipeTreeTest(List<Line> allLines, Point3d supplyStart)
         {
             var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
 
+            var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allLines);
+
+
             var root = buildTree(lines, supplyStart);
+            var root2 = buildTree(lines2, supplyStart);
+
+            travelTree(root, "l063tree");
+            travelTree(root2, "l031tree");
 
             return root;
         }
+
+        public static void travelTree(ThDrainageSDTreeNode root, string layer)
+        {
+
+            int cs = root.getLeafCount();
+            int dp = root.getDepth();
+            DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("{0}_{1}", dp, cs), layer, (short)(dp % 7), 25, 100);
+
+            root.Child.ForEach(x => travelTree(x, layer));
+        }
+
 
         private static ThDrainageSDTreeNode buildTree(List<Line> lines, Point3d startPt)
         {

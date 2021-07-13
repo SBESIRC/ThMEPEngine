@@ -51,9 +51,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else
                 {
                     //普通组
-                    //var poly = getVitualColumnForStrightGroup(group.Value);
-                    //virtualColumn.Add(poly);
-
                     if (group.Value.SelectMany(x => x.SupplyCoolOnWall).Count() == 1)
                     {
                         var poly = getVitualColumnForToilates(group.Value.First());
@@ -63,8 +60,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         }
                     }
                 }
-
-
             }
             return virtualColumn;
         }
@@ -91,7 +86,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var orderPts = ThDrainageSDCommonService.orderPtInStrightLine(pts);
             var dir = group.First().Dir;
 
-            double length = ThDrainageSDCommon.SublinkLength * 2;
+            double length = ThDrainageSDCommon.LengthSublink * 2;
 
             var pt1 = orderPts.First();
             var pt2 = orderPts.Last();
@@ -119,7 +114,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             Polyline column = new Polyline();
 
-            double verticalLength = ThDrainageSDCommon.SublinkLength-100 ;
+            double verticalLength = ThDrainageSDCommon.LengthSublink-100 ;
             double length = 100;
 
             Vector3d dir = toilate.Dir;

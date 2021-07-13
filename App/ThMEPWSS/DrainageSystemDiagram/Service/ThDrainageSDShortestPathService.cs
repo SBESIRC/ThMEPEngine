@@ -41,7 +41,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
         private static double[,] createGraphForRoom(ThToilateRoom room, out List<Point3d> ptGraph)
         {
             ptGraph = new List<Point3d>();
-            var roomPt = room.outlinePtList;
+            var roomPt = new List<Point3d>();
+            roomPt.AddRange(room.outlinePtList);
 
             var toilateOnWallPts = InsertToilateToWall(room);
 
@@ -97,7 +98,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                                 bBuild = false;
                                 bCheck = true;
                             }
-                           
+
                         }
 
                         if (bCheck == false && room.Contains(line.GetCenter()) == false)
@@ -280,7 +281,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var tol = new Tolerance(10, 10);
             int tolCloseWallForIsland = 10000;
 
-            //foreach (var toilate in )
             foreach (var toilate in room.toilate)
             {
                 toilate.SupplyCoolOnWall.ForEach(ptOnWall =>
@@ -294,7 +294,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     {
                         //岛
                         var wallList = room.wallList;
-                        var ptOnWallIsland = ThDrainageSDCoolPtService.findPtOnWall(wallList, toilate, tolCloseWallForIsland);
+                        var ptOnWallIsland = ThDrainageSDCoolPtService.findPtOnWall(wallList, toilate, tolCloseWallForIsland,true);
+                        //ptOnWallIsland.ForEach(x => DrawUtils.ShowGeometry(x, "l0islandOnWall",3,25,30));
                         pl.AddRange(ptOnWallIsland);
                     }
                 });

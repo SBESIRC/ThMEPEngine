@@ -11,6 +11,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDDataExchange
     {
+        public List<ThToilateRoom > roomList { get; set; }
         public List<ThIfcSanitaryTerminalToilate> TerminalList { get; set; }
         public Dictionary <string,List<ThIfcSanitaryTerminalToilate>> GroupList { get; set; }
         public Dictionary<string, (string, string)> IslandPair { get; set; }

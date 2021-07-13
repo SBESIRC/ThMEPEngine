@@ -33,15 +33,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
             return obj;
         }
+
         public static List<Point3d> orderPtInStrightLine(List<Point3d> pts)
         {
-            //var pts = groupToilate.SelectMany(x => x.SupplyCoolOnBranch).ToList();
-
             if (pts.Count > 1)
             {
                 var matrix = getGroupMatrix(pts);
 
-                var ptsDict = pts.ToDictionary(x => x, x => x.TransformBy(matrix));
+                var ptsDict = pts.ToDictionary(x => x, x => x.TransformBy(matrix.Inverse()));
                 var ptsOrder = ptsDict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
 
                 pts = ptsOrder;
@@ -71,6 +70,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
 
             return ptList;
+        }
+
+        public static List<Line> GetLines(Polyline pl)
+        {
+            var lines = new List<Line>();
+            for (int j = 0; j < pl.NumberOfVertices; j++)
+            {
+                var pt = pl.GetPoint3dAt(j % pl.NumberOfVertices);
+                var ptNext = pl.GetPoint3dAt((j + 1) % pl.NumberOfVertices);
+
+                var line = new Line(pt, ptNext);
+                lines.Add(line);
+            }
+            
+            return lines;
+
         }
     }
 }

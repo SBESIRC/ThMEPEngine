@@ -129,7 +129,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 if (loopedGroup.Contains(group.Key))
                 {
-                    //跳过处理的岛
+                    //跳过处理过的岛
                     continue;
                 }
 
@@ -171,10 +171,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var matrix1 = ThDrainageSDCommonService.getGroupMatrix(pts1);
 
-            var pts1Dict = pts1.ToDictionary(x => x, x => x.TransformBy(matrix1));
+            var pts1Dict = pts1.ToDictionary(x => x, x => x.TransformBy(matrix1.Inverse()));
             pts1 = pts1Dict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
 
-            var pts2Dict = pts2.ToDictionary(x => x, x => x.TransformBy(matrix1));
+            var pts2Dict = pts2.ToDictionary(x => x, x => x.TransformBy(matrix1.Inverse()));
             pts2 = pts2Dict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
 
             var pts = new List<Point3d>();
@@ -184,6 +184,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             pts.Add(pts2.Last());
 
             var pt = pts.OrderBy(x => ptDistDict[x]).First();
+            var aaa = pts.ToDictionary(x => x, x => ptDistDict[x]);
 
             var tol = new Tolerance(10, 10);
             if (pts1.First().IsEqualTo(pt, tol))
@@ -301,7 +302,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 //moveDir = new Vector3d(0, 0, 0);
             }
 
-            ptTemp = pt + moveDir * ThDrainageSDCommon.MovedLength;
+            ptTemp = pt + moveDir * ThDrainageSDCommon.MoveDistVirtualPt;
 
             movedPt = new(toilate, ptTemp);
 

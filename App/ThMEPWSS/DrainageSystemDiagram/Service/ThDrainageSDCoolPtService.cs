@@ -34,17 +34,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else
                 {
                     var wallList = room.First().wallList;
-                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToilateToWall);
+                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToilateToWall,false);
                     terminal.SupplyCoolOnWall = ptOnWall;
                 }
             }
         }
 
-        public static List<Point3d> findPtOnWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall)
+        public static List<Point3d> findPtOnWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall,bool toilateFaceSide)
         {
             List<Point3d> ptOnWall = new List<Point3d>();
             var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
-            var parallelWall = findParallelWall(closeWall, terminal);
+            var parallelWall = findParallelWall(closeWall, terminal, toilateFaceSide);
 
             Line closestWall = null;
             if (parallelWall.Count > 1)
@@ -71,7 +71,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return ptOnWall;
         }
 
-        private static List<Line> findParallelWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal)
+        private static List<Line> findParallelWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal,bool toilateFaceSide)
         {
             List<Line> parallelWall = new List<Line>();
             if (wallList.Count > 0)
@@ -86,10 +86,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
                    var angle = ptToWallDir.GetAngleTo(terminal.Dir);
 
                    var bReturn = false;
-                   if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
+                   if (toilateFaceSide == false)
                    {
-                       bReturn = true;
+                       if (Math.Abs(Math.Cos(angle)) >= Math.Cos(10 * Math.PI / 180))
+                       {
+                           bReturn = true;
+                       }
                    }
+                   else
+                   {
+                       if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
+                       {
+                           bReturn = true;
+                       }
+                   }
+                  
 
                    return bReturn;
                }).ToList();

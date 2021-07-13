@@ -79,7 +79,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var tempLine = new Line(orderPts.First(), orderPts.Last());
             var vPtOnTempLine = tempLine.GetClosestPointTo(vPt, true);
 
-            if (tempLine.ToCurve3d().IsOn(vPtOnTempLine, tol) == false || vPt.DistanceTo(vPtOnTempLine) > ThDrainageSDCommon.MovedLength)
+            if (tempLine.ToCurve3d().IsOn(vPtOnTempLine, tol) == false || vPt.DistanceTo(vPtOnTempLine) > ThDrainageSDCommon.MoveDistVirtualPt)
             {
                 var sPt = orderPts.OrderBy(x => x.DistanceTo(vPt)).First();
                 var line = new Line(vPt, sPt);
