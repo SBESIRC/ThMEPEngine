@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {    
@@ -65,6 +68,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 };
                 instance.Extract(database, pts);
                 Walls = instance.Polys.Cast<Entity>().ToList();
+            }
+            if(FilterMode == FilterMode.Window)
+            {
+                Walls = FilterWindowPolygon(pts, Walls);
             }
         }
         public override void SetRooms(List<ThIfcRoom> rooms)

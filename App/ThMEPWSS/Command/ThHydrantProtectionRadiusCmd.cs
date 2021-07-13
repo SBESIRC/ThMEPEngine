@@ -14,6 +14,8 @@ using System;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.Diagnostics;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Command
 {
@@ -29,8 +31,8 @@ namespace ThMEPWSS.Command
         {
             using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
-            {
-                var frame = ThWindowInteraction.GetPolyline(PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+            {              
+                var frame = SelectFrame(acadDb);
                 if (frame.Area <= 1e-4)
                 {
                     return;
@@ -68,6 +70,38 @@ namespace ThMEPWSS.Command
                 ThStopWatchService.Stop();
                 ThStopWatchService.Print("校核耗时：");
             }
+        }
+        private Polyline SelectFrame(AcadDatabase acadDb)
+        {
+            var frame = new Polyline();
+            var options = new PromptKeywordOptions("\n选择区域");
+            options.Keywords.Add("框选矩形区域", "K", "框选矩形区域(K)");
+            options.Keywords.Add("使用已绘区域", "P", "使用已绘区域(P)");
+            options.Keywords.Default = "框选矩形区域";
+            var keyRes = Active.Editor.GetKeywords(options);
+            if (keyRes.Status != PromptStatus.OK)
+            {
+                return frame;
+            }
+            if (keyRes.StringResult == "框选矩形区域")
+            {
+                frame = ThWindowInteraction.GetPolyline(
+                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+            }
+            else
+            {
+                var per = Active.Editor.GetEntity("\n请框选一个框");
+                if (per.Status != PromptStatus.OK)
+                {
+                    return frame;
+                }
+                var entity = acadDb.Element<Entity>(per.ObjectId);
+                if(entity is Polyline)
+                {
+                    frame = entity as Polyline;
+                }
+            }
+            return frame;
         }
 #else
         public void Execute()

@@ -87,33 +87,39 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.ArchitectureWallLayer,
                     },
                     new ThShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.ShearWallLayer,
                     },
                     new ThColumnExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer = AiLayerManager.ColumnLayer,
                     },
                     new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
+                        FilterMode = FilterMode.Window,
                         ElementLayer = AiLayerManager.DoorOpeningLayer,
                     },
                     new ThExternalSpaceExtractor()
                     {
                         UseDb3Engine=false,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.OuterBoundaryLayer,
                     }, //暂时通过图层判断
                     new ThRoomExtractor()
                     {
                         UseDb3Engine=true,
+                        FilterMode = FilterMode.Window,
                     },
                 };
             extractors.ForEach(o => o.Extract(db, pts));

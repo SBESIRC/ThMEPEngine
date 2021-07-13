@@ -32,6 +32,10 @@ namespace ThMEPWSS.Hydrant.Data
             var centerPoints = hydrantExtractor.Elements.Select(o => GetCenter(o.Outline as Polyline)).ToList();
             FireHydrants = centerPoints.Select(o => new DBPoint(o)).ToList();
 
+            if(FilterMode == FilterMode.Window)
+            {
+                FireHydrants = FilterWindowPolygon(pts, FireHydrants.Cast<Entity>().ToList()).Cast<DBPoint>().ToList();
+            }
         }
         public override List<ThGeometry> BuildGeometries()
         {

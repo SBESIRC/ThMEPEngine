@@ -62,6 +62,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
             {
                 //TODO
             }
+            if (FilterMode == FilterMode.Window)
+            {
+                var rooms = FilterWindowPolygon(pts, Rooms.Select(o => o.Boundary).ToList());
+                Rooms = Rooms.Where(o => rooms.Contains(o.Boundary)).ToList();
+            }
         }
         private void Clean()
         {            
@@ -86,7 +91,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                         }
                         else
                         {
-
+                            //
                         }
                     }
                     else if (Rooms[i].Boundary is MPolygon mPolygon)
@@ -104,7 +109,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         }
         private Privacy CheckPrivate(ThIfcRoom room)
         {
-            if(iRoomPrivacy !=null)
+            if (iRoomPrivacy != null)
             {
                 return iRoomPrivacy.Judge(room);
             }

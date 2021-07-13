@@ -9,10 +9,10 @@ using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Data;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -71,34 +71,43 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.ArchitectureWallLayer,
                     },
                     new ThShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.ShearWallLayer,
                     },
                     new ThColumnExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Window,
                         ElementLayer = AiLayerManager.ColumnLayer,
                     },
                     new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
+                        FilterMode = FilterMode.Window,
                         ElementLayer = AiLayerManager.DoorOpeningLayer,
                     },
                     new ThExternalSpaceExtractor()
                     {
                         UseDb3Engine=false,
+                        FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.OuterBoundaryLayer,
                     }, 
-                    new ThFireHydrantExtractor(),
+                    new ThFireHydrantExtractor()
+                    {
+                        FilterMode = FilterMode.Window,
+                    },
                     new ThRoomExtractor()
                     {
                         UseDb3Engine=true,
+                        FilterMode = FilterMode.Window,
                     },
                 };
             extractors.ForEach(o => o.Extract(db, pts));

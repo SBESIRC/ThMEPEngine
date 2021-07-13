@@ -1,8 +1,11 @@
-﻿using DotNetARX;
+﻿using NFox.Cad;
+using DotNetARX;
 using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -66,6 +69,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 };
                 instance.Extract(database, pts);
                 Columns = instance.Polys;
+            }
+            if (FilterMode == FilterMode.Window)
+            {
+                Columns = FilterWindowPolygon(pts, Columns.Cast<Entity>().ToList()).Cast<Polyline>().ToList();
             }
         }
         public override void SetRooms(List<ThIfcRoom> rooms)
