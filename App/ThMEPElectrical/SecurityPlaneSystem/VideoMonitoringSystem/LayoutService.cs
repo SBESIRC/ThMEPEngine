@@ -10,6 +10,7 @@ using ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService;
 using ThMEPEngineCore.Model;
 using System.Linq;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
@@ -17,7 +18,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
     {
         LayoutVideo layoutVideo = new LayoutVideo();
         LayoutVideoByLine layoutVideoByLine = new LayoutVideoByLine();
-        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes, ThStoreys floor)
+        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes, ThEStoreys floor)
         {
             //填充数据
             HandleVideoMonitoringRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable);

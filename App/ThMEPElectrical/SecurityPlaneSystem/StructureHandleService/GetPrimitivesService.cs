@@ -18,6 +18,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.StructureHandleService
 {
@@ -190,17 +191,17 @@ namespace ThMEPElectrical.StructureHandleService
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public ThStoreys GetFloorInfo(Polyline polyline)
+        public ThEStoreys GetFloorInfo(Polyline polyline)
         {
             var bufferPoly = polyline.Buffer(100)[0] as Polyline;
-            var storeysRecognitionEngine = new ThStoreysRecognitionEngine();
+            var storeysRecognitionEngine = new ThEStoreysRecognitionEngine();
             using (AcadDatabase db = AcadDatabase.Active())
             {   
                 storeysRecognitionEngine.Recognize(db.Database, bufferPoly.Vertices());
             }
             if (storeysRecognitionEngine.Elements.Count > 0)
             {
-                return storeysRecognitionEngine.Elements[0] as ThStoreys;
+                return storeysRecognitionEngine.Elements[0] as ThEStoreys;
             }
 
             return null;

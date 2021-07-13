@@ -10,12 +10,13 @@ using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutAccessControlService
     {
-        public List<AccessControlModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThStoreys floor)
+        public List<AccessControlModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThEStoreys floor)
         {
             HandleAccessControlRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.accessControlSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();

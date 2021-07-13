@@ -18,7 +18,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
-        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表0628.xlsx");
+        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表.xlsx");
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
@@ -37,6 +37,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem))
                 {
                     VideoMonitoringGrid.ItemsSource = table.DefaultView;
+                    //VideoMonitoringGrid.Columns[0].IsReadOnly = true;
                     ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable = table;
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem))

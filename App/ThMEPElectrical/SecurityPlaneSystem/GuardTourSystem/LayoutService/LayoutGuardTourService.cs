@@ -10,12 +10,13 @@ using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
 {
     public class LayoutGuardTourService
     {
-        public List<(Point3d, Vector3d)> Layout(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<List<Line>> lanes, ThStoreys floor)
+        public List<(Point3d, Vector3d)> Layout(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<List<Line>> lanes, ThEStoreys floor)
         {
             HandleGuardTourRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.guardTourSystemTable);
             var otherRooms = rooms.Where(x => HandleGuardTourRoomService.otherRooms.Any(y => x.Tags.Any(z => y.roomName.Contains(z)))).ToList();

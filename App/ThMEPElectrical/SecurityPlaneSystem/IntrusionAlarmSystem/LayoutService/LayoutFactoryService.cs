@@ -10,6 +10,7 @@ using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
@@ -19,7 +20,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         LayoutEmergencyAlarmService layoutEmergencyAlarmService = new LayoutEmergencyAlarmService();
         LayoutMonitoringService layoutMonitoringService = new LayoutMonitoringService();
 
-        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThStoreys floor)
+        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThEStoreys floor)
         {
             HandleIntrusionAlarmRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.intrusionAlarmSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
