@@ -15,20 +15,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static Line PointInLine(Point3d pt, List<Line> lineList)
         {
             double Tolerance = 10.0;
+            var termPointLine = new Line();
             foreach (var line in lineList)
             {
-                var isOnLine = line.PointOnLine(pt, false, Tolerance);
-                //if (PointIsLineTerm(pt, line))
-                //{
-                //    continue;
-                //}
-                if (isOnLine)
+                var isOnLine = line.PointOnLine(pt, false, Tolerance);//判断点是否在线上
+                if (isOnLine)//点在线上
                 {
-                    return line;
+                    if (!PointIsLineTerm(pt, line))//点不是点的端点
+                    {
+                        return line;//直接返回
+                    }
+                    else//是端点
+                    {
+                        termPointLine = line;//先保存
+                    }
                 }
             }
-            
-            return new Line();
+
+            return termPointLine;
         }
 
         public static bool PointIsLineTerm(Point3d pt1, Line line)

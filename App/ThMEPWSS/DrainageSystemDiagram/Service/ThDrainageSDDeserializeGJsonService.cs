@@ -24,7 +24,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 foreach (var f in features)
                 {
-                    if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == DrainageSDCommon.GJWaterSupplyPoint)
+                    if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == ThDrainageSDCommon.GJWaterSupplyPoint)
                     {
                         var coordinates = f.Geometry.Coordinates;
                         var dirArr = f.Attributes["Direction"] as List<object>;
@@ -63,7 +63,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 foreach (var f in features)
                 {
-                    if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == DrainageSDCommon.GJPipe)
+                    if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == ThDrainageSDCommon.GJPipe)
                     {
                         if (f.Geometry.GeometryType.Equals("LineString"))
                         {

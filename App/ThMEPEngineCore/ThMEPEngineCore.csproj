@@ -59,13 +59,14 @@
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
-    <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
+    <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
@@ -93,7 +94,6 @@
     <Compile Include="GeojsonExtractor\Service\ThExtractLineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractPolylineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractService.cs" />
-    <Compile Include="GeojsonExtractor\Service\ThRoomBuildAreaService.cs" />
     <Compile Include="GeojsonExtractor\ThAILayerManager.cs" />
     <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
@@ -102,11 +102,15 @@
     <Compile Include="GeojsonExtractor\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
+    <Compile Include="IO\ExcelService\ReadExcelService.cs" />
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
+    <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
+    <Compile Include="Service\ThDclPrintService.cs" />
+    <Compile Include="Service\ThDclResultParseService.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
@@ -512,6 +516,7 @@
     <Compile Include="Temp\ThWaterSupplyStartExtractor.cs" />
     <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
+    <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
@@ -569,7 +574,7 @@
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
         <Reference Include="ManagedLibrary.v16">
-          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
+          <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>
@@ -583,6 +588,9 @@
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
         </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
   </Choose>
@@ -590,6 +598,9 @@
     <PackageReference Include="NetTopologySuite" Version="2.3.0" />
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
+    <PackageReference Include="NPOI">
+      <Version>2.5.3</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

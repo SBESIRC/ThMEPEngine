@@ -47,7 +47,11 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
-            return curves.UnionGeometries().ToDbCollection();
+            if(curves.Count>0)
+            {
+                return curves.UnionGeometries().ToDbCollection();
+            }
+            return new DBObjectCollection();
         }
 
         public static DBObjectCollection BufferPolygons(this DBObjectCollection polygons, double distance)

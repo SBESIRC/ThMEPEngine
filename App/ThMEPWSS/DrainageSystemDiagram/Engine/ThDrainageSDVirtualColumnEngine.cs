@@ -38,19 +38,36 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else if (allToiInGroup.ContainsKey(group.Key))
                 {
                     //小空间
+                    var toilate = allToiInGroup[group.Key];
+                    foreach (var t in toilate)
+                    {
+                        var poly = getVitualColumnForToilates(t);
+                        if (poly != null && poly.NumberOfVertices > 0)
+                        {
+                            virtualColumn.Add(poly);
+                        }
+                    }
                 }
                 else
                 {
                     //普通组
                     //var poly = getVitualColumnForStrightGroup(group.Value);
                     //virtualColumn.Add(poly);
+
+                    if (group.Value.SelectMany(x => x.SupplyCoolOnWall).Count() == 1)
+                    {
+                        var poly = getVitualColumnForToilates(group.Value.First());
+                        if (poly != null && poly.NumberOfVertices > 0)
+                        {
+                            virtualColumn.Add(poly);
+                        }
+                    }
                 }
 
 
             }
             return virtualColumn;
         }
-
 
         private static List<Polyline> getVitualColumnForIsland(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, (string, string) island)
         {
@@ -74,7 +91,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var orderPts = ThDrainageSDCommonService.orderPtInStrightLine(pts);
             var dir = group.First().Dir;
 
-            double length = DrainageSDCommon.SublinkLength * 2;
+            double length = ThDrainageSDCommon.SublinkLength * 2;
 
             var pt1 = orderPts.First();
             var pt2 = orderPts.Last();
@@ -94,7 +111,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         }
 
         /// <summary>
-        /// 不可用
+        /// 
         /// </summary>
         /// <param name="toilate"></param>
         /// <returns></returns>
@@ -102,15 +119,27 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             Polyline column = new Polyline();
 
+            double verticalLength = ThDrainageSDCommon.SublinkLength-100 ;
+            double length = 100;
+
             Vector3d dir = toilate.Dir;
-            Vector3d dirVerti = toilate.Dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis).GetNormal();
+            Vector3d dirLeft = toilate.Dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
+            Vector3d dirRight = toilate.Dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis).GetNormal();
 
-            double vertiLength = toilate.Boundary.GetPoint3dAt(2).DistanceTo(toilate.Boundary.GetPoint3dAt(1));
-            double length = DrainageSDCommon.SublinkLength * 2;
+            var pt1 = toilate.SupplyCoolOnWall.First() + dirLeft * (length/2);
+            var pt2 = pt1 + dir * verticalLength;
+            var pt3 = pt2 + dirRight * length ;
+            var pt4 = pt3 - dir * verticalLength;
 
+            column.AddVertexAt(column.NumberOfVertices, pt1.ToPoint2d(), 0, 0, 0);
+            column.AddVertexAt(column.NumberOfVertices, pt2.ToPoint2d(), 0, 0, 0);
+            column.AddVertexAt(column.NumberOfVertices, pt3.ToPoint2d(), 0, 0, 0);
+            column.AddVertexAt(column.NumberOfVertices, pt4.ToPoint2d(), 0, 0, 0);
 
+            column.Closed = true;
 
             return column;
+
 
         }
     }

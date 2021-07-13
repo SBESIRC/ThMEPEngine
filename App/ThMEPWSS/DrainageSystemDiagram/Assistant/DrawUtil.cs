@@ -11,7 +11,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class DrawUtils
     {
-        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, short colorIndex, int lineWeightNum)
+        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, int colorIndex, int lineWeightNum)
         {
             var objectIds = new List<ObjectId>();
             if (curves == null || curves.Count == 0)
@@ -20,7 +20,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             using (var db = AcadDatabase.Active())
             {
 
-                Color color = Color.FromColorIndex(ColorMethod.ByColor, colorIndex);
+                Color color = Color.FromColorIndex(ColorMethod.ByColor, (short)colorIndex);
 
                 CreateLayer(LayerName, color);
 
@@ -94,7 +94,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return layerRecord.ObjectId;
         }
 
-        private static List<ObjectId> DrawProfileDebug(List<Entity> curves, string LayerName, short colorIndex, int lineWeightNum)
+        private static List<ObjectId> DrawProfileDebug(List<Entity> curves, string LayerName, int colorIndex, int lineWeightNum)
         {
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
@@ -104,7 +104,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return DrawProfile(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(Point3d pt, string LayerName, short colorIndex = 3, int lineWeightNum = 25, int r = 200, string symbol = "C")
+        public static void ShowGeometry(Point3d pt, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int r = 200, string symbol = "C")
         {
             Entity clone = null;
 
@@ -124,7 +124,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
             else if (symbol == "T")
             {
-            
+
             }
             else
             {
@@ -134,7 +134,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             DrawUtils.ShowGeometry(clone, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(Point3d pt, string s, string LayerName, short colorIndex = 3, int lineWeightNum = 25, double hight = 1000)
+        public static void ShowGeometry(Point3d pt, string s, string LayerName, int colorIndex = 3, int lineWeightNum = 25, double hight = 1000)
         {
 
             DBText text = new DBText();
@@ -147,31 +147,48 @@ namespace ThMEPWSS.DrainageSystemDiagram
             DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(Entity geom, string LayerName, short colorIndex = 3, int lineWeightNum = 25)
+        public static void ShowGeometry(Entity geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             var curves = new List<Entity>();
             curves.Add(geom);
             DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(List<Line> geom, string LayerName, short colorIndex = 3, int lineWeightNum = 25)
+        public static void ShowGeometry(List<Line> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             var curves = new List<Entity>();
             curves.AddRange(geom);
             DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(List<Polyline> geom, string LayerName, short colorIndex = 3, int lineWeightNum = 25)
+        public static void ShowGeometry(List<Polyline> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             var curves = new List<Entity>();
             curves.AddRange(geom);
             DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(List<Entity> geom, string LayerName, short colorIndex = 3, int lineWeightNum = 25)
+        public static void ShowGeometry(List<Entity> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             DrawUtils.DrawProfileDebug(geom, LayerName, colorIndex, lineWeightNum);
         }
 
+        public static void ShowGeometry(Point3d pt, Vector3d dir, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int l = 200)
+        {
+            dir = dir.GetNormal();
+            var ptE = pt + dir * l;
+
+            var line = new Line(pt, ptE);
+
+            var ptA1 = ptE + dir.RotateBy(150 * Math.PI / 180, -Vector3d.ZAxis) * l / 5;
+            var Arrow1 = new Line(ptE, ptA1 );
+
+            var ptA2 = ptE + dir.RotateBy(150 * Math.PI / 180, Vector3d.ZAxis) * l / 5;
+            var Arrow2 = new Line(ptE, ptA2);
+
+            DrawUtils.ShowGeometry(line, LayerName, colorIndex, lineWeightNum);
+            DrawUtils.ShowGeometry(Arrow1, LayerName, colorIndex, lineWeightNum);
+            DrawUtils.ShowGeometry(Arrow2, LayerName, colorIndex, lineWeightNum);
+        }
     }
 }

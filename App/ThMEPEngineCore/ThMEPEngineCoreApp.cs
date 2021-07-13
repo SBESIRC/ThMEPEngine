@@ -1,5 +1,6 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.IO;
@@ -8,24 +9,19 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using ThMEPEngineCore.IO.GeoJSON;
-using Autodesk.AutoCAD.EditorInput;
-using ThMEPEngineCore.BuildRoom.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.BuildRoom.Interface;
-using NFox.Cad;
 using ThMEPEngineCore.LaneLine;
-using GeometryExtensions;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.IO.GeoJSON;
 
 namespace ThMEPEngineCore
 {
@@ -645,53 +641,26 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THPICKROOM", CommandFlags.Modal)]
-        public void ThPickRoom()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
-            {
-                var result1 = Active.Editor.GetEntity("\n选择框线");
-                if (result1.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetPoint("\n选取房间内一点");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var data = new ThBuildRoomDataService();
-                var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
-                data.Build(acadDatabase.Database, nFrame.Vertices());
-                roomBuilder.Build(data);
-                roomBuilder.Outlines
-                    .Where(r => r.IsContains(result2.Value))
-                    .ForEach(r =>
-                    {
-                        acadDatabase.ModelSpace.Add(r);
-                        r.SetDatabaseDefaults();
-                        r.Layer = "AD-AREA-OUTL";
-                        r.ColorIndex = (int)ColorIndex.BYLAYER;
-                    });
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THExtractSlab", CommandFlags.Modal)]
         public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThDB3SlabRecognitionEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                ThDB3SlabRecognitionEngine floorEngine = new ThDB3SlabRecognitionEngine();
                 floorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 floorEngine.Elements.ForEach(o =>
                 {
@@ -701,6 +670,7 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
 
         [CommandMethod("TIANHUACAD", "THExtractRailing", CommandFlags.Modal)]
         public void THExtractRailing()
@@ -749,6 +719,8 @@ namespace ThMEPEngineCore
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
+
+
 
                 ThDB3CorniceRecognitionEngine corniceRecognitionEngine = new ThDB3CorniceRecognitionEngine();
                 corniceRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
@@ -921,6 +893,134 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();
                 });
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractContourLine", CommandFlags.Modal)]
+        public void THExtractContourLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var options = new PromptKeywordOptions("\n选择处理模式");
+                options.Keywords.Add("建筑模式", "A", "建筑模式(A)");
+                options.Keywords.Add("结构模式", "S", "结构模式(S)");
+                options.Keywords.Default = "结构模式";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                if (result2.StringResult == "建筑模式")
+                {
+                    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+                else
+                {
+                    var data = new Model2Data(acadDatabase.Database, frame.Vertices());
+                    var builder = new ThArchitectureOutlineBuilder(data.MergeData());
+                    builder.Build();
+                    builder.Results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDB3ExtractRoom", CommandFlags.Modal)]
+        public void THDB3ExtractRoom()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+
+                //var selectRes = Active.Editor.GetSelection();
+                //var testDatas = new DBObjectCollection();
+                //if (selectRes.Status == PromptStatus.OK)
+                //{
+                //    var Datas = selectRes.Value.GetObjectIds()
+                //        .Select(o => acadDatabase.Element<Curve>(o).Clone() as Curve)
+                //        .ToCollection();
+                //    Datas.Polygonize().ForEach(o =>
+                //    {
+                //        foreach(DBObject obj in o.ToDbCollection())
+                //        {
+                //            testDatas.Add(obj);
+                //        }
+                //    });
+                //    Datas = Datas.FilterSmallArea(10.0);
+                //    testDatas = testDatas.FilterSmallArea(10.0);
+                //}
+                //else
+                //{
+                //    var data = new Roomdata(acadDatabase.Database, frame.Vertices());
+                //    data.Deburring();
+                //    testDatas = data.MergeData();
+                //}
+                Roomdata data = new Roomdata(acadDatabase.Database, frame.Vertices());
+                data.Deburring();
+                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
+                if (builder.Count == 0)
+                    return;
+                //从CAD中获取点
+
+                var ptList = new List<Point3d>();
+                while(true)
+                {
+                    var ptRes = Active.Editor.GetPoint("\n选择房间内的一点");
+                    if(ptRes.Status==PromptStatus.OK)
+                    {
+                        ptList.Add(ptRes.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if(ptList.Count>0)
+                {
+                    builder.Build(ptList).Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
             }
         }
     }

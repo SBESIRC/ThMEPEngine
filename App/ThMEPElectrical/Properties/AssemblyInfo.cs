@@ -32,13 +32,12 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.2.1")]
-[assembly: AssemblyFileVersion("1.4.2.1")]
+[assembly: AssemblyVersion("1.4.3")]
+[assembly: AssemblyFileVersion("1.4.3")]
 
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.ThBlockConvertCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThMEPElectricalApp))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAutoFireAlarmSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]

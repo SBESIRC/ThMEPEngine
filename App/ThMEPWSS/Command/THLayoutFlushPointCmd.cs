@@ -6,7 +6,7 @@ using ThMEPWSS.ViewModel;
 using ThMEPWSS.FlushPoint.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 
-#if ACAD2016
+#if (ACAD2016 || ACAD2018)
 using CLI;
 using Linq2Acad;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace ThMEPWSS.Command
         {
         }
 
-#if ACAD2016
+#if (ACAD2016 || ACAD2018)
         public void Execute()
         {
             using (var lockDoc = Active.Document.LockDocument())
@@ -109,8 +109,6 @@ namespace ThMEPWSS.Command
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
                     Rooms = roomExtractor.Rooms.Select(o => o.Boundary).ToList(),
-                    WashPointBlkName = "给水角阀平面",
-                    WashPointLayerName = "W-WSUP-EQPM",
                     WashPoints = layOutPts,
                     Db = acadDb.Database,
                     PtRange = 10.0,

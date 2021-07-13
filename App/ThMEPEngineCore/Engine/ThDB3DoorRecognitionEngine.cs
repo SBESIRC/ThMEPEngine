@@ -6,6 +6,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -90,15 +91,18 @@ namespace ThMEPEngineCore.Engine
         {
             if (polygon.Count > 0)
             {
-                var dbObjs = new DBObjectCollection();
-                datas.ForEach(o => dbObjs.Add(o.Geometry));
+                var dbObjs = datas.Select(o => o.Geometry).ToCollection();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 var filterObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                return datas.Where(o => filterObjs.Contains(o.Geometry)).ToList();
+                filterObjs = filterObjs.UnionPolygons();
+                //过滤面积很小的Polygon                
+                return filterObjs.Cast<Polyline>().Where(o=>o.Area>=1.0).Select(o => new ThRawIfcBuildingElementData { Geometry = o.OBB() }).ToList();                
             }
             else
             {
-                return datas;
+                var dbObjs = datas.Select(o=>o.Geometry).ToCollection();
+                dbObjs = dbObjs.UnionPolygons();
+                return dbObjs.Cast<Polyline>().Where(o => o.Area >= 1.0).Select(o => new ThRawIfcBuildingElementData { Geometry = o.OBB() }).ToList();
             }
         }
         private List<ThRawIfcBuildingElementData> GetDoorMarks(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)

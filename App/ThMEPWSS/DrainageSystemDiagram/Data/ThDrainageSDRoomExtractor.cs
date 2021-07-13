@@ -57,7 +57,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     o.Tags.Add(o.Name);
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, string.Join(";", o.Tags.ToArray()));
-                geometry.Properties.Add(DrainageSDCommon.ProAreaId, AreaId);
+                geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, AreaId);
 
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);

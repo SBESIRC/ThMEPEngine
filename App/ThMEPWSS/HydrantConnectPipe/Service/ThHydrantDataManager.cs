@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -16,33 +17,27 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         public static List<ThHydrant> GetFireHydrants(Point3dCollection selectArea)
         {
             ThHydrantService fireHydrantService = new ThHydrantService();
-            List<ThHydrant> fireHydrants = fireHydrantService.GetFireHydrant(selectArea);
-            return fireHydrants;
+            return fireHydrantService.GetFireHydrant(selectArea);
         }
         public static List<ThHydrantPipe> GetFireHydrantPipes(Point3dCollection selectArea)
         {
             var pipeService = new ThHydrantPipeService();
             return pipeService.GetFireHydrantPipe(selectArea);
         }
-        public static List<ThHydrantMainLine> GetHydrantMainLines(Point3dCollection selectArea)
+        public static void GetHydrantLoopAndBranchLines(ref List<Line> loopLines, ref List<Line> branchLines, Point3dCollection selectArea)
         {
-            List<ThHydrantMainLine> mainLines = new List<ThHydrantMainLine>();
-            return mainLines;
-        }
-        public static List<ThHydrantBranchLine> GetHydrantBranchLines(Point3dCollection selectArea)
-        {
-            List<ThHydrantBranchLine> branchLines = new List<ThHydrantBranchLine>();
-            return branchLines;
+            var hydrantMainLineService = new ThHydrantPipeLineService();
+            hydrantMainLineService.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, selectArea);
         }
         public static List<ThCivilAirWall> GetCivilAirWalls(Point3dCollection selectArea)
         {
-            var airWalls = new List<ThCivilAirWall>();
-            return airWalls;
+            var civilAirWallService = new ThCivilAirWallService();
+            return civilAirWallService.GetCivilAirWall(selectArea);
         }
         public static List<ThElectricWell> GetElectricWells(Point3dCollection selectArea)
         {
-            var eleWalls = new List<ThElectricWell>();
-            return eleWalls;
+            var electricWellService = new ThElectricWellService();
+            return electricWellService.GetElectricWell(selectArea);
         }
         public static List<ThFireShutter> GetFireShutters(Point3dCollection selectArea)
         {
@@ -51,28 +46,28 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         }
         public static List<ThShearWall> GetShearWalls(Point3dCollection selectArea)
         {
-            var shaerWalls = new List<ThShearWall>();
-            return shaerWalls;
+            ThShearWallService shearWallService = new ThShearWallService();
+            return shearWallService.GetWallEdges(selectArea);
         }
         public static List<ThStairsRoom> GetStairsRooms(Point3dCollection selectArea)
         {
-            var stairsRooms = new List<ThStairsRoom>();
-            return stairsRooms;
+            var stairsRoomService = new ThStairsRoomService();
+            return stairsRoomService.GetStairsRoom(selectArea);
         }
         public static List<ThStructureCol> GetStructuralCols(Point3dCollection selectArea)
         {
-            var structuralCols = new List<ThStructureCol>();
-            return structuralCols;
+            var structureColService = new ThStructureColService();
+            return structureColService.GetStructureCols(selectArea);
         }
         public static List<ThStructureWall> GetStructureWalls(Point3dCollection selectArea)
         {
-            var structureWalls = new List<ThStructureWall>();
-            return structureWalls;
+            var structureWallService = new ThStructureWallService();
+            return structureWallService.GetStructureWalls(selectArea);
         }
         public static List<ThWindWell> GetWindWells(Point3dCollection selectArea)
         {
-            var windWells = new List<ThWindWell>();
-            return windWells;
+            var windWellService = new ThWindWellService();
+            return windWellService.GetWindWell(selectArea);
         }
     }
 }

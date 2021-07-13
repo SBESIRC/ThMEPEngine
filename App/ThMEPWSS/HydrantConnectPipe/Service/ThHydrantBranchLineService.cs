@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
-    class ThHydrantBranchLineService
+    public class ThHydrantBranchLineService
     {
     }
 }

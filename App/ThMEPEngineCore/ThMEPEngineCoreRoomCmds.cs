@@ -7,13 +7,20 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.BuildRoom.Interface;
+using ThMEPEngineCore.BuildRoom.Service;
 
 namespace ThMEPEngineCore
 {
     public class ThMEPEngineCoreRoomCmds
     {
+        /// <summary>
+        /// 提取空间
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THKJTQ", CommandFlags.Modal)]
         public void THKJTQ()
         {
@@ -40,5 +47,43 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
+        /// <summary>
+        /// 空间拾取
+        /// </summary>
+        //[CommandMethod("TIANHUACAD", "THKJSQ", CommandFlags.Modal)]
+        //public void THKJSQ()
+        //{
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
+        //    {
+        //        var result1 = Active.Editor.GetEntity("\n选择框线");
+        //        if (result1.Status != PromptStatus.OK)
+        //        {
+        //            return;
+        //        }
+
+        //        var result2 = Active.Editor.GetPoint("\n选取房间内一点");
+        //        if (result2.Status != PromptStatus.OK)
+        //        {
+        //            return;
+        //        }
+
+        //        var data = new ThBuildRoomDataService();
+        //        var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
+        //        var nFrame = ThMEPFrameService.Normalize(frame);
+        //        data.Build(acadDatabase.Database, nFrame.Vertices());
+        //        roomBuilder.Build(data);
+        //        roomBuilder.Outlines
+        //            .Where(r => r.IsContains(result2.Value))
+        //            .ForEach(r =>
+        //            {
+        //                acadDatabase.ModelSpace.Add(r);
+        //                r.SetDatabaseDefaults();
+        //                r.Layer = "AD-AREA-OUTL";
+        //                r.ColorIndex = (int)ColorIndex.BYLAYER;
+        //            });
+        //    }
+        //}
     }
 }

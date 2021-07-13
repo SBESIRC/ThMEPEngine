@@ -89,7 +89,6 @@
     <Compile Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml.cs">
       <DependentUpon>SecurityPlaneSystemUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Service\ExcelSrevice.cs" />
     <Compile Include="SystemDiagram\ElectricalUISystemDiagram.cs" />
     <Compile Include="SystemDiagram\UI\DrainageLayerViewModel.cs" />
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
@@ -145,6 +144,10 @@
     <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
       <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
       <Name>ThMEPElectrical</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
       <Project>{6eb17675-61ba-4669-a2ed-da7a8a4af715}</Project>
@@ -233,9 +236,6 @@
     <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="NPOI">
-      <Version>2.5.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />

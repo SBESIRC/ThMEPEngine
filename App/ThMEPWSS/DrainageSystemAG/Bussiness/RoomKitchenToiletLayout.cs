@@ -22,7 +22,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private List<RoomModel> _kitchenRooms = new List<RoomModel>();
         private List<TubeWellsRoomModel> _tubeWellsRooms = new List<TubeWellsRoomModel>();
         private List<RoomPipeRoomRelation> _roomPipeRoomRelations = new List<RoomPipeRoomRelation>();
-        private AcadDatabase _acdb;
         private string _floorUid;
         /// <summary>
         /// 卫生间、厨房业务逻辑构造方法
@@ -30,10 +29,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         /// <param name="toiletRooms">卫生间房间</param>
         /// <param name="kitchenRooms">厨房房间</param>
         /// <param name="tubeWellsRooms">管道井房间信息</param>
-        public RoomKitchenToiletLayout(string floorId,AcadDatabase database,List<RoomModel> toiletRooms,List<RoomModel> kitchenRooms, List<TubeWellsRoomModel> tubeWellsRooms) 
+        public RoomKitchenToiletLayout(string floorId,List<RoomModel> toiletRooms,List<RoomModel> kitchenRooms, List<TubeWellsRoomModel> tubeWellsRooms) 
         {
             _floorUid = floorId;
-            _acdb = database;
             if (null != toiletRooms && toiletRooms.Count>0)
                 foreach (var item in toiletRooms) 
                 {
@@ -169,7 +167,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     if (relation == null || relation.roomModel == null || relation.canLayoutRoomSpace.Count < 1 || relation.roomModel.thIFCRoom.Uuid.Equals(room.thIFCRoom.Uuid))
                         continue;
-                    var isShare= relation.layoutRoomSpaceId == pipeRoomSpace.pipeRoomModel.thIFCRoom.Uuid;
+                    string relationLayerRoomId = relation.layoutRoomSpaceId;
+                    if (string.IsNullOrEmpty(relationLayerRoomId) && relation.canLayoutRoomSpace.Count == 1)
+                        relationLayerRoomId = relation.canLayoutRoomSpace.FirstOrDefault().pipeRoomModel.thIFCRoom.Uuid;
+                    else
+                        continue;
+                    var isShare= relationLayerRoomId.Equals(pipeRoomSpace.pipeRoomModel.thIFCRoom.Uuid);
                     if (isShare) 
                     {
                         type = 2;

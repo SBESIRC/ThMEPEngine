@@ -4,7 +4,10 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Model;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
+using ThMEPElectrical.Service;
+using ThMEPEngineCore.Config;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem
 {
@@ -51,8 +54,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem
 
             foreach (DataRow row in table.Rows)
             {
-                var roomANames = CommonRoomHandleService.HandleRoom(row[roomA].ToString());
-                var roomBNames = CommonRoomHandleService.HandleRoom(row[roomB].ToString());
+                var roomANames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomA].ToString());
+                var roomBNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomB].ToString());
                 RoomInfoModel roomInfo = new RoomInfoModel();
                 roomInfo.roomA = roomANames;
                 roomInfo.roomB = roomBNames;

@@ -1,0 +1,76 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.DrainageSystemParamsUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    WindowStartupLocation="CenterOwner"
+                    Title="参数设置"
+                    SizeToContent="Height"
+                    Width="215"
+             mc:Ignorable="d" >
+    <cus:ThCustomWindow.Resources>
+        <x:Array x:Key="DNLists" Type ="sys:String">
+            <sys:String>DN25</sys:String>
+            <sys:String>DN50</sys:String>
+            <sys:String>DN75</sys:String>
+            <sys:String>DN100</sys:String>
+        </x:Array>
+    </cus:ThCustomWindow.Resources>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="楼层线间距"></Label>
+            <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+            <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
+            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+            <Grid Margin="0,5,0,5">
+                <Label Content="尺寸规格："></Label>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"/>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label Content="洗衣地漏："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="其他地漏："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding OtherFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="水井废水："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding DirtyWaterWellDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="2" >
+
+            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" Margin="-5,0,-5,0"  SnapsToDevicePixels="True"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>
+                <CheckBox Grid.Row="1" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
+            </Grid>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="确认" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="取消" Width="50" Height="24" Margin="30,0,0,0" Name="Cancle" Click="Cancle_Click" ></cus:ImageButton>
+        </StackPanel>
+    
+    </Grid>
+</cus:ThCustomWindow>

@@ -112,7 +112,7 @@ namespace ThMEPWSS.Model
         /// 设备平台
         /// </summary>
         [Description("设备平台")]
-        equipmentPlatform = 10,
+        EquipmentPlatform = 10,
         /// <summary>
         /// 其它
         /// </summary>

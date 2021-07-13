@@ -51,15 +51,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                 return false;
             if (entity is BlockReference)
                 return false;
-            var name = entity.Layer;
-            name = ThMEPXRefService.OriginalFromXref(entity.Layer);
-            if (entity.ToString().ToUpper().Contains("DBTEXT")) 
-            {
-                var str = ((DBText)entity).TextString;
-                if (str.Contains("卫生")) 
-                {
-                }
-            }
+            var name = ThMEPXRefService.OriginalFromXref(entity.Layer);
             if (string.IsNullOrEmpty(name))
                 return false;
             bool isAdd = false;
@@ -146,10 +138,6 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         }
         Point3d? GetEntityPoint(Entity entity) 
         {
-            if (entity != null) 
-            {
-            
-            }
             if (entity is DBText dbText)
             {
                 return dbText.Position;

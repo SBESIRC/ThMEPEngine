@@ -65,7 +65,7 @@ namespace ThMEPWSS.ViewModel
             };
             var balcRaise = CommonUtil.EnumDescriptionToList(typeof(EnumPipeDiameter), balcValues);
             balcRaise.ForEach(c => BPipeDiameterListItems.Add(c));
-            BPipeDiameterSelectItem = BPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN200).FirstOrDefault();
+            BPipeDiameterSelectItem = BPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
 
 
             //冷凝立管 可选项为DN50、DN75和DN100，初始选项为DN50。

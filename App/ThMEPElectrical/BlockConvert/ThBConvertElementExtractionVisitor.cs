@@ -49,7 +49,7 @@ namespace ThMEPElectrical.BlockConvert
                 results.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = new ThBlockReferenceData(br.ObjectId, matrix),
-                    Geometry = br.ObjectId.GetBlockGeometryExtents(matrix).ToRectangle(),
+                    Geometry = br.GetTransformedCopy(matrix).GeometricExtents.ToRectangle(),
                 });
             }
             return results;

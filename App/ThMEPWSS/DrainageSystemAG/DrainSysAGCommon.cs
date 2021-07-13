@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPWSS.DrainageSystemAG.DataEngine;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
 
@@ -150,7 +151,12 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             else if (cElem.baseCurce is Circle)
             {
-
+                var circle = (Circle)cElem.baseCurce;
+                var center = circle.Center;
+                var moveVecotor = center - oldBasePoint;
+                var newCenter = newBasePoint + moveVecotor;
+                var newCircle = new Circle(newCenter, circle.Normal, circle.Radius);
+                basicElement = new CreateBasicElement(floorId, newCircle, cElem.layerName, cElem.belongBlockId, cElem.curveTag, cElem.lineColor);
             }
             return basicElement;
         }
@@ -174,6 +180,113 @@ namespace ThMEPWSS.DrainageSystemAG
                 text.Layer = cText.layerName;
             var copyText = new CreateDBTextElement(floorId, newPoint, text, cText.belongBlockId, cText.layerName,cText.textStyle, cText.uid);
             return copyText;
+        }
+
+
+        public static List<EquipmentBlcokModel> GetFloorBlocks(FloorFramed floor, BlockReferenceDataEngine equipmentData, BasicElementEngine basicElementEngine)
+        {
+            var resList = new List<EquipmentBlcokModel>();
+            if (null == equipmentData)
+                return resList;
+            //根据轴网过滤元素
+            var tempBlocks = equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
+            if (null == tempBlocks || tempBlocks.Count < 1 || basicElementEngine == null)
+                return tempBlocks;
+            var axisEntitys = basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });
+            if (null == axisEntitys || axisEntitys.Count < 2)
+                return tempBlocks;
+            var xAxisPoints = new List<Point3d>();
+            var yAxisPoints = new List<Point3d>();
+            foreach (var axis in axisEntitys)
+            {
+                if (axis is Line line)
+                {
+                    if (line.Length < 5000)
+                        continue;
+                    var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
+                    var angle = lineDir.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
+                    var angle0 = angle % Math.PI;
+                    var angle90 = angle % (Math.PI / 2);
+                    var minAngle = Math.PI * 5 / 180;
+                    var maxAngle = Math.PI - minAngle;
+                    if (Math.Abs(angle) > minAngle && Math.Abs(angle) < maxAngle)
+                        continue;
+                    if (Math.Abs(angle0) < minAngle || Math.Abs(angle0) > maxAngle)
+                    {
+                        xAxisPoints.Add(line.StartPoint);
+                        xAxisPoints.Add(line.EndPoint);
+                    }
+                    else if (Math.Abs(angle90) < minAngle)
+                    {
+                        yAxisPoints.Add(line.StartPoint);
+                        yAxisPoints.Add(line.EndPoint);
+                    }
+                }
+            }
+            if (xAxisPoints.Count >3)
+            {
+                double minY = xAxisPoints.Min(c => c.Y);
+                double maxY = xAxisPoints.Max(c => c.Y);
+                if (Math.Abs(minY - maxY) > 1000)
+                {
+                    minY -= 2000;
+                    maxY += 2000;
+                    foreach (var item in tempBlocks)
+                    {
+                        if (item.blockReferences == null || item.blockReferences.Count < 1)
+                            continue;
+                        var thisTypeBlocks = new List<BlockReference>();
+                        foreach (var block in item.blockReferences)
+                        {
+                            if (block.Position.Y < minY || block.Position.Y > maxY)
+                                continue;
+                            thisTypeBlocks.Add(block);
+                        }
+                        if (thisTypeBlocks.Count < 1)
+                            continue;
+                        resList.Add(new EquipmentBlcokModel(item.enumEquipmentType, thisTypeBlocks));
+                    }
+                }
+                else 
+                {
+                    resList.AddRange(tempBlocks);
+                }
+            }
+            else
+            {
+                resList.AddRange(tempBlocks);
+            }
+            if (resList.Count < 1)
+                return resList;
+            if (yAxisPoints.Count > 3) 
+            {
+                double minX = yAxisPoints.Min(c => c.X);
+                double maxX = yAxisPoints.Max(c => c.X);
+                if (Math.Abs(minX - maxX) > 1000)
+                {
+                    tempBlocks.Clear();
+                    tempBlocks.AddRange(resList);
+                    resList.Clear();
+                    minX -= 2000;
+                    maxX += 2000;
+                    foreach (var item in tempBlocks)
+                    {
+                        if (item.blockReferences == null || item.blockReferences.Count < 1)
+                            continue;
+                        var thisTypeBlocks = new List<BlockReference>();
+                        foreach (var block in item.blockReferences)
+                        {
+                            if (block.Position.X < minX || block.Position.X > maxX)
+                                continue;
+                            thisTypeBlocks.Add(block);
+                        }
+                        if (thisTypeBlocks.Count < 1)
+                            continue;
+                        resList.Add(new EquipmentBlcokModel(item.enumEquipmentType, thisTypeBlocks));
+                    }
+                }
+            }
+            return resList;
         }
     }
 }

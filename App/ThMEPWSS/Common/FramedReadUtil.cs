@@ -24,7 +24,7 @@ namespace ThMEPWSS.Common
         static readonly string floorBlockName = "楼层框定";
         public static List<FloorFramed> ReadAllFloorFramed()
         {
-            //楼层框定是动态块，目前的提取引擎不支持动态块的提前
+            //楼层框定是动态块，目前的提取引擎不支持动态块的提取
             //这里楼层框定一般不在其它块中，这里就不继续遍历块去找
             List<FloorFramed> resFloors = new List<FloorFramed>();
             Active.Document.LockDocument();
@@ -57,7 +57,7 @@ namespace ThMEPWSS.Common
                     {
                         AllowDuplicates = false,
                         MessageForAdding = "请选择楼层框线",
-                        RejectObjectsOnLockedLayers = true,
+                        //RejectObjectsOnLockedLayers = true,
                     };
                     var dxfNames = new string[]
                     {
@@ -86,25 +86,34 @@ namespace ThMEPWSS.Common
         public static List<FloorFramed> FloorFramedOrder(List<FloorFramed> orderFloors,bool isDes)
         {
             var resFloors = new List<FloorFramed>();
-            var tempFramed = orderFloors.OrderBy(c => c.startFloorOrder).ToList();
+            var tempFramed = orderFloors.OrderBy(c => c.endFloorOrder).ToList();
             if(isDes)
-                tempFramed = orderFloors.OrderByDescending(c => c.startFloorOrder).ToList();
+                tempFramed = orderFloors.OrderByDescending(c => c.endFloorOrder).ToList();
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("小屋面")).ToList());
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("大屋面")).ToList());
-            foreach (var item in tempFramed)
+            //foreach (var item in tempFramed)
+            //{
+            //    if (item.floorType.Contains("屋面"))
+            //        continue;
+            //    if (item.floorType.Contains("非标"))
+            //        continue;
+            //    resFloors.Add(item);
+            //}
+            //foreach (var item in tempFramed)
+            //{
+            //    if (item.floorType.Contains("屋面"))
+            //        continue;
+            //    if (!item.floorType.Contains("非标"))
+            //        continue;
+            //    resFloors.Add(item);
+            //}
+            foreach (var item in tempFramed) 
             {
                 if (item.floorType.Contains("屋面"))
                     continue;
-                if (item.floorType.Contains("非标"))
-                    continue;
                 resFloors.Add(item);
             }
-            foreach (var item in tempFramed)
-            {
-                if (!item.floorType.Contains("非标"))
-                    continue;
-                resFloors.Add(item);
-            }
+                
             return resFloors;
         }
         public static List<Line> FloorFrameSpliteLines(FloorFramed floorFramed) 

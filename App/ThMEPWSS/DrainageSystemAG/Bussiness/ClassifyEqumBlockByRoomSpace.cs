@@ -8,9 +8,13 @@ using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
+    /// <summary>
+    /// 获取到的块根据房间信息进行分类
+    /// </summary>
     class ClassifyEqumBlockByRoomSpace
     {
-        private double outBalconyDistanceEqumPipe = 2500;
+        private double outBalconyDistanceEqumPipe = 2500;//阳台地漏找设备平台立管距离
+        private double minArea = 100;
         private List<RoomModel> _roomModels = new List<RoomModel>();
         private List<EquipmentBlcokModel> _targetEquipmentBlock = new List<EquipmentBlcokModel>();
         public ClassifyEqumBlockByRoomSpace(List<RoomModel> roomModels, List<EquipmentBlcokModel> targetEquipmentBlock) 
@@ -40,12 +44,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //地漏进行分类
                         classify = GetFloorDrainClassifies(item.blockReferences, item.enumEquipmentType);
                         break;
-                    case EnumEquipmentType.kitchenBasin://厨房台盆
-                    case EnumEquipmentType.washingMachine://洗衣机进行分类
-                        //这里只是区分所属房间，就通用的获取归属房间信息
-                        classify = GetBlockRoomClassifies(item.blockReferences, item.enumEquipmentType);
-                        break;
                     default:
+                        //这里只是区分所属房间，通用的获取归属房间信息
                         classify = GetBlockRoomClassifies(item.blockReferences, item.enumEquipmentType);
                         break;
                 }
@@ -93,7 +93,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         continue;
                     if (roomOutPLine.Contains(riserBlock.blockPosition))
                     {
-                        riserBlock.enumRoomType = EnumRoomType.equipmentPlatform;
+                        riserBlock.enumRoomType = EnumRoomType.EquipmentPlatform;
                     }
                 }
             }
@@ -115,9 +115,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     continue;
                 foreach (var room in _roomModels)
                 {
-                    if (null == room || (room.roomTypeName != EnumRoomType.Toilet && room.roomTypeName != EnumRoomType.Corridor && room.roomTypeName != EnumRoomType.Balcony))
+                    if (null == room || (room.roomTypeName != EnumRoomType.Toilet && room.roomTypeName != EnumRoomType.Corridor && room.roomTypeName != EnumRoomType.Balcony && room.roomTypeName != EnumRoomType.Kitchen))
                         continue;
-                    if (room.outLine.Contains(item.blockPosition))
+                    if (room.outLine.Contains(item.blockPosition) || room.outLine.Contains(item.blockCenterPoint))
                     {
                         item.enumRoomType = room.roomTypeName;
                         item.roomSpaceId = room.thIFCRoom.Uuid;
@@ -127,7 +127,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (item.enumRoomType != EnumRoomType.Other)
                     continue;
                 //没有归属空间，认为是设备平台的地漏
-                item.enumRoomType = EnumRoomType.equipmentPlatform;
+                item.enumRoomType = EnumRoomType.EquipmentPlatform;
                 item.roomSpaceId = "";
             }
             return drainsClassify;
@@ -141,26 +141,18 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             washMachines.ForEach(c => { if (c != null) { retModels.Add(new EquipmentBlockSpace(c, enumEquipment)); } });
             foreach (var room in _roomModels)
             {
-                try 
+                if (room.outLine ==null || room.outLine.Area < minArea)
+                    continue;
+                foreach (var item in retModels)
                 {
-                    if (room.outLine.Area < 100)
+                    if (item.enumRoomType != EnumRoomType.Other)
                         continue;
-                    foreach (var item in retModels)
+                    if (room.outLine.Contains(item.blockCenterPoint) || room.outLine.Contains(item.blockPosition))
                     {
-                        if (item.enumRoomType != EnumRoomType.Other)
-                            continue;
-                        if (room.outLine.Contains(item.blockCenterPoint) || room.outLine.Contains(item.blockPosition))
-                        {
-                            item.enumRoomType = room.roomTypeName;
-                            item.roomSpaceId = room.thIFCRoom.Uuid;
-                        }
+                        item.enumRoomType = room.roomTypeName;
+                        item.roomSpaceId = room.thIFCRoom.Uuid;
                     }
                 }
-                catch (Exception ex) 
-                {
-                
-                }
-                
             }
             return retModels;
         }

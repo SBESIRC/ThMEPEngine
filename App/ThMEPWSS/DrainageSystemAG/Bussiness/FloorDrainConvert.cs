@@ -12,6 +12,9 @@ using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
+    /// <summary>
+    /// 地漏转换
+    /// </summary>
     class FloorDrainConvert
     {
         static double _balconyWMachineFloorDrainDistance = 1000;//阳台洗衣机找地漏范围
@@ -27,8 +30,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     continue;
                 switch (item.enumRoomType) 
                 {
+                    case EnumRoomType.Kitchen:
                     case EnumRoomType.Toilet:
-                        //卫生间地漏 图层：W - DRAI - FLDR，图块：地漏平面，可见性：普通地漏
+                        //厨房,卫生间地漏 图层：W - DRAI - FLDR，图块：地漏平面，可见性：普通地漏
                         var tDrain = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockWastLayerName, item.blockPosition,item.enumEquipmentType,item.uid);
                         tDrain.dymBlockAttr.Add("可见性", "普通地漏");
                         tDrain.spaceId = item.roomSpaceId;
@@ -46,7 +50,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //阳台地漏要考虑是否是洗衣机地漏
                         balconyDrain.Add(item);
                         break;
-                    case EnumRoomType.equipmentPlatform:
+                    case EnumRoomType.EquipmentPlatform:
                         //设备平台上的地漏是雨水/冷凝水地漏
                         //设备平台上的地漏有可能不生成，要进一步根据是否可以找到立管
                         var eqDrain = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, item.blockPosition, item.enumEquipmentType, item.uid);

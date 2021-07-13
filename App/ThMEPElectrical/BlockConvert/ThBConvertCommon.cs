@@ -19,10 +19,14 @@
         public static readonly string PROPERTY_EQUIPMENT_SYMBOL = "设备符号";
         public static readonly string PROPERTY_STOREY_AND_NUMBER = "楼层-编号";
         public static readonly string PROPERTY_FIRE_POWER_SUPPLY = "消防电源";
-        public static readonly string PROPERTY_NON_FIRE_POWER_SUPPLY = "非消防电源";
+        public static readonly string PROPERTY_FIRE_POWER_SUPPLY2 = "消防电源或非消防电源";
         public static readonly string PROPERTY_FIXED_FREQUENCY = "定频";
         public static readonly string PROPERTY_VARIABLE_FREQUENCY = "变频";
         public static readonly string PROPERTY_DUAL_FREQUENCY = "双频";
+        public static readonly string PROPERTY_ALL_FREQUENCY = "变频、双速或定频";
+
+        public static readonly string PROPERTY_VALUE_FIRE_POWER = "消防电源";
+        public static readonly string PROPERTY_VALUE_NON_FIRE_POWER = "非消防电源";
 
         public static readonly string PROPERTY_FAN_TYPE = "风机类型";
         public static readonly string PROPERTY_FAN_USAGE = "风机功能";

@@ -1,11 +1,14 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
 using ThMEPWSS.Pipe;
@@ -17,7 +20,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public void Dispose()
         {
         }
-
         public void Execute()
         {
             try
@@ -34,11 +36,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var structureCols = ThHydrantDataManager.GetStructuralCols(range);//获取结构柱
                     var structureWalls = ThHydrantDataManager.GetStructureWalls(range);//获取结构墙
                     var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
-                    var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓
+                    var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓 
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
-                    var hydrantMainLines = ThHydrantDataManager.GetHydrantMainLines(range);//获取环管
-                    var hydrantBranchLines = ThHydrantDataManager.GetHydrantBranchLines(range);//获取支管
 
+                    List<Line> loopLines = new List<Line>();
+                    List<Line> branchLines = new List<Line>();
+                    ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines,ref branchLines, range);//获取环管和支路
+                    
                     var pathService = new ThCreateHydrantPathService();
                     //添加障碍
                     foreach (var civilAirWall in civilAirWalls)
@@ -73,15 +77,15 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     {
                         pathService.SetObstacle(windWell.ElementObb);
                     }
-                    foreach (var line in hydrantBranchLines)
-                    {
-                        pathService.SetObstacle(line.BranchPolyline);
-                    }
+                    //foreach (var line in branchLines)
+                    //{
+                    //    var objcets = line.Buffer(50);
+                    //    var obb = objcets as Polyline;
+                    //    pathService.SetObstacle(obb);
+                    //}
+
                     //添加约束终止线
-                    foreach (var line in hydrantMainLines)
-                    {
-                        pathService.SetTermination(line.MainLines);
-                    }
+                    pathService.SetTermination(loopLines);
 
                     foreach (var hydrant in hydrants)
                     {
@@ -89,23 +93,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         {
                             //创建路径
                             pathService.SetStartPoint(hydrant.FireHydrantPipe.PipePosition);//设置立管点为起始点
-                            var path = pathService.CreateHydrantPath(true);
-                            ThHydrantBranchLine branchLine = new ThHydrantBranchLine();
-                            branchLine.BranchPolyline = path;
-                            hydrantBranchLines.Add(branchLine);
-                            pathService.SetObstacle(path);
+                            pathService.SetHydrantAngle(hydrant.GetRotationAngle());
+                            var path = pathService.CreateHydrantPath(false);
                         }
                     }
-
+                    
                     foreach (var hydrantPipe in hydrantPipes)
                     {
                         //创建路径
                         pathService.SetStartPoint(hydrantPipe.PipePosition);//设置立管点为起始点
                         var path = pathService.CreateHydrantPath(false);
-                        ThHydrantBranchLine branchLine = new ThHydrantBranchLine();     
-                        branchLine.BranchPolyline = path;
-                        hydrantBranchLines.Add(branchLine);
-                        pathService.SetObstacle(path);
                     }
                 }
             }

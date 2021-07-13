@@ -10,7 +10,7 @@ namespace ThMEPElectrical
 {
     public class ThSecurityPlaneCmds
     {
-        [CommandMethod("TIANHUACAD", "ThVMSystem", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THVMSYSTEM", CommandFlags.Modal)]
         public void ThVideoMSystem()
         {
             using (var cmd = new ThVideoMonitoringSystemCommand())
@@ -19,16 +19,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThVMLSystem", CommandFlags.Modal)]
-        public void ThVideoMLSystem()
-        {
-            using (var cmd = new ThVideoMonitoringSystemWithLaneCommand())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThIASystem", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THIASYSTEM", CommandFlags.Modal)]
         public void ThIntrusionAlarmSystem()
         {
             using (var cmd = new ThIntrusionAlarmSystemCommand())
@@ -37,10 +28,19 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThIAHSystem", CommandFlags.Modal)]
-        public void ThIntrusionAlarmHositingSystem()
+        [CommandMethod("TIANHUACAD", "THGTSYSTEM", CommandFlags.Modal)]
+        public void ThGuardToourSystem()
         {
-            using (var cmd = new ThIntrusionAlarmSystemHositingCommand())
+            using (var cmd = new ThGuardToourSystemCommand())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THACSYSTEM", CommandFlags.Modal)]
+        public void ThAccessControlSystem()
+        {
+            using (var cmd = new ThAccessControlSystemCommand())
             {
                 cmd.Execute();
             }

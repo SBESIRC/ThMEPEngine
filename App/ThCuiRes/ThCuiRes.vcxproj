@@ -20,13 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -86,7 +86,6 @@
   <ItemGroup>
     <Image Include="Images\AppIcon.ico" />
     <Image Include="Images\BLOCKSPLIT_dark.ico" />
-    <Image Include="Images\DGNPURGE_dark_small.ico" />
     <Image Include="Images\DGNPURGE_dark_small.ico" />
     <Image Include="Images\T20V4.0_dark_small.ico" />
     <Image Include="Images\T20V4.0_dark_large.ico" />
@@ -263,10 +262,10 @@
     <Image Include="Images\THDKFPM_dark_large.ico" />
     <Image Include="Images\THHZXT_dark_small.ico" />    
     <Image Include="Images\THHZXT_dark_large.ico" />
-
     <Image Include="Images\THLCDY_dark_small.ico" />    
     <Image Include="Images\THLCDY_dark_large.ico" />
-
+    <Image Include="Images\THPYSPM_dark_small.ico" />    
+    <Image Include="Images\THPYSPM_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

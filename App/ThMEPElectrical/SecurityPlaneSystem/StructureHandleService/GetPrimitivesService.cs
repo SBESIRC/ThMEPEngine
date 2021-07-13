@@ -17,6 +17,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPElectrical.StructureHandleService
 {
@@ -75,19 +76,19 @@ namespace ThMEPElectrical.StructureHandleService
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomEngine = new ThDB3RoomOutlineExtractionEngine();
+                var roomEngine = new ThRoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
                 //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var markEngine = new ThDB3RoomOutlineExtractionEngine();
+                var markEngine = new ThRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
                 //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var boundaryEngine = new ThDB3RoomOutlineRecognitionEngine();
+                var boundaryEngine = new ThRoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markRecEngine = new ThRoomMarkRecognitionEngine();
-                markRecEngine.Recognize(markEngine.Results.Cast<ThRawIfcAnnotationElementData>().ToList(), polyline.Vertices());
+                markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
                  var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);
@@ -174,6 +175,27 @@ namespace ThMEPElectrical.StructureHandleService
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 获取楼层信息
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public ThStoreys GetFloorInfo(Polyline polyline)
+        {
+            var bufferPoly = polyline.Buffer(100)[0] as Polyline;
+            var storeysRecognitionEngine = new ThStoreysRecognitionEngine();
+            using (AcadDatabase db = AcadDatabase.Active())
+            {   
+                storeysRecognitionEngine.Recognize(db.Database, bufferPoly.Vertices());
+            }
+            if (storeysRecognitionEngine.Elements.Count > 0)
+            {
+                return storeysRecognitionEngine.Elements[0] as ThStoreys;
+            }
+
+            return null;
         }
     }
 }

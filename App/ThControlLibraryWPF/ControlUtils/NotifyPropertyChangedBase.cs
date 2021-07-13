@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace ThControlLibraryWPF.ControlUtils
 {
+    [Serializable]
     public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
     {
         [field: NonSerialized]

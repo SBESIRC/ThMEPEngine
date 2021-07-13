@@ -198,5 +198,23 @@ namespace ThMEPEngineCore.CAD
         {
             return value1 == value2 || Math.Abs(value1 - value2) < DOUBLE_DELTA;
         }
+        public static DBObjectCollection FilterSmallArea(this DBObjectCollection polygons,double areaTolerance)
+        {
+            return polygons.Cast<Entity>().Where(o =>
+            {
+                if (o is Polyline polygon)
+                {
+                    return polygon.Area >= areaTolerance;
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    return mPolygon.Area >= areaTolerance;
+                }
+                else
+                {
+                    return false;
+                }
+            }).ToCollection();
+        }
     }
 }

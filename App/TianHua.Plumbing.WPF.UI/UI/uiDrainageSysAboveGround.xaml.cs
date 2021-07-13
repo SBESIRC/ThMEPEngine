@@ -26,13 +26,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
         //或将按钮全部置为不可用状态，选择完成后在进行可用
         //或使用一个标志，根据标志的值判断是否再执行中，如果执行中，就不再执行代码
         //或使用进度条，或等待页面
-        ShowListViewModel viewModel = new ShowListViewModel();
+        static ShowListViewModel viewModel = null;
         static DrainageSystemAGViewmodel setViewModel = null;
         bool _createFrame = false;
         bool _readFloor = false;
         public uiDrainageSysAboveGround()
         {
             InitializeComponent();
+            if(null == viewModel)
+                viewModel = new ShowListViewModel();
             this.DataContext = viewModel;
             if(null == setViewModel)
                 setViewModel = new DrainageSystemAGViewmodel();

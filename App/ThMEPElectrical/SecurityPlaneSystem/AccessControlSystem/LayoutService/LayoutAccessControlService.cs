@@ -9,12 +9,13 @@ using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutAccessControlService
     {
-        public void LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls)
+        public List<AccessControlModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThStoreys floor)
         {
             HandleAccessControlRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.accessControlSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
@@ -29,23 +30,25 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 }
                 else if (connectRooms.Count == 1)
                 {
-                    var layoutType = CalNoCennectRoom(connectRooms[0]);
+                    var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                     models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls));
                 }
                 else if (connectRooms.Count >= 2)
                 {
-                    if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], out LayoutType layoutAType, out LayoutType layoutBType))
+                    if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
                     }
-                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], out layoutAType, out layoutBType))
+                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[1], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[0], door, columns, walls));
                     }
                 }
             }
+
+            return models;
         }
 
         /// <summary>
@@ -83,16 +86,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// </summary>
         /// <param name="connectRoom"></param>
         /// <returns></returns>
-        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom)
+        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
             var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
                 {
-                    if (roomAInfo.connectType == ConnectType.NoCennect || roomAInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                     {
-                        return roomAInfo.roomAHandle;
+                        if (roomAInfo.connectType == ConnectType.NoCennect || roomAInfo.connectType == ConnectType.AllConnect)
+                        {
+                            return roomAInfo.roomAHandle;
+                        }
                     }
                 }
             }
@@ -101,9 +107,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 foreach (var roomBInfo in roomBInfos)
                 {
-                    if (roomBInfo.connectType == ConnectType.NoCennect || roomBInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomBInfo.floorName) || roomBInfo.floorName == floor)
                     {
-                        return roomBInfo.roomBHandle;
+                        if (roomBInfo.connectType == ConnectType.NoCennect || roomBInfo.connectType == ConnectType.AllConnect)
+                        {
+                            return roomBInfo.roomBHandle;
+                        }
                     }
                 }
             }
@@ -119,7 +128,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="roomAType"></param>
         /// <param name="roomBType"></param>
         /// <returns></returns>
-        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, out LayoutType roomAType, out LayoutType roomBType)
+        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
         {
             roomAType = LayoutType.Nothing;
             roomBType = LayoutType.Nothing;
@@ -130,19 +139,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 foreach (var roomAInfo in roomAInfos)
                 {
-                    if (roomAInfo.connectType == ConnectType.AllConnect)
+                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                     {
-                        roomAType = roomAInfo.roomAHandle;
-                        roomBType = roomAInfo.roomBHandle;
-                        findRule = true;
-                    }
-                    else if (roomAInfo.connectType == ConnectType.Normal)
-                    {
-                        if (roomAInfo.roomB.Contains(roomB.Name))
+                        if (roomAInfo.connectType == ConnectType.AllConnect)
                         {
                             roomAType = roomAInfo.roomAHandle;
                             roomBType = roomAInfo.roomBHandle;
                             findRule = true;
+                        }
+                        else if (roomAInfo.connectType == ConnectType.Normal)
+                        {
+                            if (roomAInfo.roomB.Contains(roomB.Name))
+                            {
+                                roomAType = roomAInfo.roomAHandle;
+                                roomBType = roomAInfo.roomBHandle;
+                                findRule = true;
+                            }
                         }
                     }
                 }

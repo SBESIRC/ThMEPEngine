@@ -1,5 +1,4 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -7,7 +6,6 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Interface;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
@@ -136,6 +134,7 @@ namespace ThMEPEngineCore.Service
             var results = new DBObjectCollection();
             polygons = MakeValid(polygons);
             polygons = DPSimplify(polygons);
+            polygons= polygons.FilterSmallArea(1.0);
             polygons.Cast<Polyline>().ForEach(o =>
             {
                 if(o.IsRectangle())
@@ -164,6 +163,7 @@ namespace ThMEPEngineCore.Service
             var results = new DBObjectCollection();
             polygons = MakeValid(polygons);
             polygons = DPSimplify(polygons);
+            polygons = polygons.FilterSmallArea(1.0);
             polygons.Cast<Polyline>().ForEach(o =>
             {
                 var converter = new ThRectangleConverter(o);
@@ -178,53 +178,6 @@ namespace ThMEPEngineCore.Service
                 }
             });
             return results;
-        }
-
-        private bool IsTurnCornerType(Polyline polyline)
-        {
-            // 判断一个Polyline 是否是拐弯L型
-            if (polyline.IsRectangle())
-            {
-                return false;
-            }
-            var edges = polyline.GetEdges();
-            var pairs = new List<Tuple<Vector3d, double, double>>(); // 方向，间距，公共部分
-            while (edges.Count > 0)
-            {
-                var first = edges.First();
-                edges.RemoveAt(0);
-                var subPairs = new List<Tuple<Line, double>>();
-                for (int i = 0; i < edges.Count; i++)
-                {
-                    var ps = first.CalculatePublicSector(edges[i]);
-                    if (ps > 0.0 && ps <= DitchMaxWidth)
-                    {
-                        subPairs.Add(Tuple.Create(edges[i], ps));
-                    }
-                }
-                if (subPairs.Count > 0)
-                {
-                    var lineInf = subPairs.OrderByDescending(o => o.Item2).First();
-                    pairs.Add(Tuple.Create(first.LineDirection(), first.Distance(lineInf.Item1), lineInf.Item2));
-                }
-            }
-            var angs = pairs.Select(o => (Vector3d.XAxis.GetAngleTo(o.Item1).RadToAng()) % 180.0).ToList();
-            var angResults = new List<double>();
-            while (angs.Count > 0)
-            {
-                angResults.Add(angs.First());
-                angs.RemoveAt(0);
-                for (int i = 0; i < angs.Count; i++)
-                {
-                    if (Math.Abs(angResults.Last() - angs[i]) <= 5.0 ||
-                        Math.Abs((angResults.Last() + 180.0) - angs[i]) <= 5.0)
-                    {
-                        angs.RemoveAt(i);
-                        i = i - 1;
-                    }
-                }
-            }
-            return angResults.Count > 1;
         }
 
         private DBObjectCollection FilterNeibours(DBObjectCollection drainWells)

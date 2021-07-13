@@ -70,7 +70,7 @@ namespace ThMEPElectrical.Command
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frames = frames.Select(x =>
                 {
-                    originTransformer.Transform(x);
+                    //originTransformer.Transform(x);
                     return ThMEPFrameService.Normalize(x);
                 }).ToList();
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
@@ -84,17 +84,27 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    
+                    //获取车道线
+                    var lanes = getPrimitivesService.GetLanes(outFrame, out List<List<Line>> otherLanes);
+                    lanes.AddRange(otherLanes);
+
+                    //获取楼层信息
+                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
                     //布置
                     LayoutService layoutService = new LayoutService();
-                    var layoutInfo = layoutService.ExitLayoutService(rooms, doors, columns, walls);
+                    var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, lanes.SelectMany(x => x).ToList(), floor);
                     using (AcadDatabase db = AcadDatabase.Active())
                     {
                         foreach (var item in layoutInfo)
                         {
-                            Line line = new Line(item.Key, item.Key + 1000 * item.Value);
-                            originTransformer.Reset(line);
+                            var endPt = item.layoutPt + 1000 * item.layoutDir;
+                            Line line = new Line(item.layoutPt, endPt);
+                            Circle circle = new Circle(endPt, Vector3d.ZAxis, 200);
+                            //originTransformer.Reset(line);
                             db.ModelSpace.Add(line);
+                            db.ModelSpace.Add(circle);
                         }
                     }
                 }

@@ -21,10 +21,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
         }
         public static ThHydrant Create(ThRawIfcDistributionElementData data)
         {
-            var fireHydrant = new ThHydrant();
-            fireHydrant.Uuid = Guid.NewGuid().ToString();
-            fireHydrant.Outline = data.Geometry;
-            fireHydrant.FireHydrantObb = data.Data as Polyline;
+            var fireHydrant = new ThHydrant
+            {
+                Uuid = Guid.NewGuid().ToString(),
+                Outline = data.Geometry,
+                FireHydrantObb = data.Data as Polyline
+            };
             return fireHydrant; 
         }
 
@@ -41,6 +43,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
             }
             return false;
+        }
+        public double GetRotationAngle()
+        {
+            var blk = Outline as BlockReference;
+            return blk.Rotation;
         }
     }
 }

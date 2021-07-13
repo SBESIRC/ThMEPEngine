@@ -214,6 +214,18 @@ namespace TianHua.AutoCAD.ThCui
 
             {
                 var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("地上排水平面",
+                    "地上排水平面",
+                    "THPYSPM",
+                    "地上排水平面",
+                    "IDI_THCAD_THPYSPM_SMALL",
+                    "IDI_THCAD_THPYSPM_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
 
                 // 地上雨水系统图
                 var subRow = subPanel.AddNewRibbonRow();

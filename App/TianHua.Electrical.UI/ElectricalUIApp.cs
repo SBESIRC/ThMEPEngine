@@ -1,19 +1,13 @@
-﻿using Linq2Acad;
-using System.IO;
-using System.Linq;
-using ThCADExtension;
-using ThMEPElectrical;
-using AcHelper.Commands;
-using System.Windows.Forms;
-using ThMEPElectrical.Model;
-using TianHua.Electrical.UI.CAD;
-using System.Collections.Generic;
-using ThMEPElectrical.BlockConvert;
+﻿using AcHelper;
+using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.EditorInput;
+using ThMEPElectrical;
+using ThMEPElectrical.Model;
+using ThMEPElectrical.Command;
+using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI
 {
@@ -51,80 +45,78 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
         }
 
-        [CommandMethod("TIANHUACAD", "THTZL", CommandFlags.Modal)]
-        public void ThBlockConvert()
+        [CommandMethod("TIANHUACAD", "THTZZH", CommandFlags.Modal)]
+        public void THTZZH()
         {
-            using (var dlg = new fmBlockConvert())
-            using (var blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
-            using (var manager = ThBConvertManager.CreateManager(blockDb.Database, ConvertMode.ALL))
+            // TODO：跳出模态对话框，获取转换参数
+            // 暂时用命令行获取转换参数
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                // 获取转换条目
-                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.STRONGCURRENT) == ConvertMode.STRONGCURRENT))
+                // 专业
+                var options = new PromptKeywordOptions("\n选择专业");
+                options.Keywords.Add("暖通", "H", "暖通(H)");
+                options.Keywords.Add("给排水", "W", "给排水(W)");
+                options.Keywords.Add("所有", "A", "所有(A)");
+                options.Keywords.Default = "所有";
+                var category = Active.Editor.GetKeywords(options);
+                if (category.Status != PromptStatus.OK)
                 {
-                    if (dlg.m_ListStrongBlockConvert == null || dlg.m_ListStrongBlockConvert.Count == 0) { dlg.m_ListStrongBlockConvert = new List<ViewFireBlockConvert>(); }
-                    dlg.m_ListStrongBlockConvert.Add(new ViewFireBlockConvert()
-                    {
-                        UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
-                        DownstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item2),
-                    });
-                }
-                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.WEAKCURRENT) == ConvertMode.WEAKCURRENT))
-                {
-                   if (dlg.m_ListWeakBlockConvert == null || dlg.m_ListWeakBlockConvert.Count == 0) { dlg.m_ListWeakBlockConvert = new List<ViewFireBlockConvert>(); }
-                    dlg.m_ListWeakBlockConvert.Add(new ViewFireBlockConvert()
-                    {
-                        UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
-                        DownstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item2),
-                    });
+                    return;
                 }
 
-                var result = AcadApp.ShowModalDialog(dlg);
-                if (result == DialogResult.OK)
+                // 模式
+                options = new PromptKeywordOptions("\n选择模式");
+                options.Keywords.Add("强电", "S", "强电(S)");
+                options.Keywords.Add("弱电", "W", "弱电(W)");
+                options.Keywords.Add("所有", "A", "所有(A)");
+                options.Keywords.Default = "所有";
+                var mode = Active.Editor.GetKeywords(options);
+                if (mode.Status != PromptStatus.OK)
                 {
-                    // 获取图块转换比例
-                    ConvertParameter.Scale = new Scale3d(dlg.BlockScale);
-
-                    // 获取用户指定的转换条目
-                    var rules = new List<ThBConvertRule>();
-                    dlg.m_ListStrongBlockConvert.ForEach(o =>
-                    {
-                        rules.AddRange(manager.Rules.Where(r =>
-                        {
-                            return o.IsSelect &&                                
-                            r.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.UpstreamID &&
-                            r.Transformation.Item2.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.DownstreamID;
-                        }));
-                    });
-                    dlg.m_ListWeakBlockConvert.ForEach(o =>
-                    {
-                        rules.AddRange(manager.Rules.Where(r =>
-                        {
-                            return o.IsSelect &&
-                            r.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.UpstreamID &&
-                            r.Transformation.Item2.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.DownstreamID;
-                        }));
-                    });
-                    ConvertParameter.Rules = rules;
-
-                    // 发送命令
-                    switch (dlg.ConvertMode)
-                    {
-                        case ConvertMode.STRONGCURRENT:
-                            CommandHandlerBase.ExecuteFromCommandLine(false, "THPBE");
-                            break;
-                        case ConvertMode.WEAKCURRENT:
-                            CommandHandlerBase.ExecuteFromCommandLine(false, "THLBE");
-                            break;
-                        default:
-                            break;
-                    }
+                    return;
                 }
+
+                // 图纸比例
+                var scale = Active.Editor.GetDouble(new PromptDoubleOptions("\n图纸比例")
+                {
+                    DefaultValue = 100.0,
+                });
+                if (scale.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                // 执行命令
+                var cmd = new ThBConvertCommand()
+                {
+                    Scale = scale.Value,
+                };
+                if (category.StringResult == "暖通")
+                {
+                    cmd.Category = ConvertCategory.HVAC;
+                }
+                else if (category.StringResult == "给排水")
+                {
+                    cmd.Category = ConvertCategory.WSS;
+                }
+                else if (category.StringResult == "所有")
+                {
+                    cmd.Category = ConvertCategory.ALL;
+                }
+                if (mode.StringResult == "强电")
+                {
+                    cmd.Mode = ConvertMode.STRONGCURRENT;
+                }
+                else if (mode.StringResult == "弱电")
+                {
+                    cmd.Mode = ConvertMode.WEAKCURRENT;
+                }
+                else if (mode.StringResult == "所有")
+                {
+                    cmd.Mode = ConvertMode.ALL;
+                }
+                cmd.Execute();
             }
-        }
-
-        private string BlockDwgPath()
-        {
-            return ThCADCommon.BlockConvertDwgPath();
         }
 
         [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
@@ -138,7 +130,7 @@ namespace TianHua.Electrical.UI
         }
 
         [CommandMethod("TIANHUACAD", "THSPS", CommandFlags.Modal)]
-        public void THSecurityPlaneUI()
+        public void THSPS()
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
@@ -170,18 +162,6 @@ namespace TianHua.Electrical.UI
                     ThMEPElectricalService.Instance.Parameter = new PlaceParameter();
                 }
                 return ThMEPElectricalService.Instance.Parameter;
-            }
-        }
-
-        private ThBConvertParameter ConvertParameter
-        {
-            get
-            {
-                if (ThMEPElectricalService.Instance.ConvertParameter == null)
-                {
-                    ThMEPElectricalService.Instance.ConvertParameter = new ThBConvertParameter();
-                }
-                return ThMEPElectricalService.Instance.ConvertParameter;
             }
         }
     }

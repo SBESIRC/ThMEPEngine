@@ -44,7 +44,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var roomPt = room.outlinePtList;
 
             var toilateOnWallPts = InsertToilateToWall(room);
-            toilateOnWallPts.ForEach(pt=> DrawUtils.ShowGeometry(pt, "l0islandeOnwall", 10, 25, 20, "C"));
+
             intersectToilateOnWallToRoomOutline(toilateOnWallPts, roomPt);
 
             roomPt = roomPt.Distinct().ToList();
@@ -294,7 +294,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     {
                         //岛
                         var wallList = room.wallList;
-                        var ptOnWallIsland = ThDrainageSDFindColdPtService.findPtOnWall(wallList, toilate, tolCloseWallForIsland);
+                        var ptOnWallIsland = ThDrainageSDCoolPtService.findPtOnWall(wallList, toilate, tolCloseWallForIsland);
                         pl.AddRange(ptOnWallIsland);
                     }
                 });
@@ -311,7 +311,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 for (int i = 0; i < outline.Count - 1; i++)
                 {
                     var line = new Line(outline[i], outline[i + 1]);
-                    if (line.IsPointOnCurve (pt, tol))
+                    if (line.IsPointOnCurve(pt, tol))
                     {
                         outline.Insert(i + 1, pt);
                         break;

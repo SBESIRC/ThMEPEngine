@@ -50,15 +50,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
 
                 var items = acadDatabase.ModelSpace
-                    .OfType<Curve>()
+                    .OfType<Entity>()
                     .Where(o => layerList.Contains(o.Layer) == true).ToList();
 
-                var itemDict = new Dictionary<Curve, Curve>();
+                var itemDict = new Dictionary<Entity, Entity>();
                 if (transFrame != null && transformer != null)
                 {
                     foreach (Curve item in items)
                     {
-                        var itemTrans = item.Clone() as Curve;
+                        var itemTrans = item.Clone() as Entity;
                         transformer.Transform(itemTrans);
                         
                         itemDict.Add(item, itemTrans);
@@ -89,7 +89,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ClearFinalDrawing(Polyline transFrame = null, ThMEPOriginTransformer transformer = null)
         {
-            var sLayerName = DrainageSDCommon.LDrainageGivenSD;
+            var sLayerName = ThDrainageSDCommon.LDrainageGivenSD;
             ClearDrawing(new List<string>() { sLayerName }, transFrame, transformer);
         }
     }

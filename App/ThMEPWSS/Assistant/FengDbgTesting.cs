@@ -712,8 +712,8 @@ namespace ThMEPWSS.DebugNs
             Console.WriteLine(nameof(DrainageSystemDiagram.draw10));
             Console.WriteLine(nameof(DrainageSystemDiagram.draw13));
         }
-        [Feng("xx")]
-        public static void qvkflv()
+        [Feng("qvm853")]
+        public static void qvm853()
         {
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
@@ -722,11 +722,41 @@ namespace ThMEPWSS.DebugNs
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-                var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer == "W-FRPT-HYDT-PIPE").Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
-                foreach (var line in AutoConn(lines))
-                {
-                    DU.DrawLineSegmentBufferLazy(line, 10).ColorIndex = 4;
-                }
+                //foreach (var br in adb.ModelSpace.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && (x.GetEffectiveName()?.Contains("地漏") ?? false)))
+                //{
+                //    Dbg.ShowWhere(br);
+
+                //}
+            }
+        }
+        [Feng("xx")]
+        public static void qvkflv()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                //var db = adb.Database;
+                //Dbg.BuildAndSetCurrentLayer(db);
+                //var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer == "W-FRPT-HYDT-PIPE").Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                //foreach (var line in AutoConn(lines))
+                //{
+                //    DU.DrawLineSegmentBufferLazy(line, 10).ColorIndex = 4;
+                //}
+
+                //var v1=Dbg.SelectEntity<Line>(adb).ToGLineSegment().ToVector2d();
+                //var v2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment().ToVector2d();
+                //Console.WriteLine(v1.GetAngleTo(v2).AngleToDegree());
+                //Console.WriteLine(v2.GetAngleTo(v1).AngleToDegree());
+
+                //var cl = new ThDrainageSystemServiceGeoCollector() { adb = adb, };
+                //cl.PreExplode();
+                //foreach (var br in adb.ModelSpace.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && (x.GetEffectiveName()?.Contains("地漏") ?? false)))
+                //{
+                //Dbg.ShowWhere(br);
+
+                //}
             }
         }
         public static IEnumerable<GLineSegment> AutoConn(List<GLineSegment> lines)
@@ -736,7 +766,44 @@ namespace ThMEPWSS.DebugNs
                 yield return GeoFac.GetCenterLine(g);
             }
         }
-
+        [Feng("draw16")]
+        public static void draw16()
+        {
+            try
+            {
+                var vm = new ThMEPWSS.Diagram.ViewModel.DrainageSystemDiagramViewModel();
+                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = vm, };
+                ThDrainageService.CollectFloorListDatasEx();
+                DrainageSystemDiagram.DrawDrainageSystemDiagram(vm);
+            }
+            finally
+            {
+                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
+            }
+        }
+        [Feng("draw15")]
+        public static void draw15()
+        {
+            DrainageSystemDiagram.DrawDrainageSystemDiagram();
+        }
+        [Feng("qvvcmm")]
+        public static void qvvcmm()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var offsetY = 2000.0;
+                var pt = Dbg.SelectPoint();
+                DrainageSystemDiagram.DrawAiringSymbol(pt.ToPoint2d(), offsetY);
+            }
+        }
+        [Feng("draw14")]
+        public static void qvsvsx()
+        {
+            DrainageSystemDiagram.draw14();
+        }
         [Feng("draw13")]
         public static void qvk1j8()
         {
@@ -752,7 +819,7 @@ namespace ThMEPWSS.DebugNs
         {
             DrainageSystemDiagram.draw11();
         }
-      
+
         [Feng("qvkdxw")]
         public static void qvkdxw()
         {
@@ -2675,7 +2742,7 @@ namespace ThMEPWSS.DebugNs
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb, true))
+            using (var tr = DrawingTransaction.CreateWithFbk(adb))
             {
                 var pt = Dbg.SelectPoint();
                 var fbk = FastBlock.Create(adb);

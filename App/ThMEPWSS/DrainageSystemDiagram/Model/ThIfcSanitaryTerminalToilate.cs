@@ -41,12 +41,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             AreaId = "";
             setInfo();
 
-            Point3d leftPt = Boundary.GetPoint3dAt(1);
-            Point3d rightPt = Boundary.GetPoint3dAt(2);
-            Point3d rightPt2 = Boundary.GetPoint3dAt(3);
-            DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
+            //Point3d leftPt = Boundary.GetPoint3dAt(1);
+            //Point3d rightPt = Boundary.GetPoint3dAt(2);
+            //Point3d rightPt2 = Boundary.GetPoint3dAt(3);
+            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
         }
 
         public void setInfo()
@@ -75,50 +75,49 @@ namespace ThMEPWSS.DrainageSystemDiagram
             switch (Type)
             {
                 case "A-Toilet-1":
-
                 case "A-Toilet-4":
                 case "A-Toilet-6":
                 case "A-Toilet-8":
                 case "A-Kitchen-3":
                 case "A-Kitchen-4":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta75);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta75);
                     break;
 
                 case "A-Toilet-2":
                     pt = getSupplyPtDoubleSinkLeft();
                     break;
                 case "A-Toilet-3":
-                    pt = getSupplyPtByLeftTop(DrainageSDCommon.supplyCoolDalta308);
+                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta308);
                     break;
 
                 case "小便器":
                 case "A-Kitchen-9":
                 case "儿童小便器":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta0);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta0);
                     break;
 
                 case "A-Toilet-5":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta200);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta200);
                     break;
 
                 case "儿童坐便器":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta250);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta250);
                     break;
 
                 case "儿童洗脸盆":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta150);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta150);
                     break;
 
                 case "蹲便器":
-                    pt = getSupplyPtByCenter(DrainageSDCommon.supplyCoolDalta120);
+                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta120);
                     break;
 
                 case "A-Toilet-7":
-                    pt = getSupplyPtByLeftTop(DrainageSDCommon.supplyCoolDalta350);
+                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta350);
                     break;
 
                 case "A-Toilet-9":
-                    pt = getSupplyPtByLeftTop(DrainageSDCommon.supplyCoolDalta150);
+                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta150);
                     break;
 
                 default:
@@ -176,7 +175,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var dir = (rightPt - leftPt).GetNormal();
 
             double length = (rightPt - leftPt).Length;
-            double dalta = length / DrainageSDCommon.supplyCoolDaltaDoubleSinkLeftParameter + DrainageSDCommon.supplyCoolDalta75;
+            double dalta = length / ThDrainageSDCommon.supplyCoolDaltaDoubleSinkLeftParameter + ThDrainageSDCommon.supplyCoolDalta75;
 
             double coorX = leftPt.X + (dir * dalta).X;
             double coorY = leftPt.Y + (dir * dalta).Y;
@@ -194,7 +193,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var dir = (rightPt - leftPt).GetNormal();
 
             double length = (rightPt - leftPt).Length;
-            double dalta = length / (4.0 / 3.0) + DrainageSDCommon.supplyCoolDalta75;
+            double dalta = length / (4.0 / 3.0) + ThDrainageSDCommon.supplyCoolDalta75;
 
             double coorX = leftPt.X + (dir * dalta).X;
             double coorY = leftPt.Y + (dir * dalta).Y;

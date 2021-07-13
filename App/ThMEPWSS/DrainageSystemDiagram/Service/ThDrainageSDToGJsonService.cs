@@ -28,7 +28,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return areaGeom;
         }
 
-        public static List<ThGeometry> buildColdPtGeometry(List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static List<ThGeometry> buildCoolPtGeometry(List<ThIfcSanitaryTerminalToilate> toilateList)
         {
             List<ThGeometry> geom = new List<ThGeometry>();
 
@@ -41,13 +41,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     if (pt != Point3d.Origin)
                     {
                         var geometry = new ThGeometry();
-                        var id = i == 0 ? toilate.Uuid : toilate.Uuid + DrainageSDCommon.GJSecPtSuffix;
+                        var id = i == 0 ? toilate.Uuid : toilate.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
 
-                        geometry.Properties.Add(DrainageSDCommon.ProId, id);
+                        geometry.Properties.Add(ThDrainageSDCommon.ProId, id);
                         geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WaterSupplyPoint.ToString());
-                        geometry.Properties.Add(DrainageSDCommon.ProAreaId, toilate.AreaId);
-                        geometry.Properties.Add(DrainageSDCommon.ProGroupId, toilate.GroupId);
-                        geometry.Properties.Add(DrainageSDCommon.ProDirection, new double[] { toilate.Dir.X, toilate.Dir.Y });
+                        geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, toilate.AreaId);
+                        geometry.Properties.Add(ThDrainageSDCommon.ProGroupId, toilate.GroupId);
+                        geometry.Properties.Add(ThDrainageSDCommon.ProDirection, new double[] { toilate.Dir.X, toilate.Dir.Y });
 
                         geometry.Boundary = new DBPoint(pt);
 
@@ -60,18 +60,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return geom;
         }
 
-        public static List<ThGeometry> buildVirtualColdPtGeomary(List<ThToilateGJson> virtualPtList)
+        public static List<ThGeometry> buildVirtualCoolPtGeomary(List<ThToilateGJson> virtualPtList)
         {
             List<ThGeometry> geom = new List<ThGeometry>();
 
             virtualPtList.ForEach(pt =>
                 {
                     var geometry = new ThGeometry();
-                    geometry.Properties.Add(DrainageSDCommon.ProId, pt.Id);
+                    geometry.Properties.Add(ThDrainageSDCommon.ProId, pt.Id);
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WaterSupplyPoint.ToString());
-                    geometry.Properties.Add(DrainageSDCommon.ProAreaId, pt.AreaId);
-                    geometry.Properties.Add(DrainageSDCommon.ProGroupId, pt.GroupId);
-                    geometry.Properties.Add(DrainageSDCommon.ProDirection, new double[] { pt.Direction.X, pt.Direction.Y });
+                    geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, pt.AreaId);
+                    geometry.Properties.Add(ThDrainageSDCommon.ProGroupId, pt.GroupId);
+                    geometry.Properties.Add(ThDrainageSDCommon.ProDirection, new double[] { pt.Direction.X, pt.Direction.Y });
                     geometry.Boundary = new DBPoint(pt.Pt);
 
                     geom.Add(geometry);
@@ -89,7 +89,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                   var geometry = new ThGeometry();
 
                   geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Column.ToString());
-                  geometry.Properties.Add(DrainageSDCommon.ProAreaId, areaId);
+                  geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, areaId);
 
                   geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, false);
                   geometry.Boundary = vcl;
@@ -127,7 +127,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     //Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
 
-                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * DrainageSDCommon.SublinkLength;
+                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.SublinkLength;
 
                     toilate.SupplyCoolOnBranch.Add(subLinkEndPt);
                     //toilate.Dir = gj.Direction;
@@ -152,7 +152,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 for (int i = 0; i < toilatePt.Value.Count; i++)
                 {
                     var pt = toilatePt.Value[i];
-                    var id = i == 0 ? toilate.Uuid : toilate.Uuid + DrainageSDCommon.GJSecPtSuffix;
+                    var id = i == 0 ? toilate.Uuid : toilate.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
 
                     var virtualPt = new ThToilateGJson()
                     {
