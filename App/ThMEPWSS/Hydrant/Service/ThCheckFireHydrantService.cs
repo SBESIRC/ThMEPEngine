@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -32,10 +33,11 @@ namespace ThMEPWSS.Hydrant.Service
 
         public void Check(Database db, Point3dCollection pts)
         {
+            ThStopWatchService.Start();
             var extractors = Extract(db, pts); //获取数据
             ThStopWatchService.Stop();
-            AcHelper.Active.Editor.WriteMessage("\n提取数据耗时：" + ThStopWatchService.TimeSpan() + "秒");
-            ThStopWatchService.Reset();
+            ThStopWatchService.Print("提取数据耗时：");
+
             ThStopWatchService.ReStart();
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
             Rooms = roomExtractor.Rooms; //获取房间
@@ -57,7 +59,7 @@ namespace ThMEPWSS.Hydrant.Service
             var regions = hydrant.Validate(geoContent, context);
             Covers = ThHydrantResultParseService.Parse(regions);
             ThStopWatchService.Stop();
-            AcHelper.Active.Editor.WriteMessage("\n保护区域计算耗时：" + ThStopWatchService.TimeSpan() + "秒");
+            ThStopWatchService.Print("保护区域计算耗时：");
         }
 
         private List<ThExtractorBase> Extract(Database db, Point3dCollection pts)

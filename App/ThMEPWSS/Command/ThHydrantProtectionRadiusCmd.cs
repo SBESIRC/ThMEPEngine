@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.Command
 {
@@ -38,7 +39,6 @@ namespace ThMEPWSS.Command
                 var pts = nFrame.Vertices();
 
                 ICheck checkService = null;
-                ThStopWatchService.Start();
                 if (FireHydrantVM.Parameter.CheckObjectOption== CheckObjectOps.FireHydrant)
                 {
                     checkService = new ThCheckFireHydrantService(FireHydrantVM);
@@ -51,8 +51,7 @@ namespace ThMEPWSS.Command
                 checkService.Print(acadDb.Database); //仅供测试用，后续删除
 
                 // 校核
-                ThStopWatchService.Reset();
-                ThStopWatchService.ReStart();
+                ThStopWatchService.Start();
                 var regionCheckService = new ThCheckRegionService()
                 {
                     Covers = checkService.Covers.SelectMany(o=>o.Item3).ToList(),
@@ -67,9 +66,7 @@ namespace ThMEPWSS.Command
                     ThCheckExpressionControlService.CheckExpressionLayer);
                 printService.Print(regionCheckService.CheckResults);
                 ThStopWatchService.Stop();
-                AcHelper.Active.Editor.WriteMessage("\n校核耗时：" + ThStopWatchService.TimeSpan() + "秒");
-                ThStopWatchService.Reset();
-                AcHelper.Active.Editor.WriteMessage("\n执行完成！");
+                ThStopWatchService.Print("校核耗时：");
             }
         }
 #else

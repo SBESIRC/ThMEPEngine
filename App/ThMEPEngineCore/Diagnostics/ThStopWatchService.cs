@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
-namespace ThMEPWSS.Hydrant.Service
+namespace ThMEPEngineCore.Diagnostics
 {
     public class ThStopWatchService
     {
@@ -15,6 +16,7 @@ namespace ThMEPWSS.Hydrant.Service
         /// </summary>
         public static void Start()
         {
+            Watch.Reset();
             Watch.Start();
         }
         /// <summary>
@@ -23,13 +25,6 @@ namespace ThMEPWSS.Hydrant.Service
         public static void Stop()
         {
             Watch.Stop();
-        }
-        /// <summary>
-        /// 停止时间间隔测量，并将运行时间重置为零。
-        /// </summary>
-        public static void Reset()
-        {
-            Watch.Reset();
         }
         /// <summary>
         /// 停止时间间隔测量，将运行时间重置为零，然后开始测量运行时间。
@@ -45,6 +40,11 @@ namespace ThMEPWSS.Hydrant.Service
         public static double TimeSpan()
         {
             return Watch.Elapsed.TotalSeconds;
+        }
+        public static void Print(string prefix)
+        {
+            AcHelper.Active.Editor.WriteMessage("\n" + prefix + TimeSpan() + "秒");
+            AcHelper.Active.Editor.WriteMessage("\n");
         }
     }
 }
