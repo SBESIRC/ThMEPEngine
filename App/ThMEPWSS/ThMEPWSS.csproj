@@ -39,6 +39,7 @@
     <Compile Include="Assistant\FengKeys.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
+    <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />

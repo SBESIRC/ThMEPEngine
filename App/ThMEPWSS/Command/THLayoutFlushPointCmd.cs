@@ -11,14 +11,14 @@ using CLI;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using ThMEPWSS.FlushPoint;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
-using ThMEPWSS.FlushPoint.Data;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPWSS.FlushPoint.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.FlushPoint;
+using ThMEPWSS.FlushPoint.Data;
+using ThMEPWSS.FlushPoint.Service;
 #endif
 
 namespace ThMEPWSS.Command
@@ -80,8 +80,8 @@ namespace ThMEPWSS.Command
                 washData.ReadFromContent(geoContent);
 
                 var washPointEngint = new ThWashPointLayoutEngineMgd();
-                double[] points = washPointEngint.Layout(washData, washPara);
-                var washPoints = ThFlushPointUtils.GetPoints(points);
+                var result = washPointEngint.Run(washData, washPara);
+                var washPoints = ThWashPointResultParseService.Parse(result);
 
                 // 过滤哪些点位靠近排水设施，哪些远离排水设施
                 var filterService = new ThFilterWashPointsService()
