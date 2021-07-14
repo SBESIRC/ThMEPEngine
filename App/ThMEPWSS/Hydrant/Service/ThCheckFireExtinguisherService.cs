@@ -96,14 +96,7 @@ namespace ThMEPWSS.Hydrant.Service
                         IsolateSwitch=true,
                         FilterMode = FilterMode.Window,
                         ElementLayer=AiLayerManager.ShearWallLayer,
-                    },
-                    new ThColumnExtractor()
-                    {
-                        UseDb3Engine=true,
-                        IsolateSwitch=true,
-                        FilterMode = FilterMode.Window,
-                        ElementLayer = AiLayerManager.ColumnLayer,
-                    },
+                    },                    
                     new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
@@ -122,6 +115,16 @@ namespace ThMEPWSS.Hydrant.Service
                         FilterMode = FilterMode.Window,
                     },
                 };
+            if (FireHydrantVM.Parameter.IsThinkIsolatedColumn)
+            {
+                extractors.Add(new ThColumnExtractor()
+                {
+                    UseDb3Engine = true,
+                    IsolateSwitch = true,
+                    FilterMode = FilterMode.Window,
+                    ElementLayer = AiLayerManager.ColumnLayer,
+                });
+            }
             extractors.ForEach(o => o.Extract(db, pts));
             return extractors;
         }

@@ -149,6 +149,23 @@ namespace ThMEPWSS.Hydrant.Model
             }
         }
 
+        private bool isThinkIsolatedColumn;
+        /// <summary>
+        /// 考虑孤立柱
+        /// </summary>
+        public bool IsThinkIsolatedColumn
+        {
+            get
+            {
+                return isThinkIsolatedColumn;
+            }
+            set
+            {
+                isThinkIsolatedColumn = value;
+                RaisePropertyChanged("IsThinkIsolatedColumn");
+            }
+        }
+
         private bool isShowCheckResult;
         /// <summary>
         /// 显示校验结果
