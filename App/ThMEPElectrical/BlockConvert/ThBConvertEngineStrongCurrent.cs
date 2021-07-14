@@ -63,6 +63,10 @@ namespace ThMEPElectrical.BlockConvert
             {
                 TransformByBase(blkRef, srcBlockData);
             }
+            else if (srcBlockData.EffectiveName.Contains("潜水泵"))
+            {
+                TransformByPosition(blkRef, srcBlockData);
+            }
             else
             {
                 TransformByCenter(blkRef, srcBlockData);
@@ -92,6 +96,24 @@ namespace ThMEPElectrical.BlockConvert
                 var base_x = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
                 var base_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 var offset = targetBlockData.Position.GetVectorTo(new Point3d(base_x, base_y, 0).TransformBy(srcBlockData.MCS2WCS));
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
+            }
+        }
+
+        private void TransformByPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            // 考虑插入点
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var dynamicProperties = srcBlockData.CustomProperties;
+                blkRef.SetDynBlockValue("距离", dynamicProperties.GetValue("距离"));
+                blkRef.SetDynBlockValue("距离1", dynamicProperties.GetValue("距离1"));
+                blkRef.SetDynBlockValue("距离2", dynamicProperties.GetValue("距离2"));
+                blkRef.SetDynBlockValue("角度", dynamicProperties.GetValue("角度"));
+                blkRef.SetDynBlockValue("角度1", dynamicProperties.GetValue("角度1"));
+                var offset = targetBlockData.Position.GetVectorTo(new Point3d().TransformBy(srcBlockData.MCS2WCS));
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
