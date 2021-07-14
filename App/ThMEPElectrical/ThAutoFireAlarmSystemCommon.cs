@@ -11,6 +11,7 @@ namespace ThMEPElectrical
         //防火分区最短长度
         public static readonly double FireDistrictShortestLength = 200;
         public static readonly string FireDistrictByLayer = "AD-AREA-DIVD";     //防火分区图层
+        public static readonly string WireCircuitByLayer = "E-FAS-NUMB";     //电路编号图层
 
         //左部分的列数量
         public static readonly int SystemColLeftNum = 5;
@@ -57,7 +58,23 @@ namespace ThMEPElectrical
         public static readonly List<string> AlarmControlWireCircuitBlocks = new List<string>() { 
             "手动火灾报警按钮(带消防电话插座)", 
             "感烟火灾探测器", 
-            "感温火灾探测器", 
+            "感温火灾探测器",
+            "红外光束感烟火灾探测器发射器",
+            "红外光束感烟火灾探测器接收器",
+            "非编址感烟火灾探测器",
+            "防爆型感烟火灾探测器",
+            "家用感烟火灾探测报警器",
+            "独立式感烟火灾探测报警器",
+            "非编址感温火灾探测器",
+            "防爆型感温火灾探测器",
+            "线型差定温火灾探测器",
+            "缆型感温火灾探测器",
+            "家用感温火灾探测报警器",
+            "独立式感温火灾探测报警器",
+            "火焰探测器",
+            "复合型感烟感温火灾探测器",
+            "吸气式感烟火灾探测器",
+            "图像型火灾探测器",
             "强电间总线控制模块", 
             "弱电间总线控制模块", 
             "防火卷帘模块", 
@@ -77,11 +94,27 @@ namespace ThMEPElectrical
             "喷淋泵", 
             "消防水池"
         };
-
+        public static readonly List<string> Detectors = new List<string>()
+        {
+            "非编址感烟火灾探测器",
+            "防爆型感烟火灾探测器",
+            "家用感烟火灾探测报警器",
+            "独立式感烟火灾探测报警器",
+            "非编址感温火灾探测器",
+            "防爆型感温火灾探测器",
+            "线型差定温火灾探测器",
+            "缆型感温火灾探测器",
+            "家用感温火灾探测报警器",
+            "独立式感温火灾探测报警器",
+            "火焰探测器",
+            "复合型感烟感温火灾探测器",
+            "吸气式感烟火灾探测器",
+            "图像型火灾探测器",
+        };
 
 
         //按回路区分部分
         //连接点允许误差
-        public static readonly int ConnectionTolerance = 25;
+        public const int ConnectionTolerance = 25;
     }
 }

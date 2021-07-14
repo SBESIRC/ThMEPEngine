@@ -141,10 +141,18 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
             if (SelectA.IsChecked.Value)
             {
                 DrawingList.Visibility = Visibility.Visible;
+                DistinguishByCircuit.Visibility = Visibility.Visible;
+            }
+            else if(SelectF.IsChecked.Value)
+            {
+                DrawingList.Visibility = Visibility.Collapsed;
+                DistinguishByCircuit.Visibility = Visibility.Visible;
             }
             else
             {
                 DrawingList.Visibility = Visibility.Collapsed;
+                DistinguishByCircuit.Visibility = Visibility.Collapsed;
+                DistinguishByFireCompartment.IsChecked = true;
             }
         }
     }

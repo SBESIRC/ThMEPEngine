@@ -27,7 +27,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     FindCount += AreaData.Data.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
                 });
-                FindCount = FindCount / FireCompartmentParameter.ControlBusCount + 1;
+                FindCount = (int)Math.Ceiling((double)FindCount / FireCompartmentParameter.ControlBusCount);//向上缺省
                 InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (StartIndexBlock - 1) + 2300, OuterFrameLength * FloorNum + 1500, 0), new Scale3d(-100, 100, 100), 0, new Dictionary<string, string>() { { "N", FindCount.ToString() } });
                 SumCount += FindCount;
             }

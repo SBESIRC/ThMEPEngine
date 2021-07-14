@@ -260,14 +260,11 @@ namespace DotNetARX
                 foreach (ObjectId attId in bref.AttributeCollection)
                 {
                     AttributeReference attRef = (AttributeReference)trans.GetObject(attId, OpenMode.ForRead);
-                    if(OnlyShowVisible)
+                    if (OnlyShowVisible && !attRef.Visible)
                     {
-                        if(attRef.Visible)
-                        {
-                            attributes.Add(attRef.Tag, attRef.TextString);
-                        }
+                        continue;
                     }
-                    else
+                    if (!attributes.ContainsKey(attRef.Tag))
                     {
                         attributes.Add(attRef.Tag, attRef.TextString);
                     }

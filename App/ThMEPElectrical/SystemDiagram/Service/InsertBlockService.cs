@@ -47,7 +47,9 @@ namespace ThMEPElectrical.SystemDiagram.Service
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false);
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false);
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.FireDistrictByLayer), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(ThAutoFireAlarmSystemCommon.WireCircuitByLayer), false);
             }
 
         }

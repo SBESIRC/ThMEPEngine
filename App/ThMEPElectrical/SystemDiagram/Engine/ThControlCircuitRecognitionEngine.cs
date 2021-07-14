@@ -40,23 +40,17 @@ namespace ThMEPElectrical.SystemDiagram.Engine
     public class ThControlCircuitRecognitionEngine : ThEntityCommonRecognitionEngine
     {
         public List<string> LayerFilter { get; set; }
-        //ThAutoFireAlarmSystemRecognitionEngine BlockReferenceEngine;
         public ThControlCircuitRecognitionEngine()
         {
-            //BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine();
             LayerFilter = new List<string>();
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            //BlockReferenceEngine.Recognize(database, polygon);
             throw new NotImplementedException();
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            //BlockReferenceEngine.RecognizeMS(database, polygon);
-            //BlockReferenceEngine.Elements.ForEach(data => Elements.Add(new ThEntityData() { Geometry = data.Outline }));
-
             var engine = new ThControlCircuitExtractionEngine()
             {
                 LayerFilter = this.LayerFilter,

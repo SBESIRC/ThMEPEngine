@@ -199,7 +199,123 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             bool HasBFAS113 = this.fireDistrict.Data.BlockData.BlockStatistics["红外光束感烟火灾探测器接收器"] > 0;
             if (!HasBFAS112 && !HasBFAS113)
             {
-                result.Add(DrawStraightLine(currentIndex));
+                //要关注到[吸气式感烟火灾探测器],[家用感烟火灾探测报警器],[家用感温火灾探测报警器]因为这些块和其他的块长的都不一样
+                int DetectorCount = ThAutoFireAlarmSystemCommon.Detectors.Count(o => this.fireDistrict.Data.BlockData.BlockStatistics[o] > 0);
+                //没有其他探测器
+                if (DetectorCount == 0)
+                {
+                    result.Add(DrawStraightLine(currentIndex));
+                }
+                //一个探测器
+                else if (DetectorCount == 1)
+                {
+                    double spacing = 150.0;
+                    bool HasBFAS160 = this.fireDistrict.Data.BlockData.BlockStatistics["吸气式感烟火灾探测器"] > 0;
+                    if(HasBFAS160)
+                    {
+                        spacing = 250.0;
+                    }
+                    else
+                    {
+                        bool HasBFAS114 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感烟火灾探测报警器"] > 0;
+                        bool HasBFAS124 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感温火灾探测报警器"] > 0;
+                        spacing = 200.0;
+                    }
+                    double RightmostPosition = 0;
+                    double BlockPosition = 1500 - spacing;
+                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline1);
+                    RightmostPosition = 1500 + spacing;
+                    Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline2);
+                }
+                //两个探测器
+                else if(DetectorCount == 2)
+                {
+                    double spacing1 = 150.0;
+                    double spacing2 = 150.0;
+                    bool HasBFAS160 = this.fireDistrict.Data.BlockData.BlockStatistics["吸气式感烟火灾探测器"] > 0;
+                    bool HasBFAS114 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感烟火灾探测报警器"] > 0;
+                    bool HasBFAS124 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感温火灾探测报警器"] > 0;
+                    if (HasBFAS160)
+                    {
+                        spacing1 = 250.0;
+                        if (HasBFAS114 | HasBFAS124)
+                        {
+                            spacing2 = 200.0;
+                        }
+                    }
+                    else
+                    {
+                        if (HasBFAS114 & HasBFAS124)
+                        {
+                            spacing1 = 200.0;
+                            spacing2 = 200.0;
+                        }
+                        else if (HasBFAS114 | HasBFAS124)
+                        {
+                            spacing1 = 200.0;
+                        }
+                    }
+                    double RightmostPosition = 0;
+                    double BlockPosition = 1000 - spacing1;
+                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline1);
+                    RightmostPosition = 1000 + spacing1;
+                    Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 2000 - spacing2, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline2);
+                    RightmostPosition = 2000 + spacing2;
+                    Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline3);
+                }
+                //三个及以上探测器
+                else
+                {
+                    double spacing1 = 150.0;
+                    double spacing2 = 150.0;
+                    double spacing3 = 150.0;
+                    bool HasBFAS160 = this.fireDistrict.Data.BlockData.BlockStatistics["吸气式感烟火灾探测器"] > 0;
+                    bool HasBFAS114 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感烟火灾探测报警器"] > 0;
+                    bool HasBFAS124 = this.fireDistrict.Data.BlockData.BlockStatistics["家用感温火灾探测报警器"] > 0;
+                    if (HasBFAS160)
+                    {
+                        spacing1 = 250.0;
+                        if (HasBFAS114 & HasBFAS124)
+                        {
+                            spacing2 = 200.0;
+                            spacing3 = 200.0;
+                        }
+                        else if (HasBFAS114 | HasBFAS124)
+                        {
+                            spacing2 = 200.0;
+                        }
+                    }
+                    else
+                    {
+                        if (HasBFAS114 & HasBFAS124)
+                        {
+                            spacing1 = 200.0;
+                            spacing2 = 200.0;
+                        }
+                        else if (HasBFAS114 | HasBFAS124)
+                        {
+                            spacing1 = 200.0;
+                        }
+                    }
+                    double RightmostPosition = 0;
+                    double BlockPosition = 750 - spacing1;
+                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline1);
+                    RightmostPosition = 750 + spacing1;
+                    Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 1500 - spacing2, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline2);
+                    RightmostPosition = 1500 + spacing2;
+                    Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 2250 - spacing3, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline3);
+                    RightmostPosition = 2250 + spacing3;
+                    Line Midline4 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline4);
+                }
             }
             else
             {

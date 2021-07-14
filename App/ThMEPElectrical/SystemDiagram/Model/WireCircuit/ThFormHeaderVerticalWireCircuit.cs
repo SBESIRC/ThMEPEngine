@@ -21,11 +21,21 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             //画楼层左侧的楼层名称
             for (int i = 0; i < this.FloorIndex; i++)
             {
+                var floorData = this.AllFireDistrictData[i];
                 DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
-                Text.TextString = this.AllFireDistrictData[i].FireDistrictName;
+                Text.TextString = floorData.FireDistrictName;
                 Text.Position = new Point3d(-1500, OuterFrameLength * i + 1500, 0);
                 Text.AlignmentPoint = Text.Position;
                 Result.Add(Text);
+
+                if(floorData.DrawCircuitName)
+                {
+                    DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    WireCircuitText.TextString = floorData.WireCircuitName;
+                    WireCircuitText.Position = new Point3d(13500, OuterFrameLength * i + 2200, 0);
+                    WireCircuitText.AlignmentPoint = WireCircuitText.Position;
+                    Result.Add(WireCircuitText);
+                }
             }
             //画三个标题
             {

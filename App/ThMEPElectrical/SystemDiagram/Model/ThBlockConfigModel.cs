@@ -241,7 +241,186 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 CanHidden = true,
                 Position = new Point3d(2000, 1500, 0),
                 ShowQuantity = true,
+                CoefficientOfExpansion = 0,
                 QuantityPosition = new Point3d(2350, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "非编址感烟火灾探测器",
+                BlockName = "E-BFAS110-2",
+                BlockNameRemark = "非编址感烟火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "N" } },
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "防爆型感烟火灾探测器",
+                BlockName = "E-BFAS110-3",
+                BlockNameRemark = "防爆型感烟火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "EX" } },
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "家用感烟火灾探测报警器",
+                BlockName = "E-BFAS114",
+                BlockNameRemark = "家用感烟火灾探测报警器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 0,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "独立式感烟火灾探测报警器",
+                BlockName = "E-BFAS115",
+                BlockNameRemark = "独立式感烟火灾探测报警器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "非编址感温火灾探测器",
+                BlockName = "E-BFAS120-2",
+                BlockNameRemark = "非编址感温火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "N" } },
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "防爆型感温火灾探测器",
+                BlockName = "E-BFAS120-3",
+                BlockNameRemark = "防爆型感温火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "EX" } },
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "线型差定温火灾探测器",
+                BlockName = "E-BFAS122",
+                BlockNameRemark = "线型差定温火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "缆型感温火灾探测器",
+                BlockName = "E-BFAS123",
+                BlockNameRemark = "缆型感温火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "家用感温火灾探测报警器",
+                BlockName = "E-BFAS124",
+                BlockNameRemark = "家用感温火灾探测报警器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 0,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "独立式感温火灾探测报警器",
+                BlockName = "E-BFAS125",
+                BlockNameRemark = "独立式感温火灾探测报警器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "火焰探测器",
+                BlockName = "E-BFAS130",
+                BlockNameRemark = "火焰探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "复合型感烟感温火灾探测器",
+                BlockName = "E-BFAS150",
+                BlockNameRemark = "复合型感烟感温火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "吸气式感烟火灾探测器",
+                BlockName = "E-BFAS160",
+                BlockNameRemark = "吸气式感烟火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "ASD" } },
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "图像型火灾探测器",
+                BlockName = "E-BFAS170",
+                BlockNameRemark = "图像型火灾探测器",
+                Index = 10,
+                CanHidden = true,
+                Position = new Point3d(0, 1500, 0),
+                ShowQuantity = false,
+                CoefficientOfExpansion = 1,
+                QuantityPosition = new Point3d(0, 1150, 0)
             });
             #endregion
             #region #11
@@ -257,7 +436,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY","ST" } } },
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0)
@@ -516,7 +695,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1100, 1150, 0),
                 HasMultipleBlocks = true,
-                CoefficientOfExpansion=2,
+                CoefficientOfExpansion = 2,
                 AssociatedBlocks = new List<ThBlockModel>()
                 {
                     new ThBlockModel()

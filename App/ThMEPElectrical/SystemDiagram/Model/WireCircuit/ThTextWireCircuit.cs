@@ -26,6 +26,11 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     if (x.ShowQuantity && ((Quantity = this.fireDistrict.Data.BlockData.BlockStatistics[x.UniqueName]) > 0 || !x.CanHidden))
                     {
+                        //V2.0 新增业务需求 【火灾声光警报器】显示的数量与【手动火灾报警按钮(带消防电话插座)】一致，但是内部计数还需要保留
+                        if (x.UniqueName == "火灾声光警报器")
+                        {
+                            Quantity = this.fireDistrict.Data.BlockData.BlockStatistics["手动火灾报警按钮(带消防电话插座)"];
+                        }
                         DBText QuantityText = new DBText() { Height = 250, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                         QuantityText.TextString = Quantity.ToString();
                         QuantityText.Position = x.QuantityPosition.Add(new Vector3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1), 0));
