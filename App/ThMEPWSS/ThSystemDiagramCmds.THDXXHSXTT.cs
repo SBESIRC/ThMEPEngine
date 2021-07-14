@@ -12,7 +12,7 @@ namespace ThMEPWSS
     {
         [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]
         public void ThTestFireHydrant()
-        {
+        {           
             using (var cmd = new ThFireHydrantCmd())
             {
                 cmd.Execute();

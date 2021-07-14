@@ -23,29 +23,45 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public TermPoint(Point3dEx ptEx)
         {
             PtEx = ptEx;
-            Tolerance = 200;
+            Tolerance = 100;
         }
 
         public void SetLines(List<Line> labelLine)
         {
+            
             foreach(var l in labelLine)
             {
+                if(l is null)
+                {
+                    continue;
+                }
+                
                 var spt = new Point3dEx(l.StartPoint);
                 var ept = new Point3dEx(l.EndPoint);
-                if (PtEx._pt.DistanceTo(spt._pt) < Tolerance || PtEx._pt.DistanceTo(ept._pt) < Tolerance)
+                
+                if(PtEx._pt.DistanceTo(spt._pt) < Tolerance || PtEx._pt.DistanceTo(ept._pt) < Tolerance) 
                 {
                     StartLine = l;
                 }
             }
+            if(StartLine is null)
+            {
+                return;
+            }
             foreach (var l in labelLine)
             {
-                var spt = new Point3dEx(l.StartPoint);
-                var ept = new Point3dEx(l.EndPoint);
-                var spt1 = new Point3dEx(StartLine.StartPoint);
-                var ept1 = new Point3dEx(StartLine.EndPoint);
+                if (l is null)
+                {
+                    continue;
+                }
+                var spt = l.StartPoint;
+                var ept = l.EndPoint;
+                var spt1 = StartLine.StartPoint;
+                var ept1 = StartLine.EndPoint;
+                var tolerance = 100;
                 if(!l.Equals(StartLine))
                 {
-                    if (spt.Equals(spt1) || spt.Equals(ept1) || ept.Equals(spt1) || ept.Equals(ept1))
+                    if (spt.DistanceTo(spt1) < tolerance || spt.DistanceTo(ept1) < tolerance || ept.DistanceTo(spt1) < tolerance || ept.DistanceTo(ept1) < tolerance)
                     {
                         TextLine = l;
                     }
@@ -53,44 +69,64 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
         }
 
-        public void SetPipeNumber(List<DBText> Results)
+        public void SetPipeNumber(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
             var leftX = 0.0;
             var rightX = 0.0;
-            var downY = TextLine.StartPoint.Y;
-            var textHeight = 1000;
+            var leftY = 0.0;
+            var rightY = 0.0;
+            var textHeight = 500;
             if (TextLine.StartPoint.X < TextLine.EndPoint.X)
             {
                 leftX = TextLine.StartPoint.X;
                 rightX = TextLine.EndPoint.X;
+                leftY = TextLine.StartPoint.Y;
+                rightY = TextLine.EndPoint.Y;
+
             }
             else
             {
                 leftX = TextLine.EndPoint.X;
                 rightX = TextLine.StartPoint.X;
+                leftY = TextLine.EndPoint.Y;
+                rightY = TextLine.StartPoint.Y;
             }
 
-            var pt1 = new Point3d(leftX, downY + textHeight, 0);
-            var pt2 = new Point3d(rightX, downY, 0);
+            var pt1 = new Point3d(leftX, leftY + textHeight, 0);
+            var pt2 = new Point3d(rightX, rightY, 0);
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//文字范围
+            
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             foreach(var obj in DBObjs)
             {
-                var br = obj as DBText;
-                PipeNumber = br.TextString;
+                if(obj is DBText)
+                {
+                    var br = obj as DBText;
+                    PipeNumber = br.TextString;
+                }
+                else
+                {
+
+                    var ad = (obj as Entity).AcadObject;
+                    dynamic o = ad;
+                    if((o.ObjectName as string).Equals("TDbText"))
+                    {
+                        PipeNumber = o.Text;
+                    }
+                    
+                }
+                
             }
         }
 
-        public void SetType(List<BlockReference> Results)
+        public void SetType(ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var xRange = 1200;
             var yRange = 250;
             var pt1 = new Point3d(PtEx._pt.X - xRange, PtEx._pt.Y + yRange, 0);
             var pt2 = new Point3d(PtEx._pt.X + xRange, PtEx._pt.Y - yRange, 0);
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//消火栓范围
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             if(DBObjs.Count == 0)

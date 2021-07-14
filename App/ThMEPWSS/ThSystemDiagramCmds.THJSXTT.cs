@@ -139,6 +139,9 @@ namespace ThMEPWSS
                 if (per.Status == PromptStatus.OK)//框选择成功
                 {
                     var households = 0;
+
+                    var entity = db.Element<Entity>(per.ObjectId);
+                    dynamic acadObject = entity.AcadObject;
                     engine.Recognize(db.Database, db.Element<Polyline>(per.ObjectId).Vertices());
                     var ele = engine.Elements;
                     var roomMark = ele.Select(e => (e as ThMEPEngineCore.Model.ThIfcTextNote).Text);

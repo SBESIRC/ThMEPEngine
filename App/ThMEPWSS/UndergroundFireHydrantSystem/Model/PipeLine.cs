@@ -15,19 +15,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         {
             foreach (var f in dbObjs)
             {
-                var fl = f as Polyline;
-                if (fl is null)
+                if (f is Line)
                 {
-                    var fline = f as Line;
-                    var pt1 = new Point3dEx(fline.StartPoint.X, fline.StartPoint.Y, 0);
-                    var pt2 = new Point3dEx(fline.EndPoint.X, fline.EndPoint.Y, 0);
+                    var fl = f as Line;
+                    var pt1 = new Point3dEx(fl.StartPoint.X, fl.StartPoint.Y, 0);
+                    var pt2 = new Point3dEx(fl.EndPoint.X, fl.EndPoint.Y, 0);
                     pointList.Add(pt1);
                     pointList.Add(pt2);
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
                     lineList.Add(new Line(pt1._pt, pt2._pt));
                 }
-                else
+                if (f is Polyline)
                 {
+                    var fl = f as Polyline;
                     var ptPre = fl.GetPoint3dAt(0);
                     for (int i = 1; i < fl.NumberOfVertices; i++)
                     {
@@ -44,23 +44,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
         }
 
-        public static void AddValveLine(DBObjectCollection valveDB, 
-            ref FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList, ref List<Line> lineList, ref List<Line> valveList)
+        public static void AddValveLine(DBObjectCollection valveDB, ref FireHydrantSystemIn fireHydrantSysIn, 
+            ref List<Point3dEx> pointList, ref List<Line> lineList, ref List<Line> valveList)
         {
             foreach (var v in valveDB)
             {
-                if(v is BlockReference)
+                if(v is BlockReference)//块参照
                 {
                     var br = v as BlockReference;
                     var valve = new ThFireHydrantValve(br);
                     var line1 = valve.GetLine(fireHydrantSysIn.ValveIsBkReference);
-                    var pt1 = new Point3dEx(line1.StartPoint);
-                    var pt2 = new Point3dEx(line1.EndPoint);
-                    pointList.Add(pt1);
-                    pointList.Add(pt2);
-                    valveList.Add(line1);
-                    //lineList.Add(new Line(pt1._pt, pt2._pt));
-                    ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
+                    if(LineOnLine.LineIsOnLineList(line1, lineList))//阀门在管段线上
+                    {
+                        var pt1 = new Point3dEx(line1.StartPoint);
+                        var pt2 = new Point3dEx(line1.EndPoint);
+                        pointList.Add(pt1);
+                        pointList.Add(pt2);
+                        valveList.Add(line1);
+                        ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
+                    }
                 }
                 else
                 {
@@ -82,16 +84,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                     var pt1 = new Point3dEx(bdpt1);
                     var pt2 = new Point3dEx(bdpt2);
-                    pointList.Add(pt1);
-                    pointList.Add(pt2);
-                    valveList.Add(new Line(bdpt1, bdpt2));
-                    //lineList.Add(new Line(pt1._pt, pt2._pt));
-                    ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
-                }
-                
+                    if (LineOnLine.LineIsOnLineList(new Line(pt1._pt, pt2._pt), lineList))//阀门在管段线上
+                    {
+                        pointList.Add(pt1);
+                        pointList.Add(pt2);
+                        valveList.Add(new Line(bdpt1, bdpt2));
+                        ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "Valve");
+                    }    
+                } 
             }
             PipeLineSplit(ref lineList, valveList);
-
         }
 
         public static void PipeLineSplit(ref List<Line> pipeLineList, List<Point3dEx> pointList)

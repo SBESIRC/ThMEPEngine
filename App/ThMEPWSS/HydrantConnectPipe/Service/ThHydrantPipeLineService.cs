@@ -12,6 +12,8 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.CADExtensionsNs;
 using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
+using NFox.Cad;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -310,6 +312,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 var hydrantDB = hydrantEngine.Extract(acadDatabase.Database, selectArea);
                 fireHydrantSysIn.hydrantPosition = hydrantEngine.CreatePointList();
 
+
                 var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
                 var mark = markEngine.Extract(acadDatabase.Database, selectArea);
                 var pipeMarkSite = markEngine.GetPipeMarkPoisition();
@@ -320,7 +323,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                     var markL = new List<Line>();
                     foreach (var v in pms)
                     {
-                        markL.Add(PointCompute.PointInLine(v, lineList));
+                        markL.Add(PointCompute.PointOnLine(v, lineList));
                     }
                     fireHydrantSysIn.markLineList.Add(markL);
                 }
@@ -332,9 +335,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
                 var textEngine = new ThExtractLabelText();//提取文字
                 textEngine.Extract(acadDatabase.Database);
+                var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textEngine.Results.ToCollection());
 
                 var fireHydrantEngine = new ThExtractFireHydrant();
                 fireHydrantEngine.Extract(acadDatabase.Database);
+                var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.Results.ToCollection());
+
 
                 foreach (var pt in fireHydrantSysIn.hydrantPosition)
                 {
@@ -355,8 +361,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                     }
                     var termPoint = new TermPoint(pt);
                     termPoint.SetLines(labelLine);
-                    termPoint.SetPipeNumber(textEngine.Results);
-                    termPoint.SetType(fireHydrantEngine.Results);
+                    termPoint.SetPipeNumber(textSpatialIndex);
+                    termPoint.SetType(fhSpatialIndex);
                     fireHydrantSysIn.termPointDic.Add(tpt, termPoint);
                 }
 

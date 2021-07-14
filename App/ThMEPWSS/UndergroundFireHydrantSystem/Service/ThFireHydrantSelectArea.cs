@@ -1,5 +1,7 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -17,6 +19,56 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var ptCollect = new Point3dCollection(ptNum);
 
             return ptCollect;
+        }
+
+        public static Point3dCollection CreateArea(List<Point3d> PtList)
+        {
+            var ptNum = new Point3d[5];
+            ptNum[0] = PtList[0];
+            ptNum[2] = PtList[2];
+            ptNum[4] = PtList[0];
+            ptNum[1] = PtList[1];
+            ptNum[3] = PtList[3];
+
+            var ptCollect = new Point3dCollection(ptNum);
+
+            return ptCollect;
+        }
+
+        public static Point3dCollection CreateArea(Line line)
+        {
+            var pt1 = new Point3d();
+            var pt2 = new Point3d();
+
+            if (Math.Abs(line.StartPoint.X - line.EndPoint.X) < Math.Abs(line.StartPoint.Y - line.EndPoint.Y))
+            {   
+                //线是竖着的
+                if (line.StartPoint.Y < line.EndPoint.Y)//起点在上面
+                {
+                    pt1 = new Point3d(line.StartPoint.X - 100, line.StartPoint.Y, 0);
+                    pt2 = line.EndPoint;
+                }
+                else//起点在下面
+                {
+                    pt1 = new Point3d(line.EndPoint.X - 100, line.EndPoint.Y, 0);
+                    pt2 = line.StartPoint;
+                }
+            }
+            else//线是横着的
+            {
+                if (line.StartPoint.X < line.EndPoint.X)//起点在左面
+                {
+                    pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y + 100, 0);
+                    pt2 = line.EndPoint;
+                }
+                else//起点在右面
+                {
+                    pt1 = new Point3d(line.EndPoint.X, line.EndPoint.Y + 100, 0);
+                    pt2 = line.StartPoint;
+                }
+            }
+            var tuplePoint = Tuple.Create(pt1, pt2);
+            return CreateArea(tuplePoint);
         }
     }
 }

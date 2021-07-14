@@ -30,7 +30,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return line;
         }
 
-        
+        public static DBText ThText(Point3d position, double rotation, string textString)
+        {
+            var text = new DBText();
+            text.TextString = textString;
+            text.Position = new Point3d(position.X + 50, position.Y + 50, 0);
+            text.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-DIMS");
+            text.WidthFactor = 0.7;
+            text.Height = 350;
+            text.Rotation = rotation;
+            text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            return text;
+        }
+
+
     }
         
 }

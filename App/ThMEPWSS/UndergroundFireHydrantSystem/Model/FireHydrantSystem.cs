@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
@@ -22,9 +23,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<DBText> TextList { get; set; }
         public Dictionary<Point3d, double> PipeInterrupted { get; set; }
         public List<Point3d> Valve { get; set; }
-
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
+        public List<DBText> DNList { get; set; }
 
         public FireHydrantSystemOut()
         {
@@ -37,13 +38,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             FireHydrant = new List<Point3d>();
             var opt = new PromptPointOptions("指定消火栓系统图插入点");
             InsertPoint = Active.Editor.GetPoint(opt).Value;
+            DNList = new List<DBText>();
         }
 
         public void Draw()
         {
             using ( var acadDatabase = AcadDatabase.Active())
             {
-                foreach(var line in LoopLine)
+                WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
+                foreach (var line in LoopLine)
                 {
                     line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
                     acadDatabase.CurrentSpace.Add(line);
@@ -56,7 +59,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach(var line in TextLine)
                 {
-                    //line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-DIMS");
                     acadDatabase.CurrentSpace.Add(line);
                 }
             
@@ -79,6 +81,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                         fh, new Scale3d(1, 1, 1), 0);
                     objID.SetDynBlockValue("可见性", "单栓");
                 }
+
+                foreach (var text in DNList)
+                {
+                    acadDatabase.CurrentSpace.Add(text);
+                }
             }
         }
     }
@@ -93,6 +100,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3dEx> hydrantPosition { get; set; }
         public Dictionary<Point3dEx, TermPoint> termPointDic { get; set; }
         public Dictionary<Point3dEx, List<Point3dEx>> ptDic { get; set; }
+        public Dictionary<LineSegEx, string> ptDNDic { get; set; }
+        public Dictionary<Point3dEx, string> SlashDic { get; set; }
 
         public bool ValveIsBkReference { get; set; }
 
@@ -104,8 +113,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             markList = new Dictionary<Point3dEx, string>();//次环节点名称
             ptTypeDic = new Dictionary<Point3dEx, string>();//当前点的类型字典对
             hydrantPosition = new List<Point3dEx>(); //消火栓端点
-            termPointDic = new Dictionary<Point3dEx, TermPoint>();
+            termPointDic = new Dictionary<Point3dEx, TermPoint>();//端点字典对
             ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//当前点和邻接点字典对
+            ptDNDic = new Dictionary<LineSegEx, string>();//当前点的DN字典对
+            SlashDic = new Dictionary<Point3dEx, string>();//斜点的DN字典对
         }
     }
 }

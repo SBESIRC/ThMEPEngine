@@ -12,20 +12,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     class GetPipePart
     {
         public static Point3d GetMainLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d stPt, 
-            List<Point3dEx> rstPath, Dictionary<Point3dEx, string> ptTypeDic, double valveWidth, double pipeLength)
+            List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double valveWidth, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var pt1 = stPt;
                 var pt2 = new Point3d();
-                if(i != 0)
+                if(i != 0)//对于多主环点的情况，我们只需要绘制第一对即可
                 {
-                    if(ptTypeDic[rstPath[i-1]].Equals("MainLoop"))
+                    if(fireHydrantSysIn.ptTypeDic[rstPath[i-1]].Equals("MainLoop"))
                     {
                         return stPt;
                     }
                 }
-                if (ptTypeDic[rstPath[i + 1]].Equals("Valve"))
+                if (fireHydrantSysIn.ptTypeDic[rstPath[i + 1]].Equals("Valve"))
                 {
                     pt2 = new Point3d(stPt.X + 1200 - valveWidth / 2, stPt.Y, 0);
                 }
@@ -37,12 +37,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
                 stPt = pt2;
 
+                AddDN(ref fireHydrantSysOut, i, pt1, fireHydrantSysIn, rstPath);
                 return stPt;
             }
         }
 
         public static Point3d GetSubLoopPoint(ref FireHydrantSystemOut fireHydrantSysOut, bool IsSubLoop, int i,
-            Point3dEx pt, Point3d stPt, Dictionary<Point3dEx, string> markList, double pipeGap, double pipeLength)
+            Point3dEx pt, Point3d stPt, List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double pipeGap, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -53,34 +54,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 if (i != 0 || !IsSubLoop)
                 {
-                    var textMark = ThTextSet.ThText(new Point3d(pt3.X + 120, pt3.Y - 180, 0), markList[pt]);
+                    var textMark = ThTextSet.ThText(new Point3d(pt3.X + 120, pt3.Y - 180, 0), fireHydrantSysIn.markList[pt]);
 
                     fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
                     fireHydrantSysOut.LoopLine.Add(new Line(pt2, pt3));
                     fireHydrantSysOut.PipeInterrupted.Add(pt3, Math.PI);
                     fireHydrantSysOut.TextList.Add(textMark);
                 }
-
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt4));
                 stPt = pt4;
-
+                AddDN(ref fireHydrantSysOut, i, pt1, fireHydrantSysIn, rstPath);
                 return stPt;
             }   
         }
 
-        public static Point3d GetBranchPoint(ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx pt, Point3d stPt, 
-            double pipeGap, double pipeLength)
+        public static Point3d GetBranchPoint(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3dEx pt, Point3d stPt,
+            List<Point3dEx> rstPath, double pipeGap, double pipeLength, FireHydrantSystemIn fireHydrantSysIn)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var pt1 = stPt;
                 var pt2 = new Point3d(stPt.X, stPt.Y - pipeGap, 0);
                 var pt4 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-
+                if(fireHydrantSysOut.BranchDrawDic.ContainsKey(pt))
+                {
+                    return stPt;
+                }
                 fireHydrantSysOut.BranchDrawDic.Add(pt, new Point3dEx(pt2));
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt4));
                 stPt = pt4;
+
+                AddDN(ref fireHydrantSysOut, i, pt1, fireHydrantSysIn, rstPath);
+
+
                 return stPt;
             }  
         }
@@ -103,11 +110,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     stPt = pt2;
                     valveCheck = true;
                 }
-
                 return stPt;
             } 
         }
 
+        public static void AddDN(ref FireHydrantSystemOut fireHydrantSysOut, int i, Point3d pt1, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> rstPath)
+        {
+            var pipeLine = new LineSegEx(rstPath[i]._pt, rstPath[i + 1]._pt);
+            var position = new Point3d(pt1.X + 350, pt1.Y + 100, 0);
+            if (fireHydrantSysIn.ptDNDic.ContainsKey(pipeLine))
+            {
+
+                var dn = ThTextSet.ThText(position, fireHydrantSysIn.ptDNDic[pipeLine]);
+                fireHydrantSysOut.DNList.Add(dn);
+            }
+            else
+            {
+                var tolerance = 20;
+                foreach (var slash in fireHydrantSysIn.SlashDic.Keys)
+                {
+                    if (slash._pt.DistanceTo(new Line(rstPath[i]._pt, rstPath[i + 1]._pt).GetClosestPointTo(slash._pt, false)) < tolerance)
+                    {
+                        var dn = ThTextSet.ThText(position, fireHydrantSysIn.SlashDic[slash]);
+                        fireHydrantSysOut.DNList.Add(dn);
+                        break;
+                    }
+                }
+            }
+        }
         public static void GetMainLoopDetial(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, Point3d ptStart)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

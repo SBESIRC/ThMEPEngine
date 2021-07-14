@@ -49,26 +49,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
 
-            var autConnectList = GeoFac.GroupParallelLines(GLineSegList, 1000, 5);
-            var tmpSegList = new List<GLineSegment>();
-            foreach (var l in autConnectList)
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, null, 1000, 1);//打断部分 自动连接
+            foreach (var l in GLineConnectList)
             {
-                tmpSegList.Add(GeoFac.GetCenterLine(l));
+                GLineSegList.Add(l);
             }
 
-                //var GLineConnectList = GeoFac.AutoConn(GLineSegList, null, 1000, 2);//打断部分 自动连接
-                //foreach (var l in GLineConnectList)
-                //{
-                //    GLineSegList.Add(l);
-                //}
-
             lineList = new List<Line>();//GLineSegment 转 line
-            foreach (var gl in tmpSegList)
+            foreach (var gl in GLineSegList)
             {
                 var pt1 = new Point3d(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3d(gl.EndPoint.X, gl.EndPoint.Y, 0);
                 var line = new Line(pt1, pt2);
                 lineList.Add(line);
+            }
+        }
+
+        public static void RemoveFalsePipe(ref List<Line> lineList, List<Point3dEx> hydrantPosition)
+        {
+            foreach (var line in lineList.ToArray())//删除两个点都是端点的线段
+            {
+                if (PtInPtList.PtIsTermLine(line, hydrantPosition))
+                {
+                    lineList.Remove(line);
+                }
             }
         }
     }
