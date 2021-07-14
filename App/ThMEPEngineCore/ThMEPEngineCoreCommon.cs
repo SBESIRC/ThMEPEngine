@@ -129,6 +129,7 @@ namespace ThMEPEngineCore
         public const double DoorStoneInterval=5.0;
         public const double DoorMaximumThick = 300;
         public const double DoorMinimumThick = 50;
+        public const double DoorStoneWidthTolerance = 110;
 
         /// <summary>
         /// 圆形柱细化弧长

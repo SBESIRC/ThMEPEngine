@@ -90,23 +90,25 @@ namespace ThMEPEngineCore.Service
         }       
         public static double GetLength(List<string> values)
         {
+            //由于地方设计院与集团制定的门洞规则不一致，暂时不用，后续再开发
             double length = 0.0;
             if(values.Count >= 2 && values.Count <= 3)
             {
                 string lengthStr = values[1];
                 length = double.Parse(lengthStr.Substring(0, 2)) * 100.0;
-                if (values.Count == 3)
-                {
-                    switch (values[2])
-                    {
-                        case "a":
-                            length += 50.0;
-                            break;
-                        default:
-                            length += 0.0;
-                            break;
-                    }
-                }
+                //if (values.Count == 3)
+                //{
+                //    switch (values[2])
+                //    {
+                //        case "b":
+                //        case "c":
+                //            length += 50.0;
+                //            break;
+                //        default:
+                //            length += 0.0;
+                //            break;
+                //    }
+                //}
             }          
             return length;
         }
