@@ -128,7 +128,6 @@
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtProcessService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDShortestPathService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCleanLineService.cs" />
-    <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="DrainageSystemDiagram\Assistant\CleanDebugDrawing.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRoomExtractor.cs" />
