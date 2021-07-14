@@ -202,7 +202,7 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return Math.Abs(first.Distance(second) - length) <= 55.0; //5.0用于解决小于点误差, 50对应于标注值可能需要加100
+            return Math.Abs(first.Distance(second) - length) <= ThMEPEngineCoreCommon.DoorStoneWidthTolerance;
         }
         private Polyline ToOBB(Line left,Line right)
         {
