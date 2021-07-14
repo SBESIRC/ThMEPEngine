@@ -134,10 +134,12 @@ namespace ThMEPWSS.Hydrant.Service
 
         private ThProtectionContextMgd BuildHydrantParam()
         {
-            var context = new ThProtectionContextMgd();
-            context.HydrantHoseLength = FireHydrantVM.Parameter.FireHoseWalkRange;
-            context.HydrantClearanceRadius = FireHydrantVM.Parameter.SprayWaterColumnRange;
-            return context;
+            return new ThProtectionContextMgd()
+            {
+                HydrantClearanceSampleLength = 1000.0,
+                HydrantHoseLength = FireHydrantVM.Parameter.FireHoseWalkRange,
+                HydrantClearanceRadius = FireHydrantVM.Parameter.SprayWaterColumnRange
+            };
         }
         private List<Point3d> ContainsPts(Entity polygon,List<Point3d> pts)
         {
