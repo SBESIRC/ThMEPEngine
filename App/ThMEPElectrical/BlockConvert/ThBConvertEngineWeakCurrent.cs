@@ -44,12 +44,15 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            // 考虑几何中心
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.MCS2WCS);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var offset = targetBlockData.GetCentroidPoint().GetVectorTo(srcBlockData.GetCentroidPoint());
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
@@ -66,28 +69,20 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 double rotation = srcBlockReference.Rotation;
                 if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                    (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
+                    (rotation - Math.PI * 3 / 2) <= -ThBConvertCommon.radian_tolerance)
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, blockReference.Position));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, srcBlockReference.GetCentroidPoint()));
+                }
+                else
+                {
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, srcBlockReference.GetCentroidPoint()));
                 }
             }
         }
 
-        private void AdjustPosition(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        private void AdjustPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 当图块的基点与其中图元的OBB内部或边界上时，目标块基点与源块基点相同
-            // 当图块的基点在其中图元的OBB外部时，目标块基点选择源块图元OBB的几何中心
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef);
-                var blockReferenceOBB = blockReference.GetBlockReferenceOBB(blockReference.BlockTransform);
-                if (!blockReferenceOBB.ContainsPoint(blockReference.Position))
-                {
-                    var centroid = blockReferenceOBB.GetCentroidPoint();
-                    var offset = centroid.GetVectorTo(blockReference.Position);
-                    blockReference.TransformBy(Matrix3d.Displacement(offset));
-                }
-            }
+            //
         }
     }
 }

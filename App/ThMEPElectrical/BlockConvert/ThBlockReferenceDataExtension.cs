@@ -19,8 +19,27 @@ namespace ThMEPElectrical.BlockConvert
                     .Select(e => acadDatabase.Element<Entity>(e))
                     .Where(e => e.Layer != "DEFPOINTS")
                     .Where(e => e is Curve);
-                var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
-                return rectangle.GetCentroidPoint().TransformBy(data.MCS2WCS);
+                if (entities.Any())
+                {
+                    var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
+                    return rectangle.GetCentroidPoint().TransformBy(data.MCS2WCS);
+                }
+                else
+                {
+                    var rectangle = data.ToOBB();
+                    return rectangle.GetCentroidPoint();
+                }
+            }
+        }
+
+        public static Polyline ToOBB(this ThBlockReferenceData data)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(data.EffectiveName);
+                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
+                rectangle.TransformBy(data.MCS2WCS);
+                return rectangle;
             }
         }
     }

@@ -57,18 +57,66 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            if (srcBlockData.EffectiveName.Contains("风机"))
+            {
+                TransformByBase(blkRef, srcBlockData);
+            }
+            else
+            {
+                TransformByCenter(blkRef, srcBlockData);
+            }
+        }
+
+        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            // 考虑几何中心
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.MCS2WCS);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var offset = targetBlockData.GetCentroidPoint().GetVectorTo(srcBlockData.GetCentroidPoint());
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
+            }
+        }
+
+        private void TransformByBase(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            // 考虑设备基点
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var dynamicProperties = srcBlockData.CustomProperties;
+                var base_x = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
+                var base_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                var offset = targetBlockData.Position.GetVectorTo(new Point3d(base_x, base_y, 0).TransformBy(srcBlockData.MCS2WCS));
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
         public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
-            AdjustPositionWithOBB(blkRef, srcBlockReference);
+            AdjustRotation(blkRef, srcBlockReference);
+        }
+
+        private void AdjustRotation(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                double rotation = srcBlockReference.Rotation;
+                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
+                    (rotation - Math.PI * 3 / 2) <= - ThBConvertCommon.radian_tolerance)
+                {
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, srcBlockReference.GetCentroidPoint()));
+                }
+                else
+                {
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, srcBlockReference.GetCentroidPoint()));
+                }
+            }
         }
 
         private void AdjustPositionWithBasePoint(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
@@ -94,16 +142,6 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     blockReference.TransformBy(Matrix3d.Displacement(offset));
                 }
-            }
-        }
-
-        private void AdjustPositionWithOBB(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var offset = blockReference.Position.GetVectorTo(srcBlockData.GetCentroidPoint());
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
