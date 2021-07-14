@@ -23,7 +23,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageSDColdWaterSupplyStartExtractor : ThExtractorBase , IAreaId
     {
         public List<ThRawIfcBuildingElementData> ColdWaterSupplyStarts { get; private set; }
-        public string ElementLayer { get; set; }
         public string AreaId { get;private set; }
 
         public ThDrainageSDColdWaterSupplyStartExtractor()

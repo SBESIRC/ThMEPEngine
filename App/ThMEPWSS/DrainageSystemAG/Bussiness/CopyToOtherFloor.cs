@@ -15,7 +15,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private List<CreateBlockInfo> _thisFloorBlocks;
         private List<CreateBasicElement> _thisFloorBasicElems;
         private List<CreateDBTextElement> _thisFloorTextElems;
-        private FloorFramed _baseFloor;
         private Point3d _thisFloorBasePoint;
         public CopyToOtherFloor(FloorFramed baseFloor, List<CreateBlockInfo> thisFloorBlocks, List<CreateBasicElement> thisFloorBasicElement, List<CreateDBTextElement> thisFloorTextElems) 
         {
