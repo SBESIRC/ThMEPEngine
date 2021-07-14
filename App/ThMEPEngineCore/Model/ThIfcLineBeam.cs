@@ -33,7 +33,7 @@ namespace ThMEPEngineCore.Model
             //
         }
 
-        public static ThIfcLineBeam Create(Polyline polyline, double height = 0.0)
+        public static ThIfcLineBeam Create(Polyline polyline, double height = 0.0, double distanceToFloor = 0.0)
         {
             var segments = new PolylineSegmentCollection(polyline);
             var enumerable = segments.Where(o => o.IsLinear).OrderByDescending(o => o.ToLineSegment().Length);
@@ -48,13 +48,14 @@ namespace ThMEPEngineCore.Model
                 Outline = beam.BeamBoundary,
                 StartPoint = beam.StartPoint,
                 Uuid = Guid.NewGuid().ToString(),
+                DistanceToFloor = distanceToFloor
             };
         }
         public static ThIfcLineBeam Create(ThIfcBeamAnnotation annotation)
         {
             var outline = ThLineBeamOutliner.CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
             outline.TransformBy(annotation.Matrix);
-            return Create(outline, annotation.Size.Y);
+            return Create(outline, annotation.Size.Y, double.Parse(annotation.Attributes[ThMEPEngineCoreCommon.BEAM_GEOMETRY_DISTANCETOFLOOR]));
         }
         public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
         {

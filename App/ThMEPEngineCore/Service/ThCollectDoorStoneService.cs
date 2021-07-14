@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Service
         public double EnvelopWidthMaxExtent { get; set; }
         public double EnvelopHeightMaxExtent { get; set; }
         public double DoorStoneLength { get; set; }
-        public List<Tuple<Entity, List<Polyline>, double>> Results { get; private set; }
+        public List<Tuple<Entity, List<Polyline>, double, string>> Results { get; private set; }
         private DBObjectCollection DoorMarks { get; set; }
         private ThCADCoreNTSSpatialIndex DoorStoneSpatialIndex { get; set; }
         public ThCollectDoorStoneService(
@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.Service
             EnvelopHeightMaxExtent = 400;
             DoorStoneLength = 50;
             DoorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(doorStones);
-            Results = new List<Tuple<Entity, List<Polyline>, double>>();
+            Results = new List<Tuple<Entity, List<Polyline>, double, string>>();
         }
         public void Build()
         {
@@ -55,7 +55,7 @@ namespace ThMEPEngineCore.Service
                             int max = stones.Count;
                             double Minlength = double.MaxValue;
                             double MinAngle = double.MaxValue;
-                            Tuple<Entity, List<Polyline>, double> temp=null;
+                            Tuple<Entity, List<Polyline>, double, string> temp=null;
                             for (int i=0;i<max-1;i++)
                                 for(int j=i+1;j<max;j++)
                                 {
@@ -66,14 +66,14 @@ namespace ThMEPEngineCore.Service
                                     {
                                         if(ThAuxiliaryUtils.DoubleEquals(angle, MinAngle, 1.0 / 180 * Math.PI) && realLength < Minlength)
                                         {
-                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length);
+                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length, strList[0]);
                                             //Results.Add(Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length));
                                             Minlength = realLength;
                                             MinAngle = angle;
                                         }
                                         else if(angle < MinAngle)
                                         {
-                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length);
+                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length, strList[0]);
                                             //Results.Add(Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length));
                                             Minlength = realLength;
                                             MinAngle = angle;

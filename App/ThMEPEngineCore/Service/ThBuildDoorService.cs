@@ -11,7 +11,7 @@ namespace ThMEPEngineCore.Service
 {
     public class ThBuildDoorService
     {
-        public List<Polyline> Outlines { get; private set; }
+        public List<Tuple<Polyline, string>> Outlines { get; private set; }
         public double TesslateLength { get; set; }
         private Dictionary<DBText, List<Polyline>> DoorMarkStones { get; set; }
         private double Interval { get; set; }
@@ -20,21 +20,21 @@ namespace ThMEPEngineCore.Service
         {        
             MaxDoorWidth = 300;
             TesslateLength = 1000;
-            Outlines = new List<Polyline>();
+            Outlines = new List<Tuple<Polyline, string>>();
             Interval = ThMEPEngineCoreCommon.DoorStoneInterval; //门垛与邻居的间隔，用于搜索相邻的元素
         }
         
-        public void Build(List<Tuple<Entity, List<Polyline>, double>> doorMarkStones)
+        public void Build(List<Tuple<Entity, List<Polyline>, double, string>> doorMarkStones)
         {
             // 门标注，对应两个门垛，门长度
             foreach(var group in doorMarkStones)
             {
                 if (group.Item2.Count == 2)
                 {
-                    Outlines.Add(BuildDoor(group.Item2[0], group.Item2[1], group.Item3));
+                    Outlines.Add(Tuple.Create(BuildDoor(group.Item2[0], group.Item2[1], group.Item3),group.Item4));
                 }
             }
-            Outlines = Outlines.Where(o => o.Area > 0.0).ToList();
+            Outlines = Outlines.Where(o => o.Item1.Area > 0.0).ToList();
         }
         private Polyline BuildDoor(Polyline firstStone,Polyline secondStone, double length)
         {
