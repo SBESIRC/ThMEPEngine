@@ -80,12 +80,12 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static DBObjectCollection Intersection(Entity first, Entity other)
+        public static DBObjectCollection Intersection(Entity first, Entity other, bool keepHoles = false)
         {
             return OverlayNGRobust.Overlay(
                 first.ToNTSPolygon(),
                 other.ToNTSPolygon(), 
-                SpatialFunction.Intersection).ToDbCollection();
+                SpatialFunction.Intersection).ToDbCollection(keepHoles);
         }
 
         public static DBObjectCollection Difference(Entity entity, DBObjectCollection objs,bool keepHoles=false)

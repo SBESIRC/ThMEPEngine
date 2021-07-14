@@ -141,13 +141,13 @@ namespace ThCADCore.NTS
             var locator = new SimplePointInAreaLocator(polygon.ToNTSGeometry());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
-        public static DBObjectCollection MakeValid(this MPolygon mPolygon)
+        public static DBObjectCollection MakeValid(this MPolygon mPolygon,bool keepHoles=false)
         {
             // zero-width buffer trick:
             //  http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
             // self-union trick:
             //  http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
-            return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection();
+            return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection(keepHoles);
         }
 
         public static DBObjectCollection Buffer(this MPolygon mPolygon, double length)
