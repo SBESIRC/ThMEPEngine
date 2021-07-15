@@ -1,7 +1,7 @@
 ﻿//this file is for debugging only by Feng
 
 //#if DEBUG
-
+#pragma warning disable
 
 using System;
 using System.Text;
@@ -29,7 +29,6 @@ namespace ThMEPWSS.DebugNs
     using Dreambuild.AutoCAD;
     using DotNetARX;
     using Autodesk.AutoCAD.Internal;
-    using static ThMEPWSS.DebugNs.ThPublicMethods;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.DebugNs;
@@ -55,1082 +54,6 @@ namespace ThMEPWSS.DebugNs
     using ThMEPEngineCore.Engine;
     using NetTopologySuite.Geometries;
     using System.Linq.Expressions;
-#pragma warning disable
-    public class FengDbgTest
-    {
-        public static Dictionary<string, object> processContext;
-        public static Dictionary<string, object> ctx
-        {
-            get
-            {
-                if (processContext == null) return null;
-                return (Dictionary<string, object>)processContext["context"];
-            }
-        }
-        //using (var adb = AcadDatabase.Active())
-        //using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-        //{
-        //}
-        public class qt8czw
-        {
-            public static void InitButtons()
-            {
-                qt8f54(); qt8ddf();
-            }
-            public static void AddButton(string name, Action f)
-            {
-                if (!Dbg.isDebugging) return;
-                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
-            }
-            private static void qt8ddf()
-            {
-                var targetType = typeof(Util1);
-                ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], targetType.FullName);
-                var fs = ((List<Action>)ctx["actions"]).ToList();
-                var names = ((List<string>)ctx["names"]).ToList();
-                ((Action<Assembly>)ctx["clearAcadActions"])((Assembly)ctx["currentAsm"]);
-                for (int i = 0; i < fs.Count; i++)
-                {
-                    var f = fs[i];
-                    var name = names[i];
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
-                }
-            }
-            private static void qt8f54()
-            {
-                AddButtons4(typeof(THDrainageService));
-                AddButtons3(typeof(Sankaku2));
-                AddButtons3(typeof(Sankaku1));
-
-                AddButtons2(typeof(DrainageTest));
-                AddButtons2(typeof(Sankaku));
-
-
-                if (false)
-                {
-                    AddButtons2(typeof(Sankaku1.qvjp9n));
-                    AddButtons2(typeof(FengDbgTesting));
-                    AddButtons2(typeof(quj50y));
-                    AddButtons2(typeof(quin3c));
-                }
-            }
-
-            private static void AddButtons3(Type t)
-            {
-                if (t.GetCustomAttribute<FengAttribute>() != null)
-                {
-                    AddButtons2(t);
-                }
-            }
-            public static void AddButtons4(Type targetType)
-            {
-                var attrType = ((Assembly)ctx["currentAsm"]).GetType(typeof(FengAttribute).FullName);
-                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.NonPublic | BindingFlags.Static))
-                {
-                    var attr = mi.GetCustomAttribute(attrType);
-                    if (attr == null) continue;
-                    var name = (string)attrType.GetField("Title").GetValue(attr);
-                    if (string.IsNullOrEmpty(name)) name = mi.Name;
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
-                    {
-                        try
-                        {
-                            mi.Invoke(null, null);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            MessageBox.Show((ex.InnerException ?? ex).Message);
-                        }
-                    });
-                }
-            }
-            public static void AddButtons2(Type targetType)
-            {
-                var attrType = ((Assembly)ctx["currentAsm"]).GetType(typeof(FengAttribute).FullName);
-                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.Public | BindingFlags.Static))
-                {
-                    var attr = mi.GetCustomAttribute(attrType);
-                    if (attr == null) continue;
-                    var name = (string)attrType.GetField("Title").GetValue(attr);
-                    if (string.IsNullOrEmpty(name)) name = mi.Name;
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
-                    {
-                        try
-                        {
-                            mi.Invoke(null, null);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            MessageBox.Show((ex.InnerException ?? ex).Message);
-                        }
-                    });
-                }
-            }
-            public static void AddButtons1(Type targetType)
-            {
-                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.Public | BindingFlags.Static))
-                {
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], mi.Name, () =>
-                    {
-                        try
-                        {
-                            mi.Invoke(null, null);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            MessageBox.Show((ex.InnerException ?? ex).Message);
-                        }
-                    });
-                }
-            }
-        }
-        public static void Test(Dictionary<string, object> ctx)
-        {
-            processContext = (Dictionary<string, object>)ctx["processContext"];
-            ctx.TryGetValue("entryMethod", out object o);
-            if (o is Action entryMethod)
-            {
-                Action initMethod = null;
-                initMethod = new Action(() =>
-                {
-                    ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], typeof(ThDebugClass).FullName);
-                    var fs = ((List<Action>)ctx["actions"]).ToList();
-                    var names = ((List<string>)ctx["names"]).ToList();
-                    ((Action<Assembly>)ctx["clearAcadActions"])((Assembly)ctx["currentAsm"]);
-                    ((Action<object>)ctx["clearBtns"])(ctx["currentPanel"]);
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "initMethod", initMethod);
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "reloadMe", () =>
-                    {
-                        var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
-                        asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
-                        initMethod();
-                    });
-
-                    {
-                        qt8czw.InitButtons();
-                    }
-                    {
-                        var _names = File.ReadLines(@"E:\xx.txt")
-             .Select(x => x.Trim())
-             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("//"))
-             .ToList();
-                        foreach (var _name in _names)
-                        {
-                            var name = _name;
-                            string __name = null;
-                            if (name.Contains(" "))
-                            {
-                                var j = name.IndexOf(" ");
-                                var tmp = name;
-                                name = tmp.Substring(0, j);
-                                __name = tmp.Substring(j).Trim();
-                                if (string.IsNullOrWhiteSpace(__name)) __name = null;
-                            }
-                            var i = names.IndexOf(name);
-                            if (i >= 0)
-                            {
-                                var f = fs[i];
-                                var name_ = names[i];
-                                if (__name != "xx")
-                                {
-                                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], __name ?? name, f);
-                                }
-                            }
-                        }
-                    }
-
-                    if (false)
-                    {
-                        for (int i = 0; i < fs.Count; i++)
-                        {
-                            var f = fs[i];
-                            var name = names[i];
-                            ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
-                        }
-                    }
-                });
-                ctx["initMethod"] = initMethod;
-                entryMethod();
-            }
-            else
-            {
-                MessageBox.Show("entryMethod not set!");
-            }
-            return;
-            Origin(ctx);
-        }
-
-
-        private static void Origin(Dictionary<string, object> ctx)
-        {
-            processContext = (Dictionary<string, object>)ctx["processContext"];
-            ctx.TryGetValue("entryMethod", out object o);
-            if (o is Action entryMethod)
-            {
-                Action initMethod = null;
-                initMethod = new Action(() =>
-                {
-                    ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], typeof(ThDebugClass).FullName);
-                    ((Action<object>)ctx["clearBtns"])(ctx["currentPanel"]);
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "initMethod", initMethod);
-                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "reloadMe", () =>
-                    {
-                        var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
-                        asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
-                        initMethod();
-                    });
-                    var fs = (List<Action>)ctx["actions"];
-                    var names = (List<string>)ctx["names"];
-                    for (int i = 0; i < fs.Count; i++)
-                    {
-                        var f = fs[i];
-                        var name = names[i];
-                        ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
-                    }
-                });
-                ctx["initMethod"] = initMethod;
-                entryMethod();
-            }
-            else
-            {
-                MessageBox.Show("entryMethod not set!");
-            }
-        }
-    }
-    public class ThDebugDrawer
-    {
-        static Database WorkingDatabase => HostApplicationServices.WorkingDatabase;
-        static Transaction Transaction => WorkingDatabase.TransactionManager.StartTransaction();
-        static ObjectId GetEntity()
-        {
-            var ed = Active.Editor;
-            var opt = new PromptEntityOptions("请选择");
-            var ret = ed.GetEntity(opt);
-            if (ret.Status != PromptStatus.OK) return ObjectId.Null;
-            return ret.ObjectId;
-        }
-        public static T GetEntity<T>(AcadDatabase adb) where T : DBObject
-        {
-            var id = GetEntity();
-            var ent = adb.Element<T>(id);
-            return ent;
-        }
-        public static ObjectId[] GetSelection()
-        {
-            var ed = Active.Editor;
-            var opt = new PromptSelectionOptions();
-            var ret = ed.GetSelection(opt);
-            if (ret.Status != PromptStatus.OK) return null;
-            return ret.Value.GetObjectIds();
-        }
-        private static BlockTableRecord GetBlockTableRecord(Database db, Transaction trans)
-        {
-            var bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
-            var btr = (BlockTableRecord)trans.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-            return btr;
-        }
-        public static Polyline DrawPolygon(Database db, Transaction trans, Point2d center, int num, double radius)
-        {
-            var btr = GetBlockTableRecord(db, trans);
-            var pline = PolylineTools.CreatePolygon(center, num, radius);
-            btr.AppendEntity(pline);
-            trans.AddNewlyCreatedDBObject(pline, true);
-            return pline;
-        }
-        public static bool GetCircleBoundary(Point3dCollection points, out Point3d center, out double radius)
-        {
-            if (points.Count == 0)
-            {
-                center = default;
-                radius = default;
-                return false;
-            }
-            var minX = points.Cast<Point3d>().Select(p => p.X).Min();
-            var maxX = points.Cast<Point3d>().Select(p => p.X).Max();
-            var minY = points.Cast<Point3d>().Select(p => p.Y).Min();
-            var maxY = points.Cast<Point3d>().Select(p => p.Y).Max();
-            var minZ = points.Cast<Point3d>().Select(p => p.Z).Min();
-            var maxZ = points.Cast<Point3d>().Select(p => p.Z).Max();
-            var pt1 = new Point3d(minX, minY, minZ);
-            var pt2 = new Point3d(maxX, maxY, maxZ);
-            center = GeTools.MidPoint(pt1, pt2);
-            radius = (center - pt1).Length;
-            return true;
-        }
-        public static void DrawLabelBox(Database db, params Point2d[] points)
-        {
-            using (var trans = Transaction)
-            {
-                var radius = 50;
-                foreach (var pt in points)
-                {
-                    var pline = DrawPolygon(db, trans, pt, 6, radius * 1.5);
-                    pline.ConstantWidth = 50;
-                    trans.Commit();
-                }
-            }
-        }
-        public static void DrawLineByPolar(Database db, Point2d center, double radius, double angle)
-        {
-            var x = center.X + radius * Math.Cos(angle);
-            var y = center.Y + radius * Math.Sin(angle);
-            DrawLine(db, center, new Point2d(x, y));
-        }
-        public static void DrawLineByOffset(Database db, Point2d start, double offsetX, double offsetY)
-        {
-            DrawLine(db, start, new Point2d(start.X + offsetX, start.Y + offsetY));
-        }
-        public static void DrawText(Database db, Point2d pt, string text)
-        {
-            using (var trans = Transaction)
-            {
-                var btr = GetBlockTableRecord(db, trans);
-                var t = new DBText() { Position = pt.ToPoint3d(), TextString = text, Height = 350, Thickness = 10, };
-                btr.AppendEntity(t);
-                trans.AddNewlyCreatedDBObject(t, true);
-                trans.Commit();
-            }
-
-        }
-        public static void DrawCircle(Database db, Point3d pt1, Point3d pt2, Point3d pt3)
-        {
-            using (var trans = Transaction)
-            {
-                var btr = GetBlockTableRecord(db, trans);
-                var circle = CircleTools.CreateCircle(pt1, pt2, pt3);
-                circle.Thickness = 5;
-                btr.AppendEntity(circle);
-                trans.AddNewlyCreatedDBObject(circle, true);
-                circle.ColorIndex = 32;
-                trans.Commit();
-            }
-        }
-        public static void DrawCircle(Database db, Point2d center, double radius)
-        {
-            using (var trans = Transaction)
-            {
-                var btr = GetBlockTableRecord(db, trans);
-                var circle = new Circle
-                {
-                    Center = center.ToPoint3d(),
-                    Radius = radius,
-                    Thickness = 5
-                };
-                btr.AppendEntity(circle);
-                trans.AddNewlyCreatedDBObject(circle, true);
-                circle.ColorIndex = 32;
-                trans.Commit();
-            }
-        }
-        public static void DrawLine(Database db, Point2d start, Point2d end)
-        {
-            using (var trans = Transaction)
-            {
-                var btr = GetBlockTableRecord(db, trans);
-                var pts = new Point2dCollection { start, end, };
-                var pline = PolylineTools.CreatePolyline(pts);
-                btr.AppendEntity(pline);
-                trans.AddNewlyCreatedDBObject(pline, true);
-                pline.ConstantWidth = 2;
-                pline.ColorIndex = 32;
-                trans.Commit();
-            }
-        }
-
-
-    }
-    public class StaticMethods
-    {
-        public static void SaveData(string name, object obj)
-        {
-            File.WriteAllText($@"D:\temptxts\{name}.txt", obj.ToJson());
-        }
-        public static T LoadData<T>(string name)
-        {
-            return File.ReadAllText($@"D:\temptxts\{name}.txt").FromJson<T>();
-        }
-        public static T LoadData<T>(string name, JsonConverter cvt)
-        {
-            return JsonConvert.DeserializeObject<T>(File.ReadAllText($@"D:\temptxts\{name}.txt"), cvt);
-        }
-    }
-    public class ThDebugTool
-    {
-
-        public static GeometryFactory GeometryFactory => ThCADCoreNTSService.Instance.GeometryFactory;
-        public static DocumentLock DocumentLock => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
-        public static Editor Editor => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-        public static Document MdiActiveDocument => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-        public static Dictionary<string, object> ctx => ThDebugClass.ctx;
-        public static T LoadFromTempJsonFile<T>(string name)
-        {
-            return LoadFromJsonFile<T>(@"Y:\" + name + ".json");
-        }
-        public static T LoadFromJsonFile<T>(string file)
-        {
-            return File.ReadAllText(file).FromCadJson<T>();
-        }
-        public static void AddButton(string name, Action f)
-        {
-            FengDbgTesting.AddButton(name, f);
-        }
-        public static void AddLazyAction(string name, Action<AcadDatabase> f)
-        {
-            FengDbgTesting.AddLazyAction(name, f);
-        }
-        public static void SaveToTempJsonFile(object obj, string filename = null)
-        {
-            filename ??= DateTime.Now.Ticks.ToString();
-            var file = @"Y:\" + filename + ".json";
-            File.WriteAllText(file, obj.ToCadJson());
-            Dbg.PrintLine(file);
-        }
-        public static void SaveToJsonFile(object obj, string filename = null)
-        {
-            filename ??= DateTime.Now.Ticks.ToString();
-            var file = @"D:\DATA\temp\" + filename + ".json";
-            File.WriteAllText(file, obj.ToCadJson());
-            Dbg.PrintLine(file);
-        }
-        public static void UnHighLight(IEnumerable<Entity> ents)
-        {
-            HighlightHelper.UnHighLight(ents);
-        }
-        public static void HighLight(IEnumerable<Entity> ents)
-        {
-            HighlightHelper.HighLight(ents);
-        }
-        public static void ShowString(string str)
-        {
-            if (!isDebugging) return;
-            ((Action<string>)ctx["showString"])(str);
-        }
-        public static void PrintLine(bool b)
-        {
-            PrintLine(b.ToString());
-        }
-        public static void PrintLine(double line)
-        {
-            PrintLine(line.ToString());
-        }
-        public static void PrintLine(string line)
-        {
-            if (!isDebugging) return;
-            if (ctx["currentLogWindow"] == null) return;
-            ((Action<string>)ctx["addline"])(line);
-        }
-        public static void PrintText(string text)
-        {
-            if (!isDebugging) return;
-            if (ctx["currentLogWindow"] == null) return;
-            ((Action<string>)ctx["addtext"])(text);
-        }
-        public static void PrintText(string[] lines)
-        {
-            if (!isDebugging) return;
-            if (ctx["currentLogWindow"] == null) return;
-            ((Action<string>)ctx["addtext"])(string.Join("\n", lines));
-        }
-        public static void Log(object obj)
-        {
-            ((Action<string>)Dbg.ctx["thape_logger"])(obj.ToCadJson());
-        }
-        public static void NewLogWindow()
-        {
-            if (!isDebugging) return;
-            ((Action)ctx["newLogWindow"])();
-        }
-        public static void ShowCurrentLogWindow()
-        {
-            if (!isDebugging) return;
-            ((Action)ctx["showCurrentLogWindow"])();
-        }
-        public static bool isDebugging => FengDbgTest.ctx != null;
-        public static bool _;
-        public static void SetText(IEnumerable<string> lines)
-        {
-            if (!isDebugging) return;
-            if (lines == null) SetText((string)null);
-            SetText(string.Join("\n", lines));
-        }
-        public static void SetText(string text)
-        {
-            if (!isDebugging) return;
-            ((Action<string>)ctx["setText"])(text);
-        }
-        public class TextBoxWriter : System.IO.TextWriter
-        {
-            //重载string那个方法没用的
-            StringBuilder sb = new StringBuilder(8192);
-            bool r;
-            public override void Write(char value)
-            {
-                //Dbg.PrintLine(value.ToJson());
-                if (value == '\r')
-                {
-                    r = true;
-                    return;
-                }
-                if (value == '\n')
-                {
-                    if (r)
-                    {
-                        var s = sb.ToString();
-                        if (s.Length > 100 || s.Contains('\n'))
-                        {
-                            Dbg.PrintText(s);
-                        }
-                        else
-                        {
-                            Dbg.PrintLine(s);
-                        }
-                        r = false;
-                        sb.Clear();
-                        return;
-                    }
-                    else
-                    {
-                        sb.Append(value);
-                        return;
-                    }
-                }
-                r = false;
-                sb.Append(value);
-            }
-            public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;
-        }
-        static ThDebugTool()
-        {
-            Console.SetOut(new TextBoxWriter());
-        }
-        const double DEFAULT_WIDTH = 100;
-        public static void ShowLine(Line line, double width = DEFAULT_WIDTH)
-        {
-            var pl = DU.DrawPolyLineLazy(line.StartPoint, line.EndPoint);
-            pl.ConstantWidth = width;
-        }
-        public static void ShowLine(Polyline pline, double width = DEFAULT_WIDTH)
-        {
-            var pl = DU.DrawPolyLineLazy(pline.ToPoint3dCollection().Cast<Point3d>().ToArray());
-            pl.ConstantWidth = width;
-        }
-        public static void ShowLine(Entity ent, double width = DEFAULT_WIDTH)
-        {
-            if (ThRainSystemService.IsTianZhengElement(ent))
-            {
-                foreach (var e in ent.ExplodeToDBObjectCollection().OfType<Entity>())
-                {
-                    ShowLine(e, width);
-                }
-            }
-            else if (ent is Line line)
-            {
-                ShowLine(line, width);
-            }
-            else if (ent is Polyline pl)
-            {
-                ShowLine(pl, width);
-            }
-        }
-        public static void LayerThreeAxes(List<string> layers)
-        {
-            static void EnsureLayerOn(string layerName)
-            {
-                var id = DbHelper.GetLayerId(layerName);
-                id.QOpenForWrite<LayerTableRecord>(layer =>
-                {
-                    layer.IsLocked = false;
-                    layer.IsFrozen = false;
-                    layer.IsHidden = false;
-                    layer.IsOff = false;
-                });
-            }
-            foreach (var layer in layers)
-            {
-                try
-                {
-                    //Dreambuild.AutoCAD.DbHelper.EnsureLayerOn(layer);
-                    EnsureLayerOn(layer);
-                }
-                catch { }
-            }
-        }
-        const double DEFAULT_DELTA = 10000;
-        public static void ShowAll(string text, double delta = DEFAULT_DELTA)
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            {
-                foreach (var t in adb.ModelSpace.OfType<DBText>().Where(t => t.TextString == text))
-                {
-                    var bd = GeoAlgorithm.GetBoundaryRect(t);
-                    Dbg.ShowWhere(bd, delta);
-                }
-            }
-        }
-        public static void ShowWhere(string text, double delta = DEFAULT_DELTA)
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            {
-                var t = adb.ModelSpace.OfType<DBText>().FirstOrDefault(x => x.TextString == text);
-                if (t != null)
-                {
-                    var bd = GeoAlgorithm.GetBoundaryRect(t);
-                    Dbg.ShowWhere(bd);
-                }
-            }
-        }
-        public static void ShowWhere(Entity e, double delta = DEFAULT_DELTA)
-        {
-            ShowWhere(GeoAlgorithm.GetBoundaryRect(e), delta);
-        }
-        public static void ShowWhere(Point2d pt, double delta = DEFAULT_DELTA)
-        {
-            ShowWhere(pt.ToPoint3d(), delta);
-        }
-        public static void ShowWhere(Point3d pt, double delta = DEFAULT_DELTA)
-        {
-            ShowWhere(new GRect(pt.ToPoint2d(), pt.ToPoint2d()), delta);
-        }
-        public static void ShowXLabel(Point2d pt, double size = 500)
-        {
-            ShowXLabel(pt.ToPoint3d(), size);
-        }
-        public static void ShowXLabel(Point3d pt, double size = 500)
-        {
-            DrawUtils.DrawingQueue.Enqueue(adb =>
-            {
-                var db = adb.Database;
-                //Dbg.BuildAndSetCurrentLayer(db);
-                var r = new GRect(pt.X - size / 2, pt.Y - size / 2, pt.X + size / 2, pt.Y + size / 2);
-                var lines = new Line[] {
-new Line() { StartPoint = r.LeftTop.ToPoint3d(), EndPoint = r.RightButtom.ToPoint3d()},
-new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoint3d() }
-      };
-                foreach (var line in lines)
-                {
-                    line.Thickness = 10;
-                    line.ColorIndex = 3;
-                    adb.ModelSpace.Add(line);
-                }
-            });
-        }
-        public static void ShowWhere(Geometry geo, double delta = DEFAULT_DELTA)
-        {
-            ShowWhere(geo.ToGRect(), delta);
-        }
-        public static void ShowWhere(GRect r, double delta = DEFAULT_DELTA)
-        {
-            DrawUtils.DrawingQueue.Enqueue(adb =>
-            {
-                var db = adb.Database;
-                //Dbg.BuildAndSetCurrentLayer(db);
-                var rect = "[-334718.142328821,1366616.99129695,635160.253054206,1868196.71202574]".JsonToGRect();
-                GRect r3 = default;
-                {
-                    var circle = DrawUtils.DrawCircleLazy(r.Expand(800));
-                    circle.Thickness = 500;
-                    circle.ColorIndex = 3;
-                }
-                for (int i = 0; i < 4; i++)
-                {
-                    var _delta = delta * i;
-                    //if (_delta > rect.Width / 2 && _delta > rect.Height / 2) break;
-                    var _r = new GRect(r.MinX - _delta, r.MaxY + _delta, r.MaxX + _delta, r.MinY - _delta);
-                    r3 = _r;
-                    //DrawUtils.DrawRectLazy(_r);
-                    var circle = DrawUtils.DrawCircleLazy(_r);
-                    if (i == 0)
-                    {
-                        circle.Thickness = 10;
-                        circle.ColorIndex = 3;
-                    }
-                    else if (i == 2)
-                    {
-                        circle.Thickness = 1000;
-                        circle.ColorIndex = 4;
-                    }
-                }
-                if (!Equals(r3, default(GRect)))
-                {
-                    var l1 = DU.DrawLineLazy(new Point3d(r3.MinX, r3.MinY, 0), new Point3d(r3.MaxX, r3.MaxY, 0));
-                    var l2 = DU.DrawLineLazy(new Point3d(r3.MinX, r3.MaxY, 0), new Point3d(r3.MaxX, r3.MinY, 0));
-                    l1.Thickness = 10;
-                    l2.Thickness = 10;
-                    l1.ColorIndex = 4;
-                    l2.ColorIndex = 4;
-                }
-            });
-        }
-        public static void ChangeCadScreenTo(GRect r)
-        {
-            if (r.IsValid)
-            {
-                AcHelper.Commands.CommandHandlerBase.ExecuteFromCommandLine("ZOOM", "W", $"{r.LeftTop.X},{r.LeftTop.Y}", $"{r.RightButtom.X},{r.RightButtom.Y}");
-            }
-        }
-        public static void ZoomAll()
-        {
-            AcHelper.Commands.CommandHandlerBase.ExecuteFromCommandLine("ZOOM", "A");
-        }
-        public static void FocusMainWindow()
-        {
-            ThMEPWSS.Common.Utils.FocusMainWindow();
-        }
-        public static void OpenCadDwgFile(string file, bool readOnly = false)
-        {
-            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, readOnly);
-        }
-        public static void Print(string str, params object[] objs)
-        {
-            var dt = DateTime.Now.ToString("HH:mm:ss.fff");
-            if (objs.Length == 0) Editor.WriteMessage($"\n[{dt}] " + str + "\n");
-            else Editor.WriteMessage($"\n[{dt}] " + str + "\n", objs);
-        }
-
-        const string TEST_GEO_PREFIX = "feng_test_";
-        public static string BuildAndSetCurrentLayer(Database db, string targetLayerName = null)
-        {
-            //直接打开或新建，然后解冻、解锁
-            targetLayerName ??= TEST_GEO_PREFIX + CtGuid().ToString();
-            //var targetLayer = db.GetAllLayers().FirstOrDefault(x => x.Name == targetLayerName);
-            var targetLayer = db.AddLayer(targetLayerName);
-            if (targetLayer.IsNull) throw new System.Exception();
-            //db.UnFrozenLayer(targetLayerName);
-            //db.UnLockLayer(targetLayerName);
-            //db.UnPrintLayer(targetLayerName);
-            //db.UnOffLayer(targetLayerName);
-            db.SetCurrentLayer(targetLayerName);
-            short targetColorIndex = 1;
-            db.SetLayerColor(targetLayerName, targetColorIndex);
-            return targetLayerName;
-        }
-        public static void UnlockCurrentLayer()
-        {
-            using var adb = AcadDatabase.Active();
-            var db = adb.Database;
-            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
-            foreach (var layerId in lt)
-            {
-                if (db.Clayer == layerId)
-                {
-                    LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
-                    if (ltr != null)
-                    {
-                        if (ltr.IsFrozen)
-                        {
-                            ltr.IsFrozen = false;
-                        }
-                        if (ltr.IsLocked)
-                        {
-                            ltr.IsLocked = false;
-                        }
-                        if (ltr.IsPlottable)
-                        {
-                            ltr.IsPlottable = false;
-                        }
-                        if (ltr.IsOff)
-                        {
-                            ltr.IsOff = false;
-                        }
-                    }
-                    return;
-                }
-            }
-        }
-        public static void UpdateScreen()
-        {
-            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
-        }
-        public static void DeleteTestGeometries()
-        {
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            {
-                adb.Database.SetCurrentLayer("0");
-
-                var lst = adb.ModelSpace.OfType<Entity>().Where(x => x.Layer.Contains(TEST_GEO_PREFIX)).Distinct().ToList();
-                foreach (var e in lst)
-                {
-                    adb.Element<Entity>(e.ObjectId, true).Erase();
-                }
-            }
-            FocusMainWindow();
-        }
-        public static void BatchDeleteEntities(AcadDatabase adb, Entity[] ents)
-        {
-            adb.Database.SetCurrentLayer("0");
-
-            foreach (var e in ents.Distinct())
-            {
-                adb.Element<Entity>(e.ObjectId, true).Erase();
-            }
-            FocusMainWindow();
-        }
-        public static void DoExtract(AcadDatabase adb, Func<BlockReference, Matrix3d, bool> doExtract,
-           bool supportDynamicBlock = false,
-           Action<BlockReference, Matrix3d> doXClip = null)
-        {
-            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
-            {
-                DoExtract(br, Matrix3d.Identity, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: true);
-            }
-        }
-        public static void DoExtract(BlockReference blockReference, Matrix3d matrix,
-         Func<BlockReference, Matrix3d, bool> doExtract,
-           bool supportDynamicBlock = false,
-           Action<BlockReference, Matrix3d> doXClip = null,
-           bool rootInclude = false)
-        {
-            static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-            {
-                //return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-                //return !layerTableRecord.IsOff;
-                return !layerTableRecord.IsFrozen;//一个个试出来的，我也不懂。。。
-                //return !layerTableRecord.IsHidden;
-                //return layerTableRecord.IsUsed;
-            }
-            bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
-            {
-                if (!supportDynamicBlock)
-                {
-                    // 暂时不支持动态块，外部参照，覆盖
-                    if (blockTableRecord.IsDynamicBlock)
-                    {
-                        return false;
-                    }
-                }
-
-                // 忽略图纸空间和匿名块
-                if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
-                {
-                    return false;
-                }
-
-                // 忽略不可“炸开”的块
-                if (!blockTableRecord.Explodable)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            using AcadDatabase adb = AcadDatabase.Use(blockReference.Database);
-            bool isVisibleBlockRef(BlockReference br)
-            {
-                var layer = br.Layer;
-                if (layer == null) return false;
-                var _layer = adb.Layers.ElementOrDefault(layer);
-                return _layer == null ? false : IsVisibleLayer(_layer);
-            }
-            if (blockReference.BlockTableRecord.IsValid)
-            {
-                if (rootInclude && blockReference.ObjectId.IsValid && isVisibleBlockRef(blockReference))
-                {
-                    if (doExtract(blockReference, matrix)) return;
-                }
-                var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord))
-                {
-                    // 提取图元信息                        
-                    foreach (var objId in blockTableRecord)
-                    {
-                        var dbObj = adb.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
-                        {
-                            //if (blockObj.BlockTableRecord.IsNull) continue;
-                            if (!isVisibleBlockRef(blockObj)) continue;
-                            if (blockObj.BlockTableRecord.IsValid)
-                            {
-                                if (doExtract(blockObj, matrix)) continue;
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                DoExtract(blockObj, mcs2wcs, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: false);
-                            }
-                        }
-                    }
-
-                    // 过滤XClip外的图元信息
-                    doXClip?.Invoke(blockReference, matrix);
-                    {
-                        //var xclip = blockReference.XClipInfo();
-                        //var poly = xclip.Polygon;
-                        //if (poly != null)
-                        //{
-                        //    poly.TransformBy(m);
-                        //    var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
-                        //    geos.RemoveAll(o => !gf.Contains(o));
-                        //}
-                    }
-                }
-            }
-        }
-        public static List<Entity> SelectEntitiesEx(AcadDatabase adb)
-        {
-            {
-                var options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择",
-                };
-                var result = Active.Editor.GetSelection(options);
-                if (result.Status == PromptStatus.OK)
-                {
-                    var selectedIds = result.Value.GetObjectIds();
-                    return selectedIds.Select(id => adb.Element<Entity>(id)).ToList();
-                }
-                return null;
-            }
-            if (Dbg._)
-            {
-                var options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择楼层框线",
-                    //RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                        RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-            }
-        }
-        public static T SelectEntity<T>(AcadDatabase adb) where T : DBObject
-        {
-            return ThDebugDrawer.GetEntity<T>(adb);
-        }
-        public static T TrySelectEntity<T>(AcadDatabase adb) where T : DBObject
-        {
-            var ed = Active.Editor;
-            var opt = new PromptEntityOptions("请选择");
-            var ret = ed.GetEntity(opt);
-            if (ret.Status != PromptStatus.OK) return null;
-            return adb.Element<T>(ret.ObjectId);
-        }
-        public static DBObjectCollection SelectEntities(AcadDatabase adb)
-        {
-            IEnumerable<ObjectId> f()
-            {
-                var ed = Active.Editor;
-                var opt = new PromptEntityOptions("请选择");
-                while (true)
-                {
-                    var ret = ed.GetEntity(opt);
-                    if (ret.Status == PromptStatus.OK) yield return ret.ObjectId;
-                    else yield break;
-                }
-            }
-            return f().Select(id => adb.Element<DBObject>(id)).ToCollection();
-        }
-        public static Point3d SelectPoint()
-        {
-            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
-            var rst = Active.Editor.GetPoint(basePtOptions);
-            if (rst.Status != PromptStatus.OK) return default;
-            var basePt = rst.Value;
-            return basePt;
-        }
-        public static bool TrySelectPoint(out Point3d pt)
-        {
-            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
-            var rst = Active.Editor.GetPoint(basePtOptions);
-            if (rst.Status != PromptStatus.OK)
-            {
-                pt = default;
-                return false;
-            }
-            pt = rst.Value;
-            return true;
-        }
-        public static Point3dCollection SelectRange()
-        {
-            return SelectGRect().ToPoint3dCollection();
-        }
-        public static Point3dCollection TrySelectRange()
-        {
-            return TrySelectRect()?.ToPoint3dCollection();
-        }
-        public static Tuple<Point3d, Point3d> TrySelectRect()
-        {
-            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
-            if (ptLeftRes.Status != PromptStatus.OK) return null;
-            Point3d leftDownPt = ptLeftRes.Value;
-            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
-            if (ptRightRes.Status != PromptStatus.OK) return null;
-            return new Tuple<Point3d, Point3d>(leftDownPt, ptRightRes.Value);
-        }
-        public static GRect SelectGRect()
-        {
-            var t = SelectRect();
-            return new GRect(t.Item1.ToPoint2d(), t.Item2.ToPoint2d());
-        }
-        public static Tuple<Point3d, Point3d> SelectRect()
-        {
-            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
-            Point3d leftDownPt = Point3d.Origin;
-            if (ptLeftRes.Status == PromptStatus.OK)
-            {
-                leftDownPt = ptLeftRes.Value;
-            }
-            else
-            {
-                return Tuple.Create(leftDownPt, leftDownPt);
-            }
-
-            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
-            if (ptRightRes.Status == PromptStatus.OK)
-            {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
-            }
-            else
-            {
-                return Tuple.Create(leftDownPt, leftDownPt);
-            }
-        }
-        static _nzm __nzm;
-        public static _nzm nzm
-        {
-            get
-            {
-                __nzm ??= _nzm.nzm;
-                return __nzm;
-            }
-        }
-    }
-    public class ThPublicMethods
-    {
-        public static string CtGuid()
-        {
-            return Guid.NewGuid().ToString("N");
-        }
-    }
-    public class ThCADInput
-    {
-        public static bool QueryYesOrNo(string text, bool dft = false)
-        {
-            var separation_key = new PromptKeywordOptions(text);
-            separation_key.Keywords.Add("是", "Y", "是(Y)");
-            separation_key.Keywords.Add("否", "N", "否(N)");
-            separation_key.Keywords.Default = dft ? "是" : "否";
-            var result = Active.Editor.GetKeywords(separation_key);
-            if (result.Status != PromptStatus.OK) return false;
-            return result.StringResult == "是";
-        }
-        public static bool? QueryYesOrNoOrCanceled(string text, bool dft = false)
-        {
-            var separation_key = new PromptKeywordOptions(text);
-            separation_key.Keywords.Add("是", "Y", "是(Y)");
-            separation_key.Keywords.Add("否", "N", "否(N)");
-            separation_key.Keywords.Default = dft ? "是" : "否";
-            var result = Active.Editor.GetKeywords(separation_key);
-            if (result.Status != PromptStatus.OK) return null;
-            return result.StringResult == "是";
-        }
-    }
 
     public class ThDebugClass
     {
@@ -1916,38 +839,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             }
         }
         static KeyValuePair<K, V> CreateKeyValuePair<K, V>(K k, V v) => new KeyValuePair<K, V>(k, v);
-        public static void LoadEntityTest_LineGrouping()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                const string KEY = FengKeys.ThRainSystemServiceContextData;
-                var c = LoadData<ThRainSystemService.Context>(KEY);
-                var pipes = c.VerticalPipes;
-                var d = c.BoundaryDict;
-                var lines = c.WRainLines;
-                var ld = c.WRainLinesDict;
-                var ld2 = ld.Select(kv => new KeyValuePair<string, Entity>(kv.Key, kv.Value.ToLine())).ToDictionary(kv => kv.Value, kv => kv.Key);
-                var lst = ThRainSystemService.GroupLines(ld2.Keys.Cast<Entity>().ToList());
-                var gs = lst.Select(l => l.Select(e => ld2[e]).ToList()).ToList();
-                SaveData(FengKeys.LinesGroupData, gs);
-            }
-        }
-        public static void SaveEntityTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                const string KEY = FengKeys.ThRainSystemServiceContextData;
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                SaveData(KEY, sv.GetCurrentContext());
-            }
-        }
         public static void qsqesb()
         {
             Dbg.FocusMainWindow();
@@ -2216,41 +1107,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 Dbg.ShowString(ls.JoinWith("\n"));
             }
         }
-        //判断天正元素
-        public static void test1()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var e in adb.ModelSpace.OfType<Entity>().Where(x => x.GetType().IsNotPublic && x.GetType().Name.StartsWith("Imp") && x.GetType().Namespace == "Autodesk.AutoCAD.DatabaseServices"))
-                {
-                    DU.DrawBoundaryLazy(e);
-                }
-            }
-        }
-        //炸开天正元素
-        public static void test2()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var e in adb.ModelSpace.OfType<Entity>().Where(x => x.GetType().IsNotPublic && x.GetType().Name.StartsWith("Imp") && x.GetType().Namespace == "Autodesk.AutoCAD.DatabaseServices"))
-                {
-                    foreach (var ee in e.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
-                    {
-                        DU.DrawBoundaryLazy(ee);
-                    }
-                }
-            }
-        }
         public static void test3()
         {
             Dbg.FocusMainWindow();
@@ -2275,47 +1131,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             using (var tr = DrawUtils.DrawingTransaction)
             {
                 MessageBox.Show(adb.ModelSpace.OfType<Polyline>().Select(e => e.ExplodeToDBObjectCollection().Count).Max().ToString());
-            }
-        }
-        public static void qsw7rc()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var ents = adb.ModelSpace.OfType<BlockReference>()
-          .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-          .Where(x => x.GetEffectiveName() == "$LIGUAN")
-          .ToList();
-                foreach (var e in ents)
-                {
-                    Dbg.ShowWhere(e);
-                }
-                //var e =Dbg.SelectEntity<BlockReference>(adb);
-                //Dbg.ShowString(e.GetEffectiveName());
-            }
-
-        }
-        public static void qsw8d6()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var ents = adb.ModelSpace.OfType<BlockReference>()
-          .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-          .Where(x => x.Name == "*U398")
-          .ToList();
-                foreach (var e in ents)
-                {
-                    Dbg.ShowWhere(e);
-                }
             }
         }
         public static void qsxip5()
@@ -2362,787 +1177,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     }
                 }
             }
-        }
-        public static void qsxk6p()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                var txts = sv.GetDBText(Dbg.SelectRange());
-                Dbg.PrintText(txts.ToJson());
-            }
-        }
-        public static void qsxz9s()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                Dbg.PrintLine(e.ExplodeToDBObjectCollection().Count);
-            }
-        }
-        public static void qsxzxx()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipeLines)
-                {
-                    DU.DrawBoundaryLazy(e);
-                }
-            }
-        }
-        public static void qsxynk()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var g in sv.RainPortsGroups)
-                {
-                    //DU.DrawBoundaryLazy(g.ToArray());
-                    foreach (var e in g)
-                    {
-                        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out string lb))
-                        {
-                            if (!string.IsNullOrEmpty(lb))
-                            {
-                                DU.DrawTextLazy(lb, sv.BoundaryDict[e].LeftTop.ToPoint3d());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        public static void qt8n7z()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectData();
-
-                if (false) NewMethod2(adb, sv);
-                if (false) ThRainSystemService.TempPatch(adb, sv);
-            }
-        }
-
-        private static void NewMethod2(AcadDatabase adb, ThRainSystemService sv)
-        {
-            var txts = new List<Entity>();
-            foreach (var ent in sv.EnumerateTianzhengElements().ToList())
-            {
-                var lst = ent.ExplodeToDBObjectCollection().OfType<DBText>().ToList();
-                if (lst.Count == 1)
-                {
-                    var e = lst.First();
-                    txts.Add(e);
-                    //if (e.TextString == "Y1L1-2")
-                    //{
-                    //    Dbg.ShowWhere(e);
-                    //}
-                }
-            }
-            var pipes = new List<Entity>();
-            foreach (var ent in sv.EnumerateTianzhengElements().ToList())
-            {
-                if (ent.Layer == "W-RAIN-EQPM" || ent.Layer == "WP_KTN_LG")
-                {
-                    var lst = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
-                    if (lst.Count == 1)
-                    {
-                        var e = lst.First();
-                        pipes.Add(ent);
-                    }
-                    else
-                    {
-                        pipes.Add(ent);
-                        //Dbg.ShowWhere(ent);
-                    }
-                }
-            }
-            var lines = adb.ModelSpace.OfType<Line>().Where(x => x.Length > 0 && x.Layer == "W-RAIN-NOTE").Cast<Entity>().ToList();
-            var d = new Dictionary<Entity, GRect>();
-            foreach (var e in pipes.Concat(lines).Concat(txts).Distinct())
-            {
-                d[e] = GeoAlgorithm.GetBoundaryRect(e);
-            }
-            var gs = ThRainSystemService.GroupLines(lines);
-            foreach (var g in gs)
-            {
-                //DU.DrawBoundaryLazy(g.ToArray());
-                string lb = null;
-                foreach (Line e in g)
-                {
-                    var s = e.ToGLineSegment();
-                    if (s.IsHorizontal(10))
-                    {
-                        foreach (var t in txts)
-                        {
-                            var bd = d[t];
-                            if (bd.CenterY > d[e].Center.Y)
-                            {
-                                if (GeoAlgorithm.Distance(bd.Center, d[e].Center) < 500)
-                                {
-                                    lb = ((DBText)t).TextString;
-                                    DU.DrawTextLazy(lb, bd.Center.ToPoint3d());
-                                    goto xx;
-                                }
-                            }
-                        }
-                    }
-                }
-                xx:
-                if (lb != null)
-                {
-                    var pts = new List<Point2d>(8);
-                    foreach (Line line in g)
-                    {
-                        var s = line.ToGLineSegment();
-                        pts.Add(s.StartPoint);
-                        pts.Add(s.EndPoint);
-                    }
-                    foreach (var p in pipes)
-                    {
-                        var bd = d[p];
-                        foreach (var pt in pts)
-                        {
-                            if (bd.ContainsPoint(pt))
-                            {
-                                DU.DrawTextLazy(lb, bd.Center.ToPoint3d());
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void qsxmgz()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectData();
-                //foreach (var g in sv.RainPortsGroups)
-                //{
-                //    //DU.DrawBoundaryLazy(g.ToArray());
-                //    foreach (var e in g)
-                //    {
-                //        if(sv.VerticalPipeToLabelDict.TryGetValue(e,out string lb))
-                //        {
-                //            if (string.IsNullOrEmpty(lb)) lb = "???";
-                //            {
-                //                DU.DrawTextLazy(lb, sv.BoundaryDict[e].LeftTop.ToPoint3d());
-                //            }
-                //        }
-                //    }
-                //}
-                foreach (var e in sv.VerticalPipes)
-                {
-                    if (sv.VerticalPipeToLabelDict.TryGetValue(e, out string lb))
-                    {
-                        //if (string.IsNullOrEmpty(lb)) lb = "???";
-                        //{
-                        //    DU.DrawTextLazy(lb, sv.BoundaryDict[e].LeftTop.ToPoint3d());
-                        //}
-                        if (string.IsNullOrEmpty(lb)) Dbg.ShowWhere(e);
-                    }
-                }
-            }
-        }
-        public static void qsxhgn()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var lst = new List<DBText>();
-                foreach (var br in adb.ModelSpace.OfType<BlockReference>().ToList())
-                {
-                    var r = GeoAlgorithm.GetBoundaryRect(br);
-                    if (r.Width > 10000 && r.Width < 60000)
-                    {
-                        foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
-                        {
-                            //var r2 = GeoAlgorithm.GetBoundaryRect(e);
-                            //DU.DrawRectLazy(r2);
-                            //if (e is BlockReference br2)
-                            //{
-                            //    DU.DrawTextLazy(br2.Name, r2.RightTop.ToPoint3d());
-                            //}
-                            //if (e is BlockReference br2)
-                            //{
-                            //    if (br2.Name == "*U398")
-                            //    {
-                            //        vps.Add(br2);
-                            //    }
-                            //}
-                            //else
-                            if (ThRainSystemService.IsTianZhengElement(e))
-                            {
-                                var lst3 = e.ExplodeToDBObjectCollection()
-                                    .OfType<Entity>()
-                                    .Where(x => ThRainSystemService.IsTianZhengElement(x))
-                                    .SelectMany(x => x.ExplodeToDBObjectCollection().OfType<DBText>())
-                                    .ToList();
-                                foreach (var t in lst3)
-                                {
-                                    //txts.Add(t);
-                                    Dbg.ShowWhere(t);
-                                }
-                            }
-
-                            //if(e is DBText)
-                            //{
-                            //    Dbg.ShowWhere(e);
-                            //}
-
-                            //ExplodedEntities.Add(e);
-                        }
-                    }
-                }
-            }
-        }
-        public static void qsw8n3()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.CollectTianZhengEntities();
-                sv.ExplodeSingleTianZhengElements();
-                sv.CollectExplodedEntities();
-                sv.CollectVerticalPipes();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    Dbg.ShowWhere(e);
-                    //DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                }
-                //foreach (var e in sv.ExplodedEntities)
-                //{
-                //    DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //}
-            }
-        }
-        public static void qsxbgn()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    Dbg.ShowWhere(e);
-                    //DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                }
-                //foreach (var e in sv.ExplodedEntities)
-                //{
-                //    DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //}
-            }
-        }
-        public static void qsxnsd()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var points = Dbg.SelectRange();
-                var storeysRecEngine = new ThStoreysRecognitionEngine();
-                storeysRecEngine.Recognize(adb.Database, points);
-                Dbg.ShowString(storeysRecEngine.Elements.Count.ToString());
-            }
-
-        }
-        public static void qsxc3b()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipeDBTexts)
-                {
-                    if (e is DBText) Dbg.ShowWhere(e);
-                    //DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                }
-
-                //foreach (var e in sv.ExplodedEntities)
-                //{
-                //    DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //}
-            }
-        }
-        public static void qsxsdp()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.ConnectToRainPortSymbols)
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-
-        public static void qsxbif()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipeDBTexts)
-                {
-                    Dbg.ShowWhere(e);
-                    //DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                }
-                //foreach (var e in sv.ExplodedEntities)
-                //{
-                //    DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //}
-            }
-        }
-        public static void qsxbv3()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var e in adb.ModelSpace.OfType<Entity>().ToList())
-                {
-                    if (ThRainSystemService.IsTianZhengElement(e))
-                    {
-                        var lst = e.ExplodeToDBObjectCollection().OfType<DBText>().ToList();
-                        foreach (var t in lst)
-                        {
-                            Dbg.ShowWhere(t);
-                        }
-                    }
-                }
-            }
-        }
-        public static void qt8n3e()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var ents = adb.ModelSpace.OfType<Entity>()
-        .Where(x => ThRainSystemService.IsTianZhengElement(x))
-        .Where(x => x.Layer == "W-RAIN-EQPM")
-        .SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Circle>().Where(c => c.Radius > 40 && c.Radius < 80));
-
-                foreach (var e in ents)
-                {
-                    Dbg.ShowWhere(e);
-                }
-
-
-                //var br = Dbg.SelectEntity<BlockReference>(adb);
-                ////Dbg.PrintLine(br.ExplodeToDBObjectCollection().Count);
-                //foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
-                //{
-                //    DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //}
-
-                //foreach (var br in adb.ModelSpace.OfType<BlockReference>())
-                //{
-                //    var r = GeoAlgorithm.GetBoundaryRect(br);
-                //    if (r.Width > 10000 && r.Width < 60000)
-                //    {
-                //        foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
-                //        {
-                //            DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(e));
-                //        }
-                //    }
-                //}
-            }
-        }
-        public static void qsxmvb()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    DU.DrawRectLazy(sv.BoundaryDict[e]);
-                }
-            }
-        }
-        public static void qsxmqt()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    DU.DrawBoundaryLazy(e);
-                }
-            }
-        }
-        public static void qsx97t()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var br = Dbg.SelectEntity<BlockReference>(adb);
-                foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
-                {
-                    DU.DrawBoundaryLazy(e);
-                }
-            }
-        }
-        public static void qt8mkj()
-        {
-        }
-
-        public static void qt8mkk()
-        {
-        }
-
-        public static void qt8mkl()
-        {
-        }
-
-        public static void qt8mkm()
-        {
-        }
-
-        public static void qt8mkn()
-        {
-        }
-
-        public static void qt8mko()
-        {
-        }
-
-        public static void qt8mkp()
-        {
-        }
-
-        public static void qt8mkq()
-        {
-        }
-
-        public static void qt8mkr()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var e in adb.ModelSpace.OfType<DBText>())
-                {
-                    if (e.TextString == "NL1-5")
-                    {
-                        Dbg.ShowWhere(e);
-                    }
-                }
-            }
-        }
-
-        public static void qt8mks()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                foreach (var e in sv.VerticalPipeDBTexts)
-                {
-                    if (e.TextString == "Y2L1-3")
-                        Dbg.ShowWhere(e);
-                }
-                //foreach (var e in adb.ModelSpace.OfType<DBText>().Where(x => x.TextString == "Y1L1-1"))
-                //{
-                //    Dbg.ShowWhere(e);
-                //}
-            }
-        }
-
-        public static void qu0jef()
-        {
-            Dbg.FocusMainWindow();
-            using (Lock)
-            using (var adb = AcadDatabase.Active())
-            using (DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-
-                //var pl = DU.DrawPolyLineLazy(new Point3d[] { Dbg.SelectPoint(), Dbg.SelectPoint() });
-                //pl.ConstantWidth = 100;
-
-                //sv.InitCache();
-                //foreach (var e in sv.VerticalPipeLines)
-                //{
-                //    Dbg.ShowLine(e);
-                //}
-
-                //foreach (var e in adb.ModelSpace.OfType<Entity>())
-                //{
-                //    if (ThRainSystemService.IsTianZhengElement(e))
-                //    {
-                //        foreach (var ee in e.ExplodeToDBObjectCollection().OfType<DBText>())
-                //        {
-                //            if (ee.TextString == "NL2-1")
-                //            {
-                //                Dbg.ShowWhere(ee);
-                //            }
-                //        }
-                //    }
-                //}
-
-                //string strFloorDrain = "地漏";
-                //var q = adb.ModelSpace.OfType<BlockReference>()
-                //   .Where(e => e.ObjectId.IsValid)
-                //.Where(x =>
-                //{
-                //    if (x.IsDynamicBlock)
-                //    {
-                //        return x.ObjectId.GetDynBlockValue("可见性")?.Contains(strFloorDrain) ?? false;
-
-                //    }
-                //    else
-                //    {
-                //        return x.GetEffectiveName().Contains(strFloorDrain);
-                //    }
-                //});
-                //foreach (var e in q)
-                //{
-                //    //Dbg.ShowWhere(e);
-                //    //DU.DrawBoundaryLazy(e, 10);
-                //}
-
-                //sv.InitCache();
-                //foreach (var e in sv.VerticalPipes)
-                //{
-                //    //DU.DrawBoundaryLazy(e, 10);
-                //    var bd = sv.BoundaryDict[e];
-                //    DU.DrawRectLazy(bd);
-                //}
-
-                //sv.InitCache();
-                //sv.CollectData();
-
-                //foreach (var pipe in sv.VerticalPipes)
-                //{
-                //    sv.VerticalPipeToLabelDict.TryGetValue(pipe, out string lb);
-                //    if (ThRainSystemService.IsWantedLabelText(lb))
-                //    {
-                //        Dbg.ShowWhere(pipe);
-                //    }
-                //    else
-                //    {
-                //        DU.DrawTextLazy(lb ?? "???", sv.BoundaryDict[pipe].Center.ToPoint3d());
-                //    }
-                //    //DU.DrawBoundaryLazy(e, 10);
-                //}
-
-                //if (false)
-                //qt344d.qt3457(adb);
-
-                //var storeysRecEngine = new ThStoreysRecognitionEngine();
-                //storeysRecEngine.Recognize(adb.Database, Dbg.SelectRange());
-                //foreach (var e in storeysRecEngine.Elements)
-                //{
-                //    //DU.DrawBoundaryLazy(e.Boundary,100);
-                //    var r = GeoAlgorithm.GetBoundaryRect(e.Boundary);
-                //    Dbg.PrintLine(r.ToJson());
-                //    //Dbg.PrintLine(e.Boundary.Bounds.ToJson());
-                //    if (e.Boundary == null)
-                //    {
-                //        //Dbg.ShowString("!!!");
-                //    }
-                //    //var pl = DU.DrawRectLazy(r);
-                //    //pl.ConstantWidth = 100;
-                //           DU.DrawBoundaryLazy(adb.Element<Entity>(e.ObjectId), 100);
-                //}
-
-
-            }
-        }
-
-
-
-        public static void qsx5z7()
-        {
-            //var file = @"D:\DATA\Git\ThMEPEngine\AutoLoader\Contents\Support\地上给水排水平面图模板_20210125.dwg";
-
-            //绘图说明
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\8#_210429\8#\设计区\绘图说明_20210409.dwg";
-
-            //一开始的图纸
-            //第01张图纸
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\8#_210429\8#\设计区\FL1ASTSB_W20-8#楼-给排水及消防平面图.dwg";
-            //图画出来了
-            //地漏和立管无连线的情况不识别
-            //Y1L1-2 has problem for check point and label
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\佳兆业滨江新城\佳兆业滨江新城\FS5BH1EW_W20-5#地上给水排水及消防平面图.dwg";
-            //提取楼层失败
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\湖北交投颐和华府\FS59OCRA_W20-3#-地上给排水及消防平面图.dwg";
-            //提取楼层失败
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\佳兆业滨江新城\FS5BH1EW_W20-5#地上给水排水及消防平面图.dwg";
-            //提取楼层失败
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\蓝光未来阅璟\FS5F8704_W20-地上给水排水平面图-送审版.dwg";
-            //提取楼层失败
-            //提取立管失败（注意跟GAS的引线的共用问题）
-            //雨水口也很奇怪
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\蓝光钰泷府二期\FS59P2BC_W20-地上给水排水平面图-副本.dwg";
-            //提取楼层失败
-            //这里的文本带了星号，被过滤掉了
-            //不管
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\万科花园\FS56Y37Y_W20-地上给水排水平面图2017-3-14.dwg";
-            //提取楼层失败
-            //这里的文本也带有前缀
-            //有部分图块需要炸一下
-            //雨水口图层需要修正
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\武汉二七滨江商务区南一片住宅地块\FS5747SS_W20-地上给水排水平面图.dwg";
-            //提取楼层失败
-            //雨水口也很奇怪
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\05_测试图纸（新武汉）(2)\05_测试图纸（新武汉）\长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg";
-            //图画出来了
-            //不支持FL开头的立管
-            //支持87雨水斗
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210508\湖北交投颐和华府\湖北交投颐和华府\FS59OCRA_W20-3#-地上给排水及消防平面图.dwg";
-
-
-
-            //文本，炸开两次才能拿到，天正 W-RAIN-DIMS
-            //标号格式不对，先不管
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210512\亳州恒大城\亳州恒大城\fs54ba4v_w20-地上给水排水平面图7.26.dwg";
-
-            //文本包含前缀
-            //先不管
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210512\合景红莲湖项目\合景红莲湖项目\FS55TD78_W20-73#-地上给水排水平面图.dwg";
-            //图画出来了
-            //LN开头的立管不支持
-            //87雨水斗问题
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210512\清江山水四期\清江山水四期\FS55TMPH_W20-地上给水排水平面图.dwg";
-            //图画出来了
-            //不支持YL开头的立管
-            //地漏没有连线
-            //NL2-4 先连到雨水口，又连到雨水井
-            //一楼套管问题
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210512\庭瑞君越观澜三期\庭瑞君越观澜三期\fs57grhn_w20-地上给水排水平面图.dwg";
-            //图画出来了
-            //地漏 转管看看
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210512\澳海黄州府（二期）\澳海黄州府（二期）\FS5GMBXU_W20-地上给水排水平面图.dwg";
-
-            //label不对
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\合景红莲湖项目_框线(1)\合景红莲湖项目_框线\FS55TD78_W20-73#-地上给水排水平面图.dwg";
-            //图画出来了
-            //RF层不对
-            //第03张图纸
-            var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\湖北交投颐和华府_框线(1)\湖北交投颐和华府_框线\FS59OCRA_W20-3#-地上给排水及消防平面图.dwg";
-            //图画出来了
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\佳兆业滨江新城_框线(1)\佳兆业滨江新城_框线\FS5BH1EW_W20-5#地上给水排水及消防平面图.dwg";
-            //图画出来了
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\蓝光未来阅璟_框线(1)\蓝光未来阅璟_框线\FS5F8704_W20-地上给水排水平面图-送审版.dwg";
-            //图画出来了
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\蓝光钰泷府二期_框线(1)\蓝光钰泷府二期_框线\FS59P2BC_W20-地上给水排水平面图-副本.dwg";
-            //图画出来了
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\清江山水四期_框线(1)\清江山水四期_框线\FS55TMPH_W20-地上给水排水平面图.dwg";
-            //label不对
-            //var file = @"E:\thepa_workingSpace\任务资料\任务2\210517\武汉二七滨江商务区南一片住宅地块_框线(1)\武汉二七滨江商务区南一片住宅地块_框线\FS5747SS_W20-地上给水排水平面图.dwg";
-
-            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
-            //Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
-
         }
         public static void DrawBoundaryTest()
         {
@@ -4020,7 +2054,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 Dbg.PrintLine(GeoAlgorithm.IsOnSameLine(seg1, seg2, 5).ToString());
             }
         }
-        public class qu0jxf
+        public class DebugTools
         {
             [Feng]
             public static void CollectEntitiesCodegen()
@@ -6085,2124 +4119,980 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
     }
 
 
-
-
-
-
-    public static class qt344d
+    public class FengDbgTest
     {
-        public static void qt3457(AcadDatabase adb)
+        public static Dictionary<string, object> processContext;
+        public static Dictionary<string, object> ctx
         {
-            var d = new Dictionary<Entity, GRect>();
-            var ld = new Dictionary<Entity, string>();
-            var txts = new List<Entity>();
-            var lines = new List<Entity>();
-            var pipes = new List<Entity>();
-            foreach (var e in adb.ModelSpace.OfType<Circle>().Where(c => Convert.ToInt32(c.Radius) == 50).ToList())
+            get
             {
-                //Dbg.ShowWhere(e);
-                pipes.Add(e);
-                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+                if (processContext == null) return null;
+                return (Dictionary<string, object>)processContext["context"];
             }
-            foreach (var e in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer == "W-RAIN-EQPM").Where(x => ThRainSystemService.IsTianZhengElement(x)))
+        }
+        public class FengDbgTesting
+        {
+            public static void InitButtons()
             {
-                //Dbg.ShowWhere(e);
-                pipes.Add(e);
-                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+                register(); qt8ddf();
             }
-            foreach (var e in adb.ModelSpace.OfType<DBText>().ToList())
+            public static void AddButton(string name, Action f)
             {
-                if (ThRainSystemService.IsWantedLabelText(e.TextString))
+                if (!Dbg.isDebugging) return;
+                ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
+            }
+            private static void qt8ddf()
+            {
+                var targetType = typeof(Util1);
+                ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], targetType.FullName);
+                var fs = ((List<Action>)ctx["actions"]).ToList();
+                var names = ((List<string>)ctx["names"]).ToList();
+                ((Action<Assembly>)ctx["clearAcadActions"])((Assembly)ctx["currentAsm"]);
+                for (int i = 0; i < fs.Count; i++)
                 {
-                    //Dbg.ShowWhere(e);
-                    txts.Add(e);
-                    d[e] = GeoAlgorithm.GetBoundaryRect(e);
+                    var f = fs[i];
+                    var name = names[i];
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
                 }
             }
-
-            foreach (var e in adb.ModelSpace.OfType<Line>().Where(line => line.Length > 0).ToList())
+            private static void register()
             {
-                //Dbg.ShowLine(e);
-                lines.Add(e);
-                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+                THDrainageService.Register(AddButton);
+                RegisterNonPublic(typeof(THDrainageService));
+                RegisterWithAttribute(typeof(Test1));
+                Register(typeof(DrainageTest));
+                RegisterWithAttribute(typeof(Test1.DrainageTest));
+                RegisterWithAttribute(typeof(DebugNs.FengDbgTesting));
             }
 
-            var gs = ThRainSystemService.GroupLines(lines);
-            foreach (var g in gs)
+            private static void RegisterWithAttribute(Type t)
             {
-                //DU.DrawBoundaryLazy(g.ToArray());
-                void f()
+                if (t.GetCustomAttribute<FengAttribute>() != null)
                 {
-                    foreach (var line in g.OfType<Line>())
+                    Register(t);
+                }
+            }
+            public static void RegisterNonPublic(Type targetType)
+            {
+                var attrType = ((Assembly)ctx["currentAsm"]).GetType(typeof(FengAttribute).FullName);
+                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    var attr = mi.GetCustomAttribute(attrType);
+                    if (attr == null) continue;
+                    var name = (string)attrType.GetField("Title").GetValue(attr);
+                    if (string.IsNullOrEmpty(name)) name = mi.Name;
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
                     {
-                        var seg = line.ToGLineSegment();
-                        if (seg.IsHorizontal(10))
+                        try
                         {
-                            foreach (var t in txts.OfType<DBText>())
+                            mi.Invoke(null, null);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            MessageBox.Show((ex.InnerException ?? ex).Message);
+                        }
+                    });
+                }
+            }
+            public static void Register(Type targetType)
+            {
+                var attrType = ((Assembly)ctx["currentAsm"]).GetType(typeof(FengAttribute).FullName);
+                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.Public | BindingFlags.Static))
+                {
+                    var attr = mi.GetCustomAttribute(attrType);
+                    if (attr == null) continue;
+                    var name = (string)attrType.GetField("Title").GetValue(attr);
+                    if (string.IsNullOrEmpty(name)) name = mi.Name;
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, () =>
+                    {
+                        try
+                        {
+                            mi.Invoke(null, null);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            MessageBox.Show((ex.InnerException ?? ex).Message);
+                        }
+                    });
+                }
+            }
+            public static void AddButtons1(Type targetType)
+            {
+                foreach (var mi in ((Assembly)ctx["currentAsm"]).GetType(targetType.FullName).GetMethods(BindingFlags.Public | BindingFlags.Static))
+                {
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], mi.Name, () =>
+                    {
+                        try
+                        {
+                            mi.Invoke(null, null);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            MessageBox.Show((ex.InnerException ?? ex).Message);
+                        }
+                    });
+                }
+            }
+        }
+        public static void Test(Dictionary<string, object> ctx)
+        {
+            processContext = (Dictionary<string, object>)ctx["processContext"];
+            ctx.TryGetValue("entryMethod", out object o);
+            if (o is Action entryMethod)
+            {
+                Action initMethod = null;
+                initMethod = new Action(() =>
+                {
+                    ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], typeof(ThDebugClass).FullName);
+                    var fs = ((List<Action>)ctx["actions"]).ToList();
+                    var names = ((List<string>)ctx["names"]).ToList();
+                    ((Action<Assembly>)ctx["clearAcadActions"])((Assembly)ctx["currentAsm"]);
+                    ((Action<object>)ctx["clearBtns"])(ctx["currentPanel"]);
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "initMethod", initMethod);
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "reloadMe", () =>
+                    {
+                        var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
+                        asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
+                        initMethod();
+                    });
+
+                    {
+                        FengDbgTesting.InitButtons();
+                    }
+                    {
+                        var _names = File.ReadLines(@"E:\xx.txt")
+             .Select(x => x.Trim())
+             .Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("//"))
+             .ToList();
+                        foreach (var _name in _names)
+                        {
+                            var name = _name;
+                            string __name = null;
+                            if (name.Contains(" "))
                             {
-                                var bd = d[t];
-                                var dt = bd.CenterY - seg.StartPoint.Y;
-                                if (dt > 0 && dt < 250)
+                                var j = name.IndexOf(" ");
+                                var tmp = name;
+                                name = tmp.Substring(0, j);
+                                __name = tmp.Substring(j).Trim();
+                                if (string.IsNullOrWhiteSpace(__name)) __name = null;
+                            }
+                            var i = names.IndexOf(name);
+                            if (i >= 0)
+                            {
+                                var f = fs[i];
+                                var name_ = names[i];
+                                if (__name != "xx")
                                 {
-                                    var x1 = Math.Min(seg.StartPoint.X, seg.EndPoint.X);
-                                    var x2 = Math.Max(seg.StartPoint.X, seg.EndPoint.X);
-                                    if (x1 < bd.CenterX && x2 > bd.CenterX)
-                                    {
-                                        var pts = g.OfType<Line>().SelectMany(line => new Point2d[] { line.StartPoint.ToPoint2d(), line.EndPoint.ToPoint2d() }).ToList();
-                                        foreach (var p in pipes)
-                                        {
-                                            foreach (var pt in pts)
-                                            {
-                                                if (d[p].ContainsPoint(pt))
-                                                {
-                                                    var lb = t.TextString;
-                                                    ld[p] = lb;
-                                                    return;
-                                                }
-                                            }
-                                        }
-                                    }
+                                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], __name ?? name, f);
                                 }
                             }
                         }
                     }
-                }
-                f();
-            }
 
-            foreach (var pipe in pipes)
-            {
-                ld.TryGetValue(pipe, out string lb);
-                if (lb != null)
-                {
-                    DU.DrawTextLazy(lb, d[pipe].Center.ToPoint3d());
-                }
-            }
-
-            var longPipes = new List<Entity>();
-            var lines2 = new List<Entity>();
-            string getLabel(Entity e)
-            {
-                ld.TryGetValue(e, out string v);
-                return v;
-            }
-            foreach (var line in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer == "W-RAIN-PIPE").Where(x => ThRainSystemService.IsTianZhengElement(x)))
-            {
-                if (GeoAlgorithm.TryConvertToLineSegment(line, out GLineSegment seg))
-                {
-                    var pts = new Point2d[] { seg.StartPoint, seg.EndPoint };
-                    var ps = pipes.Where(pipe => pts.Any(pt => d[pipe].ContainsPoint(pt)));
-                    var pp1 = ps.FirstOrDefault(p => getLabel(p) != null);
-                    var pp2 = ps.FirstOrDefault(p => getLabel(p) == null);
-                    if (pp1 != null && pp2 != null)
+                    if (false)
                     {
-                        longPipes.Add(pp1);
-                        longPipes.Add(pp2);
-                    }
-                }
-            }
-            foreach (var pp in longPipes)
-            {
-                Dbg.ShowWhere(pp);
-            }
-        }
-    }
-}
-namespace ThMEPWSS.DebugNs
-{
-    using System;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.Linq;
-    using System.Text;
-    using System.Reflection;
-    using System.Collections.Generic;
-    using System.Windows.Forms;
-    using ThMEPWSS.JsonExtensionsNs;
-    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-    using DU = ThMEPWSS.Assistant.DrawUtils;
-    using Linq2Acad;
-    using ThMEPWSS.Assistant;
-    using System.Drawing.Drawing2D;
-    using System.Drawing.Text;
-
-    public class quin3c
-    {
-        public static void quiqni()
-        {
-            var f = new Form();
-            f.Paint += (s, e) =>
-            {
-                Bitmap bitmap = new Bitmap(@"Y:\xxx.gif");
-
-                // Initialize the color matrix.
-                float[][] matrixItems ={
- new float[] {0.4f, 0.2f, 0.4f, 0, 0},
- new float[] {0.4f, 0.2f, 0.4f, 0, 0},
- new float[] {0.4f, 0.2f, 0.4f, 0, 0},
- new float[] {0, 0, 0, 1, 0},
- new float[] {0, 0, 0, 0, 1}};
-                ColorMatrix colorMatrix = new ColorMatrix(matrixItems);
-
-                // Create an ImageAttributes object and set its color matrix.
-                ImageAttributes imageAtt = new ImageAttributes();
-                imageAtt.SetColorMatrix(
-                colorMatrix,
-                ColorMatrixFlag.Default,
-                ColorAdjustType.Bitmap);
-
-                // Now draw the semitransparent bitmap image.
-                int iWidth = bitmap.Width;
-                int iHeight = bitmap.Height;
-                f.Width = iWidth;
-                f.Height = iHeight;
-                e.Graphics.DrawImage(
-                bitmap,
-                new Rectangle(0, 0, iWidth, iHeight),
-                    0.0f,
-                    0.0f,
-                    iWidth,
-                    iHeight,
-                    GraphicsUnit.Pixel,
-                imageAtt);
-            }; f.ShowDialog();
-        }
-        public static void quip92()
-        {
-            var f = new Form();
-            f.Paint += (s, e) =>
-            {
-                Graphics g = f.CreateGraphics();
-                Pen p = new Pen(Color.Blue, 1);
-                for (int i = 0; i < 90; i++)
-                {
-                    g.RotateTransform(i);
-                    g.DrawLine(p, 0, 0, 100, 0);
-                    g.ResetTransform();
-                }
-                g.TranslateTransform(100, 100);
-                g.DrawLine(p, 0, 0, 100, 0);
-                g.ResetTransform();
-                g.TranslateTransform(100, 200);
-                for (int i = 0; i < 8; i++)
-                {
-                    g.RotateTransform(45);
-                    g.DrawLine(p, 0, 0, 100, 0);
-                }
-                g.Dispose();
-            }; f.ShowDialog();
-        }
-        public static void quinww()
-        {
-            var f = new Form();
-            f.Paint += (s, e) =>
-            {
-                Graphics g = f.CreateGraphics();
-                Rectangle rect = new Rectangle(10, 10, 50, 50);
-                SolidBrush b1 = new SolidBrush(Color.Blue);//定义单色画刷
-                g.FillRectangle(b1, rect);
-                g.DrawString("字符串", new Font("宋体", 10), b1, new PointF(90, 10));
-                TextureBrush b2 = new TextureBrush(Image.FromFile(@"Y:\xxx.gif"));
-                rect.Location = new Point(10, 70);
-                rect.Width = 200;
-                rect.Height = 200;
-                g.FillRectangle(b2, rect);
-                rect.Location = new Point(10, 290);
-                LinearGradientBrush b3 = new LinearGradientBrush(rect, Color.Yellow, Color.Black, LinearGradientMode.Horizontal);
-                g.FillRectangle(b3, rect);
-            }; f.ShowDialog();
-        }
-        public static void quinwv()
-        {
-            var f = new Form();
-            f.Paint += (s, e) =>
-            {
-                Pen p = new Pen(Color.Blue, 5);
-                Graphics g = f.CreateGraphics();
-                p.DashStyle = DashStyle.Dot;
-                g.DrawLine(p, 10, 10, 200, 10);
-                p.DashPattern = new float[] { 2, 1 };
-                g.DrawLine(p, 10, 20, 200, 20);
-                p.DashStyle = DashStyle.Solid;
-                p.EndCap = LineCap.ArrowAnchor;
-                g.DrawLine(p, 10, 30, 200, 30);
-                g.Dispose();
-                p.Dispose();
-            }; f.ShowDialog();
-        }
-        public static void quinwx()
-        {
-            var f = new Form();
-            f.Paint += (s, e) =>
-            {
-                Graphics g = e.Graphics;
-                Pen p = new Pen(Color.Blue, 2);
-                g.DrawLine(p, 10, 10, 100, 100);
-                g.DrawRectangle(p, 10, 10, 100, 100);
-                g.DrawEllipse(p, 10, 10, 100, 100);
-            }; f.ShowDialog();
-        }
-        public static void quinwy()
-        {
-            Bitmap bmp;
-            Graphics g;
-            string strString;
-            bmp = new Bitmap(600, 400);
-            g = Graphics.FromImage(bmp);
-            g.Clear(Color.DarkBlue);
-            Font objFont = new Font("Times", 24);
-            strString = "ABCabc123 - AntiAlias";
-            g.TextRenderingHint = TextRenderingHint.AntiAlias;
-            g.DrawString(strString, objFont, Brushes.White, 10, 10);
-            strString = "ABCabc123 - AntiAliasGridFit";
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            g.DrawString(strString, objFont, Brushes.White, 10, 50);
-            strString = "ABCabc123 - ClearTypeGridFit";
-            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-            g.DrawString(strString, objFont, Brushes.White, 10, 90);
-            strString = "ABCabc123 - SingleBitPerPixel";
-            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-            g.DrawString(strString, objFont, Brushes.White, 10, 130);
-            strString = "ABCabc123 - SingleBitPerPixelGridFit";
-            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-            g.DrawString(strString, objFont, Brushes.White, 10, 170);
-            strString = "ABCabc123 - SystemDefault";
-            g.TextRenderingHint = TextRenderingHint.SystemDefault;
-            g.DrawString(strString, objFont, Brushes.White, 10, 210);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinwz()
-        {
-            Bitmap bmp;
-            Graphics g;
-            Pen objPen;
-            Brush objBrush;
-            Font objFont;
-            bmp = new Bitmap(400, 400);
-            g = Graphics.FromImage(bmp);
-            objPen = new Pen(Color.Yellow);
-            objBrush = new SolidBrush(Color.Yellow);
-            objFont = new Font("Lucida Sans Unicode", 18);
-            g.SmoothingMode = SmoothingMode.Default;
-            g.DrawString("Default", objFont, objBrush, 50, 20);
-            g.DrawEllipse(objPen, 10, 10, 200, 50);
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.DrawString("AntiAlias", objFont, objBrush, 50, 80);
-            g.DrawEllipse(objPen, 10, 70, 200, 50);
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.DrawString("HighQuality", objFont, objBrush, 50, 140);
-            g.DrawEllipse(objPen, 10, 130, 200, 50);
-            g.SmoothingMode = SmoothingMode.HighSpeed;
-            g.DrawString("HighSpeed", objFont, objBrush, 50, 200);
-            g.DrawEllipse(objPen, 10, 190, 200, 50);
-            g.SmoothingMode = SmoothingMode.None;
-            g.DrawString("None", objFont, objBrush, 50, 260);
-            g.DrawEllipse(objPen, 10, 250, 200, 50);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinx1()
-        {
-            Bitmap bmp = new Bitmap(600, 500);
-            Graphics gph;
-            gph = Graphics.FromImage(bmp);
-            gph.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-            gph.Clear(Color.Red);
-            gph.DrawString("无换行显示:绘制文本换行显示的字符串,应该使用文本外部边界的长方形", new Font("宋体", 16), Brushes.Blue, 10, 10);
-            RectangleF rect = new RectangleF(10, 110, 300, 200);
-            string str = "绘制文本换行显示的字符串,应该使用文本外部边界的长方形";
-            gph.DrawString(str, new Font("宋体", 16), Brushes.Blue, rect);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinx3()
-        {
-            Bitmap bmp = new Bitmap(600, 500);
-            Graphics gph;
-            gph = Graphics.FromImage(bmp);
-            gph.SmoothingMode = SmoothingMode.HighQuality;
-            gph.Clear(Color.Red);
-            gph.DrawRectangle(Pens.Blue, 10, 10, 100, 100);
-            gph.FillRectangle(Brushes.Blue, 120, 10, 100, 100);
-            gph.DrawEllipse(Pens.Blue, 10, 120, 100, 100);
-            gph.FillEllipse(Brushes.Blue, 120, 120, 100, 100);
-            gph.DrawPie(Pens.Blue, 10, 230, 100, 100, 0, 270);
-            gph.FillPie(Brushes.Blue, 120, 230, 100, 100, 0, 270);
-            Point[] line = { new Point(10, 340), new Point(60, 30), new Point(110, 30), new Point(160, 340) };
-            gph.DrawCurve(Pens.Blue, line);
-            gph.DrawBezier(Pens.Blue, new Point(10, 340), new Point(60, 30), new Point(110, 30), new Point(160, 340));
-            Point[] line2 = { new Point(10, 340), new Point(340, 100), new Point(190, 340), new Point(10, 340) };
-            gph.DrawPolygon(Pens.Blue, line2);
-            Bitmap mybit = new Bitmap(@"Y:\xxx.gif");
-            gph.DrawImage(mybit, 10, 360, 100, 100);
-            gph.DrawLine(Pens.Black, 10, 480, 300, 480);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinx4()
-        {
-            Bitmap bmp;
-            Graphics objGraphics;
-            Pen pen;
-            bmp = new Bitmap(400, 300);
-            objGraphics = Graphics.FromImage(bmp);
-            pen = new Pen(Color.White);
-            pen.Width = 10;
-            pen.LineJoin = LineJoin.Bevel;
-            objGraphics.DrawRectangle(pen, 10, 20, 350, 40);
-            pen.LineJoin = LineJoin.Miter;
-            objGraphics.DrawRectangle(pen, 10, 80, 350, 40);
-            pen.LineJoin = LineJoin.MiterClipped;
-            objGraphics.DrawRectangle(pen, 10, 140, 350, 40);
-            pen.LineJoin = LineJoin.Round;
-            objGraphics.DrawRectangle(pen, 10, 200, 350, 40);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinx5()
-        {
-            Bitmap bmp;
-            Graphics objGraphics;
-            Pen pen;
-            bmp = new Bitmap(400, 200);
-            objGraphics = Graphics.FromImage(bmp);
-            pen = new Pen(Color.White);
-            pen.Width = 6;
-            pen.EndCap = LineCap.ArrowAnchor;
-            objGraphics.DrawLine(pen, 10, 20, 350, 20);
-            pen.EndCap = LineCap.DiamondAnchor;
-            objGraphics.DrawLine(pen, 10, 40, 350, 40);
-            pen.EndCap = LineCap.Flat;
-            objGraphics.DrawLine(pen, 10, 60, 350, 60);
-            pen.EndCap = LineCap.Round;
-            objGraphics.DrawLine(pen, 10, 80, 350, 80);
-            pen.EndCap = LineCap.RoundAnchor;
-            objGraphics.DrawLine(pen, 10, 100, 350, 100);
-            pen.EndCap = LineCap.Square;
-            objGraphics.DrawLine(pen, 10, 120, 350, 120);
-            pen.EndCap = LineCap.SquareAnchor;
-            objGraphics.DrawLine(pen, 10, 140, 350, 140);
-            pen.EndCap = LineCap.Triangle;
-            objGraphics.DrawLine(pen, 10, 160, 350, 160);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinx6()
-        {
-            Bitmap bmp = new Bitmap(600, 120);
-            Graphics gph;
-            gph = Graphics.FromImage(bmp);
-            gph.Clear(Color.Green);
-            Pen mypen = new Pen(Color.Red, 2);
-            mypen.DashStyle = DashStyle.Custom;
-            gph.DrawLine(mypen, 10, 10, 300, 10);
-            mypen.DashStyle = DashStyle.Dash;
-            gph.DrawLine(mypen, 10, 30, 300, 30);
-            mypen.DashStyle = DashStyle.DashDot;
-            gph.DrawLine(mypen, 10, 50, 300, 50);
-            mypen.DashStyle = DashStyle.DashDotDot;
-            gph.DrawLine(mypen, 10, 70, 300, 70);
-            mypen.DashStyle = DashStyle.Dot;
-            gph.DrawLine(mypen, 10, 90, 300, 90);
-            mypen.DashStyle = DashStyle.Solid;
-            gph.DrawLine(mypen, 10, 110, 300, 110);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinap()
-        {
-            Bitmap bmp = new Bitmap(600, 120);
-            Color mycolor;
-            mycolor = Color.FromArgb(0, 0, 255);
-            Pen mypen = new Pen(Color.Blue, 5);
-            Graphics gph;
-            gph = Graphics.FromImage(bmp);
-            gph.Clear(Color.Red);
-            gph.DrawRectangle(Pens.Green, 10, 10, 100, 100);
-            gph.DrawRectangle(mypen, 120, 10, 100, 100);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinat()
-        {
-            Bitmap bmp = new Bitmap(600, 120);
-            Bitmap img = new Bitmap(@"Y:\xxx.gif");
-            Color mycolor;
-            mycolor = Color.FromArgb(0, 0, 255);
-            Rectangle rect = new Rectangle(300, 0, 100, 100);
-            SolidBrush solid = new SolidBrush(mycolor);
-            HatchBrush hatch = new HatchBrush(HatchStyle.Cross, Color.Orange);
-            LinearGradientBrush linear;
-            linear = new LinearGradientBrush(rect, Color.Red, Color.Yellow, LinearGradientMode.ForwardDiagonal);
-            TextureBrush texture = new TextureBrush(img);
-            Graphics gph;
-            gph = Graphics.FromImage(bmp);
-            gph.Clear(Color.Red);
-            gph.FillRectangle(Brushes.Green, 0, 0, 100, 100);
-            gph.FillRectangle(solid, 100, 0, 100, 100);
-            gph.FillRectangle(hatch, 200, 0, 100, 100);
-            gph.FillRectangle(linear, rect);
-            gph.FillRectangle(texture, 400, 0, 100, 100);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        public static void quinax()
-        {
-            var bmp = new Bitmap(500, 400);
-            var gph = Graphics.FromImage(bmp);
-            gph.Clear(Color.Olive);
-            gph.DrawRectangle(Pens.Red, 100, 100, 50, 50);
-            gph.FillRectangle(Brushes.Green, 200, 200, 50, 50);
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-        static string temp_file => @"Y:\" + DateTime.Now.Ticks;
-        public static void quimxe()
-        {
-            var bmp = new Bitmap(400, 200);
-            var rd = new Random();
-            for (int i = 0; i < 1000; i++)
-            {
-                bmp.SetPixel(rd.Next(400), rd.Next(200), System.Drawing.Color.Red);
-            }
-            bmp.Save(temp_file + ".gif", ImageFormat.Gif);
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-namespace qtc3hs
-{
-    public class Matrix
-    {
-
-        public double[,] Mat;
-        private long _m, _n;
-        public long M
-        {
-            get
-            {
-                return _m;
-            }
-            private set
-            {
-                _m = value;
-            }
-        }
-        public long N
-        {
-            get
-            {
-                return _n;
-            }
-            private set
-            {
-                _n = value;
-            }
-        }
-        protected static Random rand = new Random((int)DateTime.Now.Ticks);
-
-        public Matrix(long m, long n, bool isRandValue = false)
-        {
-            _m = m;
-            _n = n;
-
-            Mat = new double[m, n];
-            for (int i = 0; i < m; i++)
-                for (int j = 0; j < n; j++)
-                    if (isRandValue)
-                        Mat[i, j] = rand.NextDouble();
-                    else Mat[i, j] = 0;
-        }
-        public Matrix(double[,] m)
-        {
-            _m = m.GetLongLength(0);
-            _n = m.GetLongLength(1);
-            Mat = m;
-        }
-
-
-        public static Matrix operator +(Matrix M1, Matrix M2)
-        {
-            if (M1.M != M2.M
-             || M1.N != M1.N)
-                throw new Exception("矩阵不符合运算条件，2个矩阵必须完全一样的行和列");
-
-            Matrix result = new Matrix(M1.M, M1.N);
-            for (int i = 0; i < M1.M; i++)
-                for (int j = 0; j < M1.N; j++)
-                {
-                    result.Mat[i, j] = M1.Mat[i, j] + M2.Mat[i, j];
-                }
-            return result;
-        }
-        public static Matrix operator -(Matrix M1, Matrix M2)
-        {
-            if (M1.M != M2.M
-             || M1.N != M1.N)
-                throw new Exception("矩阵不符合运算条件，2个矩阵必须完全一样的行和列");
-
-            Matrix result = new Matrix(M1.M, M1.N);
-            for (int i = 0; i < M1.M; i++)
-                for (int j = 0; j < M1.N; j++)
-                {
-                    result.Mat[i, j] = M1.Mat[i, j] - M2.Mat[i, j];
-                }
-            return result;
-        }
-        public static Matrix operator ^(Matrix M1, Matrix M2)
-        {
-            if (M1.M != M2.M
-             || M1.N != M1.N)
-                throw new Exception("矩阵不符合运算条件，2个矩阵必须完全一样的行和列");
-
-            Matrix result = new Matrix(M1.M, M1.N);
-            for (int i = 0; i < M1.M; i++)
-                for (int j = 0; j < M1.N; j++)
-                {
-                    result.Mat[i, j] = M1.Mat[i, j] * M2.Mat[i, j];
-                }
-            return result;
-        }
-
-        public static Matrix operator *(Matrix M1, Matrix M2)
-        {
-            long m = M1.Mat.GetLongLength(0);
-            long jW = M1.Mat.GetLongLength(1);
-
-            long iH = M2.Mat.GetLongLength(0);
-            long n = M2.Mat.GetLongLength(1);
-
-            if (jW != iH)
-                throw new Exception("矩阵不符合运算条件，W的行不等于H的列");
-            Matrix result = new Matrix(m, n);
-
-            for (int i = 0; i < m; i++)//W的行数
-            {
-                for (int j = 0; j < n; j++)//H的列数
-                {
-
-                    for (int k = 0; k < jW; k++)
-                    {
-
-                        result.Mat[i, j] += M2.Mat[k, j] * M1.Mat[i, k];
-                    }
-                }
-            }
-
-            return result;
-        }
-        public static Matrix operator *(Matrix M1, double ratio)
-        {
-            long m = M1.Mat.GetLongLength(0);
-            long n = M1.Mat.GetLongLength(1);
-            Matrix result = new Matrix(m, n);
-            for (int i = 0; i < m; i++)
-                for (int j = 0; j < n; j++)
-                    result.Mat[i, j] = M1.Mat[i, j] * ratio;
-            return result;
-        }
-
-        public Matrix Nonlin()
-        {
-            Matrix result = new Matrix(M, N);
-            for (int i = 0; i < M; i++)
-                for (int j = 0; j < N; j++)
-                    result.Mat[i, j] = Sigmoid(Mat[i, j]);
-            return result;
-        }
-        public Matrix Derivative()
-        {
-            Matrix result = new Matrix(M, N);
-            for (int i = 0; i < M; i++)
-                for (int j = 0; j < N; j++)
-                    result.Mat[i, j] = Derivative(Mat[i, j]);
-            return result;
-        }
-        public double Sigmoid(double x)
-        {
-            return (1 / (1 + Math.Exp(-3 * x)));
-        }
-
-        //求导
-        public double Derivative(double x)
-        {
-            return (3 * x * (1 - x));
-        }
-        public Matrix T
-        {
-            get
-            {
-                Matrix result = new Matrix(N, M);
-
-                //新矩阵生成规则： b[i,j]=a[j,i]
-                for (int i = 0; i < N; i++)
-                {
-                    for (int j = 0; j < M; j++)
-                    {
-                        result.Mat[i, j] = this.Mat[j, i];
-                    }
-                }
-                return result;
-            }
-        }
-        public override string ToString()
-        {
-            StringBuilder sbd = new StringBuilder();
-            for (int i = 0; i < this.M; i++)
-            {
-                for (int j = 0; j < this.N; j++)
-                {
-                    sbd.Append(Mat[i, j].ToString("N10"));
-                    sbd.Append(",");
-                }
-                sbd.AppendLine();
-            }
-            return sbd.ToString();
-        }
-
-        public static void Test()
-        {
-
-            double[,] X = new double[4, 3] { { 0, 0, 1 }, { 1, 1, 1 }, { 1, 0, 1 }, { 0, 1, 1 } };
-            double[,] y = new double[4, 1] { { 0 }, { 1 }, { 1 }, { 0 } };
-            Matrix MatX = new Matrix(X);
-            Matrix MatY = new Matrix(y);
-            Matrix syn0 = new Matrix(3, 4, true);
-            Matrix syn1 = new Matrix(4, 1, true);
-            Matrix L1, L1_Delta;
-            Matrix L2 = null, L2_Delta;
-            Matrix L2_Err, L1_Err;
-            for (long i = 0; i < 9000; i++)
-            {
-                L1 = (MatX * syn0).Nonlin();         //l1 = nonlin(np.dot(l0,syn0))
-                L2 = (L1 * syn1).Nonlin();           //l2 = nonlin(np.dot(l1,syn1))
-                L2_Err = MatY - L2;                  //L2_error = y - l2
-                L2_Delta = L2_Err ^ L2.Derivative(); //l2_delta = l2_error*nonlin(l2,deriv=True)
-                L1_Err = L2_Delta * syn1.T;          //l1_error = l2_delta.dot(syn1.T)
-                L1_Delta = L1_Err ^ L1.Derivative(); //l1_delta = l1_error * nonlin(l1,deriv=True)
-                syn1 = syn1 + L1.T * L2_Delta * 0.01;//l1.T.dot(l2_delta)
-                syn0 = syn0 + MatX.T * L1_Delta * 0.01;//l0.T.dot(l1_delta)
-            }
-            Console.WriteLine(L2.ToString());
-            Console.WriteLine(syn0.ToString());
-            Console.WriteLine(syn1.ToString());
-        }
-    }
-}
-
-namespace qtc49j
-{
-    using System;
-    using System.IO;
-    using System.Text;
-
-    /// <summary>
-    /// BpNet 的摘要说明。
-    /// </summary>
-    public class BpNet
-    {
-        public int inNum;//输入节点数
-        int hideNum;//隐层节点数
-        public int outNum;//输出层节点数
-        public int sampleNum;//样本总数
-
-        Random R;
-        double[] x;//输入节点的输入数据
-        double[] x1;//隐层节点的输出
-        double[] x2;//输出节点的输出
-
-        double[] o1;//隐层的输入
-        double[] o2;//输出层的输入
-        public double[,] w;//权值矩阵w
-        public double[,] v;//权值矩阵V
-        public double[,] dw;//权值矩阵w
-        public double[,] dv;//权值矩阵V
-
-
-        public double rate;//学习率
-        public double[] b1;//隐层阈值矩阵
-        public double[] b2;//输出层阈值矩阵
-        public double[] db1;//隐层阈值矩阵
-        public double[] db2;//输出层阈值矩阵
-
-        double[] pp;//输出层的误差
-        double[] qq;//隐层的误差
-        double[] yd;//输出层的教师数据
-        public double e;//均方误差
-        double in_rate;//归一化比例系数
-
-        public int computeHideNum(int m, int n)
-        {
-            double s = Math.Sqrt(0.43 * m * n + 0.12 * n * n + 2.54 * m + 0.77 * n + 0.35) + 0.51;
-            int ss = Convert.ToInt32(s);
-            return ((s - (double)ss) > 0.5) ? ss + 1 : ss;
-
-        }
-        public BpNet(double[,] p, double[,] t)
-        {
-
-            // 构造函数逻辑
-            R = new Random();
-
-            this.inNum = p.GetLength(1);
-            this.outNum = t.GetLength(1);
-            this.hideNum = computeHideNum(inNum, outNum);
-            //      this.hideNum=18;
-            this.sampleNum = p.GetLength(0);
-
-            Console.WriteLine("输入节点数目： " + inNum);
-            Console.WriteLine("隐层节点数目：" + hideNum);
-            Console.WriteLine("输出层节点数目：" + outNum);
-
-            Console.ReadLine();
-
-            x = new double[inNum];
-            x1 = new double[hideNum];
-            x2 = new double[outNum];
-
-            o1 = new double[hideNum];
-            o2 = new double[outNum];
-
-            w = new double[inNum, hideNum];
-            v = new double[hideNum, outNum];
-            dw = new double[inNum, hideNum];
-            dv = new double[hideNum, outNum];
-
-            b1 = new double[hideNum];
-            b2 = new double[outNum];
-            db1 = new double[hideNum];
-            db2 = new double[outNum];
-
-            pp = new double[hideNum];
-            qq = new double[outNum];
-            yd = new double[outNum];
-
-            //初始化w
-            for (int i = 0; i < inNum; i++)
-            {
-                for (int j = 0; j < hideNum; j++)
-                {
-                    w[i, j] = (R.NextDouble() * 2 - 1.0) / 2;
-                }
-            }
-
-            //初始化v
-            for (int i = 0; i < hideNum; i++)
-            {
-                for (int j = 0; j < outNum; j++)
-                {
-                    v[i, j] = (R.NextDouble() * 2 - 1.0) / 2;
-                }
-            }
-
-            rate = 0.8;
-            e = 0.0;
-            in_rate = 1.0;
-        }
-
-        //训练函数
-        public void train(double[,] p, double[,] t)
-        {
-            e = 0.0;
-            //求p，t中的最大值
-            double pMax = 0.0;
-            for (int isamp = 0; isamp < sampleNum; isamp++)
-            {
-                for (int i = 0; i < inNum; i++)
-                {
-                    if (Math.Abs(p[isamp, i]) > pMax)
-                    {
-                        pMax = Math.Abs(p[isamp, i]);
-                    }
-                }
-
-                for (int j = 0; j < outNum; j++)
-                {
-                    if (Math.Abs(t[isamp, j]) > pMax)
-                    {
-                        pMax = Math.Abs(t[isamp, j]);
-                    }
-                }
-
-                in_rate = pMax;
-            }//end isamp
-
-
-
-            for (int isamp = 0; isamp < sampleNum; isamp++)
-            {
-                //数据归一化
-                for (int i = 0; i < inNum; i++)
-                {
-                    x[i] = p[isamp, i] / in_rate;
-                }
-                for (int i = 0; i < outNum; i++)
-                {
-                    yd[i] = t[isamp, i] / in_rate;
-                }
-
-                //计算隐层的输入和输出
-
-                for (int j = 0; j < hideNum; j++)
-                {
-                    o1[j] = 0.0;
-                    for (int i = 0; i < inNum; i++)
-                    {
-                        o1[j] += w[i, j] * x[i];
-                    }
-                    x1[j] = 1.0 / (1.0 + Math.Exp(-o1[j] - b1[j]));
-                }
-
-                //计算输出层的输入和输出
-                for (int k = 0; k < outNum; k++)
-                {
-                    o2[k] = 0.0;
-                    for (int j = 0; j < hideNum; j++)
-                    {
-                        o2[k] += v[j, k] * x1[j];
-                    }
-                    x2[k] = 1.0 / (1.0 + Math.Exp(-o2[k] - b2[k]));
-                }
-
-                //计算输出层误差和均方差
-
-                for (int k = 0; k < outNum; k++)
-                {
-                    qq[k] = (yd[k] - x2[k]) * x2[k] * (1.0 - x2[k]);
-                    e += (yd[k] - x2[k]) * (yd[k] - x2[k]);
-                    //更新V
-                    for (int j = 0; j < hideNum; j++)
-                    {
-                        v[j, k] += rate * qq[k] * x1[j];
-                    }
-                }
-
-                //计算隐层误差
-
-                for (int j = 0; j < hideNum; j++)
-                {
-                    pp[j] = 0.0;
-                    for (int k = 0; k < outNum; k++)
-                    {
-                        pp[j] += qq[k] * v[j, k];
-                    }
-                    pp[j] = pp[j] * x1[j] * (1 - x1[j]);
-
-                    //更新W
-
-                    for (int i = 0; i < inNum; i++)
-                    {
-                        w[i, j] += rate * pp[j] * x[i];
-                    }
-                }
-
-                //更新b2
-                for (int k = 0; k < outNum; k++)
-                {
-                    b2[k] += rate * qq[k];
-                }
-
-                //更新b1
-                for (int j = 0; j < hideNum; j++)
-                {
-                    b1[j] += rate * pp[j];
-                }
-
-            }//end isamp
-            e = Math.Sqrt(e);
-            //      adjustWV(w,dw);
-            //      adjustWV(v,dv);
-
-
-        }//end train
-
-        public void adjustWV(double[,] w, double[,] dw)
-        {
-            for (int i = 0; i < w.GetLength(0); i++)
-            {
-                for (int j = 0; j < w.GetLength(1); j++)
-                {
-                    w[i, j] += dw[i, j];
-                }
-            }
-
-        }
-
-        public void adjustWV(double[] w, double[] dw)
-        {
-            for (int i = 0; i < w.Length; i++)
-            {
-
-                w[i] += dw[i];
-
-            }
-
-        }
-
-        //数据仿真函数
-
-        public double[] sim(double[] psim)
-        {
-            for (int i = 0; i < inNum; i++)
-                x[i] = psim[i] / in_rate;
-
-            for (int j = 0; j < hideNum; j++)
-            {
-                o1[j] = 0.0;
-                for (int i = 0; i < inNum; i++)
-                    o1[j] = o1[j] + w[i, j] * x[i];
-                x1[j] = 1.0 / (1.0 + Math.Exp(-o1[j] - b1[j]));
-            }
-            for (int k = 0; k < outNum; k++)
-            {
-                o2[k] = 0.0;
-                for (int j = 0; j < hideNum; j++)
-                    o2[k] = o2[k] + v[j, k] * x1[j];
-                x2[k] = 1.0 / (1.0 + Math.Exp(-o2[k] - b2[k]));
-
-                x2[k] = in_rate * x2[k];
-
-            }
-
-            return x2;
-        } //end sim
-
-        //保存矩阵w,v
-        public void saveMatrix(double[,] w, string filename)
-        {
-            StreamWriter sw = File.CreateText(filename);
-            for (int i = 0; i < w.GetLength(0); i++)
-            {
-                for (int j = 0; j < w.GetLength(1); j++)
-                {
-                    sw.Write(w[i, j] + " ");
-                }
-                sw.WriteLine();
-            }
-            sw.Close();
-
-        }
-
-        //保存矩阵b1,b2
-        public void saveMatrix(double[] b, string filename)
-        {
-            StreamWriter sw = File.CreateText(filename);
-            for (int i = 0; i < b.Length; i++)
-            {
-                sw.Write(b[i] + " ");
-            }
-            sw.Close();
-        }
-
-        //读取矩阵W,V
-        public void readMatrixW(double[,] w, string filename)
-        {
-
-            StreamReader sr;
-            try
-            {
-
-                sr = new StreamReader(filename, Encoding.GetEncoding("gb2312"));
-
-                String line;
-                int i = 0;
-
-                while ((line = sr.ReadLine()) != null)
-                {
-
-                    string[] s1 = line.Trim().Split(' ');
-                    for (int j = 0; j < s1.Length; j++)
-                    {
-                        w[i, j] = Convert.ToDouble(s1[j]);
-                    }
-                    i++;
-                }
-                sr.Close();
-
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                Console.WriteLine("The file could not be read:");
-                Console.WriteLine(e.Message);
-            }
-
-        }
-
-
-
-
-        //读取矩阵b1,b2
-        public void readMatrixB(double[] b, string filename)
-        {
-
-            StreamReader sr;
-            try
-            {
-                sr = new StreamReader(filename, Encoding.GetEncoding("gb2312"));
-
-                String line;
-                int i = 0;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    b[i] = Convert.ToDouble(line);
-                    i++;
-                }
-                sr.Close();
-
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                Console.WriteLine("The file could not be read:");
-                Console.WriteLine(e.Message);
-            }
-
-        }
-
-
-
-    }
-    class Class1
-    {
-        [STAThread]
-        static void qtc4a9(string[] args)
-        {
-            //0.1399,0.1467,0.1567,0.1595,0.1588,0.1622,0.1611,0.1615,0.1685,0.1789,0.1790
-
-            //      double [,] p1=new double[,]{{0.05,0.02},{0.09,0.11},{0.12,0.20},{0.15,0.22},{0.20,0.25},{0.75,0.75},{0.80,0.83},{0.82,0.80},{0.90,0.89},{0.95,0.89},{0.09,0.04},{0.1,0.1},{0.14,0.21},{0.18,0.24},{0.22,0.28},{0.77,0.78},{0.79,0.81},{0.84,0.82},{0.94,0.93},{0.98,0.99}};
-            //      double [,] t1=new double[,]{{1,0},{1,0},{1,0},{1,0},{1,0},{0,1},{0,1},{0,1},{0,1},{0,1},{1,0},{1,0},{1,0},{1,0},{1,0},{0,1},{0,1},{0,1},{0,1},{0,1}};
-            double[,] p1 = new double[,] { { 0.1399, 0.1467, 0.1567, 0.1595, 0.1588, 0.1622 }, { 0.1467, 0.1567, 0.1595, 0.1588, 0.1622, 0.1611 }, { 0.1567, 0.1595, 0.1588, 0.1622, 0.1611, 0.1615 }, { 0.1595, 0.1588, 0.1622, 0.1611, 0.1615, 0.1685 }, { 0.1588, 0.1622, 0.1611, 0.1615, 0.1685, 0.1789 } };
-            double[,] t1 = new double[,] { { 0.1622 }, { 0.1611 }, { 0.1615 }, { 0.1685 }, { 0.1789 }, { 0.1790 } };
-            BpNet bp = new BpNet(p1, t1);
-            int study = 0;
-            do
-            {
-                study++;
-                bp.train(p1, t1);
-                //       bp.rate=0.95-(0.95-0.3)*study/50000;
-                //        Console.Write("第 "+ study+"次学习： ");
-                //        Console.WriteLine(" 均方差为 "+bp.e);
-
-            } while (bp.e > 0.001 && study < 50000);
-            Console.Write("第 " + study + "次学习： ");
-            Console.WriteLine(" 均方差为 " + bp.e);
-            bp.saveMatrix(bp.w, "w.txt");
-            bp.saveMatrix(bp.v, "v.txt");
-            bp.saveMatrix(bp.b1, "b1.txt");
-            bp.saveMatrix(bp.b2, "b2.txt");
-
-            //      double [,] p2=new double[,]{{0.05,0.02},{0.09,0.11},{0.12,0.20},{0.15,0.22},{0.20,0.25},{0.75,0.75},{0.80,0.83},{0.82,0.80},{0.90,0.89},{0.95,0.89},{0.09,0.04},{0.1,0.1},{0.14,0.21},{0.18,0.24},{0.22,0.28},{0.77,0.78},{0.79,0.81},{0.84,0.82},{0.94,0.93},{0.98,0.99}};
-            double[,] p2 = new double[,] { { 0.1399, 0.1467, 0.1567, 0.1595, 0.1588, 0.1622 }, { 0.1622, 0.1611, 0.1615, 0.1685, 0.1789, 0.1790 } };
-            int aa = bp.inNum;
-            int bb = bp.outNum;
-            int cc = p2.GetLength(0);
-            double[] p21 = new double[aa];
-            double[] t2 = new double[bb];
-            for (int n = 0; n < cc; n++)
-            {
-                for (int i = 0; i < aa; i++)
-                {
-                    p21[i] = p2[n, i];
-                }
-                t2 = bp.sim(p21);
-
-                for (int i = 0; i < t2.Length; i++)
-                {
-                    Console.WriteLine(t2[i] + " ");
-                }
-
-            }
-
-            Console.ReadLine();
-        }
-    }
-}
-
-
-namespace ThMEPWSS.DebugNs
-{
-    using System;
-    using System.Linq;
-    using System.Text;
-    using System.Reflection;
-    using System.Collections.Generic;
-    using System.Windows.Forms;
-    using ThMEPWSS.JsonExtensionsNs;
-    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-    using DU = ThMEPWSS.Assistant.DrawUtils;
-    using Autodesk.AutoCAD.EditorInput;
-    using AcHelper;
-    using Autodesk.AutoCAD.Geometry;
-    using Linq2Acad;
-    using ThMEPWSS.Pipe.Model;
-    using ThMEPWSS.Pipe.Engine;
-    using Autodesk.AutoCAD.DatabaseServices;
-    using System.Diagnostics;
-    using Autodesk.AutoCAD.ApplicationServices;
-    using Dreambuild.AutoCAD;
-    using DotNetARX;
-    using Autodesk.AutoCAD.Internal;
-    using static ThMEPWSS.DebugNs.ThPublicMethods;
-    using ThMEPWSS.CADExtensionsNs;
-    using ThMEPWSS.Uitl;
-    using ThMEPWSS.Uitl.DebugNs;
-    using ThMEPWSS.Uitl.ExtensionsNs;
-    using ThMEPWSS.Assistant;
-    using ThMEPWSS.Pipe.Service;
-    using NFox.Cad;
-    using ThCADCore.NTS;
-    using Autodesk.AutoCAD.Colors;
-    using System.Runtime.Remoting;
-    using PolylineTools = Pipe.Service.PolylineTools;
-    using CircleTools = Pipe.Service.CircleTools;
-    using System.IO;
-    using Autodesk.AutoCAD.Runtime;
-    using static StaticMethods;
-    using ThMEPWSS.Pipe;
-    using Newtonsoft.Json;
-    using System.Text.RegularExpressions;
-    using ThCADExtension;
-    using System.Collections;
-    using ThCADCore.NTS.IO;
-    using Newtonsoft.Json.Linq;
-    using ThMEPEngineCore.Engine;
-    using NetTopologySuite.Geometries;
-    using System.Linq.Expressions;
-    public class _nzm
-    {
-        private _nzm() { }
-        static _nzm __nzm;
-        public static _nzm nzm
-        {
-            get
-            {
-                if (!Dbg.isDebugging) return null;
-                if (__nzm == null)
-                {
-                    var o = new _nzm();
-                    var types = ((Assembly)Dbg.ctx["nozomi"]).GetTypes().Where(x => x.IsPublic && !x.IsEnum).ToList();
-                    var baseTypeDict = new Dictionary<Type, string>()
-                {
-                    {typeof(byte),"byte"} ,
-                    {typeof(sbyte),"sbyte"} ,
-                    {typeof(ushort),"ushort"} ,
-                    {typeof(short),"short"} ,
-                    {typeof(uint),"uint"} ,
-                    {typeof(int),"int"} ,
-                    {typeof(ulong),"ulong"} ,
-                    {typeof(long),"long"} ,
-                    {typeof(string),"string"} ,
-                    {typeof(object),"object"} ,
-                    {typeof(void),"void"} ,
-                    {typeof(byte[]),"byte[]"} ,
-                    {typeof(float),"float"} ,
-                    {typeof(double),"double"} ,
-                    {typeof(decimal),"decimal"} ,
-                    {typeof(DateTime),"DateTime"} ,
-                };
-                    foreach (var type in types)
-                    {
-                        var d = baseTypeDict;
-                        var mis = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
-                        foreach (var mi in mis)
+                        for (int i = 0; i < fs.Count; i++)
                         {
-                            if (Regex.IsMatch(mi.Name, @"[\+`<>]")) continue;
-                            if (!(d.ContainsKey(mi.ReturnType) && mi.GetParameters().All(p => d.ContainsKey(p.ParameterType)))) continue;
-                            o.Init(mi);
+                            var f = fs[i];
+                            var name = names[i];
+                            ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
                         }
                     }
-                    __nzm = o;
-                }
-                return __nzm;
+                });
+                ctx["initMethod"] = initMethod;
+                entryMethod();
             }
+            else
+            {
+                MessageBox.Show("entryMethod not set!");
+            }
+            return;
+            Origin(ctx);
         }
-        public int Copy(string sourceFile, string targetFile) => f0(sourceFile, targetFile);
-        public int Move(string sourceFile, string targetFile) => f1(sourceFile, targetFile);
-        public int Delete(string filePath) => f2(filePath);
-        public int GetLastError() => f3();
-        public string GetErrorString() => f4();
-        public string GetErrorString(int n) => f5(n);
-        public void KillProcess(string preciseName) => f6(preciseName);
-        public void OpenDir(string dir) => f7(dir);
-        public void OpenFile(string file) => f8(file);
-        public void Open(string path) => f9(path);
-        public string RunAndRead(string fileName, string args) => f10(fileName, args);
-        public byte[] AesEncrypt(byte[] bytes, string key) => f11(bytes, key);
-        public string AesEncrypt(string str, string key) => f12(str, key);
-        public byte[] AesDecrypt(byte[] encryptedBytes, string key) => f13(encryptedBytes, key);
-        public string AesDecrypt(string Base64Str, string key) => f14(Base64Str, key);
-        public uint GetCrc32(byte[] bytes, int start, int count) => f15(bytes, start, count);
-        public byte[] EncryptData(byte[] data, string publickeyXml) => f16(data, publickeyXml);
-        public byte[] DecryptData(byte[] data, string privatekeyXml) => f17(data, privatekeyXml);
-        public byte[] Sign(byte[] data, string privatekeyXml) => f18(data, privatekeyXml);
-        public string GetMD5StringFromFile(string filePath) => f19(filePath);
-        public string GetSHA1StringFromFile(string filePath) => f20(filePath);
-        public string GetMd5StringFromString(string str) => f21(str);
-        public string GetMd5String(byte[] bytes) => f22(bytes);
-        public byte[] GetMd5Bytes(byte[] bytes) => f23(bytes);
-        public string Base16To10(string colorStr) => f24(colorStr);
-        public string Base10To16(string colorStr) => f25(colorStr);
-        public void SetHtmlText(string html, string plainText) => f26(html, plainText);
-        public string GetText() => f27();
-        public void JoinWith(string str) => f28(str);
-        public void SetText(string text) => f29(text);
-        public void Test() => f30();
-        public int memcmp(byte[] b1, byte[] b2, int count) => f31(b1, b2, count);
-        public int memcmp(byte[] b1, byte[] b2, uint count) => f32(b1, b2, count);
-        public int memcpy(byte[] dst, byte[] src, int count) => f33(dst, src, count);
-        public int memcpy(byte[] dst, byte[] src, uint count) => f34(dst, src, count);
-        public int memset(byte[] p, int x, int count) => f35(p, x, count);
-        public int memset(byte[] p, int x, uint count) => f36(p, x, count);
-        public string ReadTextFile(string fileName, int limitedSize) => f37(fileName, limitedSize);
-        public void WriteUtf8BOMTextFile(string str, string filePath) => f38(str, filePath);
-        public void WriteGbkTextFile(string str, string filePath) => f39(str, filePath);
-        public byte[] EncodeUTF8(string str) => f40(str);
-        public byte[] EncodeUTF16LE(string str) => f41(str);
-        public double ToUtcTime_Double(DateTime time) => f42(time);
-        public double ToUtcTime_Double_Milliseconds(DateTime time) => f43(time);
-        public int ToUtcTime_Int(DateTime time) => f44(time);
-        public long ToUtcTime_Long(DateTime time) => f45(time);
-        public long ToUtcTime_Milliseconds(DateTime time) => f46(time);
-        public long ToUtfTime_Ticks(DateTime time) => f47(time);
-        public DateTime ToDateTimeFromUtc(double time) => f48(time);
-        public DateTime ToDateTimeFromUtf_Milliseconds(long time) => f49(time);
-        public DateTime ToDateTimeFromUtf_Ticks(long time) => f50(time);
-        public DateTime ToDateTimeFrunUtf(int time) => f51(time);
-        public DateTime ToDateTimeFromUtf(long time) => f52(time);
-        public int get_NowUtcSeconds() => f53();
-        public long get_NowUtcMilliSeconds() => f54();
-        public long get_NowTicks() => f55();
-        public void MkDir(string dir) => f56(dir);
-        public string GetFullPath(string path) => f57(path);
-        public string GetParentPath(string path) => f58(path);
-        public string ReName(string path, string newName) => f59(path, newName);
-        public string UrlJoin(string baseUrl, string url) => f60(baseUrl, url);
-        public string FromHtmlText(string html) => f61(html);
-        public string ToHtmlText(string text) => f62(text);
-        public string GetFileMd5(string filePath) => f63(filePath);
-        public string CutEnd(string str, int n) => f64(str, n);
-        public string ReadFromFile(string filePath, int limitedSize) => f65(filePath, limitedSize);
-        public byte[] EncodeUtf8(string str) => f66(str);
-        public string DecodeUtf8(byte[] bytes) => f67(bytes);
-        public byte[] EncodeUnicode(string str) => f68(str);
-        public string DecodeUnicode(byte[] bytes) => f69(bytes);
-        public byte[] EncodeGbk(string str) => f70(str);
-        public string DecodeGbk(byte[] bytes) => f71(bytes);
-        public void AssertNotNull(object obj) => f72(obj);
-        public void AssertNotNullOrEmpty(string str) => f73(str);
-        public void AssertNotNullOrWhiteSpace(string str) => f74(str);
-        public string GetStandardPathString(string path) => f75(path);
-        public string EscapeFromFilePathChars(string path) => f76(path);
-        public string GetExtension(string name) => f77(name);
-        public string GetNameWithoutExtension(string fullname) => f78(fullname);
-        public string GetName(string path) => f79(path);
-        public string wpj(string str, string str2) => f80(str, str2);
-        public string lpj(string str, string str2) => f81(str, str2);
-        public string ToWpt(string str) => f82(str);
-        public string ToLpt(string str) => f83(str);
-        public string ToStdWinFullPath(string path) => f84(path);
-        public void AssertNotExists(string path) => f85(path);
-        public void AssertIsDir(string dir) => f86(dir);
-        public void AssertIsEmptyDir(string dir) => f87(dir);
-        public void AssertIsFile(string file) => f88(file);
-        public string ToAnsiString(byte[] bytes) => f89(bytes);
-        public string ToAnsiString(byte[] bytes, int start, int length) => f90(bytes, start, length);
-        public string ToAsciiString(byte[] bytes) => f91(bytes);
-        public string ToAsciiString(byte[] bytes, int start, int length) => f92(bytes, start, length);
-        public string ToUtf8String(byte[] bytes) => f93(bytes);
-        public string ToUtf8String(byte[] bytes, int start, int length) => f94(bytes, start, length);
-        public string ToUnicodeString(byte[] bytes) => f95(bytes);
-        public string ToUnicodeString(byte[] bytes, int start, int length) => f96(bytes, start, length);
-        public string ToHexString(byte[] bytes, int start, int length) => f97(bytes, start, length);
-        public string ToHexString(byte[] bytes) => f98(bytes);
-        public string ToBase64String(byte[] bytes, int start, int length) => f99(bytes, start, length);
-        public string ToBase64String(byte[] bytes) => f100(bytes);
-        public byte[] ToByteArrayFromHexString(string hexStr) => f101(hexStr);
-        public byte[] Base64Decode(string Base64Str) => f102(Base64Str);
 
-        Func<string, string, int> f0;
-        Func<string, string, int> f1;
-        Func<string, int> f2;
-        Func<int> f3;
-        Func<string> f4;
-        Func<int, string> f5;
-        Action<string> f6;
-        Action<string> f7;
-        Action<string> f8;
-        Action<string> f9;
-        Func<string, string, string> f10;
-        Func<byte[], string, byte[]> f11;
-        Func<string, string, string> f12;
-        Func<byte[], string, byte[]> f13;
-        Func<string, string, string> f14;
-        Func<byte[], int, int, uint> f15;
-        Func<byte[], string, byte[]> f16;
-        Func<byte[], string, byte[]> f17;
-        Func<byte[], string, byte[]> f18;
-        Func<string, string> f19;
-        Func<string, string> f20;
-        Func<string, string> f21;
-        Func<byte[], string> f22;
-        Func<byte[], byte[]> f23;
-        Func<string, string> f24;
-        Func<string, string> f25;
-        Action<string, string> f26;
-        Func<string> f27;
-        Action<string> f28;
-        Action<string> f29;
-        Action f30;
-        Func<byte[], byte[], int, int> f31;
-        Func<byte[], byte[], uint, int> f32;
-        Func<byte[], byte[], int, int> f33;
-        Func<byte[], byte[], uint, int> f34;
-        Func<byte[], int, int, int> f35;
-        Func<byte[], int, uint, int> f36;
-        Func<string, int, string> f37;
-        Action<string, string> f38;
-        Action<string, string> f39;
-        Func<string, byte[]> f40;
-        Func<string, byte[]> f41;
-        Func<DateTime, double> f42;
-        Func<DateTime, double> f43;
-        Func<DateTime, int> f44;
-        Func<DateTime, long> f45;
-        Func<DateTime, long> f46;
-        Func<DateTime, long> f47;
-        Func<double, DateTime> f48;
-        Func<long, DateTime> f49;
-        Func<long, DateTime> f50;
-        Func<int, DateTime> f51;
-        Func<long, DateTime> f52;
-        Func<int> f53;
-        Func<long> f54;
-        Func<long> f55;
-        Action<string> f56;
-        Func<string, string> f57;
-        Func<string, string> f58;
-        Func<string, string, string> f59;
-        Func<string, string, string> f60;
-        Func<string, string> f61;
-        Func<string, string> f62;
-        Func<string, string> f63;
-        Func<string, int, string> f64;
-        Func<string, int, string> f65;
-        Func<string, byte[]> f66;
-        Func<byte[], string> f67;
-        Func<string, byte[]> f68;
-        Func<byte[], string> f69;
-        Func<string, byte[]> f70;
-        Func<byte[], string> f71;
-        Action<object> f72;
-        Action<string> f73;
-        Action<string> f74;
-        Func<string, string> f75;
-        Func<string, string> f76;
-        Func<string, string> f77;
-        Func<string, string> f78;
-        Func<string, string> f79;
-        Func<string, string, string> f80;
-        Func<string, string, string> f81;
-        Func<string, string> f82;
-        Func<string, string> f83;
-        Func<string, string> f84;
-        Action<string> f85;
-        Action<string> f86;
-        Action<string> f87;
-        Action<string> f88;
-        Func<byte[], string> f89;
-        Func<byte[], int, int, string> f90;
-        Func<byte[], string> f91;
-        Func<byte[], int, int, string> f92;
-        Func<byte[], string> f93;
-        Func<byte[], int, int, string> f94;
-        Func<byte[], string> f95;
-        Func<byte[], int, int, string> f96;
-        Func<byte[], int, int, string> f97;
-        Func<byte[], string> f98;
-        Func<byte[], int, int, string> f99;
-        Func<byte[], string> f100;
-        Func<string, byte[]> f101;
-        Func<string, byte[]> f102;
 
-        void Init(MethodInfo mi)
+        private static void Origin(Dictionary<string, object> ctx)
         {
-            var k = mi.ToString();
-            if (k == "Int32 Copy(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f0 = Expression.Lambda<Func<string, string, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Int32 Move(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f1 = Expression.Lambda<Func<string, string, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Int32 Delete(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f2 = Expression.Lambda<Func<string, int>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int32 GetLastError()")
-            {
-                f3 = Expression.Lambda<Func<int>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "System.String GetErrorString()")
-            {
-                f4 = Expression.Lambda<Func<string>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "System.String GetErrorString(Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(int), "v0");
-                f5 = Expression.Lambda<Func<int, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void KillProcess(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f6 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void OpenDir(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f7 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void OpenFile(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f8 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void Open(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f9 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String RunAndRead(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f10 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] AesEncrypt(Byte[], System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f11 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String AesEncrypt(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f12 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] AesDecrypt(Byte[], System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f13 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String AesDecrypt(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f14 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "UInt32 GetCrc32(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f15 = Expression.Lambda<Func<byte[], int, int, uint>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Byte[] EncryptData(Byte[], System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f16 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] DecryptData(Byte[], System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f17 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] Sign(Byte[], System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f18 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String GetMD5StringFromFile(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f19 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetSHA1StringFromFile(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f20 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetMd5StringFromString(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f21 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetMd5String(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f22 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] GetMd5Bytes(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f23 = Expression.Lambda<Func<byte[], byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String Base16To10(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f24 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String Base10To16(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f25 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void SetHtmlText(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f26 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String GetText()")
-            {
-                f27 = Expression.Lambda<Func<string>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "Void JoinWith(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f28 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void SetText(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f29 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void Test()")
-            {
-                f30 = Expression.Lambda<Action>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "Int32 memcmp(Byte[], Byte[], Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f31 = Expression.Lambda<Func<byte[], byte[], int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Int32 memcmp(Byte[], Byte[], UInt32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
-                var pe2 = Expression.Parameter(typeof(uint), "v2");
-                f32 = Expression.Lambda<Func<byte[], byte[], uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Int32 memcpy(Byte[], Byte[], Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f33 = Expression.Lambda<Func<byte[], byte[], int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Int32 memcpy(Byte[], Byte[], UInt32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
-                var pe2 = Expression.Parameter(typeof(uint), "v2");
-                f34 = Expression.Lambda<Func<byte[], byte[], uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Int32 memset(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f35 = Expression.Lambda<Func<byte[], int, int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "Int32 memset(Byte[], Int32, UInt32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(uint), "v2");
-                f36 = Expression.Lambda<Func<byte[], int, uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ReadTextFile(System.String, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                f37 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Void WriteUtf8BOMTextFile(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f38 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Void WriteGbkTextFile(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f39 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] EncodeUTF8(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f40 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] EncodeUTF16LE(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f41 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Double ToUtcTime_Double(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f42 = Expression.Lambda<Func<DateTime, double>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Double ToUtcTime_Double_Milliseconds(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f43 = Expression.Lambda<Func<DateTime, double>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int32 ToUtcTime_Int(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f44 = Expression.Lambda<Func<DateTime, int>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int64 ToUtcTime_Long(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f45 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int64 ToUtcTime_Milliseconds(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f46 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int64 ToUtfTime_Ticks(System.DateTime)")
-            {
-                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
-                f47 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.DateTime ToDateTimeFromUtc(Double)")
-            {
-                var pe0 = Expression.Parameter(typeof(double), "v0");
-                f48 = Expression.Lambda<Func<double, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.DateTime ToDateTimeFromUtf_Milliseconds(Int64)")
-            {
-                var pe0 = Expression.Parameter(typeof(long), "v0");
-                f49 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.DateTime ToDateTimeFromUtf_Ticks(Int64)")
-            {
-                var pe0 = Expression.Parameter(typeof(long), "v0");
-                f50 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.DateTime ToDateTimeFrunUtf(Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(int), "v0");
-                f51 = Expression.Lambda<Func<int, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.DateTime ToDateTimeFromUtf(Int64)")
-            {
-                var pe0 = Expression.Parameter(typeof(long), "v0");
-                f52 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Int32 get_NowUtcSeconds()")
-            {
-                f53 = Expression.Lambda<Func<int>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "Int64 get_NowUtcMilliSeconds()")
-            {
-                f54 = Expression.Lambda<Func<long>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "Int64 get_NowTicks()")
-            {
-                f55 = Expression.Lambda<Func<long>>(Expression.Block(Expression.Call(null, mi))).Compile();
-                return;
-            }
-            if (k == "Void MkDir(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f56 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetFullPath(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f57 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetParentPath(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f58 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ReName(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f59 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String UrlJoin(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f60 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String FromHtmlText(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f61 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToHtmlText(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f62 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetFileMd5(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f63 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String CutEnd(System.String, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                f64 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String ReadFromFile(System.String, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                f65 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "Byte[] EncodeUtf8(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f66 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String DecodeUtf8(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f67 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] EncodeUnicode(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f68 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String DecodeUnicode(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f69 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] EncodeGbk(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f70 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String DecodeGbk(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f71 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertNotNull(System.Object)")
-            {
-                var pe0 = Expression.Parameter(typeof(object), "v0");
-                f72 = Expression.Lambda<Action<object>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertNotNullOrEmpty(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f73 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertNotNullOrWhiteSpace(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f74 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetStandardPathString(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f75 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String EscapeFromFilePathChars(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f76 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetExtension(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f77 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetNameWithoutExtension(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f78 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String GetName(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f79 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String wpj(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f80 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String lpj(System.String, System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                var pe1 = Expression.Parameter(typeof(string), "v1");
-                f81 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
-                return;
-            }
-            if (k == "System.String ToWpt(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f82 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToLpt(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f83 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToStdWinFullPath(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f84 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertNotExists(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f85 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertIsDir(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f86 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertIsEmptyDir(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f87 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Void AssertIsFile(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f88 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToAnsiString(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f89 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToAnsiString(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f90 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToAsciiString(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f91 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToAsciiString(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f92 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToUtf8String(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f93 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToUtf8String(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f94 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToUnicodeString(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f95 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToUnicodeString(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f96 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToHexString(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f97 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToHexString(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f98 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "System.String ToBase64String(Byte[], Int32, Int32)")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                var pe1 = Expression.Parameter(typeof(int), "v1");
-                var pe2 = Expression.Parameter(typeof(int), "v2");
-                f99 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
-                return;
-            }
-            if (k == "System.String ToBase64String(Byte[])")
-            {
-                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
-                f100 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] ToByteArrayFromHexString(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f101 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
-            }
-            if (k == "Byte[] Base64Decode(System.String)")
-            {
-                var pe0 = Expression.Parameter(typeof(string), "v0");
-                f102 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
-                return;
+            processContext = (Dictionary<string, object>)ctx["processContext"];
+            ctx.TryGetValue("entryMethod", out object o);
+            if (o is Action entryMethod)
+            {
+                Action initMethod = null;
+                initMethod = new Action(() =>
+                {
+                    ((Action<Assembly, string>)ctx["pushAcadActions"])((Assembly)ctx["currentAsm"], typeof(ThDebugClass).FullName);
+                    ((Action<object>)ctx["clearBtns"])(ctx["currentPanel"]);
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "initMethod", initMethod);
+                    ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "reloadMe", () =>
+                    {
+                        var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
+                        asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
+                        initMethod();
+                    });
+                    var fs = (List<Action>)ctx["actions"];
+                    var names = (List<string>)ctx["names"];
+                    for (int i = 0; i < fs.Count; i++)
+                    {
+                        var f = fs[i];
+                        var name = names[i];
+                        ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], name, f);
+                    }
+                });
+                ctx["initMethod"] = initMethod;
+                entryMethod();
+            }
+            else
+            {
+                MessageBox.Show("entryMethod not set!");
             }
-
         }
     }
+    public class ThDebugDrawer
+    {
+        static Database WorkingDatabase => HostApplicationServices.WorkingDatabase;
+        static Transaction Transaction => WorkingDatabase.TransactionManager.StartTransaction();
+        static ObjectId GetEntity()
+        {
+            var ed = Active.Editor;
+            var opt = new PromptEntityOptions("请选择");
+            var ret = ed.GetEntity(opt);
+            if (ret.Status != PromptStatus.OK) return ObjectId.Null;
+            return ret.ObjectId;
+        }
+        public static T GetEntity<T>(AcadDatabase adb) where T : DBObject
+        {
+            var id = GetEntity();
+            var ent = adb.Element<T>(id);
+            return ent;
+        }
+        public static ObjectId[] GetSelection()
+        {
+            var ed = Active.Editor;
+            var opt = new PromptSelectionOptions();
+            var ret = ed.GetSelection(opt);
+            if (ret.Status != PromptStatus.OK) return null;
+            return ret.Value.GetObjectIds();
+        }
+        private static BlockTableRecord GetBlockTableRecord(Database db, Transaction trans)
+        {
+            var bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
+            var btr = (BlockTableRecord)trans.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+            return btr;
+        }
+        public static Polyline DrawPolygon(Database db, Transaction trans, Point2d center, int num, double radius)
+        {
+            var btr = GetBlockTableRecord(db, trans);
+            var pline = PolylineTools.CreatePolygon(center, num, radius);
+            btr.AppendEntity(pline);
+            trans.AddNewlyCreatedDBObject(pline, true);
+            return pline;
+        }
+        public static bool GetCircleBoundary(Point3dCollection points, out Point3d center, out double radius)
+        {
+            if (points.Count == 0)
+            {
+                center = default;
+                radius = default;
+                return false;
+            }
+            var minX = points.Cast<Point3d>().Select(p => p.X).Min();
+            var maxX = points.Cast<Point3d>().Select(p => p.X).Max();
+            var minY = points.Cast<Point3d>().Select(p => p.Y).Min();
+            var maxY = points.Cast<Point3d>().Select(p => p.Y).Max();
+            var minZ = points.Cast<Point3d>().Select(p => p.Z).Min();
+            var maxZ = points.Cast<Point3d>().Select(p => p.Z).Max();
+            var pt1 = new Point3d(minX, minY, minZ);
+            var pt2 = new Point3d(maxX, maxY, maxZ);
+            center = GeTools.MidPoint(pt1, pt2);
+            radius = (center - pt1).Length;
+            return true;
+        }
+        public static void DrawLabelBox(Database db, params Point2d[] points)
+        {
+            using (var trans = Transaction)
+            {
+                var radius = 50;
+                foreach (var pt in points)
+                {
+                    var pline = DrawPolygon(db, trans, pt, 6, radius * 1.5);
+                    pline.ConstantWidth = 50;
+                    trans.Commit();
+                }
+            }
+        }
+        public static void DrawLineByPolar(Database db, Point2d center, double radius, double angle)
+        {
+            var x = center.X + radius * Math.Cos(angle);
+            var y = center.Y + radius * Math.Sin(angle);
+            DrawLine(db, center, new Point2d(x, y));
+        }
+        public static void DrawLineByOffset(Database db, Point2d start, double offsetX, double offsetY)
+        {
+            DrawLine(db, start, new Point2d(start.X + offsetX, start.Y + offsetY));
+        }
+        public static void DrawText(Database db, Point2d pt, string text)
+        {
+            using (var trans = Transaction)
+            {
+                var btr = GetBlockTableRecord(db, trans);
+                var t = new DBText() { Position = pt.ToPoint3d(), TextString = text, Height = 350, Thickness = 10, };
+                btr.AppendEntity(t);
+                trans.AddNewlyCreatedDBObject(t, true);
+                trans.Commit();
+            }
+
+        }
+        public static void DrawCircle(Database db, Point3d pt1, Point3d pt2, Point3d pt3)
+        {
+            using (var trans = Transaction)
+            {
+                var btr = GetBlockTableRecord(db, trans);
+                var circle = CircleTools.CreateCircle(pt1, pt2, pt3);
+                circle.Thickness = 5;
+                btr.AppendEntity(circle);
+                trans.AddNewlyCreatedDBObject(circle, true);
+                circle.ColorIndex = 32;
+                trans.Commit();
+            }
+        }
+        public static void DrawCircle(Database db, Point2d center, double radius)
+        {
+            using (var trans = Transaction)
+            {
+                var btr = GetBlockTableRecord(db, trans);
+                var circle = new Circle
+                {
+                    Center = center.ToPoint3d(),
+                    Radius = radius,
+                    Thickness = 5
+                };
+                btr.AppendEntity(circle);
+                trans.AddNewlyCreatedDBObject(circle, true);
+                circle.ColorIndex = 32;
+                trans.Commit();
+            }
+        }
+        public static void DrawLine(Database db, Point2d start, Point2d end)
+        {
+            using (var trans = Transaction)
+            {
+                var btr = GetBlockTableRecord(db, trans);
+                var pts = new Point2dCollection { start, end, };
+                var pline = PolylineTools.CreatePolyline(pts);
+                btr.AppendEntity(pline);
+                trans.AddNewlyCreatedDBObject(pline, true);
+                pline.ConstantWidth = 2;
+                pline.ColorIndex = 32;
+                trans.Commit();
+            }
+        }
+
+
+    }
+    public class StaticMethods
+    {
+        public static void SaveData(string name, object obj)
+        {
+            File.WriteAllText($@"D:\temptxts\{name}.txt", obj.ToJson());
+        }
+        public static T LoadData<T>(string name)
+        {
+            return File.ReadAllText($@"D:\temptxts\{name}.txt").FromJson<T>();
+        }
+        public static T LoadData<T>(string name, JsonConverter cvt)
+        {
+            return JsonConvert.DeserializeObject<T>(File.ReadAllText($@"D:\temptxts\{name}.txt"), cvt);
+        }
+    }
+    public class ThDebugTool
+    {
+
+        public static GeometryFactory GeometryFactory => ThCADCoreNTSService.Instance.GeometryFactory;
+        public static DocumentLock DocumentLock => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
+        public static Editor Editor => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+        public static Document MdiActiveDocument => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+        public static Dictionary<string, object> ctx => ThDebugClass.ctx;
+        public static T LoadFromTempJsonFile<T>(string name)
+        {
+            return LoadFromJsonFile<T>(@"Y:\" + name + ".json");
+        }
+        public static T LoadFromJsonFile<T>(string file)
+        {
+            return File.ReadAllText(file).FromCadJson<T>();
+        }
+        public static void AddButton(string name, Action f)
+        {
+            FengDbgTesting.AddButton(name, f);
+        }
+        public static void AddLazyAction(string name, Action<AcadDatabase> f)
+        {
+            FengDbgTesting.AddLazyAction(name, f);
+        }
+        public static void SaveToTempJsonFile(object obj, string filename = null)
+        {
+            filename ??= DateTime.Now.Ticks.ToString();
+            var file = @"Y:\" + filename + ".json";
+            File.WriteAllText(file, obj.ToCadJson());
+            Dbg.PrintLine(file);
+        }
+        public static void SaveToJsonFile(object obj, string filename = null)
+        {
+            filename ??= DateTime.Now.Ticks.ToString();
+            var file = @"D:\DATA\temp\" + filename + ".json";
+            File.WriteAllText(file, obj.ToCadJson());
+            Dbg.PrintLine(file);
+        }
+        public static void UnHighLight(IEnumerable<Entity> ents)
+        {
+            HighlightHelper.UnHighLight(ents);
+        }
+        public static void HighLight(IEnumerable<Entity> ents)
+        {
+            HighlightHelper.HighLight(ents);
+        }
+        public static void ShowString(string str)
+        {
+            if (!isDebugging) return;
+            ((Action<string>)ctx["showString"])(str);
+        }
+        public static void PrintLine(bool b)
+        {
+            PrintLine(b.ToString());
+        }
+        public static void PrintLine(double line)
+        {
+            PrintLine(line.ToString());
+        }
+        public static bool QueryYesOrNo(string text, bool dft = false)
+        {
+            var separation_key = new PromptKeywordOptions(text);
+            separation_key.Keywords.Add("是", "Y", "是(Y)");
+            separation_key.Keywords.Add("否", "N", "否(N)");
+            separation_key.Keywords.Default = dft ? "是" : "否";
+            var result = Active.Editor.GetKeywords(separation_key);
+            if (result.Status != PromptStatus.OK) return false;
+            return result.StringResult == "是";
+        }
+        public static bool? QueryYesOrNoOrCanceled(string text, bool dft = false)
+        {
+            var separation_key = new PromptKeywordOptions(text);
+            separation_key.Keywords.Add("是", "Y", "是(Y)");
+            separation_key.Keywords.Add("否", "N", "否(N)");
+            separation_key.Keywords.Default = dft ? "是" : "否";
+            var result = Active.Editor.GetKeywords(separation_key);
+            if (result.Status != PromptStatus.OK) return null;
+            return result.StringResult == "是";
+        }
+        public static void PrintLine(string line)
+        {
+            if (!isDebugging) return;
+            if (ctx["currentLogWindow"] == null) return;
+            ((Action<string>)ctx["addline"])(line);
+        }
+        public static void PrintText(string text)
+        {
+            if (!isDebugging) return;
+            if (ctx["currentLogWindow"] == null) return;
+            ((Action<string>)ctx["addtext"])(text);
+        }
+        public static void PrintText(string[] lines)
+        {
+            if (!isDebugging) return;
+            if (ctx["currentLogWindow"] == null) return;
+            ((Action<string>)ctx["addtext"])(string.Join("\n", lines));
+        }
+        public static void Log(object obj)
+        {
+            ((Action<string>)Dbg.ctx["thape_logger"])(obj.ToCadJson());
+        }
+        public static void NewLogWindow()
+        {
+            if (!isDebugging) return;
+            ((Action)ctx["newLogWindow"])();
+        }
+        public static void ShowCurrentLogWindow()
+        {
+            if (!isDebugging) return;
+            ((Action)ctx["showCurrentLogWindow"])();
+        }
+        public static bool isDebugging => FengDbgTest.ctx != null;
+        public static bool _;
+        public static void SetText(IEnumerable<string> lines)
+        {
+            if (!isDebugging) return;
+            if (lines == null) SetText((string)null);
+            SetText(string.Join("\n", lines));
+        }
+        public static void SetText(string text)
+        {
+            if (!isDebugging) return;
+            ((Action<string>)ctx["setText"])(text);
+        }
+        public class TextBoxWriter : System.IO.TextWriter
+        {
+            //重载string那个方法没用的
+            StringBuilder sb = new StringBuilder(8192);
+            bool r;
+            public override void Write(char value)
+            {
+                //Dbg.PrintLine(value.ToJson());
+                if (value == '\r')
+                {
+                    r = true;
+                    return;
+                }
+                if (value == '\n')
+                {
+                    if (r)
+                    {
+                        var s = sb.ToString();
+                        if (s.Length > 100 || s.Contains('\n'))
+                        {
+                            Dbg.PrintText(s);
+                        }
+                        else
+                        {
+                            Dbg.PrintLine(s);
+                        }
+                        r = false;
+                        sb.Clear();
+                        return;
+                    }
+                    else
+                    {
+                        sb.Append(value);
+                        return;
+                    }
+                }
+                r = false;
+                sb.Append(value);
+            }
+            public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;
+        }
+        static ThDebugTool()
+        {
+            Console.SetOut(new TextBoxWriter());
+        }
+        const double DEFAULT_WIDTH = 100;
+        public static void ShowLine(Line line, double width = DEFAULT_WIDTH)
+        {
+            var pl = DU.DrawPolyLineLazy(line.StartPoint, line.EndPoint);
+            pl.ConstantWidth = width;
+        }
+        public static void ShowLine(Polyline pline, double width = DEFAULT_WIDTH)
+        {
+            var pl = DU.DrawPolyLineLazy(pline.ToPoint3dCollection().Cast<Point3d>().ToArray());
+            pl.ConstantWidth = width;
+        }
+        public static void ShowLine(Entity ent, double width = DEFAULT_WIDTH)
+        {
+            if (ThRainSystemService.IsTianZhengElement(ent))
+            {
+                foreach (var e in ent.ExplodeToDBObjectCollection().OfType<Entity>())
+                {
+                    ShowLine(e, width);
+                }
+            }
+            else if (ent is Line line)
+            {
+                ShowLine(line, width);
+            }
+            else if (ent is Polyline pl)
+            {
+                ShowLine(pl, width);
+            }
+        }
+        public static void LayerThreeAxes(List<string> layers)
+        {
+            static void EnsureLayerOn(string layerName)
+            {
+                var id = DbHelper.GetLayerId(layerName);
+                id.QOpenForWrite<LayerTableRecord>(layer =>
+                {
+                    layer.IsLocked = false;
+                    layer.IsFrozen = false;
+                    layer.IsHidden = false;
+                    layer.IsOff = false;
+                });
+            }
+            foreach (var layer in layers)
+            {
+                try
+                {
+                    //Dreambuild.AutoCAD.DbHelper.EnsureLayerOn(layer);
+                    EnsureLayerOn(layer);
+                }
+                catch { }
+            }
+        }
+        const double DEFAULT_DELTA = 10000;
+        public static void ShowAll(string text, double delta = DEFAULT_DELTA)
+        {
+            Dbg.FocusMainWindow();
+            using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                foreach (var t in adb.ModelSpace.OfType<DBText>().Where(t => t.TextString == text))
+                {
+                    var bd = GeoAlgorithm.GetBoundaryRect(t);
+                    Dbg.ShowWhere(bd, delta);
+                }
+            }
+        }
+        public static void ShowWhere(string text, double delta = DEFAULT_DELTA)
+        {
+            Dbg.FocusMainWindow();
+            using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                var t = adb.ModelSpace.OfType<DBText>().FirstOrDefault(x => x.TextString == text);
+                if (t != null)
+                {
+                    var bd = GeoAlgorithm.GetBoundaryRect(t);
+                    Dbg.ShowWhere(bd);
+                }
+            }
+        }
+        public static void ShowWhere(Entity e, double delta = DEFAULT_DELTA)
+        {
+            ShowWhere(GeoAlgorithm.GetBoundaryRect(e), delta);
+        }
+        public static void ShowWhere(Point2d pt, double delta = DEFAULT_DELTA)
+        {
+            ShowWhere(pt.ToPoint3d(), delta);
+        }
+        public static void ShowWhere(Point3d pt, double delta = DEFAULT_DELTA)
+        {
+            ShowWhere(new GRect(pt.ToPoint2d(), pt.ToPoint2d()), delta);
+        }
+        public static void ShowXLabel(Point2d pt, double size = 500)
+        {
+            ShowXLabel(pt.ToPoint3d(), size);
+        }
+        public static void ShowXLabel(Point3d pt, double size = 500)
+        {
+            DrawUtils.DrawingQueue.Enqueue(adb =>
+            {
+                var db = adb.Database;
+                //Dbg.BuildAndSetCurrentLayer(db);
+                var r = new GRect(pt.X - size / 2, pt.Y - size / 2, pt.X + size / 2, pt.Y + size / 2);
+                var lines = new Line[] {
+new Line() { StartPoint = r.LeftTop.ToPoint3d(), EndPoint = r.RightButtom.ToPoint3d()},
+new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoint3d() }
+      };
+                foreach (var line in lines)
+                {
+                    line.Thickness = 10;
+                    line.ColorIndex = 3;
+                    adb.ModelSpace.Add(line);
+                }
+            });
+        }
+        public static void ShowWhere(Geometry geo, double delta = DEFAULT_DELTA)
+        {
+            ShowWhere(geo.ToGRect(), delta);
+        }
+        public static void ShowWhere(GRect r, double delta = DEFAULT_DELTA)
+        {
+            DrawUtils.DrawingQueue.Enqueue(adb =>
+            {
+                var db = adb.Database;
+                //Dbg.BuildAndSetCurrentLayer(db);
+                var rect = "[-334718.142328821,1366616.99129695,635160.253054206,1868196.71202574]".JsonToGRect();
+                GRect r3 = default;
+                {
+                    var circle = DrawUtils.DrawCircleLazy(r.Expand(800));
+                    circle.Thickness = 500;
+                    circle.ColorIndex = 3;
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    var _delta = delta * i;
+                    //if (_delta > rect.Width / 2 && _delta > rect.Height / 2) break;
+                    var _r = new GRect(r.MinX - _delta, r.MaxY + _delta, r.MaxX + _delta, r.MinY - _delta);
+                    r3 = _r;
+                    //DrawUtils.DrawRectLazy(_r);
+                    var circle = DrawUtils.DrawCircleLazy(_r);
+                    if (i == 0)
+                    {
+                        circle.Thickness = 10;
+                        circle.ColorIndex = 3;
+                    }
+                    else if (i == 2)
+                    {
+                        circle.Thickness = 1000;
+                        circle.ColorIndex = 4;
+                    }
+                }
+                if (!Equals(r3, default(GRect)))
+                {
+                    var l1 = DU.DrawLineLazy(new Point3d(r3.MinX, r3.MinY, 0), new Point3d(r3.MaxX, r3.MaxY, 0));
+                    var l2 = DU.DrawLineLazy(new Point3d(r3.MinX, r3.MaxY, 0), new Point3d(r3.MaxX, r3.MinY, 0));
+                    l1.Thickness = 10;
+                    l2.Thickness = 10;
+                    l1.ColorIndex = 4;
+                    l2.ColorIndex = 4;
+                }
+            });
+        }
+        public static void ChangeCadScreenTo(GRect r)
+        {
+            if (r.IsValid)
+            {
+                AcHelper.Commands.CommandHandlerBase.ExecuteFromCommandLine("ZOOM", "W", $"{r.LeftTop.X},{r.LeftTop.Y}", $"{r.RightButtom.X},{r.RightButtom.Y}");
+            }
+        }
+        public static void ZoomAll()
+        {
+            AcHelper.Commands.CommandHandlerBase.ExecuteFromCommandLine("ZOOM", "A");
+        }
+        public static void FocusMainWindow()
+        {
+            ThMEPWSS.Common.Utils.FocusMainWindow();
+        }
+        public static void OpenCadDwgFile(string file, bool readOnly = false)
+        {
+            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, readOnly);
+        }
+        public static void Print(string str, params object[] objs)
+        {
+            var dt = DateTime.Now.ToString("HH:mm:ss.fff");
+            if (objs.Length == 0) Editor.WriteMessage($"\n[{dt}] " + str + "\n");
+            else Editor.WriteMessage($"\n[{dt}] " + str + "\n", objs);
+        }
+
+        const string TEST_GEO_PREFIX = "feng_test_";
+        public static string BuildAndSetCurrentLayer(Database db, string targetLayerName = null)
+        {
+            //直接打开或新建，然后解冻、解锁
+            targetLayerName ??= TEST_GEO_PREFIX + Guid.NewGuid().ToString("N");
+            //var targetLayer = db.GetAllLayers().FirstOrDefault(x => x.Name == targetLayerName);
+            var targetLayer = db.AddLayer(targetLayerName);
+            if (targetLayer.IsNull) throw new System.Exception();
+            //db.UnFrozenLayer(targetLayerName);
+            //db.UnLockLayer(targetLayerName);
+            //db.UnPrintLayer(targetLayerName);
+            //db.UnOffLayer(targetLayerName);
+            db.SetCurrentLayer(targetLayerName);
+            short targetColorIndex = 1;
+            db.SetLayerColor(targetLayerName, targetColorIndex);
+            return targetLayerName;
+        }
+        public static void UnlockCurrentLayer()
+        {
+            using var adb = AcadDatabase.Active();
+            var db = adb.Database;
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            foreach (var layerId in lt)
+            {
+                if (db.Clayer == layerId)
+                {
+                    LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+                    if (ltr != null)
+                    {
+                        if (ltr.IsFrozen)
+                        {
+                            ltr.IsFrozen = false;
+                        }
+                        if (ltr.IsLocked)
+                        {
+                            ltr.IsLocked = false;
+                        }
+                        if (ltr.IsPlottable)
+                        {
+                            ltr.IsPlottable = false;
+                        }
+                        if (ltr.IsOff)
+                        {
+                            ltr.IsOff = false;
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+        public static void UpdateScreen()
+        {
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
+        }
+        public static void DeleteTestGeometries()
+        {
+            using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                adb.Database.SetCurrentLayer("0");
+
+                var lst = adb.ModelSpace.OfType<Entity>().Where(x => x.Layer.Contains(TEST_GEO_PREFIX)).Distinct().ToList();
+                foreach (var e in lst)
+                {
+                    adb.Element<Entity>(e.ObjectId, true).Erase();
+                }
+            }
+            FocusMainWindow();
+        }
+        public static void BatchDeleteEntities(AcadDatabase adb, Entity[] ents)
+        {
+            adb.Database.SetCurrentLayer("0");
+
+            foreach (var e in ents.Distinct())
+            {
+                adb.Element<Entity>(e.ObjectId, true).Erase();
+            }
+            FocusMainWindow();
+        }
+
+        public static List<Entity> SelectEntitiesEx(AcadDatabase adb)
+        {
+            {
+                var options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择",
+                };
+                var result = Active.Editor.GetSelection(options);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var selectedIds = result.Value.GetObjectIds();
+                    return selectedIds.Select(id => adb.Element<Entity>(id)).ToList();
+                }
+                return null;
+            }
+            if (Dbg._)
+            {
+                var options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择楼层框线",
+                    //RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                        RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+            }
+        }
+        public static T SelectEntity<T>(AcadDatabase adb) where T : DBObject
+        {
+            return ThDebugDrawer.GetEntity<T>(adb);
+        }
+        public static T TrySelectEntity<T>(AcadDatabase adb) where T : DBObject
+        {
+            var ed = Active.Editor;
+            var opt = new PromptEntityOptions("请选择");
+            var ret = ed.GetEntity(opt);
+            if (ret.Status != PromptStatus.OK) return null;
+            return adb.Element<T>(ret.ObjectId);
+        }
+        public static DBObjectCollection SelectEntities(AcadDatabase adb)
+        {
+            IEnumerable<ObjectId> f()
+            {
+                var ed = Active.Editor;
+                var opt = new PromptEntityOptions("请选择");
+                while (true)
+                {
+                    var ret = ed.GetEntity(opt);
+                    if (ret.Status == PromptStatus.OK) yield return ret.ObjectId;
+                    else yield break;
+                }
+            }
+            return f().Select(id => adb.Element<DBObject>(id)).ToCollection();
+        }
+        public static Point3d SelectPoint()
+        {
+            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+            var rst = Active.Editor.GetPoint(basePtOptions);
+            if (rst.Status != PromptStatus.OK) return default;
+            var basePt = rst.Value;
+            return basePt;
+        }
+        public static bool TrySelectPoint(out Point3d pt)
+        {
+            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+            var rst = Active.Editor.GetPoint(basePtOptions);
+            if (rst.Status != PromptStatus.OK)
+            {
+                pt = default;
+                return false;
+            }
+            pt = rst.Value;
+            return true;
+        }
+        public static Point3dCollection SelectRange()
+        {
+            return SelectGRect().ToPoint3dCollection();
+        }
+        public static Point3dCollection TrySelectRange()
+        {
+            return TrySelectRect()?.ToPoint3dCollection();
+        }
+        public static Tuple<Point3d, Point3d> TrySelectRect()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            if (ptLeftRes.Status != PromptStatus.OK) return null;
+            Point3d leftDownPt = ptLeftRes.Value;
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status != PromptStatus.OK) return null;
+            return new Tuple<Point3d, Point3d>(leftDownPt, ptRightRes.Value);
+        }
+        public static GRect SelectGRect()
+        {
+            var t = SelectRect();
+            return new GRect(t.Item1.ToPoint2d(), t.Item2.ToPoint2d());
+        }
+        public static Tuple<Point3d, Point3d> SelectRect()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace ThMEPWSS.DebugNs
 {
@@ -8227,7 +5117,6 @@ namespace ThMEPWSS.DebugNs
     using Dreambuild.AutoCAD;
     using DotNetARX;
     using Autodesk.AutoCAD.Internal;
-    using static ThMEPWSS.DebugNs.ThPublicMethods;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.DebugNs;
@@ -8691,11 +5580,11 @@ namespace ThMEPWSS.DebugNs
 
         public static void AddButton(string name, Action f)
         {
-            FengDbgTest.qt8czw.AddButton(name, f);
+            FengDbgTest.FengDbgTesting.AddButton(name, f);
         }
         public static void AddLazyAction(string name, Action<AcadDatabase> f)
         {
-            FengDbgTest.qt8czw.AddButton(name, () =>
+            FengDbgTest.FengDbgTesting.AddButton(name, () =>
             {
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
@@ -9568,7 +6457,7 @@ E:\thepa_workingSpace\任务资料\任务2\210517\武汉二七滨江商务区南
 
             }
 
-            FengDbgTest.qt8czw.AddButton("--", () =>
+            FengDbgTest.FengDbgTesting.AddButton("--", () =>
             {
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
@@ -9664,37 +6553,7 @@ E:\thepa_workingSpace\任务资料\任务2\210517\武汉二七滨江商务区南
             }
         }
 
-        private static void qtcknq()
-        {
-            var fileToStoreysDataDict = LoadData<Dictionary<string, List<ThStoreysData>>>(FengKeys.StoreysJsonData210519, cvt4);
-            var files = getFiles();
-            var file = files.First();
-            var lst = fileToStoreysDataDict[file];
-            var items = LoadData<List<RainSystemGeoData>>(FengKeys.WaterBucketsJsonData210519, cvt4);
-            var data = items.First();
 
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var item in lst)
-                {
-                    DU.DrawRectLazy(item.Boundary);
-                    DU.DrawTextLazy(item.StoreyType + item.Storeys.ToJson(), 3000, item.Boundary.LeftTop.ToPoint3d());
-                }
-                foreach (var bk in data.SideWaterBuckets)
-                {
-                    DU.DrawRectLazy(bk);
-                }
-                foreach (var bk in data.GravityWaterBuckets)
-                {
-                    DU.DrawRectLazy(bk);
-                }
-            }
-        }
 
         private static void qtclnt()
         {
@@ -9978,7 +6837,6 @@ namespace ThMEPWSS.DebugNs
     using Dreambuild.AutoCAD;
     using DotNetARX;
     using Autodesk.AutoCAD.Internal;
-    using static ThMEPWSS.DebugNs.ThPublicMethods;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.DebugNs;
@@ -11313,22 +8171,6 @@ namespace ThMEPWSS.DebugNs
                 }
             }
         }
-
-        [Feng("😎直接跑")]
-        public static void qtt6el()
-        {
-            ThRainSystemService.DrawRainSystemDiagram2();
-        }
-        public static void TestThWRainSystemDiagram_Save()
-        {
-            ThWRainSystemDiagramTest.Test2();
-        }
-        [Feng("🔴TestThWRainSystemDiagram_Load")]
-        public static void TestThWRainSystemDiagram_Load()
-        {
-            //ThRainSystemService.ImportElementsFromStdDwg();
-            ThWRainSystemDiagramTest.Test1();
-        }
         [Feng("🔴cad win")]
         public static void qtytu6()
         {
@@ -11766,20 +8608,7 @@ namespace ThMEPWSS.DebugNs
         {
             ThRainSystemService.DrawRainSystemDiagram1();
         }
-        public static void qty6kj()
-        {
-            var storeys = Util1.LoadCadData<Dictionary<string, List<ThStoreysData>>>(FengKeys.StoreysJsonData210519).Values.First();
-            var geoData = File.ReadAllText(qtdwh3).FromCadJson<RainSystemGeoData>();
-            {
-                //导入雨水斗数据
-                var items = LoadData<List<RainSystemGeoData>>(FengKeys.WaterBucketsJsonData210519, Util1.cvt4);
-                var data = items.First();
-                geoData.SideWaterBuckets.AddRange(data.SideWaterBuckets);
-                geoData.GravityWaterBuckets.AddRange(data.GravityWaterBuckets);
-            }
-            NewMethod1(storeys, geoData);
 
-        }
 
         private static void NewMethod1(List<ThStoreysData> storeys, RainSystemGeoData geoData)
         {
@@ -11993,3 +8822,1332 @@ namespace ThMEPWSS.DebugNs
 
 
 
+//this file is for debugging only by Feng
+
+//#if DEBUG
+
+
+
+
+namespace ThMEPWSS.DebugNs
+{
+    using TypeDescriptor = System.ComponentModel.TypeDescriptor;
+    using System;
+    using System.Linq;
+    using System.Text;
+    using System.Reflection;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+    using ThMEPWSS.JsonExtensionsNs;
+    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
+    using DU = ThMEPWSS.Assistant.DrawUtils;
+    using Autodesk.AutoCAD.EditorInput;
+    using AcHelper;
+    using Autodesk.AutoCAD.Geometry;
+    using Linq2Acad;
+    using ThMEPWSS.Pipe.Model;
+    using ThMEPWSS.Pipe.Engine;
+    using Autodesk.AutoCAD.DatabaseServices;
+    using System.Diagnostics;
+    using Autodesk.AutoCAD.ApplicationServices;
+    using Dreambuild.AutoCAD;
+    using DotNetARX;
+    using Autodesk.AutoCAD.Internal;
+    using ThMEPWSS.CADExtensionsNs;
+    using ThMEPWSS.Uitl;
+    using ThMEPWSS.Uitl.DebugNs;
+    using ThMEPWSS.Uitl.ExtensionsNs;
+    using ThMEPWSS.Assistant;
+    using ThMEPWSS.Pipe.Service;
+    using NFox.Cad;
+    using ThCADCore.NTS;
+    using Autodesk.AutoCAD.Colors;
+    using System.Runtime.Remoting;
+    using PolylineTools = Pipe.Service.PolylineTools;
+    using CircleTools = Pipe.Service.CircleTools;
+    using System.IO;
+    using Autodesk.AutoCAD.Runtime;
+    using static StaticMethods;
+    using ThMEPWSS.Pipe;
+    using Newtonsoft.Json;
+    using System.Text.RegularExpressions;
+    using ThCADExtension;
+    using System.Collections;
+    using ThCADCore.NTS.IO;
+    using Newtonsoft.Json.Linq;
+    using ThMEPEngineCore.Engine;
+    using NetTopologySuite.Geometries;
+    using NetTopologySuite.Operation.Linemerge;
+    using Microsoft.CSharp;
+    using System.CodeDom.Compiler;
+    using System.Linq.Expressions;
+    using ThMEPEngineCore.Algorithm;
+    using NetTopologySuite.Operation.OverlayNG;
+    using NetTopologySuite.Operation.Overlay;
+    using NetTopologySuite.Algorithm;
+#pragma warning disable
+    public static class HighlightHelper
+    {
+        public static Point2d GetCurrentViewSize()
+        {
+            double h = (double)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("VIEWSIZE");
+            Point2d screen = (Point2d)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("SCREENSIZE");
+            double w = h * (screen.X / screen.Y);
+            return new Point2d(w, h);
+        }
+        public static Extents2d GetCurrentViewBound(double shrinkScale = 1.0)
+        {
+            Point2d vSize = GetCurrentViewSize();
+            Point3d center = ((Point3d)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("VIEWCTR")).
+                    TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+            double w = vSize.X * shrinkScale;
+            double h = vSize.Y * shrinkScale;
+            Point2d minPoint = new Point2d(center.X - w / 2.0, center.Y - h / 2.0);
+            Point2d maxPoint = new Point2d(center.X + w / 2.0, center.Y + h / 2.0);
+            return new Extents2d(minPoint, maxPoint);
+        }
+        public static void HighLight(IEnumerable<Entity> ents)
+        {
+            //var extents = ThAuxiliaryUtils.GetCurrentViewBound();
+            var extents = GetCurrentViewBound();
+            foreach (var e in ents)
+            {
+                if (!e.IsErased && !e.IsDisposed && e.Bounds is Extents3d ext)
+                {
+                    if (IsInActiveView(ext.MinPoint,
+                        extents.MinPoint.X, extents.MaxPoint.X,
+                        extents.MinPoint.Y, extents.MaxPoint.Y) ||
+                    IsInActiveView(ext.MaxPoint,
+                    extents.MinPoint.X, extents.MaxPoint.X,
+                    extents.MinPoint.Y, extents.MaxPoint.Y))
+                    {
+                        e.Highlight();
+                    }
+                }
+            }
+        }
+        public static void UnHighLight(IEnumerable<Entity> ents)
+        {
+            foreach (var e in ents)
+            {
+                if (!e.IsErased && !e.IsDisposed)
+                {
+                    e.Unhighlight();
+                }
+            }
+        }
+        private static bool IsInActiveView(Point3d pt, double minX, double maxX, double minY, double maxY)
+        {
+            return pt.X >= minX && pt.X <= maxX && pt.Y >= minY && pt.Y <= maxY;
+        }
+    }
+    public static class CloneHelper
+    {
+        public static readonly MethodInfo ObjectMemberwiseCloneMethodInfo = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
+        public static readonly MethodInfo CopyListMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyList));
+        public static readonly MethodInfo CopyHashSetMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyHashSet));
+        public static readonly MethodInfo CopyQueueMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyQueue));
+        public static readonly MethodInfo CopyStackMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyStack));
+        public static readonly MethodInfo CopyObservableCollectionMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyObservableCollection));
+        public static readonly MethodInfo CopyArrayMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyArray));
+        public static readonly MethodInfo CopyDictionaryMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopyDictionary));
+        public static readonly MethodInfo CopySortedDictionaryMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopySortedDictionary));
+        public static readonly MethodInfo CopySortedListMethodInfo = typeof(CloneHelper).GetMethod(nameof(CopySortedList));
+        public static object GetDefaultValue(Type type)
+        {
+            return type.IsClass ? null : Activator.CreateInstance(type);
+        }
+        public static List<T> CopyList<T>(List<T> src) => new List<T>(src);
+        public static HashSet<T> CopyHashSet<T>(HashSet<T> src) => new HashSet<T>(src);
+        public static Queue<T> CopyQueue<T>(Queue<T> src) => new Queue<T>(src);
+        public static Stack<T> CopyStack<T>(Stack<T> src) => new Stack<T>(src);
+        public static System.Collections.ObjectModel.ObservableCollection<T> CopyObservableCollection<T>(System.Collections.ObjectModel.ObservableCollection<T> src) => new System.Collections.ObjectModel.ObservableCollection<T>(src);
+        public static T[] CopyArray<T>(T[] src)
+        {
+            var dst = new T[src.Length];
+            Array.Copy(src, dst, src.Length);
+            return dst;
+        }
+        public static Dictionary<K, V> CopyDictionary<K, V>(Dictionary<K, V> src) => new Dictionary<K, V>(src);
+        public static SortedDictionary<K, V> CopySortedDictionary<K, V>(SortedDictionary<K, V> src) => new SortedDictionary<K, V>(src);
+        public static SortedList<K, V> CopySortedList<K, V>(SortedList<K, V> src) => new SortedList<K, V>(src);
+        public static Func<T, T> MemberwiseCloneF<T>()
+        {
+            var pe = Expression.Parameter(typeof(T), "v");
+            if (typeof(T).IsValueType) return Expression.Lambda<Func<T, T>>(Expression.Block(pe), pe).Compile();
+            return Expression.Lambda<Func<T, T>>(Expression.Block(Expression.Convert(Expression.Call(pe, CloneHelper.ObjectMemberwiseCloneMethodInfo), typeof(T))), pe).Compile();
+        }
+
+        public static Action<T, T> CopyFieldsMemberwiseF<T>()
+        {
+            var src = Expression.Parameter(typeof(T), "src");
+            var dst = Expression.Parameter(typeof(T), "dst");
+            return Expression.Lambda<Action<T, T>>(Expression.Block(typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Select(fi => Expression.Assign(Expression.Field(dst, fi), Expression.Field(src, fi)))), src, dst).Compile();
+        }
+
+        public static Action<T, T> CopyCollectionFieldsF<T>()
+        {
+            var src = Expression.Parameter(typeof(T), "src");
+            var dst = Expression.Parameter(typeof(T), "dst");
+            var exprs = new List<Expression>();
+            foreach (var fi in typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                var mi = TryGetCollectionCloneMethodInfo(fi.FieldType);
+                if (mi != null)
+                {
+                    exprs.Add(Expression.Assign(Expression.Field(dst, fi), Expression.Call(null, mi, Expression.Field(src, fi))));
+                }
+            }
+            return Expression.Lambda<Action<T, T>>(Expression.Block(exprs), src, dst).Compile();
+        }
+        public static MethodInfo TryGetCollectionCloneMethodInfo(Type type)
+        {
+            if (type.IsArray)
+            {
+                var itemType = type.GetElementType();
+                return CopyArrayMethodInfo.MakeGenericMethod(itemType);
+            }
+            if (type.IsGenericType)
+            {
+                var gtypes = type.GetGenericArguments();
+                if (gtypes.Length == 1)
+                {
+                    var itemType = gtypes[0];
+                    var gtypeDef = type.GetGenericTypeDefinition();
+                    if (gtypeDef == typeof(List<>))
+                    {
+                        return CopyListMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(System.Collections.ObjectModel.ObservableCollection<>))
+                    {
+                        return CopyObservableCollectionMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(HashSet<>))
+                    {
+                        return CopyHashSetMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(Queue<>))
+                    {
+                        return CopyQueueMethodInfo.MakeGenericMethod(itemType);
+                    }
+                    if (gtypeDef == typeof(Stack<>))
+                    {
+                        return CopyStackMethodInfo.MakeGenericMethod(itemType);
+                    }
+                }
+                else if (gtypes.Length == 2)
+                {
+                    var gtypeDef = type.GetGenericTypeDefinition();
+                    if (gtypeDef == typeof(Dictionary<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopyDictionaryMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                    if (gtypeDef == typeof(SortedDictionary<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopySortedDictionaryMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                    if (gtypeDef == typeof(SortedList<string, string>).GetGenericTypeDefinition())
+                    {
+                        var ktype = gtypes[0];
+                        var vtype = gtypes[1];
+                        return CopySortedListMethodInfo.MakeGenericMethod(ktype, vtype);
+                    }
+                }
+            }
+            return null;
+        }
+    }
+    public class ReturnBlockBuilder
+    {
+        public LabelTarget returnTarget;
+        public LabelExpression returnLabel;
+        public List<Expression> expressions { get; } = new List<Expression>();
+        public ReturnBlockBuilder(Type type, object dftValue)
+        {
+            returnTarget = Expression.Label(type);
+            returnLabel = Expression.Label(returnTarget, Expression.Constant(dftValue, type));
+        }
+        public ReturnBlockBuilder(Type type) : this(type, CloneHelper.GetDefaultValue(type)) { }
+        public BlockExpression BuildBlockExpression()
+        {
+            try
+            {
+                expressions.Add(returnLabel);
+                return Expression.Block(expressions);
+            }
+            finally
+            {
+                expressions.Clear();
+            }
+        }
+        public void AddReturnExpression(Expression expr)
+        {
+            expressions.Add(Expression.Return(returnTarget, expr));
+        }
+    }
+
+
+
+    [Feng]
+    public class Test1
+    {
+        static string ReadString()
+        {
+            var rst = AcHelper.Active.Editor.GetString("\n输入立管编号");
+            if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return null;
+            return rst.StringResult;
+        }
+        [Feng("👀")]
+        public static void qus5uz()
+        {
+            Util1.FindText();
+        }
+        [Feng("❌")]
+        public static void qus63i()
+        {
+            Dbg.DeleteTestGeometries();
+        }
+        [Feng("DrawDrainageSystemDiagram2")]
+        public static void qus6ak()
+        {
+            DrainageService.DrawDrainageSystemDiagram2();
+        }
+        [Feng("保存geoData")]
+        public static void qutpmu()
+        {
+            var geoData = DrainageService.CollectGeoData();
+            Dbg.SaveToJsonFile(geoData);
+        }
+
+
+
+        [Feng("直接从geoData生成")]
+        public static void qutpt9()
+        {
+            var file = @"D:\DATA\temp\637595412925029309.json";
+            var geoData = Dbg.LoadFromJsonFile<DrainageGeoData>(file);
+            DrainageService.TestDrawingDatasCreation(geoData);
+        }
+        [Feng("直接从drawingDatas draw8")]
+        public static void qv92ji()
+        {
+            var file = @"D:\DATA\temp\637602373354770648.json";
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(file);
+
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var pt = Dbg.SelectPoint().ToPoint2d();
+                DrainageSystemDiagram.draw8(drDatas, pt);
+            }
+        }
+        [Feng("draw9")]
+        public static void qveh3t()
+        {
+            var file = @"D:\DATA\temp\637602373354770648.json";
+            var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(file);
+
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var pt = Dbg.SelectPoint().ToPoint2d();
+                //DrainageSystemDiagram.draw9(drDatas, pt);
+            }
+        }
+        [Feng("从图纸提取geoData")]
+        public static void qv6yoh()
+        {
+            var geoData = DrainageService.CollectGeoData();
+            DrainageService.TestDrawingDatasCreation(geoData);
+        }
+        [Feng("draw10")]
+        public static void qvemj1()
+        {
+            DrainageSystemDiagram.draw10();
+        }
+
+        [Feng("UnlockCurrentLayer")]
+        public static void qvenc4()
+        {
+            using (Dbg.DocumentLock)
+                Dbg.UnlockCurrentLayer();
+        }
+        public static List<Point2d> GetAlivePointsByNTS(List<Point2d> points, double radius)
+        {
+            var pts = points.Select(x => new GCircle(x, radius).ToCirclePolygon(6, false)).ToList();
+            var flags = new bool[pts.Count];
+            for (int i = 0; i < pts.Count; i++)
+            {
+                if (!flags[i])
+                {
+                    for (int j = 0; j < pts.Count; j++)
+                    {
+                        if (!flags[j])
+                        {
+                            if (i != j)
+                            {
+                                if (pts[i].Intersects(pts[j]))
+                                {
+                                    flags[i] = true;
+                                    flags[j] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            IEnumerable<Point2d> f()
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (!flags[i])
+                    {
+                        yield return points[i];
+                    }
+                }
+            }
+            var q = f();
+            return q.ToList();
+        }
+
+
+        public static void quu77p()
+        {
+            var file = @"D:\DATA\temp\637595412925029309.json";
+            var geoData = File.ReadAllText(file).FromCadJson<DrainageGeoData>();
+            {
+                for (int i = 0; i < geoData.DLines.Count; i++)
+                {
+                    geoData.DLines[i] = geoData.DLines[i].Extend(5);
+                }
+            }
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var cadData = DrainageCadData.Create(geoData);
+                var killer = GeoFac.CreateGeometryEx(cadData.VerticalPipes.Concat(cadData.WaterPorts).Concat(cadData.FloorDrains).ToList());
+                var maxDis = 8000;
+                var angleTolleranceDegree = 1;
+                var lines = geoData.DLines.Where(x => x.Length > 0).Distinct().ToList();
+                geoData.DLines.AddRange(GeoFac.AutoConn(lines, killer, maxDis, angleTolleranceDegree));
+                DrainageService.DrawGeoData(geoData);
+            }
+        }
+
+        public class DrainageTest
+        {
+
+            [Feng("水管井")]
+            public static void quqgdc()
+            {
+                //6.3.8	水管井的FL
+                //若FL在水管井中，则认为该FL在出现的每层都安装了一个地漏。
+                //水管井的判断：
+                //空间名称为“水”、包含“水井”或“水管井”（持续更新）。
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var list = DrainageService.CollectRoomData(adb);
+                    foreach (var kv in list)
+                    {
+                        if (kv.Key == "水" || kv.Key.Contains("水井") || kv.Key.Contains("水管井"))
+                        {
+                            Dbg.PrintLine(kv.Key);
+                        }
+                    }
+                }
+            }
+            [Feng("quqfmg")]
+            public static void quqfmg()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
+                    var ls = lines.Select(x => x.ToLineString()).ToList();
+                    var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
+                    var _gs = new List<List<Geometry>>();
+                    foreach (var g in gs)
+                    {
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
+                        var _lines = g.Where(x => ls.Contains(x)).ToList();
+                        var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                        var lst = new List<Geometry>();
+                        lst.AddRange(_circles);
+                        lst.AddRange(segs.Select(x => x.Extend(.1).ToLineString()));//延长一点点！
+                        _gs.Add(lst);
+                    }
+                    foreach (var g in _gs)
+                    {
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
+                        foreach (var c in _circles)
+                        {
+                            var lst = g.ToList();
+                            lst.Remove(c);
+                            var f = GeoFac.CreateIntersectsSelector(lst);
+                            Dbg.PrintLine(f(c).Count);//OK,如果有地漏是串联的，那么这里会等于2，否则等于1
+                        }
+
+                    }
+                }
+            }
+            [Feng("在交点处打碎")]
+            public static void quqqrp()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var seg1 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    var seg2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    var geo = seg1.ToLineString().Union(seg2.ToLineString());//MultiLineString
+                    var segs = geo.ToDbCollection().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).ToList();
+
+                    FengDbgTesting.AddLazyAction("", adb =>
+                    {
+                        foreach (var seg in segs)
+                        {
+                            DU.DrawLineSegmentLazy(seg);
+                        }
+                    });
+                }
+            }
+            [Feng("qurx6s")]
+            public static void qurx6s()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circle = Dbg.SelectEntity<Circle>(adb);
+                    //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6));
+                    DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(6, false));
+                    //DU.DrawGeometryLazy(circle.ToGCircle().ToCirclePolygon(36));
+                }
+            }
+            [Feng("quqdxf")]
+            public static void quqdxf()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    var cs = circles.Select(x => x.ToCirclePolygon(36)).ToList();
+                    var ls = lines.Select(x => x.ToLineString()).ToList();
+                    var gs = GeoFac.GroupGeometries(ToGeometries(cs, ls));
+                    //Dbg.PrintLine(gs.Count);
+                    foreach (var g in gs)
+                    {
+                        var _circles = g.Where(x => cs.Contains(x)).ToList();
+                        var _lines = g.Where(x => ls.Contains(x)).ToList();
+                        var segs = GeoFac.CreateGeometry(_lines).Difference(GeoFac.CreateGeometry(_circles)).ToDbObjects().OfType<Polyline>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<Line>()).Select(x => x.ToGLineSegment()).Where(x => x.IsValid).ToList();
+                        FengDbgTesting.AddLazyAction("", adb =>
+                        {
+                            foreach (var c in _circles)
+                            {
+                                DU.DrawGeometryLazy(c);
+                            }
+                            foreach (var seg in segs)
+                            {
+                                DU.DrawLineSegmentLazy(seg);
+                            }
+                        });
+                    }
+                }
+            }
+            public static List<Geometry> ToGeometries(IEnumerable<Geometry> geos1, IEnumerable<Geometry> geos2)
+            {
+                return geos1.Concat(geos2).ToList();
+            }
+            public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
+            {
+                return source1.Concat(source2).ToList();
+            }
+            public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2, IEnumerable<T> source3)
+            {
+                return source1.Concat(source2).Concat(source3).ToList();
+            }
+            [Feng("quqcqu")]
+            public static void quqcqu()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var e1 = Dbg.SelectEntity<Line>(adb);
+                    var e2 = Dbg.SelectEntity<Circle>(adb);
+                    var g1 = e1.ToGLineSegment().ToLineString();
+                    var g2 = e2.ToGCircle().ToCirclePolygon(36);
+                    var g3 = g1.Difference(g2);
+                    FengDbgTesting.AddLazyAction("", _adb =>
+                    {
+                        DU.DrawGeometryLazy(g3);
+                        Dbg.PrintLine(g3.Intersects(g2));
+                    });
+                }
+            }
+            [Feng("quqb3e")]
+            public static void quqb3e()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = adb.ModelSpace.OfType<Circle>().Select(x => x.ToGCircle()).ToList();
+                    var lines = adb.ModelSpace.OfType<Line>().Select(x => x.ToGLineSegment()).ToList();
+                    //[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]
+                    Dbg.PrintText(circles.ToCadJson());
+                    //[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]
+                    Dbg.PrintText(lines.ToCadJson());
+                }
+            }
+            [Feng("quqbet")]
+            public static void quqbet()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var circles = "[{'X':1744.5169050298846,'Y':2095.5695398475646,'Radius':656.30028012291064,'Center':{'Y':2095.5695398475646,'X':1744.5169050298846}}]".FromCadJson<List<GCircle>>();
+                    var lines = "[{'type':'GLineSegment','values':[1823.533911180044,2017.6666691268156,6103.4608013348316,1256.789502112395]},{'type':'GLineSegment','values':[6103.4608013348316,1256.789502112395,6360.6679478744718,2249.0144581879167]},{'type':'GLineSegment','values':[6360.6679478744718,2249.0144581879167,5038.6232134830043,2326.1303835595991]},{'type':'GLineSegment','values':[5038.6232134830043,2326.1303835595991,4915.1637896213415,2819.6723318304757]},{'type':'GLineSegment','values':[4915.1637896213415,2819.6723318304757,6525.2805081162569,2819.6723318304757]}]".FromCadJson<List<GLineSegment>>();
+                    foreach (var e in circles)
+                    {
+                        DU.DrawGeometryLazy(e);
+                    }
+                    foreach (var e in lines)
+                    {
+                        DU.DrawLineSegmentLazy(e);
+                    }
+                    var nothing = nameof(FengDbgTesting.GetSegsToConnect);
+                    var h = GeoFac.LineGrouppingHelper.Create(lines);
+                    h.InitPointGeos(radius: 2.5);
+                    h.DoGroupingByPoint();
+                    h.CalcAlonePoints();
+                    h.DistinguishAlonePoints();
+                    foreach (var geo in h.GetAlonePoints())
+                    {
+                        DU.DrawGeometryLazy(geo);
+                    }
+                    //去掉起点剩下的全是终点
+                }
+            }
+
+
+            [Feng("qupz46")]
+            public static void qupz46()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var e = new Leader();
+                    e.HasArrowHead = true;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        e.AppendVertex(Dbg.SelectPoint());
+                    }
+                    //e.Layer = "H-DIMS-DUCT";
+                    e.Dimasz = 200;
+                    //e.Dimtxt = 1000;
+                    //e.SetDimstyleData(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100"));
+
+                    //Dbg.PrintLine(AcHelper.Collections.Tables.GetDimStyle("TH-DIM100").ObjectId.ToString());
+                    //e.SetDatabaseDefaults(db);
+                    DU.DrawEntityLazy(e);
+
+                }
+            }
+            [Feng("quq0kg")]
+            public static void quq0kg()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var e1 = Dbg.SelectEntity<Leader>(adb);
+                    Debugger.Break();
+                }
+            }
+            [Feng("qupzpe")]
+            public static void qupzpe()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    //var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+
+                    var e1 = Dbg.SelectEntity<Leader>(adb);
+                    var e2 = Dbg.SelectEntity<Leader>(adb);
+                    //e2.Dimldrblk = e1.Dimldrblk;//boom
+                    //e2.DimensionStyle = e1.DimensionStyle;//boom
+
+                    //var e2=(Leader)e1.GetTransformedCopy(Matrix3d.Displacement(new Vector3d(100,0,0)));
+                    //e2.AppendVertex(Dbg.SelectPoint());
+                    //DU.DrawEntityLazy(e2);
+                }
+            }
+            [Feng("qupz57")]
+            public static void qupz57()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    //Dbg.BuildAndSetCurrentLayer(db);
+                    var e = Dbg.SelectEntity<Leader>(adb);
+                    Dbg.PrintLine(e.DimensionStyleName);
+                }
+            }
+
+        }
+
+    }
+    public class ListDict<K, V> : Dictionary<K, List<V>>
+    {
+        public void Add(K key, V value)
+        {
+            var d = this;
+            if (!d.TryGetValue(key, out List<V> lst))
+            {
+                lst = new List<V>() { value };
+                d[key] = lst;
+            }
+            else
+            {
+                lst.Add(value);
+            }
+        }
+    }
+    public class CountDict<K> : IEnumerable<KeyValuePair<K, int>>
+    {
+        Dictionary<K, int> d = new Dictionary<K, int>();
+        public int this[K key]
+        {
+            get
+            {
+                d.TryGetValue(key, out int value); return value;
+            }
+            set
+            {
+                d[key] = value;
+            }
+        }
+
+        public IEnumerator<KeyValuePair<K, int>> GetEnumerator()
+        {
+            foreach (var kv in d)
+            {
+                if (kv.Value > 0) yield return kv;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+    public static class CadJsonExtension
+    {
+        public static string ToCadJson(this object obj)
+        {
+            return Util1.ToJson(obj);
+        }
+        public static T FromCadJson<T>(this string json)
+        {
+            return Util1.FromJson<T>(json);
+        }
+    }
+    public class FengAttribute : Attribute
+    {
+        public string Title;
+        public FengAttribute() { }
+        public FengAttribute(string title) { this.Title = title; }
+    }
+
+    public static class Matrix2dUtil
+    {
+        public static readonly Matrix2d Identity = new Matrix2d(new double[] { 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 });
+    }
+    public static class DrainageTest
+    {
+
+
+
+
+
+        public static void quizl8()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var _segs = NewMethod4();
+
+                foreach (var seg in _segs)
+                {
+                    DU.DrawLineSegmentLazy(seg);
+                }
+
+                var sv = new ThMEPEngineCore.Service.ThLaneLineCleanService();
+                sv.ExtendDistance = 1;
+                var colle = _segs.Select(x => x.ToCadLine()).ToCollection();
+                var ret = sv.Clean(colle);
+                foreach (Line e in ret)
+                {
+                    DU.DrawLineSegmentLazy(e.ToGLineSegment());
+                }
+            }
+        }
+
+        private static List<GLineSegment> NewMethod4()
+        {
+            var r = "{'type':'GRect','values':[521552.78763576248,867324.05193330813,533133.08130046073,876100.43981294858]}".FromCadJson<GRect>();
+            var segs = loadsegs();
+            var dlines = segs.Select(x => x.ToLineString()).ToGeometryList();
+            var f = GeoFac.CreateContainsSelector(dlines);
+            var list = f(r.ToPolygon());
+            var ext = new Extents3d();
+            foreach (var dline in list)
+            {
+                var seg = segs[dlines.IndexOf(dline)];
+                ext.AddPoint(seg.StartPoint.ToPoint3d());
+                ext.AddPoint(seg.EndPoint.ToPoint3d());
+            }
+            var w = ext.ToGRect();
+            var targetWorld = GRect.Create(800, 600);
+
+            //var m=Matrix2d.Displacement(-ext.MinPoint.ToPoint2d().ToVector2d());
+            var v = -ext.MinPoint.ToPoint2d().ToVector2d();
+
+            var p1 = ext.MaxPoint.ToPoint2D() + v;
+            var p2 = ext.MinPoint.ToPoint2D() + v;
+            var kx = targetWorld.Width / (p1.X - p2.X);
+            var ky = targetWorld.Height / (p1.Y - p2.Y);
+
+            var _segs = new List<GLineSegment>(segs.Count);
+            foreach (var seg in segs)
+            {
+                //var sp=seg.StartPoint.TransformBy(m);
+                //var ep = seg.EndPoint.TransformBy(m);
+                var sp = seg.StartPoint + v;
+                sp = new Point2d(sp.X * kx, sp.Y * ky);
+                var ep = seg.EndPoint + v;
+                ep = new Point2d(ep.X * kx, ep.Y * ky);
+                _segs.Add(new GLineSegment(sp, ep));
+            }
+
+            return _segs;
+        }
+
+
+        public static void quirdk()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var e = Dbg.SelectEntity<Entity>(adb);
+                var ee = (Entity)e.Clone();
+                DU.DrawRectLazy(ee.Bounds.ToGRect());
+            }
+        }
+
+        public static void quim6x()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var segs = new List<GLineSegment>();
+                foreach (var e in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer == "W-DRAI-DOME-PIPE" && ThRainSystemService.IsTianZhengElement(x)))
+                {
+                    if (GeoAlgorithm.TryConvertToLineSegment(e, out GLineSegment seg))
+                    {
+                        segs.Add(seg);
+                    }
+                }
+                var dlines = segs.Select(x => x.ToLineString()).ToList();
+                Dbg.PrintText(segs.ToCadJson());
+            }
+        }
+
+        public static void quizgv()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            {
+                var r = Dbg.SelectGRect();
+                Dbg.PrintLine(r.ToCadJson());
+            }
+        }
+        public static List<GLineSegment> loadsegs()
+        {
+            return File.ReadAllText(@"Y:\xxx.txt").FromCadJson<List<GLineSegment>>().Distinct().ToList();
+        }
+
+
+
+
+
+        public static void quha91()
+        {
+            //光胜给的提取代码
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var range = Dbg.SelectRange();
+                var roomBuilder = new ThRoomBuilderEngine();
+                var rooms = roomBuilder.BuildFromMS(db, range);
+
+                foreach (var room in rooms)
+                {
+                    //内容是空的，算了，还是自己写吧
+                    Dbg.PrintLine(room.Name);
+                    Dbg.PrintLine(room.Tags.ToJson());
+                }
+            }
+        }
+        private static void qugqvl()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                //var list=adb.ModelSpace.OfType<DBText>().Where(x => x.Layer == "W-DRAI-EQPM").ToList();
+                //Dbg.PrintText(list.Select(x => x.TextString).ToJson());
+
+                //var list = adb.ModelSpace.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-EQPM" && x.ObjectId.IsValid && x.GetEffectiveName()=="立管编号").ToList();
+                //Dbg.PrintLine(list.Count);
+
+                //var list = adb.ModelSpace.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-EQPM" && x.ObjectId.IsValid && x.GetEffectiveName() == "清扫口系统").ToList();
+                //Dbg.PrintLine(list.Count);
+
+                //var list = adb.ModelSpace.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-EQPM" && x.ObjectId.IsValid && x.GetEffectiveName() == "污废合流井编号").ToList();
+                //Dbg.PrintLine(list.Count);
+                //foreach (var e in list)
+                //{
+                //    Dbg.PrintLine(e.GetAttributesStrValue("-"));
+                //}
+
+
+                //Dbg.PrintLine(RXClass.GetClass(Dbg.SelectEntity<Entity>(adb).GetType()).DxfName);//tch_pipe是空的
+                //Dbg.PrintLine(RXClass.GetClass(Dbg.SelectEntity<Entity>(adb).AcadObject.GetType()).DxfName);//报错
+
+                //不管了，就这么判断吧
+                //var e = Dbg.SelectEntity<Entity>(adb);
+                //Dbg.PrintLine(System.ComponentModel.TypeDescriptor.GetClassName(e.AcadObject));//IComPipe
+                //Dbg.PrintLine(TypeDescriptor.GetReflectionType(e.AcadObject).ToString());//System.__ComObject
+                //Dbg.PrintLine(e.AcadObject.GetType().Assembly.FullName);
+                //Dbg.PrintLine(TypeDescriptor.GetComponentName(e.AcadObject));//空的
+                //Dbg.PrintLine(e.GetType().Assembly.FullName);//Acdbmgd,...
+
+                //var list=adb.ModelSpace.OfType<Entity>().Where(x => ThRainSystemService.IsTianZhengElement(x)).ToList();
+                //Dbg.PrintLine(list.Count);
+
+                //var list = adb.ModelSpace.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR" && x.ObjectId.IsValid).ToList();
+                //Dbg.PrintLine(list.Count);
+
+
+            }
+        }
+
+
+
+        private static void NewMethod2(Database db)
+        {
+            var texts = new List<CText>();
+            var visitor = new Visitor();
+            visitor.ExtractCb = (e, m) =>
+            {
+                if (e is MText mt)
+                {
+                    var bd = mt.Bounds;
+                    if (bd is Extents3d ext)
+                    {
+                        ext.TransformBy(m);
+                        var r = ext.ToGRect();
+                        if (r.IsValid)
+                        {
+                            var text = mt.Contents;
+                            //长这样
+                            //"\\A1;Ah2","\\A1;Ah1"
+                            if (text.ToLower().Contains("ah1") || text.ToLower().Contains("ah2"))
+                            {
+                                var ct = new CText() { Text = text, Boundary = r };
+                                texts.Add(ct);
+                            }
+                        }
+                    }
+                }
+            };
+            Execute(db, visitor);
+            foreach (var ct in texts)
+            {
+                DU.DrawRectLazy(ct.Boundary);
+            }
+            //Dbg.PrintLine(texts.Select(x => x.Text).ToJson());
+        }
+        [Feng("💰准备打开多张图纸")]
+        public static void qtjr2w()
+        {
+            var files = Util1.getFiles();
+            for (int i = 0; i < files.Length; i++)
+            {
+                string file = files[i];
+                AddButton((i + 1) + " " + Path.GetFileName(file), () =>
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+                });
+            }
+            AddButton("地上给水排水平面图模板_20210125", () =>
+            {
+                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\地上给水排水平面图模板_20210125.dwg";
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+            });
+            AddButton("绘图说明_20210326", () =>
+            {
+                var file = @"E:\thepa_workingSpace\任务资料\任务2\210430\8#_210429\8#\设计区\绘图说明_20210326（反馈）.dwg";
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+            });
+
+        }
+        [Feng("💰准备打开多张图纸2")]
+        public static void quhakv()
+        {
+            var root = @"E:\thepa_workingSpace\任务资料\任务3\图纸";
+            var files = new string[]
+            {
+$@"{root}\01_蓝光钰泷府二期_框线\FS59P2BC_W20-地上给水排水平面图-副本.dwg",
+$@"{root}\02_湖北交投颐和华府_框线\FS59OCRA_W20-3#-地上给排水及消防平面图.dwg",
+$@"{root}\03_佳兆业滨江新城_框线\FS5BH1EW_W20-5#地上给水排水及消防平面图.dwg",
+$@"{root}\04_蓝光未来阅璟_框线\FS5F8704_W20-地上给水排水平面图-送审版.dwg",
+$@"{root}\05_清江山水四期_框线\FS55TMPH_W20-地上给水排水平面图.dwg",
+$@"{root}\06_庭瑞君越观澜三期_框线\fs57grhn_w20-地上给水排水平面图.dwg",
+$@"{root}\07_武汉二七滨江商务区南一片住宅地块_框线\FS5747SS_W20-地上给水排水平面图.dwg",
+$@"{root}\08_合景红莲湖项目_框线\FS55TD78_W20-73#-地上给水排水平面图.dwg",
+$@"{root}\09_长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg",
+            };
+            for (int i = 0; i < files.Length; i++)
+            {
+                var file = files[i];
+                var _i = i;
+                AddButton((i + 1) + " " + Path.GetFileName(file), () =>
+                {
+                    Console.WriteLine("图纸" + (_i + 1));
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+                });
+            }
+            AddButton("全部打开", () =>
+            {
+                foreach (var file in files)
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.Open(file, false);
+                }
+            });
+        }
+        public static void AddButton(string name, Action f)
+        {
+            Util1.AddButton(name, f);
+        }
+        private static void Execute(Database db, Visitor visitor)
+        {
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(db);
+        }
+
+        private static void NewMethod1(Database db)
+        {
+            var texts = new List<CText>();
+            var mtexts = new List<CText>();
+
+            var visitor = new Visitor();
+            visitor.ExtractCb = (e, m) =>
+            {
+                if (e is DBText dbt)
+                {
+                    //if (string.IsNullOrEmpty(dbt.TextString) || !dbt.TextString.ToLower().Contains("ah2")) return;
+                    //var dbt2 = (DBText)dbt.Clone();
+                    //dbt2.TransformBy(m);//eCannotScaleNonUniformly
+                    //texts.Add(dbt);
+
+                    var bd = dbt.Bounds;
+                    if (bd is Extents3d ext)
+                    {
+                        ext.TransformBy(m);
+                        var ct = new CText() { Text = dbt.TextString, Boundary = ext.ToGRect() };
+                        texts.Add(ct);
+                    }
+                }
+                else if (e is MText mt)
+                {
+                    //if (string.IsNullOrEmpty(mt.Contents) || !mt.Contents.ToLower().Contains("ah2")) return;
+                    //var mt2 = (MText)mt.Clone();
+                    //mt2.TransformBy(m);
+                    //mtexts.Add(mt2);
+
+                    var bd = mt.Bounds;
+                    if (bd is Extents3d ext)
+                    {
+                        ext.TransformBy(m);
+                        var ct = new CText() { Text = mt.Contents, Boundary = ext.ToGRect() };
+                        mtexts.Add(ct);
+                    }
+                }
+            };
+
+            var ranges = new List<Geometry>();
+            visitor.DoXClipCb = (xclip) =>
+            {
+                ranges.Add(xclip.Polygon.ToNTSPolygon());
+            };
+
+            Execute(db, visitor);
+
+
+            Dbg.PrintLine(texts.Count);
+            Dbg.PrintLine(mtexts.Count);
+
+
+            if (ranges.Count > 0)
+            {
+                var _geo = ranges[0];
+                for (int i = 1; i < ranges.Count; i++)
+                {
+                    //_geo = _geo.Intersection(ranges[i]);
+                    _geo = _geo.Union(ranges[i]);
+                }
+                var bds = texts.Select(x => x.Boundary).Concat(mtexts.Select(x => x.Boundary)).Distinct().ToList();
+                var geos = bds.Where(x => x.IsValid).Select(x => x.ToPolygon()).Cast<Geometry>().ToList();
+                Dbg.PrintLine(geos.Count);
+                var geo = GeoFac.CreateGeometry(geos);
+                var f = GeoFac.CreateIntersectsSelector(geos);
+                var results = f(_geo);
+                Dbg.PrintLine(results.Count);
+            }
+        }
+
+        public class Visitor : ThBuildingElementExtractionVisitor
+        {
+            public Action<Entity, Matrix3d> ExtractCb;
+            public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
+            {
+                ExtractCb?.Invoke(dbObj, matrix);
+                //if (dbObj is DBText dbText)
+                //{
+                //    elements.AddRange(HandleDbText(dbText, matrix));
+                //}
+                //else if (dbObj is MText mText)
+                //{
+                //    elements.AddRange(HandleMText(mText, matrix));
+                //}
+            }
+            public Action<ThMEPXClipInfo> DoXClipCb;
+            public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
+            {
+                var xclip = blockReference.XClipInfo();
+                if (xclip.IsValid)
+                {
+                    xclip.TransformBy(matrix);
+                    //elements.RemoveAll(o => !xclip.Contains(GetTextPosition(o.Geometry)));
+                    DoXClipCb?.Invoke(xclip);
+                }
+            }
+
+        }
+        private static void NewMethod(AcadDatabase adb, Database db)
+        {
+            if (false)
+            {
+                var gravityBucketEngine = new ThWGravityWaterBucketRecognitionEngine();
+                gravityBucketEngine.Recognize(adb.Database, Dbg.SelectRange());
+            }
+            var list = new List<string>();
+            var visitor = new BlockReferenceVisitor();
+            visitor.IsTargetBlockReferenceCb = (br) =>
+            {
+                //__覆盖_A10-8地上平面_SEN23WUB$0$厨房250X250洞口
+                var name = br.GetEffectiveName();
+                //list.Add(name);
+                if (name.Contains("厨房")) return true;
+                return false;
+            };
+            var rs = new List<GRect>();
+            visitor.HandleBlockReferenceCb = (br, m) =>
+            {
+                var e = br.GetTransformedCopy(m);
+                rs.Add(e.Bounds.ToGRect());
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(db);
+            //File.WriteAllText(@"Y:\xxxx.json", list.ToJson());
+            foreach (var r in rs)
+            {
+                //Dbg.ShowWhere(r);
+                DU.DrawRectLazy(r);
+            }
+        }
+    }
+    public class BlockReferenceVisitor : ThDistributionElementExtractionVisitor
+    {
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        {
+            if (dbObj is BlockReference blkref)
+            {
+                _HandleBlockReference(elements, blkref, matrix);
+            }
+        }
+
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
+        {
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
+        }
+
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
+        }
+        public Func<BlockReference, bool> IsTargetBlockReferenceCb;
+        public override bool IsDistributionElement(Entity entity)
+        {
+            if (entity is BlockReference blkref)
+            {
+                return IsTargetBlockReferenceCb(blkref);
+                var name = blkref.GetEffectiveName();
+                return (ThMEPEngineCore.Service.ThGravityWaterBucketLayerManager.IsGravityWaterBucketBlockName(name));
+            }
+            return false;
+        }
+        public Action<BlockReference, Matrix3d> HandleBlockReferenceCb;
+        public bool SupportDynamicBlock;
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            //// 暂时不支持动态块，外部参照，覆盖
+            //if (blockTableRecord.IsDynamicBlock)
+            //{
+            //    return false;
+            //}
+
+            if (!SupportDynamicBlock)
+            {
+                if (blockTableRecord.IsDynamicBlock)
+                {
+                    return false;
+                }
+            }
+
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private void _HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
+        {
+            if (!blkref.ObjectId.IsValid) return;
+            HandleBlockReferenceCb(blkref, matrix);
+        }
+
+        private bool IsContain(ThMEPEngineCore.Algorithm.ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is BlockReference br)
+            {
+                return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+    }
+
+}
+
+//#endif

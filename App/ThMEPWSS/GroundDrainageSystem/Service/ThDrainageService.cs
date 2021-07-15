@@ -94,11 +94,15 @@
         public List<string> Comments;
 
 
-        public HashSet<string> HasDSCurve;
-        public HashSet<string> HasKitchenFloorDrain;
-        public HashSet<string> HasKitchenWashingMachine;
-        public HashSet<string> HasKitchenBasin;
+        public HashSet<string> HasKitchenBasin;//目前只在1F判断，其他楼全部加上去，后面不知道会不会主动去识别
+        public HashSet<string> HasKitchenFloorDrain;//
+        public HashSet<string> HasKitchenWashingMachine;//
+        //上面两个同时存在，标记为“厨房洗衣机地漏”，无洗衣机则标记为“厨房地漏”
+
         public HashSet<string> HasBalconyWashingMachine;
+        public HashSet<string> HasMopPool;
+        //类似的还有“阳台洗衣机地漏”，“阳台地漏”，厨房只有1个，阳台可能有2个
+
 
         public void Init()
         {
@@ -118,11 +122,11 @@
             WaterPipeWellFLs ??= new HashSet<string>();
             Comments ??= new List<string>();
             SingleOutlet ??= new HashSet<string>();
-            HasDSCurve ??= new HashSet<string>();
             HasKitchenFloorDrain ??= new HashSet<string>();
             HasKitchenWashingMachine ??= new HashSet<string>();
             HasKitchenBasin ??= new HashSet<string>();
             HasBalconyWashingMachine ??= new HashSet<string>();
+            HasMopPool ??= new HashSet<string>();
         }
     }
 
@@ -1100,11 +1104,17 @@
                         //2)	若厨房内存在任何地漏图块或洗衣机图块（图块名称包含A-Toilet-9），则必然负担一个地漏下水点。
                         //最多同时负担一个洗涤盆下水店和一个地漏下水点。
                         var hasBasinList = new List<bool>();
+                        var hasKitchenFloorDrainList = new List<bool>();
+                        var hasKitchenWashingMachineList = new List<bool>();
                         var _fls1 = DrainageService.GetKitchenOnlyFLs(fls, kitchens, nonames,
                             balconys, pts, item.DLines,
                             fls.Select(x => lbDict[x]).ToList(),
                             item.Basins,
-                            hasBasinList
+                            item.FloorDrains,
+                            item.WashingMachines,
+                            hasBasinList,
+                            hasKitchenFloorDrainList,
+                            hasKitchenWashingMachineList
                             );
                         for (int i = 0; i < _fls1.Count; i++)
                         {
@@ -1114,6 +1124,14 @@
                             if (hasBasinList[i])
                             {
                                 drData.HasKitchenBasin.Add(label);
+                            }
+                            if (hasKitchenFloorDrainList[i])
+                            {
+                                drData.HasKitchenFloorDrain.Add(label);
+                            }
+                            if (hasKitchenWashingMachineList[i])
+                            {
+                                drData.HasKitchenWashingMachine.Add(label);
                             }
                         }
                         var _fls4 = DrainageService.GetFLsWhereSupportingFloorDrainUnderWaterPoint(fls, kitchens, item.FloorDrains, item.WashingMachines);
@@ -1125,7 +1143,8 @@
                         }
                         List<bool> hasWashingMachineList = new List<bool>();
                         List<int> floorDrainsCountList = new List<int>();
-                        var _fls2 = DrainageService.GetBalconyOnlyFLs(fls, kitchens, nonames, balconys, pts, item.DLines, fls.Select(x => lbDict[x]).ToList(), item.WashingMachines, item.FloorDrains, hasWashingMachineList, floorDrainsCountList);
+                        List<bool> hasMopPoolList = new List<bool>();
+                        var _fls2 = DrainageService.GetBalconyOnlyFLs(fls, kitchens, nonames, balconys, pts, item.DLines, fls.Select(x => lbDict[x]).ToList(), item.WashingMachines, item.MopPools, item.FloorDrains, hasWashingMachineList, floorDrainsCountList, hasMopPoolList);
                         //1)	图层名称包含“W-DRAI-EPQM”且半径大于40的圆视为洗手台下水点
                         //2)	地漏图块视为地漏下水点
                         for (int i = 0; i < _fls2.Count; i++)
@@ -1134,9 +1153,11 @@
                             var label = lbDict[fl];
                             var hasWashingMachine = hasWashingMachineList[i];
                             var floorDrainsCount = floorDrainsCountList[i];
+                            var hasMopPool = hasMopPoolList[i];
                             drData.BalconyOnlyFLs.Add(label);
                             drData.FloorDrains[label] = floorDrainsCount;
                             if (hasWashingMachine) drData.HasBalconyWashingMachine.Add(label);
+                            if (hasMopPool) drData.HasMopPool.Add(label);
                         }
 
                         //综合厨房和阳台的点位
@@ -1161,11 +1182,11 @@
                     sb.AppendLine("KitchenAndBalconyFLs：" + drData.KitchenAndBalconyFLs.OrderBy(x => x).ToJson());
                     sb.AppendLine("MustHaveFloorDrains：" + drData.MustHaveFloorDrains.OrderBy(x => x).ToJson());
 
-                    sb.AppendLine("HasDSCurve：" + drData.HasDSCurve.OrderBy(x => x).ToJson());
                     sb.AppendLine("HasKitchenFloorDrain：" + drData.HasKitchenFloorDrain.OrderBy(x => x).ToJson());
                     sb.AppendLine("HasKitchenWashingMachine：" + drData.HasKitchenWashingMachine.OrderBy(x => x).ToJson());
                     sb.AppendLine("HasKitchenBasin：" + drData.HasKitchenBasin.OrderBy(x => x).ToJson());
                     sb.AppendLine("HasBalconyWashingMachine：" + drData.HasBalconyWashingMachine.OrderBy(x => x).ToJson());
+                    sb.AppendLine("HasMopPool：" + drData.HasMopPool.OrderBy(x => x).ToJson());
 
                 }
 
@@ -1243,7 +1264,12 @@
             List<Geometry> dlines,
             List<string> labels,
             List<Geometry> basins,
-            List<bool> hasBasinList)
+            List<Geometry> floorDrains,
+            List<Geometry> washingMachines,
+            List<bool> hasBasinList,
+            List<bool> hasKitchenFloorDrainList,
+            List<bool> hasKitchenWashingMachineList
+            )
         {
             //6.3.2	只负责厨房的FL
             //-	判断方法
@@ -1262,6 +1288,8 @@
             {
                 var ok_fls = new HashSet<Geometry>();
                 //210714 写到这里
+                var floorDrainsf = GeoFac.CreateIntersectsSelector(floorDrains);
+                var washingMachinesf = GeoFac.CreateIntersectsSelector(washingMachines);
                 foreach (var kitchen in kitchens)
                 {
                     var flsf = GeoFac.CreateIntersectsSelector(FLs.Except(ok_fls).ToList());
@@ -1273,6 +1301,8 @@
                         {
                             list.Add(fl);
                             hasBasinList.Add(hasBasin);
+                            hasKitchenFloorDrainList.Add(floorDrainsf(kitchen).Any());
+                            hasKitchenWashingMachineList.Add(washingMachinesf(kitchen).Any());
                             ok_fls.Add(fl);
                         }
                     }
@@ -1285,6 +1315,8 @@
                             var fl = GeoFac.NearestNeighbourGeometryF(fls)(kitchen);
                             list.Add(fl);
                             hasBasinList.Add(hasBasin);
+                            hasKitchenFloorDrainList.Add(floorDrainsf(kitchen).Any());
+                            hasKitchenWashingMachineList.Add(washingMachinesf(kitchen).Any());
                             ok_fls.Add(fl);
                         }
                     }
@@ -1379,9 +1411,11 @@
             List<Geometry> dlines,
             List<string> labels,
             List<Geometry> washingMachines,
+            List<Geometry> mopPools,
             List<Geometry> floorDrains,
             List<bool> hasWashingMachineList,
-            List<int> floorDrainsCountList)
+            List<int> floorDrainsCountList,
+            List<bool> hasMopPoolList)
         {
             //6.3.3	只负责阳台的FL
             //-	判断方法
@@ -1401,7 +1435,7 @@
             var list = new List<Geometry>(FLs.Count);
             var washingMachinesf = GeoFac.CreateIntersectsSelector(washingMachines);
             var floorDrainsf = GeoFac.CreateIntersectsSelector(floorDrains);
-
+            var mopPoolsf = GeoFac.CreateIntersectsSelector(mopPools);
             {
                 var ok_fls = new HashSet<Geometry>();
                 //210715 写到这里
@@ -1417,6 +1451,7 @@
                             ok_fls.Add(fl);
                             hasWashingMachineList.Add(washingMachinesf(balcony).Any());
                             floorDrainsCountList.Add(floorDrainsf(balcony).Count);
+                            hasMopPoolList.Add(mopPoolsf(balcony).Any());
                         }
                     }
                     else
@@ -1429,6 +1464,7 @@
                             ok_fls.Add(fl);
                             hasWashingMachineList.Add(washingMachinesf(balcony).Any());
                             floorDrainsCountList.Add(floorDrainsf(balcony).Count);
+                            hasMopPoolList.Add(mopPoolsf(balcony).Any());
                         }
                     }
                 }
@@ -1547,6 +1583,17 @@
             //👻开始写分组逻辑
 
             //Console.WriteLine(storeysItems.ToCadJson());
+
+            {
+                //prefix drData
+
+                foreach (var drData in drDatas)
+                {
+
+                }
+
+            }
+
             var allFls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => IsFL(x)));
             var allTls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => IsTL(x)));
             var allPls = new HashSet<string>(drDatas.SelectMany(x => x.VerticalPipeLabels).Where(x => IsPL(x)));
@@ -1864,6 +1911,11 @@
                                 //{
                                 //    return true;
                                 //}
+
+                                if (drData.HasMopPool.Contains(label))
+                                {
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -4810,6 +4862,7 @@
         public List<string> WaterPortLabels;
         public List<GRect> WashingMachines;
         public List<GRect> Basins;
+        public List<GRect> MopPools;
         public List<Point2d> CleaningPorts;
         public List<Point2d> SideFloorDrains;
         public List<GRect> PipeKillers;
@@ -4830,6 +4883,7 @@
             CleaningPorts ??= new List<Point2d>();
             SideFloorDrains ??= new List<Point2d>();
             PipeKillers ??= new List<GRect>();
+            MopPools ??= new List<GRect>();
         }
         public void FixData()
         {
@@ -4845,6 +4899,7 @@
             WaterPorts = WaterPorts.Where(x => x.IsValid).Distinct().ToList();
             WashingMachines = WashingMachines.Where(x => x.IsValid).Distinct().ToList();
             Basins = Basins.Where(x => x.IsValid).Distinct().ToList();
+            MopPools = MopPools.Where(x => x.IsValid).Distinct().ToList();
             PipeKillers = PipeKillers.Where(x => x.IsValid).Distinct().ToList();
         }
         public DrainageGeoData Clone()
@@ -4872,6 +4927,7 @@
         public List<Geometry> SideFloorDrains;
         public List<Geometry> PipeKillers;
         public List<Geometry> Basins;
+        public List<Geometry> MopPools;
         public void Init()
         {
             Storeys ??= new List<Geometry>();
@@ -4888,6 +4944,7 @@
             SideFloorDrains ??= new List<Geometry>();
             PipeKillers ??= new List<Geometry>();
             Basins ??= new List<Geometry>();
+            MopPools ??= new List<Geometry>();
         }
         public static DrainageCadData Create(DrainageGeoData data)
         {
@@ -4908,6 +4965,7 @@
             o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
             o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
             o.Basins.AddRange(data.Basins.Select(ConvertWashingMachinesF()));
+            o.MopPools.AddRange(data.MopPools.Select(ConvertWashingMachinesF()));
             o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
             o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
             o.PipeKillers.AddRange(data.PipeKillers.Select(ConvertVerticalPipesF()));
@@ -4994,6 +5052,7 @@
             ret.AddRange(SideFloorDrains);
             ret.AddRange(PipeKillers);
             ret.AddRange(Basins);
+            ret.AddRange(MopPools);
             return ret;
         }
         public List<DrainageCadData> SplitByStorey()
@@ -5019,6 +5078,7 @@
                 o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
                 o.PipeKillers.AddRange(objs.Where(x => this.PipeKillers.Contains(x)));
                 o.Basins.AddRange(objs.Where(x => this.Basins.Contains(x)));
+                o.MopPools.AddRange(objs.Where(x => this.MopPools.Contains(x)));
                 lst.Add(o);
             }
             return lst;
@@ -5031,6 +5091,103 @@
     [Feng]
     public static class THDrainageService
     {
+        public static void DoExtract(AcadDatabase adb, Func<BlockReference, Matrix3d, bool> doExtract,
+            bool supportDynamicBlock = false,
+            Action<BlockReference, Matrix3d> doXClip = null)
+        {
+            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
+            {
+                DoExtract(br, Matrix3d.Identity, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: true);
+            }
+        }
+        public static void DoExtract(BlockReference blockReference, Matrix3d matrix,
+         Func<BlockReference, Matrix3d, bool> doExtract,
+           bool supportDynamicBlock = false,
+           Action<BlockReference, Matrix3d> doXClip = null,
+           bool rootInclude = false)
+        {
+            static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+            {
+                //return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
+                //return !layerTableRecord.IsOff;
+                return !layerTableRecord.IsFrozen;//一个个试出来的，我也不懂。。。
+                //return !layerTableRecord.IsHidden;
+                //return layerTableRecord.IsUsed;
+            }
+            bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+            {
+                if (!supportDynamicBlock)
+                {
+                    // 暂时不支持动态块，外部参照，覆盖
+                    if (blockTableRecord.IsDynamicBlock)
+                    {
+                        return false;
+                    }
+                }
+
+                // 忽略图纸空间和匿名块
+                if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+                {
+                    return false;
+                }
+
+                // 忽略不可“炸开”的块
+                if (!blockTableRecord.Explodable)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            using AcadDatabase adb = AcadDatabase.Use(blockReference.Database);
+            bool isVisibleBlockRef(BlockReference br)
+            {
+                var layer = br.Layer;
+                if (layer == null) return false;
+                var _layer = adb.Layers.ElementOrDefault(layer);
+                return _layer == null ? false : IsVisibleLayer(_layer);
+            }
+            if (blockReference.BlockTableRecord.IsValid)
+            {
+                if (rootInclude && blockReference.ObjectId.IsValid && isVisibleBlockRef(blockReference))
+                {
+                    if (doExtract(blockReference, matrix)) return;
+                }
+                var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
+                if (IsBuildElementBlock(blockTableRecord))
+                {
+                    // 提取图元信息                        
+                    foreach (var objId in blockTableRecord)
+                    {
+                        var dbObj = adb.Element<Entity>(objId);
+                        if (dbObj is BlockReference blockObj)
+                        {
+                            //if (blockObj.BlockTableRecord.IsNull) continue;
+                            if (!isVisibleBlockRef(blockObj)) continue;
+                            if (blockObj.BlockTableRecord.IsValid)
+                            {
+                                if (doExtract(blockObj, matrix)) continue;
+                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                DoExtract(blockObj, mcs2wcs, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: false);
+                            }
+                        }
+                    }
+
+                    // 过滤XClip外的图元信息
+                    doXClip?.Invoke(blockReference, matrix);
+                    {
+                        //var xclip = blockReference.XClipInfo();
+                        //var poly = xclip.Polygon;
+                        //if (poly != null)
+                        //{
+                        //    poly.TransformBy(m);
+                        //    var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
+                        //    geos.RemoveAll(o => !gf.Contains(o));
+                        //}
+                    }
+                }
+            }
+        }
         public static bool IsToilet(string roomName)
         {
             //1)	包含“卫生间” //2)	包含“主卫” //3)	包含“次卫”
@@ -5103,143 +5260,820 @@
         {
             return Regex.IsMatch(label, @"^D\d?L");
         }
-        [Feng("厨房")]
-        private static void qw8f51()
+        public static void Register(Action<string, Action> register)
         {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            register("拖把池", () =>
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var roomData = DrainageService.CollectRoomData(adb);
-                var kitchens = new List<Geometry>();
-                foreach (var kv in roomData)
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    if (IsKitchen(kv.Key))
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var names = new List<string>() { "A-Kitchen-9" };
+                    DoExtract(adb, (br, m) =>
                     {
-                        kitchens.Add(kv.Value);
+                        var name = br.GetEffectiveName();
+                        if (names.Any(x => name.Contains(x)))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            DU.DrawRectLazy(r, 10);
+                            Dbg.ShowWhere(r);
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            register("厨房", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    var kitchens = new List<Geometry>();
+                    foreach (var kv in roomData)
+                    {
+                        if (IsKitchen(kv.Key))
+                        {
+                            kitchens.Add(kv.Value);
+                        }
+                    }
+                    foreach (var kc in kitchens)
+                    {
+                        DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
                     }
                 }
-                foreach (var kc in kitchens)
-                {
-                    DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
-                }
-            }
-        }
-        [Feng("阳台")]
-        private static void qw8f52()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            });
+            register("阳台", () =>
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var roomData = DrainageService.CollectRoomData(adb);
-                var kitchens = new List<Geometry>();
-                foreach (var kv in roomData)
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    if (IsBalcony(kv.Key))
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    var kitchens = new List<Geometry>();
+                    foreach (var kv in roomData)
                     {
-                        kitchens.Add(kv.Value);
+                        if (IsBalcony(kv.Key))
+                        {
+                            kitchens.Add(kv.Value);
+                        }
+                    }
+                    foreach (var kc in kitchens)
+                    {
+                        DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
                     }
                 }
-                foreach (var kc in kitchens)
-                {
-                    DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
-                }
-            }
-        }
-        [Feng("阳台有洗衣机")]
-        private static void qw866k()
-        {
-            //fl1-2 fl1-3
-            //fl1-2 fl1-4 fl2-2 fl2-4
-            //fl1-4 fl1-3 fl2-3 fl2-4
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            });
+            register("阳台有洗衣机", () =>
             {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var roomData = DrainageService.CollectRoomData(adb);
-                var balcony = new List<Geometry>();
-                foreach (var kv in roomData)
+                //fl1-2 fl1-3
+                //fl1-2 fl1-4 fl2-2 fl2-4
+                //fl1-4 fl1-3 fl2-3 fl2-4
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    if (kv.Key == "阳台")
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    var balcony = new List<Geometry>();
+                    foreach (var kv in roomData)
                     {
-                        balcony.Add(kv.Value);
+                        if (kv.Key == "阳台")
+                        {
+                            balcony.Add(kv.Value);
+                        }
+                    }
+                    var f = GeoFac.CreateIntersectsSelector(balcony);
+                    DoExtract(adb, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (name.Contains("A-Toilet-9"))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            if (f(r.ToPolygon()).Any())
+                            {
+                                DU.DrawRectLazy(r, 10);
+                                Dbg.ShowWhere(r);
+                            }
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            register("厨房有洗涤盆", () =>
+            {
+                //图1 fl1-1 fl1-4
+                //图2 fl1-1 fl1-3 fl2-1 fl2-3
+                //图3 fl1-1 fl1-2 fl2-2 fl2-1
+
+                //厨房外扩350再判断
+
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    var kitchens = new List<Geometry>();
+                    foreach (var kv in roomData)
+                    {
+                        if (IsKitchen(kv.Key))
+                        {
+                            kitchens.Add(kv.Value);
+                        }
+                    }
+                    var f = GeoFac.CreateIntersectsSelector(kitchens);
+                    var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
+                    DoExtract(adb, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (names.Any(x => name.Contains(x)))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            if (f(r.ToPolygon()).Any())
+                            {
+                                DU.DrawRectLazy(r, 10);
+                                Dbg.ShowWhere(r);
+                            }
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            register("ThDistributionElementExtractor", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+
+
+                    var visitor = new ThModelExtractionVisitor();
+                    var extractor = new ThDistributionElementExtractor();
+                    extractor.Accept(visitor);
+                    extractor.Extract(adb.Database);
+                    Console.WriteLine(visitor.Results.Count);
+                }
+            });
+            register("洗衣机", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var names = new List<string>() { "A-Toilet-9", "$xiyiji" };
+                    DoExtract(adb, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (names.Any(x => name.Contains(x)))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            DU.DrawRectLazy(r, 10);
+                            Dbg.ShowWhere(r);
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            register("洗脸盆", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
+                    DoExtract(adb, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (names.Any(x => name.Contains(x)))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            DU.DrawRectLazy(r, 10);
+                            Dbg.ShowWhere(r);
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            register("洗衣机抬高的触发条件", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    var kitchens = new List<Geometry>();
+                    foreach (var kv in roomData)
+                    {
+                        if (IsKitchen(kv.Key))
+                        {
+                            kitchens.Add(kv.Value);
+                        }
+                    }
+                    var washingMachines = new List<Geometry>();
+
+                    DoExtract(adb, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+
+                        if (name.Contains("A-Toilet-9"))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            if (!r.IsValid) return true;
+                            washingMachines.Add(r.ToPolygon());
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    var f = GeoFac.CreateIntersectsSelector(washingMachines);
+                    foreach (var k in kitchens)
+                    {
+                        if (f(k).Any())
+                        {
+                            Console.WriteLine("OK");
+                            return;
+                        }
                     }
                 }
-                var f = GeoFac.CreateIntersectsSelector(balcony);
-                Dbg.DoExtract(adb, (br, m) =>
+            });
+            register("$JB-XiDiPen-", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("A-Toilet-9"))
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var rs = new List<GRect>();
+                    DoExtract(Dbg.SelectEntity<BlockReference>(adb), Matrix3d.Identity, (br, m) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕") || name.Contains("0$asdfghjgjhkl"))
+                        {
+                            var e = br.GetTransformedCopy(m);
+                            var r = e.Bounds.ToGRect();
+                            rs.Add(r);
+                            return true;
+                        }
+                        return false;
+                    });
+                    foreach (var r in rs)
+                    {
+                        DU.DrawRectLazy(r, 10);
+                    }
+                }
+            });
+            register("$JB-XiDiPen-", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    //var br = Dbg.SelectEntity<BlockReference>(adb);
+                    var ext = new ThDistributionElementExtractor();
+                    var visitor = new BlockReferenceVisitor();
+                    var names = new List<string>();
+                    visitor.IsTargetBlockReferenceCb = br =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕"))
+                        {
+                            names.Add(name);
+                            return true;
+                        }
+                        return false;
+                    };
+                    var rs = new List<GRect>();
+                    visitor.HandleBlockReferenceCb = (br, m) =>
                     {
                         var e = br.GetTransformedCopy(m);
                         var r = e.Bounds.ToGRect();
-                        if (!r.IsValid) return true;
-                        if (f(r.ToPolygon()).Any())
-                        {
-                            DU.DrawRectLazy(r, 10);
-                            Dbg.ShowWhere(r);
-                        }
-                        return true;
-                    }
-                    return false;
-                });
-            }
-        }
-        [Feng("厨房有洗涤盆")]
-        private static void qw85nx()
-        {
-            //图1 fl1-1 fl1-4
-            //图2 fl1-1 fl1-3 fl2-1 fl2-3
-            //图3 fl1-1 fl1-2 fl2-2 fl2-1
-
-            //厨房外扩350再判断
-
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var roomData = DrainageService.CollectRoomData(adb);
-                var kitchens = new List<Geometry>();
-                foreach (var kv in roomData)
-                {
-                    if (IsKitchen(kv.Key))
+                        rs.Add(r);
+                    };
+                    ext.Accept(visitor);
+                    ext.Extract(adb.Database);
+                    Console.WriteLine(names.ToJson());
+                    foreach (var r in rs)
                     {
-                        kitchens.Add(kv.Value);
+                        DU.DrawRectLazy(r, 10);
                     }
                 }
-                var f = GeoFac.CreateIntersectsSelector(kitchens);
-                var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
-                Dbg.DoExtract(adb, (br, m) =>
+            });
+            register("A-Kitchen-Toilet", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var name = br.GetEffectiveName();
-                    if (names.Any(x => name.Contains(x)))
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+
+                    var list = new List<string>();
+                    var visitor = new BlockReferenceVisitor();
+                    visitor.IsTargetBlockReferenceCb = (br) =>
                     {
+                        var name = br.GetEffectiveName();
+                        list.Add(name);
+                        if (name.Contains("|A-Kitchen-") || name.Contains("|A-Toilet-") || name.EndsWith("|lp") || name.EndsWith("|lp1") || name.EndsWith("|lp2") || name.EndsWith("|A-lavabo"))
+                        {
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    var rs = new List<GRect>();
+                    visitor.HandleBlockReferenceCb = (br, m) =>
+                    {
+
                         var e = br.GetTransformedCopy(m);
                         var r = e.Bounds.ToGRect();
-                        if (!r.IsValid) return true;
-                        if (f(r.ToPolygon()).Any())
-                        {
-                            DU.DrawRectLazy(r, 10);
-                            Dbg.ShowWhere(r);
-                        }
-                        return true;
+                        rs.Add(r);
+                        //rs.Add(br.GeometryExtentsBestFit(m).ToGRect());
+                        //var name = br.GetEffectiveName();
+                    };
+                    var extractor = new ThDistributionElementExtractor();
+                    extractor.Accept(visitor);
+                    extractor.Extract(db);
+                    foreach (var r in rs)
+                    {
+                        DU.DrawRectLazy(r, 10);
+                        //Dbg.ShowWhere(r);
                     }
-                    return false;
-                });
-            }
+                    Console.WriteLine(list.ToJson());
+                    Dbg.SetText(list);
+                }
+            });
+            register("A-Kitchen-", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+
+                    var list = new List<string>();
+                    var visitor = new BlockReferenceVisitor();
+                    visitor.IsTargetBlockReferenceCb = (br) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (name.Contains("A-Kitchen-"))
+                        {
+                            list.Add(name);
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    var rs = new List<GRect>();
+                    visitor.HandleBlockReferenceCb = (br, m) =>
+                    {
+                        var e = br.GetTransformedCopy(m);
+                        rs.Add(e.Bounds.ToGRect());
+                    };
+                    var extractor = new ThDistributionElementExtractor();
+                    extractor.Accept(visitor);
+                    extractor.Extract(db);
+                    foreach (var r in rs)
+                    {
+                        DU.DrawRectLazy(r);
+                    }
+                    Console.WriteLine(list.ToJson());
+                    Dbg.SetText(list);
+                }
+            });
+            register("A-Toilet-", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+
+                    var list = new List<string>();
+                    var visitor = new BlockReferenceVisitor();
+                    visitor.IsTargetBlockReferenceCb = (br) =>
+                    {
+                        var name = br.GetEffectiveName();
+                        if (name.Contains("A-Toilet-"))
+                        {
+                            list.Add(name);
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    var rs = new List<GRect>();
+                    visitor.HandleBlockReferenceCb = (br, m) =>
+                    {
+                        var e = br.GetTransformedCopy(m);
+                        rs.Add(e.Bounds.ToGRect());
+                    };
+                    var extractor = new ThDistributionElementExtractor();
+                    extractor.Accept(visitor);
+                    extractor.Extract(db);
+                    foreach (var r in rs)
+                    {
+                        DU.DrawRectLazy(r);
+                    }
+                    Console.WriteLine(list.ToJson());
+                    Dbg.SetText(list);
+                }
+            });
+            register("CollectRoomData", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var list = DrainageService.CollectRoomData(adb);
+                    Console.WriteLine(list.Select(x => x.Key).ToJson());
+                }
+            });
+            register("DrawOutlets2", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var pt = Dbg.SelectPoint().ToPoint2d();
+                    DrainageSystemDiagram.DrawOutlets2(pt);
+                }
+            });
+            register("draw byuivm", () =>
+            {
+                try
+                {
+                    var vm = new ThMEPWSS.Diagram.ViewModel.DrainageSystemDiagramViewModel();
+                    vm.Params.CouldHavePeopleOnRoof = true;
+                    ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = vm, };
+                    ThDrainageService.CollectFloorListDatasEx();
+                    DrainageSystemDiagram.DrawDrainageSystemDiagram(vm);
+                }
+                finally
+                {
+                    ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
+                }
+            });
+            register("draw bycmd", () => { DrainageSystemDiagram.DrawDrainageSystemDiagram(); });
+            register("CollectRoomData", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var roomData = DrainageService.CollectRoomData(adb);
+                    foreach (var kv in roomData)
+                    {
+                        if (kv.Key == "")
+                        {
+                            DU.DrawGeometryLazy(kv.Value, ents => ents.ForEach(e => { e.ColorIndex = 3; if (e is Polyline pl) { pl.ConstantWidth = 10; } }));
+                        }
+                    }
+                }
+            });
+            register("三板斧", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                {
+                    Dbg.LayerThreeAxes(adb.Layers.Select(x => x.Name).ToList());
+                }
+            });
+            register("load drDatas and draw", () =>
+            {
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
+                var drDatas = Dbg.LoadFromTempJsonFile<List<DrainageDrawingData>>("drDatas");
+                Dbg.FocusMainWindow();
+                var basePoint = Dbg.SelectPoint().ToPoint2d();
+
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var pipeGroupItems = DrainageSystemDiagram.GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
+                    DU.Dispose();
+                    DrainageSystemDiagram.DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys);
+                    DU.Draw(adb);
+                }
+            });
+            register("load geoData save drDatas noDraw", () =>
+            {
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
+                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("geoData");
+
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, true);
+                    Dbg.SaveToTempJsonFile(drDatas, "drDatas");
+                }
+            });
+            register("load geoData save drDatas", () =>
+            {
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
+                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("geoData");
+
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, false);
+                    Dbg.SaveToTempJsonFile(drDatas, "drDatas");
+                }
+            });
+            register("save geoData", () =>
+            {
+                Dbg.FocusMainWindow();
+                var range = Dbg.TrySelectRange();
+                if (range == null) return;
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<DrainageSystemDiagram.StoreysItem> storeysItems, out DrainageGeoData geoData);
+                    Dbg.SaveToTempJsonFile(storeysItems, "storeysItems");
+                    Dbg.SaveToTempJsonFile(geoData, "geoData");
+                }
+            });
+            register("draw14(from cache)", DrainageSystemDiagram.draw14);
+            register("draw13(log only)", DrainageSystemDiagram.draw13);
+            register("draw12(create cache)", DrainageSystemDiagram.draw12);
+            register("draw11", DrainageSystemDiagram.draw11);
+            register("draw8", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
+                    var basePt = Dbg.SelectPoint();
+                    DrainageSystemDiagram.draw8(drDatas, basePt.ToPoint2d());
+                }
+            });
+            register("draw7", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
+                    var basePt = Dbg.SelectPoint();
+                    DrainageSystemDiagram.draw7(drDatas, basePt.ToPoint2d());
+                }
+            });
+            register("UnHighLightAll", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                {
+                    HighlightHelper.UnHighLight(adb.ModelSpace.OfType<Entity>());
+                }
+            });
+            register("draw1", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var basePt = Dbg.SelectPoint();
+                    if (false)
+                    {
+                        var dg = new DrainageSystemDiagram();
+                        dg.Draw(basePt);
+                    }
+                    else
+                    {
+                        DrainageSystemDiagram.draw1(basePt);
+                    }
+                }
+            });
+            register("draw2", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var basePt = Dbg.SelectPoint();
+                    if (false)
+                    {
+                        var dg = new DrainageSystemDiagram();
+                        dg.Draw(basePt);
+                    }
+                    else
+                    {
+                        DrainageSystemDiagram.draw2(basePt);
+                    }
+                }
+            });
+            register("draw3", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var basePt = Dbg.SelectPoint();
+                    DrainageSystemDiagram.draw3(basePt.ToPoint2d());
+                }
+            });
+            register("draw4", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var basePt = Dbg.SelectPoint();
+                    DrainageSystemDiagram.draw4(basePt.ToPoint2d());
+                }
+            });
+            register("draw6", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var basePt = Dbg.SelectPoint();
+                    DrainageSystemDiagram.draw6(basePt.ToPoint2d());
+                }
+            });
+            register("根据点收集向量数据", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var points = new List<Point3d>();
+                    while (Dbg.TrySelectPoint(out Point3d pt))
+                    {
+                        points.Add(pt);
+                    }
+                    var vecs = points.Select(p => p.ToPoint2d()).ToArray().ToVector2ds();
+                    Dbg.PrintLine($"var vecs=new List<Vector2d>{{{vecs.Select(v => $"new Vector2d({Convert.ToInt64(v.X)},{Convert.ToInt64(v.Y)})").JoinWith(",")}}};");
+                }
+            });
+            register("根据点收集点数据", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var points = new List<Point3d>();
+                    while (Dbg.TrySelectPoint(out Point3d pt))
+                    {
+                        points.Add(pt);
+                    }
+                    var v = points[0].ToVector3d();
+                    for (int i = 0; i < points.Count; i++)
+                    {
+                        points[i] = points[i] - v;
+                    }
+                    Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
+                }
+            });
+            register("根据线收集点数据", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var basePt = Dbg.SelectPoint().ToPoint2d();
+                    var lines = Dbg.SelectEntities(adb).OfType<Line>().ToList();
+                    if (lines.Count > 0)
+                    {
+                        //var points = new List<Point2d>();
+                        //points.Add(lines[0].StartPoint.ToPoint2d());
+                        //points.Add(lines[0].EndPoint.ToPoint2d());
+                        //for (int i = 1; i < lines.Count; i++)
+                        //{
+                        //    points.Add(lines[i].EndPoint.ToPoint2d());
+                        //}
+                        //Dbg.PrintLine(basePt.ToPoint2d().ToCadJson());
+                        //Dbg.PrintLine(points.ToCadJson());
+                        var points = new List<Point2d>() { Point2d.Origin };
+                        var curPt = basePt;
+                        foreach (var line in lines)
+                        {
+                            var p1 = line.StartPoint.ToPoint2d();
+                            var p2 = line.EndPoint.ToPoint2d();
+                            if (p1.GetDistanceTo(curPt) < 1)
+                            {
+                                points.Add((p2 - basePt).ToPoint2d());
+                                curPt = p2;
+                            }
+                            else if (p2.GetDistanceTo(curPt) < 1)
+                            {
+                                points.Add((p1 - basePt).ToPoint2d());
+                                curPt = p1;
+                            }
+                            else
+                            {
+                                Dbg.PrintLine("err");
+                                return;
+                            }
+                        }
+                        //Dbg.PrintLine(points.Select(p=>p.ToLongPoint2d()).ToCadJson());
+                        Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
+                    }
+
+                }
+            });
+            register("ImportElementsFromStdDwg", () => ThRainSystemService.ImportElementsFromStdDwg());
+            register("CreateFloorFraming", ThMEPWSS.Common.Utils.CreateFloorFraming);
+            register("🔴一些工具", () => { FengDbgTest.FengDbgTesting.Register(typeof(ThDebugClass.DebugTools)); });
         }
 
         public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
@@ -5290,401 +6124,7 @@
                 });
             }
         }
-        [Feng("qw9ng5")]
-        private static void qw9ng5()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
 
-
-                var visitor = new ThModelExtractionVisitor();
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(adb.Database);
-                Console.WriteLine(visitor.Results.Count);
-            }
-        }
-        [Feng("洗衣机")]
-        private static void qw858w()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var names = new List<string>() { "A-Toilet-9", "$xiyiji" };
-                Dbg.DoExtract(adb, (br, m) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (names.Any(x => name.Contains(x)))
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        if (!r.IsValid) return true;
-                        Console.WriteLine(br.Layer);
-                        DU.DrawRectLazy(r, 10);
-                        Dbg.ShowWhere(r);
-                        return true;
-                    }
-                    return false;
-                });
-            }
-        }
-        [Feng("洗脸盆")]
-        private static void qw858v()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
-                Dbg.DoExtract(adb, (br, m) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (names.Any(x => name.Contains(x)))
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        if (!r.IsValid) return true;
-                        DU.DrawRectLazy(r, 10);
-                        Dbg.ShowWhere(r);
-                        return true;
-                    }
-                    return false;
-                });
-            }
-        }
-        [Feng("1楼厨房有洗涤盆的触发条件")]
-        private static void qw84yb()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-            }
-        }
-        [Feng("洗衣机抬高的触发条件")]
-        private static void qw84gk()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var roomData = DrainageService.CollectRoomData(adb);
-                var kitchens = new List<Geometry>();
-                foreach (var kv in roomData)
-                {
-                    if (IsKitchen(kv.Key))
-                    {
-                        kitchens.Add(kv.Value);
-                    }
-                }
-                var washingMachines = new List<Geometry>();
-
-                Dbg.DoExtract(adb, (br, m) =>
-                {
-                    var name = br.GetEffectiveName();
-
-                    if (name.Contains("A-Toilet-9"))
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        if (!r.IsValid) return true;
-                        washingMachines.Add(r.ToPolygon());
-                        return true;
-                    }
-                    return false;
-                });
-
-                var f = GeoFac.CreateIntersectsSelector(washingMachines);
-                foreach (var k in kitchens)
-                {
-                    if (f(k).Any())
-                    {
-                        Console.WriteLine("OK");
-                        return;
-                    }
-                }
-            }
-        }
-        [Feng("circle buffer")]
-        private static void qw6pq4()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                //DU.DrawGeometryLazy(Dbg.SelectEntity<Circle>(adb).ToGCircle().ToCirclePolygon(36).Buffer(100));
-                //DU.DrawGeometryLazy(Dbg.SelectEntity<Circle>(adb).ToGCircle().ToCirclePolygon(36).Buffer(-100));
-
-
-            }
-        }
-
-        [Feng("$JB-XiDiPen-")]
-        private static void qw6czh()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var rs = new List<GRect>();
-                Dbg.DoExtract(Dbg.SelectEntity<BlockReference>(adb), Matrix3d.Identity, (br, m) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕") || name.Contains("0$asdfghjgjhkl"))
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        rs.Add(r);
-                        return true;
-                    }
-                    return false;
-                });
-                foreach (var r in rs)
-                {
-                    DU.DrawRectLazy(r, 10);
-                }
-            }
-        }
-        [Feng("$JB-XiDiPen-")]
-        private static void qw6bdo()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                //var br = Dbg.SelectEntity<BlockReference>(adb);
-                var ext = new ThDistributionElementExtractor();
-                var visitor = new BlockReferenceVisitor();
-                var names = new List<string>();
-                visitor.IsTargetBlockReferenceCb = br =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕"))
-                    {
-                        names.Add(name);
-                        return true;
-                    }
-                    return false;
-                };
-                var rs = new List<GRect>();
-                visitor.HandleBlockReferenceCb = (br, m) =>
-                {
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    rs.Add(r);
-                };
-                ext.Accept(visitor);
-                ext.Extract(adb.Database);
-                Console.WriteLine(names.ToJson());
-                foreach (var r in rs)
-                {
-                    DU.DrawRectLazy(r, 10);
-                    //Dbg.ShowWhere(r);
-                }
-            }
-
-        }
-        [Feng("A-Kitchen-Toilet")]
-        private static void qw4rmd()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var list = new List<string>();
-                var visitor = new BlockReferenceVisitor();
-                visitor.IsTargetBlockReferenceCb = (br) =>
-                {
-                    var name = br.GetEffectiveName();
-                    list.Add(name);
-                    if (name.Contains("|A-Kitchen-") || name.Contains("|A-Toilet-") || name.EndsWith("|lp") || name.EndsWith("|lp1") || name.EndsWith("|lp2") || name.EndsWith("|A-lavabo"))
-                    {
-                        return true;
-                    }
-                    return false;
-                };
-
-                var rs = new List<GRect>();
-                visitor.HandleBlockReferenceCb = (br, m) =>
-                {
-
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    rs.Add(r);
-                    //rs.Add(br.GeometryExtentsBestFit(m).ToGRect());
-
-                    //var name = br.GetEffectiveName();
-                };
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(db);
-                foreach (var r in rs)
-                {
-                    DU.DrawRectLazy(r, 10);
-                    //Dbg.ShowWhere(r);
-                }
-                Console.WriteLine(list.ToJson());
-                Dbg.SetText(list);
-            }
-        }
-        [Feng("A-Kitchen-")]
-        private static void qw4rmc()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var list = new List<string>();
-                var visitor = new BlockReferenceVisitor();
-                visitor.IsTargetBlockReferenceCb = (br) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("A-Kitchen-"))
-                    {
-                        list.Add(name);
-                        return true;
-                    }
-                    return false;
-                };
-
-                var rs = new List<GRect>();
-                visitor.HandleBlockReferenceCb = (br, m) =>
-                {
-                    var e = br.GetTransformedCopy(m);
-                    rs.Add(e.Bounds.ToGRect());
-                };
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(db);
-                foreach (var r in rs)
-                {
-                    DU.DrawRectLazy(r);
-                    //Dbg.ShowWhere(r);
-                }
-                Console.WriteLine(list.ToJson());
-                Dbg.SetText(list);
-            }
-        }
-        [Feng("A-Toilet-")]
-        private static void qw4rmb()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var list = new List<string>();
-                var visitor = new BlockReferenceVisitor();
-                visitor.IsTargetBlockReferenceCb = (br) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("A-Toilet-"))
-                    {
-                        list.Add(name);
-                        return true;
-                    }
-                    return false;
-                };
-
-                var rs = new List<GRect>();
-                visitor.HandleBlockReferenceCb = (br, m) =>
-                {
-                    var e = br.GetTransformedCopy(m);
-                    rs.Add(e.Bounds.ToGRect());
-                };
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(db);
-                foreach (var r in rs)
-                {
-                    DU.DrawRectLazy(r);
-                    //Dbg.ShowWhere(r);
-                }
-                Console.WriteLine(list.ToJson());
-                Dbg.SetText(list);
-            }
-        }
-        [Feng("CollectRoomData")]
-        public static void qvfyms()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var list = DrainageService.CollectRoomData(adb);
-                Console.WriteLine(list.Select(x => x.Key).ToJson());
-            }
-        }
-        [Feng("DrawOutlets2")]
-        private static void qw5wit()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var pt = Dbg.SelectPoint().ToPoint2d();
-                DrainageSystemDiagram.DrawOutlets2(pt);
-            }
-        }
-        [Feng("draw16(byuivm)")]
-        private static void draw16()
-        {
-            try
-            {
-                var vm = new ThMEPWSS.Diagram.ViewModel.DrainageSystemDiagramViewModel();
-                vm.Params.CouldHavePeopleOnRoof = true;
-                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = vm, };
-                ThDrainageService.CollectFloorListDatasEx();
-                DrainageSystemDiagram.DrawDrainageSystemDiagram(vm);
-            }
-            finally
-            {
-                ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
-            }
-        }
     }
 
     public class ThDrainageService
@@ -5707,10 +6147,6 @@
             foreach (var bd in bds)
             {
                 var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1500, 250);
-                //{
-                //    var e = DU.DrawRectLazy(g);
-                //    e.ColorIndex = 2;
-                //}
                 var _lineHGs = f1(g.ToPolygon());
                 var geo = GeoFac.NearestNeighbourGeometryF(_lineHGs)(bd.Center.ToNTSPoint());
                 if (geo == null) continue;
@@ -6054,6 +6490,7 @@ namespace ThMEPWSS.Pipe.Service
         List<GRect> storeys => geoData.Storeys;
         List<Point2d> cleaningPorts => geoData.CleaningPorts;
         List<GRect> washingMachines => geoData.WashingMachines;
+        List<GRect> mopPools => geoData.MopPools;
         List<GRect> basins => geoData.Basins;
         List<GRect> pipeKillers => geoData.PipeKillers;
         public void CollectStoreys(Geometry range, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
@@ -6062,11 +6499,12 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void CollectKillers()
         {
-            Dbg.DoExtract(adb, (br, m) =>
+            DoExtract(adb, (br, m) =>
             {
                 var ok = false;
                 var basinNames = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
                 var washingMachinesNames = new List<string>() { "A-Toilet-9", "$xiyiji" };
+                var mopPoolNames = new List<string>() { "A-Kitchen-9", };
                 var killerNames = new List<string>() { "-XiDiPen-", "0$座厕", "0$asdfghjgjhkl", "A-Toilet-", "A-Kitchen-", "|lp", "|lp1", "|lp2" };
                 var name = br.GetEffectiveName();
                 if (killerNames.Any(x => name.Contains(x)))
@@ -6095,6 +6533,14 @@ namespace ThMEPWSS.Pipe.Service
                     var r = e.Bounds.ToGRect();
                     if (!r.IsValid) return true;
                     washingMachines.Add(r);
+                    ok = true;
+                }
+                if (mopPoolNames.Any(x => name.Contains(x)))
+                {
+                    var e = br.GetTransformedCopy(m);
+                    var r = e.Bounds.ToGRect();
+                    if (!r.IsValid) return true;
+                    mopPools.Add(r);
                     ok = true;
                 }
                 return ok;

@@ -2660,26 +2660,6 @@ namespace ThMEPWSS.TestNs
                 }
             });
         }
-        private static void qtchqt()
-        {
-            var k = FengKeys.StoreysJsonData210519;
-            var dict = StaticMethods.LoadData<Dictionary<string, List<ThStoreysData>>>(k, cvt4);
-            var lst = dict.Values.First();
-
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                foreach (var item in lst)
-                {
-                    DU.DrawRectLazy(item.Boundary);
-                    DU.DrawTextLazy(item.StoreyType + item.Storeys.ToJson(), 3000, item.Boundary.LeftTop.ToPoint3d());
-                }
-            }
-        }
 
 
         public static void qtchqu()
