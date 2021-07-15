@@ -102,6 +102,7 @@ namespace ThMEPElectrical.Command
                         var ControlCircuitEngine = new ThControlCircuitRecognitionEngine() { LayerFilter = new List<string>() { "E-FAS-WIRE" } };
                         //按回路区分需要额外拿数据
                         //拿到全图所有线
+                        ControlCircuitEngine.Recognize(acadDatabase.Database, points);
                         ControlCircuitEngine.RecognizeMS(acadDatabase.Database, points);
                         //获取选择连接关系区域其他的块
                         RequiredElementEngine.Recognize(acadDatabase.Database, points);

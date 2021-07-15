@@ -62,11 +62,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             bool IsRequired = false;
             ThBlockConfigModel.BlockConfig.ForEach(o =>
             {
-                switch (o.StatisticMode)
-                {
-                    case StatisticType.BlockName:
+            switch (o.StatisticMode)
+            {
+                case StatisticType.BlockName:
                         {
-                            if (o.BlockName == blkref.Name)
+                            if (o.BlockName == blkref.Name || (o.HasAlias && o.AliasList.Contains(blkref.Name)))
                             {
                                 IsRequired = true;
                                 return;

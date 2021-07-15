@@ -21,7 +21,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         public override void Extract(Database database)
         {
-            throw new NotImplementedException();
+            var visitor = new ThControlCircuitVisitor()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            var extractor = new ThEntityCommonExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);    // 提取MS
+            Results = visitor.Results;
         }
 
         public override void ExtractFromMS(Database database)
@@ -33,7 +40,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             var extractor = new ThEntityCommonExtractor();
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);    // 提取MS
-            Results = visitor.Results;
+            Results.AddRange(visitor.Results);
         }
     }
 
@@ -47,7 +54,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var engine = new ThControlCircuitExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {

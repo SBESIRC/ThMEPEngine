@@ -13,7 +13,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
     {
         public override void DoExtract(List<ThEntityData> elements, Entity dbObj, Matrix3d matrix)
         {
-            throw new NotImplementedException();
+            if (dbObj is Curve curve)
+            {
+                elements.AddRange(HandleCurve(curve));
+            }
+            else if (dbObj is DBText text)
+            {
+                elements.AddRange(HandleCurve(text));
+            }
         }
 
         public override void DoExtract(List<ThEntityData> elements, Entity dbObj)
@@ -46,7 +53,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             if (entity is Curve curve)
             {
-                return LayerFilter.Contains(curve.Layer) || curve.Layer.Contains("CMTB");
+                return (curve.GetLength()>0 && LayerFilter.Contains(curve.Layer)) || (curve.GetLength() > 100.0 && curve.Layer.Contains("CMTB"));
             }
             else if (entity is DBText text)
             {
@@ -68,7 +75,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override void DoXClip(List<ThEntityData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

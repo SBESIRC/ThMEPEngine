@@ -53,6 +53,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     case StatisticType.BlockName:
                         {
                             BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                            if(o.HasAlias)
+                            {
+                                BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                            }
                             break;
                         }
                     case StatisticType.Attributes:

@@ -660,6 +660,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
             {
                 UniqueName = "消火栓按钮",
                 BlockName = "E-BFAS610",
+                HasAlias = true,
+                AliasList = new List<string>() { "室内消火栓平面" },
                 BlockNameRemark = "消火栓按钮",
                 Index = 17,
                 CanHidden = true,

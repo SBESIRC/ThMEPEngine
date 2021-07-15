@@ -202,7 +202,7 @@ namespace ThCADExtension
         // 消防喷淋块
         public static string AutoFireAlarmSystemDwgPath()
         {
-            return Path.Combine(SupportPath(), "火灾自动报警系统图.dwg");
+            return Path.Combine(SupportPath(), "火灾自动报警系统图例.dwg");
         }
 
 

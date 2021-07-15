@@ -115,6 +115,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 膨胀系数
         /// </summary>
         public int CoefficientOfExpansion { get; set; } = 1;
+
+        /// <summary>
+        /// 是否有别名
+        /// </summary>
+        public bool HasAlias { get; set; } = false;
+
+        /// <summary>
+        /// 块别名
+        /// </summary>
+        public List<string> AliasList { get; set; }
     }
 
     /// <summary>
