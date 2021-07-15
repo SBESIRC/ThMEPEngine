@@ -15,11 +15,13 @@ namespace ThMEPEngineCore.Engine
 
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj, Matrix3d matrix)
         {
+            Impl.LayerFilter = LayerFilter;
             Impl.DoExtract(elements, dbObj, matrix);
         }
 
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj)
         {
+            Impl.LayerFilter = LayerFilter;
             Impl.DoExtract(elements, dbObj);
         }
 

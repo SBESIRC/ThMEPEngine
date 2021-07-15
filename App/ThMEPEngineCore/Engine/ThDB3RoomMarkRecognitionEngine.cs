@@ -35,7 +35,7 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine();
+            var engine = new ThDB3RoomMarkExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
