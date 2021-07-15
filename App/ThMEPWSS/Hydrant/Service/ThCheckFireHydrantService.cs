@@ -71,36 +71,36 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.ArchitectureWallLayer,
                     },
                     new ThShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.ShearWallLayer,
                     },
                     new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer = AiLayerManager.DoorOpeningLayer,
                     },
                     new ThExternalSpaceExtractor()
                     {
                         UseDb3Engine=false,
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.OuterBoundaryLayer,
                     }, 
                     new ThFireHydrantExtractor()
                     {
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                     },
                     new ThRoomExtractor()
                     {
                         UseDb3Engine=true,
-                        FilterMode = FilterMode.Window,
+                        FilterMode = FilterMode.Cross,
                     },
                 };
             if(FireHydrantVM.Parameter.IsThinkIsolatedColumn)
@@ -109,11 +109,15 @@ namespace ThMEPWSS.Hydrant.Service
                 {
                     UseDb3Engine = true,
                     IsolateSwitch = true,
-                    FilterMode = FilterMode.Window,
+                    FilterMode = FilterMode.Cross,
                     ElementLayer = AiLayerManager.ColumnLayer,
                 });
             }
             extractors.ForEach(o => o.Extract(db, pts));
+            //调整不在房间内的消火栓的点位
+            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
+            hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
             return extractors;
         }
 
