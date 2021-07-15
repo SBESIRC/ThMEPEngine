@@ -135,7 +135,7 @@ namespace ThMEPElectrical.Command
                                 {
                                     case ConvertMode.STRONGCURRENT:
                                         {
-                                            if (string.IsNullOrEmpty(visibility))
+                                            if (string.IsNullOrEmpty(visibility) && string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
                                             {
                                                 // 当配置表中可见性为空时，则按图块名转换
                                                 transformedBlock = manager.TransformRule(srcName);

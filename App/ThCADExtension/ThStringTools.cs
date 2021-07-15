@@ -247,6 +247,7 @@ namespace ThCADExtension
             str = str.Replace("(", "（");
             str = str.Replace(")", "）");
             str = str.Replace(",", "，");
+            str = str.Replace(" ", "");
             return str;
         }
     }
