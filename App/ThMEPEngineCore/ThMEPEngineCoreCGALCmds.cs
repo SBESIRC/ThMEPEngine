@@ -29,7 +29,6 @@ namespace ThMEPEngineCore
         public void THExtractAreaCenterLineDemoTest()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
             {
                 var per = Active.Editor.GetEntity("\n选择一个框线");
                 var pts = new Point3dCollection();
@@ -43,20 +42,21 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
-
-                var extractors = new List<ThExtractorBase>()
+                var roomExtractor = new ThRoomExtractor { ColorIndex = 1 };
+                roomExtractor.Extract(acadDatabase.Database, pts);
+                var geos  = roomExtractor.BuildGeometries();
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                string fileName = fileInfo.Name;
+                int count = 1;
+                foreach (var geo in geos)
                 {
-                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,NameLayer="AD-NAME-ROOM",ColorIndex=1},
-                    new ThWallExtractor{ColorIndex=2},
-                    new ThCenterLineExtractor{ColorIndex=3},
-                };
-
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.OutputGeo(Active.Document.Name);
-                extractEngine.Print(acadDatabase.Database);
+                    //
+                    string newFileName = "";
+                    newFileName = fileName + count.ToString("000");
+                    count++;
+                    ThGeoOutput.Output(new List<Model.ThGeometry> { geo }, path, newFileName);
+                }
             }
         }
 
