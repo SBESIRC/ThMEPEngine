@@ -3,6 +3,7 @@ using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -16,7 +17,6 @@ namespace ThMEPEngineCore.CAD
                 //  图层的可见性
                 //  动态块的可见性
                 //  XClip的影响
-                //  遮罩（WipeOut)的影响
 
                 // 考虑动态性
                 //  动态块：当前可见性下的所有图元
@@ -26,16 +26,28 @@ namespace ThMEPEngineCore.CAD
                 blkref.ExplodeWithVisible(objs);
 
                 // 考虑图层可见性
-                return objs.Cast<Entity>().Where(o =>
+                var results = objs.Cast<Entity>().Where(o =>
                 {
                     var layer = acadDatabase.Element<LayerTableRecord>(o.LayerId);
                     return !layer.IsFrozen && !layer.IsHidden && !layer.IsOff;
-                }).ToCollection();
+                });
 
                 // 考虑XClip的影响
-
-                // 是否考虑遮罩？
+                var xclip = blkref.XClipInfo();
+                if (xclip.IsValid)
+                {
+                    return results.Where(o => IsContain(xclip, o)).ToCollection();
+                }
+                else
+                {
+                    return results.ToCollection();
+                }
             }
+        }
+
+        private static bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            return xclip.Contains(ent.GeometricExtents.ToRectangle());
         }
     }
 }
