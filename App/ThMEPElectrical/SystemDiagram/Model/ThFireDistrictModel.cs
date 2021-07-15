@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using DotNetARX;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SystemDiagram.Model

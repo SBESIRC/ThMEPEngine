@@ -1,26 +1,9 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using Linq2Acad;
-using NFox.Cad;
-using System;
+﻿using Linq2Acad;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Engine;
-using ThMEPElectrical.SystemDiagram.Extension;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
-using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {

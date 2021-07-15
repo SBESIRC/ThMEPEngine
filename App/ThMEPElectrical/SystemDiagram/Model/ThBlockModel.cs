@@ -1,10 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
+﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -14,7 +9,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <summary>
         /// 每个块的唯一名称标识，不可重复
         /// </summary>
-        public string UniqueName  { get; set; }
+        public string UniqueName { get; set; }
 
         /// <summary>
         /// 系统图对应块名

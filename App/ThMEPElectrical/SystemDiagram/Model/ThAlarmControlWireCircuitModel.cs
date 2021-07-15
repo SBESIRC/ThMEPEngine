@@ -1,12 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using System;
 using QuickGraph;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Engine;
 
 namespace ThMEPElectrical.SystemDiagram.Model
@@ -59,7 +57,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         }
                     case StatisticType.Attributes:
                         {
-                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x =>GlobleBlockAttInfoDic.ContainsKey(x) &&(GlobleBlockAttInfoDic.First(b => b.Key.Equals(x))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
+                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => GlobleBlockAttInfoDic.ContainsKey(x) && (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
                             break;
                         }
                     case StatisticType.RelyOthers:
@@ -100,9 +98,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 o.RelyBlockUniqueNames.ForEach(name =>
                 {
                     FindCount += BlockDataReturn.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
-                    });
-                BlockDataReturn.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
                 });
+                BlockDataReturn.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
+            });
             //与读取到的[消防水箱],[灭火系统压力开关]同一分区，默认数量为2
             if (BlockDataReturn.BlockStatistics["消防水池"] > 0 && BlockDataReturn.BlockStatistics["灭火系统压力开关"] > 0)
             {
@@ -128,7 +126,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             {
                 blockCount += Data.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
             });
-            this.BlockCount= blockCount;
+            this.BlockCount = blockCount;
         }
 
         public static ThAlarmControlWireCircuitModel operator +(ThAlarmControlWireCircuitModel x, ThAlarmControlWireCircuitModel y)
@@ -136,7 +134,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             ThAlarmControlWireCircuitModel newWireCircuitModel = new ThAlarmControlWireCircuitModel()
             {
                 WireCircuitName = x.WireCircuitName,
-                TextPoint=x.TextPoint.Equals(Point3d.Origin)?y.TextPoint:x.TextPoint,
+                TextPoint = x.TextPoint.Equals(Point3d.Origin) ? y.TextPoint : x.TextPoint,
                 Data = x.Data + y.Data,
                 BlockCount = x.BlockCount + y.BlockCount,
                 Graph = x.Graph,
