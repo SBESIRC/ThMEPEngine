@@ -64,6 +64,7 @@
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
+    <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
@@ -158,7 +159,6 @@
     <Compile Include="Service\ThNTSSimilarityMeasureService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexService.cs" />
     <Compile Include="CAD\ThAuxiliaryUtils.cs" />
-    <Compile Include="CAD\ThDbObjectRecognitionEngine.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="Algorithm\ThMEPLineExtension.cs" />
