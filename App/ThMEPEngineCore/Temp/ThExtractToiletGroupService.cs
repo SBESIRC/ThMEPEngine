@@ -32,11 +32,6 @@ namespace ThMEPEngineCore.Temp
                     ToiletGroups = objs.Cast<Polyline>().ToList();
                 }
             }
-        }      
-
-        public override bool IsElementLayer(string layer)
-        {
-            return layer == ElementLayer;
-        }
+        }     
     }
 }

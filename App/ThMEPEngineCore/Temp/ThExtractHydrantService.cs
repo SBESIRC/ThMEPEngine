@@ -71,10 +71,5 @@ namespace ThMEPEngineCore.Temp
                 return polyline;
             }
         }
-
-        public override bool IsElementLayer(string layer)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

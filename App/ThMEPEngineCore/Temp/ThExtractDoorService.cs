@@ -67,10 +67,5 @@ namespace ThMEPEngineCore.Temp
             results.Add(lines[1].StartPoint.GetMidPt(lines[1].EndPoint));
             return results;
         }
-
-        public override bool IsElementLayer(string layer)
-        {
-            return layer == ElementLayer;
-        }
     }
 }

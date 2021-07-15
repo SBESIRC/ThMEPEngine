@@ -399,6 +399,157 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THFireAlarmTestDataExtract", CommandFlags.Modal)]
+        public void THFireAlarmTestDataExtract()
+        {
+
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                else
+                {
+                    return;
+                }
+                // ArchitectureWall、Shearwall、Column、Window、Room
+                // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
+                var storeyExtractor = new ThEStoreyExtractor()
+                {
+                    ElementLayer = "AI-楼层框定E",
+                    ColorIndex = 12,
+                    GroupSwitch = false,
+                    Group2Switch = false,
+                    UseDb3Engine = true,
+                    IsolateSwitch = false,
+                };
+                storeyExtractor.Extract(acadDatabase.Database,pts);
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    new ThArchitectureWallExtractor()
+                    {
+                        ElementLayer = "AI-墙",
+                        ColorIndex=1,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThShearWallExtractor()
+                    {
+                        ElementLayer = "AI-剪力墙",
+                        ColorIndex=2,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThColumnExtractor()
+                    {
+                        ElementLayer = "AI-柱",
+                        ColorIndex=3,
+                        GroupSwitch=false,
+                        Group2Switch=false,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThWindowExtractor()
+                    {
+                        ElementLayer="AI-窗",
+                        ColorIndex=4,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThRoomExtractor()   
+                    {
+                        ColorIndex=5,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaBeamExtractor()
+                    {
+                        ElementLayer = "AI-梁",
+                        ColorIndex=6,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaDoorOpeningExtractor()
+                    {
+                        ElementLayer = "AI-门",
+                        ColorIndex=7,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThRailingExtractor()
+                    {
+                        ElementLayer = "AI-栏杆",
+                        ColorIndex=8,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaFireproofshutterExtractor()
+                    {
+                        ElementLayer = "AI-防火卷帘",
+                        ColorIndex=9,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThHoleExtractor()
+                    {
+                        ElementLayer = "AI-洞",
+                        ColorIndex=10,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFiredistrictExtractor()
+                    {
+                        ElementLayer="AI-防火分区,AD-AREA-DIVD",
+                        ColorIndex=11,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },                    
+                };
+                extractEngine.Accept(extractors);
+                var fireApartExtractor = extractors.Where(o => o is ThFiredistrictExtractor).First() as ThFiredistrictExtractor;
+                fireApartExtractor.StoreyInfos = storeyExtractor.Storeys.Cast<StoreyInfo>().ToList();
+                extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.Accept(storeyExtractor);
+                extractEngine.Group(storeyExtractor.StoreyIds);
+                extractEngine.Group2(fireApartExtractor.GetFireAPartIds());
+
+                var faDoorExtractor = extractors.Where(o => o is ThFaDoorOpeningExtractor).First() as ThFaDoorOpeningExtractor;
+                faDoorExtractor.SetTags(fireApartExtractor.GetFireAPartIds());
+                var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
+                fireProofShutter.SetTags(fireApartExtractor.GetFireAPartIds());
+                //string geoContent = extractEngine.OutputGeo();                
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
     }
 }
 #endif

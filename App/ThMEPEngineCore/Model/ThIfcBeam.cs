@@ -11,6 +11,11 @@ namespace ThMEPEngineCore.Model
         public double Height { get; set; }
         public double DistanceToFloor { get; set; }
         public BeamComponentType ComponentType { get; set; }
+        public string Use { get; set; }
+        public ThIfcBeam()
+        {
+            Use = "";
+        }
     }
     public enum BeamComponentType
     {

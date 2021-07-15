@@ -39,10 +39,5 @@ namespace ThMEPEngineCore.Temp
                 OtherColumns = columns.Where(o => o.ColorIndex == OtherColorIndex).Select(o => o.Clone() as Entity).ToList();
             }
         }
-
-        public override bool IsElementLayer(string layer)
-        {
-            return ElementLayer.ToUpper() == layer;
-        }
     }
 }

@@ -12,19 +12,20 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Model.Common;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThStoreyExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry,IGroup
+    public class ThEStoreyExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry,IGroup
     {
-        public List<StoreyInfo> Storeys { get; private set; }
+        public List<EStoreyInfo> Storeys { get; private set; }
         private const string FloorNumberPropertyName = "FloorNumber";
         private const string FloorTypePropertyName = "FloorType";
         private const string BasePointPropertyName = "BasePoint";
-        public ThStoreyExtractor()
+        public ThEStoreyExtractor()
         {
             UseDb3Engine = true;
-            Storeys = new List<StoreyInfo>();
+            Storeys = new List<EStoreyInfo>();
             Category = BuiltInCategory.StoreyBorder.ToString();
             TesslateLength = 200.0;
         }
@@ -33,9 +34,9 @@ namespace ThMEPEngineCore.Temp
         {
             if (UseDb3Engine)
             {
-                var engine = new ThStoreysRecognitionEngine();
+                var engine = new ThEStoreysRecognitionEngine();
                 engine.Recognize(database, pts);
-                Storeys = engine.Elements.Cast<ThStoreys>().Select(o=>new StoreyInfo(o)).ToList();                
+                Storeys = engine.Elements.Cast<ThEStoreys>().Select(o=>new EStoreyInfo(o)).ToList();                
             }
             else
             {
@@ -54,6 +55,14 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Boundary));
+                }
+                if (Group2Switch)
+                {
+                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Boundary));
+                }
                 geometry.Properties.Add(FloorTypePropertyName, o.StoreyType);
                 geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);                
                 geometry.Properties.Add(IdPropertyName, o.Id);
@@ -89,49 +98,24 @@ namespace ThMEPEngineCore.Temp
             }
         }
     }
-    public class StoreyInfo
+    public class EStoreyInfo:StoreyInfo
     {        
-        public string Id { get; set; }
-        public Polyline Boundary { get; set; }
-        /// <summary>
-        /// 楼层编号原始值
-        /// </summary>
-        public string OriginFloorNumber { get; set; }
-        /// <summary>
-        /// 解析过的楼层编号
-        /// </summary>
-        public string StoreyNumber { get; set; }
-        /// <summary>
-        /// 楼层范围
-        /// </summary>
-        public string StoreyRange { get; set; }
-        /// <summary>
-        /// 楼层类型
-        /// </summary>
-        public string StoreyType { get; set; }
+        private ThEStoreys Storey { get; set; }
 
-        public string BasePoint { get; set; }
-
-        private ThStoreys Storey { get; set; }
-
-        public StoreyInfo(ThStoreys storey)
+        public EStoreyInfo(ThEStoreys storey)
         {
             Storey = storey;
             Id = Guid.NewGuid().ToString();
             Parse();
         }
-        public StoreyInfo()
-        {
-            Id = Guid.NewGuid().ToString();
-        }
         private void Parse()
         {
             StoreyRange = GetFloorRange();
             OriginFloorNumber = GetFloorNumber();
-            StoreyType = Storey.StoreyTypeString;
-            StoreyNumber = ParseStoreyNumber();
+            StoreyNumber = string.Join(",",Storey.Storeys);
             Boundary = GetBoundary();
             BasePoint = GetBasePoint();
+            StoreyType = Storey.StoreyTypeString;
         }
         private string GetFloorNumber()
         {
