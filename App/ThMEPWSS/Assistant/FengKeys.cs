@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.Assistant
 {
-    static class FengKeys
+    public static class FengKeys
     {
         public const string ThWRainSystemDiagramData = "qrjq0x";
         public const string ThRainSystemServiceContextData = "qrjq0y";

@@ -144,7 +144,7 @@ namespace ThMEPWSS.Pipe.Model
                     {
                         Vector3d v = default;
                         if (s.Label == "RF+2") v = new Vector3d(0, -400, 0);
-                        DrawPipeLabels(texts, ctxs[runs.FindIndex(r => r.Storey == s)].BasePoint+v);
+                        DrawPipeLabels(texts, ctxs[runs.FindIndex(r => r.Storey == s)].BasePoint + v);
                     }
                 }
 
@@ -209,7 +209,7 @@ namespace ThMEPWSS.Pipe.Model
                 if (pts.Count > 0)
                 {
                     var yd = new YesDraw();
-                    yd.GoY(-500-800);
+                    yd.GoY(-500 - 800);
                     yd.OffsetXY(-200, -200);
                     yd.OffsetX(-1600);
                     var dx = yd.GetCurX();
@@ -474,7 +474,7 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-
+     
         private static void DrawPipeLinesLazy(List<Point3d> pts)
         {
             var lines = DU.DrawLinesLazy(YesDraw.FixLines(pts));

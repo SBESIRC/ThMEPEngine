@@ -949,6 +949,15 @@ namespace ThMEPWSS.Uitl
 
     public static class LinqAlgorithm
     {
+
+        public static IEnumerable<T> SelectNotNull<T>(this IEnumerable<T> source)where T : class
+        {
+            return source.Where(x => x != null);
+        }
+        public static T GetLastOrDefault<T>(this IList<T> source, int i)
+        {
+            return source.GetAt(source.Count - i);
+        }
         public static T GetAt<T>(this IList<T> source, int i)
         {
             if (i >= 0 && i < source.Count) return source[i];
@@ -990,11 +999,6 @@ namespace ThMEPWSS.Uitl
                     ok = true;
                 }
             });
-        }
-        public static T GetLastOrDefault<T>(this IList<T> source, int n)
-        {
-            if (source.Count < n) return default;
-            return source[source.Count - n];
         }
         public static T GetLast<T>(this IList<T> source, int n)
         {

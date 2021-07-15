@@ -294,7 +294,7 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
-    <Compile Include="Pipe\Service\ThDrainagePipeSystemService.cs" />
+    <Compile Include="Pipe\Service\ThRainPipeDiagramService.cs" />
     <Compile Include="Pipe\Service\ThDrainageService.cs" />
     <Compile Include="Pipe\Service\ThDrainageSystemDiagram.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />

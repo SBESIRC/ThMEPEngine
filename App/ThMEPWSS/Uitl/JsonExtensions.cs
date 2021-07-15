@@ -198,6 +198,14 @@ namespace ThMEPWSS.CADExtensionsNs
 {
     public static class CADExtensions
     {
+        public static IEnumerable<GLineSegment> ToGLineSegments(this LineString lineString)
+        {
+            for (int i = 1; i < lineString.NumPoints; i++)
+            {
+                var seg = new GLineSegment(lineString.Coordinates[i - 1].ToPoint2d(), lineString.Coordinates[i].ToPoint2d());
+                if (seg.IsValid) yield return seg;
+            }
+        }
         public static Point2d GetCenter(this Geometry geo) => geo.ToGRect().Center;
         public static GRect ToGRect(this Geometry geo)
         {
@@ -256,7 +264,7 @@ namespace ThMEPWSS.CADExtensionsNs
             };
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points);
         }
-        public static NetTopologySuite.Geometries.Prepared.IPreparedGeometry CreateIPreparedGeometry(this Geometry geo)
+        public static NetTopologySuite.Geometries.Prepared.IPreparedGeometry ToIPreparedGeometry(this Geometry geo)
         {
             return ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
         }
