@@ -1,4 +1,6 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -24,11 +26,15 @@ namespace ThMEPEngineCore.CAD
                 blkref.ExplodeWithVisible(objs);
 
                 // 考虑图层可见性
+                return objs.Cast<Entity>().Where(o =>
+                {
+                    var layer = acadDatabase.Element<LayerTableRecord>(o.LayerId);
+                    return !layer.IsFrozen && !layer.IsHidden && !layer.IsOff;
+                }).ToCollection();
 
                 // 考虑XClip的影响
 
                 // 是否考虑遮罩？
-                return objs;
             }
         }
     }
