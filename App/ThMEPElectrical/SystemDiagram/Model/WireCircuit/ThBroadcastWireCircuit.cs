@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 if (CurrentIndex == this.SpecialBlockIndex[0])
                 {
                     //该模块有挂块
-                    Result.AddRange(DrawSpecialBlock5(CurrentIndex));
+                    Result.AddRange(DrawSpecialBlock6(CurrentIndex));
                 }
                 else
                 {
@@ -74,7 +74,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         /// </summary>
         /// <param name="currentIndex"></param>
         /// <returns></returns>
-        private List<Entity> DrawSpecialBlock5(int currentIndex)
+        private List<Entity> DrawSpecialBlock6(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             double RightmostPosition = 0;
@@ -96,7 +96,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             this.StartIndexBlock = 1;
             this.Offset = 1150;
             this.EndIndexBlock = 8;
-            SpecialBlockIndex = new int[] { 5 };
+            SpecialBlockIndex = new int[] { 6 };
         }
     }
 }

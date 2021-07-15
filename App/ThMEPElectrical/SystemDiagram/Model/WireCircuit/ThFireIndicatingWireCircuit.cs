@@ -64,7 +64,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             this.CircuitLayerLinetype = "CONTINUOUS";
             this.StartIndexBlock = 2;
             this.Offset = 450;
-            this.EndIndexBlock = 6;
+            this.EndIndexBlock = 5;
         }
     }
 }

@@ -94,7 +94,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         /// </summary>
         /// <param name="currentIndex"></param>
         /// <returns></returns>
-        private List<Entity> DrawSpecialBlock5(int currentIndex)
+        private List<Entity> DrawSpecialBlock6(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             Polyline Midpolyline1 = new Polyline(3);
@@ -126,7 +126,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return result;
         }
 
-        private List<Entity> DrawSpecialBlock6(int currentIndex)
+        private List<Entity> DrawSpecialBlock5(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             if (this.fireDistrict.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] > 0 || this.fireDistrict.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)

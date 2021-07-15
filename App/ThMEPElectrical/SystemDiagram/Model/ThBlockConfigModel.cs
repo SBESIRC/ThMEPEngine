@@ -35,11 +35,41 @@ namespace ThMEPElectrical.SystemDiagram.Model
             #region #5
             BlockConfig.Add(new ThBlockModel()
             {
+                UniqueName = "区域显示器/火灾显示盘",
+                BlockName = "E-BFAS030",
+                BlockAliasName = "E-BFAS030",
+                BlockNameRemark = "区域显示器/火灾显示盘",
+                Index = 5,
+                CanHidden = true,
+                Position = new Point3d(1500, 450, 0),
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(1850, 450, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "D" } }
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "楼层或回路重复显示屏",
+                BlockName = "E-BFAS031",
+                BlockAliasName = "E-BFAS031",
+                BlockNameRemark = "楼层或回路重复显示屏",
+                Index = 5,
+                CanHidden = true,
+                Position = new Point3d(1500, 450, 0),
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(1850, 450, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "FI" } }
+            });
+            #endregion
+            #region #6
+            BlockConfig.Add(new ThBlockModel()
+            {
                 UniqueName = "短路隔离器",
                 BlockName = "E-BFAS540",
                 BlockAliasName = "E-BFAS540",
                 BlockNameRemark = "短路隔离器",
-                Index = 5,
+                Index = 6,
                 Position = new Point3d(700, 1500, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1050, 1150, 0),
@@ -55,7 +85,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockName = "E-BFAS520",
                 BlockAliasName = "E-BFAS520_分区声光报警器",
                 BlockNameRemark = "分区声光报警器",
-                Index = 5,
+                Index = 6,
                 Position = new Point3d(1500, 800, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1850, 1150, 0),
@@ -70,7 +100,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockName = "E-BFAS520",
                 BlockAliasName = "E-BFAS520_消防广播火栓强制启动模块",
                 BlockNameRemark = "消防广播火栓强制启动模块",
-                Index = 5,
+                Index = 6,
                 Position = new Point3d(2300, 1150, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(2650, 1150, 0),
@@ -79,36 +109,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 StatisticMode = StatisticType.RelyOthers,
                 RelyBlockUniqueNames = new List<string>() { "火灾应急广播扬声器-2", "火灾应急广播扬声器-3", "火灾应急广播扬声器-4" },
                 DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount
-            });
-            #endregion
-            #region #6
-            BlockConfig.Add(new ThBlockModel()
-            {
-                UniqueName = "区域显示器/火灾显示盘",
-                BlockName = "E-BFAS030",
-                BlockAliasName = "E-BFAS030",
-                BlockNameRemark = "区域显示器/火灾显示盘",
-                Index = 6,
-                CanHidden = true,
-                Position = new Point3d(1500, 450, 0),
-                ShowQuantity = true,
-                QuantityPosition = new Point3d(1850, 450, 0),
-                ShowAtt = true,
-                attNameValues = new Dictionary<string, string>() { { "F", "D" } }
-            });
-            BlockConfig.Add(new ThBlockModel()
-            {
-                UniqueName = "楼层或回路重复显示屏",
-                BlockName = "E-BFAS031",
-                BlockAliasName = "E-BFAS031",
-                BlockNameRemark = "楼层或回路重复显示屏",
-                Index = 6,
-                CanHidden = true,
-                Position = new Point3d(1500, 450, 0),
-                ShowQuantity = true,
-                QuantityPosition = new Point3d(1850, 450, 0),
-                ShowAtt = true,
-                attNameValues = new Dictionary<string, string>() { { "F", "FI" } }
             });
             #endregion
             #region #7
@@ -595,7 +595,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ", "ESF", "SPF", "SSF" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ", "ESF", "SPF", "SSF", "APE", "AC" } } },
                 HasMultipleBlocks = true,
                 CoefficientOfExpansion = 5,
                 AssociatedBlocks = new List<ThBlockModel>()

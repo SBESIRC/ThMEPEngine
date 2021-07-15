@@ -36,7 +36,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 if (CurrentIndex == this.SpecialBlockIndex[0])
                 {
-                    Result.AddRange(DrawSpecialBlock5(CurrentIndex));
+                    Result.AddRange(DrawSpecialBlock6(CurrentIndex));
                 }
                 else if (CurrentIndex == this.SpecialBlockIndex[1])
                 {
@@ -118,7 +118,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         }
 
         #region 画特殊块方法
-        private List<Entity> DrawSpecialBlock5(int currentIndex)
+        private List<Entity> DrawSpecialBlock6(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             double RightmostPosition = 0;
@@ -695,7 +695,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             this.StartIndexBlock = 4;
             this.Offset = 1500;
             this.EndIndexBlock = 21;
-            SpecialBlockIndex = new int[] { 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+            SpecialBlockIndex = new int[] { 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
         }
     }
 }

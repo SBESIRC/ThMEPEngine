@@ -85,7 +85,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 //重设高度
                 this.Offset = 800;
-                CurrentIndex = this.StartIndexBlock + 3;
+                CurrentIndex = this.StartIndexBlock + 4;
                 //画起点框
                 #region 起点框
                 Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1650, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
