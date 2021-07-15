@@ -10,7 +10,7 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        [CommandMethod("TIANHUACAD", "THDXXHSXTT_Test", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THDXXHSXTT", CommandFlags.Modal)]
         public void ThTestFireHydrant()
         {
             using (var cmd = new ThFireHydrantCmd())

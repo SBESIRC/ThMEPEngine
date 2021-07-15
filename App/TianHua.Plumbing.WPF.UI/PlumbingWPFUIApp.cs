@@ -136,7 +136,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// 地下消火栓系统图
         /// </summary>
         [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]
-        public void ThTestFireHydrant()
+        public void THDXXHSXTT()
         {
             var uiDrainage = new uiFireHydrantSystem();
             Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowModelessWindow(uiDrainage);
