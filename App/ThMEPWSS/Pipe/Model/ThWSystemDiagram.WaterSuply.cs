@@ -961,17 +961,11 @@ namespace ThMEPWSS.Pipe.Model
             using var acadDatabase = AcadDatabase.Active();
             //统计厨房数
             //创建厨房识别引擎
-            var engineKitchen = new ThRoomMarkRecognitionEngine();
-            engineKitchen.RecognizeMS(acadDatabase.Database, selectArea);//厨房识别
+            var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
+            engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
             var ele = engineKitchen.Elements;
             var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
-            if(rooms.Count() == 0)
-            {
-                engineKitchen = new ThRoomMarkRecognitionEngine();
-                engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
-                ele = engineKitchen.Elements;
-                rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
-            }
+
             var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
             var households = new int[floorAreaList.Count, floorAreaList[0].Count];
             for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层

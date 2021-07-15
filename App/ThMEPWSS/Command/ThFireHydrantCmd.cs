@@ -28,9 +28,13 @@ namespace ThMEPWSS.Command
             var opt = new PromptPointOptions("请指定环管标记起点");
             var loopStartPt = Active.Editor.GetPoint(opt).Value;
 
-            var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
+            var tuplePoint = Common.Utils.SelectPoints();//范围框定
+            var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
 
-            GetInput.GetFireHydrantSysInput(ref fireHydrantSysIn);//提取输入参数
+            var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
+            var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
+
+            GetInput.GetFireHydrantSysInput(ref fireHydrantSysIn, selectArea);//提取输入参数
             
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
             var extraNodes = new List<Point3dEx>();//主环路连通阀点集
@@ -100,7 +104,7 @@ namespace ThMEPWSS.Command
             PtDic.CreateBranchDic(ref branchDic, mainPathList, fireHydrantSysIn, visited, extraNodes);
             PtDic.CreateBranchDic(ref branchDic, subPathList, fireHydrantSysIn, visited, extraNodes);
 
-            var fireHydrantSysOut = new FireHydrantSystemOut();
+            
             GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList, fireHydrantSysIn);//主环路获取
             GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, fireHydrantSysIn);//支路获取

@@ -17,13 +17,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class GetInput
     {
-        public static void GetFireHydrantSysInput(ref FireHydrantSystemIn fireHydrantSysIn)
+        public static void GetFireHydrantSysInput(ref FireHydrantSystemIn fireHydrantSysIn, Point3dCollection selectArea)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var tuplePoint = Common.Utils.SelectPoints();//范围框定
-                var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
                 
+
                 var lineList = new List<Line>();//管段列表
                 var pointList = new List<Point3dEx>();//点集
                 var ptVisit = new Dictionary<Point3dEx, bool>();//访问标志
