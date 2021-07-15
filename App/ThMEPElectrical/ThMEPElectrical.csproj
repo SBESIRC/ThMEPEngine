@@ -214,7 +214,6 @@
     <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockNumStatistics.cs" />
-    <Compile Include="SystemDiagram\Model\ThControlCircuitAlarmSystemModel.cs" />
     <Compile Include="SystemDiagram\Model\ThDrawModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFireDistrictModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
@@ -236,7 +235,6 @@
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
     <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
-    <Compile Include="SystemDiagram\Service\ThSystemDiagramUtils.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
