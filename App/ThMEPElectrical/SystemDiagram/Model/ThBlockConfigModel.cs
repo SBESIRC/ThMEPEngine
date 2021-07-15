@@ -61,8 +61,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 1150, 0),
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
-                StatisticMode=StatisticType.NoStatisticsRequired,
-                DefaultQuantity=1
+                StatisticMode = StatisticType.NoStatisticsRequired,
+                DefaultQuantity = 1
             });
             BlockConfig.Add(new ThBlockModel()
             {
@@ -77,7 +77,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.RelyOthers,
-                RelyBlockUniqueNames = new List<string>() { "火灾应急广播扬声器-2","火灾应急广播扬声器-3","火灾应急广播扬声器-4" },
+                RelyBlockUniqueNames = new List<string>() { "火灾应急广播扬声器-2", "火灾应急广播扬声器-3", "火灾应急广播扬声器-4" },
                 DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount
             });
             #endregion
@@ -91,8 +91,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 Index = 6,
                 CanHidden = true,
                 Position = new Point3d(1500, 450, 0),
-                ShowQuantity=true,
-                QuantityPosition=new Point3d(1850,450,0),
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(1850, 450, 0),
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "D" } }
             });
@@ -121,8 +121,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 Index = 7,
                 CanHidden = false,
                 Position = new Point3d(1500, 1500, 0),
-                ShowQuantity=true,
-                QuantityPosition=new Point3d(1850,1150,0)
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(1850, 1150, 0)
             });
             BlockConfig.Add(new ThBlockModel()
             {
@@ -434,7 +434,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY","ST" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY", "ST" } } },
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0)
@@ -454,8 +454,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
                 StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "MJ" } } },
-                CanHidden =true,
-                ShowText=true,
+                CanHidden = true,
+                ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0)
             });
             #endregion
@@ -476,7 +476,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(750, 450, 0),
-                CoefficientOfExpansion=2
+                CoefficientOfExpansion = 2
             });
             BlockConfig.Add(new ThBlockModel()
             {
@@ -594,8 +594,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 850, 0),
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
-                StatisticMode=StatisticType.Attributes,
-                StatisticAttNameValues=new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ","ESF","SPF","SSF" } } },
+                StatisticMode = StatisticType.Attributes,
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ", "ESF", "SPF", "SSF" } } },
                 HasMultipleBlocks = true,
                 CoefficientOfExpansion = 5,
                 AssociatedBlocks = new List<ThBlockModel>()
@@ -646,7 +646,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     {
                         UniqueName = "旁通阀_1",
                         BlockName = "E-BFAS510",
-                        BlockNameRemark = "旁通阀_1", 
+                        BlockNameRemark = "旁通阀_1",
                         Index = 16,
                         Position = new Point3d(2250, 1500, 0),
                         ShowAtt=true,
@@ -662,7 +662,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockName = "E-BFAS610",
                 BlockNameRemark = "消火栓按钮",
                 Index = 17,
-                CanHidden=true,
+                CanHidden = true,
                 Position = new Point3d(750, 1500, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(1100, 1150, 0),
@@ -746,7 +746,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 850, 0),
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
-                StatisticMode=StatisticType.NeedSpecialTreatment,
+                StatisticMode = StatisticType.NeedSpecialTreatment,
                 HasMultipleBlocks = true,
                 AssociatedBlocks = new List<ThBlockModel>()
                 {
