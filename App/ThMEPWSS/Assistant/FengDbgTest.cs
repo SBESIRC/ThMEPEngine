@@ -923,7 +923,8 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             {
                 var layer = br.Layer;
                 if (layer == null) return false;
-                return IsVisibleLayer(adb.Layers.Element(layer));
+                var _layer = adb.Layers.ElementOrDefault(layer);
+                return _layer == null ? false : IsVisibleLayer(_layer);
             }
             if (blockReference.BlockTableRecord.IsValid)
             {
