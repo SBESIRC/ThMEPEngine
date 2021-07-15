@@ -52,8 +52,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 foreach (var oriD in originDatas)
                 {
-                    transData.Add(oriD);
+                    
                 }
+            }
+            else
+            {
+                transData.AddRange(originDatas);
             }
 
             //recogition Engine

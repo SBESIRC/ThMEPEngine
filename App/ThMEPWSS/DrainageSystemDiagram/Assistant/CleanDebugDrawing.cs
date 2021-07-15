@@ -56,11 +56,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 var itemDict = new Dictionary<Entity, Entity>();
                 if (transFrame != null && transformer != null)
                 {
-                    foreach (Curve item in items)
+                    foreach (Entity item in items)
                     {
                         var itemTrans = item.Clone() as Entity;
                         transformer.Transform(itemTrans);
-                        
+
                         itemDict.Add(item, itemTrans);
                     }
                     ////transfer 以后经常不共面
@@ -89,8 +89,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ClearFinalDrawing(Polyline transFrame = null, ThMEPOriginTransformer transformer = null)
         {
-            var sLayerName = ThDrainageSDCommon.LDrainageGivenSD;
-            ClearDrawing(new List<string>() { sLayerName }, transFrame, transformer);
+            var sLayerName = new List<string>();
+            sLayerName.Add(ThDrainageSDCommon.Layer_CoolPipe);
+            sLayerName.Add(ThDrainageSDCommon.Layer_Stack);
+            sLayerName.Add(ThDrainageSDCommon.Layer_AngleValves);
+            sLayerName.Add(ThDrainageSDCommon.Layer_ShutValve);
+            sLayerName.Add(ThDrainageSDCommon.Layer_Dim);
+
+            ClearDrawing(sLayerName, transFrame, transformer);
         }
     }
 }

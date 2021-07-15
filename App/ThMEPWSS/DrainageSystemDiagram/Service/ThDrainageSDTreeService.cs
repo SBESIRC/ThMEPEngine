@@ -26,52 +26,33 @@ namespace ThMEPWSS.DrainageSystemDiagram
     {
         public static void buildPipeTree(ThDrainageSDDataExchange dataset)
         {
-            if (dataset.Pipes != null && dataset.Pipes .Count > 0)
+            if (dataset.Pipes != null && dataset.Pipes.Count > 0)
             {
-                var nodes = buildPipeTree(dataset.Pipes, dataset.SupplyCoolStart);
+                var nodes = buildPipeTree(dataset.Pipes, dataset.SupplyStart.Pt);
                 dataset.PipeTreeRoot = nodes;
             }
-        
-
         }
 
         private static ThDrainageSDTreeNode buildPipeTree(List<Line> allLines, Point3d supplyStart)
         {
             var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
-            
-            var root = buildTree(lines, supplyStart);
-   
-            travelTree(root, "l063tree");
-         
-            return root;
-        }
-
-        public static ThDrainageSDTreeNode buildPipeTreeTest(List<Line> allLines, Point3d supplyStart)
-        {
-            var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
-
-            var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allLines);
-
 
             var root = buildTree(lines, supplyStart);
-            var root2 = buildTree(lines2, supplyStart);
 
-            travelTree(root, "l063tree");
-            travelTree(root2, "l031tree");
+            printTree(root, "l063tree");
 
             return root;
         }
 
-        public static void travelTree(ThDrainageSDTreeNode root, string layer)
+        public static void printTree(ThDrainageSDTreeNode root, string layer)
         {
 
             int cs = root.getLeafCount();
             int dp = root.getDepth();
             DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("{0}_{1}", dp, cs), layer, (short)(dp % 7), 25, 100);
 
-            root.Child.ForEach(x => travelTree(x, layer));
+            root.Child.ForEach(x => printTree(x, layer));
         }
-
 
         private static ThDrainageSDTreeNode buildTree(List<Line> lines, Point3d startPt)
         {
@@ -120,6 +101,27 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 }
             }
+        }
+
+
+
+
+
+
+        public static ThDrainageSDTreeNode buildPipeTreeTest(List<Line> allLines, Point3d supplyStart)
+        {
+            var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
+
+            //  var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allLines);
+
+
+            var root = buildTree(lines, supplyStart);
+            // var root2 = buildTree(lines2, supplyStart);
+
+            printTree(root, "l063tree");
+            //  printTree(root2, "l031tree");
+
+            return root;
         }
     }
 }

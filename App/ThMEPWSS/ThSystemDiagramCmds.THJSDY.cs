@@ -15,152 +15,71 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        [CommandMethod("TIANHUACAD", "THWDYTGS", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THJSDY", CommandFlags.Modal)]
         public void ThRouteMainPipe()
         {
 #if (ACAD2016 || ACAD2018)
-            //取框线
-            Polyline frame = selectFrame();
+            //取起点
+            var startPt = SelectPoint();
+            if (startPt == Point3d.Origin)
+            {
+                return;
+            }
+            var areaId = Guid.NewGuid().ToString();
+            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
 
+            //取框线
+            var regionPts = SelectPoints();
+            if (regionPts.Item1 == regionPts.Item2)
+            {
+                return;
+            }
+
+            var region = new ThDrainageSDRegion(regionPts, areaId);
+            var frame = region.Frame;
             if (frame == null || frame.NumberOfVertices == 0)
             {
                 return;
             }
 
-            Polyline transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-            if (frame != null && frame.NumberOfVertices > 0)
-            {
-                transFrame = transPoly(frame, ref transformer);
-            }
-
-            //var pts = transFrame.VerticesEx(100.0);
-            var pts = frame.VerticesEx(100.0);
-
-            //取厕所
-            List<ThIfcSanitaryTerminalToilate> terminalList = null;
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var drainageExtractor = new ThDrainageSDExtractor();
-                drainageExtractor.Transfer = transformer;
-                drainageExtractor.Extract(acadDb.Database, pts);
-
-                terminalList = drainageExtractor.SanTmnList;
-            }
-
-            //取房间,建筑，给水点
-            List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
-            string areaId = "";
-            using (var acadDb = AcadDatabase.Active())
-            {
-                //var roomExtractor = new ThDrainageToilateRoomExtractor() { ColorIndex = 6 };
-                //roomExtractor.Extract(acadDb.Database, pts);
-
-                archiExtractor = new List<ThExtractorBase>()
-                {
-                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
-                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
-                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
-                    new ThDrainageSDRegionExtractor(){ColorIndex = 5,IsolateSwitch =true},
-                    new ThDrainageToilateRoomExtractor() { ColorIndex = 6,GroupSwitch=true },
-                    new ThDrainageSDColdWaterSupplyStartExtractor(){ColorIndex=4,GroupSwitch=true},
-                };
-
-                //archiExtractor.ForEach(o => o.SetRooms(roomExtractor.Rooms));
-                archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
-
-                areaId = ThDrainageSDToGJsonService.getAreaId(archiExtractor);
-                archiExtractor.ForEach(o =>
-                {
-                    if (o is IAreaId needAreaID)
-                    {
-                        needAreaID.setAreaId(areaId);
-                    }
-                });
-                //archiExtractor.Add(roomExtractor);
-
-            }
-
             var dataSet = new ThDrainageSDDataExchange();
             dataSet.AreaID = areaId;
+            dataSet.SupplyStart = supplyPt;
+            dataSet.Region = region;
 
-            var allLink = ThDrainageSDConnectCoolSupplyEngine.ThConnectCoolSupplyEngine(archiExtractor, terminalList, dataSet);
-            DrawUtils.ShowGeometry(allLink, "l07finalLink", 142, 30);
-
-            //var allStack = ThDrainageSDStackEngine.getStackPoint(terminalList);
-            //allStack.ForEach(x => DrawUtils.ShowGeometry(x, "l10stack", 30, 25, 25));
-
-            //var allAngleValves = ThDrainageSDAngleValvesEngine.getAngleValves(terminalList);
-            //allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l20Valves", 11, 25, 100));
-
-            ////debug need to add in the final version for clean overlap lines
-            //ThDrainageSDBuildTreeEngine.buildPipeTree(allLink);
-
-            ThDrainageSDTreeService.buildPipeTree(dataSet);
-
-            //var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
-            //allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l31ShutValves", 50, 35, 200));
-
-            var allDims = ThDrainageSDDimEngine.getDim(dataSet);
-            //allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
-
-
-
-            //ThDrainageSDPositionDimEngine.positionDimTry(dataSet.PipeTreeRoot);
-
-#endif        
-        }
-
-
-        [CommandMethod("TIANHUACAD", "THPIPETEST", CommandFlags.Modal)]
-        public void ThPipeTreeTest()
-        {
-            //取框线
-            Polyline frame = selectFrame();
-
-            Polyline transFrame = new Polyline();
+            ////转换坐标系
+            //Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
-
             //if (frame != null && frame.NumberOfVertices > 0)
             //{
             //    transFrame = transPoly(frame, ref transformer);
             //}
-
             //var pts = transFrame.VerticesEx(100.0);
-            var pts = frame.VerticesEx(100.0);
 
             //取厕所
-            List<ThIfcSanitaryTerminalToilate> terminalList = null;
+            var pts = frame.VerticesEx(100.0);
+            List<ThIfcSanitaryTerminalToilate> allToilateList = null;
             using (var acadDb = AcadDatabase.Active())
             {
                 var drainageExtractor = new ThDrainageSDExtractor();
                 drainageExtractor.Transfer = transformer;
                 drainageExtractor.Extract(acadDb.Database, pts);
-
-                terminalList = drainageExtractor.SanTmnList;
+                allToilateList = drainageExtractor.SanTmnList;
             }
 
-            //取房间,建筑，给水点
+            //取房间,建筑
             List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
             using (var acadDb = AcadDatabase.Active())
             {
-                //var roomExtractor = new ThDrainageToilateRoomExtractor() { ColorIndex = 6 };
-                //roomExtractor.Extract(acadDb.Database, pts);
-
                 archiExtractor = new List<ThExtractorBase>()
                 {
                     new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
                     new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
                     new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
-                    new ThDrainageSDRegionExtractor(){ColorIndex = 5,IsolateSwitch =true},
                     new ThDrainageToilateRoomExtractor() { ColorIndex = 6,GroupSwitch=true },
-                    new ThDrainageSDColdWaterSupplyStartExtractor(){ColorIndex=4,GroupSwitch=true},
                 };
 
-                //archiExtractor.ForEach(o => o.SetRooms(roomExtractor.Rooms));
                 archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
-
-                var areaId = ThDrainageSDToGJsonService.getAreaId(archiExtractor);
                 archiExtractor.ForEach(o =>
                 {
                     if (o is IAreaId needAreaID)
@@ -168,8 +87,108 @@ namespace ThMEPWSS
                         needAreaID.setAreaId(areaId);
                     }
                 });
-                //archiExtractor.Add(roomExtractor);
+            }
 
+            var allLink = ThDrainageSDConnectCoolSupplyEngine.ThConnectCoolSupplyEngine(archiExtractor, allToilateList, dataSet);
+            DrawUtils.ShowGeometry(allLink, "l07finalLink", 142, 30);
+
+            var allStack = ThDrainageSDStackEngine.getStackPoint(dataSet.TerminalList);
+            allStack.ForEach(x => DrawUtils.ShowGeometry(x, "l10stack", 30, 25, 25));
+
+            var allAngleValves = ThDrainageSDAngleValvesEngine.getAngleValves(dataSet.TerminalList);
+            allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l20Valves", 11, 25, 100));
+
+            ThDrainageSDTreeService.buildPipeTree(dataSet);
+
+            var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
+            allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l31ShutValves", 50, 35, 200));
+
+            var allDims = ThDrainageSDDimEngine.getDim(dataSet);
+            allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
+
+            var finalLink = ThDrainageSDShutValveEngine.cutPipe(allShutValve,allLink);
+
+            ThDrainageSDInsertService.InsertConnectLine(finalLink);
+            ThDrainageSDInsertService.InsertStackPoint(allStack);
+            ThDrainageSDInsertService.InsertBlk(allAngleValves, ThDrainageSDCommon.Layer_AngleValves, ThDrainageSDCommon.Blk_AngleValves, 
+                                                new Dictionary<string, string>() { { "可见性1", "不带锁" } });
+            ThDrainageSDInsertService.InsertBlk(allShutValve, ThDrainageSDCommon.Layer_ShutValve, ThDrainageSDCommon.Blk_ShutValves, 
+                                                new Dictionary<string, string>() { });
+            ThDrainageSDInsertService.InsertDim(allDims);
+#endif
+        }
+
+        [CommandMethod("TIANHUACAD", "THPIPETEST", CommandFlags.Modal)]
+        public void ThPipeTreeTest()
+        {
+            //取起点
+            var startPt = SelectPoint();
+            if (startPt == Point3d.Origin)
+            {
+                return;
+            }
+            var areaId = Guid.NewGuid().ToString();
+            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
+
+            //取框线
+            var regionPts = SelectPoints();
+            if (regionPts.Item1 == regionPts.Item2)
+            {
+                return;
+            }
+
+            var region = new ThDrainageSDRegion(regionPts, areaId);
+            var frame = region.Frame;
+            if (frame == null || frame.NumberOfVertices == 0)
+            {
+                return;
+            }
+
+            var dataSet = new ThDrainageSDDataExchange();
+            dataSet.AreaID = areaId;
+            dataSet.SupplyStart = supplyPt;
+            dataSet.Region = region;
+
+            ////转换坐标系
+            //Polyline transFrame = new Polyline();
+            ThMEPOriginTransformer transformer = null;
+            //if (frame != null && frame.NumberOfVertices > 0)
+            //{
+            //    transFrame = transPoly(frame, ref transformer);
+            //}
+            //var pts = transFrame.VerticesEx(100.0);
+
+            //取厕所
+            var pts = frame.VerticesEx(100.0);
+            List<ThIfcSanitaryTerminalToilate> allToilateList = null;
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var drainageExtractor = new ThDrainageSDExtractor();
+                drainageExtractor.Transfer = transformer;
+                drainageExtractor.Extract(acadDb.Database, pts);
+                allToilateList = drainageExtractor.SanTmnList;
+            }
+
+            //取房间,建筑
+            List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
+            using (var acadDb = AcadDatabase.Active())
+            {
+                archiExtractor = new List<ThExtractorBase>()
+                {
+                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
+                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
+                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
+                    new ThDrainageToilateRoomExtractor() { ColorIndex = 6,GroupSwitch=true },
+                };
+
+                archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
+                archiExtractor.ForEach(o =>
+                {
+                    if (o is IAreaId needAreaID)
+                    {
+                        needAreaID.setAreaId(areaId);
+                    }
+                });
             }
 
             var allPipeOri = new List<Line>();
@@ -178,17 +197,13 @@ namespace ThMEPWSS
                 allPipeOri = ThDrainageSDSystemDiagramExtractor.GetSD(frame, acadDb, transformer);
             }
 
-            var supplyStartExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDColdWaterSupplyStartExtractor)) as ThDrainageSDColdWaterSupplyStartExtractor;
-            var supplyStart = (supplyStartExtractor.ColdWaterSupplyStarts[0].Geometry as DBPoint).Position;
-
             //清理线和线头
             //var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allPipeOri);
-            var nodes = ThDrainageSDTreeService.buildPipeTreeTest(allPipeOri, supplyStart);
+            var nodes = ThDrainageSDTreeService.buildPipeTreeTest(allPipeOri, dataSet.SupplyStart.Pt);
 
             // ThDrainageSDDimEngine.positionDimTry(nodes);
 
         }
-
 
         private static Polyline selectFrame()
         {
@@ -223,7 +238,40 @@ namespace ThMEPWSS
             return polyline;
         }
 
+        private Tuple<Point3d, Point3d> SelectPoints()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请框选洁具,选择左上角点");
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
 
+            var ptRightRes = Active.Editor.GetCorner("\n请框选洁具,再选择右下角点", leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+
+        private Point3d SelectPoint()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请选择给水起点");
+            Point3d pt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                pt = ptLeftRes.Value;
+            }
+            return pt;
+        }
 
         private static Polyline transPoly(Polyline poly, ref ThMEPOriginTransformer transformer)
         {
@@ -277,13 +325,13 @@ namespace ThMEPWSS
         public void ThCleanDrainageFinalDraw()
         {
 
-            Polyline frame = selectFrame();
+            //Polyline frame = selectFrame();
             Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
-            if (frame != null && frame.NumberOfVertices > 0)
-            {
-                transFrame = transPoly(frame, ref transformer);
-            }
+            //if (frame != null && frame.NumberOfVertices > 0)
+            //{
+            //    transFrame = transPoly(frame, ref transformer);
+            //}
 
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);

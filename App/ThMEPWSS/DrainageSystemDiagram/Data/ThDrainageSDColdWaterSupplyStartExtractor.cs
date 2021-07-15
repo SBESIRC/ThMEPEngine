@@ -23,6 +23,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageSDColdWaterSupplyStartExtractor : ThExtractorBase , IAreaId
     {
         public List<ThRawIfcBuildingElementData> ColdWaterSupplyStarts { get; private set; }
+        //public string ElementLayer { get; set; }
         public string AreaId { get;private set; }
 
         public ThDrainageSDColdWaterSupplyStartExtractor()
@@ -66,7 +67,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                geometry.Properties.Add(ThDrainageSDCommon.ProAreaId,AreaId);
+                //geometry.Properties.Add(ThDrainageSDCommon.ProAreaId,AreaId);
 
                 if (o.Geometry is DBPoint polyline)
                 {

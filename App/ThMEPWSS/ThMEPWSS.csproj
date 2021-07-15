@@ -38,9 +38,11 @@
     <Compile Include="Assistant\FengDbgTesting.cs" />
     <Compile Include="Assistant\FengKeys.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDCoolSupplyStart.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
-    <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
-    <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDInsertService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDLineExtension.cs" />
+	<Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />    <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThElectricWellService.cs" />
@@ -454,7 +456,7 @@
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ThSystemDiagramCmds.THWDYTGS.cs" />
+    <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>
   <ItemGroup />
   <Choose>

@@ -18,7 +18,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageToilateRoomExtractor : ThExtractorBase, IAreaId
     {
         public string AreaId { get; private set; }
-
+        public static string AreaIdPropertyName = "AreaId";
         public List<ThIfcRoom> Rooms { get; private set; }
         public ThDrainageToilateRoomExtractor()
         {
@@ -57,7 +57,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     o.Tags.Add(o.Name);
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, string.Join(";", o.Tags.ToArray()));
-                geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, AreaId);
+                geometry.Properties.Add(AreaIdPropertyName, AreaId);
 
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);

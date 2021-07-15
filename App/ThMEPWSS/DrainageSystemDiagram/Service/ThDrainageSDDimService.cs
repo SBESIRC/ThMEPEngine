@@ -31,22 +31,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        //public static Line[] getDimAreaBaseLineNouse(List<ThIfcSanitaryTerminalToilate> toilateInGroup)
-        //{
-        //    //岛
-        //    var baseLine = new Line[2];
-
-        //    var edge = findToilateBelongsToOutline(toilateInGroup[0]);
-
-        //    if (edge != null)
-        //    {
-        //        baseLine = getDimAreaBaseLine(toilateInGroup, edge);
-        //    }
-
-        //    return baseLine;
-
-        //}
-
         public static Dictionary<Line, List<Point3d>> getDimAreaBaseLineIsland(List<ThIfcSanitaryTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
         {
             //岛
@@ -160,18 +144,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return baseLine;
         }
-
-        //private static Line findToilateBelongsToOutline(ThIfcSanitaryTerminalToilate toilate)
-        //{
-        //    var tol = new Tolerance(10, 10);
-        //    var lines = ThDrainageSDCommonService.GetLines(toilate.Boundary);
-
-
-        //    var edge = lines.Where(x => x.ToCurve3d().IsOn(toilate.SupplyCoolOnWall.First(), tol)).FirstOrDefault();
-        //    return edge;
-        //}
-
-
 
         public static Dictionary<Polyline, Line> getPossibleDimArea(Dictionary<Line, List<Point3d>> baseLine, string groupName, List<ThIfcSanitaryTerminalToilate> toilateInGroup)
         {

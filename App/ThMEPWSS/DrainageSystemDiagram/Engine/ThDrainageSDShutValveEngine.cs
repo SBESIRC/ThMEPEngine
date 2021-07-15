@@ -1,7 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -14,8 +17,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (dataset.PipeTreeRoot != null)
             {
                 ThDrainageSDTreeNode root = dataset.PipeTreeRoot;
-
-                //ThDrainageSDTreeService.travelTree(root, "l30tree");
 
                 List<ThDrainageSDTreeNode> cutList = new List<ThDrainageSDTreeNode>();
 
@@ -42,8 +43,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return valve;
         }
-
-
 
         private static void cutTree(ThDrainageSDTreeNode node, List<ThDrainageSDTreeNode> cutList, ThDrainageSDDataExchange dataset)
         {
@@ -136,6 +135,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     {
                         bEnd = true;
                     }
+                }
+                else
+                {
+                    bEnd = true;
                 }
             }
 
@@ -254,6 +257,41 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var terminal = terminalList.Where(x => x.SupplyCoolOnWall.Where(pt => pt.IsEqualTo(node.Node, tol)).Count() > 0).FirstOrDefault();
             return terminal;
+        }
+
+        public static List<Line> cutPipe(List<KeyValuePair<Point3d, Vector3d>> valveList, List<Line> pipes)
+        {
+            var tol = new Tolerance(1, 1);
+            var finalLine = new List<Line>();
+
+            double scale = ThDrainageSDCommon.Blk_scale;
+            double blkSize = ThDrainageSDCommon.Blk_Size;
+
+            foreach (var valve in valveList)
+            {
+                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.Key, tol)).ToList();
+                if (line.Count > 0)
+                {
+                    var l = line.First();
+                    var dir = valve.Value;
+                    var blkS = valve.Key - dir * scale * blkSize;
+                    var blkE = valve.Key + dir * scale * blkSize;
+                    var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
+                    var newE2 = blkS == newE ? blkE : blkS;
+
+
+                    var cutpart1 = new Line(l.StartPoint, newE);
+                    var cutpart2 = new Line(newE2, l.EndPoint);
+                    finalLine.Add(cutpart1);
+                    finalLine.Add(cutpart2);
+                    pipes.Remove(l);
+                }
+
+            }
+
+            finalLine.AddRange(pipes);
+
+            return finalLine;
         }
     }
 }

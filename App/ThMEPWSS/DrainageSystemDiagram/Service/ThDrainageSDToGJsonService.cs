@@ -100,21 +100,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return columnGeom;
         }
 
-        public static string getAreaId(List<ThExtractorBase> archiExtractor)
-        {
-            string areaId = "";
+        //public static string getAreaId(List<ThExtractorBase> archiExtractor)
+        //{
+        //    string areaId = "";
 
-            var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
+        //    var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
 
-            if (extractor != null && extractor.Region.Count > 0)
-            {
-                var pl = extractor.Region[0].Geometry as Polyline;
-                var areaPolylineToIdDic = extractor.ToiletGroupId;
-                areaId = areaPolylineToIdDic[pl];
-            }
+        //    if (extractor != null && extractor.Region.Count > 0)
+        //    {
+        //        var pl = extractor.Region[0].Geometry as Polyline;
+        //        var areaPolylineToIdDic = extractor.ToiletGroupId;
+        //        areaId = areaPolylineToIdDic[pl];
+        //    }
 
-            return areaId;
-        }
+        //    return areaId;
+        //}
 
         public static List<Line> updateToilateModel(List<ThToilateGJson> tGJList, List<ThIfcSanitaryTerminalToilate> toilateList)
         {

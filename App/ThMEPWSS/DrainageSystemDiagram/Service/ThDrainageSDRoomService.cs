@@ -29,18 +29,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return rooms;
         }
 
-        public static void shrinkRoom(List<ThExtractorBase> archiExtractor)
-        {
-            var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
+        //public static void shrinkRoom(List<ThExtractorBase> archiExtractor)
+        //{
+        //    var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
 
-            roomExtractor.Rooms.ForEach(room =>
-            {
-                var roomOutline = room.Boundary as Polyline;
-                roomOutline = ThMEPFrameService.Buffer(roomOutline, -100);
-                room.Boundary = roomOutline;
-            });
+        //    roomExtractor.Rooms.ForEach(room =>
+        //    {
+        //        var roomOutline = room.Boundary as Polyline;
+        //        roomOutline = ThMEPFrameService.Buffer(roomOutline, -100);
+        //        room.Boundary = roomOutline;
+        //    });
 
-        }
+        //}
 
         public static List<ThIfcRoom> getRoomList(List<ThExtractorBase> archiExtractor)
         {

@@ -29,6 +29,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public Dictionary<Polyline, string> ToiletGroupId { get; private set; }
         public List<ThRawIfcBuildingElementData> Region { get; private set; }
 
+        //public string ElementLayer { get; set; }
+
         private const string AlignmentVectorPropertyName = "AlignmentVector";
         private const string NeibourIdsPropertyName = "NeighborIds";
         private const string IdPropertyName = "Id";

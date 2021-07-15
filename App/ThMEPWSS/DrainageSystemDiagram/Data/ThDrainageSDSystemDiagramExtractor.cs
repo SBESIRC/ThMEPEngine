@@ -33,6 +33,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 laneList.ForEach(x => transformer.Transform(x));
             }
+           
             laneList.ForEach(x => objs.Add(x));
 
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);

@@ -18,6 +18,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var toilateList = allToilateList.Where(x => x.SupplyCool.Count > 0).ToList();
 
+            //所有空间建model 包括没有厕所的空间（后续建图需要）
             var roomPolyList = ThDrainageSDRoomService.getRoomList(archiExtractor);
             var roomList = ThDrainageSDRoomService.buildRoomModel(roomPolyList, toilateList);
             var filteredRoom = ThDrainageSDRoomService.filtRoomList(roomList);
@@ -27,17 +28,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 return allLink;
             }
 
-            var supplyStartExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDColdWaterSupplyStartExtractor)) as ThDrainageSDColdWaterSupplyStartExtractor;
-            var supplyStart = (supplyStartExtractor.ColdWaterSupplyStarts[0].Geometry as DBPoint).Position;
-
+            var supplyStart = dataSet.SupplyStart.Pt;
             toilateList.ForEach(x => x.AreaId = dataSet.AreaID);
-
-            //所有空间建model 包括没有厕所的空间（后续建图需要）
-
 
             //确定每个厕所在墙上的给水点位
             ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toilateList, out var aloneToilate);
-            toilateList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
+            //toilateList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
 
             ///////////收缩外框
             //ThDrainageSDRoomService.shrinkRoom(archiExtractor);
@@ -51,15 +47,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //////////分组  
             var forGroupJson = ThDrainageSDToGJsonService.buildArchiGeometry(archiExtractor);
+            forGroupJson.AddRange(dataSet.Region.BuildGeometries());
+            forGroupJson.AddRange(dataSet.SupplyStart.BuildGeometries());
             forGroupJson.AddRange(ThDrainageSDToGJsonService.buildCoolPtGeometry(toilateList));
             var forGroupJsonString = ThGeoOutput.Output(forGroupJson);
-            string path = @"D:\project\2.drainage\jsonSample\2-1.input.geojson";
-            File.WriteAllText(path, forGroupJsonString);
+            //string path = @"D:\project\2.drainage\jsonSample\2-1.input.geojson";
+            //File.WriteAllText(path, forGroupJsonString);
 
             ThPipeSystemDiagramMgd SystemDiagramMethods = new ThPipeSystemDiagramMgd();
             var groupOutput = SystemDiagramMethods.ProcessGrouping(forGroupJsonString);
-            string path2 = @"D:\project\2.drainage\jsonSample\2-2.output.geojson";
-            File.WriteAllText(path2, groupOutput);
+            //string path2 = @"D:\project\2.drainage\jsonSample\2-2.output.geojson";
+            //File.WriteAllText(path2, groupOutput);
 
             //解析分组，更新点位信息
             var tGJList = ThDrainageSDDeserializeGJsonService.getGroupPt(groupOutput);
@@ -70,10 +68,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //找主线虚拟点位
             var groupList = ThDrainageSDCoolPtProcessService.classifyToilate(toilateList);
-            ThDrainageSDCoolPtProcessService.classifySmallRoomGroup(ref groupList,roomList);
+            ThDrainageSDCoolPtProcessService.classifySmallRoomGroup(ref groupList, roomList);
 
             var islandPair = ThDrainageSDCoolPtProcessService.mergeIsland(groupList);
-          
+
             var virtualPtList = ThDrainageSDVirtualPtEngine.getVirtualPtOfGroup(supplyStart, groupList, islandPair, roomList, out var ptForVirtualDict, out var allToiInGroup);
             ////debug drawing
             virtualPtList.ForEach(pt =>
@@ -87,16 +85,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //////找主线
             var forBranchJson = ThDrainageSDToGJsonService.buildArchiGeometry(archiExtractor);
+            forBranchJson.AddRange(dataSet.Region.BuildGeometries());
+            forBranchJson.AddRange(dataSet.SupplyStart.BuildGeometries());
             forBranchJson.AddRange(ThDrainageSDToGJsonService.buildVirtualCoolPtGeomary(virtualPtList));
             forBranchJson.AddRange(ThDrainageSDToGJsonService.buildVirtualColumn(virtualColumn, dataSet.AreaID));
 
             var forBranchJsonString = ThGeoOutput.Output(forBranchJson);
-            string path3 = @"D:\project\2.drainage\jsonSample\2-3.input.geojson";
-            File.WriteAllText(path3, forBranchJsonString);
+            //string path3 = @"D:\project\2.drainage\jsonSample\2-3.input.geojson";
+            //File.WriteAllText(path3, forBranchJsonString);
 
             var branchOutput = SystemDiagramMethods.ProcessMainBranchs(forBranchJsonString);
-            string path4 = @"D:\project\2.drainage\jsonSample\2-4.output.geojson";
-            File.WriteAllText(path4, branchOutput);
+            //string path4 = @"D:\project\2.drainage\jsonSample\2-4.output.geojson";
+            //File.WriteAllText(path4, branchOutput);
 
             var branchList = ThDrainageSDDeserializeGJsonService.getBranchLineList(branchOutput);
             allLink.AddRange(branchList);
@@ -106,8 +106,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var subBranchList = ThDrainageSDConnectSubService.linkGroupSub(groupList, ptForVirtualDict, islandPair, branchList);
             allLink.AddRange(subBranchList);
             DrawUtils.ShowGeometry(subBranchList, "l05subBranch", 140);
-
-            //DrawUtils.ShowGeometry(allLink, "l06linkNoClean", 170);
 
             //清理线和线头
             var lines = ThDrainageSDCleanLineService.simplifyLine(allLink);
@@ -119,9 +117,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             dataSet.TerminalList = toilateList;
             dataSet.IslandPair = islandPair;
             dataSet.GroupList = groupList;
-            dataSet.SupplyCoolStart = supplyStart;
             dataSet.Pipes = lines;
-
 
             return lines;
         }

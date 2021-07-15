@@ -20,7 +20,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageSDCommonService
     {
         public static ThExtractorBase getExtruactor(List<ThExtractorBase> extractors, Type extruactorName)
-
         {
             ThExtractorBase obj = null;
             foreach (var ex in extractors)
