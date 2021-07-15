@@ -5352,7 +5352,7 @@
                     var balcony = new List<Geometry>();
                     foreach (var kv in roomData)
                     {
-                        if (kv.Key == "阳台")
+                        if (IsBalcony(kv.Key))
                         {
                             balcony.Add(kv.Value);
                         }

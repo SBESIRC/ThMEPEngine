@@ -25,7 +25,6 @@ namespace ThMEPWSS.TestNs
     using Dreambuild.AutoCAD;
     using DotNetARX;
     using Autodesk.AutoCAD.Internal;
-    using static ThMEPWSS.DebugNs.ThPublicMethods;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.DebugNs;
