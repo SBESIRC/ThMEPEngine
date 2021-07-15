@@ -1,20 +1,15 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
+using Linq2Acad;
+using ThCADExtension;
 using AcHelper.Commands;
+using GeometryExtensions;
+using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
-using Linq2Acad;
-using System;
-using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPEngineCore.Engine;
+using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
-using System.Collections.Generic;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
-using System.Linq;
 
 namespace ThMEPElectrical.Command
 {
@@ -52,7 +47,7 @@ namespace ThMEPElectrical.Command
                     LayerFilter = FireCompartmentParameter.LayerNames,
                 };
                 var compartments = builder.BuildFromMS(acadDatabase.Database, objs);
-                if(compartments.Count==0)
+                if (compartments.Count == 0)
                 {
                     return;
                 }
@@ -61,7 +56,7 @@ namespace ThMEPElectrical.Command
                 ThBlockConfigModel.Init();
 
                 //获取该区域的所有所需块
-                var dbobjs =new DBObjectCollection();
+                var dbobjs = new DBObjectCollection();
                 foreach (ObjectId obj in objs)
                 {
                     dbobjs.Add(acadDatabase.Element<Entity>(obj));
@@ -71,19 +66,20 @@ namespace ThMEPElectrical.Command
                 BlockReferenceEngine.Recognize(acadDatabase.Database, pts);
                 BlockReferenceEngine.RecognizeMS(acadDatabase.Database, pts);
 
-
                 //填充块数量到防火分区
                 ThAutoFireAlarmSystemModel diagram = new ThAutoFireAlarmSystemModelFromFireCompartment();
+
                 //获取块引擎附加信息
                 var datas = BlockReferenceEngine.QueryAllOriginDatas();
+
+                //填充块数量到防火分区
                 diagram.SetGlobalData(acadDatabase.Database, datas, null);
+
                 //初始化虚假楼层
                 var AddFloorss = diagram.InitVirtualStoreys(
                     acadDatabase.Database,
                     Rectangle,
                     compartments);
-
-                
 
                 //绘画该图纸的防火分区编号
                 diagram.DrawFloorsNum(acadDatabase.Database, AddFloorss);

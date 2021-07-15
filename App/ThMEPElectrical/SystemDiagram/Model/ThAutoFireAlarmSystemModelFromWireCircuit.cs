@@ -1,26 +1,21 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using Linq2Acad;
+﻿using System;
+using AcHelper;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
+using Linq2Acad;
+using DotNetARX;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Engine;
-using ThMEPElectrical.SystemDiagram.Extension;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
-using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPEngineCore.Engine;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
+using ThMEPElectrical.SystemDiagram.Engine;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.SystemDiagram.Service;
+using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -43,7 +38,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             floors = new List<ThFloorModel>();
         }
-        
+
         /// <summary>
         /// 设置全局空间索引
         /// </summary>
@@ -170,7 +165,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     FillingFireCompartmentData(ref fireDistrict, GraphEngine.GraphsDic);
                 });
-                
+
             });
             //分解复数楼层
             Floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
@@ -202,12 +197,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             {
                                 DrawWireCircuit = cw.DrawWireCircuit,
                                 DrawWireCircuitText = newfloor.FloorNumber == floor.MulitFloorName[0] ? cw.DrawWireCircuitText : false,
-                                TextPoint=cw.TextPoint,
-                                WireCircuitName=cw.WireCircuitName.Replace(OldName, newfloor.FloorName),
-                                WireCircuitNo=cw.WireCircuitNo,
-                                Data=cw.Data,
-                                Graph=cw.Graph,
-                                BlockCount=cw.BlockCount,
+                                TextPoint = cw.TextPoint,
+                                WireCircuitName = cw.WireCircuitName.Replace(OldName, newfloor.FloorName),
+                                WireCircuitNo = cw.WireCircuitNo,
+                                Data = cw.Data,
+                                Graph = cw.Graph,
+                                BlockCount = cw.BlockCount,
                             });
                         });
                         newfloor.FireDistricts.Add(newFireDistrict);
@@ -219,7 +214,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         }
 
         /// <summary>
-        /// 虚拟初始化一栋楼
+        /// 虚拟初始化一栋楼,V2.0版本不支持此操作
         /// </summary>
         /// <param name="storeys"></param>
         public override List<ThFloorModel> InitVirtualStoreys(Database db, Polyline storyBoundary, List<ThFireCompartment> fireCompartments)
@@ -315,7 +310,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 List<ThDrawModel> AllData = new List<ThDrawModel>();
                 AllData = DataProcessingAndConversion(AllFireDistrictsData, out List<string> warningMsg);
                 warningMsg.ForEach(msg => Active.Editor.WriteLine($"\n{msg}"));
-                    
+
                 foreach (var fireDistrict in AllData)
                 {
                     //初始化横线
@@ -478,7 +473,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <returns></returns>
         private List<ThFireDistrictModel> GetFireDistrictsInfo()
         {
-            return this.floors.OrderBy(x => { x.FireDistricts = x.FireDistricts.Where(f=>f.WireCircuits.Count>0).OrderBy(y => y.FireDistrictNo).ToList(); return x.FloorNumber; }).SelectMany(o => o.FireDistricts).Where(f => f.DrawFireDistrict).ToList();
+            return this.floors.OrderBy(x => { x.FireDistricts = x.FireDistricts.Where(f => f.WireCircuits.Count > 0).OrderBy(y => y.FireDistrictNo).ToList(); return x.FloorNumber; }).SelectMany(o => o.FireDistricts).Where(f => f.DrawFireDistrict).ToList();
         }
 
         /// <summary>
@@ -486,7 +481,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         /// <param name="allData"></param>
         /// <returns></returns>
-        private List<ThDrawModel> DataProcessingAndConversion(List<ThFireDistrictModel> allData,out List<string> Msg)
+        private List<ThDrawModel> DataProcessingAndConversion(List<ThFireDistrictModel> allData, out List<string> Msg)
         {
             List<KeyValuePair<string, ThAlarmControlWireCircuitModel>> WireCircuitModels = new List<KeyValuePair<string, ThAlarmControlWireCircuitModel>>();
             Msg = new List<string>();
@@ -540,11 +535,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     o.Value.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
             });
             Msg.AddRange(warningMsg);
-            return WireCircuitModels.Select(o => new ThDrawModel() { 
-                FireDistrictName = o.Key, 
-                Data = o.Value.Data, 
-                DrawCircuitName = true, 
-                WireCircuitName = o.Value.WireCircuitName 
+            return WireCircuitModels.Select(o => new ThDrawModel()
+            {
+                FireDistrictName = o.Key,
+                Data = o.Value.Data,
+                DrawCircuitName = true,
+                WireCircuitName = o.Value.WireCircuitName
             }).ToList();
         }
 
@@ -565,7 +561,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 //第一遍遍历，检索出所有不属于本防火分区或已经拥有名称的电路
                 GraphData.ForEach(graphInfo => graphInfo.Value.ForEach(wc =>
                 {
-                    if(!string.IsNullOrWhiteSpace(wc.WireCircuitName))
+                    if (!string.IsNullOrWhiteSpace(wc.WireCircuitName))
                     {
                         wc.DrawWireCircuitText = false;
                         if (wc.WireCircuitName.Contains(fireDistrictName))

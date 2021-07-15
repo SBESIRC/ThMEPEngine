@@ -1,15 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -26,16 +23,16 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);    // 提取外参中的块            
-            Results=visitor.Results;
+            Results = visitor.Results;
         }
 
         public override void ExtractFromMS(Database database)
         {
             var visitor = new ThAutoFireAlarmSystemVisitor();
             var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(visitor);           
+            extractor.Accept(visitor);
             extractor.ExtractFromMS(database);// 提取ModelSpace下的块
-            Results=visitor.Results;
+            Results = visitor.Results;
         }
     }
     public class ThAutoFireAlarmSystemRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -76,7 +73,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             originDatas.ForEach(o => BlockAttInfo.Add(o.Geometry, (o.Data as ElementInfo).AttNames));
             // 通过获取的OriginData 分类
             Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
-        }      
+        }
         public Dictionary<Entity, List<KeyValuePair<string, string>>> QueryAllOriginDatas()
         {
             return BlockAttInfo;
@@ -84,7 +81,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public List<KeyValuePair<string, string>> QueryOriginDatas(ThIfcDistributionFlowElement element)
         {
-            return BlockAttInfo.First(o=>o.Key.Equals(element.Outline)).Value;
+            return BlockAttInfo.First(o => o.Key.Equals(element.Outline)).Value;
         }
     }
 }

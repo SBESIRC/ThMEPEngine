@@ -1,19 +1,18 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
+﻿using System;
 using NFox.Cad;
+using Linq2Acad;
 using QuickGraph;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Extension;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPEngineCore.CAD;
+using ThMEPElectrical.SystemDiagram.Extension;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -25,8 +24,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
 
         public Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> GraphsDic { get; set; }
-        
-        public ThAFASVertex GraphStartVertex { get; set; }
+
         public Database Database { get; set; }
 
         /// <summary>
@@ -48,22 +46,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         private List<string> NotInAlarmControlWireCircuit { get; set; }
 
-
-        //起点终点规则
-        private Func<Entity, bool> BreakpointRule = (e) =>
-        {
-            if (e is BlockReference blk)
-            {
-                if (blk.Name == "E-BFAS540" || blk.Name == "E-BFAS010")
-                    return true;
-            }
-            if (e is Line line)
-            {
-                if (e.Layer.Contains("CMTB"))
-                    return true;
-            }
-            return false;
-        };
         //短路隔离器规则
         private Func<Entity, bool> SIRule = (e) =>
         {
@@ -80,7 +62,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             return e is Curve cur && cur.Layer.Contains("CMTB");
         };
 
-        public ThAFASGraphEngine(Database db,List<Entity> Datas, Dictionary<Entity, List<KeyValuePair<string, string>>> blockAttInfoDic, bool isJF=false)
+        public ThAFASGraphEngine(Database db, List<Entity> Datas, Dictionary<Entity, List<KeyValuePair<string, string>>> blockAttInfoDic, bool isJF = false)
         {
             GraphsDic = new Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>>();
             GlobleNTSMappingDic = new Dictionary<Entity, Entity>();
@@ -149,14 +131,27 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 Polyline polyline = Buffer(blockObj);
                 var results = FindNextEntity(blockObj, polyline);
                 foreach (var result in results)
+                {
+                    //#1碰到桥架或者配电箱，忽略
+                    if (CMTBRule(result) || FASRule(result))
                     {
-                        //#1碰到桥架或者配电箱，忽略
-                        if (CMTBRule(result) || FASRule(result))
-                        {
-                            continue;
-                        }
-                        //碰到块
-                        if (result is BlockReference blkref)
+                        continue;
+                    }
+                    //碰到块
+                    if (result is BlockReference blkref)
+                    {
+                        Point3d center = Database.GetBlockReferenceOBBCenter(blockObj);
+                        if (this.GraphsDic.ContainsKey(center))
+                            this.GraphsDic[center].AddRange(FirstNavigate(startingEntity, result));
+                        else
+                            this.GraphsDic.Add(center, FirstNavigate(startingEntity, result));
+                    }
+                    //碰到线
+                    else if (result is Curve findcurve)
+                    {
+                        //线得搭到块上才可遍历，否则认为线只是跨过块
+                        var blockobb = Buffer(blockObj, 0);
+                        if (blockobb.Distance(findcurve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance || blockobb.Distance(findcurve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                         {
                             Point3d center = Database.GetBlockReferenceOBBCenter(blockObj);
                             if (this.GraphsDic.ContainsKey(center))
@@ -164,21 +159,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             else
                                 this.GraphsDic.Add(center, FirstNavigate(startingEntity, result));
                         }
-                        //碰到线
-                        else if (result is Curve findcurve)
-                        {
-                            //线得搭到块上才可遍历，否则认为线只是跨过块
-                            var blockobb = Buffer(blockObj, 0);
-                            if (blockobb.Distance(findcurve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance || blockobb.Distance(findcurve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
-                            {
-                                Point3d center = Database.GetBlockReferenceOBBCenter(blockObj);
-                                if (this.GraphsDic.ContainsKey(center))
-                                    this.GraphsDic[center].AddRange(FirstNavigate(startingEntity, result));
-                                else
-                                    this.GraphsDic.Add(center, FirstNavigate(startingEntity, result));
-                            }
-                        }
                     }
+                }
             }
             //是桥架 *CMTB
             else if (startingEntity is Curve curve)
@@ -236,7 +218,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         public List<ThAlarmControlWireCircuitModel> FirstNavigate(Entity SourceEntity, Entity nextEntity)
         {
             List<ThAlarmControlWireCircuitModel> FindWireCircuitModels = new List<ThAlarmControlWireCircuitModel>();
-            var findLoop= FindRootNextElement(SourceEntity, nextEntity);
+            var findLoop = FindRootNextElement(SourceEntity, nextEntity);
             foreach (var item in findLoop)
             {
                 //此时已经可以确定，这是仅有的一条回路了
@@ -273,11 +255,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         {
                             extendNewWireCircuits.Add(NavigateGraph);
                         }
-                        //后续考虑是合并还是分离
-                        //to do
-                        //目前是全部分离，先不考虑合并问题
-                        //FindGraphs.Add(newWireCircuitModel);
-                        //FindWireCircuitModels.AddRange(NavigateGraph);
                     }
                     if (!CacheSINodeCollection.Contains(item.Key))
                     {
@@ -292,7 +269,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     CacheDataCollection.Add(item.Key);
                     if (item.Value.Count > 0)
                     {
-                        //FindWireCircuitModels.AddRange(ExtensionGraph(ref newWireCircuitModel, item.Value.Last(), item.Key));
                         var extensionGraph = ExtensionGraph(ref newWireCircuitModel, item.Value.Last(), item.Key);
                         if (extensionGraph.Count > 0)
                         {
@@ -301,7 +277,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     }
                     else
                     {
-                        //FindWireCircuitModels.AddRange(ExtensionGraph(ref newWireCircuitModel, SourceEntity, item.Key));
                         var extensionGraph = ExtensionGraph(ref newWireCircuitModel, SourceEntity, item.Key);
                         if (extensionGraph.Count > 0)
                         {
@@ -362,7 +337,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <param name="SourceEntity"></param>
         /// <param name="TargetEntity"></param>
         public List<List<ThAlarmControlWireCircuitModel>> ExtensionGraph(ref ThAlarmControlWireCircuitModel WireCircuitModel, Entity existingElement, BlockReference TargetEntity)
-        { 
+        {
             if (string.IsNullOrEmpty(WireCircuitModel.WireCircuitName))
             {
                 DBText wireCircuitName = FindWireCircuitName(TargetEntity);
@@ -395,10 +370,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     {
                         //这就是自己本身延伸出去的块
                         var NavigateGraph = FirstNavigate(item.Key, entity);
-                        //后续考虑是合并还是分离
-                        //to do
-                        //目前是全部分离，先不考虑合并问题
-                        //FindGraphs.Add(newGraph);
                         if (NavigateGraph.Count > 0)
                         {
                             extensiongraphs.Add(NavigateGraph);
@@ -411,13 +382,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     }
                 }
                 //正常块
-                else if(!CacheDataCollection.Contains(item.Key))
+                else if (!CacheDataCollection.Contains(item.Key))
                 {
                     WireCircuitModel.Graph.AddEdgeAndVertex(TargetEntity, item.Key, item.Value);
                     CacheDataCollection.Add(item.Key);
                     if (item.Value.Count > 0)
                     {
-                        //extensiongraphs.AddRange(ExtensionGraph(ref WireCircuitModel, item.Value.Last(), item.Key));
                         var extensionGraph = ExtensionGraph(ref WireCircuitModel, item.Value.Last(), item.Key);
                         if (extensionGraph.Count > 0)
                         {
@@ -426,7 +396,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     }
                     else
                     {
-                        //extensiongraphs.AddRange(ExtensionGraph(ref WireCircuitModel, TargetEntity, item.Key));
                         var extensionGraph = ExtensionGraph(ref WireCircuitModel, TargetEntity, item.Key);
                         if (extensionGraph.Count > 0)
                         {
@@ -458,7 +427,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             sharedPath.Add(sourceElement);
 
-            var space = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance*2);
+            var space = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
             var results = SpatialIndex.SelectCrossingPolygon(space);
             results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
             results.Remove(sourceElement);
@@ -533,12 +502,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <param name="sourceElement">已存在的曲线</param>
         /// <param name="space">探针</param>
         /// <returns></returns>
-        public Dictionary<BlockReference, List<Curve>> FindRootNextPath(ref List<Curve> sharedPath, Curve sourceElement,bool IsStartPoint)
+        public Dictionary<BlockReference, List<Curve>> FindRootNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
         {
             Dictionary<BlockReference, List<Curve>> FindPath = new Dictionary<BlockReference, List<Curve>>();
             sharedPath.Add(sourceElement);
 
-            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance*2);
+            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
             var probeResults = SpatialIndex.SelectCrossingPolygon(probe);
             probeResults = probeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
             probeResults.Remove(sourceElement);
@@ -561,7 +530,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             var longProbeResults = SpatialIndex.SelectCrossingPolygon(longProbe);
                             longProbeResults = longProbeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
                             longProbeResults.Remove(sourceElement);
-                            var longProbeLineResults  =longProbeResults.Cast<Entity>().Where(e=>e is Line).Cast<Line>().ToList();
+                            var longProbeLineResults = longProbeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>().ToList();
                             //长探针只能找到一个符合条件的线。如果遇到多条，只取最符合的一条线
                             var point = IsStartPoint ? sourceline.StartPoint : sourceline.EndPoint;
                             longProbeLineResults = longProbeLineResults.Where(o => ThGeometryTool.IsCollinearEx(sourceline.StartPoint, sourceline.EndPoint, o.StartPoint, o.EndPoint)).OrderBy(o => Math.Min(point.DistanceTo(o.StartPoint), point.DistanceTo(o.EndPoint))).ToList();
@@ -576,21 +545,21 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 //找到下一个元素，返回
                 case 1:
                     {
-                        if(probeResults[0] is BlockReference blk)
+                        if (probeResults[0] is BlockReference blk)
                         {
                             FindPath.Add(blk, sharedPath);
                         }
-                        else if(probeResults[0] is Curve curve)
+                        else if (probeResults[0] is Curve curve)
                         {
-                            if(curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint)< ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
                                 return FindRootNextPath(ref sharedPath, curve, true);
                             }
-                            else if(curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
                                 return FindRootNextPath(ref sharedPath, curve, false);
                             }
-                            else if(sourceElement is Line sourceline && probeResults[0] is Line targetline)
+                            else if (sourceElement is Line sourceline && probeResults[0] is Line targetline)
                             {
                                 var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
                                 var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
@@ -616,7 +585,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                                         {
                                             if (secondEntity is Curve secondCurve)
                                             {
-                                                if(secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                                 {
                                                     var newsharedPath = sharedPath.Clone().ToList();
                                                     FindRootNextPath(ref newsharedPath, secondCurve, false).ForEach(newPath =>
@@ -647,11 +616,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         var blkResults = probeResults.Cast<Entity>().Where(e => e is BlockReference).ToList();
                         if (blkResults.Count() > 0)
                         {
-                            var blk= blkResults.First() as BlockReference;
+                            var blk = blkResults.First() as BlockReference;
                             FindPath.Add(blk, sharedPath);
                         }
                         //遇到分支的情况
-                        else if(sourceElement is Line sourceline)
+                        else if (sourceElement is Line sourceline)
                         {
                             var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
                             foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
@@ -714,7 +683,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <param name="existingElement">已存在的元素</param>
         /// <param name="sourceElement">源点块</param>
         /// <returns></returns>
-        public Dictionary<BlockReference,List<Curve>> FindNextElement(Entity existingElement, BlockReference sourceElement)
+        public Dictionary<BlockReference, List<Curve>> FindNextElement(Entity existingElement, BlockReference sourceElement)
         {
             Dictionary<BlockReference, List<Curve>> NextElements = new Dictionary<BlockReference, List<Curve>>();
             var results = SpatialIndex.SelectCrossingPolygon(Buffer(sourceElement));
@@ -772,14 +741,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             if (specifyElement is BlockReference blk)
                 return new Dictionary<BlockReference, List<Curve>>() { { blk, new List<Curve>() } };
             //线需要寻块，且要考虑到一条线延伸多条线的情况
-            else if(specifyElement is Curve curve)
+            else if (specifyElement is Curve curve)
             {
                 List<Curve> sharedpath = new List<Curve>();
                 //配电箱/短路隔离器
                 if (rootElement is BlockReference rootblk)
                 {
                     //起点连着块
-                    if(Buffer(rootblk,0).Distance(curve.StartPoint)< ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                    if (Buffer(rootblk, 0).Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, false);
                     }
@@ -790,10 +759,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     }
                 }
                 //桥架
-                else if(rootElement is Curve rootcurve)
+                else if (rootElement is Curve rootcurve)
                 {
                     //起点连着桥架
-                    if(curve.StartPoint.DistanceTo(rootcurve.GetClosestPointTo(curve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                    if (curve.StartPoint.DistanceTo(rootcurve.GetClosestPointTo(curve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, false);
                     }
@@ -825,7 +794,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             var polyline = Buffer(blk, 0.0);
             var results = SpatialIndex.SelectCrossingPolygon(polyline).Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(e => e is DBText);
-            return results.Cast<DBText>().Where(o=>polyline.Contains(Database.GetDBTextReferenceOBBCenter(o))).FirstOrDefault();
+            return results.Cast<DBText>().Where(o => polyline.Contains(Database.GetDBTextReferenceOBBCenter(o))).FirstOrDefault();
         }
 
         /// <summary>
@@ -835,7 +804,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <param name="ep"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Point3d ExtendLine(Point3d sp, Point3d ep, double length=2000.0)
+        public Point3d ExtendLine(Point3d sp, Point3d ep, double length = 2000.0)
         {
             var vec = sp.GetVectorTo(ep).GetNormal();
             return ep + vec.MultiplyBy(length);
@@ -877,7 +846,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
 
         /// <summary>
-        /// 测试用
+        /// 画寻路算法路径，不要删掉，排查问题时很有用
         /// </summary>
         public void DrawGraphs()
         {
@@ -909,7 +878,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                                     acadDatabase.ModelSpace.Add(dBText);
                                 }
                             }
-                            if(clone is Curve clinecurve)
+                            if (clone is Curve clinecurve)
                             {
                                 clinecurve.ColorIndex = colorindex;
                                 acadDatabase.ModelSpace.Add(clinecurve);
@@ -950,9 +919,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public ThAFASEdge(T source, T target) : base(source, target)
         {
-            //要根据实际情况去创建自己的边，没办法根据两个节点去创建边
-            //暂时还不清楚我要不要再去抽象一下生成一条线
-            //后面再说
             Edge = new List<Curve>() { };
         }
     }
