@@ -59,9 +59,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
 
-            {
-                ;
-            }
             return new Line();
         }
 

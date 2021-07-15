@@ -2,6 +2,7 @@
 using ThMEPWSS.ViewModel;
 using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPWSS.UndergroundFireHydrantSystem.UI;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -130,6 +131,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 return;
             uiFireHydrant = new FireHydrant(ThHydrantProtectionRadiusCmd.FireHydrantVM);
             AcadApp.ShowModelessWindow(uiFireHydrant);
+        }
+        /// <summary>
+        /// 地下消火栓系统图
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]
+        public void ThTestFireHydrant()
+        {
+            var uiDrainage = new uiFireHydrantSystem();
+            Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowModelessWindow(uiDrainage);
         }
     }
 }

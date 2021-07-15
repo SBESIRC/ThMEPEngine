@@ -70,7 +70,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var index = 0;
                 foreach(var rstPath in subPathList)
                 {
-                    //index += 1;
                     var stPt1 = fireHydrantSysOut.InsertPoint;
                     var stPt = new Point3d(stPt1.X, stPt1.Y + 20000 * index, 0);
                     index += 1;
@@ -111,7 +110,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                     GetPipePart.GetSubLoopDetial(ref fireHydrantSysOut, stPt, ptStart, rstPath, fireHydrantSysIn.markList);
                 }  
-
             }
         }
 

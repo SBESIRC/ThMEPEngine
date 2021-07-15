@@ -185,10 +185,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void dfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
              FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
-            if(tempPath.Count==82)
-            {
-                ;
-            }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);

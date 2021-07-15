@@ -274,6 +274,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             foreach (var obj in DBObjs)
             {
+                var br = obj as DBText;
+                text = br.TextString;
+                /*
                 if (obj is DBText)
                 {
                     var br = obj as DBText;
@@ -290,10 +293,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
 
                 }
+                */
 
             }
 
             return text;
         }
+    
+        public static void CreateBranchDic(ref Dictionary<Point3dEx, List<List<Point3dEx>>> branchDic, List<List<Point3dEx>> mainPathList, 
+            FireHydrantSystemIn fireHydrantSysIn, HashSet<Point3dEx> visited, List<Point3dEx> extraNodes)
+        {
+            foreach (var rstPath in mainPathList)
+            {
+                foreach (var pt in rstPath)//遍历主环路的点
+                {
+                    if (fireHydrantSysIn.ptTypeDic[pt].Equals("Branch"))//是支点
+                    {
+                        var branchPath = new List<List<Point3dEx>>();
+                        DepthFirstSearch.BranchSearch(pt, visited, ref branchPath, rstPath, fireHydrantSysIn, extraNodes);//支路遍历
+
+                        if (branchPath.Count != 0)
+                        {
+                            branchDic.Add(pt, branchPath);
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 }

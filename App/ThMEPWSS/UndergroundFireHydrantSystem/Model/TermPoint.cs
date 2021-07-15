@@ -100,7 +100,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             foreach(var obj in DBObjs)
             {
-                if(obj is DBText)
+                //var br = obj as DBText;
+                //PipeNumber = br.TextString;
+                if (obj is DBText)
                 {
                     var br = obj as DBText;
                     PipeNumber = br.TextString;
@@ -110,13 +112,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                     var ad = (obj as Entity).AcadObject;
                     dynamic o = ad;
-                    if((o.ObjectName as string).Equals("TDbText"))
+                    if ((o.ObjectName as string).Equals("TDbText"))
                     {
                         PipeNumber = o.Text;
                     }
-                    
                 }
-                
             }
         }
 

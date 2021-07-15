@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPWSS.UndergroundFireHydrantSystem.Command;
+using ThMEPWSS.Command;
 
 namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THDXXHSXTT_Test", CommandFlags.Modal)]
         public void ThTestFireHydrant()
-        {           
+        {
             using (var cmd = new ThFireHydrantCmd())
             {
                 cmd.Execute();

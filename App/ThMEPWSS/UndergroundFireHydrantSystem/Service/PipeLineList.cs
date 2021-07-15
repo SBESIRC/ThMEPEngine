@@ -30,7 +30,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 var valveEngine = new ThExtractValveService();//提取蝶阀
                 var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
+                //假设阀块和天正阀不共存
+                fireHydrantSysIn.ValveIsBkReference = true;
                 var valveList = new List<Line>();
                 PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);
 

@@ -23,7 +23,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var tuplePoint = Common.Utils.SelectPoints();//范围框定
                 var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
-
+                
                 var lineList = new List<Line>();//管段列表
                 var pointList = new List<Point3dEx>();//点集
                 var ptVisit = new Dictionary<Point3dEx, bool>();//访问标志
@@ -42,7 +42,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 var valveEngine = new ThExtractValveService();//提取蝶阀
                 var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
+                //假定同一图纸只存在一种类型的阀
+                fireHydrantSysIn.ValveIsBkReference = valveDB.Cast<Entity>().Where(e => e is BlockReference).Any();
                 var valveList = new List<Line>();
                 
                 PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);

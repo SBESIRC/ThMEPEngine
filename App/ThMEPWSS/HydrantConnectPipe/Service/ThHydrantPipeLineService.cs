@@ -286,7 +286,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
                 var valveEngine = new ThExtractValveService();//提取蝶阀
                 var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
+                // 虽然同时支持阀块和天正阀对象，
+                // 但是为了方便，暂时不考虑两种类型同时存在的情况
+                fireHydrantSysIn.ValveIsBkReference = valveDB.Cast<Entity>().Where(e => e is BlockReference).Any();
                 var valveList = new List<Line>();
 
                 PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);

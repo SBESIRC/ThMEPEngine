@@ -25,6 +25,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -363,15 +364,18 @@
     <Compile Include="ThSystemDiagramCmds.THDSPSXT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Command\ThFireHydrantCmd.cs" />
+    <Compile Include="Command\ThFireHydrantCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\General.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\Block.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystem.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PointCompute.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockInsert.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Dist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\MarkLine.cs" />
@@ -380,6 +384,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\GetInput.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PointAngle.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtDic.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PtSet.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Rects.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Sort.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PolyLineSplit.cs" />
@@ -389,6 +394,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
+    <Compile Include="ViewModel\ThFireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
@@ -453,12 +459,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="UndergroundFireHydrantSystem\NewFolder1\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
@@ -40,55 +41,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
     public class ThExtractValveService//提取阀门
     {
-        public IEnumerable<Entity> Results { get; private set; }
-        public bool IsBkReference { get; private set; }
-
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
+            var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
+                var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
                    .Where(o => IsHYDTPipeLayer(o.Layer));
-
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                string objName = "";
-
-                for (int i = 0; i < dbObjs.Count; i++)
-                {
-                    var db = dbObjs[i];
-                    if (db is BlockReference)
-                    {
-                        objName = (db as BlockReference).GetEffectiveName();
-                        IsBkReference = true;
-                    }
-                    else
-                    {
-                        IsBkReference = false;
-                        var ad = (db as Entity).AcadObject;
-                        dynamic o = ad;
-                        objName = o.ObjectName;
-                    }
-                    if (!IsValve(objName))
-                    {
-                        dbObjs.RemoveAt(i);
-                        i -= 1;
-                    }
-                }
-
-                foreach (var v in dbObjs)
-                {
-                    var ad = (v as Entity).AcadObject;
-                    dynamic o = ad;
-                    objName = o.ObjectName;
-                    if (!objName.ToUpper().Contains("VALVE"))
-                    {
-                        ;
-                    }
-                }
-                return dbObjs;
+                // 阀块
+                dbObjs.Cast<Entity>()
+                    .Where(e => e is BlockReference)
+                    .Where(e => IsValveBlock((BlockReference)e))
+                    .ForEach(e => objs.Add(e));
+                // 天正阀
+                dbObjs.Cast<Entity>()
+                    .Where(e => e.IsTCHValve())
+                    .ForEach(e => objs.Add(e));
+                return objs;
             }
         }
         private bool IsHYDTPipeLayer(string layer)
@@ -96,9 +69,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
         }
 
-        private bool IsValve(string valve)
+        private bool IsValveBlock(BlockReference blockReference)
         {
-            return valve.ToUpper() == "蝶阀" || valve.ToUpper().Contains("VALVE");
+            var blkName = blockReference.GetEffectiveName().ToUpper();
+            return blkName == "蝶阀" || blkName.Contains("VALVE");
         }
     }
 
