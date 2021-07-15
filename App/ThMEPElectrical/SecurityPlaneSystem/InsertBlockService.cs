@@ -13,16 +13,17 @@ namespace ThMEPElectrical.SecurityPlaneSystem
 {
     public static class InsertBlockService
     {
-        public static List<BlockReference> InsertBlock(string layerName, string blockName, Point3d point, double angle, double scale)
+        public static BlockReference InsertBlock(string layerName, string blockName, Point3d point, double angle, double scale)
         {
-            List<BlockReference> broadcasts = new List<BlockReference>();
+            BlockReference broadcast = null;
             using (var db = AcadDatabase.Active())
             {
                 db.Database.ImportModel(blockName, layerName);
                 var id = db.Database.InsertModel(point, angle, layerName, blockName, scale);
+                broadcast = db.Element<BlockReference>(id, true);
             }
 
-            return broadcasts;
+            return broadcast;
         }
 
         public static ObjectId InsertModel(this Database database, Point3d pt, double rotateAngle, string layerName, string blockName, double scale)

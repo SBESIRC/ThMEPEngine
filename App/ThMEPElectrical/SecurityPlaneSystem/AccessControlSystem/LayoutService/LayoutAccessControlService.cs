@@ -8,6 +8,7 @@ using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
@@ -89,7 +90,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Contains(y))).ToList();
+            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -103,7 +104,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                     }
                 }
             }
-            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Contains(y))).ToList();
+            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -135,7 +136,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             roomBType = LayoutType.Nothing;
 
             bool findRule = false;
-            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Contains(y))).ToList();
+            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)

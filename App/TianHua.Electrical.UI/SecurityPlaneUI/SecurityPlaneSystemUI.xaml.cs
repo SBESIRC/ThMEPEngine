@@ -1,10 +1,12 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Service;
@@ -18,42 +20,52 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
-        readonly string url = Path.Combine(ThCADCommon.SupportPath(), "上海地区住宅-安防配置表.xlsx");
+        static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "SecurityPlaneConfig");
+        static string defaultFile = "上海地区住宅-安防配置表.xlsx";
+        static string url = urlFolder + "\\" + defaultFile;
+        DataSet configSet = null;
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
-            SetListView();
+
+            //设置填充listview
+            var dataSet = GetExcelContent(url);
+            SetListView(dataSet);
+
+            //设置默认值
+            SetDefaultValue();
         }
 
         /// <summary>
         /// 填充listView
         /// </summary>
-        private void SetListView()
+        private void SetListView(DataSet dataSet)
         {
-            var dataSet = GetExcelContent();
+            configSet = dataSet;
+            var configTable = dataSet.Tables[ThElectricalUIService.Instance.Parameter.Configs];
 
             foreach (DataTable table in dataSet.Tables)
             {
                 if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem))
                 {
-                    VideoMonitoringGrid.ItemsSource = table.DefaultView;
-                    //VideoMonitoringGrid.Columns[0].IsReadOnly = true;
                     ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable = table;
+                    SetGridValue(VideoMonitoringGrid, table, GetConfigCollection(configTable, 0));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem))
                 {
-                    IntrusionAlarmGrid.ItemsSource = table.DefaultView;
                     ThElectricalUIService.Instance.Parameter.intrusionAlarmSystemTable = table;
+                    SetGridValue(IntrusionAlarmGrid, table, GetConfigCollection(configTable, 1));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.AccessControlSystem))
                 {
-                    AccessControlGrid.ItemsSource = table.DefaultView;
                     ThElectricalUIService.Instance.Parameter.accessControlSystemTable = table;
+                    SetGridValue(AccessControlGrid, table, GetConfigCollection(configTable, 2));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.GuardTourSystem))
                 {
                     GuardTourGrid.ItemsSource = table.DefaultView;
-                    ThElectricalUIService.Instance.Parameter.guardTourSystemTable = table;
+                    List<string> configLst = new List<string>() { "是", "否" };
+                    SetGridValue(GuardTourGrid, table, configLst);
                 }   
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.RoomNameControl))
                 {
@@ -67,13 +79,87 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         }
 
         /// <summary>
+        /// 设置datagrid表值
+        /// </summary>
+        /// <param name="dataGrid"></param>
+        /// <param name="table"></param>
+        /// <param name="configs"></param>
+        private void SetGridValue(DataGrid dataGrid, DataTable table, List<string> configs)
+        {
+            dataGrid.Columns.Clear();
+            int columnCount = table.Columns.Count;
+            for (int i = 0; i < columnCount; i++)
+            {
+                if (i >= columnCount - 2)
+                {
+                    DataGridComboBoxColumn column = new DataGridComboBoxColumn();
+                    column.Header = table.Columns[i].ColumnName;
+                    column.ItemsSource = configs;
+                    column.SelectedValueBinding = new Binding(table.Columns[i].ColumnName);
+                    dataGrid.Columns.Add(column);
+                }
+                else
+                {
+                    DataGridTextColumn column = new DataGridTextColumn();
+                    column.Header = table.Columns[i].ColumnName;
+                    column.Binding = new Binding(table.Columns[i].ColumnName);
+                    column.IsReadOnly = true;
+                    dataGrid.Columns.Add(column);
+                }
+            }
+            dataGrid.AutoGenerateColumns = false;
+            dataGrid.ItemsSource = table.DefaultView;
+        }
+
+        /// <summary>
+        /// 设置默认值
+        /// </summary>
+        private void SetDefaultValue()
+        {
+            string[] files = Directory.GetFiles(urlFolder + @"\", "*.xls");
+            List<string> fileLst = new List<string>();
+            foreach (string file in files)
+            {
+                var fileArray = file.Split("\\".ToCharArray());
+                fileLst.Add(fileArray[fileArray.Length - 1]);
+            }
+            configList.ItemsSource = fileLst;
+            configList.SelectedItem = defaultFile;
+
+            videoDistance.Text = ThElectricalUIService.Instance.Parameter.videoDistance.ToString();
+            videoBlindArea.Text = ThElectricalUIService.Instance.Parameter.videoBlindArea.ToString();
+            videaMaxArea.Text = ThElectricalUIService.Instance.Parameter.videaMaxArea.ToString();
+            gtDistance.Text = ThElectricalUIService.Instance.Parameter.gtDistance.ToString();
+        }
+
+        /// <summary>
+        /// 获取配置表
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private List<string> GetConfigCollection(DataTable table, int index)
+        {
+            List<string> configs = new List<string>();
+            foreach (DataRow row in table.Rows)
+            {
+                if (!string.IsNullOrEmpty(row[index].ToString()))
+                {
+                    configs.Add(row[index].ToString());
+                }
+            }
+
+            return configs;
+        }
+
+        /// <summary>
         /// 读取excel内容
         /// </summary>
         /// <returns></returns>
-        private DataSet GetExcelContent()
+        private DataSet GetExcelContent(string path)
         {
             ReadExcelService excelSrevice = new ReadExcelService();
-            return excelSrevice.ReadExcelToDataSet(url, true);
+            return excelSrevice.ReadExcelToDataSet(path, true);
         }
 
         /// <summary>
@@ -106,7 +192,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THGTSYSTEM");
             }
 
-            this.Close();
+            this.Hide();
         }
 
         /// <summary>
@@ -173,6 +259,78 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// 导入excel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnImportTabl1e_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            openFileDialog.Multiselect = false;//该值确定是否可以选择多个文件
+            openFileDialog.Filter = "Microsoft Excel files(*.xls)|*.xls;*.xlsx";
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string file = openFileDialog.FileName;
+
+                //设置填充listview
+                var dataSet = GetExcelContent(file);
+                SetListView(dataSet);
+
+                //存储成excel
+                var fileArray = file.Split("\\".ToCharArray());
+                var flieName = fileArray[fileArray.Length - 1];
+                string newPath = urlFolder + "\\" + flieName;
+                ReadExcelService excelService = new ReadExcelService();
+                excelService.ConvertExcelToDataSet(dataSet, newPath);
+
+                //设置默认值
+                SetDefaultValue();
+                configList.SelectedItem = flieName;
+            }
+        }
+
+        /// <summary>
+        /// 导出excel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnExportTable_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
+            dialog.Filter = "Microsoft Excel files(*.xlsx)|*.xls;*.xlsx";
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var localFilePath = dialog.FileName.ToString();
+
+                DataSet dataSet = new DataSet();
+                dataSet.Merge(((DataView)VideoMonitoringGrid.ItemsSource).Table);
+                dataSet.Merge(((DataView)IntrusionAlarmGrid.ItemsSource).Table);
+                dataSet.Merge(((DataView)AccessControlGrid.ItemsSource).Table);
+                dataSet.Merge(((DataView)GuardTourGrid.ItemsSource).Table);
+                dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.Configs]);
+                dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
+
+                //存储成excel
+                ReadExcelService excelService = new ReadExcelService();
+                excelService.ConvertExcelToDataSet(dataSet, localFilePath);
+            }
+        }
+
+        /// <summary>
+        /// 更换配置原则
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void configList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string file = urlFolder + "\\" + configList.SelectedItem.ToString();
+
+            //设置填充listview
+            var dataSet = GetExcelContent(file);
+            SetListView(dataSet);
         }
 
         /// <summary>

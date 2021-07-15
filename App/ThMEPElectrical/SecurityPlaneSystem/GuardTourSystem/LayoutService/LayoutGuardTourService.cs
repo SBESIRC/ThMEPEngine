@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
@@ -19,7 +20,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
         public List<(Point3d, Vector3d)> Layout(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<List<Line>> lanes, ThEStoreys floor)
         {
             HandleGuardTourRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.guardTourSystemTable);
-            var otherRooms = rooms.Where(x => HandleGuardTourRoomService.otherRooms.Any(y => x.Tags.Any(z => y.roomName.Contains(z)))).ToList();
+            var otherRooms = rooms.Where(x => HandleGuardTourRoomService.otherRooms.Any(y => x.Tags.Any(z => y.roomName.Any(m => RoomConfigTreeService.CompareRoom(m, z))))).ToList();
 
             List<(Point3d, Vector3d)> layoutInfo = new List<(Point3d, Vector3d)>();
             //房间外需要布置的房间
@@ -32,7 +33,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
             layoutGTAlongLaneService.layoutSpace = ThElectricalUIService.Instance.Parameter.gtDistance;
             foreach (var thRoom in rooms)
             {
-                var roomInfo = HandleGuardTourRoomService.GTRooms.Where(y => thRoom.Tags.Any(x => y.roomName.Contains(x)) &&
+                var roomInfo = HandleGuardTourRoomService.GTRooms.Where(y => thRoom.Tags.Any(x => y.roomName.Any(z => RoomConfigTreeService.CompareRoom(z, x))) &&
                     (string.IsNullOrEmpty(y.floor) || y.floor == floor.StoreyTypeString));
                 if (roomInfo.Count() <= 0)
                 {

@@ -8,6 +8,7 @@ using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
@@ -104,7 +105,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Contains(y))).ToList();
+            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -118,7 +119,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
                     }
                 }
             }
-            var roomBInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Contains(y))).ToList();
+            var roomBInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -150,7 +151,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             roomBType = LayoutType.Nothing;
 
             bool findRule = false;
-            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Contains(y))).ToList();
+            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
