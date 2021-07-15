@@ -3,6 +3,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -39,10 +40,15 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
-                results.Add(new ThRawIfcBuildingElementData()
+                var clone = polyline.WashClone();
+                if(clone!= null)
                 {
-                    Geometry = polyline.GetTransformedCopy(matrix),
-                });
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Geometry = clone,
+                    });
+                }
             }
             return results;
         }

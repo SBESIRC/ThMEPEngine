@@ -63,7 +63,11 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> Split(List<Entity> areas)
         {
             var results = new List<Entity>();
+            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
+            areas = MakeValid(areas.ToCollection()).Cast<Entity>().ToList();
+            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(areas.ToCollection());
+            var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
             areas.ForEach(o =>
             {
                 var objs = spatialIndex.SelectCrossingPolygon(o);
@@ -74,7 +78,8 @@ namespace ThMEPWSS.Hydrant.Service
                 }
                 else
                 {
-                    var subRes = Subtraction(o, objs);
+                    var entity = bufferService.Buffer(o, -0.1); // fixed TopologyException
+                    var subRes = Subtraction(entity, objs);
                     results.AddRange(subRes.Cast<Entity>().ToList());
                 }
             });

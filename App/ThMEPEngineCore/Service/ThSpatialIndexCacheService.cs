@@ -191,12 +191,19 @@ namespace ThMEPEngineCore.Service
         {
             using (var engine = new ThDB3WindowRecognitionEngine())
             {
-                // 识别结构柱
                 engine.Recognize(database, polygon);
                 if(engine.Elements.Count>0)
                 {
-                    SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    engine.Elements.Select(o => o.Outline).ToCollection());
+                    var objs = new DBObjectCollection();
+                    engine.Elements.ForEach(o =>
+                    {
+                        var outline = o.Outline as Polyline;
+                        if (outline.Area > 1e-4)
+                        {
+                            objs.Add(outline);
+                        }
+                    });
+                    SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 }
                 else
                 {

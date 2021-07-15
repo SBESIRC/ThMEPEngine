@@ -101,7 +101,7 @@ namespace ThMEPWSS.Hydrant.Service
                     { 
                         UseDb3Engine=false,
                         FilterMode = FilterMode.Cross,
-                        ElementLayer = AiLayerManager.DoorOpeningLayer,
+                        ElementLayer = "AI-Door,AI-门,门",
                     },
                     new ThExternalSpaceExtractor()
                     {

@@ -1,15 +1,40 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPWSS.Hydrant.Data
 {
     public class ThHydrantDoorOpeningExtractor : ThDoorOpeningExtractor
     {
         private const double EnlargeTolerance = 5.0;
+        public override void Extract(Database database, Point3dCollection pts)
+        {
+            var doors = new DBObjectCollection();
+            var doorEngine = new ThDB3DoorRecognitionEngine();
+            doorEngine.Recognize(database, pts);
+            doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ForEach(o => doors.Add(o));
+            var instance = new ThExtractPolylineService()
+            {
+                ElementLayer = this.ElementLayer,
+            };
+            instance.Extract(database, pts);
+            instance.Polys.ForEach(o=> doors.Add(o));
+            if (FilterMode == FilterMode.Window)
+            {
+                doors = FilterWindowPolygon(pts, doors.Cast<Entity>().ToList()).ToCollection();
+            }
+            var objs = doors.UnionPolygons();
+            objs = objs.FilterSmallArea(100.0);
+            Doors = objs.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList();
+        }        
         public void FilterOuterDoors(List<Entity> rooms)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
