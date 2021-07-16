@@ -89,6 +89,7 @@
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="GeojsonExtractor\Interface\IArchitectureOutlineData.cs" />
     <Compile Include="GeojsonExtractor\Interface\IClean.cs" />
+    <Compile Include="GeojsonExtractor\Interface\IGroup2.cs" />
     <Compile Include="GeojsonExtractor\Interface\IGroup.cs" />
     <Compile Include="GeojsonExtractor\Interface\IPrint.cs" />
     <Compile Include="GeojsonExtractor\Interface\IRoomPrivacy.cs" />

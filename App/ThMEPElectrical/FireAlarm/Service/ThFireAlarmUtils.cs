@@ -1,9 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System.Linq;
+using ThMEPEngineCore.CAD;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.FireAlarm.Service
 {
@@ -16,6 +14,13 @@ namespace ThMEPElectrical.FireAlarm.Service
                 return string.Join(linkChar, owners[curve]);
             }
             return "";
+        }
+        public static List<string> FindCurveGroupIds(Dictionary<Entity, string> groupId, Entity curve)
+        {
+            var ids = new List<string>();
+            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
+            groups.ForEach(g => ids.Add(groupId[g]));
+            return ids;
         }
     }
 }
