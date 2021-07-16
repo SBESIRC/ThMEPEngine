@@ -131,7 +131,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 3;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-CTRL-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "BORDER2";

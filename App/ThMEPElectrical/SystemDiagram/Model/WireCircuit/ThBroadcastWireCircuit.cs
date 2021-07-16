@@ -95,7 +95,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 2;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-BRST-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "BORDER";

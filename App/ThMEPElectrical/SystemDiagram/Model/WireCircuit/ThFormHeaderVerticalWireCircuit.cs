@@ -114,7 +114,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 6;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-UNIV-NOTE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "CONTINUOUS";

@@ -101,7 +101,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 4;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-FAS-WIRE4";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "PHANTOM2";
