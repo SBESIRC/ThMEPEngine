@@ -3,6 +3,7 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -18,7 +19,7 @@ namespace ThMEPEngineCore.Algorithm
 
         public ThMEPOriginTransformer(DBObjectCollection objs)
         {
-            var center = objs.GetCentroid();
+            var center = objs.GeometricExtents().CenterPoint();
             var vector = center.GetVectorTo(Point3d.Origin);
             Displacement = Matrix3d.Displacement(vector);
         }
