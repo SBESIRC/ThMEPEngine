@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
+using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -77,7 +78,7 @@ namespace ThMEPWSS.Hydrant.Service
                     mPolygon.ColorIndex = colorIndex;
                     mPolygon.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
                     acadDatabase.ModelSpace.Add(mPolygon);
-                    mPolygon.Hatch.ColorIndex = colorIndex;
+                    mPolygon.PatternColor = Color.FromColorIndex(ColorMethod.ByAci, (short)colorIndex);
                     mPolygon.EvaluateHatch(true);
                 }                
             }
