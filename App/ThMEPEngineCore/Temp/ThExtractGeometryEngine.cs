@@ -25,6 +25,11 @@ namespace ThMEPEngineCore.Temp
                 Extrators.Add(extractor);
             }
         }
+
+        public void Remove(ThExtractorBase extractor)
+        {
+            Extrators.Remove(extractor);
+        }
         public void Accept(List<ThExtractorBase> extractors)
         {
             extractors.ForEach(o => Accept(o));
