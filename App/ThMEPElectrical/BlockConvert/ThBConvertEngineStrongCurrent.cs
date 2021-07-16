@@ -79,11 +79,12 @@ namespace ThMEPElectrical.BlockConvert
 
         private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 考虑几何中心
+            // 考虑几何中心点与位置点的偏差，如果偏差在允许范围内，则取位置点进行计算
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
+                var dynamicProperties = srcBlockData.CustomProperties;
                 var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
                     ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
                 var srcBlockDataPosition = new Point3d().TransformBy(srcBlockData.MCS2WCS);
@@ -93,10 +94,10 @@ namespace ThMEPElectrical.BlockConvert
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
-
+        
         private void TransformByBase(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 考虑设备基点
+            // 对风机，考虑设备基点（如果没有则默认为0）
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
@@ -112,35 +113,14 @@ namespace ThMEPElectrical.BlockConvert
                     base_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 }
                 var offset = targetBlockData.Position.GetVectorTo(new Point3d(base_x, base_y, 0).TransformBy(srcBlockData.MCS2WCS));
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
-            }
-        }
-
-        private void TransformByCenter_FireDamper(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            // 考虑防火阀的几何中心
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var dynamicProperties = srcBlockData.CustomProperties;
-                double centroid_x = 0, centroid_y = 0;
-                if (dynamicProperties.Contains("长度"))
-                {
-                    centroid_x = (double)dynamicProperties.GetValue("长度");
-                }
-                if (dynamicProperties.Contains("宽度"))
-                {
-                    centroid_y = (double)dynamicProperties.GetValue("宽度");
-                }
-                var offset = targetBlockData.Position.GetVectorTo(new Point3d(centroid_x / 2, centroid_y / 2, 0).TransformBy(srcBlockData.MCS2WCS));
+                
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
         private void TransformByPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 考虑位置点
+            // 考虑潜水泵的位置点
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
@@ -176,6 +156,31 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
+        private void TransformByCenter_FireDamper(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            // 考虑防火阀的几何中心
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var dynamicProperties = srcBlockData.CustomProperties;
+                double length = 0, width = 0;
+                if (srcBlockData.CustomProperties.Contains("长度"))
+                {
+                    length = (double)dynamicProperties.GetValue("长度");
+                }
+                if (srcBlockData.CustomProperties.Contains("宽度或直径"))
+                {
+                    width = (double)dynamicProperties.GetValue("宽度或直径");
+                }
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
+                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
+                var srcBlockDataPosition = new Point3d(width / 2, -length / 2, 0).TransformBy(srcBlockData.MCS2WCS);
+                var offset = targetPoint.GetVectorTo(srcBlockDataPosition);
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
+            }
+        }
+
         public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             AdjustRotation(blkRef, srcBlockReference);
@@ -188,36 +193,15 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 double rotation = srcBlockReference.Rotation;
-                if (srcBlockReference.EffectiveName.Contains("防火阀"))
-                {
-                    var srcBlockDataPosition = new Point3d().TransformBy(srcBlockReference.MCS2WCS);
-                    var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
                     ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                    if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                        (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
-                    {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI * 3 / 2, Vector3d.ZAxis, srcBlockDataPosition));
-                        blockReference.TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, targetPoint));
-                    }
-                    else
-                    {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI / 2, Vector3d.ZAxis, srcBlockDataPosition));
-                        blockReference.TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, targetPoint));
-                    }
+                if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                {
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
                 }
                 else
                 {
-                    var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                    if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                        (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
-                    {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
-                    }
-                    else
-                    {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
-                    }
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
                 }
             }
         }
