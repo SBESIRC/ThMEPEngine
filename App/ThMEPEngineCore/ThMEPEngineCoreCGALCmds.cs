@@ -545,8 +545,18 @@ namespace ThMEPEngineCore
                 faDoorExtractor.SetTags(fireApartExtractor.GetFireAPartIds());
                 var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
                 fireProofShutter.SetTags(fireApartExtractor.GetFireAPartIds());
-                //string geoContent = extractEngine.OutputGeo();                
-                extractEngine.OutputGeo(Active.Document.Name);
+                //string geoContent = extractEngine.OutputGeo(); 
+                extractEngine.Remove(storeyExtractor);
+                var geos = extractEngine.BuildGeometries();
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                string fileName = fileInfo.Name;
+                string newFileName = "";
+                storeyExtractor.Storeys.ForEach(o =>
+                {
+                    newFileName = fileName + o.StoreyType + o.StoreyNumber;
+                });
+                ThGeoOutput.Output(geos, path, newFileName);
                 extractEngine.Print(acadDatabase.Database);
             }
         }
