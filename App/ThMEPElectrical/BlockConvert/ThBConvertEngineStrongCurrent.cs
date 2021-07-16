@@ -191,14 +191,18 @@ namespace ThMEPElectrical.BlockConvert
                 if (srcBlockReference.EffectiveName.Contains("防火阀"))
                 {
                     var srcBlockDataPosition = new Point3d().TransformBy(srcBlockReference.MCS2WCS);
+                    var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
+                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
                     if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                        (rotation - Math.PI * 3 / 2) <= -ThBConvertCommon.radian_tolerance)
+                        (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI / 2, Vector3d.ZAxis, srcBlockDataPosition));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI * 3 / 2, Vector3d.ZAxis, srcBlockDataPosition));
+                        blockReference.TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, targetPoint));
                     }
                     else
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI / 2, Vector3d.ZAxis, srcBlockDataPosition));
+                        blockReference.TransformBy(Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, targetPoint));
                     }
                 }
                 else
@@ -206,7 +210,7 @@ namespace ThMEPElectrical.BlockConvert
                     var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
                     ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
                     if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                        (rotation - Math.PI * 3 / 2) <= -ThBConvertCommon.radian_tolerance)
+                        (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
                     }
