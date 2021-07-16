@@ -1,11 +1,13 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -75,9 +77,33 @@ namespace ThMEPWSS.Hydrant.Service
                     mPolygon.ColorIndex = colorIndex;
                     mPolygon.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
                     acadDatabase.ModelSpace.Add(mPolygon);
+                    mPolygon.Hatch.ColorIndex = colorIndex;
                     mPolygon.EvaluateHatch(true);
                 }                
             }
+        }
+        public void Erase()
+        {
+            using (var databse=AcadDatabase.Use(Db))
+            {
+                var layerId = databse.Database.CreateAILayer(LayerName, 30);
+                Db.UnOffLayer(LayerName);
+                Db.UnLockLayer(LayerName);
+                Db.UnFrozenLayer(LayerName);
+                databse.ModelSpace
+                    .OfType<Entity>()
+                    .Where(e => IsElementLayer(e.Layer))
+                    .ForEach(e =>
+                    {
+                        e.UpgradeOpen();
+                        e.Erase();
+                        e.DowngradeOpen();
+                    });
+            }
+        }
+        private bool IsElementLayer(string layer)
+        {
+            return layer.ToUpper() == LayerName.ToUpper();
         }
     }
 }

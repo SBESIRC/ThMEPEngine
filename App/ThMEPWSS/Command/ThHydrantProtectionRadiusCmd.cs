@@ -40,6 +40,11 @@ namespace ThMEPWSS.Command
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
 
+                var printService = new ThHydrantPrintService(
+                    acadDb.Database,
+                    ThCheckExpressionControlService.CheckExpressionLayer);
+                printService.Erase();
+
                 ICheck checkService = null;
                 if (FireHydrantVM.Parameter.CheckObjectOption== CheckObjectOps.FireHydrant)
                 {
@@ -62,10 +67,7 @@ namespace ThMEPWSS.Command
                 };
                 regionCheckService.Check(); 
 
-                //输出
-                var printService = new ThHydrantPrintService(
-                    acadDb.Database,
-                    ThCheckExpressionControlService.CheckExpressionLayer);
+                //输出                
                 printService.Print(regionCheckService.CheckResults);
                 ThStopWatchService.Stop();
                 ThStopWatchService.Print("校核耗时：");

@@ -173,8 +173,12 @@ namespace ThMEPWSS.Hydrant.Service
                 Covers.ForEach(o =>
                 {
                     var ents = new List<Entity>();
-                    ents.Add(o.Item1.Clone() as Entity);
-                    ents.Add(new Circle(o.Item2, Vector3d.ZAxis, 200.0));
+                    var cover = o.Item1.Clone() as Entity;
+                    cover.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
+                    ents.Add(cover);
+                    var circle = new Circle(o.Item2, Vector3d.ZAxis, 200.0);
+                    circle.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
+                    ents.Add(circle);
                     ents.CreateGroup(acadDb.Database, colorIndex++);
                 });
             }
