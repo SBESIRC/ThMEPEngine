@@ -117,6 +117,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
+        // 横线不支持画竖线方法
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
+            throw new NotSupportedException();
+        }
+
         #region 画特殊块方法
         private List<Entity> DrawSpecialBlock6(int currentIndex)
         {

@@ -76,9 +76,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         //public List<ThConnectInfoModel> connectionModels = new List<ThConnectInfoModel>();
 
         /// <summary>
-        /// 绘制方法
+        /// 绘制方法(横线)
         /// </summary>
         public abstract List<Entity> Draw();
+
+        /// <summary>
+        /// 绘制方法(竖线)
+        /// </summary>
+        public abstract Dictionary<int, List<Entity>> DrawVertical();
 
         /// <summary>
         /// 此方法进行回路的初始化
