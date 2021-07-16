@@ -20,7 +20,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var templateLayer = getTemplateLayerName(ThDrainageSDCommon.Layer_CoolPipe, ThDrainageSDCommon.Layer_Suffix);
-                acadDatabase.Database.ImportLayer(templateLayer, ThDrainageSDCommon.Layer_CoolPipe);
+                acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_CoolPipe, templateLayer);
 
                 //acadDatabase.Database.ImportLinetype();
                 for (int i = 0; i < lines.Count(); i++)
@@ -38,9 +38,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //var templateLayer = getTemplateLayerName(ThDrainageSDCommon.Layer_Stack, ThDrainageSDCommon.Layer_Suffix);
-                var templateLayer = ThDrainageSDCommon.Layer_Stack;
-                acadDatabase.Database.ImportLayer(templateLayer, ThDrainageSDCommon.Layer_Stack);
+                acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_Stack);
 
                 for (int i = 0; i < pts.Count(); i++)
                 {
@@ -56,9 +54,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //var templateLayer = getTemplateLayerName(layer, ThDrainageSDCommon.Layer_Suffix);
-                var templateLayer = layer;
-                acadDatabase.Database.ImportLayer(templateLayer, layer);
+                acadDatabase.Database.ImportLayer(layer);
                 acadDatabase.Database.ImportBlock(blkname);
 
                 double scale = ThDrainageSDCommon.Blk_scale;
@@ -86,9 +82,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //var templateLayer = getTemplateLayerName(ThDrainageSDCommon.Layer_Dim, ThDrainageSDCommon.Layer_Suffix);
-                var templateLayer = ThDrainageSDCommon.Layer_Dim;
-                acadDatabase.Database.ImportLayer(templateLayer, ThDrainageSDCommon.Layer_Dim);
+                acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_Dim);
                 acadDatabase.Database.ImportDimtype(ThDrainageSDCommon.Style_Dim);
 
                 var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(ThDrainageSDCommon.Style_Dim, acadDatabase.Database);
@@ -130,15 +124,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
-
         public static void ImportDimtype(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
@@ -152,22 +137,40 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static void ImportLayer(this Database database, string TemplateName, string layerName)
+        public static void ImportLayer(this Database database, string layerName, string TemplateName = "", bool replaceIfDuplicate = true)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                var tempLayer = blockDb.Layers.ElementOrDefault(TemplateName);
-                Color color = Color.FromColorIndex(ColorMethod.ByLayer, (short)3);
-                if (tempLayer != null)
+
+                if (TemplateName != "")
                 {
-                    color = tempLayer.Color;
+                    var tempLayer = blockDb.Layers.ElementOrDefault(TemplateName);
+                    Color color = Color.FromColorIndex(ColorMethod.ByLayer, (short)3);
+                    if (tempLayer != null)
+                    {
+                        color = tempLayer.Color;
+                    }
+                    var newLayer = CreateLayer(layerName, color, replaceIfDuplicate);
                 }
-                CreateLayer(layerName, color);
+                else
+                {
+                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), replaceIfDuplicate);
+                }
+
+                LayerTableRecord layer = currentDb.Layers.Element(layerName, true);
+                if (layer != null)
+                {
+                    layer.UpgradeOpen();
+                    layer.IsOff = false;
+                    layer.IsFrozen = false;
+                    layer.IsLocked = false;
+                    layer.DowngradeOpen();
+                }
             }
         }
 
-        private static ObjectId CreateLayer(string aimLayer, Color color)
+        private static LayerTableRecord CreateLayer(string aimLayer, Color color, bool replaceIfDuplicate)
         {
             LayerTableRecord layerRecord = null;
             using (var db = AcadDatabase.Active())
@@ -177,15 +180,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (layerRecord == null)
                 {
                     layerRecord = db.Layers.Create(aimLayer);
-
+                    layerRecord.Color = color;
                 }
                 layerRecord.UpgradeOpen();
-                layerRecord.Color = color;
+                if (replaceIfDuplicate == true)
+                {
+                    layerRecord.Color = color;
+                }
                 layerRecord.IsPlottable = false;
                 layerRecord.DowngradeOpen();
             }
 
-            return layerRecord.ObjectId;
+            return layerRecord;
         }
 
 

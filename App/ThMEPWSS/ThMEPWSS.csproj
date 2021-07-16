@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDAxonoExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDCoolSupplyStart.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
