@@ -228,9 +228,14 @@ namespace ThMEPElectrical.Command
         private List<ThRawIfcDistributionElementData> SelectCrossingPolygon(List<ThRawIfcDistributionElementData> blocks, Polyline frame)
         {
             var objs = blocks.Select(o => o.Geometry).ToCollection();
+            var transformer = new ThMEPOriginTransformer(objs);
+            transformer.Transform(objs);
+            transformer.Transform(frame);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var result = spatialIndex.SelectCrossingPolygon(frame.Vertices());
-            return blocks.Where(o => result.Contains(o.Geometry)).ToList();
+            var filters = blocks.Where(o => result.Contains(o.Geometry)).ToList();
+            filters.ForEach(o => transformer.Reset(o.Geometry));
+            return filters;
         }
     }
 }
