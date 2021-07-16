@@ -53,13 +53,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return roomList;
         }
 
-        public static List<ThToilateRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static List<ThToilateRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThTerminalToilate> toilateList)
         {
             List<ThToilateRoom> roomModelList = new List<ThToilateRoom>();
             roomList.ForEach(x =>
             {
                 var roomOutline = x.Boundary as Polyline;
-                var roomToilateList = new List<ThIfcSanitaryTerminalToilate>();
+                var roomToilateList = new List<ThTerminalToilate>();
                 foreach (var terminal in toilateList)
                 {
                     var toilateOutline = terminal.Boundary;

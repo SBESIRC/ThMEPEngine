@@ -17,7 +17,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDConnectSubService
     {
-        public static List<Line> linkGroupSub(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<ThIfcSanitaryTerminalToilate, Point3d> ptForVirtualDict, Dictionary<string, (string, string)> islandPare, List<Line> branchList)
+        public static List<Line> linkGroupSub(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<ThTerminalToilate, Point3d> ptForVirtualDict, Dictionary<string, (string, string)> islandPare, List<Line> branchList)
         {
             var subBranch = new List<Line>();
 
@@ -56,7 +56,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return subBranch;
         }
 
-        private static List<Line> linkSubInGroupNormal(KeyValuePair<string, List<ThIfcSanitaryTerminalToilate>> group, out List<Point3d> orderPts)
+        private static List<Line> linkSubInGroupNormal(KeyValuePair<string, List<ThTerminalToilate>> group, out List<Point3d> orderPts)
         {
             var subBranch = new List<Line>();
 
@@ -95,7 +95,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return subBranch;
         }
 
-        private static List<Line> linkSubToVirtualForIsland(Point3d vPt, List<Point3d> orderOtherPts, List<ThIfcSanitaryTerminalToilate> group, List<Line> branchList)
+        private static List<Line> linkSubToVirtualForIsland(Point3d vPt, List<Point3d> orderOtherPts, List<ThTerminalToilate> group, List<Line> branchList)
         {
 
             var subBranch = new List<Line>();

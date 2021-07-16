@@ -58,7 +58,7 @@ namespace ThMEPWSS
 
             //取厕所
             var pts = frame.VerticesEx(100.0);
-            List<ThIfcSanitaryTerminalToilate> allToilateList = null;
+            List<ThTerminalToilate> allToilateList = null;
             using (var acadDb = AcadDatabase.Active())
             {
                 var drainageExtractor = new ThDrainageSDExtractor();
@@ -160,7 +160,7 @@ namespace ThMEPWSS
 
             //取厕所
             var pts = frame.VerticesEx(100.0);
-            List<ThIfcSanitaryTerminalToilate> allToilateList = null;
+            List<ThTerminalToilate> allToilateList = null;
             using (var acadDb = AcadDatabase.Active())
             {
                 var drainageExtractor = new ThDrainageSDExtractor();
@@ -242,7 +242,7 @@ namespace ThMEPWSS
 
             //取厕所
             var pts = frame.VerticesEx(100.0);
-            List<ThIfcSanitaryTerminalToilate> allToilateList = null;
+            List<ThTerminalToilate> allToilateList = null;
             using (var acadDb = AcadDatabase.Active())
             {
                 var drainageExtractor = new ThDrainageSDAxonoExtractor();

@@ -25,14 +25,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDAxonoExtractor : ThExtractorBase
     {
-        private List<DBPoint> Points { get; set; }
-        public List<ThIfcSanitaryTerminalToilate> SanTmnList { get; private set; }
+
+        public List<ThTerminalToilate> SanTmnList { get; private set; }
+        public List<Line> pipes { get; set; }
+        private List<ThIfcSanitaryTerminalToilate> IfcSanList { get; set; }
+
+
         public ThMEPOriginTransformer Transfer { get; set; }
 
         public ThDrainageSDAxonoExtractor()
         {
             Category = BuiltInCategory.WaterSupplyPoint.ToString();
-            SanTmnList = new List<ThIfcSanitaryTerminalToilate>();
+            SanTmnList = new List<ThTerminalToilate>();
+            IfcSanList = new List<ThIfcSanitaryTerminalToilate>();
         }
 
         public override void Extract(Database database, Point3dCollection pts)
@@ -65,9 +70,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 foreach (var element in recEngine.Elements)
                 {
                     var toModel = element as ThIfcSanitaryTerminalToilate;
-                    SanTmnList.Add(toModel);
+                    IfcSanList.Add(toModel);
                 }
             }
+
+            //change IfcSanModel to this project model
+            SanTmnList.AddRange(IfcSanList.Select(x => new ThTerminalToilate(x.Outline, x.Type)));
+
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -219,9 +228,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 bReturn = IsExisted(blkName, toiBlkNames);
                 bReturn = bReturn || IsExisted(blkName, valveBlkName);
             }
-            if (entity is Curve )
+            if (entity is Curve)
             {
-                bReturn = true; 
+                bReturn = true;
             }
             return bReturn;
         }

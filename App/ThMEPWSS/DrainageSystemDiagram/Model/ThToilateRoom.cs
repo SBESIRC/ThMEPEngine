@@ -17,13 +17,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
     {
         public Polyline outline { get; private set; }
         public List<Line> wallList { get; private set; }
-        public List<ThIfcSanitaryTerminalToilate> toilate { get; private set; }
+        public List<ThTerminalToilate> toilate { get; private set; }
         public string name { get; private set; }
         public int type { get; private set; } //1:大空间 0:小空间 -1：没有厕所
 
         private List<string> typeName = new List<string>() { "工具间", "清洁间", "第三卫", "无障碍卫","儿童" };
         public List<Point3d> outlinePtList { get; private set; }
-        public ThToilateRoom(Polyline outline, string name, List<ThIfcSanitaryTerminalToilate> tolilate)
+        public ThToilateRoom(Polyline outline, string name, List<ThTerminalToilate> tolilate)
         {
             this.outline = outline;
             this.name = name;

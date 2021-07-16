@@ -15,7 +15,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDDimService
     {
-        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLine(List<ThIfcSanitaryTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
+        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLine(List<ThTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
         {
 
             Dictionary<Line, List<Point3d>> baseLine = new Dictionary<Line, List<Point3d>>();
@@ -31,7 +31,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLineIsland(List<ThIfcSanitaryTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
+        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLineIsland(List<ThTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
         {
             //岛
             var baseLine = new Dictionary<Line, List<Point3d>>();
@@ -145,7 +145,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return baseLine;
         }
 
-        public static Dictionary<Polyline, Line> getPossibleDimArea(Dictionary<Line, List<Point3d>> baseLine, string groupName, List<ThIfcSanitaryTerminalToilate> toilateInGroup)
+        public static Dictionary<Polyline, Line> getPossibleDimArea(Dictionary<Line, List<Point3d>> baseLine, string groupName, List<ThTerminalToilate> toilateInGroup)
         {
             var possibleDimArea = new Dictionary<Polyline, Line>();
             var dir = toilateInGroup.First().Dir;
@@ -205,7 +205,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static double getInnerMoveDist(List<ThIfcSanitaryTerminalToilate> toilateInGroup, Line baseline)
+        private static double getInnerMoveDist(List<ThTerminalToilate> toilateInGroup, Line baseline)
         {
             double dist = ThDrainageSDCommon.LengthSublink * 2;
             double maxY = (toilateInGroup.First().Boundary.GetPoint3dAt(0) - toilateInGroup.First().Boundary.GetPoint3dAt(1)).Length;

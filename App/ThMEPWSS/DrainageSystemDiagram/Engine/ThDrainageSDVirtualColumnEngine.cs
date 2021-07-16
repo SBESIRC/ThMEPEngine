@@ -22,7 +22,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDVirtualColumnEngine
     {
-        public static List<Polyline> getVirtualColumn(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, Dictionary<string, List<ThIfcSanitaryTerminalToilate>> allToiInGroup, Dictionary<ThIfcSanitaryTerminalToilate, Point3d> virtualPtDict)
+        public static List<Polyline> getVirtualColumn(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, Dictionary<string, List<ThTerminalToilate>> allToiInGroup, Dictionary<ThTerminalToilate, Point3d> virtualPtDict)
         {
             var virtualColumn = new List<Polyline>();
 
@@ -64,7 +64,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return virtualColumn;
         }
 
-        private static List<Polyline> getVitualColumnForIsland(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, (string, string) island)
+        private static List<Polyline> getVitualColumnForIsland(Dictionary<string, List<ThTerminalToilate>> groupList, (string, string) island)
         {
             List<Polyline> columns = new List<Polyline>();
 
@@ -78,7 +78,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static Polyline getVitualColumnForStrightGroup(List<ThIfcSanitaryTerminalToilate> group)
+        private static Polyline getVitualColumnForStrightGroup(List<ThTerminalToilate> group)
         {
             Polyline column = new Polyline();
 
@@ -110,7 +110,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// </summary>
         /// <param name="toilate"></param>
         /// <returns></returns>
-        private static Polyline getVitualColumnForToilates(ThIfcSanitaryTerminalToilate toilate)
+        private static Polyline getVitualColumnForToilates(ThTerminalToilate toilate)
         {
             Polyline column = new Polyline();
 

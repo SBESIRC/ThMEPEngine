@@ -15,9 +15,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageSDCoolPtProcessService
     {
 
-        public static Dictionary<string, List<ThIfcSanitaryTerminalToilate>> classifyToilate(List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static Dictionary<string, List<ThTerminalToilate>> classifyToilate(List<ThTerminalToilate> toilateList)
         {
-            Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupToilate = new Dictionary<string, List<ThIfcSanitaryTerminalToilate>>();
+            Dictionary<string, List<ThTerminalToilate>> groupToilate = new Dictionary<string, List<ThTerminalToilate>>();
 
             //classify
             for (int i = 0; i < toilateList.Count; i++)
@@ -25,7 +25,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 string groupid = toilateList[i].GroupId;
                 if (groupid != null && groupToilate.ContainsKey(groupid) == false)
                 {
-                    groupToilate.Add(groupid, new List<ThIfcSanitaryTerminalToilate>() { toilateList[i] });
+                    groupToilate.Add(groupid, new List<ThTerminalToilate>() { toilateList[i] });
                 }
                 else if (groupid != null)
                 {
@@ -43,7 +43,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// </summary>
         /// <param name="groupList"></param>
         /// <returns></returns>
-        public static Dictionary<string, (string, string)> mergeIsland(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList)
+        public static Dictionary<string, (string, string)> mergeIsland(Dictionary<string, List<ThTerminalToilate>> groupList)
         {
             int TolSameIsland = 800;
 
@@ -103,7 +103,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return bReturn;
         }
 
-        public static void classifySmallRoomGroup(ref Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, List<ThToilateRoom> roomList)
+        public static void classifySmallRoomGroup(ref Dictionary<string, List<ThTerminalToilate>> groupList, List<ThToilateRoom> roomList)
         {
             var groupSmall = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.tagSmallRoom)).ToList();
             var groupSmallString = groupSmall.Select(x => x.Key).ToList();
@@ -111,14 +111,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
             foreach (var groupName in groupSmallString)
             {
                 var room = findRoomToilateBelongsTo(groupList[groupName][0], roomList);
-                var subGroup = new Dictionary<Line, List<ThIfcSanitaryTerminalToilate>>();
+                var subGroup = new Dictionary<Line, List<ThTerminalToilate>>();
 
                 foreach (var toi in groupList[groupName])
                 {
                     var wall = findToilateBelongsToWall(toi, room);
                     if (subGroup.ContainsKey(wall) == false)
                     {
-                        subGroup.Add(wall, new List<ThIfcSanitaryTerminalToilate>() { toi });
+                        subGroup.Add(wall, new List<ThTerminalToilate>() { toi });
                     }
                     else
                     {
@@ -138,7 +138,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static Line findToilateToWall(ThIfcSanitaryTerminalToilate toilate, List<ThToilateRoom> roomList)
+        public static Line findToilateToWall(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
         {
             Line wall = null;
             var room = findRoomToilateBelongsTo(toilate, roomList);
@@ -151,13 +151,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return wall;
         }
 
-        public static ThToilateRoom findRoomToilateBelongsTo(ThIfcSanitaryTerminalToilate toilate, List<ThToilateRoom> roomList)
+        public static ThToilateRoom findRoomToilateBelongsTo(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
         {
             var room = roomList.Where(x => x.toilate.Contains(toilate)).FirstOrDefault();
             return room;
         }
 
-        private static Line findToilateBelongsToWall(ThIfcSanitaryTerminalToilate toilate, ThToilateRoom room)
+        private static Line findToilateBelongsToWall(ThTerminalToilate toilate, ThToilateRoom room)
         {
             var tol = new Tolerance(10, 10);
             var walls = room.wallList;

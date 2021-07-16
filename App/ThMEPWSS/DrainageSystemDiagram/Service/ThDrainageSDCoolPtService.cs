@@ -20,9 +20,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDCoolPtService
     {
-        public static void findCoolSupplyPt(List<ThToilateRoom> roomList, List<ThIfcSanitaryTerminalToilate> toilateList, out List<ThIfcSanitaryTerminalToilate> aloneToilate)
+        public static void findCoolSupplyPt(List<ThToilateRoom> roomList, List<ThTerminalToilate> toilateList, out List<ThTerminalToilate> aloneToilate)
         {
-            aloneToilate = new List<ThIfcSanitaryTerminalToilate>();
+            aloneToilate = new List<ThTerminalToilate>();
 
             foreach (var terminal in toilateList)
             {
@@ -40,7 +40,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static List<Point3d> findPtOnWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall,bool toilateFaceSide)
+        public static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilate terminal, int TolClosedWall,bool toilateFaceSide)
         {
             List<Point3d> ptOnWall = new List<Point3d>();
             var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
@@ -71,7 +71,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return ptOnWall;
         }
 
-        private static List<Line> findParallelWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal,bool toilateFaceSide)
+        private static List<Line> findParallelWall(List<Line> wallList, ThTerminalToilate terminal,bool toilateFaceSide)
         {
             List<Line> parallelWall = new List<Line>();
             if (wallList.Count > 0)
@@ -109,7 +109,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         }
 
 
-        private static List<Line> findNearbyWall(List<Line> wallList, ThIfcSanitaryTerminalToilate terminal, int TolClosedWall)
+        private static List<Line> findNearbyWall(List<Line> wallList, ThTerminalToilate terminal, int TolClosedWall)
         {
             List<Line> closeWall = new List<Line>();
             if (wallList.Count > 0)

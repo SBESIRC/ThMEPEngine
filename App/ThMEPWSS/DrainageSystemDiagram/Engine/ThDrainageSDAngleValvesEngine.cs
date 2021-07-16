@@ -10,7 +10,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDAngleValvesEngine
     {
-        public static List<KeyValuePair<Point3d, Vector3d>> getAngleValves(List<ThIfcSanitaryTerminalToilate> terminalList)
+        public static List<KeyValuePair<Point3d, Vector3d>> getAngleValves(List<ThTerminalToilate> terminalList)
         {
             var angleValves = new List<KeyValuePair<Point3d, Vector3d>>();
 

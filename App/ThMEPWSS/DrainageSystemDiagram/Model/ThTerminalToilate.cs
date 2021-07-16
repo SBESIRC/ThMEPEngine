@@ -13,8 +13,10 @@ using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThIfcSanitaryTerminalToilate : ThIfcSanitaryTerminal
+    public class ThTerminalToilate
     {
+        public BlockReference blk { get; set; }
+        public string Uuid { get; set; }
         public string Type { get; set; }
         public List<Point3d> SupplyCool { get; set; }
         public List<Point3d> SupplyCoolOnWall { get; set; }
@@ -30,9 +32,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public string GroupId { get; set; }
         public string AreaId { get; set; }
 
-        public ThIfcSanitaryTerminalToilate(Entity geometry, string blkName)
+        public ThTerminalToilate(Entity geometry, string blkName)
         {
-            Outline = geometry;
+            blk = geometry as BlockReference;
             Type = blkName;
             SupplyCool = new List<Point3d>();
             SupplyCoolOnWall = new List<Point3d>();
@@ -51,7 +53,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public void setInfo()
         {
-            var blk = this.Outline as BlockReference;
+
             Uuid = Guid.NewGuid().ToString();
             Boundary = blk.ToOBB(blk.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
             Boundary = turnBoundary(Boundary);
@@ -126,7 +128,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             }
 
-            if (pt!= Point3d.Origin )
+            if (pt != Point3d.Origin)
             {
                 returnPt.Add(pt);
             }
@@ -137,7 +139,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         private Point3d getSupplyPtByCenter(double dalta)
         {
-            Point3d leftPt =  Boundary.GetPoint3dAt(1);
+            Point3d leftPt = Boundary.GetPoint3dAt(1);
             Point3d rightPt = Boundary.GetPoint3dAt(2);
 
             Point3d cenPt = new Point3d((leftPt.X + rightPt.X) / 2, (leftPt.Y + rightPt.Y) / 2, 0);
@@ -259,7 +261,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     break;
             }
 
-            if (pt!= Point3d.Origin )
+            if (pt != Point3d.Origin)
             {
                 returnPt.Add(pt);
             }

@@ -12,7 +12,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDConnectCoolSupplyEngine
     {
-        public static List<Line> ThConnectCoolSupplyEngine(List<ThExtractorBase> archiExtractor, List<ThIfcSanitaryTerminalToilate> allToilateList, ThDrainageSDDataExchange dataSet)
+        public static List<Line> ThConnectCoolSupplyEngine(List<ThExtractorBase> archiExtractor, List<ThTerminalToilate> allToilateList, ThDrainageSDDataExchange dataSet)
         {
             var allLink = new List<Line>();
 

@@ -145,7 +145,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return currNode;
         }
 
-        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList, List<List<ThIfcSanitaryTerminalToilate>> islandGroupList)
+        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList, List<List<ThTerminalToilate>> islandGroupList)
         {
             ThDrainageSDTreeNode newNode = node;
 
@@ -172,7 +172,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList)
+        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
         {
             ThDrainageSDTreeNode newNode = node;
             List<string> HandWashSinkType = new List<string>() { "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
@@ -195,9 +195,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static List<List<ThIfcSanitaryTerminalToilate>> getIslandGroupList(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> GroupList, Dictionary<string, (string, string)> IslandPair)
+        private static List<List<ThTerminalToilate>> getIslandGroupList(Dictionary<string, List<ThTerminalToilate>> GroupList, Dictionary<string, (string, string)> IslandPair)
         {
-            var islandGroupList = new List<List<ThIfcSanitaryTerminalToilate>>();
+            var islandGroupList = new List<List<ThTerminalToilate>>();
 
             List<string> islandTraversal = new List<string>();
 
@@ -206,7 +206,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (islandTraversal.Contains(island.Key) == false)
                 {
 
-                    var group = new List<ThIfcSanitaryTerminalToilate>();
+                    var group = new List<ThTerminalToilate>();
                     group.AddRange(GroupList[island.Value.Item1]);
                     group.AddRange(GroupList[island.Value.Item2]);
                     islandGroupList.Add(group);
@@ -251,7 +251,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static ThIfcSanitaryTerminalToilate matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList)
+        private static ThTerminalToilate matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
         {
             var tol = new Tolerance(10, 10);
 

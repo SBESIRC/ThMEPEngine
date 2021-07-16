@@ -37,6 +37,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDAxonoExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThIfcSanitaryTerminalToilate.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDCoolSupplyStart.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
@@ -139,7 +140,7 @@
     <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDConnectCoolSupplyEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDColdWaterSupplyStartExtractor.cs" />
-    <Compile Include="DrainageSystemDiagram\Model\ThIfcSanitaryTerminalToilate.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilate.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJsonService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
