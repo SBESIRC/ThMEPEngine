@@ -32,6 +32,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// </summary>
         public bool GroupSwitch { get; set; }
         /// <summary>
+        /// 分组开关，用于控制是否分组
+        /// </summary>
+        public bool Group2Switch { get; set; }
+        /// <summary>
         /// 表示在BuildGeometry时只输出孤立的元素
         /// </summary>
         public bool IsolateSwitch { get; set; }
@@ -45,16 +49,20 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// 房间框线处理后导致区域变化
         /// </summary>
         protected double LoopBufferLength = 10.0;
-
+        protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
+        protected Dictionary<Entity, List<string>> Group2Owner { get; set; }
         public ThExtractorBase()
         {
             Category = "";
             ElementLayer = "";
             GroupSwitch = false;
+            Group2Switch = false;
             IsolateSwitch = false;
             UseDb3Engine = true;
             ColorIndex = 256;
             FilterMode = FilterMode.Cross;
+            GroupOwner = new Dictionary<Entity, List<string>>();
+            Group2Owner = new Dictionary<Entity, List<string>>();
         }
         public abstract void Extract(Database database, Point3dCollection pts);
         public abstract List<ThGeometry> BuildGeometries();

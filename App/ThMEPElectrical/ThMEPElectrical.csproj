@@ -115,6 +115,10 @@
     <Compile Include="ConnectPipe\Service\PathfindingWithDirServce.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="FireAlarm\Data\ThEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Model\EStoreyInfo.cs" />
+    <Compile Include="FireAlarm\Model\StoreyInfo.cs" />
+    <Compile Include="FireAlarm\Service\ThFireAlarmUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
