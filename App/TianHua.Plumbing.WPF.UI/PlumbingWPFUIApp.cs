@@ -31,26 +31,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
         }
 
-        [CommandMethod("TIANHUACAD", "THDSPSXT", CommandFlags.Modal)]
-        public void THSSUI()
-        {
-            if (null != uiDrainage && uiDrainage.IsLoaded)
-                return;
-
-            uiDrainage = new uiDrainageSystem();
-            AcadApp.ShowModelessWindow(uiDrainage);
-        }
-
-        [CommandMethod("TIANHUACAD", "THDSPSXTSet", CommandFlags.Modal)]
-        public void THSSUI2()
-        {
-            if (null != uiSet && uiSet.IsLoaded)
-                return;
-
-            uiSet = new uiDrainageSystemSet();
-            AcadApp.ShowModelessWindow(uiSet);
-        }
-
         /// <summary>
         /// 给水系统图
         /// </summary>
