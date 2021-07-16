@@ -114,6 +114,7 @@ namespace ThMEPWSS.Hydrant.Service
                         UseDb3Engine=true,
                         FilterMode = FilterMode.Cross,
                     },
+
                 };
             if (FireHydrantVM.Parameter.IsThinkIsolatedColumn)
             {
@@ -126,10 +127,6 @@ namespace ThMEPWSS.Hydrant.Service
                 });
             }
             extractors.ForEach(o => o.Extract(db, pts));
-            //调整不在房间内的消火栓的点位
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
-            var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
-            hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
             return extractors;
         }
 
