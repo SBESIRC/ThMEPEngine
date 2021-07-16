@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
     {
         public override List<Entity> Draw()
         {
+            return new List<Entity>();
+        }
+
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
             int currentIndex = 19;
-            List<Entity> Result = new List<Entity>();
+            Dictionary<int, List<Entity>> ResultDic = new Dictionary<int, List<Entity>>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
             int PressureSwitchMinFloor = 0;//灭火系统流量开关最低楼层
             int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
@@ -25,12 +31,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int FireHydrantPumpCount = 0;//消火栓泵个数
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
+                List<Entity> Result = new List<Entity>();
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["灭火系统流量开关"] > 0)
                 {
-                    if(PressureSwitchMinFloor==0)
-                        PressureSwitchMinFloor= FloorNum + 1;
+                    if (PressureSwitchMinFloor == 0)
+                        PressureSwitchMinFloor = FloorNum + 1;
                     PressureSwitchMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFirePumpStartLine(currentIndex, FloorNum));
                 }
@@ -42,45 +49,86 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         FireHydrantPumpMinFloor = FloorNum + 1;
                     Result.AddRange(DrawFireHydrantPumpLine(currentIndex, FloorNum));
                 }
+                ResultDic.Add(FloorNum + 1, Result);
             }
             //都存在，才画
             if (PressureSwitchMinFloor > 0)
             {
                 if (FireHydrantPumpMinFloor > 0)
                 {
-                    if (PressureSwitchMaxFloor >= FireHydrantPumpMinFloor)
+                    if (PressureSwitchMaxFloor == FireHydrantPumpMinFloor)
                     {
                         Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
-                        Result.Add(Endline1);
+                        ResultDic[FireHydrantPumpMinFloor].Add(Endline1);
                     }
+                    else if (PressureSwitchMaxFloor > FireHydrantPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor, 0));
+                        ResultDic[FireHydrantPumpMinFloor].Add(Endline1);
+                        for (int floorNum = FireHydrantPumpMinFloor + 1; floorNum < PressureSwitchMaxFloor; floorNum++)
+                        {
+                            Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                            ResultDic[floorNum].Add(Endline);
+                        }
+                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                        ResultDic[PressureSwitchMaxFloor].Add(Endline2);
+                    }
+
                     if (PressureSwitchMinFloor < FireHydrantPumpMinFloor)
                     {
-                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0));
-                        Result.Add(Endline1);
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor, 0));
+                        ResultDic[PressureSwitchMinFloor].Add(Endline1);
+                        for (int floorNum = PressureSwitchMinFloor + 1; floorNum < FireHydrantPumpMinFloor; floorNum++)
+                        {
+                            Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                            ResultDic[floorNum].Add(Endline);
+                        }
+                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * FireHydrantPumpMinFloor - 1700, 0));
+                        ResultDic[FireHydrantPumpMinFloor].Add(Endline2);
                     }
                 }
                 else
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
-                    Result.Add(Endline1);
+                    for (int floorNum = 1; floorNum < PressureSwitchMaxFloor; floorNum++)
+                    {
+                        Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                        ResultDic[floorNum].Add(Endline);
+                    }
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (PressureSwitchMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                    ResultDic[PressureSwitchMaxFloor].Add(Endline1);
                 }
             }
+
             //设置线型
-            Result.ForEach(o =>
+            ResultDic.Values.ForEach(x =>
             {
-                o.Linetype = this.CircuitLinetype;
-                o.Layer = this.CircuitLayer;
-                o.ColorIndex = this.CircuitColorIndex;
+                x.ForEach(o =>
+                {
+                    o.Linetype = this.CircuitLinetype;
+                    o.Layer = this.CircuitLayer;
+                    o.ColorIndex = this.CircuitColorIndex;
+                });
             });
+
             if (FireHydrantPumpMaxFloor > 0)
             {
-                Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * FireHydrantPumpMaxFloor - 1900, 0))
+                for (int floorNum = 1; floorNum < FireHydrantPumpMaxFloor; floorNum++)
+                {
+                    Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * (floorNum - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * floorNum, 0))
+                    {
+                        Linetype = "ByLayer",
+                        Layer = "E-FAS-WIRE4",
+                        ColorIndex = (int)ColorIndex.BYLAYER// 4
+                    };
+                    ResultDic[floorNum].Add(Endline);
+                }
+                Entity Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * (FireHydrantPumpMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * FireHydrantPumpMaxFloor - 1900, 0))
                 {
                     Linetype = "ByLayer",
                     Layer = "E-FAS-WIRE4",
-                    ColorIndex = 4
+                    ColorIndex = (int)ColorIndex.BYLAYER// 4
                 };
-                Result.Add(Endline2);
+                ResultDic[FireHydrantPumpMaxFloor].Add(Endline1);
             }
             //画液位信号线路模块
             if (FireCompartmentParameter.FixedPartType != 3)
@@ -94,9 +142,9 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 else if (PressureSwitchMaxFloor > 0)
                 {
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.FireHydrantPumpDirectStartSignalLineModuleExcludingFireRoom);
-                }              
+                }
             }
-            return Result;
+            return ResultDic;
         }
 
         /// <summary>
@@ -139,7 +187,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 3;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-CTRL-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "BORDER2";

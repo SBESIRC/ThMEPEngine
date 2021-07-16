@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
     {
         public override List<Entity> Draw()
         {
+            return new List<Entity>();
+        }
+
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
             int currentIndex = 20;
-            List<Entity> Result = new List<Entity>();
+            Dictionary<int, List<Entity>> ResultDic = new Dictionary<int, List<Entity>>();
             int SprayPumpMaxFloor = 0;//喷淋泵最高楼层
             int SprayPumpMinFloor = 0;//喷淋泵最低楼层
             int SprayPumpCount = 0;//喷淋泵个数
@@ -26,6 +32,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             List<int> PressureSwitchDrawLowFloorNoList = new List<int>();
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
+                List<Entity> Result = new List<Entity>();
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
@@ -37,8 +44,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["灭火系统压力开关"] > 0)
                 {
-                    if(PressureSwitchMinFloor==0)
-                        PressureSwitchMinFloor= FloorNum + 1;
+                    if (PressureSwitchMinFloor == 0)
+                        PressureSwitchMinFloor = FloorNum + 1;
                     PressureSwitchMaxFloor = FloorNum + 1;
                     if (SprayPumpMinFloor > 0)
                     {
@@ -49,46 +56,88 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         PressureSwitchDrawLowFloorNoList.Add(FloorNum);
                     }
                 }
+                ResultDic.Add(FloorNum + 1, Result);
             }
-            Result.AddRange(DrawSprayPumpLineLowFloor(currentIndex, PressureSwitchDrawLowFloorNoList, SprayPumpMinFloor>0));
+            PressureSwitchDrawLowFloorNoList.ForEach(FloorNum =>
+            {
+                ResultDic[FloorNum + 1].AddRange(DrawSprayPumpLineLowFloor(currentIndex, FloorNum, SprayPumpMinFloor > 0));
+            });
             //都存在，才画
             if (PressureSwitchMaxFloor > 0)
             {
                 if (SprayPumpMinFloor > 0)
                 {
-                    if (PressureSwitchMaxFloor >= SprayPumpMinFloor)
+                    if (PressureSwitchMaxFloor == SprayPumpMinFloor)
                     {
-                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
-                        Result.Add(Endline1);
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0));
+                        ResultDic[PressureSwitchMaxFloor].Add(Endline1);
                     }
+                    else if (PressureSwitchMaxFloor > SprayPumpMinFloor)
+                    {
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor, 0));
+                        ResultDic[SprayPumpMinFloor].Add(Endline1);
+                        for (int floorNum = SprayPumpMinFloor + 1; floorNum < PressureSwitchMaxFloor; floorNum++)
+                        {
+                            Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                            ResultDic[floorNum].Add(Endline);
+                        }
+                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0));
+                        ResultDic[PressureSwitchMaxFloor].Add(Endline2);
+                    }
+
                     if (PressureSwitchMinFloor < SprayPumpMinFloor)
                     {
-                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
-                        Result.Add(Endline2);
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor, 0));
+                        ResultDic[PressureSwitchMinFloor].Add(Endline1);
+                        for (int floorNum = PressureSwitchMinFloor + 1; floorNum < SprayPumpMinFloor; floorNum++)
+                        {
+                            Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                            ResultDic[floorNum].Add(Endline);
+                        }
+                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * SprayPumpMinFloor - 1700, 0));
+                        ResultDic[SprayPumpMinFloor].Add(Endline2);
                     }
                 }
                 else
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0));
-                    Result.Add(Endline1);
+                    for (int floorNum =  1; floorNum < PressureSwitchMaxFloor; floorNum++)
+                    {
+                        Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                        ResultDic[floorNum].Add(Endline);
+                    }
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 450, 0));
+                    ResultDic[PressureSwitchMaxFloor].Add(Endline1);
                 }
             }
             //设置线型
-            Result.ForEach(o =>
+            ResultDic.Values.ForEach(x =>
             {
-                o.Linetype = this.CircuitLinetype;
-                o.Layer = this.CircuitLayer;
-                o.ColorIndex = this.CircuitColorIndex;
+                x.ForEach(o =>
+                {
+                    o.Linetype = this.CircuitLinetype;
+                    o.Layer = this.CircuitLayer;
+                    o.ColorIndex = this.CircuitColorIndex;
+                });
             });
             if (SprayPumpMaxFloor > 0)
             {
-                Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * SprayPumpMaxFloor - 1900, 0))
+                for (int floorNum = 1; floorNum < SprayPumpMaxFloor; floorNum++)
+                {
+                    Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * floorNum, 0))
+                    {
+                        Linetype = "ByLayer",
+                        Layer = "E-FAS-WIRE4",
+                        ColorIndex = (int)ColorIndex.BYLAYER //4
+                    };
+                    ResultDic[floorNum].Add(Endline);
+                }
+                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * (SprayPumpMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * SprayPumpMaxFloor - 1900, 0))
                 {
                     Linetype = "ByLayer",
                     Layer = "E-FAS-WIRE4",
-                    ColorIndex = 4
+                    ColorIndex = (int)ColorIndex.BYLAYER //4
                 };
-                Result.Add(Endline2);
+                ResultDic[SprayPumpMaxFloor].Add(Endline1);
             }
             if (FireCompartmentParameter.FixedPartType != 3)
             {
@@ -98,34 +147,31 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.SprinklerPumpManualControlCircuitModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.SprinklerPumpManualControlCircuitModuleExcludingFireRoom);
                     InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (20 - 1) + 650, OuterFrameLength * 0 - 1000, 0), new Scale3d(-100, 100, 100), Math.PI / 4, new Dictionary<string, string>() { { "N", SprayPumpCount.ToString() } });
                 }
-                else if(PressureSwitchMinFloor>0)
+                else if (PressureSwitchMinFloor > 0)
                 {
                     InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.SprinklerPumpDirectStartSignalLineModuleContainsFireRoom : ThAutoFireAlarmSystemCommon.SprinklerPumpDirectStartSignalLineModuleExcludingFireRoom);
                 }
             }
-            return Result;
+            return ResultDic;
         }
 
-        private List<Entity> DrawSprayPumpLineLowFloor(int CurrentIndex, List<int> floorNums, bool IsUp)
+        private List<Entity> DrawSprayPumpLineLowFloor(int CurrentIndex, int floorNum, bool IsUp)
         {
             List<Entity> result = new List<Entity>();
-            floorNums.ForEach(floorNum =>
+            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
+            result.Add(Endline1);
+            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0));
+            result.Add(Endline2);
+            if (IsUp)
             {
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0));
-                result.Add(Endline1);
-                Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0));
-                result.Add(Endline2);
-                if (IsUp)
-                {
-                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2750, 0));
-                    result.Add(Endline3);
-                }
-                else
-                {
-                    Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
-                    result.Add(Endline3);
-                }  
-            });
+                Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2750, 0));
+                result.Add(Endline3);
+            }
+            else
+            {
+                Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+                result.Add(Endline3);
+            }
             return result;
         }
         private List<Entity> DrawSprayPumpLine(int CurrentIndex, int floorNum, bool drawSprinklerPump)

@@ -296,194 +296,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
         }
 
         /// <summary>
-        /// 画系统图
+        /// 准备数据
         /// </summary>
-        public override void DrawSystemDiagram(Vector3d Offset, Matrix3d ConversionMatrix)
+        protected override void PrepareData()
         {
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                HostApplicationServices.WorkingDatabase = acadDatabase.Database;
-
-                //设置全局偏移量
-                InsertBlockService.SetOffset(Offset, ConversionMatrix);
-                //初始化所有需要画的线并导入图层/线型等信息
-                ThWireCircuitConfig.HorizontalWireCircuits.ForEach(o =>
-                {
-                    o.InitCircuitConnection();
-                    InsertBlockService.InsertCircuitLayerAndLineType(o.CircuitLayer, o.CircuitLayerLinetype);
-                });
-                ThWireCircuitConfig.VerticalWireCircuits.ForEach(o =>
-                {
-                    o.InitCircuitConnection();
-                    InsertBlockService.InsertCircuitLayerAndLineType(o.CircuitLayer, o.CircuitLayerLinetype);
-                });
-                //初始化系统图需要的图层/线型等信息
-                InsertBlockService.InsertDiagramLayerAndStyle();
-                //开启相关信号线绘画权限
-                ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust = true;
-                ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump = true;
-                ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump = true;
-
-                List<Entity> DrawEntitys = new List<Entity>();
-                Dictionary<Point3d, ThBlockModel> dicBlockPoints = new Dictionary<Point3d, ThBlockModel>();
-                int RowIndex = 1;//方格层数
-                var AllFireDistrictsData = GetFireDistrictsInfo();
-                AllFireDistrictsData = DataProcessing(AllFireDistrictsData);
-                var AllData = DataConversion(AllFireDistrictsData);
-                foreach (var fireDistrict in AllData)
-                {
-                    //初始化横线
-                    ThWireCircuitConfig.HorizontalWireCircuits.ForEach(o =>
-                    {
-                        o.SetFloorIndex(RowIndex, fireDistrict);
-                        DrawEntitys.AddRange(o.Draw());
-                    });
-
-                    //Draw Block
-                    //业务更改，现在#10列，增加了多种报警器/探测器类型，需要特殊处理
-                    ThBlockConfigModel.BlockConfig.Where(o => o.Index != 10).ForEach(o =>
-                    {
-                        if (!o.CanHidden || fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0)
-                        {
-
-                            dicBlockPoints.Add(CalculateCoordinates(RowIndex, o), o);
-                            if (o.HasMultipleBlocks)
-                            {
-                                o.AssociatedBlocks.ForEach(x =>
-                                {
-                                    dicBlockPoints.Add(CalculateCoordinates(RowIndex, x), x);
-                                });
-                            }
-                        }
-                    });
-                    //处理#10 业务代码
-                    {
-                        //红外光束感烟火灾探测器发射器/接收器有任意一个，优先画，其余探测器隐藏不画
-                        if (fireDistrict.Data.BlockData.BlockStatistics["红外光束感烟火灾探测器发射器"] > 0 || fireDistrict.Data.BlockData.BlockStatistics["红外光束感烟火灾探测器接收器"] > 0)
-                        {
-                            ThBlockConfigModel.BlockConfig.Where(o => (o.UniqueName == "红外光束感烟火灾探测器发射器") || (o.UniqueName == "红外光束感烟火灾探测器接收器")).ForEach(o =>
-                              {
-                                  if (!o.CanHidden || fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0)
-                                  {
-
-                                      dicBlockPoints.Add(CalculateCoordinates(RowIndex, o), o);
-                                      if (o.HasMultipleBlocks)
-                                      {
-                                          o.AssociatedBlocks.ForEach(x =>
-                                          {
-                                              dicBlockPoints.Add(CalculateCoordinates(RowIndex, x), x);
-                                          });
-                                      }
-                                  }
-                              });
-                        }
-                        //没有红外光束烟感探测器，画剩下的任意三个(至多三个)
-                        else
-                        {
-                            var count = ThBlockConfigModel.BlockConfig.Where(o => o.Index == 10).Count(o => fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0);
-                            double spacing = 0;
-                            //优先画[吸气式感烟火灾探测器],[家用感烟火灾探测报警器],[家用感温火灾探测报警器]因为这些块和其他的块长的都不一样
-                            //没有其他探测器
-                            if (count == 0)
-                            {
-                                //Do Not
-                            }
-                            //超过三个探测器
-                            else if (count > 3)
-                            {
-                                spacing = 750.0;
-                            }
-                            //1-3个
-                            else
-                            {
-                                spacing = 3000.0 / (count + 1);
-                            }
-                            double distance = spacing;
-                            if (fireDistrict.Data.BlockData.BlockStatistics["吸气式感烟火灾探测器"] > 0)
-                            {
-                                ThBlockConfigModel.BlockConfig.Where(o => (o.UniqueName == "吸气式感烟火灾探测器")).ForEach(o =>
-                                {
-                                    if (!o.CanHidden || fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0)
-                                    {
-                                        dicBlockPoints.Add(CalculateCoordinates(RowIndex, o).Add(new Vector3d(distance, 0, 0)), o);
-                                        distance += spacing;
-                                        if (o.HasMultipleBlocks)
-                                        {
-                                            o.AssociatedBlocks.ForEach(x =>
-                                            {
-                                                dicBlockPoints.Add(CalculateCoordinates(RowIndex, x), x);
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            if (fireDistrict.Data.BlockData.BlockStatistics["家用感烟火灾探测报警器"] > 0 || fireDistrict.Data.BlockData.BlockStatistics["家用感温火灾探测报警器"] > 0)
-                            {
-                                ThBlockConfigModel.BlockConfig.Where(o => (o.UniqueName == "家用感烟火灾探测报警器") || (o.UniqueName == "家用感温火灾探测报警器")).ForEach(o =>
-                                 {
-                                     if (!o.CanHidden || fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0)
-                                     {
-                                         dicBlockPoints.Add(CalculateCoordinates(RowIndex, o).Add(new Vector3d(distance, 0, 0)), o);
-                                         distance += spacing;
-                                         if (o.HasMultipleBlocks)
-                                         {
-                                             o.AssociatedBlocks.ForEach(x =>
-                                             {
-                                                 dicBlockPoints.Add(CalculateCoordinates(RowIndex, x), x);
-                                             });
-                                         }
-                                     }
-                                 });
-                            }
-                            ThBlockConfigModel.BlockConfig.Where(o => (o.Index == 10) && (o.UniqueName != "吸气式感烟火灾探测器") && (o.UniqueName != "家用感烟火灾探测报警器") && (o.UniqueName != "家用感温火灾探测报警器")).ForEach(o =>
-                            {
-                                if (distance < 3000)
-                                {
-                                    if (!o.CanHidden || fireDistrict.Data.BlockData.BlockStatistics[o.UniqueName] > 0)
-                                    {
-                                        dicBlockPoints.Add(CalculateCoordinates(RowIndex, o).Add(new Vector3d(distance, 0, 0)), o);
-                                        distance += spacing;
-                                        if (o.HasMultipleBlocks)
-                                        {
-                                            o.AssociatedBlocks.ForEach(x =>
-                                            {
-                                                dicBlockPoints.Add(CalculateCoordinates(RowIndex, x), x);
-                                            });
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    //跳入下一层
-                    RowIndex++;
-                }
-                {
-                    //初始化竖线
-                    ThWireCircuitConfig.VerticalWireCircuits.ForEach(o =>
-                    {
-                        o.SetFloorIndex(RowIndex, AllData);
-                        DrawEntitys.AddRange(o.Draw());
-                    });
-                }
-
-                foreach (Entity item in DrawEntitys)
-                {
-                    item.Move(Offset);
-                    item.TransformBy(ConversionMatrix);
-                    acadDatabase.ModelSpace.Add(item);
-                }
-                //画所有的外框线
-                InsertBlockService.InsertOuterBorderBlock(RowIndex - 1, ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum);
-                //画所有的块
-                InsertBlockService.InsertSpecifyBlock(dicBlockPoints);
-                //画底部固定部分
-                if (FireCompartmentParameter.FixedPartType != 3)
-                {
-                    InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FixedPartContainsFireRoom : ThAutoFireAlarmSystemCommon.FixedPartExcludingFireRoom);
-                }
-            }
+            var AllFireDistrictsData = GetFireDistrictsInfo();
+            AllFireDistrictsData = DataProcessing(AllFireDistrictsData);
+            var AllData = DataConversion(AllFireDistrictsData);
+            this.DrawData = AllData;
         }
 
         /// <summary>
@@ -624,17 +444,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private List<ThDrawModel> DataConversion(List<ThFireDistrictModel> allData)
         {
             return allData.Select(o => new ThDrawModel() { FireDistrictName = o.FireDistrictName, Data = o.Data }).ToList();
-        }
-
-        /// <summary>
-        /// 计算块的实际坐标
-        /// </summary>
-        /// <param name="rowIndex"></param>
-        /// <param name="BlockInfo"></param>
-        /// <returns></returns>
-        private Point3d CalculateCoordinates(int rowIndex, ThBlockModel BlockInfo)
-        {
-            return new Point3d(3000 * (BlockInfo.Index - 1) + BlockInfo.Position.X, 3000 * (rowIndex - 1) + BlockInfo.Position.Y, 0);
         }
     }
 }

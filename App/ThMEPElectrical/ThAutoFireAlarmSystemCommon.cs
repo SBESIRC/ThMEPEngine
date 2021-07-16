@@ -14,9 +14,9 @@ namespace ThMEPElectrical
         public static readonly string WireCircuitByLayer = "E-FAS-NUMB";     //电路编号图层
 
         //左部分的列数量
-        public static readonly int SystemColLeftNum = 5;
+        public static readonly int SystemColLeftNum = 6;
         //左部分的列数量
-        public static readonly int SystemColRightNum = 16;
+        public static readonly int SystemColRightNum = 15;
 
         //图层
         public static readonly string BlockByLayer = "E-FAS-DEVC";     //块的图层名
