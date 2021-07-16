@@ -43,6 +43,43 @@ namespace ThCADExtension
             }
             return loops;
         }
+        /// <summary>
+        /// 获取MPolygon的Shell
+        /// 仅支持单个Shell带多个Hole的MPolygon
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <returns></returns>
+        public static Polyline Shell(this MPolygon mPolygon)
+        {
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
+            {
+                var loopDir = mPolygon.GetLoopDirection(i);
+                if(loopDir == LoopDirection.Exterior)
+                {
+                    return ToDbPolyline(mPolygon.GetMPolygonLoopAt(i));
+                }
+            }
+            return new Polyline();
+        }
+        /// <summary>
+        /// 获取MPolygon的Holes
+        /// 仅支持单个Shell带多个Hole的MPolygon
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <returns></returns>
+        public static List<Polyline> Holes(this MPolygon mPolygon)
+        {
+            var holes = new List<Polyline>();
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
+            {
+                var loopDir = mPolygon.GetLoopDirection(i);
+                if (loopDir == LoopDirection.Interior)
+                {
+                    holes.Add(ToDbPolyline(mPolygon.GetMPolygonLoopAt(i)));
+                }
+            }
+            return holes;
+        }
         public static Polyline ToDbPolyline(this MPolygonLoop loop)
         {
             Polyline polyline = new Polyline()

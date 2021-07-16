@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPWSS.Hydrant.Service
 { 
@@ -44,17 +45,25 @@ namespace ThMEPWSS.Hydrant.Service
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(Covers.ToCollection());
             Rooms.ForEach(o =>
             {
-                var covers = spatialIndex.SelectCrossingPolygon(o.Boundary);
-                var divideService = new ThDivideRoomService(o.Boundary, covers.Cast<Entity>().ToList());
-                divideService.Divide();
-                var belongedDic = new Dictionary<Entity, List<Entity>>();
-                divideService.UnProtectAreas.ForEach(o => belongedDic.Add(o, new List<Entity>()));
-                var belongedService = new ThRoomSplitAreaBelongedService(
-                    divideService.ProtectAreas, 
-                    covers.Cast<Entity>().ToList());
-                belongedService.Classify();                
-                belongedService.Results.ForEach(o => belongedDic.Add(o.Key, o.Value));
-                CheckResults.Add(o.Boundary, Check(belongedDic));
+                var ents = new List<Entity>() { o.Boundary };
+                if(o.Boundary is MPolygon mPolygon)
+                {
+                    ents.AddRange(mPolygon.Holes());
+                }
+                ents.ForEach(e =>
+                {
+                    var covers = spatialIndex.SelectCrossingPolygon(e);
+                    var divideService = new ThDivideRoomService(e, covers.Cast<Entity>().ToList());
+                    divideService.Divide();
+                    var belongedDic = new Dictionary<Entity, List<Entity>>();
+                    divideService.UnProtectAreas.ForEach(p => belongedDic.Add(p, new List<Entity>()));
+                    var belongedService = new ThRoomSplitAreaBelongedService(
+                        divideService.ProtectAreas,
+                        covers.Cast<Entity>().ToList());
+                    belongedService.Classify();
+                    belongedService.Results.ForEach(r => belongedDic.Add(r.Key, r.Value));
+                    CheckResults.Add(e, Check(belongedDic));
+                });
             });            
         }
         /// <summary>
