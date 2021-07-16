@@ -6,7 +6,7 @@ namespace ThMEPWSS.Hydrant.Service
 {
     public class ThCheckExpressionControlService
     {
-        public readonly static string CheckExpressionLayer = "AI-Hydrant";
+        public readonly static string CheckExpressionLayer = "AI-辅助线";
         public static void ShowCheckExpression()
         {
             using (var dockLock = AcHelper.Active.Document.LockDocument())
