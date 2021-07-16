@@ -22,8 +22,18 @@ namespace ThMEPWSS.Command
         public void Dispose()
         {
         }
-
         public void Execute()
+        {
+            try
+            {
+                CreateFireHydrantSystem();
+            }
+            catch
+            {
+                ;
+            }
+        }
+        public void CreateFireHydrantSystem()
         {
             var opt = new PromptPointOptions("请指定环管标记起点");
             var loopStartPt = Active.Editor.GetPoint(opt).Value;

@@ -66,6 +66,15 @@ namespace ThMEPWSS
                             {
                                 if (p.ToString().Contains("分割" + Convert.ToString(index) + " X"))
                                 {
+                                    var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
+                                    if (SplitX < 0)
+                                    {
+                                        continue;
+                                    }
+                                    if(SplitX > eptX - spt.X)
+                                    {
+                                        continue;
+                                    }
                                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
                                     index += 1;
                                 }

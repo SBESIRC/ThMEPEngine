@@ -582,7 +582,7 @@ namespace ThMEPWSS.Pipe.Model
             }
             else
             {
-                pt7 = new Point3d(pt374.X + 150, pt3.Y, 0);
+                pt7 = new Point3d(pt374.X + 150 * Households[AreaIndex], pt3.Y, 0);
                 pt11 = new Point3d(pt7.X, pt7.Y - (0.125 + 0.1 * (Households[AreaIndex] - 1)) * FloorHeight, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
             }
@@ -595,6 +595,7 @@ namespace ThMEPWSS.Pipe.Model
             BranchPipes.Add(new Line(pt374, pt7));
             BranchPipes.Add(new Line(pt7, pt11));
             
+       
             CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置                      
             WaterMeterSite.Add(new Point3d((pt373.X + pt374.X) / 2, pt3.Y, 0));//第一个水表位置
 
@@ -623,20 +624,24 @@ namespace ThMEPWSS.Pipe.Model
                 }
                 else
                 {
-                    pt8 = new Point3d(pt7.X - i * 150, pt3.Y, 0);
+                    pt8 = new Point3d(pt7.X - i * 150, pt4.Y, 0);
                     pt12 = new Point3d(pt8.X, pt11.Y, 0);
                     WaterPipeInterrupted.Add(pt12);//第i个水管截断位置
                 }
                 BranchPipes.Add(new Line(pt4, pt481));
+                
                 BranchPipes.Add(new Line(pt482, pt483));
+                
                 BranchPipes.Add(new Line(pt484, pt8));
+                
                 BranchPipes.Add(new Line(pt8, pt12));
-                if(i == Households[AreaIndex] - 1 && !HasFlushFaucet)
+                if(i == Households[AreaIndex] -1)
                 {
                     BranchPipes.Add(new Line(pt3, pt4));
                 }
             }
-
+            
+            
             if (HasFlushFaucet) //有冲洗龙头
             {
                 var pt19 = new Point3d(pt3.X, pt3.Y - Households[AreaIndex] * 0.1 * FloorHeight, 0);
@@ -897,7 +902,13 @@ namespace ThMEPWSS.Pipe.Model
         public List<Point3dCollection> CreateRectList()
         {
             var rectls = new List<Point3dCollection>();
-
+            if(LineXList.Count == 0)
+            {
+                Point3d[] rect;
+                rect = CreatePolyLine(StartPt.X, EndPt.X, StartPt.Y, EndPt.Y);
+                rectls.Add(new Point3dCollection(rect));
+                return rectls;
+            }
             for(int i = 0; i < LineXList.Count + 1; i++)
             {
                 Point3d[] rect;
@@ -980,6 +991,7 @@ namespace ThMEPWSS.Pipe.Model
             for (int i = 0; i < floorList.Count; i++)
             {
                 foreach (var f in floorList[i])
+
                 {
                     for (int j = 0; j < floorAreaList[0].Count; j++)
                     {
@@ -1191,6 +1203,15 @@ namespace ThMEPWSS.Pipe.Model
                 if(sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains("分割") && 
                     sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains(" X"))
                 {
+                    var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
+                    if (SplitX < 0)
+                    {
+                        continue;
+                    }
+                    if (SplitX > eptX - spt.X)
+                    {
+                        continue;
+                    }
                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
                     index += 1;
                 }
