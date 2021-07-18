@@ -25,7 +25,7 @@ namespace ThMEPWSS.Pipe.Service
     public partial class DrainageSystemDiagram
     {
 
-        public static void draw1(Point3d basePoint)
+        public static void BeginToDrawDrainageSystemDiagram(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -604,7 +604,7 @@ namespace ThMEPWSS.Pipe.Service
             return start;
         }
 
-        public static void draw6(Point2d basePoint)
+        public static void AbleToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var o = new ThwOutput();
             //o.DirtyWaterWellValues = new List<string>() { "1",  };
@@ -1328,7 +1328,7 @@ namespace ThMEPWSS.Pipe.Service
         }
 
 
-        public static void draw4(Point2d basePoint)
+        public static void ReadyToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -1457,7 +1457,7 @@ namespace ThMEPWSS.Pipe.Service
 
 
         }
-        public static void draw3(Point2d basePoint)
+        public static void PreparedToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;

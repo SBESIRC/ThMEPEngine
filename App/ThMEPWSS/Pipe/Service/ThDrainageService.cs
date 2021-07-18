@@ -19,6 +19,7 @@
     using NetTopologySuite.Operation.Overlay;
     using NetTopologySuite.Algorithm;
     using DU = ThMEPWSS.Assistant.DrawUtils;
+    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
     public class RainSystemDrawingData
     {
         public List<string> RoofLabels = new List<string>();
@@ -638,10 +639,17 @@ pt,
                 var center = ext.GetCenter();
                 if (center.GetDistanceTo(Point2d.Origin) > work_around)
                 {
-                    var v = center.ToVector2d();
-                    var m1 = Matrix2d.Displacement(-v);
-                    var m2 = Matrix2d.Displacement(v);
-                    return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                    var v = -center.ToVector2d();
+                    if (Dbg._)
+                    {
+                        var m1 = Matrix2d.Displacement(v);
+                        var m2 = Matrix2d.Displacement(-v);
+                        return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                    }
+                    else
+                    {
+                        return GetCenterLine(segs.Select(seg => seg.Offset(v)).ToList()).Offset(-v);
+                    }
                 }
             }
             return GetCenterLine(segs);
@@ -688,6 +696,7 @@ pt,
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geomList);
         }
+        public static Geometry CreateGeometryEx<T>(List<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
         public static Geometry CreateGeometry(params Geometry[] geos)
         {
@@ -727,9 +736,9 @@ pt,
             });
             return geosGroup;
         }
-        public static List<List<Geometry>> GroupGeometries(List<Geometry> geos)
+        public static List<List<T>> GroupGeometries<T>(List<T> geos)where T: Geometry
         {
-            static void GroupGeometries(List<Geometry> geos, List<List<Geometry>> geosGroup)
+            static void GroupGeometries(List<T> geos, List<List<T>> geosGroup)
             {
                 if (geos.Count == 0) return;
                 var pairs = _GroupGeometriesToKVIndex(geos).ToArray();
@@ -747,7 +756,7 @@ pt,
                 });
             }
 
-            var geosGroup = new List<List<Geometry>>();
+            var geosGroup = new List<List<T>>();
             GroupGeometries(geos, geosGroup);
             return geosGroup;
         }
@@ -817,11 +826,11 @@ pt,
                 return engine.Query(getEnvelope(item)).Where(g => test(g)).ToList();
             };
         }
-        public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex(List<Geometry> geos)
+        public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> geos)where T: Geometry
         {
             if (geos.Count == 0) yield break;
             geos = geos.Distinct().ToList();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             for (int i = 0; i < geos.Count; i++)
             {
@@ -878,12 +887,12 @@ pt,
                             {
                                 if (f(gvs[i], gvs[j]))
                                 {
-                                    flags[i] = true;
-                                    flags[j] = true;
                                     var seg = new GLineSegment(gvs[i].StartPoint, gvs[j].StartPoint);
-                                    if (seg.Length > 0)
+                                    if (seg.Length > 0 && (killer != null && !seg.ToLineString().Intersects(killer)))
                                     {
                                         yield return seg;
+                                        flags[i] = true;
+                                        flags[j] = true;
                                     }
                                 }
                             }

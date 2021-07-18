@@ -103,7 +103,7 @@
         public HashSet<string> HasMopPool;
         //类似的还有“阳台洗衣机地漏”，“阳台地漏”，厨房只有1个，阳台可能有2个
 
-
+        public HashSet<string> Shunts;//如果有两个地漏，判断下是不是并联
         public void Init()
         {
             VerticalPipeLabels ??= new HashSet<string>();
@@ -127,6 +127,7 @@
             HasKitchenBasin ??= new HashSet<string>();
             HasBalconyWashingMachine ??= new HashSet<string>();
             HasMopPool ??= new HashSet<string>();
+            Shunts ??= new HashSet<string>();
         }
     }
 
@@ -215,16 +216,16 @@
         }
         public static void CollectGeoData(Geometry range, AcadDatabase adb, DrainageGeoData geoData, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
         {
-            var cl = NewMethod(adb, geoData);
+            var cl = CollectGeoData(adb, geoData);
             cl.CollectStoreys(range, ctx);
         }
         public static void CollectGeoData(Point3dCollection range, AcadDatabase adb, DrainageGeoData geoData)
         {
-            var cl = NewMethod(adb, geoData);
+            var cl = CollectGeoData(adb, geoData);
             cl.CollectStoreys(range);
         }
 
-        private static ThDrainageSystemServiceGeoCollector NewMethod(AcadDatabase adb, DrainageGeoData geoData)
+        private static ThDrainageSystemServiceGeoCollector CollectGeoData(AcadDatabase adb, DrainageGeoData geoData)
         {
             var cl = new ThDrainageSystemServiceGeoCollector() { adb = adb, geoData = geoData };
             cl.CollectEntities();
@@ -1144,7 +1145,8 @@
                         List<bool> hasWashingMachineList = new List<bool>();
                         List<int> floorDrainsCountList = new List<int>();
                         List<bool> hasMopPoolList = new List<bool>();
-                        var _fls2 = DrainageService.GetBalconyOnlyFLs(fls, kitchens, nonames, balconys, pts, item.DLines, fls.Select(x => lbDict[x]).ToList(), item.WashingMachines, item.MopPools, item.FloorDrains, hasWashingMachineList, floorDrainsCountList, hasMopPoolList);
+                        List<bool> isShuntList = new List<bool>();
+                        var _fls2 = DrainageService.GetBalconyOnlyFLs(fls, kitchens, nonames, balconys, pts, item.DLines, fls.Select(x => lbDict[x]).ToList(), item.WashingMachines, item.MopPools, item.FloorDrains, hasWashingMachineList, floorDrainsCountList, hasMopPoolList, isShuntList);
                         //1)	图层名称包含“W-DRAI-EPQM”且半径大于40的圆视为洗手台下水点
                         //2)	地漏图块视为地漏下水点
                         for (int i = 0; i < _fls2.Count; i++)
@@ -1155,11 +1157,16 @@
                             var floorDrainsCount = floorDrainsCountList[i];
                             var hasMopPool = hasMopPoolList[i];
                             drData.BalconyOnlyFLs.Add(label);
-                            drData.FloorDrains[label] = floorDrainsCount;
-                            if (hasWashingMachine) drData.HasBalconyWashingMachine.Add(label);
+                            drData.FloorDrains.TryGetValue(label, out int count);
+                            drData.FloorDrains[label] = Math.Max(floorDrainsCount, count);
+                            if (hasWashingMachine)
+                            {
+                                drData.HasBalconyWashingMachine.Add(label);
+                                if (drData.FloorDrains[label] == 0) drData.FloorDrains[label] = 1;
+                            }
                             if (hasMopPool) drData.HasMopPool.Add(label);
+                            if (isShuntList[i]) drData.Shunts.Add(label);
                         }
-
                         //综合厨房和阳台的点位
                         var _fls3 = DrainageService.GetKitchenAndBalconyBothFLs(fls, kitchens, nonames, balconys, pts, item.DLines);
                         foreach (var fl in _fls3)
@@ -1415,7 +1422,8 @@
             List<Geometry> floorDrains,
             List<bool> hasWashingMachineList,
             List<int> floorDrainsCountList,
-            List<bool> hasMopPoolList)
+            List<bool> hasMopPoolList,
+            List<bool> isShuntList)
         {
             //6.3.3	只负责阳台的FL
             //-	判断方法
@@ -1437,21 +1445,45 @@
             var floorDrainsf = GeoFac.CreateIntersectsSelector(floorDrains);
             var mopPoolsf = GeoFac.CreateIntersectsSelector(mopPools);
             {
+                var dlinesf = GeoFac.CreateIntersectsSelector(dlines);
                 var ok_fls = new HashSet<Geometry>();
                 //210715 写到这里
                 foreach (var balcony in balconies)
                 {
                     var flsf = GeoFac.CreateIntersectsSelector(FLs.Except(ok_fls).ToList());
                     var fls = flsf(balcony);
+                    bool isShunt(Geometry fl)
+                    {
+                        var _dlines = dlinesf(fl);
+                        if (_dlines.Count == 0) return false;
+                        var fds = floorDrainsf(GeoFac.CreateGeometry(_dlines));
+                        if (fds.Count == 2)
+                        {
+                            foreach (var geo in GeoFac.GroupGeometries(GeoFac.ToNodedLineSegments(GeoFac.GetLines(GeoFac.CreateGeometry(dlinesf(GeoFac.CreateGeometry(floorDrains.YieldAfter(fl).Distinct()))).Difference(fl)).ToList()).Select(x => x.ToLineString()).ToList()).Select(geos => GeoFac.CreateGeometry(geos)))
+                            {
+                                if (geo.Intersects(fds[0]) && geo.Intersects(fds[1]))
+                                {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+                    void emit(Geometry fl)
+                    {
+                        list.Add(fl);
+                        ok_fls.Add(fl);
+                        hasWashingMachineList.Add(washingMachinesf(balcony).Any());
+                        floorDrainsCountList.Add(floorDrainsf(balcony).Count);
+                        hasMopPoolList.Add(mopPoolsf(balcony).Any());
+                        isShuntList.Add(isShunt(fl));
+                    }
                     if (fls.Count > 0)
                     {
                         foreach (var fl in fls)
                         {
-                            list.Add(fl);
-                            ok_fls.Add(fl);
-                            hasWashingMachineList.Add(washingMachinesf(balcony).Any());
-                            floorDrainsCountList.Add(floorDrainsf(balcony).Count);
-                            hasMopPoolList.Add(mopPoolsf(balcony).Any());
+                            emit(fl);
                         }
                     }
                     else
@@ -1460,11 +1492,7 @@
                         if (fls.Count > 0)
                         {
                             var fl = GeoFac.NearestNeighbourGeometryF(fls)(balcony);
-                            list.Add(fl);
-                            ok_fls.Add(fl);
-                            hasWashingMachineList.Add(washingMachinesf(balcony).Any());
-                            floorDrainsCountList.Add(floorDrainsf(balcony).Count);
-                            hasMopPoolList.Add(mopPoolsf(balcony).Any());
+                            emit(fl);
                         }
                     }
                 }
@@ -1921,6 +1949,25 @@
                     }
                     return false;
                 }
+                bool IsSeries(string label, string storey)
+                {
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                if (drData.Shunts.Contains(label))
+                                {
+                                    return false;
+                                }
+
+                            }
+                        }
+                    }
+                    return true;
+                }
                 bool hasDoubleSCurve(string label, string storey)
                 {
                     for (int i = 0; i < storeysItems.Count; i++)
@@ -2019,6 +2066,7 @@
                 }
                 int getFloorDrainsCountAt1F(string label)
                 {
+                    if (!IsFL(label)) return 0;
                     for (int i = 0; i < storeysItems.Count; i++)
                     {
                         foreach (var s in storeysItems[i].Labels)
@@ -2032,6 +2080,98 @@
                         }
                     }
                     return 0;
+                }
+                bool IsKitchenOnlyFl(string label, string storey)
+                {
+                    if (!IsFL(label)) return false;
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                return drData.KitchenOnlyFls.Contains(label);
+                            }
+                        }
+                    }
+                    return false;
+                }
+                bool IsBalconyOnlyFl(string label, string storey)
+                {
+                    if (!IsFL(label)) return false;
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                return drData.BalconyOnlyFLs.Contains(label);
+                            }
+                        }
+                    }
+                    return false;
+                }
+                bool HasKitchenFloorDrain(string label, string storey)
+                {
+                    if (!IsFL(label) || !IsKitchenOnlyFl(label, storey)) return false;
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                return drData.HasKitchenFloorDrain.Contains(label);
+                            }
+                        }
+                    }
+                    return false;
+                }
+                bool HasKitchenWashingMachine(string label, string storey)
+                {
+                    if (!IsFL(label) || !IsKitchenOnlyFl(label, storey)) return false;
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                return drData.HasKitchenWashingMachine.Contains(label);
+                            }
+                        }
+                    }
+                    return false;
+                }
+                bool HasBalconyWashingMachineFloorDrain(string label, string storey)
+                {
+                    if (!IsFL(label) || !IsBalconyOnlyFl(label, storey)) return false;
+                    for (int i = 0; i < storeysItems.Count; i++)
+                    {
+                        foreach (var s in storeysItems[i].Labels)
+                        {
+                            if (s == storey)
+                            {
+                                var drData = drDatas[i];
+                                return drData.HasBalconyWashingMachine.Contains(label);
+                            }
+                        }
+                    }
+                    return false;
+                }
+                bool HasBalconyNonWashingMachineFloorDrain(string label, string storey)
+                {
+                    if (!IsFL(label) || !IsBalconyOnlyFl(label, storey)) return false;
+                    var fdCount = getFDCount(label, storey);
+                    var hasBalconyWashingMachineFloorDrain = HasBalconyWashingMachineFloorDrain(label, storey);
+                    //有个1个地漏且不属于洗衣机地漏，那就是阳台地漏
+                    if (fdCount == 1 && !hasBalconyWashingMachineFloorDrain)
+                    {
+                        return true;
+                    }
+                    return fdCount > 1;
                 }
                 var pipeInfoDict = new Dictionary<string, DrainageGroupingPipeItem>();
                 var flGroupingItems = new List<DrainageGroupingPipeItem>();
@@ -2056,6 +2196,11 @@
                             Exist = testExist(fl, storey),
                             HasLong = _hasLong,
                             HasShort = hasShort(fl, storey, PipeType.FL),
+                            HasKitchenWashingMachine = HasKitchenWashingMachine(fl, storey),
+                            HasKitchenNonWashingMachineFloorDrain = HasKitchenFloorDrain(fl, storey) && !HasKitchenWashingMachine(fl, storey),
+                            HasKitchenWashingMachineFloorDrain = HasKitchenFloorDrain(fl, storey) && HasKitchenWashingMachine(fl, storey),
+                            HasBalconyWashingMachineFloorDrain = HasBalconyWashingMachineFloorDrain(fl, storey),
+                            HasBalconyNonWashingMachineFloorDrain = HasBalconyNonWashingMachineFloorDrain(fl, storey),
                         });
                         item.Hangings.Add(new DrainageGroupingPipeItem.Hanging()
                         {
@@ -2063,6 +2208,7 @@
                             HasCleaningPort = hasCleaningPort(fl, storey) || _hasLong,
                             HasSCurve = hasSCurve(fl, storey),
                             HasDoubleSCurve = hasDoubleSCurve(fl, storey),
+                            IsSeries = IsSeries(fl, storey),
                         });
                     }
                     if (IsWaterPipeWellFL(fl))
@@ -2094,6 +2240,10 @@
                             Exist = testExist(pl, storey),
                             HasLong = _hasLong,
                             HasShort = hasShort(pl, storey, PipeType.PL),
+                            HasKitchenNonWashingMachineFloorDrain = HasKitchenFloorDrain(pl, storey),
+                            HasKitchenWashingMachineFloorDrain = HasKitchenWashingMachine(pl, storey),
+                            HasBalconyWashingMachineFloorDrain = HasBalconyWashingMachineFloorDrain(pl, storey),
+                            HasBalconyNonWashingMachineFloorDrain = HasBalconyNonWashingMachineFloorDrain(pl, storey),
                         });
                         item.Hangings.Add(new DrainageGroupingPipeItem.Hanging()
                         {
@@ -2201,13 +2351,6 @@
                     }
                 }
 
-                {
-
-
-
-                }
-
-
 
                 //开始分组
 
@@ -2253,7 +2396,16 @@
                 return pipeGroupItems;
             }
         }
-
+        //如果存疑，则投票选举
+        static bool vote(IEnumerable<bool> flags)
+        {
+            var d = new CountDict<bool>();
+            foreach (var flag in flags)
+            {
+                d[flag]++;
+            }
+            return d[true] >= d[false];
+        }
         public class DrainageGroupedPipeItem
         {
             public List<string> Labels;
@@ -2318,6 +2470,11 @@
                 public bool Exist;
                 public bool HasLong;
                 public bool HasShort;
+                public bool HasKitchenWashingMachine;
+                public bool HasKitchenNonWashingMachineFloorDrain;
+                public bool HasKitchenWashingMachineFloorDrain;
+                public bool HasBalconyWashingMachineFloorDrain;
+                public bool HasBalconyNonWashingMachineFloorDrain;
             }
             public override int GetHashCode()
             {
@@ -2414,7 +2571,7 @@
             }
         }
 
-        public static void draw14()
+        public static void DrawDrainageSystemDiagramFromCache()
         {
 
             static void DrawStoreys(Point2d basePoint)
@@ -2565,7 +2722,7 @@
         }
         public void Draw(Point3d basePoint)
         {
-            draw1(basePoint);
+            BeginToDrawDrainageSystemDiagram(basePoint);
         }
 
         public class ThwPipeRun
@@ -2750,6 +2907,7 @@
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0 + 500 + 3500;//马力说再加个3500
             var HEIGHT = 1800.0;
+            //var HEIGHT = 3000.0;
             //var HEIGHT = 5000.0;
             var COUNT = pipeGroupItems.Count;
             var dy = HEIGHT - 1800.0;
@@ -2821,7 +2979,7 @@
             Dbg.LayerThreeAxes(new List<string>() { "W-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-NOTE", "W-DRAI-EQPM", "W-BUSH", "W-RAIN-NOTE", "W-DRAI-VENT-PIPE" });
         }
 
-        public static void draw2(Point3d basePoint)
+        public static void StartToDrawDrainageSystemDiagram(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -3356,515 +3514,7 @@
 
 
 
-            void handlePipeLine(ThwPipeLine thwPipeLine, PipeRunLocationInfo[] arr)
-            {
-                {
-                    var info = arr.Where(x => x != null).FirstOrDefault();
-                    if (info != null)
-                    {
-                        var dy = -3000;
-                        if (thwPipeLine.Labels != null)
-                        {
-                            foreach (var comment in thwPipeLine.Labels)
-                            {
-                                if (!string.IsNullOrEmpty(comment))
-                                {
-                                    DU.DrawTextLazy(comment, 350, info.EndPoint.OffsetY(-HEIGHT * ((IList)arr).IndexOf(info)).OffsetY(dy));
-                                }
-                                dy -= 350;
-                            }
-                        }
-                    }
-                }
-                {
-                    foreach (var info in arr)
-                    {
-                        if (info?.Storey == "RF")
-                        {
-                            var pt = info.BasePoint;
-                            var seg = new GLineSegment(pt, pt.OffsetY(ThWSDStorey.RF_OFFSET_Y));
-                            drawDomePipe(seg);
-                            //默认屋面不上人
-                            DrawAiringSymbol(seg.EndPoint, viewModel?.Params?.CouldHavePeopleOnRoof ?? false);
-                        }
-                    }
-                }
-                int counterPipeButtomHeightSymbol = 0;
-                bool hasDrawedSCurveLabel = false;
-                bool hasDrawedDSCurveLabel = false;
-                bool hasDrawedFloorDrain = false;
-                bool hasDrawedCleaningPort = false;
-                void _DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
-                {
-                    ++counterPipeButtomHeightSymbol;
-                    if (counterPipeButtomHeightSymbol == 2)
-                    {
-                        var p = basePt.ToPoint2d();
-                        var h = HEIGHT * .7;
-                        if (HEIGHT - h > LONG_TRANSLATOR_HEIGHT1)
-                        {
-                            h = HEIGHT - LONG_TRANSLATOR_HEIGHT1 + 150;
-                        }
-                        p = p.OffsetY(h);
-                        DrawPipeButtomHeightSymbol(HEIGHT, p);
-                    }
-                    DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                }
-                void _DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
-                {
-                    if (!hasDrawedSCurveLabel)
-                    {
-                        hasDrawedSCurveLabel = true;
-                        var vecs = new List<Vector2d> { new Vector2d(0, 1800), new Vector2d(-3600, 0) };
-                        var p = p1 + new Vector2d(-450, 1190);
-                        var segs = vecs.ToGLineSegments(p);
-                        var lines = DU.DrawLineSegmentsLazy(segs);
-                        Dr.SetLabelStylesForDraiNote(lines.ToArray());
-                        var t = DU.DrawTextLazy("接阳台洗手盆排水DN50，余同", 350, segs.Last().EndPoint.OffsetY(50));
-                        Dr.SetLabelStylesForDraiNote(t);
-                    }
-                    DrawSCurve(vec7, p1, leftOrRight);
-                }
-                void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
-                {
-                    if (!hasDrawedDSCurveLabel && !thwPipeLine.Labels.Any(x => IsFL0(x)))
-                    {
-                        hasDrawedDSCurveLabel = true;
-                        var vecs = new List<Vector2d> { new Vector2d(0, 1800), new Vector2d(-3600, 0) };
-                        var p = p1 + new Vector2d(-950, 1330);
-                        var segs = vecs.ToGLineSegments(p);
-                        var lines = DU.DrawLineSegmentsLazy(segs);
-                        Dr.SetLabelStylesForDraiNote(lines.ToArray());
-                        var t = DU.DrawTextLazy("接厨房洗涤盆排水DN50，余同", 350, segs.Last().EndPoint.OffsetY(50));
-                        Dr.SetLabelStylesForDraiNote(t);
-                    }
-                    DrawDSCurve(vec7, p1, leftOrRight);
-                }
-                void _DrawFloorDrain(Point3d basePt, bool leftOrRight)
-                {
-                    var p1 = basePt.ToPoint2d();
-                    if (!hasDrawedFloorDrain && !thwPipeLine.Labels.Any(x => IsFL0(x)))
-                    {
-                        hasDrawedFloorDrain = true;
-                        var vecs = new List<Vector2d> { new Vector2d(0, 900), new Vector2d(-3600, 0) };
-                        var p = p1 + new Vector2d(-180, 390);
-                        var segs = vecs.ToGLineSegments(p);
-                        var lines = DU.DrawLineSegmentsLazy(segs);
-                        Dr.SetLabelStylesForDraiNote(lines.ToArray());
-                        var t = DU.DrawTextLazy("接厨房洗衣机地漏DN75，余同", 350, segs.Last().EndPoint.OffsetY(50));
-                        Dr.SetLabelStylesForDraiNote(t);
-                    }
-                    DrawFloorDrain(basePt, leftOrRight);
-                }
-                void _DrawCleaningPort(Point3d basePt, bool leftOrRight, double scale)
-                {
-                    var p1 = basePt.ToPoint2d();
-                    if (!hasDrawedCleaningPort && !thwPipeLine.Labels.Any(x => IsFL0(x)))
-                    {
-                        hasDrawedCleaningPort = true;
-                        var vecs = new List<Vector2d> { new Vector2d(0, 2830), new Vector2d(-3600, 0) };
-                        var p = p1 + new Vector2d(-490, 170);
-                        var segs = vecs.ToGLineSegments(p);
-                        var lines = DU.DrawLineSegmentsLazy(segs);
-                        Dr.SetLabelStylesForDraiNote(lines.ToArray());
-                        var t = DU.DrawTextLazy("接卫生间排水管DN100，余同", 350, segs.Last().EndPoint.OffsetY(50));
-                        Dr.SetLabelStylesForDraiNote(t);
-                    }
-                    DrawCleaningPort(basePt, leftOrRight, scale);
-                }
-                for (int i = start; i >= end; i--)
-                {
-                    var storey = allNumStoreyLabels.TryGet(i);
-                    if (storey == null) continue;
-                    var run = thwPipeLine.PipeRuns.TryGet(i);
-                    if (run == null) continue;
-                    var info = arr[i];
-                    if (info == null) continue;
-                    var output = thwPipeLine.Output;
 
-                    {
-                        if (storey == "1F")
-                        {
-                            var basePt = info.EndPoint;
-                            if (output != null)
-                            {
-                                DrawOutlets1(basePt, 3600, output);
-                            }
-                        }
-                    }
-                    bool shouldRaiseWashingMachine()
-                    {
-                        return viewModel?.Params?.ShouldRaiseWashingMachine ?? false;
-                    }
-                    void handleHanging(Hanging hanging, bool isLeftOrRight)
-                    {
-                        ++counterPipeButtomHeightSymbol;
-                        //FL的话，标高画在第一个hanging上
-                        if (counterPipeButtomHeightSymbol == 1 && thwPipeLine.Labels.Any(x => IsFL(x)))
-                        {
-                            DrawPipeButtomHeightSymbol(HEIGHT, info.StartPoint.OffsetY(-390));
-                        }
-
-                        if (run.HasLongTranslator)
-                        {
-                            var beShort = hanging.FloorDrainsCount == 1 && !hanging.HasSCurve && !hanging.HasDoubleSCurve;
-                            var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 479), new Vector2d(-121, 121), new Vector2d(beShort ? 0 : -789, 0), new Vector2d(-1270, 0), new Vector2d(-180, 0), new Vector2d(-1090, 0) };
-                            if (isLeftOrRight == false)
-                            {
-                                vecs = vecs.GetYAxisMirror();
-                            }
-                            var pt = info.Segs[4].StartPoint.OffsetY(-669).OffsetY(590 - 90);
-                            if (isLeftOrRight == false && run.IsLongTranslatorToLeftOrRight == true)
-                            {
-                                var p1 = pt;
-                                var p2 = pt.OffsetX(1700);
-                                drawDomePipe(new GLineSegment(p1, p2));
-                                pt = p2;
-                            }
-                            if (isLeftOrRight == true && run.IsLongTranslatorToLeftOrRight == false)
-                            {
-                                var p1 = pt;
-                                var p2 = pt.OffsetX(-1700);
-                                drawDomePipe(new GLineSegment(p1, p2));
-                                pt = p2;
-                            }
-                            var segs = vecs.ToGLineSegments(pt);
-                            {
-                                var _segs = segs.ToList();
-                                if (hanging.FloorDrainsCount == 2)
-                                {
-                                    _segs.RemoveAt(5);
-                                }
-                                else if (hanging.FloorDrainsCount == 1)
-                                {
-                                    _segs = segs.Take(5).ToList();
-                                }
-                                else if (hanging.FloorDrainsCount == 0)
-                                {
-                                    _segs = segs.Take(4).ToList();
-                                }
-                                drawDomePipes(_segs);
-                            }
-                            if (hanging.FloorDrainsCount >= 1)
-                            {
-                                _DrawFloorDrain(segs.Last(3).EndPoint.ToPoint3d(), isLeftOrRight);
-                            }
-                            if (hanging.FloorDrainsCount >= 2)
-                            {
-                                _DrawFloorDrain(segs.Last(1).EndPoint.ToPoint3d(), isLeftOrRight);
-                                if (hanging.IsSeries)
-                                {
-                                    DrawDomePipes(segs.Last(2));
-                                }
-                            }
-
-                            if (hanging.HasSCurve)
-                            {
-                                var p1 = segs.Last(3).StartPoint;
-                                _DrawSCurve(vec7, p1, isLeftOrRight);
-                            }
-                            if (hanging.HasDoubleSCurve)
-                            {
-                                var p1 = segs.Last(3).StartPoint;
-                                _DrawDSCurve(vec7, p1, isLeftOrRight);
-                            }
-                        }
-                        else
-                        {
-                            if (hanging.IsFL0)
-                            {
-                                //Dbg.ShowXLabel(info.EndPoint);
-                                DrawFloorDrain((info.StartPoint + new Vector2d(-1391, -390)).ToPoint3d(), true, "普通地漏无存水弯");
-                                var vecs = new List<Vector2d> { new Vector2d(0, -667), new Vector2d(-121, 121), new Vector2d(-1450, 0) };
-                                var segs = vecs.ToGLineSegments(info.StartPoint).Skip(1).ToList();
-                                drawDomePipes(segs);
-                            }
-                            else
-                            {
-                                var beShort = hanging.FloorDrainsCount == 1 && !hanging.HasSCurve && !hanging.HasDoubleSCurve;
-                                var vecs = new List<Vector2d> { new Vector2d(-121, 121), new Vector2d(beShort ? 0 : -789, 0), new Vector2d(-1270, 0), new Vector2d(-180, 0), new Vector2d(-1090, -15) };
-                                if (isLeftOrRight == false)
-                                {
-                                    vecs = vecs.GetYAxisMirror();
-                                }
-                                var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(-510));
-                                {
-                                    var _segs = segs.ToList();
-                                    if (hanging.FloorDrainsCount == 2)
-                                    {
-                                        _segs.RemoveAt(3);
-                                    }
-                                    if (hanging.FloorDrainsCount == 1)
-                                    {
-                                        _segs.RemoveAt(4);
-                                        _segs.RemoveAt(3);
-                                    }
-                                    if (hanging.FloorDrainsCount == 0)
-                                    {
-                                        _segs = _segs.Take(2).ToList();
-                                    }
-                                    drawDomePipes(_segs);
-                                }
-                                if (hanging.FloorDrainsCount >= 1)
-                                {
-                                    _DrawFloorDrain(segs.Last(3).EndPoint.ToPoint3d(), isLeftOrRight);
-                                }
-                                if (hanging.FloorDrainsCount >= 2)
-                                {
-                                    _DrawFloorDrain(segs.Last(1).EndPoint.ToPoint3d(), isLeftOrRight);
-                                }
-                                if (hanging.HasSCurve)
-                                {
-                                    var p1 = segs.Last(3).StartPoint;
-                                    _DrawSCurve(vec7, p1, isLeftOrRight);
-                                }
-                                if (hanging.HasDoubleSCurve)
-                                {
-                                    var p1 = segs.Last(3).StartPoint;
-                                    _DrawDSCurve(vec7, p1, isLeftOrRight);
-                                }
-                            }
-                        }
-                    }
-                    void handleBranchInfo(ThwPipeRun run, PipeRunLocationInfo info)
-                    {
-                        var bi = run.BranchInfo;
-                        if (bi.FirstLeftRun)
-                        {
-                            var p1 = info.EndPoint;
-                            var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 2));
-                            var p3 = info.EndPoint.OffsetX(300);
-                            var p4 = p3.OffsetY(HEIGHT.ToRatioInt(2, 3));
-                            info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
-                        }
-                        if (bi.FirstRightRun)
-                        {
-                            var p1 = info.EndPoint;
-                            var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
-                            var p3 = info.EndPoint.OffsetX(-300);
-                            var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
-                            info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
-                        }
-                        if (bi.LastLeftRun)
-                        {
-
-                        }
-                        if (bi.LastRightRun)
-                        {
-
-                        }
-                        if (bi.MiddleLeftRun)
-                        {
-
-                        }
-                        if (bi.MiddleRightRun)
-                        {
-
-                        }
-                        if (bi.BlueToLeftFirst)
-                        {
-                            var p1 = info.EndPoint;
-                            var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
-                            var p3 = info.EndPoint.OffsetX(-300);
-                            var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
-                            info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
-                        }
-                        if (bi.BlueToRightFirst)
-                        {
-                            var p1 = info.EndPoint;
-                            var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
-                            var p3 = info.EndPoint.OffsetX(300);
-                            var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
-                            info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
-                        }
-                        if (bi.BlueToLeftLast)
-                        {
-                            if (run.HasLongTranslator)
-                            {
-                                if (run.IsLongTranslatorToLeftOrRight)
-                                {
-                                    var _dy = 300;
-                                    var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy + 400), new Vector2d(-300, -225) };
-                                    var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
-                                    var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
-                                    info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
-                                }
-                                else
-                                {
-                                    var _dy = 300;
-                                    var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy + 400), new Vector2d(-300, -225) };
-                                    var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
-                                    var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
-                                    info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
-                                }
-                            }
-                            else if (!run.HasLongTranslator)
-                            {
-                                var vs = new List<Vector2d> { new Vector2d(0, -1125), new Vector2d(-300, -225) };
-                                info.DisplaySegs = vs.ToGLineSegments(info.StartPoint);
-                            }
-                        }
-                        if (bi.BlueToRightLast)
-                        {
-                            if (!run.HasLongTranslator && !run.HasShortTranslator)
-                            {
-                                var p1 = info.EndPoint;
-                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                                var p3 = info.EndPoint.OffsetX(300);
-                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                                var p5 = p1.OffsetY(HEIGHT);
-                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p4, p2), new GLineSegment(p2, p5) };
-                            }
-                        }
-                        if (bi.BlueToLeftMiddle)
-                        {
-                            if (!run.HasLongTranslator && !run.HasShortTranslator)
-                            {
-                                var p1 = info.EndPoint;
-                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                                var p3 = info.EndPoint.OffsetX(-300);
-                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                                var segs = info.Segs.ToList();
-                                segs.Add(new GLineSegment(p2, p4));
-                                info.DisplaySegs = segs;
-                            }
-                            else if (run.HasLongTranslator)
-                            {
-                                if (run.IsLongTranslatorToLeftOrRight)
-                                {
-                                    var _dy = 300;
-                                    var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy) };
-                                    var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
-                                    var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
-                                    info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
-                                }
-                                else
-                                {
-                                    var _dy = 300;
-                                    var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy) };
-                                    var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
-                                    var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
-                                    info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
-                                }
-                            }
-                        }
-                        if (bi.BlueToRightMiddle)
-                        {
-                            var p1 = info.EndPoint;
-                            var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
-                            var p3 = info.EndPoint.OffsetX(300);
-                            var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
-                            var segs = info.Segs.ToList();
-                            segs.Add(new GLineSegment(p2, p4));
-                            info.DisplaySegs = segs;
-                        }
-                        {
-                            var vecs = new List<Vector2d> { new Vector2d(0, -900), new Vector2d(-121, -121), new Vector2d(-1479, 0), new Vector2d(0, -499), new Vector2d(-200, -200) };
-                            if (bi.HasLongTranslatorToLeft)
-                            {
-                                var vs = vecs;
-                                info.DisplaySegs = vecs.ToGLineSegments(info.StartPoint);
-                                if (!bi.IsLast)
-                                {
-                                    var pt = vs.Take(vs.Count - 1).GetLastPoint(info.StartPoint);
-                                    info.DisplaySegs.AddRange(new List<Vector2d> { new Vector2d(0, -280) }.ToGLineSegments(pt));
-                                }
-                            }
-                            if (bi.HasLongTranslatorToRight)
-                            {
-                                var vs = vecs.GetYAxisMirror();
-                                info.DisplaySegs = vs.ToGLineSegments(info.StartPoint);
-                                if (!bi.IsLast)
-                                {
-                                    var pt = vs.Take(vs.Count - 1).GetLastPoint(info.StartPoint);
-                                    info.DisplaySegs.AddRange(new List<Vector2d> { new Vector2d(0, -280) }.ToGLineSegments(pt));
-                                }
-                            }
-                        }
-                    }
-                    if (run.LeftHanging != null)
-                    {
-                        handleHanging(run.LeftHanging, true);
-                    }
-                    if (run.RightHanging != null)
-                    {
-                        handleHanging(run.RightHanging, false);
-                    }
-                    if (run.BranchInfo != null)
-                    {
-                        handleBranchInfo(run, info);
-                    }
-                    if (run.ShowShortTranslatorLabel)
-                    {
-                        var vecs = new List<Vector2d> { new Vector2d(76, 76), new Vector2d(-424, 424), new Vector2d(-1900, 0) };
-                        var segs = vecs.ToGLineSegments(info.EndPoint).Skip(1).ToList();
-                        DrawDraiNoteLines(segs);
-                        DrawDraiNoteLines(segs);
-                        var text = "DN100乙字弯";
-                        var pt = segs.Last().EndPoint;
-                        DrawNoteText(text, pt);
-                    }
-                    if (run.HasCheckPoint)
-                    {
-                        if (run.HasShortTranslator)
-                        {
-                            DrawPipeCheckPoint(info.Segs.Last().StartPoint.OffsetY(280).ToPoint3d(), true);
-                        }
-                        else
-                        {
-                            DrawPipeCheckPoint(info.EndPoint.OffsetY(280).ToPoint3d(), true);
-                        }
-                    }
-                    if (run.HasHorizontalShortLine)
-                    {
-                        _DrawHorizontalLineOnPipeRun(HEIGHT, info.BasePoint.ToPoint3d());
-                    }
-                    if (run.HasCleaningPort)
-                    {
-                        if (run.HasLongTranslator)
-                        {
-                            var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 300), new Vector2d(121, 121), new Vector2d(1109, 0), new Vector2d(121, 121), new Vector2d(0, 279) };
-                            if (run.IsLongTranslatorToLeftOrRight == false)
-                            {
-                                vecs = vecs.GetYAxisMirror();
-                            }
-                            if (run.HasShortTranslator)
-                            {
-                                var segs = vecs.ToGLineSegments(info.Segs.Last(2).StartPoint.OffsetY(-300));
-                                drawDomePipes(segs);
-                                _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
-                            }
-                            else
-                            {
-                                var segs = vecs.ToGLineSegments(info.Segs.Last().StartPoint.OffsetY(-300));
-                                drawDomePipes(segs);
-                                _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
-                            }
-                        }
-                        else
-                        {
-                            _DrawCleaningPort(info.StartPoint.OffsetY(-300).ToPoint3d(), true, 2);
-                        }
-
-                    }
-
-                    if (run.HasShortTranslator)
-                    {
-                        DrawShortTranslatorLabel(info.Segs.Last().Center, run.IsShortTranslatorToLeftOrRight);
-                    }
-                    if (viewModel?.Params?.ShouldRaiseWashingMachine ?? false)
-                    {
-                        if (Dbg._)
-                        {
-                            var vecs = new List<Vector2d> { new Vector2d(-121, 121), new Vector2d(-2059, 0) };
-                            var segs = vecs.ToGLineSegments(info.HangingEndPoint.OffsetY(300));
-                            drawDomePipes(segs);
-                            DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
-                        }
-                    }
-                }
-
-            }
 
             var dx = 0;
             for (int j = 0; j < COUNT; j++)
@@ -3951,7 +3601,653 @@
                     }
                 }
 
+                void handlePipeLine(ThwPipeLine thwPipeLine, PipeRunLocationInfo[] arr)
+                {
+                    {
+                        ////draw comments
+                        //var info = arr.Where(x => x != null).FirstOrDefault();
+                        //if (info != null)
+                        //{
+                        //    var dy = -3000;
+                        //    if (thwPipeLine.Labels != null)
+                        //    {
+                        //        foreach (var comment in thwPipeLine.Labels)
+                        //        {
+                        //            if (!string.IsNullOrEmpty(comment))
+                        //            {
+                        //                DU.DrawTextLazy(comment, 350, info.EndPoint.OffsetY(-HEIGHT * ((IList)arr).IndexOf(info)).OffsetY(dy));
+                        //            }
+                        //            dy -= 350;
+                        //        }
+                        //    }
+                        //}
+                    }
+                    {
+                        foreach (var info in arr)
+                        {
+                            if (info?.Storey == "RF")
+                            {
+                                var pt = info.BasePoint;
+                                var seg = new GLineSegment(pt, pt.OffsetY(ThWSDStorey.RF_OFFSET_Y));
+                                drawDomePipe(seg);
+                                //默认屋面不上人
+                                DrawAiringSymbol(seg.EndPoint, viewModel?.Params?.CouldHavePeopleOnRoof ?? false);
+                            }
+                        }
+                    }
+                    int counterPipeButtomHeightSymbol = 0;
+                    bool hasDrawedSCurveLabel = false;
+                    bool hasDrawedDSCurveLabel = false;
+                    //bool hasDrawedFloorDrain = false;
+                    bool hasDrawedCleaningPort = false;
+                    void _DrawLabel(string text, Point2d basePt, bool leftOrRight, double height)
+                    {
+                        var vecs = new List<Vector2d> { new Vector2d(0, height), new Vector2d(leftOrRight ? -3600 : 3600, 0) };
+                        var segs = vecs.ToGLineSegments(basePt);
+                        var lines = DU.DrawLineSegmentsLazy(segs);
+                        Dr.SetLabelStylesForDraiNote(lines.ToArray());
+                        var t = DU.DrawTextLazy(text, 350, segs.Last().EndPoint.OffsetY(50));
+                        Dr.SetLabelStylesForDraiNote(t);
+                    }
+                    void _DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
+                    {
+                        ++counterPipeButtomHeightSymbol;
+                        if (counterPipeButtomHeightSymbol == 2)
+                        {
+                            var p = basePt.ToPoint2d();
+                            var h = HEIGHT * .7;
+                            if (HEIGHT - h > LONG_TRANSLATOR_HEIGHT1)
+                            {
+                                h = HEIGHT - LONG_TRANSLATOR_HEIGHT1 + 150;
+                            }
+                            p = p.OffsetY(h);
+                            DrawPipeButtomHeightSymbol(HEIGHT, p);
+                        }
+                        DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
+                    }
+                    void _DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
+                    {
+                        if (!hasDrawedSCurveLabel)
+                        {
+                            hasDrawedSCurveLabel = true;
+                            _DrawLabel("接阳台洗手盆排水DN50，余同", p1 + new Vector2d(-450, 1190), true, 1800);
+                        }
+                        DrawSCurve(vec7, p1, leftOrRight);
+                    }
+                    void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
+                    {
+                        if (!hasDrawedDSCurveLabel && !thwPipeLine.Labels.Any(x => IsFL0(x)))
+                        {
+                            hasDrawedDSCurveLabel = true;
+                            _DrawLabel("接厨房洗涤盆排水DN50，余同", p1 + new Vector2d(-950, 1330), true, 1800);
+                        }
+                        DrawDSCurve(vec7, p1, leftOrRight);
+                    }
+                    //地漏要区分阳台、厨房、洗衣机、非洗衣机
 
+                    //void _DrawFloorDrain(Point3d basePt, bool leftOrRight)
+                    //{
+                    //    var p1 = basePt.ToPoint2d();
+                    //    if (!hasDrawedFloorDrain && !thwPipeLine.Labels.Any(x => IsFL0(x)))
+                    //    {
+                    //        //hasDrawedFloorDrain = true;
+                    //        _DrawLabel("接厨房洗衣机地漏DN75，余同" , p1 + new Vector2d(-180, 390), true, 900);
+                    //        //DU.DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390));
+                    //        //DU.DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyNonWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390+300));
+                    //    }
+                    //    DrawFloorDrain(basePt, leftOrRight);
+                    //}
+                    void _DrawCleaningPort(Point3d basePt, bool leftOrRight, double scale)
+                    {
+                        var p1 = basePt.ToPoint2d();
+                        if (!hasDrawedCleaningPort && !thwPipeLine.Labels.Any(x => IsFL0(x)))
+                        {
+                            hasDrawedCleaningPort = true;
+                            _DrawLabel("接卫生间排水管DN100，余同", p1 + new Vector2d(-490, 170), true, 2830);
+                        }
+                        DrawCleaningPort(basePt, leftOrRight, scale);
+                    }
+                    //var kitchenWashingMachineFloorDrains = new List<Point2d>();
+                    //var kitchenNonWashingMachineFloorDrains = new List<Point2d>();
+                    //var balconyWashingMachineFloorDrains = new List<Point2d>();
+                    //var balconyNonWashingMachineFloorDrains = new List<Point2d>();
+                    var fdBasePoints = new Dictionary<int, List<Point2d>>();
+                    for (int i = start; i >= end; i--)
+                    {
+                        var fdBsPts = new List<Point2d>();
+                        fdBasePoints[i] = fdBsPts;
+                        var storey = allNumStoreyLabels.TryGet(i);
+                        if (storey == null) continue;
+                        var run = thwPipeLine.PipeRuns.TryGet(i);
+                        if (run == null) continue;
+                        var info = arr[i];
+                        if (info == null) continue;
+                        var output = thwPipeLine.Output;
+                        {
+                            if (storey == "1F")
+                            {
+                                var basePt = info.EndPoint;
+                                if (output != null)
+                                {
+                                    DrawOutlets1(basePt, 3600, output);
+                                }
+                            }
+                        }
+
+                        //是否进行洗衣机抬高（厨房有洗衣机才触发）
+                        bool shouldRaiseWashingMachine()
+                        {
+                            return viewModel?.Params?.ShouldRaiseWashingMachine ?? false;
+                        }
+                        bool _shouldDrawRaiseWashingMachineSymbol()
+                        {
+                            return gpItem.Hangings[i].HasDoubleSCurve && gpItem.Hangings[i].FloorDrainsCount == 1 && shouldRaiseWashingMachine() && gpItem.Items[i].HasKitchenWashingMachine;
+                        }
+                        bool shouldDrawRaiseWashingMachineSymbol(Hanging hanging)
+                        {
+                            return hanging.HasDoubleSCurve && hanging.FloorDrainsCount == 1 && shouldRaiseWashingMachine() && gpItem.Items[i].HasKitchenWashingMachine;
+                        }
+                        void handleHanging(Hanging hanging, bool isLeftOrRight)
+                        {
+                            void _DrawFloorDrain(Point3d basePt, bool leftOrRight)
+                            {
+                                var p1 = basePt.ToPoint2d();
+                                {
+                                    //洗衣机抬高
+                                    if (_shouldDrawRaiseWashingMachineSymbol())
+                                    {
+                                        var fixVec = new Vector2d(-500, 0);//马力说再调节下
+                                        var p = p1 + new Vector2d(0, 900) + new Vector2d(-180, 330) + fixVec;
+                                        fdBsPts.Add(p);
+                                        var vecs = new List<Vector2d> { new Vector2d(-895, 0), fixVec, new Vector2d(-90, 90), new Vector2d(0, 700), new Vector2d(-285, 0) };
+                                        var segs = vecs.ToGLineSegments(basePt.ToPoint2d() + new Vector2d(1270, 0));
+                                        drawDomePipes(segs);
+                                        DrainageSystemDiagram.DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
+                                        return;
+                                    }
+                                }
+                                {
+                                    var p = p1 + new Vector2d(-180, 390);
+                                    fdBsPts.Add(p);
+                                    DrawFloorDrain(basePt, leftOrRight);
+                                    return;
+                                }
+                            }
+                            ++counterPipeButtomHeightSymbol;
+                            //FL的话，标高画在第一个hanging上
+                            if (counterPipeButtomHeightSymbol == 1 && thwPipeLine.Labels.Any(x => IsFL(x)))
+                            {
+                                if (thwPipeLine.Labels.Any(x => IsFL0(x)))
+                                {
+                                    DrawPipeButtomHeightSymbol(HEIGHT, info.StartPoint.OffsetY(-390 - 156));
+                                }
+                                else
+                                {
+                                    DrawPipeButtomHeightSymbol(HEIGHT, info.StartPoint.OffsetY(-390));
+                                }
+                            }
+
+                            if (run.HasLongTranslator)
+                            {
+                                var beShort = hanging.FloorDrainsCount == 1 && !hanging.HasSCurve && !hanging.HasDoubleSCurve;
+                                var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 479), new Vector2d(-121, 121), new Vector2d(beShort ? 0 : -789, 0), new Vector2d(-1270, 0), new Vector2d(-180, 0), new Vector2d(-1090, 0) };
+                                if (isLeftOrRight == false)
+                                {
+                                    vecs = vecs.GetYAxisMirror();
+                                }
+                                var pt = info.Segs[4].StartPoint.OffsetY(-669).OffsetY(590 - 90);
+                                if (isLeftOrRight == false && run.IsLongTranslatorToLeftOrRight == true)
+                                {
+                                    var p1 = pt;
+                                    var p2 = pt.OffsetX(1700);
+                                    drawDomePipe(new GLineSegment(p1, p2));
+                                    pt = p2;
+                                }
+                                if (isLeftOrRight == true && run.IsLongTranslatorToLeftOrRight == false)
+                                {
+                                    var p1 = pt;
+                                    var p2 = pt.OffsetX(-1700);
+                                    drawDomePipe(new GLineSegment(p1, p2));
+                                    pt = p2;
+                                }
+                                var segs = vecs.ToGLineSegments(pt);
+                                {
+                                    var _segs = segs.ToList();
+                                    if (hanging.FloorDrainsCount == 2)
+                                    {
+                                        if (hanging.IsSeries) _segs.RemoveAt(5);
+                                    }
+                                    else if (hanging.FloorDrainsCount == 1)
+                                    {
+                                        _segs = segs.Take(5).ToList();
+                                    }
+                                    else if (hanging.FloorDrainsCount == 0)
+                                    {
+                                        _segs = segs.Take(4).ToList();
+                                    }
+                                    if (shouldDrawRaiseWashingMachineSymbol(hanging)) { _segs.RemoveAt(2); }
+                                    drawDomePipes(_segs);
+                                }
+                                if (hanging.FloorDrainsCount >= 1)
+                                {
+                                    _DrawFloorDrain(segs.Last(3).EndPoint.ToPoint3d(), isLeftOrRight);
+                                }
+                                if (hanging.FloorDrainsCount >= 2)
+                                {
+                                    _DrawFloorDrain(segs.Last(1).EndPoint.ToPoint3d(), isLeftOrRight);
+                                    if (hanging.IsSeries)
+                                    {
+                                        DrawDomePipes(segs.Last(2));
+                                    }
+                                }
+
+                                if (hanging.HasSCurve)
+                                {
+                                    var p1 = segs.Last(3).StartPoint;
+                                    _DrawSCurve(vec7, p1, isLeftOrRight);
+                                }
+                                if (hanging.HasDoubleSCurve)
+                                {
+                                    var p1 = segs.Last(3).StartPoint;
+                                    _DrawDSCurve(vec7, p1, isLeftOrRight);
+                                }
+                            }
+                            else
+                            {
+                                if (hanging.IsFL0)
+                                {
+                                    //Dbg.ShowXLabel(info.EndPoint);
+                                    DrawFloorDrain((info.StartPoint + new Vector2d(-1391, -390)).ToPoint3d(), true, "普通地漏无存水弯");
+                                    var vecs = new List<Vector2d> { new Vector2d(0, -667), new Vector2d(-121, 121), new Vector2d(-1450, 0) };
+                                    var segs = vecs.ToGLineSegments(info.StartPoint).Skip(1).ToList();
+                                    drawDomePipes(segs);
+                                }
+                                else
+                                {
+                                    var beShort = hanging.FloorDrainsCount == 1 && !hanging.HasSCurve && !hanging.HasDoubleSCurve;
+                                    var vecs = new List<Vector2d> { new Vector2d(-121, 121), new Vector2d(beShort ? 0 : -789, 0), new Vector2d(-1270, 0), new Vector2d(-180, 0), new Vector2d(-1090, -15) };
+                                    if (isLeftOrRight == false)
+                                    {
+                                        vecs = vecs.GetYAxisMirror();
+                                    }
+                                    var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(-510));
+                                    {
+                                        var _segs = segs.ToList();
+                                        if (hanging.FloorDrainsCount == 2)
+                                        {
+                                            if (hanging.IsSeries) _segs.RemoveAt(3);
+                                        }
+                                        if (hanging.FloorDrainsCount == 1)
+                                        {
+                                            _segs.RemoveAt(4);
+                                            _segs.RemoveAt(3);
+                                        }
+                                        if (hanging.FloorDrainsCount == 0)
+                                        {
+                                            _segs = _segs.Take(2).ToList();
+                                        }
+                                        if (shouldDrawRaiseWashingMachineSymbol(hanging)) { _segs.RemoveAt(2); }
+                                        drawDomePipes(_segs);
+                                    }
+                                    if (hanging.FloorDrainsCount >= 1)
+                                    {
+                                        _DrawFloorDrain(segs.Last(3).EndPoint.ToPoint3d(), isLeftOrRight);
+                                    }
+                                    if (hanging.FloorDrainsCount >= 2)
+                                    {
+                                        _DrawFloorDrain(segs.Last(1).EndPoint.ToPoint3d(), isLeftOrRight);
+                                    }
+                                    if (hanging.HasSCurve)
+                                    {
+                                        var p1 = segs.Last(3).StartPoint;
+                                        _DrawSCurve(vec7, p1, isLeftOrRight);
+                                    }
+                                    if (hanging.HasDoubleSCurve)
+                                    {
+                                        var p1 = segs.Last(3).StartPoint;
+                                        _DrawDSCurve(vec7, p1, isLeftOrRight);
+                                    }
+                                }
+                            }
+                        }
+                        void handleBranchInfo(ThwPipeRun run, PipeRunLocationInfo info)
+                        {
+                            var bi = run.BranchInfo;
+                            if (bi.FirstLeftRun)
+                            {
+                                var p1 = info.EndPoint;
+                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 2));
+                                var p3 = info.EndPoint.OffsetX(300);
+                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(2, 3));
+                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
+                            }
+                            if (bi.FirstRightRun)
+                            {
+                                var p1 = info.EndPoint;
+                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
+                                var p3 = info.EndPoint.OffsetX(-300);
+                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
+                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
+                            }
+                            if (bi.LastLeftRun)
+                            {
+
+                            }
+                            if (bi.LastRightRun)
+                            {
+
+                            }
+                            if (bi.MiddleLeftRun)
+                            {
+
+                            }
+                            if (bi.MiddleRightRun)
+                            {
+
+                            }
+                            if (bi.BlueToLeftFirst)
+                            {
+                                var p1 = info.EndPoint;
+                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
+                                var p3 = info.EndPoint.OffsetX(-300);
+                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
+                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
+                            }
+                            if (bi.BlueToRightFirst)
+                            {
+                                var p1 = info.EndPoint;
+                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(1, 6));
+                                var p3 = info.EndPoint.OffsetX(300);
+                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(1, 3));
+                                info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p1, p2), new GLineSegment(p2, p4) };
+                            }
+                            if (bi.BlueToLeftLast)
+                            {
+                                if (run.HasLongTranslator)
+                                {
+                                    if (run.IsLongTranslatorToLeftOrRight)
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy + 400), new Vector2d(-300, -225) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                    else
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy + 400), new Vector2d(-300, -225) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                }
+                                else if (!run.HasLongTranslator)
+                                {
+                                    var vs = new List<Vector2d> { new Vector2d(0, -1125), new Vector2d(-300, -225) };
+                                    info.DisplaySegs = vs.ToGLineSegments(info.StartPoint);
+                                }
+                            }
+                            if (bi.BlueToRightLast)
+                            {
+                                if (!run.HasLongTranslator && !run.HasShortTranslator)
+                                {
+                                    var p1 = info.EndPoint;
+                                    var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
+                                    var p3 = info.EndPoint.OffsetX(300);
+                                    var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
+                                    var p5 = p1.OffsetY(HEIGHT);
+                                    info.DisplaySegs = new List<GLineSegment>() { new GLineSegment(p4, p2), new GLineSegment(p2, p5) };
+                                }
+                            }
+                            if (bi.BlueToLeftMiddle)
+                            {
+                                if (!run.HasLongTranslator && !run.HasShortTranslator)
+                                {
+                                    var p1 = info.EndPoint;
+                                    var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
+                                    var p3 = info.EndPoint.OffsetX(-300);
+                                    var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
+                                    var segs = info.Segs.ToList();
+                                    segs.Add(new GLineSegment(p2, p4));
+                                    info.DisplaySegs = segs;
+                                }
+                                else if (run.HasLongTranslator)
+                                {
+                                    if (run.IsLongTranslatorToLeftOrRight)
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 - _dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + _dy) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                    else
+                                    {
+                                        var _dy = 300;
+                                        var vs1 = new List<Vector2d> { new Vector2d(0, -780 + _dy), new Vector2d(121, -121), new Vector2d(1258, 0), new Vector2d(121, -120), new Vector2d(0, -779 - dy - _dy) };
+                                        var segs = info.DisplaySegs = vs1.ToGLineSegments(info.StartPoint);
+                                        var vs2 = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-300, -225) };
+                                        info.DisplaySegs.AddRange(vs2.ToGLineSegments(info.StartPoint).Skip(1).ToList());
+                                    }
+                                }
+                            }
+                            if (bi.BlueToRightMiddle)
+                            {
+                                var p1 = info.EndPoint;
+                                var p2 = p1.OffsetY(HEIGHT.ToRatioInt(9, 24));
+                                var p3 = info.EndPoint.OffsetX(300);
+                                var p4 = p3.OffsetY(HEIGHT.ToRatioInt(6, 24));
+                                var segs = info.Segs.ToList();
+                                segs.Add(new GLineSegment(p2, p4));
+                                info.DisplaySegs = segs;
+                            }
+                            {
+                                var vecs = new List<Vector2d> { new Vector2d(0, -900), new Vector2d(-121, -121), new Vector2d(-1479, 0), new Vector2d(0, -499), new Vector2d(-200, -200) };
+                                if (bi.HasLongTranslatorToLeft)
+                                {
+                                    var vs = vecs;
+                                    info.DisplaySegs = vecs.ToGLineSegments(info.StartPoint);
+                                    if (!bi.IsLast)
+                                    {
+                                        var pt = vs.Take(vs.Count - 1).GetLastPoint(info.StartPoint);
+                                        info.DisplaySegs.AddRange(new List<Vector2d> { new Vector2d(0, -280) }.ToGLineSegments(pt));
+                                    }
+                                }
+                                if (bi.HasLongTranslatorToRight)
+                                {
+                                    var vs = vecs.GetYAxisMirror();
+                                    info.DisplaySegs = vs.ToGLineSegments(info.StartPoint);
+                                    if (!bi.IsLast)
+                                    {
+                                        var pt = vs.Take(vs.Count - 1).GetLastPoint(info.StartPoint);
+                                        info.DisplaySegs.AddRange(new List<Vector2d> { new Vector2d(0, -280) }.ToGLineSegments(pt));
+                                    }
+                                }
+                            }
+                        }
+                        if (run.LeftHanging != null)
+                        {
+                            run.LeftHanging.IsSeries = gpItem.Hangings[i].IsSeries;
+                            handleHanging(run.LeftHanging, true);
+                        }
+                        if (run.RightHanging != null)
+                        {
+                            run.RightHanging.IsSeries = gpItem.Hangings[i].IsSeries;
+                            handleHanging(run.RightHanging, false);
+                        }
+                        if (run.BranchInfo != null)
+                        {
+                            handleBranchInfo(run, info);
+                        }
+                        if (run.ShowShortTranslatorLabel)
+                        {
+                            var vecs = new List<Vector2d> { new Vector2d(76, 76), new Vector2d(-424, 424), new Vector2d(-1900, 0) };
+                            var segs = vecs.ToGLineSegments(info.EndPoint).Skip(1).ToList();
+                            DrawDraiNoteLines(segs);
+                            DrawDraiNoteLines(segs);
+                            var text = "DN100乙字弯";
+                            var pt = segs.Last().EndPoint;
+                            DrawNoteText(text, pt);
+                        }
+                        if (run.HasCheckPoint)
+                        {
+                            if (run.HasShortTranslator)
+                            {
+                                DrawPipeCheckPoint(info.Segs.Last().StartPoint.OffsetY(280).ToPoint3d(), true);
+                            }
+                            else
+                            {
+                                DrawPipeCheckPoint(info.EndPoint.OffsetY(280).ToPoint3d(), true);
+                            }
+                        }
+                        if (run.HasHorizontalShortLine)
+                        {
+                            _DrawHorizontalLineOnPipeRun(HEIGHT, info.BasePoint.ToPoint3d());
+                        }
+                        if (run.HasCleaningPort)
+                        {
+                            if (run.HasLongTranslator)
+                            {
+                                var vecs = new List<Vector2d> { new Vector2d(-200, 200), new Vector2d(0, 300), new Vector2d(121, 121), new Vector2d(1109, 0), new Vector2d(121, 121), new Vector2d(0, 279) };
+                                if (run.IsLongTranslatorToLeftOrRight == false)
+                                {
+                                    vecs = vecs.GetYAxisMirror();
+                                }
+                                if (run.HasShortTranslator)
+                                {
+                                    var segs = vecs.ToGLineSegments(info.Segs.Last(2).StartPoint.OffsetY(-300));
+                                    drawDomePipes(segs);
+                                    _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
+                                }
+                                else
+                                {
+                                    var segs = vecs.ToGLineSegments(info.Segs.Last().StartPoint.OffsetY(-300));
+                                    drawDomePipes(segs);
+                                    _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, 2);
+                                }
+                            }
+                            else
+                            {
+                                _DrawCleaningPort(info.StartPoint.OffsetY(-300).ToPoint3d(), true, 2);
+                            }
+
+                        }
+
+                        if (run.HasShortTranslator)
+                        {
+                            DrawShortTranslatorLabel(info.Segs.Last().Center, run.IsShortTranslatorToLeftOrRight);
+                        }
+                        if (viewModel?.Params?.ShouldRaiseWashingMachine ?? false)
+                        {
+                            if (Dbg._)
+                            {
+                                var vecs = new List<Vector2d> { new Vector2d(-121, 121), new Vector2d(-2059, 0) };
+                                var segs = vecs.ToGLineSegments(info.HangingEndPoint.OffsetY(300));
+                                drawDomePipes(segs);
+                                DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
+                            }
+                        }
+                    }
+
+
+                    var showAllFloorDrainLabel = false;
+                    //showAllFloorDrainLabel = true;
+
+                    var HasBalconyWashingMachineFloorDrain = false;
+                    var HasBalconyNonWashingMachineFloorDrain = false;
+                    var HasKitchenWashingMachineFloorDrain = false;
+                    var HasKitchenNonWashingMachineFloorDrain = false;
+                    for (int i = start; i >= end; i--)
+                    {
+                        if (thwPipeLine.Labels.Any(x => IsFL0(x))) continue;
+                        var (ok, item) = gpItem.Items.TryGetValue(i + 1);
+                        if (!ok) continue;
+
+                        foreach (var pt in fdBasePoints[i].OrderBy(p => p.X))
+                        {
+                            if (showAllFloorDrainLabel)
+                            {
+                                if (item.HasBalconyWashingMachineFloorDrain)
+                                {
+                                    item.HasBalconyWashingMachineFloorDrain = false;
+                                    _DrawLabel("接阳台洗衣机地漏DN75，余同", pt, true, 900);
+                                    continue;
+                                }
+                                if (item.HasBalconyNonWashingMachineFloorDrain)
+                                {
+                                    item.HasBalconyNonWashingMachineFloorDrain = false;
+                                    _DrawLabel("接阳台地漏DN75，余同", pt, true, 1800);
+                                    continue;
+                                }
+                                if (item.HasKitchenWashingMachineFloorDrain)
+                                {
+                                    item.HasKitchenWashingMachineFloorDrain = false;
+                                    _DrawLabel("接厨房洗衣机地漏DN75，余同", pt, true, 900);
+                                    continue;
+                                }
+                                if (item.HasKitchenNonWashingMachineFloorDrain)
+                                {
+                                    item.HasKitchenNonWashingMachineFloorDrain = false;
+                                    _DrawLabel("接厨房地漏DN75，余同", pt, true, 1800);
+                                    continue;
+                                }
+                                _DrawLabel(item.ToCadJson(), pt, true, 1800);
+                            }
+                            else
+                            {
+                                if (!HasBalconyWashingMachineFloorDrain && item.HasBalconyWashingMachineFloorDrain)
+                                {
+                                    item.HasBalconyWashingMachineFloorDrain = false;
+                                    HasBalconyWashingMachineFloorDrain = true;
+                                    _DrawLabel("接阳台洗衣机地漏DN75，余同", pt, true, 900);
+                                    continue;
+                                }
+                                if (!HasBalconyNonWashingMachineFloorDrain && item.HasBalconyNonWashingMachineFloorDrain)
+                                {
+                                    item.HasBalconyNonWashingMachineFloorDrain = false;
+                                    HasBalconyNonWashingMachineFloorDrain = true;
+                                    _DrawLabel("接阳台地漏DN75，余同", pt, true, 1800);
+                                    continue;
+                                }
+                                if (!HasKitchenWashingMachineFloorDrain && item.HasKitchenWashingMachineFloorDrain)
+                                {
+                                    item.HasKitchenWashingMachineFloorDrain = false;
+                                    HasKitchenWashingMachineFloorDrain = true;
+                                    _DrawLabel("接厨房洗衣机地漏DN75，余同", pt, true, 900);
+                                    continue;
+                                }
+                                if (!HasKitchenNonWashingMachineFloorDrain && item.HasKitchenNonWashingMachineFloorDrain)
+                                {
+                                    item.HasKitchenNonWashingMachineFloorDrain = false;
+                                    HasKitchenNonWashingMachineFloorDrain = true;
+                                    _DrawLabel("接厨房地漏DN75，余同", pt, true, 1800);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    //foreach (var pt in kitchenWashingMachineFloorDrains.OrderByDescending(x=>x.Y))
+                    //{
+                    //    Dbg.ShowXLabel(pt);
+                    //    _DrawLabel("接厨房洗衣机地漏DN75，余同", pt, true, 900);
+                    //}
+                    //foreach (var pt in kitchenNonWashingMachineFloorDrains.OrderByDescending(x => x.Y))
+                    //{
+                    //    Dbg.ShowXLabel(pt);
+                    //    _DrawLabel("接厨房地漏DN75，余同", pt, true, 1800);
+                    //}
+                    //foreach (var pt in balconyWashingMachineFloorDrains.OrderByDescending(x => x.Y))
+                    //{
+                    //    Dbg.ShowXLabel(pt);
+                    //    _DrawLabel("接阳台洗衣机地漏DN75，余同", pt, true, 900);
+                    //}
+                    //foreach (var pt in balconyNonWashingMachineFloorDrains.OrderByDescending(x => x.Y))
+                    //{
+                    //    Dbg.ShowXLabel(pt);
+                    //    _DrawLabel("接阳台地漏DN75，余同", pt, true, 1800);
+                    //}
+                }
 
 
                 //修复绘图逻辑
@@ -4187,7 +4483,7 @@
                             {
                                 var p = info.EndPoint + new Vector2d(800, -390);
                                 DrawFloorDrain(p.ToPoint3d(), true, "普通地漏无存水弯");
-                                var vecs = new List<Vector2d>() { new Vector2d(0, -100 + 29), new Vector2d(-121, -121), new Vector2d(-100 - 1158, 0), new Vector2d(-121, 121) };
+                                var vecs = new List<Vector2d>() { new Vector2d(0, -100 + 29), new Vector2d(-300, -300), new Vector2d(-100 - 1158 + 179 * 2, 0), new Vector2d(-300, 300) };
                                 var segs = vecs.ToGLineSegments(p + new Vector2d(-180, -160));
                                 drawDomePipes(segs);
                                 DrawOutlets1(info.EndPoint, 3600, output, dy: -HEIGHT * .2778);
@@ -4203,7 +4499,7 @@
                             {
                                 var p = info.EndPoint + new Vector2d(800, -390);
                                 DrawFloorDrain(p.ToPoint3d(), true, "普通地漏无存水弯");
-                                var vecs = new List<Vector2d>() { new Vector2d(0, -100 + 29), new Vector2d(-121, -121), new Vector2d(-100 - 1158, 0), new Vector2d(-121, 121) };
+                                var vecs = new List<Vector2d>() { new Vector2d(0, -100 + 29), new Vector2d(-300, -300), new Vector2d(-100 - 1158 + 179 * 2, 0), new Vector2d(-300, 300) };
                                 var segs = vecs.ToGLineSegments(p + new Vector2d(-180, -160));
                                 drawDomePipes(segs);
                                 DrawOutlets1(info.EndPoint, 3600, output, dy: -HEIGHT * .2778);
@@ -4236,12 +4532,19 @@
 
             {
                 var auto_conn = false;
+                auto_conn = true;
                 if (auto_conn)
                 {
                     foreach (var g in GeoFac.GroupParallelLines(dome_lines, 1, .01))
                     {
-                        var line = DU.DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e6));
+                        var line = DU.DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
                         line.Layer = dome_layer;
+                        DU.ByLayer(line);
+                    }
+                    foreach (var g in GeoFac.GroupParallelLines(vent_lines, 1, .01))
+                    {
+                        var line = DU.DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
+                        line.Layer = vent_layer;
                         DU.ByLayer(line);
                     }
                 }
@@ -5091,103 +5394,6 @@
     [Feng]
     public static class THDrainageService
     {
-        public static void DoExtract(AcadDatabase adb, Func<BlockReference, Matrix3d, bool> doExtract,
-            bool supportDynamicBlock = false,
-            Action<BlockReference, Matrix3d> doXClip = null)
-        {
-            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
-            {
-                DoExtract(br, Matrix3d.Identity, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: true);
-            }
-        }
-        public static void DoExtract(BlockReference blockReference, Matrix3d matrix,
-         Func<BlockReference, Matrix3d, bool> doExtract,
-           bool supportDynamicBlock = false,
-           Action<BlockReference, Matrix3d> doXClip = null,
-           bool rootInclude = false)
-        {
-            static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-            {
-                //return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-                //return !layerTableRecord.IsOff;
-                return !layerTableRecord.IsFrozen;//一个个试出来的，我也不懂。。。
-                //return !layerTableRecord.IsHidden;
-                //return layerTableRecord.IsUsed;
-            }
-            bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
-            {
-                if (!supportDynamicBlock)
-                {
-                    // 暂时不支持动态块，外部参照，覆盖
-                    if (blockTableRecord.IsDynamicBlock)
-                    {
-                        return false;
-                    }
-                }
-
-                // 忽略图纸空间和匿名块
-                if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
-                {
-                    return false;
-                }
-
-                // 忽略不可“炸开”的块
-                if (!blockTableRecord.Explodable)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            using AcadDatabase adb = AcadDatabase.Use(blockReference.Database);
-            bool isVisibleBlockRef(BlockReference br)
-            {
-                var layer = br.Layer;
-                if (layer == null) return false;
-                var _layer = adb.Layers.ElementOrDefault(layer);
-                return _layer == null ? false : IsVisibleLayer(_layer);
-            }
-            if (blockReference.BlockTableRecord.IsValid)
-            {
-                if (rootInclude && blockReference.ObjectId.IsValid && isVisibleBlockRef(blockReference))
-                {
-                    if (doExtract(blockReference, matrix)) return;
-                }
-                var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord))
-                {
-                    // 提取图元信息                        
-                    foreach (var objId in blockTableRecord)
-                    {
-                        var dbObj = adb.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
-                        {
-                            //if (blockObj.BlockTableRecord.IsNull) continue;
-                            if (!isVisibleBlockRef(blockObj)) continue;
-                            if (blockObj.BlockTableRecord.IsValid)
-                            {
-                                if (doExtract(blockObj, matrix)) continue;
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                DoExtract(blockObj, mcs2wcs, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: false);
-                            }
-                        }
-                    }
-
-                    // 过滤XClip外的图元信息
-                    doXClip?.Invoke(blockReference, matrix);
-                    {
-                        //var xclip = blockReference.XClipInfo();
-                        //var poly = xclip.Polygon;
-                        //if (poly != null)
-                        //{
-                        //    poly.TransformBy(m);
-                        //    var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
-                        //    geos.RemoveAll(o => !gf.Contains(o));
-                        //}
-                    }
-                }
-            }
-        }
         public static bool IsToilet(string roomName)
         {
             //1)	包含“卫生间” //2)	包含“主卫” //3)	包含“次卫”
@@ -5272,7 +5478,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var names = new List<string>() { "A-Kitchen-9" };
-                    DoExtract(adb, (br, m) =>
+                    Dbg.DoExtract(adb, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
                         if (names.Any(x => name.Contains(x)))
@@ -5358,7 +5564,7 @@
                         }
                     }
                     var f = GeoFac.CreateIntersectsSelector(balcony);
-                    DoExtract(adb, (br, m) =>
+                    Dbg.DoExtract(adb, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
                         if (name.Contains("A-Toilet-9"))
@@ -5403,7 +5609,7 @@
                     }
                     var f = GeoFac.CreateIntersectsSelector(kitchens);
                     var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
-                    DoExtract(adb, (br, m) =>
+                    Dbg.DoExtract(adb, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
                         if (names.Any(x => name.Contains(x)))
@@ -5442,6 +5648,8 @@
             });
             register("洗衣机", () =>
             {
+                var rs = new List<GRect>();
+                var xclips = new List<GRect>();
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
@@ -5450,7 +5658,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var names = new List<string>() { "A-Toilet-9", "$xiyiji" };
-                    DoExtract(adb, (br, m) =>
+                    Dbg.DoExtract(adb, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
                         if (names.Any(x => name.Contains(x)))
@@ -5458,15 +5666,47 @@
                             var e = br.GetTransformedCopy(m);
                             var r = e.Bounds.ToGRect();
                             if (!r.IsValid) return true;
-                            DU.DrawRectLazy(r, 10);
-                            Dbg.ShowWhere(r);
+                            rs.Add(r);
+                            //DU.DrawRectLazy(r, 10);
+                            //Dbg.ShowWhere(r);
                             return true;
                         }
                         return false;
+                    }, doXClip: (br, m) =>
+                    {
+                        var xclip = br.XClipInfo();
+                        var poly = xclip.Polygon;
+                        if (poly != null)
+                        {
+                            poly.TransformBy(m);
+                            //var r = poly.ToNTSGeometry().Envelope.ToGRect();
+                            //var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
+                            //rs = rs.Distinct().ToList();
+                            //var geos = rs.Select(x => x.ToPolygon()).ToList();
+                            //rs = geos.Where(x => gf.Contains(x)).Select(geos).ToList(rs);
+                            var r = poly.Bounds.ToGRect();
+                            if (r.IsValid)
+                            {
+                                //xclips.Add(r);
+                            }
+                        }
                     });
+                    rs = rs.Distinct().ToList();
+                    if (xclips.Count > 0)
+                    {
+                        var range = GeoFac.CreateGeometryEx(xclips.Select(x => x.ToPolygon()).ToList());
+                        var geos = rs.Select(x => x.ToPolygon()).ToList();
+                        var rsf = GeoFac.CreateIntersectsSelector(geos);
+                        rs = rsf(range).Select(geos).ToList(rs);
+                    }
+                    foreach (var r in rs)
+                    {
+                        DU.DrawRectLazy(r, 10);
+                        Dbg.ShowWhere(r);
+                    }
                 }
             });
-            register("洗脸盆", () =>
+            register("XrefStatus", () =>
             {
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
@@ -5475,23 +5715,37 @@
                 {
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
-                    var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
-                    DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (names.Any(x => name.Contains(x)))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            DU.DrawRectLazy(r, 10);
-                            Dbg.ShowWhere(r);
-                            return true;
-                        }
-                        return false;
-                    });
+                    var br=Dbg.SelectEntity<BlockReference>(adb);
+                    var r=adb.Blocks.Element(br.BlockTableRecord);
+                    Console.WriteLine(r.XrefStatus);
                 }
             });
+            register("洗脸盆", () =>
+             {
+                 Dbg.FocusMainWindow();
+                 using (Dbg.DocumentLock)
+                 using (var adb = AcadDatabase.Active())
+                 using (var tr = new DrawingTransaction(adb))
+                 {
+                     var db = adb.Database;
+                     Dbg.BuildAndSetCurrentLayer(db);
+                     var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
+                     Dbg.DoExtract(adb, (br, m) =>
+                     {
+                         var name = br.GetEffectiveName();
+                         if (names.Any(x => name.Contains(x)))
+                         {
+                             var e = br.GetTransformedCopy(m);
+                             var r = e.Bounds.ToGRect();
+                             if (!r.IsValid) return true;
+                             DU.DrawRectLazy(r, 10);
+                             Dbg.ShowWhere(r);
+                             return true;
+                         }
+                         return false;
+                     });
+                 }
+             });
             register("洗衣机抬高的触发条件", () =>
             {
                 Dbg.FocusMainWindow();
@@ -5512,7 +5766,7 @@
                     }
                     var washingMachines = new List<Geometry>();
 
-                    DoExtract(adb, (br, m) =>
+                    Dbg.DoExtract(adb, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
 
@@ -5548,7 +5802,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var rs = new List<GRect>();
-                    DoExtract(Dbg.SelectEntity<BlockReference>(adb), Matrix3d.Identity, (br, m) =>
+                    Dbg.DoExtract(Dbg.SelectEntity<BlockReference>(adb), Matrix3d.Identity, (br, m) =>
                     {
                         var name = br.GetEffectiveName();
                         if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕") || name.Contains("0$asdfghjgjhkl"))
@@ -5754,7 +6008,7 @@
                     DrainageSystemDiagram.DrawOutlets2(pt);
                 }
             });
-            register("draw byuivm", () =>
+            register("🔴draw byuivm", () =>
             {
                 try
                 {
@@ -5769,7 +6023,7 @@
                     ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
                 }
             });
-            register("draw bycmd", () => { DrainageSystemDiagram.DrawDrainageSystemDiagram(); });
+            register("🔴draw bycmd", () => { DrainageSystemDiagram.DrawDrainageSystemDiagram(); });
             register("CollectRoomData", () =>
             {
                 Dbg.FocusMainWindow();
@@ -5800,8 +6054,8 @@
             });
             register("load drDatas and draw", () =>
             {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
-                var drDatas = Dbg.LoadFromTempJsonFile<List<DrainageDrawingData>>("drDatas");
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
+                var drDatas = Dbg.LoadFromTempJsonFile<List<DrainageDrawingData>>("drainage_drDatas");
                 Dbg.FocusMainWindow();
                 var basePoint = Dbg.SelectPoint().ToPoint2d();
 
@@ -5819,8 +6073,8 @@
             });
             register("load geoData save drDatas noDraw", () =>
             {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
-                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("geoData");
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
+                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("drainage_geoData");
 
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
@@ -5830,13 +6084,13 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, true);
-                    Dbg.SaveToTempJsonFile(drDatas, "drDatas");
+                    Dbg.SaveToTempJsonFile(drDatas, "drainage_drDatas");
                 }
             });
             register("load geoData save drDatas", () =>
             {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("storeysItems");
-                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("geoData");
+                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
+                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("drainage_geoData");
 
                 Dbg.FocusMainWindow();
                 using (Dbg.DocumentLock)
@@ -5846,7 +6100,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, false);
-                    Dbg.SaveToTempJsonFile(drDatas, "drDatas");
+                    Dbg.SaveToTempJsonFile(drDatas, "drainage_drDatas");
                 }
             });
             register("save geoData", () =>
@@ -5861,14 +6115,14 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<DrainageSystemDiagram.StoreysItem> storeysItems, out DrainageGeoData geoData);
-                    Dbg.SaveToTempJsonFile(storeysItems, "storeysItems");
-                    Dbg.SaveToTempJsonFile(geoData, "geoData");
+                    Dbg.SaveToTempJsonFile(storeysItems, "drainage_storeysItems");
+                    Dbg.SaveToTempJsonFile(geoData, "drainage_geoData");
                 }
             });
-            register("draw14(from cache)", DrainageSystemDiagram.draw14);
-            register("draw13(log only)", DrainageSystemDiagram.draw13);
-            register("draw12(create cache)", DrainageSystemDiagram.draw12);
-            register("draw11", DrainageSystemDiagram.draw11);
+            register("draw14(from cache)", DrainageSystemDiagram.DrawDrainageSystemDiagramFromCache);
+            register("draw13(log only)", DrainageSystemDiagram.DrawDrainageSystemDiagramLogOnly);
+            register("draw12(create cache)", DrainageSystemDiagram.DrawDrainageSystemDiagramCreateCache);
+            register("draw11", DrainageSystemDiagram.DrainageSystemDiagramStartPoint);
             register("draw8", () =>
             {
                 Dbg.FocusMainWindow();
@@ -5923,7 +6177,7 @@
                     }
                     else
                     {
-                        DrainageSystemDiagram.draw1(basePt);
+                        DrainageSystemDiagram.BeginToDrawDrainageSystemDiagram(basePt);
                     }
                 }
             });
@@ -5944,7 +6198,7 @@
                     }
                     else
                     {
-                        DrainageSystemDiagram.draw2(basePt);
+                        DrainageSystemDiagram.StartToDrawDrainageSystemDiagram(basePt);
                     }
                 }
             });
@@ -5958,7 +6212,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw3(basePt.ToPoint2d());
+                    DrainageSystemDiagram.PreparedToDrawDrainageSystemDiagram(basePt.ToPoint2d());
                 }
             });
             register("draw4", () =>
@@ -5971,7 +6225,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw4(basePt.ToPoint2d());
+                    DrainageSystemDiagram.ReadyToDrawDrainageSystemDiagram(basePt.ToPoint2d());
                 }
             });
             register("draw6", () =>
@@ -5984,7 +6238,7 @@
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
                     var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw6(basePt.ToPoint2d());
+                    DrainageSystemDiagram.AbleToDrawDrainageSystemDiagram(basePt.ToPoint2d());
                 }
             });
             register("根据点收集向量数据", () =>
@@ -6074,6 +6328,57 @@
             register("ImportElementsFromStdDwg", () => ThRainSystemService.ImportElementsFromStdDwg());
             register("CreateFloorFraming", ThMEPWSS.Common.Utils.CreateFloorFraming);
             register("🔴一些工具", () => { FengDbgTest.FengDbgTesting.Register(typeof(ThDebugClass.DebugTools)); });
+            register("0", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db, "0");
+                }
+            });
+            register("feng_dbg_test_washing_machine", () =>
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db, "feng_dbg_test_washing_machine");
+                }
+            });
+            register("DrawWashingMachineRaisingSymbol", () =>
+            {
+                static void SetDomePipeLineStyle(Line line)
+                {
+                    line.Layer = "W-DRAI-DOME-PIPE";
+                    DU.ByLayer(line);
+                }
+                static void DrawDomePipes(IEnumerable<GLineSegment> segs)
+                {
+                    var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
+                    lines.ForEach(line => SetDomePipeLineStyle(line));
+                }
+
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var pt = Dbg.SelectPoint().ToPoint2d();
+                    var vecs = new List<Vector2d> { new Vector2d(-895, 0), new Vector2d(-90, 90), new Vector2d(0, 700), new Vector2d(-285, 0) };
+                    var segs = vecs.ToGLineSegments(pt);
+                    DrainageSystemDiagram.DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
+                    DrawDomePipes(segs);
+                }
+            });
+            register("", () => { });
+            register("", () => { });
         }
 
         public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
@@ -6170,6 +6475,10 @@
                 {
                     geoData.LabelLines[i] = seg.Extend(6);
                 }
+                else if (seg.IsVertical(5))
+                {
+                    geoData.LabelLines[i] = seg.Extend(1);
+                }
             }
             for (int i = 0; i < geoData.DLines.Count; i++)
             {
@@ -6179,7 +6488,25 @@
             {
                 geoData.VLines[i] = geoData.VLines[i].Extend(5);
             }
-
+            {
+                //处理立管重叠的情况
+                geoData.VerticalPipes = geoData.VerticalPipes.Distinct(new GRect.EqualityComparer(.1)).ToList();
+            }
+            {
+                //处理洗衣机重叠的情况
+                geoData.WashingMachines = GeoFac.GroupGeometries(geoData.WashingMachines.Select(x => x.ToPolygon()).Cast<Geometry>().ToList()).Select(x => GeoFac.CreateGeometryEx(x).Envelope.ToGRect()).ToList();
+            }
+            {
+                //处理标注重叠的情况
+                geoData.Labels = geoData.Labels.Distinct(Dbg.CreateEqualityComparer<CText>((x, y) => x.Text == y.Text && x.Boundary.EqualsTo(y.Boundary, 10))).ToList();
+            }
+            {
+                //其他的也顺手处理下好了。。。
+                var cmp = new GRect.EqualityComparer(.1);
+                geoData.FloorDrains = geoData.FloorDrains.Distinct(cmp).ToList();
+                geoData.WashingMachines = geoData.WashingMachines.Distinct(cmp).ToList();
+                geoData.PipeKillers = geoData.PipeKillers.Distinct(cmp).ToList();
+            }
             {
                 var _pipes = geoData.VerticalPipes.Distinct().ToList();
                 var pipes = _pipes.Select(x => x.Center.ToNTSPoint()).ToList();
@@ -6198,11 +6525,13 @@
             {
                 foreach (var ct in geoData.Labels)
                 {
-                    //if (ct.Text.StartsWith("1-"))
                     if (ct.Text.StartsWith("73-"))
                     {
-                        //ct.Text = ct.Text.Substring(2);
                         ct.Text = ct.Text.Substring(3);
+                    }
+                    else if (ct.Text.StartsWith("1-"))
+                    {
+                        ct.Text = ct.Text.Substring(2);
                     }
                 }
             }
@@ -6238,7 +6567,12 @@
         public static bool IsMaybeLabelText(string label)
         {
             if (label == null) return false;
-            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || label.StartsWith("Y1L") || label.StartsWith("Y2L") || label.StartsWith("NL") || label.StartsWith("YL") || label.Contains("单排");
+            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label)
+                || label.StartsWith("Y1L") || label.StartsWith("Y2L") || label.StartsWith("NL") || label.StartsWith("YL")
+                || label.Contains("单排")
+                || label.StartsWith("RML") || label.StartsWith("RMHL")
+                || label.StartsWith("J1L") || label.StartsWith("J2L")
+                ;
         }
         public static void CollectFloorListDatasEx()
         {
@@ -6499,7 +6833,11 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void CollectKillers()
         {
-            DoExtract(adb, (br, m) =>
+            foreach (var c in entities.Where(x => x.Layer is "feng_dbg_test_washing_machine"))
+            {
+                washingMachines.Add(c.Bounds.ToGRect());
+            }
+            Dbg.DoExtract(adb, (br, m) =>
             {
                 var ok = false;
                 var basinNames = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
@@ -6607,7 +6945,8 @@ namespace ThMEPWSS.Pipe.Service
                         else if (
                              (br.Layer == "块" && br.ObjectId.IsValid && br.GetEffectiveName() == "A$C028429B2")
                              || (br.Layer == "W-DRAI-NOTE" && br.ObjectId.IsValid && br.GetEffectiveName() == "wwwe")
-                              || (br.Layer == "0" && br.ObjectId.IsValid && br.GetEffectiveName() == "dsa")
+                              || (br.Layer == "0" && br.ObjectId.IsValid && br.GetEffectiveName() == "dsa"
+                              || (br.Layer is "W-DRAI-DIMS" or "A-排水立管图块" && br.ObjectId.IsValid && br.GetEffectiveName() is "sadf32f43tsag"))
                              )
                         {
                             foreach (var e in br.ExplodeToDBObjectCollection().OfType<Entity>())
@@ -6768,7 +7107,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void CollectVerticalPipes()
         {
-            static bool f(string layer) => layer is "W-DRAI-EQPM" or "W-RAIN-EQPM";
+            static bool f(string layer) => layer is "W-DRAI-EQPM" or "W-RAIN-EQPM" or "VPIPE-污水" or "VPIPE-废水" or "W-DRAI-DIMS";
             {
                 var pps = new List<Entity>();
                 pps.AddRange(entities.OfType<BlockReference>()
@@ -6790,7 +7129,7 @@ namespace ThMEPWSS.Pipe.Service
             {
                 var pps = new List<Circle>();
                 pps.AddRange(entities.OfType<Circle>()
-                .Where(x => f(x.Layer))
+                .Where(x => f(x.Layer) || x.Layer is "VPIPE-给水")
                 .Where(c => distinguishDiameter <= c.Radius && c.Radius <= 100));
                 static GRect getRealBoundaryForPipe(Circle c)
                 {
@@ -7382,12 +7721,12 @@ namespace ThMEPWSS.Pipe.Service
         }
 
         static bool NoDraw;
-        public static void draw13()
+        public static void DrawDrainageSystemDiagramLogOnly()
         {
             try
             {
                 NoDraw = true;
-                draw11();
+                DrainageSystemDiagramStartPoint();
             }
             finally
             {
@@ -7397,7 +7736,7 @@ namespace ThMEPWSS.Pipe.Service
 
 
 
-        public static void draw12()
+        public static void DrawDrainageSystemDiagramCreateCache()
         {
             try
             {
@@ -7498,7 +7837,7 @@ namespace ThMEPWSS.Pipe.Service
                 return _GetEnumerator();
             }
         }
-        public static void draw11()
+        public static void DrainageSystemDiagramStartPoint()
         {
             List<DrainageDrawingData> drDatas;
             List<StoreysItem> storeysItems;

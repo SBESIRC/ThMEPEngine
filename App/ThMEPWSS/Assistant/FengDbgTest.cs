@@ -59,13 +59,6 @@ namespace ThMEPWSS.DebugNs
     {
         public static Dictionary<string, object> ctx => ThDebugClass1.ctx;
         public static Dictionary<string, object> processContext => ThDebugClass1.processContext;
-        static void nav()
-        {
-            var _ = new string[]
-            {
-                nameof(ThWRainPipeRun.Draw),
-            };
-        }
         public static void NewAndShowLogWindow()
         {
             Dbg.NewLogWindow();
@@ -2072,6 +2065,35 @@ namespace ThMEPWSS.DebugNs
                     }
                 }
             }
+            [Feng("blk trans")]
+            public static void qwdndb()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    Console.WriteLine(Dbg.SelectEntity<BlockReference>(adb).BlockTransform);
+                }
+            }
+            [Feng("test")]
+            public static void qwais7()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    var seg1 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    var seg2 = Dbg.SelectEntity<Line>(adb).ToGLineSegment();
+                    Console.WriteLine(seg1.ToLineString().Intersects(seg2.ToLineString()));
+                    Console.WriteLine(seg1.ToLineString().Distance(seg2.ToLineString()));
+                }
+            }
             [Feng("收集范围内的图层")]
             public static void qw4kwo()
             {
@@ -3856,20 +3878,8 @@ namespace ThMEPWSS.DebugNs
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-
                 var sv = new ThRainSystemService() { adb = adb };
                 sv.InitCache();
-
-                //foreach (var e in sv.WaterWells)
-                //{
-                //    DU.DrawBoundaryLazy(e);
-                //}
-
-                //foreach (var e in sv.WRainLines)
-                //{
-                //    DU.DrawBoundaryLazy(e);
-                //}
-
                 var lines = sv.WRainLines;
                 var wells = sv.WaterWells;
                 var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (e as Line)?.Buffer(10))).ToList();
@@ -3892,9 +3902,6 @@ namespace ThMEPWSS.DebugNs
 
             }
         }
-
-
-
         public static void ShowLineLength()
         {
             Dbg.FocusMainWindow();
@@ -3916,127 +3923,6 @@ namespace ThMEPWSS.DebugNs
                 var e1 = Dbg.SelectEntity<Entity>(adb);
                 GeoAlgorithm.TryConvertToLineSegment(e1, out GLineSegment seg1);
                 Dbg.PrintLine(GeoAlgorithm.AngleToDegree((seg1.EndPoint - seg1.StartPoint).Angle).ToString());
-            }
-        }
-
-        public static void ShowAllWaterBuckets()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            {
-                foreach (var t in adb.ModelSpace.OfType<DBText>().Where(t => t.TextString.Contains("雨水斗")))
-                {
-                    var bd = GeoAlgorithm.GetBoundaryRect(t);
-                    Dbg.ShowWhere(bd);
-                }
-            }
-        }
-
-
-        public static void DrawBoundaryTest2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                DrawUtils.DrawBoundaryLazy(e);
-            }
-        }
-        public static void DrawBoundaryTest3()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                DrawUtils.DrawBoundaryLazy(e, 100);
-            }
-        }
-        public static void DrawBoundaryTest4()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                var r = GeoAlgorithm.GetBoundaryRect(e);
-                DrawUtils.DrawRectLazy(r);
-            }
-        }
-
-        public static void DrawBoundaryTest5()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                var r = GeoAlgorithm.GetBoundaryRect(e);
-                var rect = "[-334718.142328821,1366616.99129695,635160.253054206,1868196.71202574]".JsonToGRect();
-                const double delta = 1000;
-                for (int i = 0; i < 1000; i++)
-                {
-                    var _delta = delta * i;
-                    if (_delta > rect.Width / 2 && _delta > rect.Height / 2) break;
-                    var _r = new GRect(r.MinX - _delta, r.MaxY + _delta, r.MaxX + _delta, r.MinY - _delta);
-                    DrawUtils.DrawRectLazy(_r);
-                }
-            }
-        }
-        public static void FindY1L1_3()
-        {
-            Dbg.ShowWhere("Y1L1-3");
-        }
-        public static void FindAllY1L1_3()
-        {
-            Dbg.ShowAll("Y1L1-3");
-        }
-        public static void FindAllWb3()
-        {
-            Dbg.ShowAll("Wb3", 10000 * 5);
-        }
-        public static void FindAllWb3WrappingPipes2()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                adb.ModelSpace.OfType<BlockReference>().Where(e => e.Layer == "W-BUSH").ForEach(e => Dbg.ShowWhere(e));
-            }
-        }
-        public static void FindAllFL1_2()
-        {
-            Dbg.ShowAll("FL1-2", 10000 * 5);
-        }
-        public static void GetBoundaryData()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var e = Dbg.SelectEntity<Entity>(adb);
-                var r = GeoAlgorithm.GetBoundaryRect(e);
-                Dbg.ShowString(r.ToJson());
             }
         }
         public static void DrawLinesDemo()
@@ -4157,7 +4043,8 @@ namespace ThMEPWSS.DebugNs
             }
             private static void register()
             {
-                THDrainageService.Register(AddButton);
+                RegisterWithEntry(typeof(RainSystemNs.ThRainService));
+                RegisterWithEntry(typeof(THDrainageService));
                 RegisterNonPublic(typeof(THDrainageService));
                 RegisterWithAttribute(typeof(Test1));
                 Register(typeof(DrainageTest));
@@ -4165,7 +4052,11 @@ namespace ThMEPWSS.DebugNs
                 RegisterWithAttribute(typeof(DebugNs.FengDbgTesting));
             }
 
-            private static void RegisterWithAttribute(Type t)
+            public static void RegisterWithEntry(Type type)
+            {
+                GetType(type).GetMethod(nameof(THDrainageService.Register)).Invoke(null, new object[] { new Action<string, Action>((title, f) => ((Action<object, string, Action>)Dbg.ctx["addBtn"])(Dbg.ctx["currentPanel"], title, f)) });
+            }
+            public static void RegisterWithAttribute(Type t)
             {
                 if (t.GetCustomAttribute<FengAttribute>() != null)
                 {
@@ -4233,6 +4124,12 @@ namespace ThMEPWSS.DebugNs
                     });
                 }
             }
+            public static Type GetType(Type type)
+            {
+                return ((Assembly)ctx["currentAsm"]).GetType(type.FullName);
+            }
+
+
         }
         public static void Test(Dictionary<string, object> ctx)
         {
@@ -4835,6 +4732,29 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             });
         }
+        class EqualityComparer<T> : IEqualityComparer<T>
+        {
+            Func<T, T, bool> f;
+
+            public EqualityComparer(Func<T, T, bool> f)
+            {
+                this.f = f;
+            }
+
+            public bool Equals(T x, T y)
+            {
+                return f(x, y);
+            }
+
+            public int GetHashCode(T obj)
+            {
+                return 0;
+            }
+        }
+        public static IEqualityComparer<T> CreateEqualityComparer<T>(Func<T, T, bool> f)
+        {
+            return new EqualityComparer<T>(f);
+        }
         public static void ChangeCadScreenTo(GRect r)
         {
             if (r.IsValid)
@@ -4878,6 +4798,137 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             db.SetLayerColor(targetLayerName, targetColorIndex);
             return targetLayerName;
         }
+        public static void DoExtract(AcadDatabase adb, Func<BlockReference, Matrix3d, bool> doExtract,
+          bool supportDynamicBlock = false,
+          Action<BlockReference, Matrix3d> doXClip = null,
+          Action<Entity, Matrix3d> entCb = null)
+        {
+            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
+            {
+                if (br.BlockTableRecord.IsNull) continue;
+                var record = adb.Blocks.Element(br.BlockTableRecord);
+                var ignoreInvisible = record.XrefStatus == XrefStatus.NotAnXref;
+                var m = br.BlockTransform;
+                DoExtract(br, m, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: false, entCb: entCb, ignoreInvisible: ignoreInvisible);
+            }
+        }
+        static bool IsVisibleBlockRef(AcadDatabase adb, BlockReference br)
+        {
+            var layer = br?.Layer;
+            if (layer == null) return false;
+            return IsVisibleLayer(adb.Layers.Element(layer));
+        }
+        static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            //return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
+            //return !layerTableRecord.IsOff;
+
+            //一个个试出来的，我也不懂。。。
+            return !layerTableRecord.IsFrozen;
+
+            //return !layerTableRecord.IsHidden;
+            //return layerTableRecord.IsUsed;
+        }
+        public class BlockExtractor
+        {
+            public class Context
+            {
+                public Stack<AcadDatabase> AcadDatabases;
+                public Stack<BlockReference> Parents;
+                public BlockReference CurrentBlockReference;
+                public Entity CurrentEntity;
+                public Stack<Matrix3d> Matrices;
+
+            }
+            public static void DoExtract()
+            {
+
+            }
+        }
+        public static void DoExtract(BlockReference blockReference, Matrix3d matrix,
+         Func<BlockReference, Matrix3d, bool> doExtract,
+           bool supportDynamicBlock = false,
+           Action<BlockReference, Matrix3d> doXClip = null,
+           bool rootInclude = false,
+           Action<Entity, Matrix3d> entCb = null,
+          bool ignoreInvisible = true)
+        {
+            bool isMaybeWantedBlockReference(AcadDatabase adb, BlockReference br)
+            {
+                if (!ignoreInvisible) return true;
+                return IsVisibleBlockRef(adb, br);
+            }
+            bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+            {
+                if (!supportDynamicBlock)
+                {
+                    // 暂时不支持动态块，外部参照，覆盖
+                    if (blockTableRecord.IsDynamicBlock)
+                    {
+                        return false;
+                    }
+                }
+
+                // 忽略图纸空间和匿名块
+                if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+                {
+                    return false;
+                }
+
+                // 忽略不可“炸开”的块
+                if (!blockTableRecord.Explodable)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            using AcadDatabase adb = AcadDatabase.Use(blockReference.Database);
+            if (blockReference.BlockTableRecord.IsValid)
+            {
+                if (rootInclude && blockReference.ObjectId.IsValid && (isMaybeWantedBlockReference(adb, blockReference)))
+                {
+                    if (doExtract(blockReference, matrix)) return;
+                }
+                var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
+                if (IsBuildElementBlock(blockTableRecord))
+                {
+                    // 提取图元信息                        
+                    foreach (var objId in blockTableRecord)
+                    {
+                        var dbObj = adb.Element<Entity>(objId);
+                        if (dbObj is BlockReference blockObj)
+                        {
+                            if (!isMaybeWantedBlockReference(adb, blockObj)) continue;
+                            if (blockObj.BlockTableRecord.IsValid)
+                            {
+                                if (doExtract(blockObj, matrix)) continue;
+                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                DoExtract(blockObj, mcs2wcs, doExtract, supportDynamicBlock: supportDynamicBlock, doXClip: doXClip, rootInclude: false, entCb: entCb, ignoreInvisible: ignoreInvisible);
+                            }
+                        }
+                        else
+                        {
+                            entCb?.Invoke(dbObj, matrix);
+                        }
+                    }
+
+                    // 过滤XClip外的图元信息
+                    doXClip?.Invoke(blockReference, matrix);
+                    {
+                        //var xclip = blockReference.XClipInfo();
+                        //var poly = xclip.Polygon;
+                        //if (poly != null)
+                        //{
+                        //    poly.TransformBy(m);
+                        //    var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
+                        //    geos.RemoveAll(o => !gf.Contains(o));
+                        //}
+                    }
+                }
+            }
+        }
+
         public static void UnlockCurrentLayer()
         {
             using var adb = AcadDatabase.Active();
@@ -7907,66 +7958,6 @@ namespace ThMEPWSS.DebugNs
             }
 
         }
-        [Feng]
-        public static void qtsmf9()
-        {
-            var file = @"E:\thepa_workingSpace\210525\test01.txt";
-            var drs1 = File.ReadAllText(file).FromCadJson<List<RainSystemDrawingData>>();
-            var file2 = @"E:\thepa_workingSpace\210526\新建文本文档.txt";
-            var drs2 = File.ReadAllText(file2).FromCadJson<List<RainSystemDrawingData>>();
-            var sb = new StringBuilder(4096);
-            for (int i = 0; i < drs1.Count; i++)
-            {
-                var d1 = drs1[i];
-                var d2 = drs2[i];
-                qtpp9s(sb, d1, d2);
-            }
-            Dbg.PrintText(sb.ToString());
-        }
-        static string newFileFn()
-        {
-            var file = $@"Y:\{DateTime.Now.Ticks}.json";
-            return file;
-        }
-        public static List<RainSystemGeoData> LoadWaterBucketGeoDataList()
-        {
-            var file = @"D:\DATA\temp\637577092816488915.json";
-            var list = File.ReadAllText(file).FromCadJson<List<RainSystemGeoData>>();
-            return list;
-        }
-        [Feng("序列化所有图纸的雨水斗位置信息")]
-        public static void qu0j7u()
-        {
-            var files = Util1.getFiles();
-            var d = Util1.getRangeDict();
-            var list = new List<RainSystemGeoData>();
-            using (Dbg.DocumentLock)
-            {
-                for (int i = 0; i < files.Length; i++)
-                {
-                    var file = files[i];
-                    var range = d[file].ToPoint3dCollection();
-                    using (var adb = AcadDatabase.Open(file, DwgOpenMode.ReadOnly))
-                    {
-                        var geoData = new RainSystemGeoData();
-                        geoData.Init();
-                        ThRainSystemService.AppendSideWaterBuckets(adb, range, geoData);
-                        ThRainSystemService.AppendGravityWaterBuckets(adb, range, geoData);
-                        list.Add(geoData);
-                    }
-                }
-            }
-            {
-                var file = newFileFn();
-                File.WriteAllText(file, list.ToCadJson());
-            }
-        }
-        public static List<List<RainSystemDrawingData>> LoadStdDrawingDatas()
-        {
-            var file = @"D:\DATA\temp\637577104526532228.json";
-            var list = File.ReadAllText(file).FromCadJson<List<List<RainSystemDrawingData>>>();
-            return list;
-        }
         public class BenchMark : IDisposable
         {
             Stopwatch sw = new Stopwatch();
@@ -7980,60 +7971,6 @@ namespace ThMEPWSS.DebugNs
                 Dbg.PrintLine(sw.Elapsed.TotalSeconds);
             }
         }
-        [Feng("找东西")]
-        public static void llllll()
-        {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                IEnumerable<Entity> GetEntities()
-                {
-                    //return adb.ModelSpace.OfType<Entity>();
-                    foreach (var ent in adb.ModelSpace.OfType<Entity>())
-                    {
-                        if (ent is BlockReference br && br.Layer == "0")
-                        {
-                            var r = br.Bounds.ToGRect();
-                            if (r.Width > 35000 && r.Width < 80000 && r.Height > 15000)
-                            {
-                                foreach (var e in br.ExplodeToDBObjectCollection().OfType<Entity>())
-                                {
-                                    yield return e;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            yield return ent;
-                        }
-                    }
-                }
-                var entities = GetEntities().ToList();
-
-
-                //var pps = new List<Entity>();
-                //pps.AddRange(entities.OfType<Circle>().Where(c => 40 <= c.Radius && c.Radius <= 60));
-                //pps.AddRange(entities
-                //    .Where(x => (x.Layer == "WP_KTN_LG" || x.Layer == "W-RAIN-EQPM")
-                //    && ThRainSystemService.IsTianZhengElement(x.GetType()))
-                //     .Where(x => x.ExplodeToDBObjectCollection().OfType<Circle>().Any())
-                //    );
-                //Dbg.PrintLine(pps.Count);
-                //static GRect getRealBoundaryForPipe(Entity ent)
-                //{
-                //    return ent.Bounds.ToGRect(50);
-                //}
-                //foreach (var pp in pps.Distinct())
-                //{
-                //    Dbg.ShowWhere(pp);
-                //}
-            }
-        }
         [Feng]
         public static void ZoomAll()
         {
@@ -8041,29 +7978,6 @@ namespace ThMEPWSS.DebugNs
         }
 
 
-
-
-        [Feng]
-        public static void temptest()
-        {
-            //ThRainSystemService.ImportElementsFromStdDwg();
-            //using (var adb = AcadDatabase.Active())
-            //{
-            //    Dbg.PrintText(adb.TextStyles.Names().ToJson());
-            //}
-
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var ents = Dbg.SelectEntities(adb).OfType<Entity>().ToList();
-                foreach (var e in ents)
-                {
-                    Dbg.PrintLine(e.GetType().FullName);
-                }
-            }
-        }
         //dim示例
         private static void NewMethod4()
         {
@@ -10151,3 +10065,5 @@ $@"{root}\09_长征村K2地块\FS5F46QE_W20-地上给水排水平面图-Z.dwg",
 }
 
 //#endif
+
+

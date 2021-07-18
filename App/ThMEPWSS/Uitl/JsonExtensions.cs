@@ -30,6 +30,11 @@ namespace ThMEPWSS.JsonExtensionsNs
             if (0 <= i && i < source.Count) return source[i];
             return dft;
         }
+        public static (bool, T) TryGetValue<T>(this IList<T> source, int i)
+        {
+            if (0 <= i && i < source.Count) return (true, source[i]);
+            return (false, default);
+        }
         public static IEnumerable<T> Flattern<T>(this IEnumerable<KeyValuePair<T, T>> source)
         {
             foreach (var kv in source)
