@@ -131,26 +131,26 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
-        public static void DrawDN_1(Point2d pt, string text = "DN100")
+        public static void DrawDN_1(Point2d pt,string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(-50, 320).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStylesForDraiNote(t);
+            Dr.SetLabelStyles(layer,t);
         }
-        public static void DrawDN_2(Point2d pt, string text = "DN100")
+        public static void DrawDN_2(Point2d pt, string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(-300, 200).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStylesForDraiNote(t);
+            Dr.SetLabelStyles(layer,t);
         }
-        public static void DrawDN_3(Point2d pt, string text = "DN100")
+        public static void DrawDN_3(Point2d pt, string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(450, 200).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStylesForDraiNote(t);
+            Dr.SetLabelStyles(layer,t);
         }
         public static void DrawStarterPipeHeightLabel(Point3d basePt)
         {
@@ -297,6 +297,10 @@ namespace ThMEPWSS.Pipe.Model
                 });
             });
         }
+        public static void DrawCondensePipe(Point2d basePt)
+        {
+            DrawCondensePipe(basePt.ToPoint3d());
+        }
         public static void DrawCondensePipe(Point3d basePt)
         {
             var c = DU.DrawCircleLazy(basePt, 30);
@@ -385,6 +389,19 @@ namespace ThMEPWSS.Pipe.Model
             foreach (var e in ents)
             {
                 e.Layer = "W-RAIN-NOTE";
+                DU.ByLayer(e);
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void SetLabelStyles(string layer,params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = layer;
                 DU.ByLayer(e);
                 if (e is DBText t)
                 {

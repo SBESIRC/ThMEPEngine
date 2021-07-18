@@ -3862,7 +3862,7 @@ new Point2d(maxX, minY)
             {
                 var ents = new List<Entity>();
                 ents.AddRange(entities.OfType<Spline>().Where(x => x.Layer == "W-RAIN-DIMS"));
-                ents.AddRange(entities.Where(e => FengDbgTesting.IsTianZhengWaterPort(e)));
+                ents.AddRange(entities.Where(e => FengDbgTesting.IsTianZhengRainPort(e)));
                 waterPortSymbols.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
             }
             public void CollectWaterPort13s()

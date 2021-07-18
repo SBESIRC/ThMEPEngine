@@ -7306,7 +7306,7 @@ namespace ThMEPWSS.DebugNs
                 //Dbg.PrintLine(e.ExplodeToDBObjectCollection()[0].ObjectId.ToString());
             }
         }
-        public static bool IsTianZhengWaterPort(Entity e)
+        public static bool IsTianZhengRainPort(Entity e)
         {
             if ((e.Layer == "W-RAIN-EQPM" || e.Layer == "W-RAIN-NOTE" || e.Layer == "W-RAIN-DIMS") && ThRainSystemService.IsTianZhengElement(e))
             {

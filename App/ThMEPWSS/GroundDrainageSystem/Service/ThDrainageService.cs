@@ -2919,7 +2919,7 @@
             //var offsetY = canPeopleBeOnRoof ? 2000.0 : 500.0;
             var offsetY = canPeopleBeOnRoof ? 1850.0 : 350.0;//马力说的
             DrawAiringSymbol(pt, offsetY);
-            Dr.DrawDN_1(pt);
+            Dr.DrawDN_1(pt, "W-DRAI-NOTE");
         }
         public static void DrawAiringSymbol(Point2d pt, double offsetY)
         {
@@ -4377,10 +4377,10 @@
                             var run = runs.TryGet(i);
                             if (run != null)
                             {
-                                Dr.DrawDN_2(info.EndPoint);
+                                Dr.DrawDN_2(info.EndPoint, "W-DRAI-NOTE");
                                 if (gpItem.HasTl)
                                 {
-                                    Dr.DrawDN_3(info.EndPoint.OffsetXY(300, 0));
+                                    Dr.DrawDN_3(info.EndPoint.OffsetXY(300, 0), "W-DRAI-NOTE");
                                 }
                             }
                         }
@@ -4935,7 +4935,7 @@
                    br.ScaleFactors = new Scale3d(-2, 2, 2);
                    if (br.IsDynamicBlock)
                    {
-                       br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                       br.ObjectId.SetDynBlockValue("可见性", value);
                    }
                });
             }
@@ -5715,8 +5715,8 @@
                 {
                     var db = adb.Database;
                     Dbg.BuildAndSetCurrentLayer(db);
-                    var br=Dbg.SelectEntity<BlockReference>(adb);
-                    var r=adb.Blocks.Element(br.BlockTableRecord);
+                    var br = Dbg.SelectEntity<BlockReference>(adb);
+                    var r = adb.Blocks.Element(br.BlockTableRecord);
                     Console.WriteLine(r.XrefStatus);
                 }
             });

@@ -72,7 +72,7 @@
         public List<GRect> SideWaterBuckets;
         public List<GRect> GravityWaterBuckets;
         public List<GRect> _87WaterBuckets;
-        public List<GRect> WaterPortSymbols;
+        public List<GRect> RainPortSymbols;
         public List<GRect> WaterPort13s;
         public List<Point2d> CleaningPorts;
         public List<Point2d> SideFloorDrains;
@@ -96,7 +96,7 @@
             CleaningPorts ??= new List<Point2d>();
             SideFloorDrains ??= new List<Point2d>();
             PipeKillers ??= new List<GRect>();
-            WaterPortSymbols ??= new List<GRect>();
+            RainPortSymbols ??= new List<GRect>();
             WaterPort13s ??= new List<GRect>();
             SideWaterBuckets ??= new List<GRect>();
             GravityWaterBuckets ??= new List<GRect>();
@@ -120,7 +120,7 @@
             SideWaterBuckets = SideWaterBuckets.Where(x => x.IsValid).Distinct().ToList();
             GravityWaterBuckets = GravityWaterBuckets.Where(x => x.IsValid).Distinct().ToList();
             _87WaterBuckets = _87WaterBuckets.Where(x => x.IsValid).Distinct().ToList();
-            WaterPortSymbols = WaterPortSymbols.Where(x => x.IsValid).Distinct().ToList();
+            RainPortSymbols = RainPortSymbols.Where(x => x.IsValid).Distinct().ToList();
             PipeKillers = PipeKillers.Where(x => x.IsValid).Distinct().ToList();
             WaterPort13s = WaterPort13s.Where(x => x.IsValid).Distinct().ToList();
         }
@@ -150,8 +150,8 @@
         public List<Geometry> SideFloorDrains;
         public List<Geometry> PipeKillers;
         public List<Geometry> WaterWells;
-        public List<Geometry> WaterPortSymbols;
-        public List<Geometry> WaterPort13s;
+        public List<Geometry> RainPortSymbols;
+        public List<Geometry> RainPort13s;
         public List<Geometry> SideWaterBuckets;
         public List<Geometry> GravityWaterBuckets;
         public List<Geometry> _87WaterBuckets;
@@ -172,8 +172,8 @@
             SideFloorDrains ??= new List<Geometry>();
             PipeKillers ??= new List<Geometry>();
             WaterWells ??= new List<Geometry>();
-            WaterPortSymbols ??= new List<Geometry>();
-            WaterPort13s ??= new List<Geometry>();
+            RainPortSymbols ??= new List<Geometry>();
+            RainPort13s ??= new List<Geometry>();
             SideWaterBuckets ??= new List<Geometry>();
             GravityWaterBuckets ??= new List<Geometry>();
             _87WaterBuckets ??= new List<Geometry>();
@@ -198,11 +198,11 @@
             o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
             o.CondensePipes.AddRange(data.CondensePipes.Select(ConvertWashingMachinesF()));
             o.WaterWells.AddRange(data.WaterWells.Select(ConvertWashingMachinesF()));
-            o.WaterPortSymbols.AddRange(data.WaterPortSymbols.Select(ConvertWashingMachinesF()));
+            o.RainPortSymbols.AddRange(data.RainPortSymbols.Select(ConvertWashingMachinesF()));
             o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
             o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
             o.PipeKillers.AddRange(data.PipeKillers.Select(ConvertVerticalPipesF()));
-            o.WaterPort13s.AddRange(data.WaterPort13s.Select(ConvertVerticalPipesF()));
+            o.RainPort13s.AddRange(data.WaterPort13s.Select(ConvertVerticalPipesF()));
             o.SideWaterBuckets.AddRange(data.SideWaterBuckets.Select(ConvertVerticalPipesF()));
             o.GravityWaterBuckets.AddRange(data.GravityWaterBuckets.Select(ConvertVerticalPipesF()));
             o._87WaterBuckets.AddRange(data._87WaterBuckets.Select(ConvertVerticalPipesF()));
@@ -290,8 +290,8 @@
             ret.AddRange(SideFloorDrains);
             ret.AddRange(PipeKillers);
             ret.AddRange(WaterWells);
-            ret.AddRange(WaterPortSymbols);
-            ret.AddRange(WaterPort13s);
+            ret.AddRange(RainPortSymbols);
+            ret.AddRange(RainPort13s);
             ret.AddRange(SideWaterBuckets);
             ret.AddRange(GravityWaterBuckets);
             ret.AddRange(_87WaterBuckets);
@@ -321,8 +321,8 @@
                 o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
                 o.PipeKillers.AddRange(objs.Where(x => this.PipeKillers.Contains(x)));
                 o.WaterWells.AddRange(objs.Where(x => this.WaterWells.Contains(x)));
-                o.WaterPortSymbols.AddRange(objs.Where(x => this.WaterPortSymbols.Contains(x)));
-                o.WaterPort13s.AddRange(objs.Where(x => this.WaterPort13s.Contains(x)));
+                o.RainPortSymbols.AddRange(objs.Where(x => this.RainPortSymbols.Contains(x)));
+                o.RainPort13s.AddRange(objs.Where(x => this.RainPort13s.Contains(x)));
                 o.SideWaterBuckets.AddRange(objs.Where(x => this.SideWaterBuckets.Contains(x)));
                 o.GravityWaterBuckets.AddRange(objs.Where(x => this.GravityWaterBuckets.Contains(x)));
                 o._87WaterBuckets.AddRange(objs.Where(x => this._87WaterBuckets.Contains(x)));
@@ -450,10 +450,10 @@
         List<GRect> storeys => geoData.Storeys;
         List<Point2d> cleaningPorts => geoData.CleaningPorts;
         List<GRect> washingMachines => geoData.CondensePipes;
-        List<GRect> mopPools => geoData.WaterPortSymbols;
+        List<GRect> mopPools => geoData.RainPortSymbols;
         List<GRect> basins => geoData.WaterWells;
         List<GRect> pipeKillers => geoData.PipeKillers;
-        List<GRect> waterPortSymbols => geoData.WaterPortSymbols;
+        List<GRect> rainPortSymbols => geoData.RainPortSymbols;
         public void CollectStoreys(Geometry range, ThRainService.CommandContext ctx)
         {
             storeys.AddRange(ctx.StoreyContext.thStoreysDatas.Select(x => x.Boundary));
@@ -870,12 +870,12 @@
             waterWells.AddRange(ents.Select(e => e.Bounds.ToGRect()));
             waterWellLabels.AddRange(ents.Select(e => e.GetAttributesStrValue("-") ?? ""));
         }
-        public void CollectWaterPortSymbols()
+        public void CollectRainPortSymbols()
         {
             var ents = new List<Entity>();
             ents.AddRange(entities.OfType<Spline>().Where(x => x.Layer == "W-RAIN-DIMS"));
-            ents.AddRange(entities.Where(e => FengDbgTesting.IsTianZhengWaterPort(e)));
-            waterPortSymbols.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
+            ents.AddRange(entities.Where(e => FengDbgTesting.IsTianZhengRainPort(e)));
+            rainPortSymbols.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
         }
         public void CollectWaterPorts()
         {
@@ -888,10 +888,7 @@
         {
             var ents = new List<Entity>();
             ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && (x.GetEffectiveName()?.Contains("地漏") ?? false)));
-            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == "W-DRAI-FLDR"));
-            //ents.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$W-FRPT-HYDT" && e.ObjectId.IsValid && e.GetEffectiveName() == "__附着_W20-8-提资文件_SEN23WUB_设计区$0$地漏平面"));
             floorDrains.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
-            sideFloorDrains.AddRange(ents.Distinct().OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName() == "侧排地漏").Select(e => e.Bounds.ToGRect().Center));
         }
         public void CollectWaterPort13s()
         {
@@ -969,13 +966,18 @@
         {
             ThRainService.ConnectLabelToLabelLine(geoData);
             geoData.FixData();
-            var cadDataMain = RainCadData.Create(geoData);
-            var cadDatas = cadDataMain.SplitByStorey();
+            GetCadDatas(geoData, out RainCadData cadDataMain, out List<RainCadData> cadDatas);
             var roomData = RainService.CollectRoomData(adb);
             RainService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out List<RainDrawingData> drDatas, roomData: roomData);
             Dbg.PrintText(logString);
             if (noDraw) DU.Dispose();
             return drDatas;
+        }
+
+        public static void GetCadDatas(RainGeoData geoData, out RainCadData cadDataMain, out List<RainCadData> cadDatas)
+        {
+            cadDataMain = RainCadData.Create(geoData);
+            cadDatas = cadDataMain.SplitByStorey();
         }
 
         public static void CollectRainGeoData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out RainGeoData geoData, ThRainService.CommandContext ctx)
@@ -1283,6 +1285,22 @@
                 var ret = _getFDCount();
                 return ret;
             }
+            int getFDWrappingPipeCount(string label, string storey)
+            {
+                for (int i = 0; i < storeysItems.Count; i++)
+                {
+                    foreach (var s in storeysItems[i].Labels)
+                    {
+                        if (s == storey)
+                        {
+                            var drData = drDatas[i];
+                            drData.FloorDrainWrappingPipes.TryGetValue(label, out int v);
+                            return v;
+                        }
+                    }
+                }
+                return 0;
+            }
             bool hasCondensePipe(string label, string storey)
             {
                 for (int i = 0; i < storeysItems.Count; i++)
@@ -1292,13 +1310,76 @@
                         if (s == storey)
                         {
                             var drData = drDatas[i];
-                            
+                            return drData.HasCondensePipe.Contains(label);
                         }
                     }
                 }
                 return false;
             }
-            bool hasBrokenCondensePipes(string label,string storey)
+            bool hasBrokenCondensePipes(string label, string storey)
+            {
+                if (!hasCondensePipe(label, storey)) return false;
+                for (int i = 0; i < storeysItems.Count; i++)
+                {
+                    foreach (var s in storeysItems[i].Labels)
+                    {
+                        if (s == storey)
+                        {
+                            var drData = drDatas[i];
+                            return drData.HasBrokenCondensePipes.Contains(label);
+                        }
+                    }
+                }
+                return false;
+            }
+            bool hasNonBrokenCondensePipes(string label, string storey)
+            {
+                if (!hasCondensePipe(label, storey)) return false;
+                for (int i = 0; i < storeysItems.Count; i++)
+                {
+                    foreach (var s in storeysItems[i].Labels)
+                    {
+                        if (s == storey)
+                        {
+                            var drData = drDatas[i];
+                            return drData.HasNonBrokenCondensePipes.Contains(label);
+                        }
+                    }
+                }
+                return false;
+            }
+            bool hasWaterWellWrappingPipe(string label)
+            {
+                for (int i = 0; i < storeysItems.Count; i++)
+                {
+                    foreach (var s in storeysItems[i].Labels)
+                    {
+                        if (s == "1F")
+                        {
+                            var drData = drDatas[i];
+                            return drData.HasOutletWrappingPipe.Contains(label);
+                        }
+                    }
+                }
+                return false;
+            }
+            bool hasRainPort(string label)
+            {
+                if (hasWaterWell(label)) return false;
+                for (int i = 0; i < storeysItems.Count; i++)
+                {
+                    foreach (var s in storeysItems[i].Labels)
+                    {
+                        if (s == "1F")
+                        {
+                            var drData = drDatas[i];
+                            return drData.HasRainPortSymbols.Contains(label);
+                        }
+                    }
+                }
+                return false;
+            }
+            bool hasSolidPipe(string label, string storey)
             {
                 for (int i = 0; i < storeysItems.Count; i++)
                 {
@@ -1313,127 +1394,129 @@
                 }
                 return false;
             }
-            bool hasNonBrokenCondensePipes(string label,string storey)
-            {
-                for (int i = 0; i < storeysItems.Count; i++)
-                {
-                    foreach (var s in storeysItems[i].Labels)
-                    {
-                        if (s == storey)
-                        {
-                            var drData = drDatas[i];
 
-                        }
-                    }
-                }
-                return false;
-            }
-            bool hasWrappingPipe(string label,string storey)
-            {
-                for (int i = 0; i < storeysItems.Count; i++)
-                {
-                    foreach (var s in storeysItems[i].Labels)
-                    {
-                        if (s == storey)
-                        {
-                            var drData = drDatas[i];
-
-                        }
-                    }
-                }
-                return false;
-            }
             var pipeInfoDict = new Dictionary<string, RainGroupingPipeItem>();
             var y1lGroupingItems = new List<RainGroupingPipeItem>();
             var y2lGroupingItems = new List<RainGroupingPipeItem>();
             var nlGroupingItems = new List<RainGroupingPipeItem>();
 
-            foreach (var y1l in allY1L)
+            foreach (var lb in allY1L)
             {
                 var item = new RainGroupingPipeItem();
-                item.Label = y1l;
+                item.Label = lb;
                 item.Items = new List<RainGroupingPipeItem.ValueItem>();
                 item.Hangings = new List<RainGroupingPipeItem.Hanging>();
                 foreach (var storey in allNumStoreyLabels)
                 {
-                    var _hasLong = hasLong(y1l, storey);
+                    var _hasLong = hasLong(lb, storey);
                     item.Items.Add(new RainGroupingPipeItem.ValueItem()
                     {
-                        Exist = testExist(y1l, storey),
+                        Exist = testExist(lb, storey),
                         HasLong = _hasLong,
-                        HasShort = hasShort(y1l, storey),
+                        HasShort = hasShort(lb, storey),
                     });
                     item.Hangings.Add(new RainGroupingPipeItem.Hanging()
                     {
-                        FloorDrainsCount = getFDCount(y1l, storey),
+                        FloorDrainsCount = getFDCount(lb, storey),
                     });
                     y1lGroupingItems.Add(item);
-                    pipeInfoDict[y1l] = item;
+                    pipeInfoDict[lb] = item;
                 }
             }
-            foreach (var y2l in allNL)
+            foreach (var lb in allY2L)
             {
                 var item = new RainGroupingPipeItem();
-                item.Label = y2l;
+                item.Label = lb;
                 item.Items = new List<RainGroupingPipeItem.ValueItem>();
                 item.Hangings = new List<RainGroupingPipeItem.Hanging>();
                 foreach (var storey in allNumStoreyLabels)
                 {
-                    var _hasLong = hasLong(y2l, storey);
+                    var _hasLong = hasLong(lb, storey);
                     item.Items.Add(new RainGroupingPipeItem.ValueItem()
                     {
-                        Exist = testExist(y2l, storey),
+                        Exist = testExist(lb, storey),
                         HasLong = _hasLong,
-                        HasShort = hasShort(y2l, storey),
+                        HasShort = hasShort(lb, storey),
                     });
                     item.Hangings.Add(new RainGroupingPipeItem.Hanging()
                     {
-                        FloorDrainsCount = getFDCount(y2l, storey),
+                        FloorDrainsCount = getFDCount(lb, storey),
+                        HasCondensePipe = hasCondensePipe(lb, storey),
+                        HasBrokenCondensePipes = hasBrokenCondensePipes(lb, storey),
+                        HasNonBrokenCondensePipes = hasNonBrokenCondensePipes(lb, storey),
+                        FloorDrainWrappingPipesCount = getFDWrappingPipeCount(lb, storey),
                     });
                     y2lGroupingItems.Add(item);
-                    pipeInfoDict[y2l] = item;
+                    pipeInfoDict[lb] = item;
                 }
             }
-            foreach (var nl in allY2L)
+
+            foreach (var lb in allNL)
             {
                 var item = new RainGroupingPipeItem();
-                item.Label = nl;
+                item.Label = lb;
                 item.Items = new List<RainGroupingPipeItem.ValueItem>();
                 item.Hangings = new List<RainGroupingPipeItem.Hanging>();
                 foreach (var storey in allNumStoreyLabels)
                 {
-                    var _hasLong = hasLong(nl, storey);
+                    var _hasLong = hasLong(lb, storey);
                     item.Items.Add(new RainGroupingPipeItem.ValueItem()
                     {
-                        Exist = testExist(nl, storey),
+                        Exist = testExist(lb, storey),
                         HasLong = _hasLong,
-                        HasShort = hasShort(nl, storey),
+                        HasShort = hasShort(lb, storey),
                     });
                     item.Hangings.Add(new RainGroupingPipeItem.Hanging()
                     {
-                        FloorDrainsCount = getFDCount(nl, storey),
+                        FloorDrainsCount = getFDCount(lb, storey),
+                        HasCondensePipe = hasCondensePipe(lb, storey),
+                        HasBrokenCondensePipes = hasBrokenCondensePipes(lb, storey),
+                        HasNonBrokenCondensePipes = hasNonBrokenCondensePipes(lb, storey),
+                        FloorDrainWrappingPipesCount = getFDWrappingPipeCount(lb, storey),
                     });
                     nlGroupingItems.Add(item);
-                    pipeInfoDict[nl] = item;
+                    pipeInfoDict[lb] = item;
+                }
+            }
+            {
+                foreach (var kv in pipeInfoDict)
+                {
+                    var label = kv.Key;
+                    var item = kv.Value;
+                    item.HasWaterWell = hasWaterWell(label);
+                    item.WaterWellLabel = getWaterWellLabel(label);
+                    item.HasWaterWellWrappingPipe = hasWaterWellWrappingPipe(label);
+                    item.HasRainPort = hasRainPort(label);
+                }
+            }
+            //修复业务bug
+            {
+                foreach (var kv in pipeInfoDict)
+                {
+                    var label = kv.Key;
+                    var item = kv.Value;
+                    //每层1F都有检查口
+                    foreach (var hanging in item.Hangings)
+                    {
+                        hanging.HasCheckPoint = true;
+                        break;
+                    }
                 }
             }
 
 
-            //修复业务bug
-            {
 
-            }
             //开始分组
             var pipeGroupItems = new List<RainGroupedPipeItem>();
             foreach (var g in y1lGroupingItems.GroupBy(x => x))
             {
-                var waterWellLabels = g.Where(x => x.HasWaterPort).Select(x => x.WaterPortLabel).Distinct().ToList();
+                var waterWellLabels = g.Where(x => x.HasWaterWell).Select(x => x.WaterWellLabel).Distinct().ToList();
                 var labels = g.Select(x => x.Label).Distinct().OrderBy(x => x).ToList();
                 var item = new RainGroupedPipeItem()
                 {
                     Labels = labels,
-                    HasWrappingPipe = g.Key.HasWrappingPipe,
-                    WaterPortLabels = waterWellLabels,
+                    HasWrappingPipe = g.Key.HasWaterWellWrappingPipe,
+                    WaterWellLabels = waterWellLabels,
                     Items = g.Key.Items.ToList(),
                     PipeType = PipeType.Y1L,
                     Hangings = g.Key.Hangings.ToList(),
@@ -1442,13 +1525,13 @@
             }
             foreach (var g in y2lGroupingItems.GroupBy(x => x))
             {
-                var waterWellLabels = g.Where(x => x.HasWaterPort).Select(x => x.WaterPortLabel).Distinct().ToList();
+                var waterWellLabels = g.Where(x => x.HasWaterWell).Select(x => x.WaterWellLabel).Distinct().ToList();
                 var labels = g.Select(x => x.Label).Distinct().OrderBy(x => x).ToList();
                 var item = new RainGroupedPipeItem()
                 {
                     Labels = labels,
-                    HasWrappingPipe = g.Key.HasWrappingPipe,
-                    WaterPortLabels = waterWellLabels,
+                    HasWrappingPipe = g.Key.HasWaterWellWrappingPipe,
+                    WaterWellLabels = waterWellLabels,
                     Items = g.Key.Items.ToList(),
                     PipeType = PipeType.Y1L,
                     Hangings = g.Key.Hangings.ToList(),
@@ -1457,16 +1540,17 @@
             }
             foreach (var g in nlGroupingItems.GroupBy(x => x))
             {
-                var waterWellLabels = g.Where(x => x.HasWaterPort).Select(x => x.WaterPortLabel).Distinct().ToList();
+                var waterWellLabels = g.Where(x => x.HasWaterWell).Select(x => x.WaterWellLabel).Distinct().ToList();
                 var labels = g.Select(x => x.Label).Distinct().OrderBy(x => x).ToList();
                 var item = new RainGroupedPipeItem()
                 {
                     Labels = labels,
-                    HasWrappingPipe = g.Key.HasWrappingPipe,
-                    WaterPortLabels = waterWellLabels,
+                    HasWrappingPipe = g.Key.HasWaterWellWrappingPipe,
+                    WaterWellLabels = waterWellLabels,
                     Items = g.Key.Items.ToList(),
                     PipeType = PipeType.Y1L,
                     Hangings = g.Key.Hangings.ToList(),
+                    HasRainPort = g.Key.HasRainPort,
                 };
                 pipeGroupItems.Add(item);
             }
@@ -1510,7 +1594,7 @@
         {
             var offsetY = canPeopleBeOnRoof ? 500.0 : 2000.0;
             DrawAiringSymbol(pt, offsetY);
-            Dr.DrawDN_1(pt);
+            Dr.DrawDN_1(pt, "W-RAIN-NOTE");
         }
         public static void DrawAiringSymbol(Point2d pt, double offsetY)
         {
@@ -1520,6 +1604,20 @@
                 br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
             });
         }
+        private static void DrawDimLabelRight(Point3d basePt, double dy)
+        {
+            var pt1 = basePt;
+            var pt2 = pt1.OffsetY(dy);
+            var dim = new AlignedDimension();
+            dim.XLine1Point = pt1;
+            dim.XLine2Point = pt2;
+            dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetX(1000);
+            dim.DimensionText = "1000";
+            dim.Layer = "W-RAIN-DIMS";
+            DU.ByLayer(dim);
+            DU.DrawEntityLazy(dim);
+        }
+        public static double CHECKPOINT_OFFSET_Y = 580;
         public static void DrawDraiNoteLines(IEnumerable<GLineSegment> segs)
         {
             var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
@@ -1906,29 +2004,8 @@
                         {
                             HasLongTranslator = gpItem.Items[i].HasLong,
                             HasShortTranslator = gpItem.Items[i].HasShort,
-                            HasCleaningPort = gpItem.Hangings[i].HasCleaningPort,
-                            HasCheckPoint = gpItem.Hangings[i].HasCheckPoint,
-                            HasHorizontalShortLine = gpItem.Hangings[i].HasDownBoardLine,
                         } : null;
                         runs.Add(run);
-                    }
-                    for (int i = 0; i < allNumStoreyLabels.Count; i++)
-                    {
-                        var FloorDrainsCount = gpItem.Hangings[i].FloorDrainsCount;
-                        var hasSCurve = gpItem.Hangings[i].HasSCurve;
-                        var hasDoubleSCurve = gpItem.Hangings[i].HasDoubleSCurve;
-                        if (FloorDrainsCount > 0 || hasSCurve || hasDoubleSCurve)
-                        {
-                            var run = runs.TryGet(i - 1);
-                            if (run != null)
-                            {
-                                var hanging = run.LeftHanging = new Hanging();
-                                hanging.FloorDrainsCount = FloorDrainsCount;
-                                hanging.HasSCurve = hasSCurve;
-                                hanging.HasDoubleSCurve = hasDoubleSCurve;
-                                hanging.IsFL0 = gpItem.Hangings[i].IsFL0;
-                            }
-                        }
                     }
 
                     {
@@ -2012,9 +2089,24 @@
                             var vecs = new List<Vector2d> { new Vector2d(0, height), new Vector2d(leftOrRight ? -3600 : 3600, 0) };
                             var segs = vecs.ToGLineSegments(basePt);
                             var lines = DU.DrawLineSegmentsLazy(segs);
-                            Dr.SetLabelStylesForDraiNote(lines.ToArray());
+                            Dr.SetLabelStylesForRainNote(lines.ToArray());
                             var t = DU.DrawTextLazy(text, 350, segs.Last().EndPoint.OffsetY(50));
-                            Dr.SetLabelStylesForDraiNote(t);
+                            Dr.SetLabelStylesForRainNote(t);
+                        }
+                        for (int i = end; i <= start; i++)
+                        {
+                            var storey = allNumStoreyLabels.TryGet(i);
+                            if (storey == null) continue;
+                            var run = thwPipeLine.PipeRuns.TryGet(i);
+                            if (run == null) continue;
+                            var info = arr[i];
+                            if (info == null) continue;
+                            if (storey == "1F") break;
+                            {
+                                var basePt = info.EndPoint;
+                                Dr.DrawLabel(basePt.ToPoint3d(), "散排至" + storey);
+                                break;
+                            }
                         }
                         for (int i = start; i >= end; i--)
                         {
@@ -2024,28 +2116,199 @@
                             if (run == null) continue;
                             var info = arr[i];
                             if (info == null) continue;
-                            var output = thwPipeLine.Output;
                             {
                                 if (storey == "1F")
                                 {
                                     var basePt = info.EndPoint;
-                                    if (output != null)
+                                    //DrawOutlets
+                                    if (gpItem.HasWaterWell)
                                     {
-                                        //DrawOutlets
+                                        void _DrawRainWaterWells(Point2d pt, List<string> values)
+                                        {
+                                            if (values == null) return;
+                                            values = values.OrderBy(x =>
+                                             {
+                                                 long.TryParse(x, out long v);
+                                                 return v;
+                                             }).ThenBy(x => x).ToList();
+                                            if (values.Count == 1)
+                                            {
+                                                DrawRainWaterWell(pt, values[0]);
+                                            }
+                                            else if (values.Count >= 2)
+                                            {
+                                                var pts = GetBasePoints(pt.OffsetX(-800), 2, values.Count, 800, 800).ToList();
+                                                for (int i = 0; i < values.Count; i++)
+                                                {
+                                                    DrawRainWaterWell(pts[i], values[i]);
+                                                }
+                                            }
+                                        }
+                                        {
+                                            var v = new Vector2d(-2000 - 400, -600);
+                                            var pt = basePt + v;
+                                            var values = gpItem.WaterWellLabels;
+                                            _DrawRainWaterWells(pt, values);
+                                            var vecs = new List<Vector2d> { new Vector2d(0, -479), new Vector2d(-121, -121), new Vector2d(-1879, 0), };
+                                            {
+                                                var segs = vecs.ToGLineSegments(basePt);
+                                                DrawRainPipes(segs);
+                                                if (gpItem.HasWrappingPipe)
+                                                {
+                                                    DrawWrappingPipe(segs.Last().EndPoint.OffsetX(950).ToPoint3d());
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (gpItem.HasRainPort)
+                                    {
+                                        var vecs = new List<Vector2d> { new Vector2d(0, -1300), new Vector2d(-200, -200), new Vector2d(-1600, 0) };
+                                        var segs = vecs.ToGLineSegments(basePt);
+                                        drawDomePipes(segs);
+                                        var pt = segs.Last().EndPoint.ToPoint3d();
+                                        {
+                                            Dr.DrawRainPort(pt.OffsetX(400));//雨水口
+                                            Dr.DrawRainPortLabel(pt.OffsetX(-50));//接至雨水口
+                                            Dr.DrawStarterPipeHeightLabel(pt.OffsetX(-50 + 1650));//起端管底标高
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Dr.DrawLabel(basePt.ToPoint3d(), "接至排水沟");
                                     }
                                 }
                             }
-                            void handleHanging(Hanging hanging, bool isLeftOrRight)
+                            void _DrawFloorDrain(Point2d basePt, bool leftOrRight)
                             {
-                                void _DrawFloorDrain(Point3d basePt, bool leftOrRight)
+                                if (leftOrRight)
                                 {
-                                    DrawFloorDrain(basePt, leftOrRight);
-                                    return;
+                                    DrawFloorDrain(basePt.OffsetXY(160 + 20, 160).ToPoint3d(), leftOrRight);
+                                }
+                                else
+                                {
+                                    DrawFloorDrain(basePt.OffsetXY(160 + 20 - 360, 160).ToPoint3d(), leftOrRight);
+                                }
+                                return;
+                            }
+
+
+                            {
+                                void drawDN(string dn, Point2d pt)
+                                {
+                                    var t = DU.DrawTextLazy(dn, 350, pt);
+                                    Dr.SetLabelStylesForRainDims(t);
+                                }
+                                var hanging = gpItem.Hangings[i];
+                                var vecs = new List<Vector2d> { new Vector2d(-130, 130), new Vector2d(-1070, 0) };
+                                if (hanging.FloorDrainsCount > 0)
+                                {
+                                    string getCondensePipeDN()
+                                    {
+                                        return "DN25";
+                                    }
+                                    var wpCount = hanging.FloorDrainWrappingPipesCount;
+                                    void tryDrawWrappingPipe(Point2d pt)
+                                    {
+                                        if (wpCount <= 0) return;
+                                        DrawWrappingPipe(pt.ToPoint3d());
+                                        --wpCount;
+                                    }
+                                    if (hanging.FloorDrainsCount == 1)
+                                    {
+                                        var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(-650 - 30));
+                                        drawDomePipes(segs);
+                                        var p = segs.Last().EndPoint;
+                                        _DrawFloorDrain(p, true);
+                                        tryDrawWrappingPipe(p.OffsetX(750));
+                                        drawDN(getCondensePipeDN(), segs[1].EndPoint.OffsetXY(100, 100));
+                                    }
+                                    else if (hanging.FloorDrainsCount == 2)
+                                    {
+                                        {
+                                            var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(-650 - 30));
+                                            drawDomePipes(segs);
+                                            var p = segs.Last().EndPoint;
+                                            _DrawFloorDrain(p, true);
+                                            tryDrawWrappingPipe(p.OffsetX(750));
+                                            drawDN(getCondensePipeDN(), segs[1].EndPoint.OffsetXY(100, 100));
+                                        }
+                                        {
+                                            var segs = vecs.GetYAxisMirror().ToGLineSegments(info.StartPoint.OffsetY(-650 - 30));
+                                            drawDomePipes(segs);
+                                            var p = segs.Last().EndPoint;
+                                            _DrawFloorDrain(p, true);
+                                            tryDrawWrappingPipe(p.OffsetX(-200));
+                                            drawDN(getCondensePipeDN(), segs[1].StartPoint.OffsetXY(100, 100));
+                                        }
+                                    }
                                 }
 
+                                if (hanging.HasCondensePipe)
+                                {
+                                    string getCondensePipeDN()
+                                    {
+                                        return "DN25";
+                                    }
+                                    if (hanging.HasBrokenCondensePipes)
+                                    {
+                                        void f(double offsetY)
+                                        {
+                                            var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(offsetY));
+                                            var h = 150;
+                                            var w = 500;
+                                            var p1 = segs.Last().EndPoint;
+                                            var p3 = p1.OffsetY(h);
+                                            drawDomePipe(new GLineSegment(p1, p3));
+                                            Dr.DrawCondensePipe(p3.OffsetXY(-100, 100));
+                                            drawDomePipes(segs);
+                                            drawDN(getCondensePipeDN(), p3.OffsetXY(100, -50));
+                                        }
+                                        f(-1280);
+                                        f(-1280 - 450);
+                                    }
+                                    else
+                                    {
+                                        var segs = vecs.ToGLineSegments(info.StartPoint.OffsetY(-1280));
+                                        var h = 150;
+                                        var w = 500;
+                                        var p1 = segs.Last().EndPoint;
+                                        var p2 = p1.OffsetX(w);
+                                        var p3 = p1.OffsetY(h);
+                                        var p4 = p2.OffsetY(h);
+                                        drawDomePipes(segs);
+                                        if (hanging.HasNonBrokenCondensePipes)
+                                        {
+                                            drawDN(getCondensePipeDN(), p3.OffsetXY(100, -50));
+                                            drawDomePipe(new GLineSegment(p1, p3));
+                                            Dr.DrawCondensePipe(p3);
+                                            drawDomePipe(new GLineSegment(p2, p4));
+                                            Dr.DrawCondensePipe(p4);
+                                        }
+                                        else
+                                        {
+                                            drawDN(getCondensePipeDN(), p3.OffsetXY(100, -50));
+                                            drawDomePipe(new GLineSegment(p1, p3));
+                                            Dr.DrawCondensePipe(p3);
+                                        }
+                                    }
+                                }
+                            }
+
+                            {
+
+                            }
 
 
+                            if (run.HasShortTranslator)
+                            {
+                                DrawShortTranslatorLabel(info.Segs.Last().Center, run.IsShortTranslatorToLeftOrRight);
+                            }
 
+                            if (gpItem.Hangings[i].HasCheckPoint)
+                            {
+                                var p = run.HasShortTranslator ? info.Segs.Last().StartPoint.OffsetY(800).ToPoint3d() : info.EndPoint.OffsetY(800).ToPoint3d();
+                                DrawCheckPoint(p, true);
+                                DrawDimLabelRight(p, -800);
                             }
                         }
                     }
@@ -2061,7 +2324,12 @@
 
                     static void drawLabel(Point2d basePt, string text1, string text2, bool isLeftOrRight)
                     {
-                        var vecs = new List<Vector2d> { new Vector2d(400, 400), new Vector2d(1400, 0) };
+                        var height = 350;
+                        var gap = 50;
+                        var factor = .7;
+                        var width = height * factor * factor * Math.Max(text1?.Length ?? 0, text2?.Length ?? 0);
+                        if (width < 1400) width = 1400;
+                        var vecs = new List<Vector2d> { new Vector2d(400, 400), new Vector2d(width, 0) };
                         if (isLeftOrRight == true)
                         {
                             vecs = vecs.GetYAxisMirror();
@@ -2070,19 +2338,19 @@
                         foreach (var seg in segs)
                         {
                             var line = DU.DrawLineSegmentLazy(seg);
-                            Dr.SetLabelStylesForDraiNote(line);
+                            Dr.SetLabelStylesForRainNote(line);
                         }
                         var txtBasePt = isLeftOrRight ? segs[1].EndPoint : segs[1].StartPoint;
-                        txtBasePt = txtBasePt.OffsetY(50);
+                        txtBasePt = txtBasePt.OffsetY(gap);
                         if (text1 != null)
                         {
-                            var t = DU.DrawTextLazy(text1, 350, txtBasePt);
-                            Dr.SetLabelStylesForDraiNote(t);
+                            var t = DU.DrawTextLazy(text1, height, txtBasePt);
+                            Dr.SetLabelStylesForRainNote(t);
                         }
                         if (text2 != null)
                         {
-                            var t = DU.DrawTextLazy(text2, 350, txtBasePt.OffsetY(-350 - 50));
-                            Dr.SetLabelStylesForDraiNote(t);
+                            var t = DU.DrawTextLazy(text2, height, txtBasePt.OffsetY(-height - gap));
+                            Dr.SetLabelStylesForRainNote(t);
                         }
                     }
                     for (int i = 0; i < allNumStoreyLabels.Count; i++)
@@ -2126,7 +2394,6 @@
 
                             {
                                 string label1, label2;
-                                var isLeftOrRight = !thwPipeLine.Labels.Any(x => IsFL(x));
                                 var labels = RainLabelItem.ConvertLabelStrings(thwPipeLine.Labels.Where(x => !IsTL(x))).ToList();
                                 if (labels.Count == 2)
                                 {
@@ -2138,6 +2405,7 @@
                                     label1 = labels.JoinWith(";");
                                     label2 = null;
                                 }
+                                var isLeftOrRight = (gpItem.Hangings.TryGet(i)?.FloorDrainsCount ?? 0) == 0 && !(gpItem.Hangings.TryGet(i)?.HasCondensePipe ?? false);
                                 drawLabel(info.PlBasePt, label1, label2, isLeftOrRight);
                             }
                         }
@@ -2160,10 +2428,10 @@
                                 var run = runs.TryGet(i);
                                 if (run != null)
                                 {
-                                    Dr.DrawDN_2(info.EndPoint);
+                                    Dr.DrawDN_2(info.EndPoint, "W-RAIN-NOTE");
                                     if (gpItem.HasTl)
                                     {
-                                        Dr.DrawDN_3(info.EndPoint.OffsetXY(300, 0));
+                                        Dr.DrawDN_3(info.EndPoint.OffsetXY(300, 0), "W-RAIN-NOTE");
                                     }
                                 }
                             }
@@ -2178,33 +2446,6 @@
 
                         }
                     }
-
-                    //draw outputs
-                    {
-                        var i = allNumStoreyLabels.IndexOf("1F");
-                        if (i >= 0)
-                        {
-                            var storey = allNumStoreyLabels[i];
-                            var info = arr.First();
-                            if (info != null && info.Visible)
-                            {
-                                var output = new ThwOutput()
-                                {
-                                    DirtyWaterWellValues = gpItem.WaterPortLabels.OrderBy(x =>
-                                    {
-                                        long.TryParse(x, out long v);
-                                        return v;
-                                    }).ToList(),
-                                    HasWrappingPipe1 = gpItem.HasWrappingPipe,
-                                    DN1 = "DN100",
-                                    HasCleaningPort1 = true,
-                                };
-                                var pt = info.EndPoint;
-
-                            }
-                        }
-                    }
-
                 }
 
                 {
@@ -2231,6 +2472,46 @@
 
             }
         }
+        public static void SetLabelStylesForRainNote(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = "W-RAIN-NOTE";
+                DU.ByLayer(e);
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void DrawShortTranslatorLabel(Point2d basePt, bool isLeftOrRight)
+        {
+            var vecs = new List<Vector2d> { new Vector2d(-800, 1000), new Vector2d(-745, 0) };
+            if (!isLeftOrRight) vecs = vecs.GetYAxisMirror();
+            var segs = vecs.ToGLineSegments(basePt);
+            var wordPt = isLeftOrRight ? segs[1].EndPoint : segs[1].StartPoint;
+            var text = "乙字弯";
+            var height = 350;
+            var lines = DU.DrawLineSegmentsLazy(segs);
+            SetLabelStylesForRainNote(lines.ToArray());
+            var t = DU.DrawTextLazy(text, height, wordPt);
+            SetLabelStylesForRainNote(t);
+        }
+        public static void DrawCheckPoint(Point3d basePt, bool leftOrRight)
+        {
+            DU.DrawBlockReference(blkName: "立管检查口", basePt: basePt,
+      cb: br =>
+      {
+          if (leftOrRight)
+          {
+              br.ScaleFactors = new Scale3d(-1, 1, 1);
+          }
+          DU.ByLayer(br);
+          br.Layer = "W-DRAI-EQPM";
+      });
+        }
+
         public static void DrawRainDiagram(List<RainDrawingData> drDatas, List<StoreysItem> storeysItems, Point2d basePoint, List<RainGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys)
         {
             var allNumStoreyLabels = allNumStoreys.Select(i => i + "F").ToList();
@@ -2238,7 +2519,7 @@
             var start = allStoreys.Count - 1;
             var end = 0;
             var OFFSET_X = 2500.0;
-            var SPAN_X = 5500.0 + 500 + 3500;//马力说再加个3500
+            var SPAN_X = 5500.0;
             var HEIGHT = 1800.0;
             //var HEIGHT = 3000.0;
             //var HEIGHT = 5000.0;
@@ -2261,8 +2542,62 @@
                 }
             }
         }
-        public static bool Testing = false;
-        public static void DrawFloorDrain(Point3d basePt, bool leftOrRight, string value = "普通地漏P弯")
+        public static bool Testing;
+        public static void DrawWrappingPipe(Point3d basePt)
+        {
+            //if (Testing) return;
+            DU.DrawBlockReference(blkName: "套管系统", basePt: basePt.OffsetXY(-450, 0), cb: br =>
+            {
+                DU.SetLayerAndByLayer("W-BUSH", br);
+                if (br.IsDynamicBlock)
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", "防水套管水平");
+                }
+            });
+        }
+        public static IEnumerable<Point2d> GetBasePoints(Point2d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = 0, j = 0;
+            for (int k = 0; k < num; k++)
+            {
+                yield return new Point2d(basePoint.X + i * width, basePoint.Y - j * height);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = 0;
+                }
+            }
+        }
+        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = 0, j = 0;
+            for (int k = 0; k < num; k++)
+            {
+                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, 0);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = 0;
+                }
+            }
+        }
+        public static void DrawRainWaterWell(Point2d basePt, string value)
+        {
+            DrawRainWaterWell(basePt.ToPoint3d(), value);
+        }
+        public static void DrawRainWaterWell(Point3d basePt, string value)
+        {
+            DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: basePt.OffsetY(-400),
+            props: new Dictionary<string, string>() { { "-", value } },
+            cb: br =>
+            {
+                br.Layer = "W-RAIN-EQPM";
+                DU.ByLayer(br);
+            });
+        }
+        public static void DrawFloorDrain(Point3d basePt, bool leftOrRight, string value = "普通地漏无存水弯")
         {
             if (Testing) return;
             if (leftOrRight)
@@ -2288,7 +2623,7 @@
                    br.ScaleFactors = new Scale3d(-2, 2, 2);
                    if (br.IsDynamicBlock)
                    {
-                       br.ObjectId.SetDynBlockValue("可见性", "普通地漏P弯");
+                       br.ObjectId.SetDynBlockValue("可见性", value);
                    }
                });
             }
@@ -2298,31 +2633,24 @@
         {
             DU.DrawBlockReference(blkName: "标高", basePt: basePt.ToPoint3d(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", label } }, cb: br => { DU.ByLayer(br); });
         }
-        public static void DrawWrappingPipe(Point2d basePt)
-        {
-            DrawWrappingPipe(basePt.ToPoint3d());
-        }
-        public static void DrawWrappingPipe(Point3d basePt)
-        {
-            DU.DrawBlockReference("套管系统", basePt, br =>
-            {
-                br.Layer = "W-BUSH";
-                DU.ByLayer(br);
-            });
-        }
         public static void SetDomePipeLineStyle(Line line)
         {
             line.Layer = "W-DRAI-DOME-PIPE";
             DU.ByLayer(line);
         }
-        public static void DrawDomePipes(params GLineSegment[] segs)
+        public static void SetRainPipeLineStyle(Line line)
         {
-            DrawDomePipes((IEnumerable<GLineSegment>)segs);
+            line.Layer = "W-RAIN-PIPE";
+            DU.ByLayer(line);
         }
-        public static void DrawDomePipes(IEnumerable<GLineSegment> segs)
+        public static void DrawRainPipes(params GLineSegment[] segs)
+        {
+            DrawRainPipes((IEnumerable<GLineSegment>)segs);
+        }
+        public static void DrawRainPipes(IEnumerable<GLineSegment> segs)
         {
             var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
-            lines.ForEach(line => SetDomePipeLineStyle(line));
+            lines.ForEach(line => SetRainPipeLineStyle(line));
         }
 
     }
@@ -2432,18 +2760,15 @@
     {
         public string Storey;
         public bool ShowStoreyLabel;
-        public bool HasHorizontalShortLine;
         public bool HasShortTranslator;
         public bool HasLongTranslator;
         public bool IsShortTranslatorToLeftOrRight;
         public bool IsLongTranslatorToLeftOrRight;
         public bool ShowShortTranslatorLabel;
-        public bool HasCheckPoint;
         public bool IsFirstItem;
         public bool IsLastItem;
         public Hanging LeftHanging;
         public Hanging RightHanging;
-        public bool HasCleaningPort;
     }
     public class ThwPipeLine
     {
@@ -2459,10 +2784,14 @@
         public HashSet<string> LongTranslatorLabels;
         public HashSet<string> ShortTranslatorLabels;
         public Dictionary<string, int> FloorDrains;
+        public Dictionary<string, int> FloorDrainWrappingPipes;
         public HashSet<string> CleaningPorts;
         public Dictionary<string, string> WaterWellLabels;
-        public HashSet<string> WrappingPipes;
-
+        public HashSet<string> HasOutletWrappingPipe;
+        public HashSet<string> HasCondensePipe;
+        public HashSet<string> HasBrokenCondensePipes;
+        public HashSet<string> HasNonBrokenCondensePipes;
+        public HashSet<string> HasRainPortSymbols;
         public List<string> Comments;
 
         public void Init()
@@ -2471,10 +2800,15 @@
             LongTranslatorLabels ??= new HashSet<string>();
             ShortTranslatorLabels ??= new HashSet<string>();
             FloorDrains ??= new Dictionary<string, int>();
+            FloorDrainWrappingPipes ??= new Dictionary<string, int>();
             CleaningPorts ??= new HashSet<string>();
             WaterWellLabels ??= new Dictionary<string, string>();
-            WrappingPipes ??= new HashSet<string>();
+            HasOutletWrappingPipe ??= new HashSet<string>();
             Comments ??= new List<string>();
+            HasCondensePipe ??= new HashSet<string>();
+            HasBrokenCondensePipes ??= new HashSet<string>();
+            HasNonBrokenCondensePipes ??= new HashSet<string>();
+            HasRainPortSymbols ??= new HashSet<string>();
         }
     }
     public partial class RainService
@@ -2527,7 +2861,7 @@
             cl.CollectVerticalPipes();
             cl.CollectWrappingPipes();
             cl.CollectWaterPorts();
-            cl.CollectWaterPortSymbols();
+            cl.CollectRainPortSymbols();
             cl.CollectFloorDrains();
             cl.CollectWaterPort13s();
             return cl;
@@ -2582,7 +2916,7 @@
                 DU.DrawRectLazy(o.Boundary).ColorIndex = 2;
             }
             foreach (var o in geoData.VerticalPipes) DU.DrawRectLazy(o).ColorIndex = 3;
-            foreach (var o in geoData.FloorDrains) DU.DrawRectLazy(o).ColorIndex = 6;
+            foreach (var o in geoData.FloorDrains) DU.DrawRectLazy(o).ColorIndex = 4;
             foreach (var o in geoData.WaterPorts) DU.DrawRectLazy(o).ColorIndex = 7;
             foreach (var o in geoData.WaterWells) DU.DrawRectLazy(o).ColorIndex = 7;
             {
@@ -2668,90 +3002,7 @@
                     }
                 }
 
-
-                DU.DrawTextLazy($"===框{storeyI}===", geoData.Storeys[storeyI].LeftTop);
-                foreach (var o in item.LabelLines)
-                {
-                    DU.DrawLineSegmentLazy(geoData.LabelLines[cadDataMain.LabelLines.IndexOf(o)]).ColorIndex = 1;
-                }
-                foreach (var pl in item.Labels)
-                {
-                    var m = geoData.Labels[cadDataMain.Labels.IndexOf(pl)];
-                    var e = DU.DrawTextLazy(m.Text, m.Boundary.LeftButtom.ToPoint3d());
-                    e.ColorIndex = 2;
-                    var _pl = DU.DrawRectLazy(m.Boundary);
-                    _pl.ColorIndex = 2;
-                }
-                foreach (var o in item.PipeKillers)
-                {
-                    DU.DrawRectLazy(geoData.PipeKillers[cadDataMain.PipeKillers.IndexOf(o)]).Color = Color.FromRgb(255, 255, 55);
-                }
-                foreach (var o in item.CondensePipes)
-                {
-                    DU.DrawRectLazy(geoData.CondensePipes[cadDataMain.CondensePipes.IndexOf(o)], 10);
-                }
-                foreach (var o in item.VerticalPipes)
-                {
-                    DU.DrawRectLazy(geoData.VerticalPipes[cadDataMain.VerticalPipes.IndexOf(o)]).ColorIndex = 3;
-                }
-                foreach (var o in item.FloorDrains)
-                {
-                    DU.DrawRectLazy(geoData.FloorDrains[cadDataMain.FloorDrains.IndexOf(o)]).ColorIndex = 6;
-                }
-                foreach (var o in item.WLines)
-                {
-                    DU.DrawLineSegmentLazy(geoData.WLines[cadDataMain.WLines.IndexOf(o)]).ColorIndex = 6;
-                }
-                foreach (var o in item.WaterPorts)
-                {
-                    DU.DrawRectLazy(geoData.WaterPorts[cadDataMain.WaterPorts.IndexOf(o)]).ColorIndex = 7;
-                    DU.DrawTextLazy(geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(o)], o.GetCenter());
-                }
-                foreach (var o in item.WaterWells)
-                {
-                    DU.DrawRectLazy(geoData.WaterWells[cadDataMain.WaterWells.IndexOf(o)]).ColorIndex = 6;
-                    DU.DrawTextLazy(geoData.WaterWellLabels[cadDataMain.WaterWells.IndexOf(o)], o.GetCenter());
-                }
-                foreach (var o in item.WaterPort13s)
-                {
-                    DU.DrawRectLazy(geoData.WaterPort13s[cadDataMain.WaterPort13s.IndexOf(o)]).ColorIndex = 7;
-                }
-                foreach (var o in item.WaterPortSymbols)
-                {
-                    DU.DrawRectLazy(geoData.WaterPortSymbols[cadDataMain.WaterPortSymbols.IndexOf(o)]).ColorIndex = 7;
-                }
-                foreach (var o in item.CondensePipes)
-                {
-                    var e = DU.DrawRectLazy(geoData.CondensePipes[cadDataMain.CondensePipes.IndexOf(o)]).ColorIndex = 1;
-                }
-                foreach (var o in item.CleaningPorts)
-                {
-                    var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
-                    if (false) DU.DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
-                    DU.DrawRectLazy(GRect.Create(m, 40));
-                }
-                {
-                    var cl = Color.FromRgb(0x91, 0xc7, 0xae);
-                    foreach (var o in item.WrappingPipes)
-                    {
-                        var e = DU.DrawRectLazy(geoData.WrappingPipes[cadDataMain.WrappingPipes.IndexOf(o)]);
-                        e.Color = cl;
-                    }
-                }
-                {
-                    var cl = Color.FromRgb(4, 229, 230);
-                    foreach (var o in item.DLines)
-                    {
-                        var e = DU.DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
-                    }
-                }
-                {
-                    var cl = Color.FromRgb(211, 213, 111);
-                    foreach (var o in item.VLines)
-                    {
-                        DU.DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
-                    }
-                }
+                DrawGeoData(geoData, cadDataMain, storeyI, item);
 
 
                 //标注立管
@@ -2972,19 +3223,28 @@
 
                 //关联地漏
                 {
-                    var dict = new Dictionary<string, int>();
+                    var floorDrainD = new Dictionary<string, int>();
+                    var floorDrainWrappingPipeD = new Dictionary<string, int>();
                     {
-                        var pipesf = GeoFac.CreateIntersectsSelector(item.VerticalPipes);
-                        var gs = GeoFac.GroupGeometriesEx(wlinesGeos, item.FloorDrains);
-                        foreach (var g in gs)
+                        var wpsf = F(item.WrappingPipes);
+                        var wlinesGeosf = F(wlinesGeos);
                         {
-                            var fds = g.Where(pl => item.FloorDrains.Contains(pl)).ToList();
-                            var dlines = g.Where(pl => wlinesGeos.Contains(pl)).ToList();
-                            if (!AllNotEmpty(fds, dlines)) continue;
-                            var pipes = pipesf(GeoFac.CreateGeometry(fds.Concat(dlines).ToList()));
-                            foreach (var lb in pipes.Select(getLabel).Where(lb => lb != null).Distinct())
+                            var fdsf = F(item.FloorDrains);
+                            foreach (var pipe in item.VerticalPipes)
                             {
-                                dict[lb] = fds.Count;
+                                var label = getLabel(pipe);
+                                if (label != null)
+                                {
+                                    var wlines = wlinesGeosf(pipe);
+                                    if (wlines.Any())
+                                    {
+                                        var wlinesGeo = GeoFac.CreateGeometry(wlines);
+                                        var fds = fdsf(wlinesGeo);
+                                        floorDrainD[label] = fds.Count;
+                                        var wps = wpsf(wlinesGeo);
+                                        floorDrainWrappingPipeD[label] = wps.Count;
+                                    }
+                                }
                             }
                         }
                     }
@@ -2998,10 +3258,10 @@
                             {
                                 if (lbDict.TryGetValue(pipe, out string label))
                                 {
-                                    dict.TryGetValue(label, out int count);
+                                    floorDrainD.TryGetValue(label, out int count);
                                     if (count == 0)
                                     {
-                                        dict[label] = 1;
+                                        floorDrainD[label] = 1;
                                         break;
                                     }
                                 }
@@ -3009,7 +3269,59 @@
                         }
 
                     }
-                    drData.FloorDrains = dict;
+                    drData.FloorDrains = floorDrainD;
+                    drData.FloorDrainWrappingPipes = floorDrainWrappingPipeD;
+                }
+
+                //关联冷凝管
+                {
+                    var ok_ents = new HashSet<Geometry>();
+                    var todoD = new Dictionary<Geometry, string>();
+                    var pipesf = F(item.VerticalPipes);
+                    var gs = GeoFac.GroupGeometries(item.CondensePipes.Concat(item.WLines).ToList());
+                    foreach (var g in gs)
+                    {
+                        var cps = g.Where(pl => item.CondensePipes.Contains(pl)).ToList();
+                        var wlines = g.Where(pl => item.WLines.Contains(pl)).ToList();
+                        if (!AllNotEmpty(cps, wlines)) continue;
+                        var pipes = pipesf(G(cps.Concat(wlines)));
+                        if (pipes.Count == 1)
+                        {
+                            var label = getLabel(pipes[0]);
+                            if (label != null)
+                            {
+                                if (cps.Count > 0)
+                                {
+                                    drData.HasCondensePipe.Add(label);
+                                    ok_ents.AddRange(cps);
+                                }
+                                if (cps.Count == 2)
+                                {
+                                    drData.HasNonBrokenCondensePipes.Add(label);
+                                }
+                                if (cps.Count == 1)
+                                {
+                                    var cp = cps[0];
+                                    todoD[cp] = label;
+                                }
+                            }
+                        }
+                    }
+                    {
+                        var cpsf = F(item.CondensePipes.Except(ok_ents).ToList());
+                        foreach (var kv in todoD)
+                        {
+                            var cp = kv.Key;
+                            var label = kv.Value;
+                            var pt = cp.GetCenter();
+                            var cps = cpsf(new GLineSegment(pt.OffsetX(-700), pt.OffsetX(700)).ToLineString()).Except(ok_ents).ToList();
+                            if (cps.Count == 1)
+                            {
+                                ok_ents.AddRange(cps);
+                                drData.HasBrokenCondensePipes.Add(label);
+                            }
+                        }
+                    }
                 }
 
                 //关联清扫口
@@ -3034,38 +3346,66 @@
                 {
                     //获取排出编号
 
-                    var ok_ents = new HashSet<Geometry>();
+                    var ok_vpipes = new HashSet<Geometry>();
                     var outletd = new Dictionary<string, string>();
-                    var has_wrappingpipes = new HashSet<string>();
-                    var portd = new Dictionary<Geometry, string>();
+                    var hasOutletWrappingPipe = new HashSet<string>();
+                    var waterWellsD = new Dictionary<Geometry, string>();
+                    var hasRainPortSymbols = new HashSet<string>();
+                    //雨水口
+                    {
+                        var rainPortsf = F(item.RainPort13s.Concat(item.RainPortSymbols).ToList());
+                        var pipesf = F(item.VerticalPipes);
+                        foreach (var wlinesGeo in wlinesGeos)
+                        {
+                            var rainPorts = rainPortsf(wlinesGeo);
+                            if (rainPorts.Count == 1)
+                            {
+                                var rainPort = rainPorts[0];
+                                var pipes = pipesf(wlinesGeo);
+                                if (pipes.Count == 1)
+                                {
+                                    var pipe = pipes[0];
+                                    var label = getLabel(pipe);
+                                    if (label != null)
+                                    {
+                                        hasRainPortSymbols.Add(label);
+                                        ok_vpipes.Add(pipe);
+                                    }
+                                }
+                            }
+                        }
+                        drData.HasRainPortSymbols = hasRainPortSymbols;
+                    }
+
+                    //雨水井
                     {
                         void collect(Func<Geometry, List<Geometry>> waterWellsf, Func<Geometry, string> getWaterWellLabel)
                         {
-                            var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
-                            foreach (var dlinesGeo in wlinesGeos)
+                            var f2 = F(item.VerticalPipes.Except(ok_vpipes).ToList());
+                            foreach (var wlinesGeo in wlinesGeos)
                             {
-                                var waterWells = waterWellsf(dlinesGeo);
+                                var waterWells = waterWellsf(wlinesGeo);
                                 if (waterWells.Count == 1)
                                 {
                                     var waterWell = waterWells[0];
                                     var waterWellLabel = getWaterWellLabel(waterWell);
-                                    portd[dlinesGeo] = waterWellLabel;
+                                    waterWellsD[wlinesGeo] = waterWellLabel;
                                     //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
-                                    var pipes = f2(dlinesGeo);
-                                    ok_ents.AddRange(pipes);
+                                    var pipes = f2(wlinesGeo);
+                                    ok_vpipes.AddRange(pipes);
                                     foreach (var pipe in pipes)
                                     {
                                         if (lbDict.TryGetValue(pipe, out string label))
                                         {
                                             outletd[label] = waterWellLabel;
-                                            var wrappingpipes = wrappingPipesf(dlinesGeo);
+                                            var wrappingpipes = wrappingPipesf(wlinesGeo);
                                             if (wrappingpipes.Count > 0)
                                             {
-                                                has_wrappingpipes.Add(label);
+                                                hasOutletWrappingPipe.Add(label);
                                             }
                                             foreach (var wp in wrappingpipes)
                                             {
-                                                portd[wp] = waterWellLabel;
+                                                waterWellsD[wp] = waterWellLabel;
                                                 DU.DrawTextLazy(waterWellLabel, wp.GetCenter());
                                             }
                                         }
@@ -3085,7 +3425,7 @@
                     }
                     {
                         //再处理挨得有点远没直接连接的
-                        var f2 = F(item.VerticalPipes.Except(ok_ents).ToList());
+                        var f2 = F(item.VerticalPipes.Except(ok_vpipes).ToList());
                         var radius = 10;
                         var f5 = GeoFac.NearestNeighbourPoint3dF(item.WaterWells);
                         foreach (var dlinesGeo in wlinesGeos)
@@ -3106,21 +3446,21 @@
                                     {
                                         Dbg.ShowXLabel(pt);
                                         var waterWellLabel = geoData.WaterWellLabels[cadDataMain.WaterWells.IndexOf(waterWell)];
-                                        portd[dlinesGeo] = waterWellLabel;
+                                        waterWellsD[dlinesGeo] = waterWellLabel;
                                         foreach (var pipe in f2(dlinesGeo))
                                         {
                                             if (lbDict.TryGetValue(pipe, out string label))
                                             {
                                                 outletd[label] = waterWellLabel;
-                                                ok_ents.Add(pipe);
+                                                ok_vpipes.Add(pipe);
                                                 var wrappingpipes = wrappingPipesf(dlinesGeo);
                                                 if (wrappingpipes.Any())
                                                 {
-                                                    has_wrappingpipes.Add(label);
+                                                    hasOutletWrappingPipe.Add(label);
                                                 }
                                                 foreach (var wp in wrappingpipes)
                                                 {
-                                                    portd[wp] = waterWellLabel;
+                                                    waterWellsD[wp] = waterWellLabel;
                                                     DU.DrawTextLazy(waterWellLabel, wp.GetCenter());
                                                 }
                                             }
@@ -3132,15 +3472,15 @@
                     }
                     {
                         //给套管做标记
-                        var wpf = F(item.WrappingPipes.Where(wp => !portd.ContainsKey(wp)).ToList());
+                        var wpf = F(item.WrappingPipes.Where(wp => !waterWellsD.ContainsKey(wp)).ToList());
                         foreach (var dlinesGeo in wlinesGeos)
                         {
-                            if (!portd.TryGetValue(dlinesGeo, out string v)) continue;
+                            if (!waterWellsD.TryGetValue(dlinesGeo, out string v)) continue;
                             foreach (var wp in wpf(dlinesGeo))
                             {
-                                if (!portd.ContainsKey(wp))
+                                if (!waterWellsD.ContainsKey(wp))
                                 {
-                                    portd[wp] = v;
+                                    waterWellsD[wp] = v;
                                 }
                             }
                         }
@@ -3150,7 +3490,7 @@
                         //再处理通过套管来连接的
                         foreach (var wp in item.WrappingPipes)
                         {
-                            if (portd.TryGetValue(wp, out string v))
+                            if (waterWellsD.TryGetValue(wp, out string v))
                             {
                                 var pipes = pipesf(wp);
                                 foreach (var pipe in pipes)
@@ -3180,8 +3520,8 @@
                         }).Count();
                     }
                     {
-                        sb.AppendLine("套管：" + has_wrappingpipes.ToJson());
-                        drData.WrappingPipes.AddRange(has_wrappingpipes);
+                        sb.AppendLine("排出套管：" + hasOutletWrappingPipe.ToJson());
+                        drData.HasOutletWrappingPipe.AddRange(hasOutletWrappingPipe);
                     }
                 }
 
@@ -3216,11 +3556,114 @@
 
                 {
                     sb.AppendLine("地漏：" + drData.FloorDrains.ToJson());
+                    sb.AppendLine("地漏套管：" + drData.FloorDrainWrappingPipes.ToJson());
+                    sb.AppendLine("HasCondensePipe：" + drData.HasCondensePipe.ToJson());
+                    sb.AppendLine("HasBrokenCondensePipes：" + drData.HasBrokenCondensePipes.ToJson());
+                    sb.AppendLine("HasNonBrokenCondensePipes：" + drData.HasNonBrokenCondensePipes.ToJson());
+                    sb.AppendLine("HasRainPortSymbols：" + drData.HasRainPortSymbols.ToJson());
                 }
                 drDatas.Add(drData);
             }
             logString = sb.ToString();
             DrawingTransaction.Current.AbleToDraw = true;
+        }
+        public static void DrawGeoData(RainGeoData geoData, RainCadData cadDataMain, List<RainCadData> cadDatas)
+        {
+            foreach (var s in geoData.Storeys)
+            {
+                var e = DU.DrawRectLazy(s).ColorIndex = 1;
+            }
+            for (int storeyI = 0; storeyI < cadDatas.Count; storeyI++)
+            {
+                var item = cadDatas[storeyI];
+                DrawGeoData(geoData, cadDataMain, storeyI, item);
+            }
+        }
+        private static void DrawGeoData(RainGeoData geoData, RainCadData cadDataMain, int storeyI, RainCadData item)
+        {
+            DU.DrawTextLazy($"===框{storeyI}===", geoData.Storeys[storeyI].LeftTop);
+            foreach (var o in item.LabelLines)
+            {
+                DU.DrawLineSegmentLazy(geoData.LabelLines[cadDataMain.LabelLines.IndexOf(o)]).ColorIndex = 1;
+            }
+            foreach (var pl in item.Labels)
+            {
+                var m = geoData.Labels[cadDataMain.Labels.IndexOf(pl)];
+                var e = DU.DrawTextLazy(m.Text, m.Boundary.LeftButtom.ToPoint3d());
+                e.ColorIndex = 2;
+                var _pl = DU.DrawRectLazy(m.Boundary);
+                _pl.ColorIndex = 2;
+            }
+            foreach (var o in item.PipeKillers)
+            {
+                DU.DrawRectLazy(geoData.PipeKillers[cadDataMain.PipeKillers.IndexOf(o)]).Color = Color.FromRgb(255, 255, 55);
+            }
+            foreach (var o in item.CondensePipes)
+            {
+                DU.DrawRectLazy(geoData.CondensePipes[cadDataMain.CondensePipes.IndexOf(o)], 10);
+            }
+            foreach (var o in item.VerticalPipes)
+            {
+                DU.DrawRectLazy(geoData.VerticalPipes[cadDataMain.VerticalPipes.IndexOf(o)]).ColorIndex = 3;
+            }
+            foreach (var o in item.FloorDrains)
+            {
+                DU.DrawRectLazy(geoData.FloorDrains[cadDataMain.FloorDrains.IndexOf(o)]).ColorIndex = 6;
+            }
+            foreach (var o in item.WLines)
+            {
+                DU.DrawLineSegmentLazy(geoData.WLines[cadDataMain.WLines.IndexOf(o)]).ColorIndex = 6;
+            }
+            foreach (var o in item.WaterPorts)
+            {
+                DU.DrawRectLazy(geoData.WaterPorts[cadDataMain.WaterPorts.IndexOf(o)]).ColorIndex = 7;
+                DU.DrawTextLazy(geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(o)], o.GetCenter());
+            }
+            foreach (var o in item.WaterWells)
+            {
+                DU.DrawRectLazy(geoData.WaterWells[cadDataMain.WaterWells.IndexOf(o)]).ColorIndex = 4;
+                DU.DrawTextLazy(geoData.WaterWellLabels[cadDataMain.WaterWells.IndexOf(o)], o.GetCenter());
+            }
+            foreach (var o in item.RainPort13s)
+            {
+                DU.DrawRectLazy(geoData.WaterPort13s[cadDataMain.RainPort13s.IndexOf(o)]).ColorIndex = 7;
+            }
+            foreach (var o in item.RainPortSymbols)
+            {
+                DU.DrawRectLazy(geoData.RainPortSymbols[cadDataMain.RainPortSymbols.IndexOf(o)]).ColorIndex = 7;
+            }
+            foreach (var o in item.CondensePipes)
+            {
+                var e = DU.DrawRectLazy(geoData.CondensePipes[cadDataMain.CondensePipes.IndexOf(o)]).ColorIndex = 1;
+            }
+            foreach (var o in item.CleaningPorts)
+            {
+                var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
+                if (false) DU.DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
+                DU.DrawRectLazy(GRect.Create(m, 40));
+            }
+            {
+                var cl = Color.FromRgb(0x91, 0xc7, 0xae);
+                foreach (var o in item.WrappingPipes)
+                {
+                    var e = DU.DrawRectLazy(geoData.WrappingPipes[cadDataMain.WrappingPipes.IndexOf(o)]);
+                    e.Color = cl;
+                }
+            }
+            {
+                var cl = Color.FromRgb(4, 229, 230);
+                foreach (var o in item.DLines)
+                {
+                    var e = DU.DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
+                }
+            }
+            {
+                var cl = Color.FromRgb(211, 213, 111);
+                foreach (var o in item.VLines)
+                {
+                    DU.DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
+                }
+            }
         }
 
         public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
@@ -3265,14 +3708,14 @@
     public class RainGroupingPipeItem : IEquatable<RainGroupingPipeItem>
     {
         public string Label;
-        public bool HasWaterPort;
+        public bool HasWaterWell;
         public bool HasBasinInKitchenAt1F;
-        public bool HasWrappingPipe;
+        public bool HasWaterWellWrappingPipe;
         public bool IsSingleOutlet;
-        public string WaterPortLabel;
+        public string WaterWellLabel;
         public List<ValueItem> Items;
         public List<Hanging> Hangings;
-        public bool HasTL;
+        public bool HasRainPort;
         public string TlLabel;
         public int MaxTl;
         public int MinTl;
@@ -3280,13 +3723,12 @@
         public class Hanging : IEquatable<Hanging>
         {
             public int FloorDrainsCount;
-            public bool IsSeries;
-            public bool HasSCurve;
-            public bool HasDoubleSCurve;
-            public bool HasCleaningPort;
+            public int FloorDrainWrappingPipesCount;
+            public bool HasCondensePipe;
+            public bool HasBrokenCondensePipes;
+            public bool HasNonBrokenCondensePipes;
             public bool HasCheckPoint;
-            public bool HasDownBoardLine;//降板线
-            public bool IsFL0;
+
             public override int GetHashCode()
             {
                 return 0;
@@ -3294,13 +3736,11 @@
             public bool Equals(Hanging other)
             {
                 return this.FloorDrainsCount == other.FloorDrainsCount
-                    && this.IsSeries == other.IsSeries
-                    && this.HasSCurve == other.HasSCurve
-                    && this.HasDoubleSCurve == other.HasDoubleSCurve
-                    && this.HasCleaningPort == other.HasCleaningPort
+                    && this.HasCondensePipe == other.HasCondensePipe
+                    && this.HasBrokenCondensePipes == other.HasBrokenCondensePipes
+                    && this.HasNonBrokenCondensePipes == other.HasNonBrokenCondensePipes
+                    && this.FloorDrainWrappingPipesCount == other.FloorDrainWrappingPipesCount
                     && this.HasCheckPoint == other.HasCheckPoint
-                    && this.HasDownBoardLine == other.HasDownBoardLine
-                    && this.IsFL0 == other.IsFL0
                     ;
             }
         }
@@ -3321,8 +3761,8 @@
         }
         public bool Equals(RainGroupingPipeItem other)
         {
-            return this.HasWaterPort == other.HasWaterPort
-                && this.HasWrappingPipe == other.HasWrappingPipe
+            return this.HasWaterWell == other.HasWaterWell
+                && this.HasWaterWellWrappingPipe == other.HasWaterWellWrappingPipe
                 && this.HasBasinInKitchenAt1F == other.HasBasinInKitchenAt1F
                 && this.MaxTl == other.MaxTl
                 && this.MinTl == other.MinTl
@@ -3339,9 +3779,10 @@
     public class RainGroupedPipeItem
     {
         public List<string> Labels;
-        public List<string> WaterPortLabels;
+        public List<string> WaterWellLabels;
         public bool HasWrappingPipe;
-        public bool HasWaterPort => WaterPortLabels != null && WaterPortLabels.Count > 0;
+        public bool HasWaterWell => WaterWellLabels != null && WaterWellLabels.Count > 0;
+        public bool HasRainPort;
         public List<RainGroupingPipeItem.ValueItem> Items;
         public List<string> TlLabels;
         public int MinTl;
@@ -3531,7 +3972,9 @@
                     Dbg.BuildAndSetCurrentLayer(db);
                     var pipeGroupItems = RainDiagram.GetRainGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
                     DU.Dispose();
+                    RainDiagram.Testing = true;
                     RainDiagram.DrawRainDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys);
+                    RainDiagram.Testing = false;
                     DU.Draw(adb);
                 }
             });
@@ -3549,6 +3992,20 @@
                     Dbg.BuildAndSetCurrentLayer(db);
                     var drDatas = RainDiagram.CreateRainDrawingData(adb, geoData, true);
                     Dbg.SaveToTempJsonFile(drDatas, "rain_drDatas");
+                }
+            });
+            register("load rain geoData and draw", () =>
+            {
+                var geoData = Dbg.LoadFromTempJsonFile<RainGeoData>("rain_geoData");
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var db = adb.Database;
+                    Dbg.BuildAndSetCurrentLayer(db);
+                    RainDiagram.GetCadDatas(geoData, out RainCadData cadDataMain, out List<RainCadData> cadDatas);
+                    RainService.DrawGeoData(geoData, cadDataMain, cadDatas);
                 }
             });
             register("load rain geoData save drDatas", () =>
