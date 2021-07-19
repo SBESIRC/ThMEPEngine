@@ -273,10 +273,10 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
                 var subRow = subPanel.AddNewRibbonRow();
-                row.AddNewButton("消火栓",
-                    "天华消火栓",
+                row.AddNewButton("消火栓校核",
+                    "天华消火栓校核",
                     "THXHSJH",
-                    "天华消火栓",
+                    "天华消火栓校核",
                     "IDI_THCAD_THXHSJH_SMALL",
                     "IDI_THCAD_THXHSJH_LARGE",
                     RibbonButtonStyle.LargeWithText);
