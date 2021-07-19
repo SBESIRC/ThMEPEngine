@@ -888,11 +888,24 @@ pt,
                                 if (f(gvs[i], gvs[j]))
                                 {
                                     var seg = new GLineSegment(gvs[i].StartPoint, gvs[j].StartPoint);
-                                    if (seg.Length > 0 && (killer != null && !seg.ToLineString().Intersects(killer)))
+                                    if (!seg.StartPoint.Equals(seg.EndPoint))
                                     {
-                                        yield return seg;
-                                        flags[i] = true;
-                                        flags[j] = true;
+
+                                        if (killer == null)
+                                        {
+                                            yield return seg;
+                                            flags[i] = true;
+                                            flags[j] = true;
+                                        }
+                                        else
+                                        {
+                                            if (!seg.ToLineString().Intersects(killer))
+                                            {
+                                                yield return seg;
+                                                flags[i] = true;
+                                                flags[j] = true;
+                                            }
+                                        }
                                     }
                                 }
                             }
