@@ -249,7 +249,7 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THYSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
-                // 地上雨水系统图
+                // 地上给水系统图
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地上给水系统图",
                     "天华地上给水系统图",
@@ -257,6 +257,16 @@ namespace TianHua.AutoCAD.ThCui
                     "天华地上给水系统图",
                     "IDI_THCAD_THJSXTT_SMALL",
                     "IDI_THCAD_THJSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 地上排水系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上排水系统图",
+                    "天华地上排水系统图",
+                    "THPSXTT",
+                    "天华地上排水系统图",
+                    "IDI_THCAD_THPSXTT_SMALL",
+                    "IDI_THCAD_THPSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
 
