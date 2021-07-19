@@ -178,15 +178,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
         /// <param name="dir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Polyline polyline, Vector3d dir, Point3d doorPt, double angle, double blockWidth)
+        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Vector3d dir, Point3d doorPt, Polyline door, double angle, double blockWidth, bool intersect = false)
         {
             Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
-            //var bufferPolyline = polyline.Buffer(5)[0] as Polyline;
             foreach (var str in structs)
             {
-                var allLines = str.GetAllLinesInPolyline()/*.Where(x => bufferPolyline.Intersects(x))*/.ToList();
+                var allLines = str.GetAllLinesInPolyline().ToList();
+                var bufferDoor = door.Buffer(10)[0] as Polyline;
                 foreach (var line in allLines)
                 {
+                    if (intersect)
+                    {
+                        if (!bufferDoor.Intersects(line))
+                        {
+                            continue;
+                        }
+                    }
                     var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
                     if (!dir.IsParallelWithTolerance(lineDir, angle) && line.Length > blockWidth)
                     {

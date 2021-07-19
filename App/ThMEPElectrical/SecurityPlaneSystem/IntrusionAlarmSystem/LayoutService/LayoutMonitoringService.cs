@@ -18,28 +18,31 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// <returns></returns>
         public List<LayoutModel> HoistingLayout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls, bool isInfrared)
         {
-            Polyline room = thRoom.Boundary as Polyline;
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
             List<LayoutModel> layoutModels = new List<LayoutModel>();
-            GetLayoutStructureService layoutStructureService = new GetLayoutStructureService();
-            var structs = layoutStructureService.CalLayoutStruc(door, columns, walls);
+            var structs = getLayoutStructureService.CalLayoutStruc(door, columns, walls);
             if (structs.Count <= 0)
             {
                 return layoutModels;
             }
-            
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var item in structs)
+                {
+                    //db.ModelSpace.Add(item);
+                }
+            }
             //计算门信息
-            var doorInfo = layoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, room, doorInfo.Item1, doorInfo.Item2);
-            controller.Room = thRoom;
+            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item2);
 
             //布置探测器
             LayoutHositingDetectorService layoutHositingDetectorService = new LayoutHositingDetectorService();
             var detector = layoutHositingDetectorService.LayoutDetector(doorInfo.Item1, doorInfo.Item2, door);
-
-            layoutModels.Add(controller);
             if (isInfrared)
             {
                 layoutModels.Add(new InfraredHositingDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
@@ -48,6 +51,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             {
                 layoutModels.Add(new DoubleHositingDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
             }
+
+            if (controller == null)
+            {
+                return layoutModels;
+            }
+            layoutModels.Add(controller);
+            controller.Room = thRoom;
             return layoutModels;
         }
 
@@ -61,21 +71,21 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// <returns></returns>
         public List<LayoutModel> WallMountingLayout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls, bool isInfrared)
         {
-            Polyline room = thRoom.Boundary as Polyline;
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
             List<LayoutModel> layoutModels = new List<LayoutModel>();
-            GetLayoutStructureService layoutStructureService = new GetLayoutStructureService();
-            var structs = layoutStructureService.CalLayoutStruc(door, columns, walls);
+            var structs = getLayoutStructureService.CalLayoutStruc(door, columns, walls);
             if (structs.Count <= 0)
             {
                 return layoutModels;
             }
 
             //计算门信息
-            var doorInfo = layoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, room, doorInfo.Item1, doorInfo.Item2);
+            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item2);
             controller.Room = thRoom;
 
             //布置探测器

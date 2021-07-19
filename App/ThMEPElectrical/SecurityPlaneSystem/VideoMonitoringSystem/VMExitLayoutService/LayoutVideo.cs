@@ -20,11 +20,12 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         public double layoutRange = 5000;
         public double blindArea = 1250;
         double bufferWidth = 300;
-        public LayoutModel Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> walls, List<Polyline> columns)
+        public LayoutModel Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> walls, List<Polyline> columns, List<Polyline> doors)
         {
-            Polyline room = thRoom.Boundary as Polyline; 
-            //找到可布置构建
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
+
+            //找到可布置构建
             var roomPtInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
             var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2, angle, layoutRange, blindArea);
             if (poly == null)
@@ -34,11 +35,21 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var bufferRoom = room.Buffer(10)[0] as Polyline;
             var nCols = getLayoutStructureService.GetNeedColumns(columns, bufferRoom, poly);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom, poly);
-           
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                //db.ModelSpace.Add(poly);
+                //foreach (var item in nWalls)
+                //{
+                //    db.ModelSpace.Add(item);
+                //}
+            }
             //计算布置点位
-            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls);
-            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls));
-            pts = pts.Where(x => poly.Contains(x) && room.Contains(x)).ToList();
+            var checkDoors = new List<Polyline>(doors);
+            checkDoors.Remove(door);
+            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors);
+            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors));
+            var checkRoom = room.Buffer(-10)[0] as Polyline;
+            pts = pts.Where(x => poly.Contains(x) && checkRoom.Contains(x)).ToList();
 
             var layoutPt = CalLayoutPt(pts, roomPtInfo.Item2, roomPtInfo.Item1);
             var layoutDir = (roomPtInfo.Item1 - layoutPt).GetNormal();
@@ -80,9 +91,12 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="doorPt"></param>
         /// <param name="columns"></param>
         /// <param name="walls"></param>
-        private List<Point3d> CreateClomunLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls)
+        private List<Point3d> CreateClomunLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
         {
             List<Point3d> pts = new List<Point3d>();
+            List<Polyline> checkStru = new List<Polyline>(columns);
+            checkStru.AddRange(walls);
+            checkStru.AddRange(doors);
             foreach (var column in columns)
             {
                 var bufferColumn = (column.Buffer(bufferWidth)[0] as Polyline).DPSimplify(1);
@@ -91,7 +105,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 {
                     var pt = new Point3d((line.StartPoint.X + line.EndPoint.X) / 2, (line.StartPoint.Y + line.EndPoint.Y) / 2, 0);
                     var checkLine = new Line(pt, doorPt);
-                    if (CheckIntersectWithStruc(checkLine, walls, columns))
+                    if (CheckIntersectWithStruc(checkLine, checkStru))
                     {
                         pts.Add(pt);
                     }
@@ -108,22 +122,25 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="columns"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        private List<Point3d> CreateWallLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls)
+        private List<Point3d> CreateWallLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
         {
             List<Point3d> pts = new List<Point3d>();
+            List<Polyline> checkStru = new List<Polyline>(walls);
+            checkStru.AddRange(columns);
+            checkStru.AddRange(doors);
             foreach (var wall in walls)
             {
                 var bufferWall = wall.Buffer(bufferWidth)[0] as Polyline;
                 var allPts = wall.Vertices();
+                var allLines = UtilService.GetAllLinesInPolyline(bufferWall).Where(x => x.Length > bufferWidth * 2).ToList();
                 foreach (Point3d pt in allPts)
                 {
-                    var allLines = UtilService.GetAllLinesInPolyline(bufferWall);
                     var interPts = allLines.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).ToList();
-                    if (CheckIntersectWithStruc(new Line(interPts[0], doorPt), walls, columns))
+                    if (CheckIntersectWithStruc(new Line(interPts[0], doorPt), checkStru))
                     {
                         pts.Add(interPts[0]);
                     }
-                    if (CheckIntersectWithStruc(new Line(interPts[1], doorPt), walls, columns))
+                    if (CheckIntersectWithStruc(new Line(interPts[1], doorPt), checkStru))
                     {
                         pts.Add(interPts[1]);
                     }
@@ -140,19 +157,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="walls"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        private bool CheckIntersectWithStruc(Line checkLine, List<Polyline> walls, List<Polyline> columns)
+        private bool CheckIntersectWithStruc(Line checkLine, List<Polyline> strus)
         {
-            foreach (var wall in walls)
+            foreach (var wall in strus)
             {
                 if (wall.Intersects(checkLine))
-                {
-                    return false;
-                }
-            }
-
-            foreach (var column in columns)
-            {
-                if (column.Intersects(checkLine))
                 {
                     return false;
                 }

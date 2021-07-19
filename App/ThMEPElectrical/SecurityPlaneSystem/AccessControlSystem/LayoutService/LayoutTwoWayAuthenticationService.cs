@@ -20,10 +20,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         double angle = 45;
         public List<AccessControlModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
-            var room = thRoom.Boundary as Polyline;
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
 
             //计算门信息
-            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
             var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
             var otherDoorPt = doorCenterPt - roomDoorInfo.Item2 * (roomDoorInfo.Item3 / 2);
@@ -35,9 +35,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
+            var inCardReader = CalLayoutCardReader(structs, door, roomDoorInfo.Item2, roomDoorInfo.Item1);
+            var outCardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, otherDoorPt);
+            if (inCardReader != null) accessControlModels.Add(inCardReader);
+            if (outCardReader != null) accessControlModels.Add(outCardReader);
             accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1, roomDoorInfo.Item2));
-            accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
-            accessControlModels.Add(CalLayoutCardReader(structs, bufferRoom, -roomDoorInfo.Item2, otherDoorPt));
 
             return accessControlModels;
         }
@@ -63,10 +65,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="doorDir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private CardReader CalLayoutCardReader(List<Polyline> structs, Polyline polyline, Vector3d doorDir, Point3d doorPt)
+        private CardReader CalLayoutCardReader(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
         {
-            var layoutInfo = UtilService.CalLayoutInfo(structs, polyline, doorDir, doorPt, angle, cardReaderWidth).First();
-
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, cardReaderWidth, true).FirstOrDefault();
+            if (layoutInfo.Key == null)
+            {
+                return null;
+            }
             var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
             if (doorDir.DotProduct(dir) < 0)
             {

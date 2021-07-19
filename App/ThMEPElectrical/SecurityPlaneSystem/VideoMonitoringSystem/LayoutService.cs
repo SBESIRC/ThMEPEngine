@@ -51,19 +51,19 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 else if (connectRooms.Count == 1)
                 {
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
-                    models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls));
+                    models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls, doors));
                 }
                 else if (connectRooms.Count >= 2)
                 {
                     if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
+                        models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls, doors));
+                        models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls, doors));
                     }
                     if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
+                        models.AddRange(DoLayout(layoutAType, connectRooms[1], door, columns, walls, doors));
+                        models.AddRange(DoLayout(layoutBType, connectRooms[0], door, columns, walls, doors));
                     }
                 }
             }
@@ -82,7 +82,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// <param name="walls"></param>
         /// <param name="lanes"></param>
         /// <returns></returns>
-        private List<LayoutModel> DoLayout(LayoutType layoutType, ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
+        private List<LayoutModel> DoLayout(LayoutType layoutType, ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
         {
             var layoutModel = new List<LayoutModel>();
             switch (layoutType)
@@ -91,13 +91,13 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 case LayoutType.EntranceDomeCamera:
                 case LayoutType.EntranceGunCameraWithShield:
                 case LayoutType.EntranceFaceRecognitionCamera:
-                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
+                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns, doors));
                     break;
                 case LayoutType.EntranceGunCameraFlip:
                 case LayoutType.EntranceDomeCameraFlip:
                 case LayoutType.EntranceGunCameraWithShieldFlip:
                 case LayoutType.EntranceFaceRecognitionCameraFlip:
-                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
+                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns, doors));
                     GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
                     var doorPt = getLayoutStructureService.GetDoorCenterPt(door);
                     layoutModel.ForEach(x =>
