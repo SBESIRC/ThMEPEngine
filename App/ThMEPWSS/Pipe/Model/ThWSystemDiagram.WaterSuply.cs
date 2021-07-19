@@ -152,7 +152,7 @@ namespace ThMEPWSS.Pipe.Model
             }
 
             acadDatabase.CurrentSpace.Add(textFirst);
-            var attNameValues = new Dictionary<string, string>() { { "标高", "H+X.XX" } };
+            var attNameValues = new Dictionary<string, string>() { { "标高", "X.XX" } };
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
             new Point3d(indexStartX, indexStartY + i * FloorHeight, 0), new Scale3d(1, 1, 1), 0, attNameValues);
         }
@@ -190,11 +190,19 @@ namespace ThMEPWSS.Pipe.Model
             var lineList = new List<Line>();
             var pt1 = new Point3d(indexStartX + PipeOffset_X, indexStartY - 300, 0);
             var pt2 = new Point3d();
-
-            if (Higheststorey > 5)
+            if(Higheststorey == 1)
             {
                 pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
-                var pt121 = new Point3d(pt1.X, pt1.Y + 2 * FloorHeight + 140, 0);
+                var pt121 = new Point3d(pt1.X, pt1.Y + 140 + 300, 0);
+                var pt122 = new Point3d(pt1.X, pt121.Y + 420, 0);
+                
+                lineList.Add(new Line(pt1, pt121));
+                lineList.Add(new Line(pt122, pt2));
+            }
+            else if (Higheststorey > 5)
+            {
+                pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
+                var pt121 = new Point3d(pt1.X, pt1.Y + 2 * FloorHeight + 140 + 300, 0);
                 var pt122 = new Point3d(pt1.X, pt121.Y + 420, 0);
                 var pt123 = new Point3d(pt1.X, indexStartY + (Higheststorey - 2) * FloorHeight + 140, 0);
                 var pt124 = new Point3d(pt1.X, pt123.Y + 420, 0);
@@ -233,7 +241,7 @@ namespace ThMEPWSS.Pipe.Model
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
             new Point3d(GetPipeX(), indexStartY - 300, 0), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
 
-            if (!PipeNumber.Contains("JGL"))
+            //if (!PipeNumber.Contains("JGL"))
             {
                 for (int j = PipeUnits.Count - 1; j >= 0; j--)
                 {
@@ -265,17 +273,26 @@ namespace ThMEPWSS.Pipe.Model
                 };
                 acadDatabase.CurrentSpace.Add(polyLine);
 
-                DBText text = new DBText
+                var textString = "";
+                if (PipeNumber.Contains("JGL"))
                 {
-                    Position = new Point3d(ptLs[1].X + 600 * i, ptLs[1].Y + 50, 0),
+                    textString = "接自市政给水管DN65(X.XXMPa)";
+                }
+                else
+                {
+                    textString = "接自加压" + Convert.ToString(i) + "区生活给水管" + PipeUnits[0].GetPipeDiameter() + "(X.XXMPa)";
+                }
+                    DBText text = new DBText
+                {
+                    Position = new Point3d(ptLs[1].X + 600 * i + 50, ptLs[1].Y + 50, 0),
                     Height = 350,
                     WidthFactor = 0.7,
-                    TextString = "接自加压" + Convert.ToString(i + 1) + "区生活给水管" + PipeUnits[0].GetPipeDiameter() + "(X.XXMPa)",
+                    
+                    TextString = textString,
                     LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
                     TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
                 };
                 acadDatabase.CurrentSpace.Add(text);
-                //text.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
 
                 //绘制立管编号 J1L1 J2L2 J3L3       2F统一标注
                 var ptPipeNumLs = new Point3d[3];
@@ -299,8 +316,11 @@ namespace ThMEPWSS.Pipe.Model
                 };
                 acadDatabase.CurrentSpace.Add(text1);
 
-                for (int j = 1; j <= i; j++)//越是低层的立管，标注越少
+                //for (int j = 1; j <= i; j++)//越是低层的立管，标注越少
+                //for (int j = 1; j <= 1; j++)//越是低层的立管，标注越少
+                if(i<0)
                 {
+                    int j = 1;
                     //绘制立管编号 J1L1 J2L2 J3L3
                     var ptPipeNumLsj = new Point3d[3];
                     ptPipeNumLsj[0] = new Point3d(GetPipeX() - 1300 - (PipeNums - i - 1) * 600, indexStartY + FloorHeight * (HighStoreyList[j] - 1) + 200 + (PipeNums - i - 1) * 450, 0);
@@ -312,7 +332,7 @@ namespace ThMEPWSS.Pipe.Model
 
                     DBText textj = new DBText
                     {
-                        Position = ptPipeNumLsj[0],
+                        Position = new Point3d(ptPipeNumLsj[0].X, ptPipeNumLsj[0].Y + 30, 0),
                         Height = 350,
                         WidthFactor = 0.7,
                         TextString = PipeNumber,
@@ -323,7 +343,13 @@ namespace ThMEPWSS.Pipe.Model
                 }
 
                 //绘制立管简编号 J1 J2 J3
-                for (int j = 0; j < 2; j++)
+                int num = 2;
+                if (PipeNumber.Contains("JGL"))
+                {
+                    num = 1;
+                }
+                
+                for (int j = 0; j < num; j++)
                 {
                     if (PipeLine.Count >= 2)
                     {
@@ -534,18 +560,18 @@ namespace ThMEPWSS.Pipe.Model
             //支管 point 初始化
             var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.175) * FloorHeight, 0);
             var pt2 = new Point3d(pt1.X + 400, pt1.Y, 0);
-            var pt231 = new Point3d(pt2.X, pt2.Y - 0.1 * FloorHeight, 0);
+            var pt231 = new Point3d(pt2.X, pt2.Y - 0.05 * FloorHeight, 0);
             Point3d pt232;
 
             if (NoValve)
             {
-                pt232 = new Point3d(pt2.X, pt2.Y - 0.1 * FloorHeight - 0.5 * BlockSize[1][0], 0);
+                pt232 = new Point3d(pt2.X, pt231.Y - 0.5 * BlockSize[1][0], 0);
             }
             else
             {
-                pt232 = new Point3d(pt2.X, pt2.Y - 0.1 * FloorHeight - 0.7 * BlockSize[0][0], 0);
+                pt232 = new Point3d(pt2.X, pt231.Y - 0.7 * BlockSize[0][0], 0);
             }
-            var pt3 = new Point3d(pt2.X, pt232.Y - 0.145 * FloorHeight, 0);
+            var pt3 = new Point3d(pt2.X, pt232.Y - 0.05 * FloorHeight, 0);
             TextSite = new Point3d(pt3.X - BlockSize[0][1]/2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight/3, 0);//文字标注
             var pt371 = new Point3d(pt3.X + 225, pt3.Y, 0);
             var pt372 = new Point3d(pt371.X + 0.5 * BlockSize[1][0], pt3.Y, 0);
@@ -570,7 +596,17 @@ namespace ThMEPWSS.Pipe.Model
             }
 
             AutoExhaustValveSite = pt1;
-            
+
+            double gap = 0.064;
+            if (Households[AreaIndex] > 2 && Households[AreaIndex] < 6)
+            {
+                gap = 0.08;
+            }
+            if (Households[AreaIndex] < 3)
+            {
+                gap = 0.1;
+            }
+
             if (LayingMethod == 0)//穿梁敷设
             {
                 pt7 = new Point3d(pt374.X + 300, pt3.Y, 0);
@@ -583,7 +619,8 @@ namespace ThMEPWSS.Pipe.Model
             else
             {
                 pt7 = new Point3d(pt374.X + 150 * Households[AreaIndex], pt3.Y, 0);
-                pt11 = new Point3d(pt7.X, pt7.Y - (0.125 + 0.1 * (Households[AreaIndex] - 1)) * FloorHeight, 0);
+                
+                pt11 = new Point3d(pt7.X, pt7.Y - gap * (Households[AreaIndex] + 1) * FloorHeight, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
             }
             
@@ -601,7 +638,7 @@ namespace ThMEPWSS.Pipe.Model
 
             for (int i = 1; i < Households[AreaIndex]; i++)
             {
-                var pt4 = new Point3d(pt2.X, pt3.Y - i * 0.1 * FloorHeight, 0);
+                var pt4 = new Point3d(pt2.X, pt3.Y - i * 0.075 * FloorHeight, 0);
                 var pt481 = new Point3d(pt371.X, pt4.Y, 0);
                 var pt482 = new Point3d(pt372.X, pt4.Y, 0);
                 var pt483 = new Point3d(pt373.X, pt4.Y, 0);
@@ -644,12 +681,29 @@ namespace ThMEPWSS.Pipe.Model
             
             if (HasFlushFaucet) //有冲洗龙头
             {
-                var pt19 = new Point3d(pt3.X, pt3.Y - Households[AreaIndex] * 0.1 * FloorHeight, 0);
+                double pt19Y = 0;
+                if(Households[AreaIndex] > 6)
+                {
+                    pt19Y = IndexStartY + (gap * 0.5 + FloorNumber - 1) * FloorHeight;
+                }
+                else
+                {
+                    pt19Y = IndexStartY + (gap + FloorNumber - 1) * FloorHeight;
+                }
+                var pt19 = new Point3d(pt3.X, pt19Y, 0);
                 var pt19201 = new Point3d(pt371.X, pt19.Y, 0);
                 var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
                 var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
                 var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-                var pt20 = new Point3d(pt7.X + 150 * Households[AreaIndex], pt19.Y, 0);
+                var pt20 = new Point3d();
+                if(LayingMethod == 0)
+                {
+                    pt20 = new Point3d(pt7.X + 150 * (Households[AreaIndex] + 4), pt19.Y, 0);
+                }
+                else
+                {
+                    pt20 = new Point3d(pt7.X + 300, pt19.Y, 0);
+                }
                 var pt21 = new Point3d(pt20.X, pt20.Y + 0.45 * FloorHeight, 0);
 
                 BranchPipes.Add(new Line(pt3, pt19));

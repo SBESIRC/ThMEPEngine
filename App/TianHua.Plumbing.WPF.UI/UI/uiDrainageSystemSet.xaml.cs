@@ -93,7 +93,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             else
             {
                 int max = 9999;
-                int min = 1500;
+                int min = 2500;
                 int number = int.Parse(strText);
                 if (number < min)
                     (sender as TextBox).Text = Convert.ToString(min);
