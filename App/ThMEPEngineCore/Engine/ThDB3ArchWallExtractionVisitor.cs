@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
-                if (clone != null)
+                if (clone != null && clone is Polyline)
                 {
                     clone.TransformBy(matrix);
                     results.Add(new ThRawIfcBuildingElementData()

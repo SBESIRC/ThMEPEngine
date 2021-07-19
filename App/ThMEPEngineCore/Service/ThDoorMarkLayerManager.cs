@@ -12,7 +12,6 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
-                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsDoorMarkLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
