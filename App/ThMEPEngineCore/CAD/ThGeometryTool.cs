@@ -130,9 +130,14 @@ namespace ThMEPEngineCore.CAD
         }
         public static Polyline TextOBB(this MText mText)
         {
-            var ang = Vector3d.XAxis.GetAngleTo(mText.Direction, mText.Normal);
-            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * ang, mText.Normal, mText.Location);
-            var newText = mText.GetTransformedCopy(clockwiseMat) as MText;
+            if(mText.Location.IsNull())
+            {
+                return new Polyline();
+            }
+            var mTextCopy = mText.Clone() as MText;
+            var ang = Vector3d.XAxis.GetAngleTo(mTextCopy.Direction, mTextCopy.Normal);
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * ang, mTextCopy.Normal, mTextCopy.Location);
+            var newText = mTextCopy.GetTransformedCopy(clockwiseMat) as MText;
 
             var objs = new DBObjectCollection();
             newText.Explode(objs);
