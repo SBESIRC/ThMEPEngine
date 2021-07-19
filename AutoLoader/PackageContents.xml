@@ -372,6 +372,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
@@ -388,6 +389,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
@@ -404,6 +406,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
