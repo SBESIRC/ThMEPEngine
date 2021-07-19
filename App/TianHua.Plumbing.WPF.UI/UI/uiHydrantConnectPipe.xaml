@@ -1,0 +1,48 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.UiHydrantConnectPipe"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    WindowStartupLocation="CenterOwner"
+                    Title="消火栓连管"
+                    SizeToContent="Height"
+                    Width="160"
+                    Height="230"
+             mc:Ignorable="d" >
+    <cus:ThCustomWindow.Resources>
+        <x:Array x:Key="PSLists" Type ="sys:String">
+            <sys:String>1:100</sys:String>
+            <sys:String>1:150</sys:String>
+        </x:Array>
+    </cus:ThCustomWindow.Resources>
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" >
+                <Label Content="出图比例:" Margin="0,0,5,0"></Label>
+                <ComboBox Width="70" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="0" SelectedValue="{Binding MapScale}"/>
+            </StackPanel>
+            <Rectangle Margin="0,5,0,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0" >
+                <Label Content="阀门和管径"></Label>
+                <CheckBox Content="设置支管蝶阀" IsChecked="{Binding SetupValve}" Margin="10,5,0,0"/>
+                <CheckBox Content="标注支管规格" IsChecked="{Binding MarkSpecif}" Margin="10,15,0,0"/>
+                <CheckBox Content="覆盖已绘图元" IsChecked="{Binding CoveredGraph}" Margin="10,15,0,0" Visibility="Hidden"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="2">
+            <StackPanel Orientation="Horizontal"  Margin="0,5,0,0" >
+                <Button x:Name="btnConnectPipe" Content="连管" Click="btnConnectPipe_Click" Width="70" Height="25" Margin="70,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

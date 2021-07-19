@@ -1,8 +1,10 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,103 +17,133 @@ using ThMEPWSS.Pipe;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
-    class ThHydrantConnectPipeCmd : IAcadCommand, IDisposable
+    public class ThHydrantConnectPipeCmd : IAcadCommand, IDisposable
     {
+        private ThHydrantConnectPipeConfigInfo ConfigInfo;
+        public ThHydrantConnectPipeCmd(ThHydrantConnectPipeConfigInfo configInfo)
+        {
+            ConfigInfo = configInfo;
+        }
         public void Dispose()
         {
         }
         public void Execute()
         {
-            try
+            ThMEPWSS.Common.Utils.FocusMainWindow();
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var database = AcadDatabase.Active())
             {
-                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var database = AcadDatabase.Active())
+                var input = ThWGeUtils.SelectPoints();//获取范围
+                if (input.Item1.IsEqualTo(input.Item2))
                 {
-                    var range = ThWGeUtils.SelectRange();//获取范围
-                    var civilAirWalls = ThHydrantDataManager.GetCivilAirWalls(range);//获取人防墙
-                    var electricWells = ThHydrantDataManager.GetElectricWells(range);//获取电井
-                    var fireShutters = ThHydrantDataManager.GetFireShutters(range);//获取防火卷帘
-                    var shearWalls = ThHydrantDataManager.GetShearWalls(range);//获取剪力墙
-                    var stairsRooms = ThHydrantDataManager.GetStairsRooms(range);//获取楼梯间
-                    var structureCols = ThHydrantDataManager.GetStructuralCols(range);//获取结构柱
-                    var structureWalls = ThHydrantDataManager.GetStructureWalls(range);//获取结构墙
-                    var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
-                    var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓 
-                    var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
+                    return;
+                }
+                Active.Editor.WriteMessage(System.DateTime.Now.ToString("yyyy-MM-dd HH：mm：ss：ffff"));
+                Active.Editor.WriteMessage("\n");
+                var range = new Point3dCollection();
+                range.Add(input.Item1);
+                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
+                range.Add(input.Item2);
+                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
 
-                    List<Line> loopLines = new List<Line>();
-                    List<Line> branchLines = new List<Line>();
-                    ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines,ref branchLines, range);//获取环管和支路
-                    
-                    var pathService = new ThCreateHydrantPathService();
-                    //添加障碍
-                    foreach (var civilAirWall in civilAirWalls)
-                    {
-                        pathService.SetObstacle(civilAirWall.ElementObb);
-                    }
-                    foreach (var electricWell in electricWells)
-                    {
-                        pathService.SetObstacle(electricWell.ElementObb);
-                    }
-                    foreach (var fireShutter in fireShutters)
-                    {
-                        pathService.SetObstacle(fireShutter.ElementObb);
-                    }
-                    foreach (var shearWall in shearWalls)
-                    {
-                        pathService.SetObstacle(shearWall.ElementObb);
-                    }
-                    foreach (var stairsRoom in stairsRooms)
-                    {
-                        pathService.SetObstacle(stairsRoom.ElementObb);
-                    }
-                    foreach (var structureCol in structureCols)
-                    {
-                        pathService.SetObstacle(structureCol.ElementObb);
-                    }
-                    foreach (var structureWall in structureWalls)
-                    {
-                        pathService.SetObstacle(structureWall.ElementObb);
-                    }
-                    foreach (var windWell in windWells)
-                    {
-                        pathService.SetObstacle(windWell.ElementObb);
-                    }
-                    //foreach (var line in branchLines)
-                    //{
-                    //    var objcets = line.Buffer(50);
-                    //    var obb = objcets as Polyline;
-                    //    pathService.SetObstacle(obb);
-                    //}
+                var electricWells = ThHydrantDataManager.GetElectricWells(range);//获取电井
+                var shearWalls = ThHydrantDataManager.GetShearWalls(range);//获取剪力墙
+                var stairsRooms = ThHydrantDataManager.GetStairsRooms(range);//获取楼梯间
+                var structureCols = ThHydrantDataManager.GetStructuralCols(range);//获取结构柱
+//              var structureWalls = ThHydrantDataManager.GetStructureWalls(range);//获取结构墙
+                var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
+                var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓 
+                var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
+                var buildRooms = ThHydrantDataManager.GetBuildRoom(range);//获取建筑房间
 
-                    //添加约束终止线
-                    pathService.SetTermination(loopLines);
+                List<Line> loopLines = new List<Line>();
+                List<Line> branchLines = new List<Line>();
+                ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
+                var pathService = new ThCreateHydrantPathService();
+                foreach (var shearWall in shearWalls)
+                {
+                    pathService.SetObstacle(shearWall.ElementObb);
+                }
+                foreach (var structureCol in structureCols)
+                {
+                    pathService.SetObstacle(structureCol.ElementObb);
+                }
+                foreach (var electricWell in electricWells)
+                {
+                    pathService.SetObstacle(electricWell.ElementObb);
+                }
+                foreach (var windWell in windWells)
+                {
+                    pathService.SetObstacle(windWell.ElementObb);
+                }
+                foreach (var stairsRoom in stairsRooms)
+                {
+                    pathService.SetRoom(stairsRoom.ElementObb);
+                }
+                foreach (var buildRoom in buildRooms)
+                {
+                    pathService.SetRoom(buildRoom.ElementObb);
+                }
 
-                    foreach (var hydrant in hydrants)
+                //添加约束终止线
+                pathService.SetTermination(loopLines);
+                pathService.InitData();
+                //foreach (var hydrant in hydrants)
+                //{
+                //    if(ThHydrantConnectPipeUtils.HydrantIsContainPipe(hydrant, hydrantPipes))
+                //    {
+                //        //创建路径
+                //        pathService.SetStartPoint(hydrant.FireHydrantPipe.PipePosition);//设置立管点为起始点
+                //        pathService.SetHydrantAngle(hydrant.GetRotationAngle());
+                //        var path = pathService.CreateHydrantPath(true);
+                //        var brLine = ThHydrantBranchLine.Create(path);
+                //        if (ConfigInfo.isSetupValve)
+                //        {
+                //            brLine.InsertValve();
+                //        }
+
+                //        if (ConfigInfo.isMarkSpecif)
+                //        {
+                //            brLine.InsertPipeMark(ConfigInfo.strMapScale);
+                //        }
+                //        var objcets = path.BufferPL(50)[0];
+                //        var obb = objcets as Polyline;
+                //        pathService.SetObstacle(obb);
+                //    }
+                //}
+                foreach (var hydrantPipe in hydrantPipes)
+                {
+                    //创建路径
+                    pathService.SetStartPoint(hydrantPipe.PipePosition);//设置立管点为起始点
+                    var path = pathService.CreateHydrantPath(false);
+                    if (path != null)
                     {
-                        if(ThHydrantConnectPipeUtils.HydrantIsContainPipe(hydrant, hydrantPipes))
+                        var brLine = ThHydrantBranchLine.Create(path);
+                        if (ConfigInfo.isSetupValve)
                         {
-                            //创建路径
-                            pathService.SetStartPoint(hydrant.FireHydrantPipe.PipePosition);//设置立管点为起始点
-                            pathService.SetHydrantAngle(hydrant.GetRotationAngle());
-                            var path = pathService.CreateHydrantPath(false);
+                            brLine.InsertValve();
                         }
-                    }
-                    
-                    foreach (var hydrantPipe in hydrantPipes)
-                    {
-                        //创建路径
-                        pathService.SetStartPoint(hydrantPipe.PipePosition);//设置立管点为起始点
-                        var path = pathService.CreateHydrantPath(false);
+
+                        if (ConfigInfo.isMarkSpecif)
+                        {
+                            brLine.InsertPipeMark(ConfigInfo.strMapScale);
+                        }
+                        var objcets = path.BufferPL(200)[0];
+                        var obb = objcets as Polyline;
+                        pathService.SetObstacle(obb);
                     }
                 }
+                Active.Editor.WriteMessage(System.DateTime.Now.ToString("yyyy-MM-dd HH：mm：ss：ffff"));
+                Active.Editor.WriteMessage("\n");
             }
-            catch (Exception ex)
-            {
-                Active.Editor.WriteMessage(ex.Message);
-            }
+            //try
+            //{
 
-            
+            //}
+            //catch (Exception ex)
+            //{
+            //    Active.Editor.WriteMessage(ex.Message);
+            //}
         }
     }
 }

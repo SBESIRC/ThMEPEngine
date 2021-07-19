@@ -10,7 +10,7 @@ using ThMEPWSS.HydrantConnectPipe.Model;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
-    class ThStairsRoomService
+    public class ThStairsRoomService
     {
         public List<ThStairsRoom> GetStairsRoom(Point3dCollection selectArea)
         {

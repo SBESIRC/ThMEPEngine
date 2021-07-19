@@ -470,7 +470,7 @@ namespace ThMEPWSS.CADExtensionsNs
 
             return distance;
         }
-        public static double PolyLineLength(this Polyline thisLine, double flag = 500.0)
+        public static double PolyLineLength(this Polyline thisLine, double flag = 1000.0)
         {
             double length = 0.0;
             length = thisLine.Length + (thisLine.NumberOfVertices - 2) * flag;

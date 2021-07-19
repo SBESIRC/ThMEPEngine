@@ -49,6 +49,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 var blk = data.Geometry as BlockReference;
                 fireHydrantPipe.PipePosition = new Point3d(blk.Position.X, blk.Position.Y, 0);
             }
+            else if (data.Geometry is Circle)
+            {
+                var circle = data.Geometry as Circle;
+                fireHydrantPipe.PipePosition = new Point3d(circle.Center.X, circle.Center.Y, 0);
+                fireHydrantPipe.Obb = circle.ToRectangle();
+            }
             return fireHydrantPipe;
         }
     }

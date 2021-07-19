@@ -147,6 +147,11 @@ namespace ThMEPWSS
                 var engine = new ThRoomMarkRecognitionEngine();//创建厨房识别引擎
                 if (per.Status == PromptStatus.OK)//框选择成功
                 {
+                    //var entity = db.Element<Entity>(per.ObjectId);
+
+                    //DBObjectCollection objs = new DBObjectCollection();
+                    //entity.Explode(objs);
+
                     var households = 0;
 
                     var entity = db.Element<Entity>(per.ObjectId);

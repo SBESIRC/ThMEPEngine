@@ -28,7 +28,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
             List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn,selectArea);
-            
+
             loopLines = GetMainPipeLines(pipeLines,pipeMarks, fireHydrantSysIn);
             branchLines = pipeLines.Except(loopLines).ToList();
         }
@@ -41,7 +41,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 bool isStartLoopLine = false;
                 foreach (var mark in marks)
                 {
-                    if (l.PointOnLine(mark.StartPoint, false, 10) || l.PointOnLine(mark.EndPoint, false, 10))
+                    if ((l.PointOnLine(mark.StartPoint, false, 100) && l.PointOnLine(mark.StartPoint, true, 10)) 
+                      ||(l.PointOnLine(mark.EndPoint, false, 100) && l.PointOnLine(mark.EndPoint, true, 10)))
                     {
                         isStartLoopLine = true;
                         break;
@@ -149,7 +150,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
                 var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
                 var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
-
 
                 PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 

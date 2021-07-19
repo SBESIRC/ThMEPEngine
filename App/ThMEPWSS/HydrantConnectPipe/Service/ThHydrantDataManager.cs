@@ -69,5 +69,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var windWellService = new ThWindWellService();
             return windWellService.GetWindWell(selectArea);
         }
+        public static List<ThBuildRoom> GetBuildRoom(Point3dCollection selectArea)
+        {
+            var buildRoomService = new ThBuildRoomService();
+            return buildRoomService.GetBuildRoom(selectArea);
+        }
     }
 }

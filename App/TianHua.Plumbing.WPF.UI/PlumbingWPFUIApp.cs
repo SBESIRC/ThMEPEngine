@@ -121,5 +121,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var uiDrainage = new uiFireHydrantSystem();
             Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowModelessWindow(uiDrainage);
         }
+
+        /// <summary>
+        /// 消火栓连管
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDXXHS", CommandFlags.Modal)]
+        public void ThHydrantConnectPipeUI()
+        {
+            var ui = new UiHydrantConnectPipe();
+            AcadApp.ShowModelessWindow(ui);
+        }
     }
 }
