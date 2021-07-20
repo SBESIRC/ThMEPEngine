@@ -10,7 +10,6 @@ using ThMEPEngineCore.Model.Electrical;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPElectrical.FireAlarm.Model;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace FireAlarm.Data
@@ -18,9 +17,6 @@ namespace FireAlarm.Data
     public class ThEStoreyExtractor : ThExtractorBase,IPrint,IGroup
     {
         public List<EStoreyInfo> Storeys { get; private set; }
-        private const string FloorNumberPropertyName = "FloorNumber";
-        private const string FloorTypePropertyName = "FloorType";
-        private const string BasePointPropertyName = "BasePoint";
         public ThEStoreyExtractor()
         {
             UseDb3Engine = true;
@@ -47,20 +43,12 @@ namespace FireAlarm.Data
             Storeys.ForEach(o =>
             {
                 var geometry = new ThGeometry();
+                geometry.Properties.Add(ThExtractorPropertyNameManager.IdPropertyName, o.Storey.ObjectId.Handle.ToString());
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if (GroupSwitch)
-                {
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.GroupIdPropertyName, ThFireAlarmUtils.BuildString(GroupOwner, o.Boundary));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.Group2IdPropertyName, ThFireAlarmUtils.BuildString(Group2Owner, o.Boundary));
-                }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.FloorTypePropertyName, o.StoreyType);
-                geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);                
-                geometry.Properties.Add(ThExtractorPropertyNameManager.IdPropertyName, o.Id);
-                geometry.Properties.Add(BasePointPropertyName, o.BasePoint);
-                geometry.Boundary = o.Boundary;
+                geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.BasePointPropertyName, o.BasePoint);
+                //geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
             return geos;
@@ -86,7 +74,7 @@ namespace FireAlarm.Data
             get
             {
                 var result = new Dictionary<Entity, string>();
-                Storeys.ForEach(o => result.Add(o.Boundary, o.Id));
+                Storeys.ForEach(o => result.Add(o.Boundary, o.Storey.ObjectId.Handle.ToString()));
                 return result;
             }
         }

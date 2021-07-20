@@ -15,7 +15,7 @@ namespace ThMEPElectrical.FireAlarm.Model
 {
     public class EStoreyInfo : StoreyInfo
     {
-        private ThEStoreys Storey { get; set; }
+        public ThEStoreys Storey { get; set; }
 
         public EStoreyInfo(ThEStoreys storey)
         {
