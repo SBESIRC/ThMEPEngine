@@ -48,15 +48,23 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
-                var isolated = IsIsolate(Spaces, o);
-                if(isolated)
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                if (IsolateSwitch)
                 {
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add(CategoryPropertyName, Category);
-                    geometry.Properties.Add(IsolatePropertyName, isolated);
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
+                    var isolate = IsIsolate(Spaces, o);
+                    geometry.Properties.Add(IsolatePropertyName, isolate);
                 }
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
+                }
+                if (Group2Switch)
+                {
+                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
+                }
+                geometry.Boundary = o;
+                geos.Add(geometry);
             });
             return geos;
         }
@@ -84,7 +92,17 @@ namespace ThMEPEngineCore.Temp
         }
         public void Group(Dictionary<Entity, string> groupId)
         {
-            throw new NotImplementedException();
+            if(GroupSwitch)
+            {
+                Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            }
+        }
+        public override void Group2(Dictionary<Entity, string> groupId)
+        {
+            if (Group2Switch)
+            {
+                Walls.ForEach(o => Group2Owner.Add(o, FindCurveGroupIds(groupId, o)));
+            }
         }
     }
 }

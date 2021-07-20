@@ -46,6 +46,7 @@
     <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="BlockConvert\ThBlockReferenceDataExtension.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
     <Compile Include="Broadcast\Service\PrintBlindAreaService.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutOtherGTService.cs" />
+    <Compile Include="SecurityPlaneSystem\InsertBlockService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\HandleIntrusionAlarmRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutDisabledToiletService.cs" />
@@ -193,6 +195,8 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
     <Compile Include="SystemDiagram\Engine\ThControlCircuitRecognitionEngine.cs" />
@@ -201,16 +205,18 @@
     <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionVistor.cs" />
     <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractor.cs" />
     <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
-    <Compile Include="SystemDiagram\Extension\ThBlockDBExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThAFASGraphExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThDBObbExtension.cs" />
     <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromFireCompartment.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockModel.cs" />
     <Compile Include="SystemDiagram\Model\ThBlockNumStatistics.cs" />
-    <Compile Include="SystemDiagram\Model\ThControlCircuitAlarmSystemModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThDrawModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFireDistrictModel.cs" />
     <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
-    <Compile Include="SystemDiagram\Model\ThWireCircuitGraphModel.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlVerticalWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastVerticalWireCircuit.cs" />
@@ -227,7 +233,6 @@
     <Compile Include="SystemDiagram\Model\WireCircuit\ThTextWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
-    <Compile Include="SystemDiagram\Service\ControlCircuitService.cs" />
     <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />

@@ -1,10 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
 using ThMEPElectrical.StructureHandleService;
@@ -16,25 +13,32 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
     {
         double angle = 30;
         double blockWidth = 300;
-        public List<(Point3d, Vector3d)> Layout(ThIfcRoom room, List<ThIfcRoom> stairRooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls) 
+        public List<KeyValuePair<Polyline, (Point3d, Vector3d)>> Layout(List<ThIfcRoom> stairRooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls)
         {
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            List<(Point3d, Vector3d)> layoutPts = new List<(Point3d, Vector3d)>();
+            List<KeyValuePair<Polyline, (Point3d, Vector3d)>> layoutPts = new List<KeyValuePair<Polyline, (Point3d, Vector3d)>>();
             foreach (var sRoom in stairRooms)
             {
                 var thSRoom = sRoom.Boundary as Polyline;
                 var bufferSRoom = thSRoom.Buffer(5)[0] as Polyline;
                 var stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferSRoom);
-                var thRoom = room.Boundary as Polyline;
-                var bufferRoom = thRoom.Buffer(5)[0] as Polyline;
-                stairDoors = getLayoutStructureService.GetNeedDoors(stairDoors, bufferRoom);
 
                 foreach (var sDoor in stairDoors)
                 {
-                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thRoom, sDoor);
+                    var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thSRoom, sDoor);
+                    var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(sDoor);
+                    var otherDoorPt = doorCenterPt - doorInfo.Item2 * (doorInfo.Item4 / 2);
                     var structs = getLayoutStructureService.CalLayoutStruc(sDoor, columns, walls);
-                    var layoutPt = CalControllerLayoutPt(structs, doorInfo.Item2, doorInfo.Item1);
-                    layoutPts.Add(layoutPt);
+                    //using (Linq2Acad.AcadDatabase db= Linq2Acad.AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in structs)
+                    //    {
+                    //        db.ModelSpace.Add(item);
+                    //    }
+                    //}
+                    var layoutPt = CalControllerLayoutPt(structs, -doorInfo.Item2, otherDoorPt);
+                    var pt = layoutPt.Item1 + layoutPt.Item2 * (blockWidth / 2);
+                    layoutPts.Add(new KeyValuePair<Polyline, (Point3d, Vector3d)>(sDoor, (pt, layoutPt.Item2)));
                 }
             }
 
@@ -67,11 +71,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                         }
 
                         var layoutPt = pt + lineDir * (blockWidth / 2);
-                        var layoutDir = Vector3d.ZAxis.CrossProduct(lineDir); 
+                        var layoutDir = Vector3d.ZAxis.CrossProduct(lineDir);
                         if (dir.DotProduct(layoutDir) < 0)
                         {
                             layoutDir = -layoutDir;
                         }
+                        
                         resLayoutInfo.Add((layoutPt, layoutDir));
                     }
                 }

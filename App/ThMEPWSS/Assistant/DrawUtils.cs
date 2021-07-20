@@ -46,28 +46,29 @@ namespace ThMEPWSS.Assistant
     }
     public class DrawingTransaction : IDisposable
     {
+        public readonly Dictionary<string, ObjectId> TextStyleIdDict = new Dictionary<string, ObjectId>();
         public bool NoDraw;
         public bool? AbleToDraw = null;
-        public static DrawingTransaction Cur { get; private set; }
+        public static DrawingTransaction Current { get; private set; }
         public AcadDatabase adb { get; private set; }
         public FastBlock fbk { get; private set; }
         public DrawingTransaction(AcadDatabase adb) : this()
         {
             this.adb = adb;
         }
-        public DrawingTransaction(AcadDatabase adb,bool noDraw) : this()
+        public DrawingTransaction(AcadDatabase adb, bool noDraw) : this()
         {
             this.adb = adb;
             this.NoDraw = noDraw;
         }
-        public static DrawingTransaction CreateWithFbk(AcadDatabase adb)=> new DrawingTransaction(adb)
+        public static DrawingTransaction CreateWithFbk(AcadDatabase adb) => new DrawingTransaction(adb)
         {
             fbk = FastBlock.Create(adb)
         };
         public DrawingTransaction()
         {
             DrawUtils.DrawingQueue.Clear();
-            Cur = this;
+            Current = this;
         }
         public void Dispose()
         {
@@ -90,7 +91,7 @@ namespace ThMEPWSS.Assistant
             }
             finally
             {
-                Cur = null;
+                Current = null;
                 DrawUtils.Dispose();
             }
         }
@@ -193,7 +194,6 @@ namespace ThMEPWSS.Assistant
     {
         public static DrawingTransaction DrawingTransaction => new DrawingTransaction();
         public static Queue<Action<AcadDatabase>> DrawingQueue { get; } = new Queue<Action<AcadDatabase>>(4096);
-        static readonly Dictionary<string, ObjectId> d = new Dictionary<string, ObjectId>();
         public static void Dispose()
         {
             DrawingQueue.Clear();
@@ -224,12 +224,17 @@ namespace ThMEPWSS.Assistant
         }
         public static ObjectId GetTextStyleId(string textStyleName)
         {
-            if (!d.TryGetValue(textStyleName, out ObjectId id))
+            var d = DrawingTransaction.Current?.TextStyleIdDict;
+            if (d != null)
             {
-                id = DbHelper.GetTextStyleId(textStyleName);
-                d[textStyleName] = id;
+                if (!d.TryGetValue(textStyleName, out ObjectId id))
+                {
+                    id = DbHelper.GetTextStyleId(textStyleName);
+                    d[textStyleName] = id;
+                }
+                return id;
             }
-            return id;
+            return DbHelper.GetTextStyleId(textStyleName);
         }
         public static void SetTextStyle(DBText t, string textStyleName)
         {
@@ -265,12 +270,12 @@ namespace ThMEPWSS.Assistant
                 if (DrawingQueue.Count > 0) DrawingQueue.Clear();
             }
         }
-        public static void SetLayerAndColorIndex(string layer, int colorIndex, params Entity[] ents)
+        public static void SetLayerAndByLayer(string layer, params Entity[] ents)
         {
             foreach (var ent in ents)
             {
                 ent.Layer = layer;
-                ent.ColorIndex = colorIndex;
+                DrawUtils.ByLayer(ent);
             }
         }
         public static Circle DrawGeometryLazy(GCircle circle)
@@ -288,6 +293,17 @@ namespace ThMEPWSS.Assistant
         public static void DrawEntityLazy(Entity ent)
         {
             DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(ent));
+        }
+        public static void DrawPoint(Point2d pt)
+        {
+            Dbg.ShowXLabel(pt);
+        }
+        public static void DrawPoints(IEnumerable<Point2d> pts)
+        {
+            foreach (var pt in pts)
+            {
+                Dbg.ShowXLabel(pt);
+            }
         }
         public static void DrawEntitiesLazy<T>(IList<T> ents) where T : Entity
         {
@@ -493,6 +509,12 @@ namespace ThMEPWSS.Assistant
             line.Layer = layer;
             return line;
         }
+        public static void ByLayer(Entity line)
+        {
+            line.ColorIndex = 256;
+            line.LineWeight = LineWeight.ByLayer;
+            line.Linetype = "ByLayer";
+        }
         public static Line DrawLineSegmentLazy(GLineSegment seg)
         {
             return DrawLineLazy(seg.StartPoint, seg.EndPoint);
@@ -515,6 +537,13 @@ namespace ThMEPWSS.Assistant
             pl.ConstantWidth = width;
             return pl;
         }
+        public static void DrawLineSegmentBufferLazy(IEnumerable<GLineSegment> segs, double bufSize)
+        {
+            foreach (var seg in segs)
+            {
+                DrawLineSegmentBufferLazy(seg, bufSize);
+            }
+        }
         public static Polyline DrawLineSegmentBufferLazy(GLineSegment seg, double bufSize)
         {
             var pl = ThCADCoreNTSOperation.Buffer(seg.ToCadLine(), bufSize);
@@ -536,6 +565,12 @@ namespace ThMEPWSS.Assistant
         public static Polyline DrawRectLazy(GRect rect)
         {
             return DrawRectLazyFromLeftTop(new Point2d(rect.MinX, rect.MaxY).ToPoint3d(), rect.Width, rect.Height);
+        }
+        public static Polyline DrawRectLazy(GRect rect, double thickness)
+        {
+            var pl = DrawRectLazyFromLeftTop(new Point2d(rect.MinX, rect.MaxY).ToPoint3d(), rect.Width, rect.Height);
+            pl.ConstantWidth = thickness;
+            return pl;
         }
         public static Polyline DrawRectLazy(Point3d pt1, Point3d pt2)
         {

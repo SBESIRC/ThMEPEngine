@@ -89,7 +89,7 @@ namespace ThMEPHVAC.Command
             return false;
         }
 
-        public  void ImportLayer(Database database, string name, bool replaceIfDuplicate = false)
+        public void ImportLayer(Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacModelDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -106,7 +106,7 @@ namespace ThMEPHVAC.Command
             return blocks.Where(o => result.Contains(o.Geometry)).ToList();
         }
 
-        public  bool QueryYesOrNo(string text)
+        public bool QueryYesOrNo(string text)
         {
             var separation_key = new PromptKeywordOptions(text);
             separation_key.Keywords.Add("是", "Y", "是(Y)");
@@ -117,7 +117,7 @@ namespace ThMEPHVAC.Command
             return result.StringResult == "是";
         }
 
-        private  bool AddAndSetDateLayer(Database db)
+        private bool AddAndSetDateLayer(Database db)
         {
             //直接打开或新建，然后解冻、解锁
             var currentDateStr = DateTime.Now.ToString("yyyyMMdd");
@@ -151,7 +151,7 @@ namespace ThMEPHVAC.Command
             return db.SetLayerColor(targetLayerName, targetColorIndex);
         }
 
-        private  void DrawLabelBox(Database db, IEnumerable<Entity> ents)
+        private void DrawLabelBox(Database db, IEnumerable<Entity> ents)
         {
             using (var adb = AcadDatabase.Use(db))
             {
@@ -178,7 +178,7 @@ namespace ThMEPHVAC.Command
             }
         }
 
-        public  bool GetCircleBoundary(Point3dCollection points, out Point3d center, out double radius)
+        public bool GetCircleBoundary(Point3dCollection points, out Point3d center, out double radius)
         {
             if (points.Count == 0)
             {
@@ -199,7 +199,7 @@ namespace ThMEPHVAC.Command
             return true;
         }
 
-        public  ObjectId DrawPolygon(Database db, Point2d center, int num, double radius)
+        public ObjectId DrawPolygon(Database db, Point2d center, int num, double radius)
         {
             using (var adb = AcadDatabase.Use(db))
             {

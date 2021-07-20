@@ -555,6 +555,25 @@ namespace ThMEPWSS.Uitl
     }
     public struct GRect
     {
+        public class EqualityComparer : IEqualityComparer<GRect>
+        {
+            double tol;
+
+            public EqualityComparer(double tollerence)
+            {
+                this.tol = tollerence;
+            }
+
+            public bool Equals(GRect x, GRect y)
+            {
+                return x.EqualsTo(y, tol);
+            }
+
+            public int GetHashCode(GRect obj)
+            {
+                return 0;
+            }
+        }
         public bool IsNull => Equals(this, default(GRect));
         public bool IsValid => Width > 0 && Height > 0;
         public double MinX { get; }
@@ -638,6 +657,22 @@ namespace ThMEPWSS.Uitl
             return Math.Abs(this.MinX - other.MinX) < tollerance && Math.Abs(this.MinY - other.MinY) < tollerance
                 && Math.Abs(this.MaxX - other.MaxX) < tollerance && Math.Abs(this.MaxY - other.MaxY) < tollerance;
         }
+        public static GRect Combine(IEnumerable<GRect> rs)
+        {
+            double minX = double.MaxValue, minY = double.MaxValue;
+            double maxX = double.MinValue, maxY = double.MinValue;
+            var ok = false;
+            foreach (var r in rs)
+            {
+                if (r.MinX < minX) minX = r.MinX;
+                if (r.MinY < minY) minY = r.MinY;
+                if (r.MaxX > maxX) maxX = r.MaxX;
+                if (r.MaxY > maxY) maxY = r.MaxY;
+                ok = true;
+            }
+            if (ok) return new GRect(minX, minY, maxX, maxY);
+            return default;
+        }
     }
     public struct GLineSegment
     {
@@ -659,7 +694,11 @@ namespace ThMEPWSS.Uitl
                 return 0;
             }
         }
-        public GLineSegment Offset(double dx,double dy)
+        public GLineSegment Offset(Vector2d vec)
+        {
+            return new GLineSegment(StartPoint + vec, EndPoint + vec);
+        }
+        public GLineSegment Offset(double dx, double dy)
         {
             return new GLineSegment(StartPoint.OffsetXY(dx, dy), EndPoint.OffsetXY(dx, dy));
         }
@@ -949,6 +988,15 @@ namespace ThMEPWSS.Uitl
 
     public static class LinqAlgorithm
     {
+
+        public static IEnumerable<T> SelectNotNull<T>(this IEnumerable<T> source) where T : class
+        {
+            return source.Where(x => x != null);
+        }
+        public static T GetLastOrDefault<T>(this IList<T> source, int i)
+        {
+            return source.GetAt(source.Count - i);
+        }
         public static T GetAt<T>(this IList<T> source, int i)
         {
             if (i >= 0 && i < source.Count) return source[i];
@@ -990,11 +1038,6 @@ namespace ThMEPWSS.Uitl
                     ok = true;
                 }
             });
-        }
-        public static T GetLastOrDefault<T>(this IList<T> source, int n)
-        {
-            if (source.Count < n) return default;
-            return source[source.Count - n];
         }
         public static T GetLast<T>(this IList<T> source, int n)
         {

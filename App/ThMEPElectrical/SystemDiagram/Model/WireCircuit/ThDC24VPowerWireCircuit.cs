@@ -89,12 +89,18 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
+        // 横线不支持画竖线方法
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
+            throw new NotSupportedException();
+        }
+
         /// <summary>
         /// 画特殊块方法
         /// </summary>
         /// <param name="currentIndex"></param>
         /// <returns></returns>
-        private List<Entity> DrawSpecialBlock5(int currentIndex)
+        private List<Entity> DrawSpecialBlock6(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             Polyline Midpolyline1 = new Polyline(3);
@@ -126,7 +132,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return result;
         }
 
-        private List<Entity> DrawSpecialBlock6(int currentIndex)
+        private List<Entity> DrawSpecialBlock5(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
             if (this.fireDistrict.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] > 0 || this.fireDistrict.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
@@ -220,7 +226,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 1;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-FAS-WIRE2";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "CENTER";

@@ -139,7 +139,8 @@ namespace ThMEPWSS.Diagram.ViewModel
                     }
                     else
                     {
-                        var roomMarkEngine = new ThRoomMarkRecognitionEngine();
+                        //var roomMarkEngine = new ThRoomMarkRecognitionEngine();
+                        var roomMarkEngine = new ThDB3RoomMarkRecognitionEngine();
                         roomMarkEngine.Recognize(acadDatabase.Database, SelectedArea); //来源于参照
                         var newRooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
                         var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());

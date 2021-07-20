@@ -43,18 +43,18 @@ namespace ThMEPWSS.Hydrant.Service
                 UnProtectAreas = new List<Entity>() { Room.Clone() as Entity};
                 return;
             }
-            UnProtectAreas = Subtraction(Room, CoverAreas.ToCollection()).Cast<Entity>().ToList(); // 获取未保护区域
+            UnProtectAreas = Subtraction(Room, CoverAreas.ToCollection()).Cast<Entity>().ToList(); // 获取未保护区域            
             var intersectAreas = Intersect(); // 获取房间与其它保护区域相交的区域
             var bufferDic = ThHydrantUtils.BufferPolygon(intersectAreas, SplitAreaOffsetLength);//防止生成的面有边重复
             intersectAreas = bufferDic.Select(o => o.Value).ToList();
-            ProtectAreas = Split(intersectAreas); // 分割相交的区域(如一个相交区域中有其它相交区域，需要分割)
+            ProtectAreas = Split(intersectAreas); // 分割相交的区域(如一个相交区域中有其它相交区域，需要分割)            
         }
 
         private List<Entity> Intersect()
         {
             var results = new List<Entity>();
             CoverAreas.ForEach(e =>
-            {
+            {                
                 var objs = Intersection(Room, e);
                 results.AddRange(objs.Cast<Entity>());
             });
@@ -63,7 +63,11 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> Split(List<Entity> areas)
         {
             var results = new List<Entity>();
+            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
+            areas = MakeValid(areas.ToCollection()).Cast<Entity>().ToList();
+            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(areas.ToCollection());
+            var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
             areas.ForEach(o =>
             {
                 var objs = spatialIndex.SelectCrossingPolygon(o);
@@ -74,7 +78,8 @@ namespace ThMEPWSS.Hydrant.Service
                 }
                 else
                 {
-                    var subRes = Subtraction(o, objs);
+                    var entity = bufferService.Buffer(o, -0.1); // fixed TopologyException
+                    var subRes = Subtraction(entity, objs);
                     results.AddRange(subRes.Cast<Entity>().ToList());
                 }
             });
@@ -82,13 +87,13 @@ namespace ThMEPWSS.Hydrant.Service
         }
         private DBObjectCollection Intersection(Entity first, Entity other)
         {
-            var results = ThCADCoreNTSEntityExtension.Intersection(first, other);
+            var results = ThCADCoreNTSEntityExtension.Intersection(first, other,true);
             results = ClearZeroPolygon(results); //清除面积为零
             results = MakeValid(results); //解决自交的Case
             results = ClearZeroPolygon(results); //清除面积为零
             results = DuplicatedRemove(results); //去重
             var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
-            return bufferDic.Where(o => first.IsContains(o.Value)).Select(o => o.Key).ToCollection();
+            return bufferDic.Where(o => first.IsContains(o.Value) && other.IsContains(o.Value)).Select(o => o.Key).ToCollection();
         }
         private DBObjectCollection Subtraction(Entity entity,DBObjectCollection objs)
         {
@@ -136,7 +141,7 @@ namespace ThMEPWSS.Hydrant.Service
                 }
                 else if(o is MPolygon mPolygon)
                 {
-                    var res = mPolygon.MakeValid();
+                    var res = mPolygon.MakeValid(true);
                     res.Cast<Entity>().ForEach(e => results.Add(e));
                 }
             });

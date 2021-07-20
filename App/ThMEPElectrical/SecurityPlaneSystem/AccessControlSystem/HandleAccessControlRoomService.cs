@@ -30,28 +30,29 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem
             string roomBEvent = null;
             foreach (DataColumn column in table.Columns)
             {
-                if (column.ColumnName.Contains(roomAColumn))
+                if (column.ColumnName == roomAColumn)
                 {
                     roomA = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomBColumn))
+                else if (column.ColumnName == roomBColumn)
                 {
                     roomB = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(floorColumn))
+                else if (column.ColumnName == floorColumn)
                 {
                     floor = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomAEventsColumn))
+                else if (column.ColumnName == roomAEventsColumn)
                 {
                     roomAEvent = column.ColumnName;
                 }
-                else if (column.ColumnName.Contains(roomBEventsColumn))
+                else if (column.ColumnName == roomBEventsColumn)
                 {
                     roomBEvent = column.ColumnName;
                 }
             }
 
+            GTRooms.Clear();
             foreach (DataRow row in table.Rows)
             {
                 var roomANames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomA].ToString());
@@ -65,7 +66,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem
                 {
                     roomInfo.floorName = row[floor].ToString();
                 }
-                roomInfo.connectType = GetConnectType(row[roomBEvent].ToString());
+                roomInfo.connectType = GetConnectType(row[roomB].ToString());
 
                 GTRooms.Add(roomInfo);
             }

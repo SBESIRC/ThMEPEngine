@@ -15,7 +15,8 @@ namespace ThMEPEngineCore.Service
         public double EnvelopWidthIncrement { get; set; }
         public double EnvelopWidthMaxExtent { get; set; }
         public double EnvelopHeightMaxExtent { get; set; }
-        public List<Tuple<Entity, List<Polyline>, double>> Results { get; private set; }
+        public double DoorStoneLength { get; set; }
+        public List<Tuple<Entity, List<Polyline>, double, string>> Results { get; private set; }
         private DBObjectCollection DoorMarks { get; set; }
         private ThCADCoreNTSSpatialIndex DoorStoneSpatialIndex { get; set; }
         public ThCollectDoorStoneService(
@@ -27,8 +28,9 @@ namespace ThMEPEngineCore.Service
             EnvelopWidthIncrement = 50;
             EnvelopWidthMaxExtent = 200;
             EnvelopHeightMaxExtent = 400;
+            DoorStoneLength = 50;
             DoorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(doorStones);
-            Results = new List<Tuple<Entity, List<Polyline>, double>>();
+            Results = new List<Tuple<Entity, List<Polyline>, double, string>>();
         }
         public void Build()
         {
@@ -39,17 +41,63 @@ namespace ThMEPEngineCore.Service
                 {
                     var strList = ThTextInfoService.Parse(ThTextInfoService.GetText(o));
                     double length = ThTextInfoService.GetLength(strList);
+
                     if (length > 0)
                     {                        
                         var center = ThTextInfoService.GetCenterLine(o);
                         var height = ThTextInfoService.GetHeight(o);
                         var stones = FindStones(center, length, height);
-                        if(stones.Count ==2)
+                        var textDir = center.LineDirection();
+                        var stoneCenterLength = length - DoorStoneLength;
+                        if(stones.Count >=2)
                         {
-                            Results.Add(Tuple.Create(o, stones, length));
+                            //Results.Add(Tuple.Create(o, stones, length));
+                            int max = stones.Count;
+                            double Minlength = double.MaxValue;
+                            double MinAngle = double.MaxValue;
+                            Tuple<Entity, List<Polyline>, double, string> temp=null;
+                            for (int i=0;i<max-1;i++)
+                                for(int j=i+1;j<max;j++)
+                                {
+                                    var doorCenterDir = stones[i].GetCenter().GetVectorTo(stones[j].GetCenter());
+                                    var angle = Math.Min(textDir.GetAngleTo(doorCenterDir), Math.PI - textDir.GetAngleTo(doorCenterDir));
+                                    var realLength= PolylineDistance(stones[i], stones[j]) * Math.Cos(angle);
+                                    if (Math.Abs(realLength- stoneCenterLength) < ThMEPEngineCoreCommon.DoorStoneWidthTolerance)//距离调整
+                                    {
+                                        if(ThAuxiliaryUtils.DoubleEquals(angle, MinAngle, 1.0 / 180 * Math.PI) && realLength < Minlength)
+                                        {
+                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length, strList[0]);
+                                            //Results.Add(Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length));
+                                            Minlength = realLength;
+                                            MinAngle = angle;
+                                        }
+                                        else if(angle < MinAngle)
+                                        {
+                                            temp = Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length, strList[0]);
+                                            //Results.Add(Tuple.Create(o, new List<Polyline>() { stones[i], stones[j] }, length));
+                                            Minlength = realLength;
+                                            MinAngle = angle;
+                                        }
+                                    }
+                                }
+
+                            if (temp != null)
+                            {
+                                Results.Add(temp);
+                            }
                         }
                     }
                 });
+        }
+        /// <summary>
+        /// 返回两条闭合Polyline中心距离
+        /// </summary>
+        /// <param name="firstpol">第一条Polyline</param>
+        /// <param name="secondpol">第二条Polyline</param>
+        /// <returns>中心距离</returns>
+        private double PolylineDistance(Polyline firstpol,Polyline secondpol)
+        {
+            return firstpol.GetCenter().DistanceTo(secondpol.GetCenter());
         }
         private List<Polyline> FindStones(Line center,double length ,double height)
         {
@@ -61,7 +109,7 @@ namespace ThMEPEngineCore.Service
                     length + i * 2 * EnvelopWidthIncrement, 
                     height + EnvelopHeightMaxExtent);                
                 var stones = DoorStoneSpatialIndex.SelectCrossingPolygon(envelope).Cast<Polyline>().ToList();
-                if(stones.Count==2)
+                if(stones.Count>=2)
                 {
                     return stones;
                 }

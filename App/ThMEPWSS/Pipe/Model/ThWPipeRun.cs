@@ -131,6 +131,27 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
+        public static void DrawDN_1(Point2d pt,string layer, string text = "DN100")
+        {
+            var basePt = pt.OffsetXY(-50, 320).ToPoint3d();
+            var t = DU.DrawTextLazy(text, 350, basePt);
+            t.Rotate(basePt, 90.0.AngleFromDegree());
+            Dr.SetLabelStyles(layer,t);
+        }
+        public static void DrawDN_2(Point2d pt, string layer, string text = "DN100")
+        {
+            var basePt = pt.OffsetXY(-300, 200).ToPoint3d();
+            var t = DU.DrawTextLazy(text, 350, basePt);
+            t.Rotate(basePt, 90.0.AngleFromDegree());
+            Dr.SetLabelStyles(layer,t);
+        }
+        public static void DrawDN_3(Point2d pt, string layer, string text = "DN100")
+        {
+            var basePt = pt.OffsetXY(450, 200).ToPoint3d();
+            var t = DU.DrawTextLazy(text, 350, basePt);
+            t.Rotate(basePt, 90.0.AngleFromDegree());
+            Dr.SetLabelStyles(layer,t);
+        }
         public static void DrawStarterPipeHeightLabel(Point3d basePt)
         {
             var text = "起端管底标高-0.65";
@@ -201,12 +222,12 @@ namespace ThMEPWSS.Pipe.Model
         {
             DU.DrawingQueue.Enqueue(adb =>
             {
-                var fbk = DrawingTransaction.Cur.fbk;
+                var fbk = DrawingTransaction.Current.fbk;
                 if (fbk == null)
                 {
                     DU.DrawBlockReference(blkName: "套管系统", basePt: basePt.OffsetXY(-450, 0), cb: br =>
                     {
-                        DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+                        DU.SetLayerAndByLayer("W-BUSH",  br);
                         if (br.IsDynamicBlock)
                         {
                             br.ObjectId.SetDynBlockValue("可见性", "防水套管水平");
@@ -218,7 +239,7 @@ namespace ThMEPWSS.Pipe.Model
                     var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
                     fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
                     {
-                        DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+                        DU.SetLayerAndByLayer("W-BUSH",  br);
 
                     }, after: br =>
                     {
@@ -241,12 +262,12 @@ namespace ThMEPWSS.Pipe.Model
         {
             DU.DrawingQueue.Enqueue(adb =>
             {
-                var fbk = DrawingTransaction.Cur.fbk;
+                var fbk = DrawingTransaction.Current.fbk;
                 if (fbk == null)
                 {
                     DU.DrawBlockReference(blkName: "地漏系统", basePt: basePt.OffsetY(-390), scale: 2, cb: br =>
                     {
-                        DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br);
+                        DU.SetLayerAndByLayer(ThWPipeCommon.W_RAIN_EQPM,  br);
                         if (br.IsDynamicBlock)
                         {
                             br.ObjectId.SetDynBlockValue("可见性", "普通地漏无存水弯");
@@ -258,7 +279,7 @@ namespace ThMEPWSS.Pipe.Model
                 fbk.InsertBlockReference(basePt.OffsetY(-390), "地漏系统", before: br =>
                 {
                     br.ScaleFactors = new Scale3d(2);
-                    DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br);
+                    DU.SetLayerAndByLayer(ThWPipeCommon.W_RAIN_EQPM,  br);
 
                 }, after: br =>
                 {
@@ -276,17 +297,21 @@ namespace ThMEPWSS.Pipe.Model
                 });
             });
         }
+        public static void DrawCondensePipe(Point2d basePt)
+        {
+            DrawCondensePipe(basePt.ToPoint3d());
+        }
         public static void DrawCondensePipe(Point3d basePt)
         {
             var c = DU.DrawCircleLazy(basePt, 30);
-            DU.SetLayerAndColorIndex("W-RAIN-EQPM", 256, c);
+            DU.SetLayerAndByLayer("W-RAIN-EQPM",  c);
         }
 
         public static void InsetDNBlock(Point3d pt, string dn, double angle, double scale = 1)
         {
             DU.DrawingQueue.Enqueue(adb =>
             {
-                var fbk = DrawingTransaction.Cur.fbk;
+                var fbk = DrawingTransaction.Current.fbk;
                 if (fbk == null) return;
                 var d = new Dictionary<string, object>() { { "可见性", dn }, { "角度1", angle } };
                 fbk.InsertBlockReference(pt, "雨水管径100", before: br =>
@@ -316,7 +341,7 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawBlockReference(
                 blkName: "$TwtSys$00000132",
                 basePt: basePt.OffsetXY(-450, 0),
-                cb: br => DU.SetLayerAndColorIndex("W-DRAI-NOTE", 256, br));
+                cb: br => DU.SetLayerAndByLayer("W-DRAI-NOTE",  br));
         }
 
         public static void DrawWaterWell(Point3d basePt, string DN)
@@ -364,7 +389,33 @@ namespace ThMEPWSS.Pipe.Model
             foreach (var e in ents)
             {
                 e.Layer = "W-RAIN-NOTE";
-                e.ColorIndex = 256;
+                DU.ByLayer(e);
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void SetLabelStyles(string layer,params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = layer;
+                DU.ByLayer(e);
+                if (e is DBText t)
+                {
+                    t.WidthFactor = .7;
+                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                }
+            }
+        }
+        public static void SetLabelStylesForDraiNote(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = "W-DRAI-NOTE";
+                DU.ByLayer(e);
                 if (e is DBText t)
                 {
                     t.WidthFactor = .7;
@@ -377,7 +428,7 @@ namespace ThMEPWSS.Pipe.Model
             foreach (var e in ents)
             {
                 e.Layer = "W-RAIN-DIMS";
-                e.ColorIndex = 256;
+                DU.ByLayer(e);
                 if (e is DBText t)
                 {
                     t.WidthFactor = .7;
@@ -402,7 +453,7 @@ namespace ThMEPWSS.Pipe.Model
             foreach (var e in ents)
             {
                 e.Layer = "W-NOTE";
-                e.ColorIndex = 256;
+                DU.ByLayer(e);
                 if (e is DBText t)
                 {
                     t.WidthFactor = 0.7;
@@ -425,7 +476,7 @@ namespace ThMEPWSS.Pipe.Model
             basePt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
             var line = DrawUtils.DrawLineLazy(basePt, basePt.OffsetXY(0, -ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
             line.Layer = "W-RAIN-PIPE";
-            line.ColorIndex = 256;
+            DU.ByLayer(line);
         }
         public static double DrawShortTranslator(Point3d basePt)
         {
@@ -441,7 +492,7 @@ namespace ThMEPWSS.Pipe.Model
             lines.ForEach(line =>
             {
                 line.Layer = "W-RAIN-PIPE";
-                line.ColorIndex = 256;
+                DU.ByLayer(line);
             });
             var deltax = p.X - basePt.X;
             return deltax;
@@ -467,7 +518,7 @@ namespace ThMEPWSS.Pipe.Model
             lines.ForEach(line =>
             {
                 line.Layer = "W-RAIN-PIPE";
-                line.ColorIndex = 256;
+                DU.ByLayer(line);
             });
             var deltax = p.X - basePt.X;
             return deltax;
@@ -509,7 +560,7 @@ namespace ThMEPWSS.Pipe.Model
 
         public static void DrawSideWaterBucket(Point3d basePt)
         {
-            DU.DrawBlockReference("侧排雨水斗系统", basePt, layer: "W-RAIN-EQPM", cb: br => br.ColorIndex = 256);
+            DU.DrawBlockReference("侧排雨水斗系统", basePt, layer: "W-RAIN-EQPM", cb: br => DU.ByLayer(br));
         }
         public static void DrawGravityWaterBucketLabel(Point3d basePt, string label = "重力雨水斗DN100")
         {
@@ -518,7 +569,7 @@ namespace ThMEPWSS.Pipe.Model
 
         public static void DrawGravityWaterBucket(Point3d basePt)
         {
-            DU.DrawBlockReference("屋面雨水斗", basePt, layer: "W-RAIN-EQPM", cb: br => br.ColorIndex = 256);
+            DU.DrawBlockReference("屋面雨水斗", basePt, layer: "W-RAIN-EQPM", cb: br => DU.ByLayer(br));
         }
 
         public static void DrawCheckPoint(Point3d basePt)
@@ -545,8 +596,8 @@ namespace ThMEPWSS.Pipe.Model
             dim.XLine2Point = pt2;
             dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetX(1000);
             dim.DimensionText = "1000";
-            dim.Layer = "W-RAIN-EQPM";
-            dim.ColorIndex = 256;
+            dim.Layer = "W-RAIN-DIMS";
+            DU.ByLayer(dim);
             DU.DrawEntityLazy(dim);
         }
 

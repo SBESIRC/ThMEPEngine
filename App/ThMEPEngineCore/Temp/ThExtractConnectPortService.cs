@@ -79,10 +79,5 @@ namespace ThMEPEngineCore.Temp
             string pattern = @"^[\d]+\s{0,}[A-Z]{1,}[\d]+";
             return Regex.IsMatch(content, pattern);
         }
-
-        public override bool IsElementLayer(string layer)
-        {
-            return layer.ToUpper() == ElementLayer;
-        }
     }
 }

@@ -36,6 +36,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
     public class ThHydrantRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public List<ThRawIfcDistributionElementData> Datas { get; set; }
+        public ThHydrantRecognitionEngine()
+        {
+            Datas = new List<ThRawIfcDistributionElementData>();
+        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             var extractionEngine = new ThFireHydrantExtractionEngine();
@@ -51,14 +55,24 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
         }
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {
+            //var dbObjs = datas.Select(o => o.Geometry).ToCollection();
+            //if (polygon.Count > 0)
+            //{
+            //    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+            //    dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+            //}
+            //Datas = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+            //Elements.AddRange(Datas.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
+
             var dbObjs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Datas = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
-            Elements.AddRange(Datas.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
+            datas = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+            Datas.AddRange(datas);
+            Elements.AddRange(datas.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
         }
     }
 }

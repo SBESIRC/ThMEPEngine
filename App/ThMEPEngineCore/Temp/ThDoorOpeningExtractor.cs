@@ -5,44 +5,63 @@ using Linq2Acad;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using System.Linq;
 
 namespace ThMEPEngineCore.Temp
 {
     public class ThDoorOpeningExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
-        public List<Polyline> Openings { get; private set; }
+        public List<ThIfcDoor> Doors { get; private set; }
 
         private const string SwitchPropertyName = "Switch";
+        private const string UsePropertyName = "Use";
 
         public ThDoorOpeningExtractor()
         {
-            Openings = new List<Polyline>();
+            Doors = new List<ThIfcDoor>();
             Category = "DoorOpening";
             ElementLayer = "门";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractDoorOpeningService()
+            if (UseDb3Engine)
             {
-                ElementLayer= this.ElementLayer,
-            };
-            instance.Extract(database, pts);
-            Openings = instance.Openings;
+                var doorEngine = new ThDB3DoorRecognitionEngine();
+                doorEngine.Recognize(database, pts);
+                Doors=doorEngine.Elements.Cast<ThIfcDoor>().ToList();
+            }
+            else
+            {
+                var instance = new ThExtractDoorOpeningService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Doors = instance.Openings.Select(o => new ThIfcDoor() { Outline = o }).ToList();
+            }
         }
 
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            Openings.ForEach(o =>
+            Doors.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(SwitchPropertyName, "Open");
-                geometry.Boundary = o;
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Outline));
+                }
+                if (Group2Switch)
+                {
+                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Outline));
+                }
+                geometry.Boundary = o.Outline;
+
                 geos.Add(geometry);
             });
-
             return geos;
         }
 
@@ -51,11 +70,11 @@ namespace ThMEPEngineCore.Temp
             using (var db =AcadDatabase.Use(database))
             {
                 var doorIds = new ObjectIdList();
-                Openings.ForEach(o =>
+                Doors.ForEach(o =>
                 {
-                    o.ColorIndex = ColorIndex;
-                    o.SetDatabaseDefaults();
-                    doorIds.Add(db.ModelSpace.Add(o));                    
+                    o.Outline.ColorIndex = ColorIndex;
+                    o.Outline.SetDatabaseDefaults();
+                    doorIds.Add(db.ModelSpace.Add(o.Outline));                    
                 });
                 if (doorIds.Count > 0)
                 {
@@ -66,7 +85,18 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            throw new NotImplementedException();
+            if (GroupSwitch)
+            {
+                Doors.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+            }
+        }
+
+        public override void Group2(Dictionary<Entity, string> groupId)
+        {
+            if (Group2Switch)
+            {
+                Doors.ForEach(o => Group2Owner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+            }
         }
     }
 }

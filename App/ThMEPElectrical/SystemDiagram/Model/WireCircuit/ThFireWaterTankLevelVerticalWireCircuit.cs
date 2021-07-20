@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,21 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
     {
         public override List<Entity> Draw()
         {
+            return new List<Entity>();
+        }
+
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
             int currentIndex = 21;
-            List<Entity> Result = new List<Entity>();
+            Dictionary<int, List<Entity>> ResultDic = new Dictionary<int, List<Entity>>();
             int FireWaterTankMaxFloor = 0;// 消防水箱最高楼层
             int FireExtinguisherPoolMinFloor = 0;//消防水池最低楼层
             int FireExtinguisherPoolMaxFloor = 0;//消防水池最高楼层
-            int FireExtinguisherPoolCount =0;    //消防水池个数
+            int FireExtinguisherPoolCount = 0;    //消防水池个数
 
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
+                List<Entity> Result = new List<Entity>();
                 //拿到该防火分区数据
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["消防水箱"] > 0)
@@ -42,6 +49,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     FireExtinguisherPoolMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFireExtinguisherPoolLine(currentIndex, FloorNum));
                 }
+                ResultDic.Add(FloorNum + 1, Result);
             }
             //都存在，才画
             if (FireWaterTankMaxFloor > 0 || FireExtinguisherPoolMaxFloor > 0)
@@ -49,21 +57,34 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 int MaxFloor = Math.Max(FireWaterTankMaxFloor, FireExtinguisherPoolMaxFloor);
                 if (FireWaterTankMaxFloor == MaxFloor)
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2350, 0));
-                    Result.Add(Endline1);
+                    for (int floorNum = 1; floorNum < MaxFloor; floorNum++)
+                    {
+                        Line Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (floorNum - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                        ResultDic[floorNum].Add(Endline);
+                    }
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2350, 0));
+                    ResultDic[MaxFloor].Add(Endline1);
                 }
                 else
                 {
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2250, 0));
-                    Result.Add(Endline1);
+                    for (int floorNum = 1; floorNum < MaxFloor; floorNum++)
+                    {
+                        Line Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (floorNum - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
+                        ResultDic[floorNum].Add(Endline);
+                    }
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (MaxFloor - 1) + 2250, 0));
+                    ResultDic[MaxFloor].Add(Endline1);
                 }
-                
+
                 //设置线型
-                Result.ForEach(o =>
+                ResultDic.Values.ForEach(x =>
                 {
-                    o.Linetype = this.CircuitLinetype;
-                    o.Layer = this.CircuitLayer;
-                    o.ColorIndex = this.CircuitColorIndex;
+                    x.ForEach(o =>
+                    {
+                        o.Linetype = this.CircuitLinetype;
+                        o.Layer = this.CircuitLayer;
+                        o.ColorIndex = this.CircuitColorIndex;
+                    });
                 });
 
                 //画液位信号线路模块
@@ -75,8 +96,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
             }
             else
-                Result = new List<Entity>();
-            return Result;
+                ResultDic = new Dictionary<int, List<Entity>>();
+            return ResultDic;
         }
 
         /// <summary>
@@ -110,7 +131,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 3;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-CTRL-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "BORDER2";

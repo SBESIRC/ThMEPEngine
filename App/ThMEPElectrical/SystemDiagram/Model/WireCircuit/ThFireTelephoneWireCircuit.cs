@@ -85,7 +85,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 //重设高度
                 this.Offset = 800;
-                CurrentIndex = this.StartIndexBlock + 3;
+                CurrentIndex = this.StartIndexBlock + 4;
                 //画起点框
                 #region 起点框
                 Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1650, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * CurrentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
@@ -116,9 +116,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
+        // 横线不支持画竖线方法
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
+            throw new NotSupportedException();
+        }
+
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 4;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-FAS-WIRE5";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "HIDDEN";

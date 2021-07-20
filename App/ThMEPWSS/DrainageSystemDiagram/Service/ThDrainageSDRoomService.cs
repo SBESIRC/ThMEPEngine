@@ -29,18 +29,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return rooms;
         }
 
-        public static void shrinkRoom(List<ThExtractorBase> archiExtractor)
-        {
-            var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
+        //public static void shrinkRoom(List<ThExtractorBase> archiExtractor)
+        //{
+        //    var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
 
-            roomExtractor.Rooms.ForEach(room =>
-            {
-                var roomOutline = room.Boundary as Polyline;
-                roomOutline = ThMEPFrameService.Buffer(roomOutline, -100);
-                room.Boundary = roomOutline;
-            });
+        //    roomExtractor.Rooms.ForEach(room =>
+        //    {
+        //        var roomOutline = room.Boundary as Polyline;
+        //        roomOutline = ThMEPFrameService.Buffer(roomOutline, -100);
+        //        room.Boundary = roomOutline;
+        //    });
 
-        }
+        //}
 
         public static List<ThIfcRoom> getRoomList(List<ThExtractorBase> archiExtractor)
         {
@@ -53,13 +53,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return roomList;
         }
 
-        public static List<ThToilateRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static List<ThToilateRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThTerminalToilate> toilateList)
         {
             List<ThToilateRoom> roomModelList = new List<ThToilateRoom>();
             roomList.ForEach(x =>
             {
                 var roomOutline = x.Boundary as Polyline;
-                var roomToilateList = new List<ThIfcSanitaryTerminalToilate>();
+                var roomToilateList = new List<ThTerminalToilate>();
                 foreach (var terminal in toilateList)
                 {
                     var toilateOutline = terminal.Boundary;

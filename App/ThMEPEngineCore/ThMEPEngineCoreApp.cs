@@ -108,7 +108,7 @@ namespace ThMEPEngineCore
                     return;
                 }
 
-                if(result2.StringResult == "识别")
+                if (result2.StringResult == "识别")
                 {
                     if (result3.StringResult == "原始")
                     {
@@ -437,7 +437,7 @@ namespace ThMEPEngineCore
                     if (o.Outline is Curve curve)
                     {
                         var clone = curve.WashClone();
-                        if(clone!=null)
+                        if (clone != null)
                         {
                             clone.ColorIndex = 6;
                             clone.SetDatabaseDefaults();
@@ -628,7 +628,7 @@ namespace ThMEPEngineCore
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
-                
+
                 var doorEngine = new ThDB3DoorRecognitionEngine();
                 doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 doorEngine.Elements.ForEach(o =>
@@ -764,7 +764,7 @@ namespace ThMEPEngineCore
                     {
                         o.ColorIndex = 2;
                         o.SetDatabaseDefaults();
-                        acadDatabase.ModelSpace.Add(o);                        
+                        acadDatabase.ModelSpace.Add(o);
                     });
                 }
             }
@@ -774,7 +774,7 @@ namespace ThMEPEngineCore
         public void THExtractDrainageWell()
         {
             using (var acadDatabase = AcadDatabase.Active())
-            using (var curveEngine  = new ThDrainageWellRecognitionEngine())
+            using (var curveEngine = new ThDrainageWellRecognitionEngine())
             using (var blockEngine = new ThDrainageWellBlockRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
@@ -782,7 +782,7 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
-                if(!(acadDatabase.Element<Entity>(result.ObjectId) is Polyline))
+                if (!(acadDatabase.Element<Entity>(result.ObjectId) is Polyline))
                 {
                     return;
                 }
@@ -825,10 +825,10 @@ namespace ThMEPEngineCore
                         o.SetDatabaseDefaults();
                         drainageWellIds.Add(acadDatabase.ModelSpace.Add(o));
                     });
-                    if(drainageWellIds.Count>0)
+                    if (drainageWellIds.Count > 0)
                     {
                         GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageWellIds);
-                    }                    
+                    }
 
                     var drainageDitchIds = new ObjectIdList();
                     breakService.DrainageDitches.ForEach(o =>
@@ -837,7 +837,7 @@ namespace ThMEPEngineCore
                         o.SetDatabaseDefaults();
                         drainageDitchIds.Add(acadDatabase.ModelSpace.Add(o));
                     });
-                    if(drainageDitchIds.Count > 0)
+                    if (drainageDitchIds.Count > 0)
                     {
                         GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageDitchIds);
                     }
@@ -896,6 +896,34 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractRoomMark", CommandFlags.Modal)]
+        public void THExtractRoomMark()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                var engine = new ThDB3RoomMarkRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Elements.Cast<ThIfcTextNote>().Select(o => o.Geometry).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THExtractContourLine", CommandFlags.Modal)]
         public void THExtractContourLine()
         {
@@ -942,80 +970,6 @@ namespace ThMEPEngineCore
                     var builder = new ThArchitectureOutlineBuilder(data.MergeData());
                     builder.Build();
                     builder.Results.Cast<Entity>().ForEach(o =>
-                    {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.SetDatabaseDefaults();
-                    });
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THDB3ExtractRoom", CommandFlags.Modal)]
-        public void THDB3ExtractRoom()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-
-
-                //var selectRes = Active.Editor.GetSelection();
-                //var testDatas = new DBObjectCollection();
-                //if (selectRes.Status == PromptStatus.OK)
-                //{
-                //    var Datas = selectRes.Value.GetObjectIds()
-                //        .Select(o => acadDatabase.Element<Curve>(o).Clone() as Curve)
-                //        .ToCollection();
-                //    Datas.Polygonize().ForEach(o =>
-                //    {
-                //        foreach(DBObject obj in o.ToDbCollection())
-                //        {
-                //            testDatas.Add(obj);
-                //        }
-                //    });
-                //    Datas = Datas.FilterSmallArea(10.0);
-                //    testDatas = testDatas.FilterSmallArea(10.0);
-                //}
-                //else
-                //{
-                //    var data = new Roomdata(acadDatabase.Database, frame.Vertices());
-                //    data.Deburring();
-                //    testDatas = data.MergeData();
-                //}
-                Roomdata data = new Roomdata(acadDatabase.Database, frame.Vertices());
-                data.Deburring();
-                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
-                if (builder.Count == 0)
-                    return;
-                //从CAD中获取点
-
-                var ptList = new List<Point3d>();
-                while(true)
-                {
-                    var ptRes = Active.Editor.GetPoint("\n选择房间内的一点");
-                    if(ptRes.Status==PromptStatus.OK)
-                    {
-                        ptList.Add(ptRes.Value);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                if(ptList.Count>0)
-                {
-                    builder.Build(ptList).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.SetDatabaseDefaults();

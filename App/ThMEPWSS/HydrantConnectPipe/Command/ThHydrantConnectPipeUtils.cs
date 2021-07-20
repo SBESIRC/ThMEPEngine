@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
@@ -112,11 +113,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             var mapFrame = polyLine.Buffer(expandLength);
             return mapFrame[0] as Polyline;
         }
+        public static Polyline CreateMapFrame(Point3d pt,double radius)
+        {
+            Circle circle = new Circle(pt, new Vector3d(0, 0, 1), radius);
+            return circle.ToRectangle();
+        }
 
         public static List<Line> GetNearbyLine4(Point3d pt,List<Line> lines)
         {
             List<Line> returnLines = new List<Line>();
-            if (lines.Count <=2 )
+            if (lines.Count <=2)
             {
                 return lines;
             }
@@ -125,6 +131,17 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             returnLines.Add(lines[0]);
             returnLines.Add(lines[1]);
             return returnLines;
+        }
+
+        public static bool IsIntersect(Line firstLine, Line secLine)
+        {
+            var ptLst = new Point3dCollection();
+            firstLine.IntersectWith(secLine, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
+            if (ptLst.Count != 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

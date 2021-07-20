@@ -64,6 +64,10 @@ namespace ThMEPWSS.Hydrant.Data
                     throw new NotSupportedException();
                 }                
             });
+            if(FilterMode ==  FilterMode.Window)
+            {
+                ExternalSpaces = FilterWindowPolygon(pts, ExternalSpaces);
+            }
         }
         public override List<ThGeometry> BuildGeometries()
         {

@@ -29,7 +29,6 @@ namespace ThMEPEngineCore
         public void THExtractAreaCenterLineDemoTest()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
             {
                 var per = Active.Editor.GetEntity("\n选择一个框线");
                 var pts = new Point3dCollection();
@@ -43,20 +42,21 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
-
-                var extractors = new List<ThExtractorBase>()
+                var roomExtractor = new ThRoomExtractor { ColorIndex = 1 };
+                roomExtractor.Extract(acadDatabase.Database, pts);
+                var geos  = roomExtractor.BuildGeometries();
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                string fileName = fileInfo.Name;
+                int count = 1;
+                foreach (var geo in geos)
                 {
-                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,NameLayer="AD-NAME-ROOM",ColorIndex=1},
-                    new ThWallExtractor{ColorIndex=2},
-                    new ThCenterLineExtractor{ColorIndex=3},
-                };
-
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.OutputGeo(Active.Document.Name);
-                extractEngine.Print(acadDatabase.Database);
+                    //
+                    string newFileName = "";
+                    newFileName = fileName + count.ToString("000");
+                    count++;
+                    ThGeoOutput.Output(new List<Model.ThGeometry> { geo }, path, newFileName);
+                }
             }
         }
 
@@ -186,6 +186,13 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
+                var levelIndex = 3;
+                var ner = Active.Editor.GetInteger("\n输入防雷等级类别<三类>");
+                if(ner.Status == PromptStatus.OK)
+                {
+                    levelIndex = ner.Value;
+                }
+
                 var extractors = new List<ThExtractorBase>()
                 {
                     new ThStoreyExtractor()
@@ -235,15 +242,15 @@ namespace ThMEPEngineCore
                 extractEngine.Extract(acadDatabase.Database, pts);
                 extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
                 string geoContent = extractEngine.OutputGeo();
+                extractEngine.OutputGeo(Active.Document.Name);
                 var dclLayoutEngine = new ThDCLayoutEngineMgd();
                 var data = new ThDCDataMgd();
                 data.ReadFromContent(geoContent);
-                var param = new ThDCParamMgd(1);
+                var param = new ThDCParamMgd(levelIndex);
                 var result = dclLayoutEngine.Run(data, param);
                 var parseResults = ThDclResultParseService.Parse(result);
                 var printService = new ThDclPrintService(acadDatabase.Database, "AI-DCL");
                 printService.Print(parseResults);
-                //extractEngine.OutputGeo(Active.Document.Name);
                 //extractEngine.Print(acadDatabase.Database);
             }
         }
@@ -390,6 +397,167 @@ namespace ThMEPEngineCore
                         }
                     }
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFireAlarmTestDataExtract", CommandFlags.Modal)]
+        public void THFireAlarmTestDataExtract()
+        {
+
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                else
+                {
+                    return;
+                }
+                // ArchitectureWall、Shearwall、Column、Window、Room
+                // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
+                var storeyExtractor = new ThEStoreyExtractor()
+                {
+                    ElementLayer = "AI-楼层框定E",
+                    ColorIndex = 12,
+                    GroupSwitch = false,
+                    Group2Switch = false,
+                    UseDb3Engine = true,
+                    IsolateSwitch = false,
+                };
+                storeyExtractor.Extract(acadDatabase.Database,pts);
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    new ThArchitectureWallExtractor()
+                    {
+                        ElementLayer = "AI-墙",
+                        ColorIndex=1,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThShearWallExtractor()
+                    {
+                        ElementLayer = "AI-剪力墙",
+                        ColorIndex=2,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThColumnExtractor()
+                    {
+                        ElementLayer = "AI-柱",
+                        ColorIndex=3,
+                        GroupSwitch=false,
+                        Group2Switch=false,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThWindowExtractor()
+                    {
+                        ElementLayer="AI-窗",
+                        ColorIndex=4,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThRoomExtractor()   
+                    {
+                        ColorIndex=5,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaBeamExtractor()
+                    {
+                        ElementLayer = "AI-梁",
+                        ColorIndex=6,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=true,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaDoorOpeningExtractor()
+                    {
+                        ElementLayer = "AI-门",
+                        ColorIndex=7,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThRailingExtractor()
+                    {
+                        ElementLayer = "AI-栏杆",
+                        ColorIndex=8,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFaFireproofshutterExtractor()
+                    {
+                        ElementLayer = "AI-防火卷帘",
+                        ColorIndex=9,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThHoleExtractor()
+                    {
+                        ElementLayer = "AI-洞",
+                        ColorIndex=10,
+                        GroupSwitch=true,
+                        Group2Switch=true,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },
+                    new ThFiredistrictExtractor()
+                    {
+                        ElementLayer="AI-防火分区,AD-AREA-DIVD",
+                        ColorIndex=11,
+                        GroupSwitch=true,
+                        Group2Switch=false,
+                        UseDb3Engine=false,
+                        IsolateSwitch=false,
+                    },                    
+                };
+                extractEngine.Accept(extractors);
+                var fireApartExtractor = extractors.Where(o => o is ThFiredistrictExtractor).First() as ThFiredistrictExtractor;
+                fireApartExtractor.StoreyInfos = storeyExtractor.Storeys.Cast<StoreyInfo>().ToList();
+                extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.Accept(storeyExtractor);
+                extractEngine.Group(storeyExtractor.StoreyIds);
+                extractEngine.Group2(fireApartExtractor.GetFireAPartIds());
+
+                var faDoorExtractor = extractors.Where(o => o is ThFaDoorOpeningExtractor).First() as ThFaDoorOpeningExtractor;
+                faDoorExtractor.SetTags(fireApartExtractor.GetFireAPartIds());
+                var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
+                fireProofShutter.SetTags(fireApartExtractor.GetFireAPartIds());
+                //string geoContent = extractEngine.OutputGeo(); 
+                extractEngine.Remove(storeyExtractor);
+                var geos = extractEngine.BuildGeometries();
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                string fileName = fileInfo.Name;
+                string newFileName = "";
+                storeyExtractor.Storeys.ForEach(o =>
+                {
+                    newFileName = fileName + o.StoreyType + o.StoreyNumber;
+                });
+                ThGeoOutput.Output(geos, path, newFileName);
+                extractEngine.Print(acadDatabase.Database);
             }
         }
     }

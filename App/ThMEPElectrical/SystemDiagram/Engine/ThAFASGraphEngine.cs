@@ -1,296 +1,897 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Linq2Acad;
+﻿using System;
 using NFox.Cad;
+using Linq2Acad;
 using QuickGraph;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.SystemDiagram.Model;
+using ThMEPElectrical.SystemDiagram.Service;
+using ThMEPElectrical.SystemDiagram.Extension;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
     public class ThAFASGraphEngine
     {
-        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public List<AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>>> Graphs { get; set; }
-        public ThAFASVertex GraphStartVertex { get; set; }
-        public AcadDatabase acadDatabase { get; set; }
+        private bool IsJF = false;//是否是大屋面
 
+        private Dictionary<Entity, Entity> GlobleNTSMappingDic;
+        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+
+        public Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> GraphsDic { get; set; }
+
+        public Database Database { get; set; }
+
+        /// <summary>
+        /// 全部数据集合
+        /// </summary>
         private List<Entity> DataCollection { get; set; }
+
+        /// <summary>
+        /// 已捕捉到的数据集合
+        /// </summary>
         private List<Entity> CacheDataCollection { get; set; }
 
-        //起点终点规则
-        private Func<Entity, bool> BreakpointRules = (e) =>
+        /// <summary>
+        /// 已捕捉到的节点的数据集合
+        /// </summary>
+        private List<Entity> CacheSINodeCollection { get; set; }
+
+        private Dictionary<Entity, List<KeyValuePair<string, string>>> globleBlockAttInfoDic { get; set; }
+
+        private List<string> NotInAlarmControlWireCircuit { get; set; }
+
+        //短路隔离器规则
+        private Func<Entity, bool> SIRule = (e) =>
         {
-            if (e is BlockReference blk)
-            {
-                if (blk.Name == "E-BFAS540" || blk.Name == "E-BFAS010")
-                    return true;
-            }
-            if (e is Line line)
-            {
-                if (e.Layer.Contains("CMTB"))
-                    return true;
-            }
-            return false;
+            return e is BlockReference blk && blk.Name == "E-BFAS540";
+        };
+        //配电箱规则
+        private Func<Entity, bool> FASRule = (e) =>
+        {
+            return e is BlockReference blk && blk.Name == "E-BFAS010";
+        };
+        //桥架规则
+        private Func<Entity, bool> CMTBRule = (e) =>
+        {
+            return e is Curve cur && cur.Layer.Contains("CMTB");
         };
 
-
-        public ThAFASGraphEngine(List<Entity> Datas)
+        public ThAFASGraphEngine(Database db, List<Entity> Datas, Dictionary<Entity, List<KeyValuePair<string, string>>> blockAttInfoDic, bool isJF = false)
         {
-            Graphs = new List<AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>>>();
+            GraphsDic = new Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>>();
+            GlobleNTSMappingDic = new Dictionary<Entity, Entity>();
             DataCollection = Datas;
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(DataCollection.ToCollection());
+            Datas.ForEach(e =>
+            {
+                if (e is BlockReference br)
+                {
+                    GlobleNTSMappingDic.Add(db.GetBlockReferenceOBB(br), br);
+                }
+                else
+                {
+                    GlobleNTSMappingDic.Add(e.Clone() as Entity, e);
+                }
+            });
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(GlobleNTSMappingDic.Keys.ToCollection());
             CacheDataCollection = new List<Entity>();
+            CacheSINodeCollection = new List<Entity>();
+            NotInAlarmControlWireCircuit = new List<string>() { "E-BFAS030", "E-BFAS031", "E-BFAS220", "E-BFAS330", "E-BFAS410-2", "E-BFAS410-3", "E-BFAS410-4" };
+            this.Database = db;
+            this.globleBlockAttInfoDic = blockAttInfoDic;
+            this.IsJF = isJF;
         }
 
-        public void SetDataBase(AcadDatabase adb)
-        {
-            this.acadDatabase = adb;
-        }
-
+        /// <summary>
+        /// 初始化图
+        /// </summary>
         public void InitGraph()
         {
-            List<Entity> StartingSet = DataCollection.Where(BreakpointRules).ToList();
-            //单独处理起始部分，进行广度遍历,以找到下一个点为终止
-            Polyline polyline = new Polyline();
-            foreach (Entity StartEntity in StartingSet)
+            //业务逻辑 优先级: 配电箱>桥架>短路隔离器
+            List<Entity> StartingSet_1 = DataCollection.Where(FASRule).ToList();
+            foreach (Entity StartEntity in StartingSet_1)
             {
-                //是配电箱 SI/FAS
-                if (StartEntity is BlockReference blockObj)
+                FindGraph(StartEntity);
+            }
+
+            List<Entity> StartingSet_2 = DataCollection.Where(CMTBRule).ToList();
+            foreach (Entity StartEntity in StartingSet_2)
+            {
+                FindGraph(StartEntity);
+            }
+
+            List<Entity> StartingSet_3 = DataCollection.Where(SIRule).Where(e => !CacheSINodeCollection.Contains(e)).ToList();
+            foreach (Entity StartEntity in StartingSet_3)
+            {
+                FindGraph(StartEntity);
+            }
+        }
+
+
+        /// <summary>
+        /// 根据节点开始寻图
+        /// 实现根据节点，广度遍历该节点所能到达的所有的回路的方法
+        /// 把数据填充到GraphsDic中
+        /// </summary>
+        /// <param name="startingEntity"></param>
+        public void FindGraph(Entity startingEntity)
+        {
+            if (!FASRule(startingEntity) && !CMTBRule(startingEntity) && !SIRule(startingEntity))
+            {
+                return;
+            }
+            //是配电箱 FAS / 短路隔离器 SI
+            if (startingEntity is BlockReference blockObj)
+            {
+                Polyline polyline = Buffer(blockObj);
+                var results = FindNextEntity(blockObj, polyline);
+                foreach (var result in results)
                 {
-                    polyline = Buffer(blockObj);
+                    //#1碰到桥架或者配电箱，忽略
+                    if (CMTBRule(result) || FASRule(result))
+                    {
+                        continue;
+                    }
+                    //碰到块
+                    if (result is BlockReference blkref)
+                    {
+                        Point3d center = Database.GetBlockReferenceOBBCenter(blockObj);
+                        if (this.GraphsDic.ContainsKey(center))
+                            this.GraphsDic[center].AddRange(FirstNavigate(startingEntity, result));
+                        else
+                            this.GraphsDic.Add(center, FirstNavigate(startingEntity, result));
+                    }
+                    //碰到线
+                    else if (result is Curve findcurve)
+                    {
+                        //线得搭到块上才可遍历，否则认为线只是跨过块
+                        var blockobb = Buffer(blockObj, 0);
+                        if (blockobb.Distance(findcurve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance || blockobb.Distance(findcurve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                        {
+                            Point3d center = Database.GetBlockReferenceOBBCenter(blockObj);
+                            if (this.GraphsDic.ContainsKey(center))
+                                this.GraphsDic[center].AddRange(FirstNavigate(startingEntity, result));
+                            else
+                                this.GraphsDic.Add(center, FirstNavigate(startingEntity, result));
+                        }
+                    }
                 }
-                //是桥架 *CMTB
-                else if (StartEntity is Line line)
-                {
-                    Buffer(line);
-                }
-                var results = SpatialIndex.SelectCrossingPolygon(polyline);
-                results.Remove(StartEntity);
-                if (results.Count == 0)
-                {
-                    continue;
-                }
+            }
+            //是桥架 *CMTB
+            else if (startingEntity is Curve curve)
+            {
+                Polyline polyline = Buffer(curve);
+                var results = FindNextEntity(curve, polyline);
                 foreach (var result in results)
                 {
                     if (result is BlockReference blkref)
                     {
-                        if (CacheDataCollection.Contains(blkref))
-                            continue;
-                        if (BreakpointRules(blkref))
-                        {
-                            continue;
-                        }
-                        CacheDataCollection.Add(blkref);
-                        Graphs.Add(CreatGraph(StartEntity, blkref, null));
+                        //根据业务，桥架不搭块，直接忽略
+                        continue;
                     }
-                    else if (result is Curve curve)
+                    else if (result is Curve findcurve)
                     {
-                        if (BreakpointRules(curve))
+                        //#1 碰到其他桥架，忽略
+                        if (CMTBRule(findcurve))
                         {
                             continue;
                         }
-                        bool IsStartPoint = false;
-                        if (StartEntity is BlockReference blk)
+                        //#2 碰到线，找到最近的点
+                        bool IsStart = findcurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findcurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance;
+                        bool IsEnd = findcurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findcurve.EndPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance;
+                        //都不相邻即无关系，都相邻即近似平行，都不符合
+                        if (IsStart != IsEnd)
                         {
-                            IsStartPoint = curve.EndPoint.DistanceTo(blk.Position) < curve.StartPoint.DistanceTo(blk.Position) ? false : true;
+                            if (IsStart)
+                            {
+                                Point3d center = findcurve.StartPoint;
+                                if (this.GraphsDic.ContainsKey(center))
+                                    this.GraphsDic[center].AddRange(FirstNavigate(curve, findcurve));
+                                else
+                                    this.GraphsDic.Add(center, FirstNavigate(curve, findcurve));
+                            }
+                            else
+                            {
+                                Point3d center = findcurve.EndPoint;
+                                if (this.GraphsDic.ContainsKey(center))
+                                    this.GraphsDic[center].AddRange(FirstNavigate(curve, findcurve));
+                                else
+                                    this.GraphsDic.Add(center, FirstNavigate(curve, findcurve));
+                            }
                         }
-                        if (StartEntity is Line line)
-                        {
-                            IsStartPoint = curve.StartPoint.DistanceTo(line.GetClosestPointTo(curve.StartPoint, false)) < curve.EndPoint.DistanceTo(line.GetClosestPointTo(curve.StartPoint, false)) ? true : false;
-                        }
-                        Point3d searchpoint = IsStartPoint ? curve.EndPoint : curve.StartPoint;
-                        FindGraph(StartEntity, curve, searchpoint);
                     }
                 }
             }
         }
 
-        public void FindGraph(Entity startEntity, Curve LastCurve, Point3d searchpoint)
+        /// <summary>
+        /// 根据初始点
+        /// 初次寻路
+        /// </summary>
+        /// <param name="SourceEntity"></param>
+        /// <returns></returns>
+        public List<ThAlarmControlWireCircuitModel> FirstNavigate(Entity SourceEntity, Entity nextEntity)
         {
-            var square = searchpoint.CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance);
-            var results = SpatialIndex.SelectCrossingPolygon(square);
-            results.Remove(LastCurve);
-            if (results.Count == 0)
-                return;
-            else
+            List<ThAlarmControlWireCircuitModel> FindWireCircuitModels = new List<ThAlarmControlWireCircuitModel>();
+            var findLoop = FindRootNextElement(SourceEntity, nextEntity);
+            foreach (var item in findLoop)
             {
-                foreach (Entity NextEntity in results)
+                //此时已经可以确定，这是仅有的一条回路了
+                var newWireCircuitModel = CreatWireCircuitModel(SourceEntity);
+                List<List<ThAlarmControlWireCircuitModel>> extendNewWireCircuits = new List<List<ThAlarmControlWireCircuitModel>>();
+                if (SIRule(SourceEntity))
                 {
-                    if (BreakpointRules(NextEntity))
+                    if (!CacheSINodeCollection.Contains(SourceEntity))
                     {
-                        continue;
+                        CacheSINodeCollection.Add(SourceEntity);
+                        CacheDataCollection.Add(SourceEntity);
                     }
-                    if (NextEntity is BlockReference blkref)
+                }
+
+                //是短路隔离器
+                if (SIRule(item.Key))
+                {
+                    List<Entity> nextLoops;
+                    if (item.Value.Count > 0)
                     {
-                        if (CacheDataCollection.Contains(blkref))
-                            continue;
-                        CacheDataCollection.Add(blkref);
-                        Graphs.Add(CreatGraph(startEntity, blkref, LastCurve));
+                        nextLoops = FindNextEntity(item.Value.Last(), Buffer(item.Key));
                     }
-                    if (NextEntity is Curve NextCurve)
+                    else
                     {
-                        //两边相接
-                        if (searchpoint.DistanceTo(NextCurve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
-                            FindGraph(startEntity, NextCurve, NextCurve.EndPoint);
-                        else if (searchpoint.DistanceTo(NextCurve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
-                            FindGraph(startEntity, NextCurve, NextCurve.StartPoint);
-                        //两边垂直
-                        else if (NextCurve is Line NextLine && LastCurve is Line LastLine)
+                        nextLoops = FindNextEntity(SourceEntity, Buffer(item.Key));
+                    }
+                    nextLoops.Remove(item.Key);
+
+                    foreach (Entity entity in nextLoops)
+                    {
+                        //这就是自己本身延伸出去的块
+                        var NavigateGraph = FirstNavigate(item.Key, entity);
+                        if (NavigateGraph.Count > 0)
                         {
-                            var mainVec = LastLine.StartPoint.GetVectorTo(LastLine.EndPoint);
-                            var branchVec = NextLine.StartPoint.GetVectorTo(NextLine.EndPoint);
-                            var ang = mainVec.GetAngleTo(branchVec);
-                            if (ang > Math.PI)
+                            extendNewWireCircuits.Add(NavigateGraph);
+                        }
+                    }
+                    if (!CacheSINodeCollection.Contains(item.Key))
+                    {
+                        CacheSINodeCollection.Add(item.Key);
+                        CacheDataCollection.Add(item.Key);
+                    }
+                }
+                //正常块
+                else if (!CacheDataCollection.Contains(item.Key))
+                {
+                    newWireCircuitModel.Graph.AddEdgeAndVertex(SourceEntity, item.Key, item.Value);
+                    CacheDataCollection.Add(item.Key);
+                    if (item.Value.Count > 0)
+                    {
+                        var extensionGraph = ExtensionGraph(ref newWireCircuitModel, item.Value.Last(), item.Key);
+                        if (extensionGraph.Count > 0)
+                        {
+                            extendNewWireCircuits.AddRange(extensionGraph);
+                        }
+                    }
+                    else
+                    {
+                        var extensionGraph = ExtensionGraph(ref newWireCircuitModel, SourceEntity, item.Key);
+                        if (extensionGraph.Count > 0)
+                        {
+                            extendNewWireCircuits.AddRange(extensionGraph);
+                        }
+                    }
+                }
+
+                //开始进行业务逻辑,整合回路
+                newWireCircuitModel.FillingData(this.globleBlockAttInfoDic, IsJF);
+                for (int i = 0; i < extendNewWireCircuits.Count; i++)
+                {
+                    ThAlarmControlWireCircuitModel wireCircuitModel = extendNewWireCircuits[i][0];
+                    wireCircuitModel.FillingData(this.globleBlockAttInfoDic, IsJF);
+                    var extendBlockCount = wireCircuitModel.BlockCount;
+
+                    var selfBlockCount = newWireCircuitModel.BlockCount;
+                    if (extendBlockCount + selfBlockCount <= FireCompartmentParameter.ShortCircuitIsolatorCount)
+                    {
+                        if (string.IsNullOrWhiteSpace(wireCircuitModel.WireCircuitName))
+                        {
+                            newWireCircuitModel += wireCircuitModel;//左右顺序很重要！
+                            extendNewWireCircuits[i].Remove(wireCircuitModel);
+                        }
+                        else if (string.IsNullOrWhiteSpace(newWireCircuitModel.WireCircuitName))
+                        {
+                            newWireCircuitModel = wireCircuitModel + newWireCircuitModel;
+                            extendNewWireCircuits[i].Remove(wireCircuitModel);
+                        }
+                        else
+                        {
+                            //两个回路都有名字，不合并
+                        }
+                    }
+                }
+                FindWireCircuitModels.Add(newWireCircuitModel);
+                for (int i = 0; i < extendNewWireCircuits.Count; i++)
+                {
+                    FindWireCircuitModels.AddRange(extendNewWireCircuits[i]);
+                }
+            }
+            return FindWireCircuitModels;
+        }
+
+        public ThAlarmControlWireCircuitModel CreatWireCircuitModel(Entity rootEntity)
+        {
+            ThAlarmControlWireCircuitModel newWireCircuitModel = new ThAlarmControlWireCircuitModel();
+            newWireCircuitModel.Graph = new AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>>(false);
+            var Source = new ThAFASVertex() { VertexElement = rootEntity, IsStartVertexOfGraph = true };
+            newWireCircuitModel.Graph.AddVertex(Source);
+            return newWireCircuitModel;
+        }
+
+        /// <summary>
+        /// 扩展图
+        /// </summary>
+        /// <param name="Graph"></param>
+        /// <param name="SourceEntity"></param>
+        /// <param name="TargetEntity"></param>
+        public List<List<ThAlarmControlWireCircuitModel>> ExtensionGraph(ref ThAlarmControlWireCircuitModel WireCircuitModel, Entity existingElement, BlockReference TargetEntity)
+        {
+            if (string.IsNullOrEmpty(WireCircuitModel.WireCircuitName))
+            {
+                DBText wireCircuitName = FindWireCircuitName(TargetEntity);
+                if (!wireCircuitName.IsNull())
+                {
+                    WireCircuitModel.WireCircuitName = wireCircuitName.TextString;
+                    WireCircuitModel.TextPoint = wireCircuitName.Position;
+                }
+                if (WireCircuitModel.TextPoint.Equals(Point3d.Origin) && IsAlarmControlWireCircuitBlock(TargetEntity))
+                    WireCircuitModel.TextPoint = TargetEntity.Position.Add(new Vector3d(0, 150, 0));
+            }
+            List<List<ThAlarmControlWireCircuitModel>> extensiongraphs = new List<List<ThAlarmControlWireCircuitModel>>();
+            var nextElement = FindNextElement(existingElement, TargetEntity);
+            foreach (var item in nextElement)
+            {
+                //是短路隔离器
+                if (SIRule(item.Key))
+                {
+                    List<Entity> nextLoops;
+                    if (item.Value.Count > 0)
+                    {
+                        nextLoops = FindNextEntity(item.Value.Last(), Buffer(item.Key));
+                    }
+                    else
+                    {
+                        nextLoops = FindNextEntity(TargetEntity, Buffer(item.Key));
+                    }
+                    nextLoops.Remove(item.Key);
+                    foreach (Entity entity in nextLoops)
+                    {
+                        //这就是自己本身延伸出去的块
+                        var NavigateGraph = FirstNavigate(item.Key, entity);
+                        if (NavigateGraph.Count > 0)
+                        {
+                            extensiongraphs.Add(NavigateGraph);
+                        }
+                    }
+                    if (!CacheSINodeCollection.Contains(item.Key))
+                    {
+                        CacheSINodeCollection.Add(item.Key);
+                        CacheDataCollection.Add(item.Key);
+                    }
+                }
+                //正常块
+                else if (!CacheDataCollection.Contains(item.Key))
+                {
+                    WireCircuitModel.Graph.AddEdgeAndVertex(TargetEntity, item.Key, item.Value);
+                    CacheDataCollection.Add(item.Key);
+                    if (item.Value.Count > 0)
+                    {
+                        var extensionGraph = ExtensionGraph(ref WireCircuitModel, item.Value.Last(), item.Key);
+                        if (extensionGraph.Count > 0)
+                        {
+                            extensiongraphs.AddRange(extensionGraph);
+                        }
+                    }
+                    else
+                    {
+                        var extensionGraph = ExtensionGraph(ref WireCircuitModel, TargetEntity, item.Key);
+                        if (extensionGraph.Count > 0)
+                        {
+                            extensiongraphs.AddRange(extensionGraph);
+                        }
+                    }
+                }
+            }
+            return extensiongraphs;
+        }
+
+        /// <summary>
+        /// 判断是否是自动报警控制总线经过的块
+        /// </summary>
+        /// <param name="targetEntity"></param>
+        /// <returns></returns>
+        private bool IsAlarmControlWireCircuitBlock(BlockReference blk)
+        {
+            return globleBlockAttInfoDic.ContainsKey(blk) && !NotInAlarmControlWireCircuit.Contains(blk.Name);
+        }
+
+        /// <summary>
+        /// 查找下一个路径
+        /// </summary>
+        /// <param name="sourceElement">已存在的曲线</param>
+        /// <param name="space">探针</param>
+        /// <returns></returns>
+        public BlockReference FindNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
+        {
+            sharedPath.Add(sourceElement);
+
+            var space = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
+            var results = SpatialIndex.SelectCrossingPolygon(space);
+            results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+            results.Remove(sourceElement);
+            switch (results.Count)
+            {
+                //没有找到任何元素，说明元素进行了跳过，创建长探针，进行搜索，如果还搜索不到，则异常
+                case 0:
+                    {
+                        if (sourceElement is Line sourceline)
+                        {
+                            Polyline longProbe = new Polyline();
+                            if (IsStartPoint)
                             {
-                                ang -= Math.PI;
+                                longProbe = ThDrawTool.ToRectangle(sourceline.StartPoint, ExtendLine(sourceline.EndPoint, sourceline.StartPoint), ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
                             }
-                            //误差一度内认为近似垂直
-                            if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
+                            else
                             {
-                                square = Buffer(NextLine);
-                                var Secondresults = SpatialIndex.SelectCrossingPolygon(square);
-                                Secondresults.Remove(LastLine);
-                                Secondresults.Remove(NextLine);
-                                if (Secondresults.Count == 0)
-                                    return;
-                                else
+                                longProbe = ThDrawTool.ToRectangle(sourceline.EndPoint, ExtendLine(sourceline.StartPoint, sourceline.EndPoint), ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
+                            }
+                            var longProbeResults = SpatialIndex.SelectCrossingPolygon(longProbe);
+                            longProbeResults = longProbeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+                            longProbeResults.Remove(sourceElement);
+                            var longProbeLineResults = longProbeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>().ToList();
+                            //长探针只能找到一个符合条件的线。如果遇到多条，只取最符合的一条线
+                            var point = IsStartPoint ? sourceline.StartPoint : sourceline.EndPoint;
+                            longProbeLineResults = longProbeLineResults.Where(o => ThGeometryTool.IsCollinearEx(sourceline.StartPoint, sourceline.EndPoint, o.StartPoint, o.EndPoint)).OrderBy(o => Math.Min(point.DistanceTo(o.StartPoint), point.DistanceTo(o.EndPoint))).ToList();
+                            if (longProbeLineResults.Count > 0)
+                            {
+                                bool isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint) > point.DistanceTo(longProbeLineResults[0].EndPoint);
+                                return FindNextPath(ref sharedPath, longProbeLineResults[0], isStartPoint);
+                            }
+                        }
+                        break;
+                    }
+                //找到下一个元素，继续寻路或者返回
+                case 1:
+                    {
+                        if (results[0] is BlockReference blk)
+                        {
+                            return blk;
+                        }
+                        else if (results[0] is Curve curve)
+                        {
+                            if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            {
+                                return FindNextPath(ref sharedPath, curve, true);
+                            }
+                            else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            {
+                                return FindNextPath(ref sharedPath, curve, false);
+                            }
+                        }
+                        break;
+                    }
+                //遇到多个元素，认为必定有块，如果全是线，则异常
+                default:
+                    {
+                        var blkResults = results.Cast<Entity>().Where(e => e is BlockReference).ToList();
+                        if (blkResults.Count() > 0)
+                        {
+                            return blkResults.First() as BlockReference;
+                        }
+                        break;
+                    }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 由根节点查找下一个路径
+        /// </summary>
+        /// <param name="sourceElement">已存在的曲线</param>
+        /// <param name="space">探针</param>
+        /// <returns></returns>
+        public Dictionary<BlockReference, List<Curve>> FindRootNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
+        {
+            Dictionary<BlockReference, List<Curve>> FindPath = new Dictionary<BlockReference, List<Curve>>();
+            sharedPath.Add(sourceElement);
+
+            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
+            var probeResults = SpatialIndex.SelectCrossingPolygon(probe);
+            probeResults = probeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+            probeResults.Remove(sourceElement);
+            switch (probeResults.Count)
+            {
+                //没有找到任何元素，说明元素进行了跳过，创建长探针，进行搜索，如果还搜索不到，则异常
+                case 0:
+                    {
+                        if (sourceElement is Line sourceline)
+                        {
+                            Polyline longProbe = new Polyline();
+                            if (IsStartPoint)
+                            {
+                                longProbe = ThDrawTool.ToRectangle(sourceline.StartPoint, ExtendLine(sourceline.EndPoint, sourceline.StartPoint), ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
+                            }
+                            else
+                            {
+                                longProbe = ThDrawTool.ToRectangle(sourceline.EndPoint, ExtendLine(sourceline.StartPoint, sourceline.EndPoint), ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
+                            }
+                            var longProbeResults = SpatialIndex.SelectCrossingPolygon(longProbe);
+                            longProbeResults = longProbeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+                            longProbeResults.Remove(sourceElement);
+                            var longProbeLineResults = longProbeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>().ToList();
+                            //长探针只能找到一个符合条件的线。如果遇到多条，只取最符合的一条线
+                            var point = IsStartPoint ? sourceline.StartPoint : sourceline.EndPoint;
+                            longProbeLineResults = longProbeLineResults.Where(o => ThGeometryTool.IsCollinearEx(sourceline.StartPoint, sourceline.EndPoint, o.StartPoint, o.EndPoint)).OrderBy(o => Math.Min(point.DistanceTo(o.StartPoint), point.DistanceTo(o.EndPoint))).ToList();
+                            if (longProbeLineResults.Count > 0)
+                            {
+                                bool isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint) > point.DistanceTo(longProbeLineResults[0].EndPoint);
+                                return FindRootNextPath(ref sharedPath, longProbeLineResults[0], isStartPoint);
+                            }
+                        }
+                        break;
+                    }
+                //找到下一个元素，返回
+                case 1:
+                    {
+                        if (probeResults[0] is BlockReference blk)
+                        {
+                            FindPath.Add(blk, sharedPath);
+                        }
+                        else if (probeResults[0] is Curve curve)
+                        {
+                            if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            {
+                                return FindRootNextPath(ref sharedPath, curve, true);
+                            }
+                            else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                            {
+                                return FindRootNextPath(ref sharedPath, curve, false);
+                            }
+                            else if (sourceElement is Line sourceline && probeResults[0] is Line targetline)
+                            {
+                                var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
+                                var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
+                                var ang = mainVec.GetAngleTo(branchVec);
+                                if (ang > Math.PI)
                                 {
-                                    foreach (var secondEntity in Secondresults)
+                                    ang -= Math.PI;
+                                }
+                                //误差一度内认为近似垂直
+                                if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
+                                {
+                                    sharedPath.Add(targetline);
+                                    var square = Buffer(targetline);
+                                    var Secondresults = SpatialIndex.SelectCrossingPolygon(square);
+                                    Secondresults = Secondresults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+                                    Secondresults.Remove(sourceline);
+                                    Secondresults.Remove(targetline);
+                                    if (Secondresults.Count == 0)
+                                        break;
+                                    else
                                     {
-                                        if (secondEntity is BlockReference Secondblkref)
+                                        foreach (var secondEntity in Secondresults)
                                         {
-                                            if (CacheDataCollection.Contains(Secondblkref))
-                                                continue;
-                                            if (BreakpointRules(Secondblkref))
+                                            if (secondEntity is Curve secondCurve)
                                             {
-                                                continue;
+                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                {
+                                                    var newsharedPath = sharedPath.Clone().ToList();
+                                                    FindRootNextPath(ref newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                    {
+                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                    });
+                                                }
+                                                else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                {
+                                                    var newsharedPath = sharedPath.Clone().ToList();
+                                                    FindRootNextPath(ref newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                    {
+                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                    });
+                                                }
                                             }
-                                            CacheDataCollection.Add(Secondblkref);
-                                            Graphs.Add(CreatGraph(startEntity, Secondblkref, NextLine));
-                                        }
-                                        else if (secondEntity is Curve Secondcurve)
-                                        {
-                                            if (BreakpointRules(Secondcurve))
-                                            {
-                                                continue;
-                                            }
-                                            bool IsStartPoint = false;
-                                            IsStartPoint = Secondcurve.StartPoint.DistanceTo(LastLine.GetClosestPointTo(Secondcurve.StartPoint, false)) < Secondcurve.EndPoint.DistanceTo(LastLine.GetClosestPointTo(Secondcurve.StartPoint, false)) ? true : false;
-                                            searchpoint = IsStartPoint ? Secondcurve.StartPoint : Secondcurve.EndPoint;
-                                            FindGraph(startEntity, Secondcurve, searchpoint);
                                         }
                                     }
                                 }
                             }
                         }
+                        break;
                     }
-                }
-            }
-        }
-
-        public AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>> CreatGraph(Entity startEntity,BlockReference block, Entity SourceEntity)
-        {
-            var newGraph = new AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>>(false);
-            var Source = new ThAFASVertex() { VertexElement = startEntity, IsStartVertexOfGraph = true };
-            newGraph.AddVertex(Source);
-            BuildGraph(ref newGraph, new List<Curve>(), SourceEntity, block);
-            return newGraph;
-        }
-
-        public void BuildGraph(ref AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>> Graph, List<Curve> edge,Entity SourceEntity,BlockReference TargetEntity)
-        {
-            var Target = new ThAFASVertex() { VertexElement = TargetEntity, IsStartVertexOfGraph = false };
-            Graph.AddEdge(new ThAFASEdge<ThAFASVertex>(Graph.Vertices.Last(), Target) { Edge= edge });
-            Graph.AddVertex(Target);
-            List<Curve> Edge = new List<Curve>();
-
-            Polyline Square;
-            Square = Buffer(TargetEntity);
-            var results = SpatialIndex.SelectCrossingPolygon(Square);
-            results.Remove(SourceEntity);
-            results.Remove(TargetEntity);
-            if (results.Count == 0)
-            {
-                return;
-            }
-            foreach (var result in results)
-            {
-                if(result is BlockReference blk)
-                {
-                    BuildGraph(ref Graph, Edge, TargetEntity, blk);
-                }
-                if (result is Curve curve)
-                {
-                    Point3d searchpoint;
-                    //两边相接
-                    if (Square.Contains(curve.StartPoint))
+                //遇到多个元素，认为必定有块/出现分支现象
+                default:
                     {
-                        searchpoint = curve.EndPoint;
-                        BuildGraph(ref Graph,ref edge, curve, searchpoint);
+                        //遇到块的情况
+                        var blkResults = probeResults.Cast<Entity>().Where(e => e is BlockReference).ToList();
+                        if (blkResults.Count() > 0)
+                        {
+                            var blk = blkResults.First() as BlockReference;
+                            FindPath.Add(blk, sharedPath);
+                        }
+                        //遇到分支的情况
+                        else if (sourceElement is Line sourceline)
+                        {
+                            var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
+                            foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
+                            {
+                                var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
+                                var ang = mainVec.GetAngleTo(branchVec);
+                                if (ang > Math.PI)
+                                {
+                                    ang -= Math.PI;
+                                }
+                                //误差一度内认为近似垂直
+                                if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
+                                {
+                                    sharedPath.Add(targetline);
+                                    var square = Buffer(targetline);
+                                    var Secondresults = SpatialIndex.SelectCrossingPolygon(square);
+                                    Secondresults = Secondresults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+                                    Secondresults.Remove(sourceline);
+                                    Secondresults.Remove(targetline);
+                                    if (Secondresults.Count == 0)
+                                        break;
+                                    else
+                                    {
+                                        foreach (var secondEntity in Secondresults)
+                                        {
+                                            if (secondEntity is Curve secondCurve)
+                                            {
+                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                {
+                                                    var newsharedPath = sharedPath.Clone().ToList();
+                                                    FindRootNextPath(ref newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                    {
+                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                    });
+                                                }
+                                                else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                {
+                                                    var newsharedPath = sharedPath.Clone().ToList();
+                                                    FindRootNextPath(ref newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                    {
+                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                     }
-                    if (Square.Contains(curve.EndPoint))
-                    {
-                        searchpoint = curve.StartPoint;
-                        BuildGraph(ref Graph,ref edge, curve, searchpoint);
-                    }
-                } 
             }
+            return FindPath;
         }
 
-        public void BuildGraph(ref AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>> Graph, ref List<Curve> Edge, Curve SourceEntity, Point3d TargetPoint)
+        /// <summary>
+        /// 由一个块找到下个元素(块)
+        /// </summary>
+        /// <param name="existingElement">已存在的元素</param>
+        /// <param name="sourceElement">源点块</param>
+        /// <returns></returns>
+        public Dictionary<BlockReference, List<Curve>> FindNextElement(Entity existingElement, BlockReference sourceElement)
         {
-            Edge.Add(SourceEntity);
-            Polyline Square = TargetPoint.CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance);
-            var results = SpatialIndex.SelectCrossingPolygon(Square);
-            results.Remove(SourceEntity);
-            if (results.Count == 0)
-            {
-                return;
-            }
+            Dictionary<BlockReference, List<Curve>> NextElements = new Dictionary<BlockReference, List<Curve>>();
+            var results = SpatialIndex.SelectCrossingPolygon(Buffer(sourceElement));
+            results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+            results.Remove(existingElement);
+            results.Remove(sourceElement);
             foreach (var result in results)
             {
                 if (result is BlockReference blk)
                 {
-                    BuildGraph(ref Graph, Edge, SourceEntity, blk);
+                    //碰到终点
+                    if (FASRule(blk) || NextElements.ContainsKey(blk))
+                        continue;
+                    NextElements.Add(blk, new List<Curve>());
                 }
-                if (result is Curve curve)
+                else if (result is Curve curve)
                 {
-                    Point3d searchpoint;
-                    //两边相接
-                    if (Square.Contains(curve.StartPoint))
+                    //碰到终点
+                    if (CMTBRule(curve))
+                        continue;
+                    List<Curve> sharedPath = new List<Curve>();
+                    var blockobb = Buffer(sourceElement, 0);
+                    if (blockobb.Contains(curve.StartPoint) || blockobb.Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
-                        searchpoint = curve.EndPoint;
-                        BuildGraph(ref Graph,ref Edge, curve, searchpoint);
+                        var NextBlk = FindNextPath(ref sharedPath, curve, false);
+                        if (!NextBlk.IsNull() && !NextElements.ContainsKey(NextBlk))
+                        {
+                            NextElements.Add(NextBlk, sharedPath);
+                        }
                     }
-                    if (Square.Contains(curve.EndPoint))
+                    else if (blockobb.Contains(curve.EndPoint) || blockobb.Distance(curve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
-                        searchpoint = curve.StartPoint;
-                        BuildGraph(ref Graph,ref Edge, curve, searchpoint);
+                        var NextBlk = FindNextPath(ref sharedPath, curve, true);
+                        if (!NextBlk.IsNull() && !NextElements.ContainsKey(NextBlk))
+                            NextElements.Add(NextBlk, sharedPath);
                     }
                 }
             }
+            return NextElements;
         }
 
-        public Polyline Buffer(Entity entity)
+        /// <summary>
+        /// 由根节点找到下个元素(块)
+        /// </summary>
+        /// <param name="existingElement">已存在的元素</param>
+        /// <param name="sourceElement">源点块</param>
+        /// <returns></returns>
+        public Dictionary<BlockReference, List<Curve>> FindRootNextElement(Entity rootElement, Entity specifyElement)
         {
-            if (entity is Line line)
+            Dictionary<BlockReference, List<Curve>> NextElement = new Dictionary<BlockReference, List<Curve>>();
+            //本身就是根节点出发的，如果碰到另一个根节点，直接忽略
+            if (FASRule(specifyElement) || CMTBRule(specifyElement))
+                return new Dictionary<BlockReference, List<Curve>>() { };
+            //如果本身就是个块，则不用继续寻路
+            if (specifyElement is BlockReference blk)
+                return new Dictionary<BlockReference, List<Curve>>() { { blk, new List<Curve>() } };
+            //线需要寻块，且要考虑到一条线延伸多条线的情况
+            else if (specifyElement is Curve curve)
             {
-                return line.Buffer(ThAutoFireAlarmSystemCommon.ConnectionTolerance);
+                List<Curve> sharedpath = new List<Curve>();
+                //配电箱/短路隔离器
+                if (rootElement is BlockReference rootblk)
+                {
+                    //起点连着块
+                    if (Buffer(rootblk, 0).Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                    {
+                        NextElement = FindRootNextPath(ref sharedpath, curve, false);
+                    }
+                    //终点连着块
+                    else
+                    {
+                        NextElement = FindRootNextPath(ref sharedpath, curve, true);
+                    }
+                }
+                //桥架
+                else if (rootElement is Curve rootcurve)
+                {
+                    //起点连着桥架
+                    if (curve.StartPoint.DistanceTo(rootcurve.GetClosestPointTo(curve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                    {
+                        NextElement = FindRootNextPath(ref sharedpath, curve, false);
+                    }
+                    //终点连着桥架
+                    else
+                    {
+                        NextElement = FindRootNextPath(ref sharedpath, curve, true);
+                    }
+                }
+            }
+            return NextElement;
+        }
+
+        /// <summary>
+        /// 查找该空间所有的元素
+        /// </summary>
+        /// <param name="existingElement">已存在的元素</param>
+        /// <param name="space">空间</param>
+        /// <returns></returns>
+        public List<Entity> FindNextEntity(Entity existingEntity, Polyline space)
+        {
+            var results = SpatialIndex.SelectCrossingPolygon(space);
+            results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+            results.Remove(existingEntity);
+            return results.Cast<Entity>().ToList();
+        }
+
+        public DBText FindWireCircuitName(BlockReference blk)
+        {
+            var polyline = Buffer(blk, 0.0);
+            var results = SpatialIndex.SelectCrossingPolygon(polyline).Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(e => e is DBText);
+            return results.Cast<DBText>().Where(o => polyline.Contains(Database.GetDBTextReferenceOBBCenter(o))).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 延伸点至指定长度
+        /// </summary>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public Point3d ExtendLine(Point3d sp, Point3d ep, double length = 2000.0)
+        {
+            var vec = sp.GetVectorTo(ep).GetNormal();
+            return ep + vec.MultiplyBy(length);
+        }
+
+        public Polyline Buffer(Entity entity, double distance = ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+        {
+            if (entity is Curve curve)
+            {
+                if (curve is Line line)
+                {
+                    return line.Buffer(distance);
+                }
+                else if (curve is Arc arc)
+                {
+                    var objs = arc.TessellateArcWithArc(100.0).BufferPL(distance);
+                    return objs[0] as Polyline;
+                }
+                else if (curve is Polyline polyline)
+                {
+                    var objs = polyline.TessellatePolylineWithArc(100.0).BufferPL(distance);
+                    return objs.Cast<Polyline>().OrderByDescending(o => o.Length).First();
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
             else if (entity is BlockReference blk)
             {
-                Polyline poly = blk.ToOBB(blk.BlockTransform);
-                return poly.Buffer(ThAutoFireAlarmSystemCommon.ConnectionTolerance)[0] as Polyline;
+                Polyline rectangle = Database.GetBlockReferenceOBB(blk);
+                return rectangle.Buffer(distance)[0] as Polyline;
             }
             else
             {
+                //不支持其他的数据类型
                 throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// 画寻路算法路径，不要删掉，排查问题时很有用
+        /// </summary>
+        public void DrawGraphs()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(Database))
+            {
+                int colorindex = 1;
+                foreach (var graphs in GraphsDic.Values.ToList())
+                {
+                    foreach (var graph in graphs)
+                    {
+                        foreach (var item in graph.Graph.Edges)
+                        {
+                            item.Edge.ForEach(o =>
+                            {
+                                o.ColorIndex = colorindex;
+                                acadDatabase.ModelSpace.Add(o);
+                            });
+                        }
+                        foreach (var item in graph.Graph.Vertices)
+                        {
+                            var clone = item.VertexElement.Clone() as Entity;
+                            if (clone is BlockReference cloneblk)
+                            {
+                                cloneblk.ColorIndex = colorindex;
+                                acadDatabase.ModelSpace.Add(cloneblk);
+                                if (item.IsStartVertexOfGraph)
+                                {
+                                    DBText dBText = new DBText() { Height = 150, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, ColorIndex = colorindex, TextString = colorindex.ToString(), Position = cloneblk.Position.Add(new Point3d(0, 250, 0).GetAsVector()), AlignmentPoint = cloneblk.Position.Add(new Point3d(0, 250, 0).GetAsVector()) };
+                                    acadDatabase.ModelSpace.Add(dBText);
+                                }
+                            }
+                            if (clone is Curve clinecurve)
+                            {
+                                clinecurve.ColorIndex = colorindex;
+                                acadDatabase.ModelSpace.Add(clinecurve);
+                                if (item.IsStartVertexOfGraph)
+                                {
+                                    DBText dBText = new DBText() { Height = 150, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, ColorIndex = colorindex, TextString = colorindex.ToString(), Position = clinecurve.StartPoint.Add(new Point3d(0, 250, 0).GetAsVector()), AlignmentPoint = clinecurve.StartPoint.Add(new Point3d(0, 250, 0).GetAsVector()) };
+                                    acadDatabase.ModelSpace.Add(dBText);
+                                }
+                            }
+                        }
+                        colorindex++;
+                    }
+                }
             }
         }
     }
@@ -318,9 +919,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public ThAFASEdge(T source, T target) : base(source, target)
         {
-            //要根据实际情况去创建自己的边，没办法根据两个节点去创建边
-            //暂时还不清楚我要不要再去抽象一下生成一条线
-            //后面再说
             Edge = new List<Curve>() { };
         }
     }

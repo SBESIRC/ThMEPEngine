@@ -1,7 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
@@ -10,16 +17,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class GetInput
     {
-        public static void GetFireHydrantSysInput(ref FireHydrantSystemIn fireHydrantSysIn)
+        public static void GetFireHydrantSysInput(ref FireHydrantSystemIn fireHydrantSysIn, Point3dCollection selectArea)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var tuplePoint = Common.Utils.SelectPoints();//范围框定
-                var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
+                
 
                 var lineList = new List<Line>();//管段列表
                 var pointList = new List<Point3dEx>();//点集
-                
                 var ptVisit = new Dictionary<Point3dEx, bool>();//访问标志
 
                 var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
@@ -28,9 +33,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 PipeLineList.PipeLineAutoConnect(ref lineList);//管线自动连接
 
+                var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
+                var hydrantDB = hydrantEngine.Extract(acadDatabase.Database, selectArea);
+                fireHydrantSysIn.hydrantPosition = hydrantEngine.CreatePointList();
+
+                PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.hydrantPosition);//删除两个点都是端点的线段
+
                 var valveEngine = new ThExtractValveService();//提取蝶阀
                 var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
+                //假定同一图纸只存在一种类型的阀
+                fireHydrantSysIn.ValveIsBkReference = valveDB.Cast<Entity>().Where(e => e is BlockReference).Any();
                 var valveList = new List<Line>();
                 
                 PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);
@@ -43,34 +55,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 fireHydrantSysIn.angleList = nodeEngine.GetAngle();
                 fireHydrantSysIn.markList = nodeEngine.GetMark();
 
-                //管线添加
-                fireHydrantSysIn.ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
-                foreach (var L in lineList)
-                {
-                    var pt1 = new Point3dEx(L.StartPoint);
-                    var pt2 = new Point3dEx(L.EndPoint);
-                    ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2);
-                }
-
-                var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
-                var hydrantDB = hydrantEngine.Extract(acadDatabase.Database, selectArea);
-                fireHydrantSysIn.hydrantPosition = hydrantEngine.CreatePointList();
+                PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//管线添加
 
                 var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
                 var mark = markEngine.Extract(acadDatabase.Database, selectArea);
                 var pipeMarkSite = markEngine.GetPipeMarkPoisition();
-
-
-                foreach (var pms in pipeMarkSite)
-                {
-                    var markL = new List<Line>();
-                    foreach (var v in pms)
-                    {
-                        markL.Add(PointCompute.PointInLine(v, lineList));
-                    }
-                    fireHydrantSysIn.markLineList.Add(markL);
-                }
-
+                MarkLine.GetMarkLineList(ref fireHydrantSysIn, pipeMarkSite, lineList);
 
                 var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
                 var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
@@ -78,48 +68,31 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 var textEngine = new ThExtractLabelText();//提取文字
                 textEngine.Extract(acadDatabase.Database);
+                var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textEngine.Results.ToCollection());
 
-                var fireHydrantEngine = new ThExtractFireHydrant();
+                var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
+                var DNLine = DNLineEngine.Extract(acadDatabase.Database, selectArea);
+                var SlashPts = DNLineEngine.ExtractSlash();//斜线点集合
+                var leadLineDic = DNLineEngine.ExtractleadLine(SlashPts);
+                var segLineDic = DNLineEngine.ExtractSegLine(leadLineDic);
+                
+                var DNPipeEngine = new ThExtractPipeDN();//提取管径标注
+                var PipeDN = DNPipeEngine.Extract(acadDatabase.Database, selectArea);
+
+                fireHydrantSysIn.SlashDic = DNPipeEngine.GetSlashDic(leadLineDic, segLineDic);//斜点标注对
+
+                PtDic.CreateDNDic(ref fireHydrantSysIn, PipeDN, lineList);//创建DN字典对
+                
+                var fireHydrantEngine = new ThExtractFireHydrant();//提取室内消火栓平面
                 fireHydrantEngine.Extract(acadDatabase.Database);
+                //var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.Results.ToCollection());
+                var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.DBobjs);
 
-                foreach (var pt in fireHydrantSysIn.hydrantPosition)
-                {
-                    var flag = false;
-                    var tpt = new Point3dEx(new Point3d());
-                    foreach (var p in pointList)
-                    {
-                        if (p._pt.DistanceTo(pt._pt) < 200)
-                        {
-                            tpt = p;
-                            flag = true;
-                        }
+                var labelPtDic = PtDic.CreateLabelPtDic(fireHydrantSysIn.hydrantPosition, labelLine);//把在同一条标记线上的点聚集
+                var labelLineDic = PtDic.CreateLabelLineDic(labelPtDic, labelLine);//找到标注线
+                var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
 
-                    }
-                    if (!flag)
-                    {
-                        ;
-                    }
-                    var termPoint = new TermPoint(pt);
-                    termPoint.SetLines(labelLine);
-                    termPoint.SetPipeNumber(textEngine.Results);
-                    termPoint.SetType(fireHydrantEngine.Results);
-                    fireHydrantSysIn.termPointDic.Add(tpt, termPoint);
-                }
-
-                foreach (var pt in pointList)
-                {
-                    if (fireHydrantSysIn.ptDic[pt].Count == 1)
-                    {
-                        if(!fireHydrantSysIn.termPointDic.ContainsKey(pt))
-                        {
-                            var termPoint = new TermPoint(pt);
-                            termPoint.Type = 2;
-                            termPoint.PipeNumber = " ";
-                            fireHydrantSysIn.termPointDic.Add(pt, termPoint);
-
-                        } 
-                    }
-                }
+                PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             }
         }
     }

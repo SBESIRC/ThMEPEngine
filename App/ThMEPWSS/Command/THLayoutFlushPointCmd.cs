@@ -11,14 +11,14 @@ using CLI;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using ThMEPWSS.FlushPoint;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
-using ThMEPWSS.FlushPoint.Data;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPWSS.FlushPoint.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.FlushPoint;
+using ThMEPWSS.FlushPoint.Data;
+using ThMEPWSS.FlushPoint.Service;
 #endif
 
 namespace ThMEPWSS.Command
@@ -76,12 +76,12 @@ namespace ThMEPWSS.Command
 
                 var washPara = BuildWashParam(); //UI参数
                 var geoContent = ThGeoOutput.Output(geos); //数据
-                var washData = new ThWashGeoData();
+                var washData = new ThWashGeoDataMgd();
                 washData.ReadFromContent(geoContent);
 
-                var washPointEngint = new ThWashPointLayoutEngine();
-                double[] points = washPointEngint.Layout(washData, washPara);
-                var washPoints = ThFlushPointUtils.GetPoints(points);
+                var washPointEngint = new ThWashPointLayoutEngineMgd();
+                var result = washPointEngint.Run(washData, washPara);
+                var washPoints = ThWashPointResultParseService.Parse(result);
 
                 // 过滤哪些点位靠近排水设施，哪些远离排水设施
                 var filterService = new ThFilterWashPointsService()
@@ -123,9 +123,9 @@ namespace ThMEPWSS.Command
                 ThPointIdentificationService.LayoutInfo = layoutInfo;
             }
         }
-        private ThWashParam BuildWashParam()
+        private ThWashParamMgd BuildWashParam()
         {
-            var washPara = new ThWashParam();
+            var washPara = new ThWashParamMgd();
             // 保护半径
             washPara.R = (int)FlushPointVM.Parameter.ProtectRadius;
             // 建筑空间（隔油池、水泵房、垃圾房等）

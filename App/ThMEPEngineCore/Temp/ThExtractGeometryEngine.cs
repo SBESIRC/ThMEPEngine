@@ -25,6 +25,11 @@ namespace ThMEPEngineCore.Temp
                 Extrators.Add(extractor);
             }
         }
+
+        public void Remove(ThExtractorBase extractor)
+        {
+            Extrators.Remove(extractor);
+        }
         public void Accept(List<ThExtractorBase> extractors)
         {
             extractors.ForEach(o => Accept(o));
@@ -39,6 +44,10 @@ namespace ThMEPEngineCore.Temp
         public void Group(Dictionary<Entity, string> groupId)
         {
             Extrators.ForEach(o => (o as IGroup).Group(groupId));
+        }
+        public void Group2(Dictionary<Entity, string> group2Id)
+        {
+            Extrators.ForEach(o => o.Group2(group2Id));
         }
         public void Print(Database database)
         {

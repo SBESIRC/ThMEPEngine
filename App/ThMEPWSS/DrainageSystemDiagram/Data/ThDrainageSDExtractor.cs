@@ -28,14 +28,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDExtractor : ThExtractorBase
     {
-        private List<DBPoint> Points { get; set; }
-        public List<ThIfcSanitaryTerminalToilate> SanTmnList { get; private set; }
+        public List<ThTerminalToilate> SanTmnList { get; private set; }
+        private List<ThIfcSanitaryTerminalToilate > IfcSanList { get; set; }
         public ThMEPOriginTransformer Transfer { get; set; }
 
         public ThDrainageSDExtractor()
         {
             Category = BuiltInCategory.WaterSupplyPoint.ToString();
-            SanTmnList = new List<ThIfcSanitaryTerminalToilate>();
+            SanTmnList = new List<ThTerminalToilate>();
+            IfcSanList = new List<ThIfcSanitaryTerminalToilate>();
         }
 
         public override void Extract(Database database, Point3dCollection pts)
@@ -52,8 +53,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 foreach (var oriD in originDatas)
                 {
-                    transData.Add(oriD);
+                    
                 }
+            }
+            else
+            {
+                transData.AddRange(originDatas);
             }
 
             //recogition Engine
@@ -64,9 +69,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 foreach (var element in recEngine.Elements)
                 {
                     var toModel = element as ThIfcSanitaryTerminalToilate;
-                    SanTmnList.Add(toModel);
+                    IfcSanList.Add(toModel);
                 }
             }
+
+            //change IfcSanModel to this project model
+            SanTmnList.AddRange(IfcSanList.Select(x => new ThTerminalToilate(x.Outline, x.Type)));
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -137,7 +145,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
 
             // 通过获取的OriginData 分类
-            Elements.AddRange(originDatas.Select(x => new ThIfcSanitaryTerminalToilate(x.Geometry, x.Data as string)));
+            Elements.AddRange(originDatas.Select(x => new ThIfcSanitaryTerminalToilate (x.Geometry, x.Data as string)));
         }
     }
 

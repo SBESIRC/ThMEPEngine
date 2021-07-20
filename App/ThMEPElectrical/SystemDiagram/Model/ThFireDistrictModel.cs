@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using DotNetARX;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SystemDiagram.Model
@@ -48,6 +46,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public bool DrawFireDistrict { get; set; } = true;
 
         /// <summary>
+        /// 所拥有的线路
+        /// </summary>
+        public List<ThAlarmControlWireCircuitModel> WireCircuits { get; set; }
+
+        /// <summary>
         /// 初始化楼层（无防火分区）
         /// </summary>
         /// <param name="FireDistrictBlockReference">楼层块</param>
@@ -55,6 +58,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             this.FireDistrictNo = 1;
             this.FireDistrictBoundary = new Polyline() { Closed = true };
+            this.WireCircuits = new List<ThAlarmControlWireCircuitModel>();
             (this.FireDistrictBoundary as Polyline).CreatePolyline(FireDistrictBlockReference.GeometricExtents.ToRectangle().Vertices());
         }
 
@@ -65,6 +69,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
         internal void InitFireDistrict(int floorNumber, ThFireCompartment FireDistrict)
         {
             this.FireDistrictBoundary = FireDistrict.Boundary;
+            //using (Linq2Acad.AcadDatabase acad= Linq2Acad.AcadDatabase.Active())
+            //{
+            //    FireDistrictBoundary.ColorIndex = 2;
+            //    acad.ModelSpace.Add(FireDistrictBoundary);
+            //}
+            this.WireCircuits = new List<ThAlarmControlWireCircuitModel>();
             if (string.IsNullOrWhiteSpace(FireDistrict.Number))
             {
                 this.DrawFireDistrictNameText = true;
@@ -80,7 +90,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             else
             {
                 string[] FireDistrictInfo = FireDistrict.Number.Split('-');
-                if (FireDistrictInfo[0].Replace('B','-').Contains(floorNumber.ToString()))//防火分区和楼层一致才能说明该防火分区属于本楼层
+                if (FireDistrictInfo[0].Replace('B', '-').Contains(floorNumber.ToString()))//防火分区和楼层一致才能说明该防火分区属于本楼层
                     this.FireDistrictNo = int.Parse(FireDistrictInfo[1]);
                 else
                 {
@@ -119,6 +129,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
             {
                 DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"] = Math.Max(DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"], 2);
                 DataSummaryReturn.BlockData.BlockStatistics["喷淋泵"] = Math.Max(DataSummaryReturn.BlockData.BlockStatistics["喷淋泵"], 2);
+            }
+            //有[消火栓泵],[喷淋泵]，默认一定至少有一个[灭火系统压力开关]
+            if (DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"] > 0 || DataSummaryReturn.BlockData.BlockStatistics["喷淋泵"] > 0)
+            {
+                DataSummaryReturn.BlockData.BlockStatistics["灭火系统压力开关"] = Math.Max(DataSummaryReturn.BlockData.BlockStatistics["灭火系统压力开关"], 1);
             }
             //设置默认值
             ThBlockConfigModel.BlockConfig.Where(b => b.DefaultQuantity != 0).ForEach(o =>

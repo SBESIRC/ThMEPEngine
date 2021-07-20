@@ -15,20 +15,26 @@ namespace ThMEPElectrical.Model
         public readonly string AccessControlSystem = "出入口控制系统";
         public readonly string GuardTourSystem = "电子巡更系统";
         public readonly string RoomNameControl = "房间名称处理";
+        public readonly string Configs = "配置模式";
         /// <summary>
         /// 摄像机均布间距
         /// </summary>
-        public double videoDistance { get; set; }
+        public double videoDistance = 10000;
 
         /// <summary>
         /// 摄像机纵向盲区距离
         /// </summary>
-        public double videoBlindArea { get; set; }
+        public double videoBlindArea = 1250;
 
         /// <summary>
         /// 摄像机最大成像距离
         /// </summary>
-        public double videaMaxArea { get; set; }
+        public double videaMaxArea = 10000;
+
+        /// <summary>
+        /// 电子巡更系统排布间距
+        /// </summary>
+        public double gtDistance = 15000;
 
         /// <summary>
         /// 出入口控制系统配置表

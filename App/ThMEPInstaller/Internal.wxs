@@ -14,8 +14,11 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" Guid="{08623593-86CB-49DC-BCBB-85E82513B616}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Publics.BaseCode.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" Guid="{47411037-07C6-4ABA-A974-7F5D5291BE3C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ManagedLibrary.v16.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" Guid="{E8904C91-1819-4D3A-8B5C-5E2F59A57FB0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" KeyPath="yes" Source="$(var.GTEPath)\v120\CppLibrary.v16.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" Guid="{6160BEE2-BFCC-4AF6-89B8-DDD984307671}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" KeyPath="yes" Source="$(var.GTEPath)\v120\ManagedLibrary.v16.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -23,8 +26,11 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" Guid="{0DF4AD2D-8AE1-4085-9039-505E914DCCE9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Publics.BaseCode.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" Guid="{214D1817-A188-4B2E-BF33-C161DE0E73B3}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ManagedLibrary.v16.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Debug" Guid="{E9DB2BA8-71F5-4E10-B058-638D448A2A63}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_CppLibrary_Debug" KeyPath="yes" Source="$(var.GTEPath)\v140\CppLibrary.v16.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" Guid="{69D98B70-DB3E-4595-AD67-EC60F6D0F539}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" KeyPath="yes" Source="$(var.GTEPath)\v140\ManagedLibrary.v16.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -39,8 +45,11 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" Guid="{09718367-D0D7-4343-950D-D6C95B2AC2EF}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Publics.BaseCode.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" Guid="{8008CBA8-2D56-4D5D-8E5C-98D9208D5D22}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ManagedLibrary.v16.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" Guid="{25F8AD91-100B-4CE9-A826-64CBFA1BFAC0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v120\CppLibrary.v16.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" Guid="{C6DC3928-534D-4D14-B7C4-652A08D0A8EE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v120\ManagedLibrary.v16.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -48,8 +57,11 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" Guid="{86665659-595C-42D3-83B0-85460E273E5B}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Publics.BaseCode.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" Guid="{563D3185-5100-4343-997D-DE4C8BE1BC13}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ManagedLibrary.v16.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Release" Guid="{F629D533-E9F4-46FB-99D6-267AB7AA4C6A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_CppLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v140\CppLibrary.v16.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" Guid="{BD7FE7E2-9ED2-4D15-8135-DCB9E0BCE955}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" KeyPath="yes" Source="$(var.GTEPath)\v140\ManagedLibrary.v16.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -59,14 +71,18 @@
             <?if $(var.Configuration) = Debug ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CppLibrary_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CppLibrary_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ManagedLibrary_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ManagedLibrary_Release" />
             <?endif?>
         </ComponentGroup>

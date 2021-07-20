@@ -8,8 +8,10 @@ using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
@@ -19,9 +21,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         LayoutEmergencyAlarmService layoutEmergencyAlarmService = new LayoutEmergencyAlarmService();
         LayoutMonitoringService layoutMonitoringService = new LayoutMonitoringService();
 
-        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThStoreys floor)
+        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThEStoreys floor)
         {
-            HandleIntrusionAlarmRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.accessControlSystemTable);
+            HandleIntrusionAlarmRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.intrusionAlarmSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             List<LayoutModel> models = new List<LayoutModel>();
             foreach (var door in doors)
@@ -52,7 +54,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
                 }
             }
 
-            return models;
+            //控制每个房间只需要一个控制器
+            var controller = models.Where(x => x is ControllerModel).ToList();
+            var classifyController = controller.GroupBy(x => x.Room).Select(x => x.First()).ToList();
+            List<LayoutModel> resModels = models.Except(controller).ToList();
+            resModels.AddRange(classifyController);
+            return resModels;
         }
 
         /// <summary>
@@ -98,7 +105,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
+            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -112,7 +119,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
                     }
                 }
             }
-            var roomBInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
+            var roomBInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -144,7 +151,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             roomBType = LayoutType.Nothing;
 
             bool findRule = false;
-            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => x.roomA.Contains(roomA.Name)).ToList();
+            var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)

@@ -44,19 +44,72 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            var tolerance = 800;
+            if (srcBlockData.EffectiveName.Contains("防火阀"))
+            {
+                TransformByCenter_FireDamper(blkRef, srcBlockData);
+            }
+            else if (srcBlockData.EffectiveName.Contains("自动扫描射水高空水炮") ||
+                     srcBlockData.EffectiveName.Contains("消防炮") ||
+                     srcBlockData.EffectiveName.Contains("大空间灭火装置") ||
+                     srcBlockData.EffectiveName.Contains("自动扫描射水喷头"))
+            {
+                TransformByCenter(blkRef, srcBlockData, tolerance);
+            }
+            else
+            {
+                tolerance = 100;
+                TransformByCenter(blkRef, srcBlockData, tolerance);
+            }
+        }
+
+        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData, int tolerance)
+        {
+            // 考虑几何中心点与位置点的偏差，如果偏差在允许范围内，则取位置点进行计算
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                blockReference.TransformBy(srcBlockReference.MCS2WCS);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < tolerance
+                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
+                var srcBlockDataPosition = new Point3d().TransformBy(srcBlockData.MCS2WCS);
+                var srcBlockDataPoint = srcBlockData.GetCentroidPoint().DistanceTo(srcBlockDataPosition) < tolerance
+                    ? srcBlockDataPosition : srcBlockData.GetCentroidPoint();
+                var offset = targetPoint.GetVectorTo(srcBlockDataPoint);
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
+            }
+        }
+
+        private void TransformByCenter_FireDamper(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            // 考虑防火阀的几何中心
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var dynamicProperties = srcBlockData.CustomProperties;
+                double length = 0, width = 0;
+                if (srcBlockData.CustomProperties.Contains("长度"))
+                {
+                    length = (double)dynamicProperties.GetValue("长度");
+                }
+                if (srcBlockData.CustomProperties.Contains("宽度或直径"))
+                {
+                    width = (double)dynamicProperties.GetValue("宽度或直径");
+                }
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
+                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
+                var srcBlockDataPosition = new Point3d(width / 2, -length / 2, 0).TransformBy(srcBlockData.MCS2WCS);
+                var offset = targetPoint.GetVectorTo(srcBlockDataPosition);
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
         public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             AdjustRotation(blkRef, srcBlockReference);
-            AdjustPosition(blkRef, srcBlockReference);
         }
 
         private void AdjustRotation(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
@@ -64,28 +117,17 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
                 double rotation = srcBlockReference.Rotation;
-                if ((rotation - Math.PI / 2) > ThBConvertCommon.radian_tolerance &&
-                    (rotation - Math.PI * 3 / 2) <= ThBConvertCommon.radian_tolerance)
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
+                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
+                if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, blockReference.Position));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
                 }
-            }
-        }
-
-        private void AdjustPosition(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
-        {
-            // 当图块的基点与其中图元的OBB内部或边界上时，目标块基点与源块基点相同
-            // 当图块的基点在其中图元的OBB外部时，目标块基点选择源块图元OBB的几何中心
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef);
-                var blockReferenceOBB = blockReference.GetBlockReferenceOBB(blockReference.BlockTransform);
-                if (!blockReferenceOBB.ContainsPoint(blockReference.Position))
+                else
                 {
-                    var centroid = blockReferenceOBB.GetCentroidPoint();
-                    var offset = centroid.GetVectorTo(blockReference.Position);
-                    blockReference.TransformBy(Matrix3d.Displacement(offset));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
                 }
             }
         }

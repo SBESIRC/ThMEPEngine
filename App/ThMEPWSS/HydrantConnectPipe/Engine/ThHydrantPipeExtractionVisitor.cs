@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.HydrantConnectPipe.Engine
@@ -18,6 +19,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
             if (dbObj is BlockReference blkref)
             {
                 HandleBlockReference(elements, blkref, matrix);
+            }
+            else if(dbObj is Circle circle)
+            {
+                HandleCircle(elements, circle, matrix);
             }
         }
 
@@ -40,6 +45,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
                     return true;
                 }
             }
+            else if(entity is Circle)
+            {
+                if(entity.Layer == "W-FRPT-HYDT-EQPM" || entity.Layer == "W-FRPT-HYDT" || entity.Layer == "W-FRPT-EXTG")
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -58,12 +70,26 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
             });
         }
 
+        private void HandleCircle(List<ThRawIfcDistributionElementData> elements, Circle circle, Matrix3d matrix)
+        {
+            var clone = circle.GetTransformedCopy(matrix) as Circle;
+            elements.Add(new ThRawIfcDistributionElementData()
+            {
+                Geometry = clone,
+                Data = clone.ToRectangle()
+        }) ;
+        }
+
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
         {
             if (ent is BlockReference br)
             {
                 //TODO: 获取块的OBB
                 return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else if (ent is Circle circle)
+            {
+                return xclip.Contains(circle.ToRectangle());
             }
             else
             {

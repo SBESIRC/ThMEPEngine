@@ -6,8 +6,9 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -54,6 +55,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 };
                 instance.Extract(database, pts);
                 Doors = instance.Polys;
+            }
+            if (FilterMode == FilterMode.Window)
+            {
+                Doors = FilterWindowPolygon(pts,Doors.Cast<Entity>().ToList()).Cast<Polyline>().ToList();
             }
         }
 

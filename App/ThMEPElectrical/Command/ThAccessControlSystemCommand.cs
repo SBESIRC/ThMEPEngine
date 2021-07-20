@@ -2,6 +2,7 @@
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using System;
@@ -9,7 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService;
+using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
@@ -87,15 +90,57 @@ namespace ThMEPElectrical.Command
                     LayoutAccessControlService layoutService = new LayoutAccessControlService();
                     var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, floor);
 
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        foreach (var item in layoutInfo)
-                        {
-                            Line line = new Line(item.layoutPt, item.layoutPt + 1000 * item.layoutDir);
-                            //originTransformer.Reset(line);
-                            db.ModelSpace.Add(line);
-                        }
-                    }
+                    //插入图块
+                    InsertBlock(layoutInfo, originTransformer);
+
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    foreach (var item in layoutInfo)
+                    //    {
+                    //        var endPt = item.layoutPt + 500 * item.layoutDir;
+                    //        Line line = new Line(item.layoutPt, endPt);
+                    //        Circle circle = new Circle(endPt, Vector3d.ZAxis, 100);
+                    //        //originTransformer.Reset(line);
+                    //        db.ModelSpace.Add(line);
+                    //        db.ModelSpace.Add(circle);
+                    //    }
+                    //}
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入图块
+        /// </summary>
+        /// <param name="layoutModels"></param>
+        /// <param name="originTransformer"></param>
+        private void InsertBlock(List<AccessControlModel> layoutModels, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var model in layoutModels)
+            {
+                var pt = model.layoutPt;
+                //originTransformer.Reset(ref pt);
+
+                if (model.layoutDir.Y < 0)
+                {
+                    model.layoutDir = new Vector3d(model.layoutDir.X, -model.layoutDir.Y, 0);
+                }
+                double rotateAngle = Vector3d.XAxis.GetAngleTo(model.layoutDir, Vector3d.ZAxis);
+                if (model is Buttun)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.BUTTON_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is CardReader)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.CARDREADER_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is ElectricLock)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.ELECTRICLOCK_BLOCK_NAME, pt, rotateAngle, 100);
+                }
+                else if (model is Intercom)
+                {
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.INTERCOM_BLOCK_NAME, pt, rotateAngle, 100);
                 }
             }
         }

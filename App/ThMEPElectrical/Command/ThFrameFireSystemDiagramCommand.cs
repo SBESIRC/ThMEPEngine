@@ -3,18 +3,16 @@ using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using GeometryExtensions;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Electrical;
-using ThMEPElectrical.SystemDiagram.Engine;
-using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPElectrical.SystemDiagram.Service;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.SystemDiagram.Model;
+using ThMEPElectrical.SystemDiagram.Engine;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.Command
 {
@@ -46,6 +44,11 @@ namespace ThMEPElectrical.Command
                     {
                         return;
                     }
+
+                    //业务逻辑，处理0图层，将0图层 解锁，解冻，打开
+                    acadDatabase.Database.UnLockLayer("0");
+                    acadDatabase.Database.UnFrozenLayer("0");
+                    acadDatabase.Database.UnOffLayer("0");
 
                     //选择区域
                     var points = new Point3dCollection();
@@ -80,23 +83,47 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    //火灾自动报警系统diagram实例化
-                    var diagram = new ThAutoFireAlarmSystemModel();
-
                     //获取块引擎附加信息
                     var datas = BlockReferenceEngine.QueryAllOriginDatas();
 
-                    //填充块数量到防火分区
-                    diagram.SetGlobalBlockInfo(acadDatabase.Database,datas);
+                    //火灾自动报警系统diagram实例化
+                    ThAutoFireAlarmSystemModel diagram;
+                    List<Entity> requiredElement = new List<Entity>();
 
-                    //初始化楼层
+                    // 1 按防火分区区分   2 按回路区分
+                    if (FireCompartmentParameter.SystemDiagramGenerationType == 1)
+                    {
+                        diagram = new ThAutoFireAlarmSystemModelFromFireCompartment();
+                    }
+                    else
+                    {
+                        diagram = new ThAutoFireAlarmSystemModelFromWireCircuit();
+                        var RequiredElementEngine = new ThRequiredElementRecognitionEngine();
+                        var ControlCircuitEngine = new ThControlCircuitRecognitionEngine() { LayerFilter = new List<string>() { "E-FAS-WIRE" } };
+                        //按回路区分需要额外拿数据
+                        //拿到全图所有线
+                        ControlCircuitEngine.Recognize(acadDatabase.Database, points);
+                        ControlCircuitEngine.RecognizeMS(acadDatabase.Database, points);
+                        //获取选择连接关系区域其他的块
+                        RequiredElementEngine.Recognize(acadDatabase.Database, points);
+                        RequiredElementEngine.RecognizeMS(acadDatabase.Database, points);
+
+                        //填充到
+                        requiredElement.AddRange(ControlCircuitEngine.Elements.Select(o => o.Geometry));
+                        requiredElement.AddRange(BlockReferenceEngine.Elements.Select(o => o.Outline));
+                        requiredElement.AddRange(RequiredElementEngine.Elements.Select(o => o.Outline));
+                    }
+
+                    //填充块数量到防火分区
+                    diagram.SetGlobalData(acadDatabase.Database, datas, requiredElement);
+                    //初始化楼层(按防火分区划分)
                     var AddFloorss = diagram.InitStoreys(
                         acadDatabase,
                         StoreysRecognitionEngine.Elements,
                         compartments);
-                    
+
                     //绘画该图纸的防火分区编号
-                    diagram.DrawFireCompartmentNum(acadDatabase.Database, AddFloorss);
+                    diagram.DrawFloorsNum(acadDatabase.Database, AddFloorss);
 
                     //把楼层信息添加到系统图中
                     diagram.floors.AddRange(AddFloorss);

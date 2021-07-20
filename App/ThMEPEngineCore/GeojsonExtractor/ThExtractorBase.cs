@@ -2,6 +2,11 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
+using ThCADCore.NTS;
+using NFox.Cad;
+using System.Linq;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -32,6 +37,14 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public bool IsolateSwitch { get; set; }
 
         public string ElementLayer { get; set; }
+        /// <summary>
+        /// 是通过Window/Cross筛选
+        /// </summary>
+        public FilterMode FilterMode { get; set; }
+        /// <summary>
+        /// 房间框线处理后导致区域变化
+        /// </summary>
+        protected double LoopBufferLength = 10.0;
 
         public ThExtractorBase()
         {
@@ -41,12 +54,21 @@ namespace ThMEPEngineCore.GeojsonExtractor
             IsolateSwitch = false;
             UseDb3Engine = true;
             ColorIndex = 256;
+            FilterMode = FilterMode.Cross;
         }
         public abstract void Extract(Database database, Point3dCollection pts);
         public abstract List<ThGeometry> BuildGeometries();
         public virtual void SetRooms(List<ThIfcRoom> rooms)
         {
             //如果要进行孤立判断，需要将Room传入到对应的Extractor中
+        }
+        protected virtual List<Entity> FilterWindowPolygon(Point3dCollection pts,List<Entity> ents)
+        {
+            var loop = pts.CreatePolyline();
+            var bufferService = new ThNTSBufferService();
+            var enlarge = bufferService.Buffer(loop, LoopBufferLength) as Polyline;
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
+            return spatialIndex.SelectWindowPolygon(enlarge).Cast<Entity>().ToList();
         }
     }
     public enum SwitchStatus
@@ -59,5 +81,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
         Unknown,
         Private,
         Public
+    }
+    public enum FilterMode
+    {
+        Window,
+        Cross
     }
 }

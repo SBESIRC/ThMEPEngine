@@ -1,6 +1,7 @@
 ﻿using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
@@ -12,7 +13,6 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
-                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsDoorStoneLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -21,14 +21,9 @@ namespace ThMEPEngineCore.Service
 
         private static bool IsDoorStoneLayer(string name)
         {
-            string endChars = "DEFPOINTS-1";
+            string pattern = @"(DEFPOINTS-)\d+";
             string newName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            int index = newName.LastIndexOf(endChars);
-            if (index >= 0 && (index+endChars.Length)==newName.Length)
-            {
-                return true;
-            }
-            return false;
+            return Regex.IsMatch(newName.ToUpper(), pattern);
         }
     }
 }

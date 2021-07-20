@@ -9,7 +9,13 @@ namespace ThMEPEngineCore.Model
         public Point3d EndPoint { get; set; }
         public double Width { get; set; } 
         public double Height { get; set; }
+        public double DistanceToFloor { get; set; }
         public BeamComponentType ComponentType { get; set; }
+        public string Use { get; set; }
+        public ThIfcBeam()
+        {
+            Use = "";
+        }
     }
     public enum BeamComponentType
     {

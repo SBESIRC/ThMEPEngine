@@ -1,17 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using NFox.Cad;
 using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPWSS.HydrantConnectPipe.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.HydrantConnectPipe.Model;
+using ThMEPWSS.HydrantConnectPipe.Engine;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -22,7 +19,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var hydrantPipe = acadDb.ModelSpace.OfType<Circle>().Where(o => o.Layer == "W-FRPT-HYDT-EQPM").ToList();
+                var hydrantPipe = acadDb.ModelSpace.OfType<Circle>().Where(o => o.Layer == "W-FRPT-HYDT-EQPM" || o.Layer == "W-FRPT-HYDT" || o.Layer == "W-FRPT-EXTG").ToList();
                 var map = new Dictionary<Polyline, Circle>();
                 hydrantPipe.ForEach(o => map.Add(o.ToRectangle(),o));
 
@@ -40,7 +37,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var hydrantPipeEngine = new ThHydrantPipeRecognitionEngine())
             {
-                hydrantPipeEngine.RecognizeMS(database.Database, selectArea);//从本图上取数据
+                hydrantPipeEngine.Recognize(database.Database, selectArea);//从块里面提取块
+                hydrantPipeEngine.RecognizeMS(database.Database, selectArea);//从本图提取块
                 foreach (var element in hydrantPipeEngine.Datas)
                 {
                     ThHydrantPipe fireHydrantPipe = ThHydrantPipe.Create(element);

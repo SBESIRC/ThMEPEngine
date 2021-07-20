@@ -18,7 +18,6 @@
             <ComponentGroupRef Id="ProductComponentsAppMvvmLight" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppCGAL" />
-            <ComponentGroupRef Id="ProductComponentsAppGDAL" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
             <ComponentGroupRef Id="ProductComponentsHVACWin64" />
             <ComponentGroupRef Id="ProductComponentsDevExpress" />

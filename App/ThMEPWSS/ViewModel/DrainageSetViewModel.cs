@@ -12,7 +12,7 @@ namespace ThMEPWSS.Diagram.ViewModel
     {
         public DrainageSetViewModel()
         {
-            FloorLineSpace = 1800;
+            FloorLineSpace = 2500;
             FaucetFloor = "1";
             NoCheckValve = "";
             MaxDayQuota = 250;

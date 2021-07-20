@@ -50,6 +50,7 @@ namespace ThMEPEngineCore
         public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";
         public static string BEAM_GEOMETRY_ENDPOINT = "Beam_Geometry_Endpoint";
         public static string BEAM_GEOMETRY_STARTPOINT = "Beam_Geometry_StartPoint";
+        public static string BEAM_GEOMETRY_DISTANCETOFLOOR = "Beam_Geometry_DistanceToFloor";
 
         // 颜色
         public const int COLORINDEX_BEAM_PRIMARY = 1;
@@ -129,6 +130,7 @@ namespace ThMEPEngineCore
         public const double DoorStoneInterval=5.0;
         public const double DoorMaximumThick = 300;
         public const double DoorMinimumThick = 50;
+        public const double DoorStoneWidthTolerance = 110;
 
         /// <summary>
         /// 圆形柱细化弧长

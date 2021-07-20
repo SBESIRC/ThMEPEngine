@@ -88,7 +88,6 @@ namespace ThMEPEngineCore.Temp
                 return result;
             }
         }
-
     }
     public class StoreyInfo
     {        
@@ -97,21 +96,21 @@ namespace ThMEPEngineCore.Temp
         /// <summary>
         /// 楼层编号原始值
         /// </summary>
-        public string OriginFloorNumber { get; private set; }
+        public string OriginFloorNumber { get; set; }
         /// <summary>
         /// 解析过的楼层编号
         /// </summary>
-        public string StoreyNumber { get; private set; }
+        public string StoreyNumber { get; set; }
         /// <summary>
         /// 楼层范围
         /// </summary>
-        public string StoreyRange { get; private set; }
+        public string StoreyRange { get; set; }
         /// <summary>
         /// 楼层类型
         /// </summary>
-        public string StoreyType { get; private set; }
+        public string StoreyType { get; set; }
 
-        public string BasePoint { get; private set; }
+        public string BasePoint { get; set; }
 
         private ThStoreys Storey { get; set; }
 
@@ -120,6 +119,10 @@ namespace ThMEPEngineCore.Temp
             Storey = storey;
             Id = Guid.NewGuid().ToString();
             Parse();
+        }
+        public StoreyInfo()
+        {
+            Id = Guid.NewGuid().ToString();
         }
         private void Parse()
         {

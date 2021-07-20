@@ -9,5 +9,10 @@ namespace ThMEPEngineCore.Model
     public class ThIfcDoor : ThIfcBuildingElement
     {
         //
+        public string Code { get; set; }
+        public ThIfcDoor()
+        {
+            Code = "";
+        }
     }
 }

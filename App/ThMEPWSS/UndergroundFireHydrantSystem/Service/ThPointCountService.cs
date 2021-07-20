@@ -1,10 +1,10 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Shapes;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -28,8 +28,47 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
         public bool Equals(Point3dEx other)
         {
-            var tolerance = 1; //mm
+            var tolerance = 5; //mm
             return Math.Abs(other._pt.X - this._pt.X) < tolerance && Math.Abs(other._pt.Y - this._pt.Y) < tolerance;
+        }
+    }
+
+    public class LineSegEx : IEquatable<LineSegEx>
+    {
+        public Point3d _spt;
+        public Point3d _ept;
+
+        public LineSegEx()
+        {
+            _spt = new Point3d();
+            _ept = new Point3d();
+        }
+        public LineSegEx(Line line)
+        {
+            _spt = line.StartPoint;
+            _ept = line.EndPoint;
+        }
+        public LineSegEx(Point3d spt, Point3d ept)
+        {
+            _spt = spt;
+            _ept = ept;
+        }
+
+        public override int GetHashCode()
+        {
+            return _spt.GetHashCode() ^ _ept.GetHashCode();
+        }
+        public bool Equals(LineSegEx other)
+        {
+            var tolerance = 5; //mm
+            return (this._spt.DistanceTo(_spt) < tolerance && this._ept.DistanceTo(_ept) < tolerance) ||
+                   (this._spt.DistanceTo(_ept) < tolerance && this._ept.DistanceTo(_spt) < tolerance);
+        }
+
+        public bool IsTermPt(Point3d pt)
+        {
+            var tolerance = 5; //mm
+            return _spt.DistanceTo(pt) < tolerance || _ept.DistanceTo(pt) < tolerance;
         }
     }
 
@@ -87,6 +126,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         public static void AddPoint(ref FireHydrantSystemIn fireHydrantSysIn, ref Point3dEx pt1, ref Point3dEx pt2)
         {
+            if(pt1.Equals(pt2))//起点和终点相同的情况（比如手痒加了个圆）
+            {
+                return;
+            }
             if (fireHydrantSysIn.ptDic.Count == 0)
             {
                 fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });

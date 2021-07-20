@@ -1,4 +1,31 @@
-﻿排水系统图
+﻿厨房有洗衣机一定有地漏
+
+A-Kitchen-3
+A-Kitchen-4
+
+A-Toilet-1
+A-Toilet-2
+A-Toilet-3
+A-Toilet-4
+
+拖把池
+A-Kitchen-9
+洗衣机
+A-Toilet-9
+
+
+
+三板斧
+设置线型等 bylayer
+
+
+var line = new Line();
+line.LineWeight = LineWeight.ByLayer;
+
+
+Application.ShowAlertDialog Method
+
+排水系统图
 
 立管分组
 tl最高、最低层判断
@@ -13,6 +40,19 @@ cad命令如果不带ui的，可以在前面加个"-"
 
 
 
+修复业务bug
+D:\DATA\Git\ThMEPEngine\App\ThMEPWSS\Pipe\Service\ThDrainagePipeSystemService.cs
+修复绘图逻辑
+D:\DATA\Git\ThMEPEngine\App\ThMEPWSS\GroundDrainageSystem\Service\ThDrainageService.cs
+
+
+1l有卫生间就一定有单排
+阳台 有两个fd 一个阳台一个洗衣机，如果有1个，看有没有洗衣机
+
+串联并联判断
+
+双s 洗涤盆
+单s 阳台的那啥，好像是拖把池
 
 
 

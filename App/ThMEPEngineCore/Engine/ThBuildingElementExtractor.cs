@@ -86,7 +86,7 @@ namespace ThMEPEngineCore.Engine
                             var dbObj = acadDatabase.Element<Entity>(objId);
                             if (dbObj is BlockReference blockObj)
                             {
-                                if (blockObj.BlockTableRecord.IsNull)
+                                if (blockObj ==null || blockObj.BlockTableRecord.IsNull)
                                 {
                                     continue;
                                 }

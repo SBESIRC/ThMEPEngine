@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using ThCADExtension;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -52,7 +53,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             var rule = Rules.First(o =>
                 (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] == block &&
-                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] == visibility);
+                 ThStringTools.CompareWithChinesePunctuation((string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY], visibility));
             return rule?.Transformation.Item2;
         }
     }

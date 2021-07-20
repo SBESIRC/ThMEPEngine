@@ -28,70 +28,30 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             var lines = new List<Line>();
 
-            var simplifiedLines = ThMEPLineExtension.LineSimplifier(allPipeOri.ToCollection(), 500, 20, 2, Math.PI / 180.0);
+            var simplifiedLines = ThDrainageSDLineExtension.LineSimplifier(allPipeOri.ToCollection(), 500, 20, 2, Math.PI / 180.0);
             //DrawUtils.ShowGeometry(simplifiedLines, "l061link", 0);
 
+            var extendLines = extendLine(simplifiedLines);
+            //DrawUtils.ShowGeometry(extendLines, "l062link", 1);
 
-            lines = breakLine(simplifiedLines);
-            //DrawUtils.ShowGeometry(lines, "l062link", 1);
+            lines = breakLine(extendLines);
+            //DrawUtils.ShowGeometry(lines, "l063link", 1);
 
             return lines;
         }
 
-        private static List<Line> simplifiyLine2(List<Curve> allPipeOri)
+        private static List<Line> extendLine(List<Line> lines)
         {
-            var lines = new List<Line>();
-            var curves = allPipeOri.ToCollection();
 
-            // 配置参数
-            ThLaneLineEngine.extend_distance = 20;
-            ThLaneLineEngine.collinear_gap_distance = 2;
+            lines = lines.Select(y =>
+                {
+                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+                }).ToList();
 
-            // 合并处理
-            var mergedLines = ThLaneLineEngine.Explode(curves);
-            mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            DrawUtils.ShowGeometry(lines, "l21link", 1);
-            lines.Clear();
-
-            //mergedLines = ThLaneLineMergeExtension.Merge(mergedLines);
-            //mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            //DrawUtils.ShowGeometry(lines, "l22link", 2);
-            //lines.Clear();
-
-            //mergedLines = ThLaneLineEngine.Noding(mergedLines);
-            //mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            //DrawUtils.ShowGeometry(lines, "l23link", 3);
-            //lines.Clear();
-
-            //mergedLines = ThLaneLineEngine.CleanZeroCurves(mergedLines);
-            //mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            //DrawUtils.ShowGeometry(lines, "l24link", 4);
-            //lines.Clear();
-
-            // 延伸处理
-            var extendedLines = ThLaneLineExtendEngine.Extend(mergedLines);
-            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            DrawUtils.ShowGeometry(lines, "l25link", 5);
-            lines.Clear();
-
-            extendedLines = ThLaneLineMergeExtension.Merge(extendedLines);
-            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            DrawUtils.ShowGeometry(lines, "l26link", 6);
-            lines.Clear();
-
-            extendedLines = ThLaneLineEngine.Noding(extendedLines);
-            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            DrawUtils.ShowGeometry(lines, "l27link", 7);
-            lines.Clear();
-
-            extendedLines = ThLaneLineEngine.CleanZeroCurves(extendedLines);
-            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
-            DrawUtils.ShowGeometry(lines, "l28link", 40);
-
-            lines = breakLine(lines);
-            DrawUtils.ShowGeometry(lines, "l29link", 190);
 
             return lines;
+
         }
 
         private static List<Line> breakLine(List<Line> lines)
@@ -116,8 +76,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return brokeLines;
         }
 
-
-        public static void cleanNoUseLines(List<Point3d> pts, ref  List<Line> lines)
+        /// <summary>
+        /// clean the line which start-end pt is not same with supply point on wall
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="lines"></param>
+        public static void cleanNoUseLines(List<Point3d> pts, ref List<Line> lines)
         {
             var ptDict = getPtCount(lines);
 
@@ -137,7 +101,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
 
             lines.RemoveAll(l => ptClean.Contains(l));
-     
+
         }
 
         private static Dictionary<Point3d, List<Line>> getPtCount(List<Line> lines)
@@ -171,9 +135,93 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return ptDict;
         }
-    
 
-    
-    
+
+
+
+
+        /// <summary>
+        /// line simplify. a lot of bugs
+        /// </summary>
+        /// <param name="allPipeOri"></param>
+        /// <returns></returns>
+        public static List<Line> simplifyLineTest(List<Line> allPipeOri)
+        {
+            var lines = new List<Line>();
+
+            var pipeCurve = new List<Curve>();
+            pipeCurve.AddRange(allPipeOri);
+
+            var simplifiedLines = simplifiyLineTestNouse(pipeCurve);
+            lines = simplifiedLines;
+            //DrawUtils.ShowGeometry(simplifiedLines, "l061link", 0);
+
+
+            //lines = breakLine(simplifiedLines);
+            //DrawUtils.ShowGeometry(lines, "l29link", 190);
+
+
+            return lines;
+        }
+
+
+        private static List<Line> simplifiyLineTestNouse(List<Curve> allPipeOri)
+        {
+            var lines = new List<Line>();
+            var curves = allPipeOri.ToCollection();
+
+            // 配置参数
+            ThLaneLineEngine.extend_distance = 1;
+            ThLaneLineEngine.collinear_gap_distance = 2;
+
+            // 合并处理
+            var mergedLines = ThLaneLineEngine.Explode(curves);
+            mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l21link", 1);
+            lines.Clear();
+
+            mergedLines = ThLaneLineMergeExtension.Merge(mergedLines);
+            mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l22link", 2);
+            lines.Clear();
+
+            mergedLines = ThLaneLineEngine.Noding(mergedLines);
+            mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l23link", 3);
+            lines.Clear();
+
+            mergedLines = ThLaneLineEngine.CleanZeroCurves(mergedLines);
+            mergedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l24link", 4);
+            lines.Clear();
+
+            // 延伸处理
+            var extendedLines = ThLaneLineExtendEngine.Extend(mergedLines);
+            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l25link", 5);
+            lines.Clear();
+
+            //extendedLines = ThLaneLineMergeExtension.Merge(extendedLines);
+            //extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            //DrawUtils.ShowGeometry(lines, "l26link", 6);
+            //lines.Clear();
+
+            extendedLines = ThLaneLineEngine.Noding(extendedLines);
+            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l27link", 7);
+            lines.Clear();
+
+            extendedLines = ThLaneLineEngine.CleanZeroCurves(extendedLines);
+            extendedLines.Cast<Line>().ForEach(x => lines.Add(x));
+            DrawUtils.ShowGeometry(lines, "l28link", 40);
+
+
+            return lines;
+        }
+
+
+
+
+
     }
 }

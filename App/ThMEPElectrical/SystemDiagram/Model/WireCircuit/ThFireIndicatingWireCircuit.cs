@@ -56,15 +56,21 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
+        // 横线不支持画竖线方法
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
+            throw new NotSupportedException();
+        }
+
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 4;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-FAS-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "CONTINUOUS";
             this.StartIndexBlock = 2;
             this.Offset = 450;
-            this.EndIndexBlock = 6;
+            this.EndIndexBlock = 5;
         }
     }
 }

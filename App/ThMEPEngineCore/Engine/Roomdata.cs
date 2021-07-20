@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
-using System.Linq;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
-using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
     public class Roomdata
     {
+        public static double BufferDistance = 10.0;
         private const double WallBufferDistance = 20.0;
         private const double SlabBufferDistance = 20.0;
-        private DBObjectCollection _wall;
-        private DBObjectCollection _door;
-        private DBObjectCollection _window;
-        private DBObjectCollection _slab;
-        private DBObjectCollection _cornice;
+        private DBObjectCollection _wall; //仅支持Polyline
+        private DBObjectCollection _door; //仅支持Polyline
+        private DBObjectCollection _window; //仅支持Polyline
+        private DBObjectCollection _slab;  //仅支持Polyline
+        private DBObjectCollection _cornice; //仅支持Polyline
         public Roomdata(Database database, Point3dCollection polygon)
         {
-            _wall = new DBObjectCollection();
-            _door = new DBObjectCollection();
-            _window = new DBObjectCollection();
-            _slab = new DBObjectCollection();
-            _cornice = new DBObjectCollection();
             var wallengine = new ThDB3ArchWallRecognitionEngine();
             wallengine.Recognize(database, polygon);
             _wall = wallengine.Elements.Select(o => o.Outline).ToList().ToCollection();
@@ -47,8 +41,19 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         public void Deburring()
         {
+            //墙和楼板去毛皮
             _wall = _wall.BufferPolygons(-WallBufferDistance).BufferPolygons(WallBufferDistance);
             _slab = _slab.BufferPolygons(-SlabBufferDistance).BufferPolygons(SlabBufferDistance);
+            //对面积为0的Polyline进行处理
+            _slab = _slab.BufferZeroPolyline();
+            _cornice = _cornice.BufferZeroPolyline();
+            //墙和门再buffer以便形成房间洞
+            _door = _door.BufferPolygons(BufferDistance);
+            _wall = _wall.BufferPolygons(BufferDistance);
+            //窗和线脚也可能出现没有完全搭接的情况
+            _window = _window.BufferPolygons(BufferDistance);
+            _cornice = _cornice.BufferPolygons(BufferDistance);
+            _slab = _slab.BufferPolygons(BufferDistance);
         }
 
         /// <summary>

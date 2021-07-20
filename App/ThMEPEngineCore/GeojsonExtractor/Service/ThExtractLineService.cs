@@ -33,10 +33,5 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
                 }
             }
         }        
-
-        public override bool IsElementLayer(string layer)
-        {
-            return layer.ToUpper() == ElementLayer.ToUpper();
-        }
     }
 }

@@ -66,6 +66,15 @@ namespace ThMEPWSS
                             {
                                 if (p.ToString().Contains("分割" + Convert.ToString(index) + " X"))
                                 {
+                                    var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
+                                    if (SplitX < 0)
+                                    {
+                                        continue;
+                                    }
+                                    if(SplitX > eptX - spt.X)
+                                    {
+                                        continue;
+                                    }
                                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
                                     index += 1;
                                 }
@@ -138,7 +147,15 @@ namespace ThMEPWSS
                 var engine = new ThRoomMarkRecognitionEngine();//创建厨房识别引擎
                 if (per.Status == PromptStatus.OK)//框选择成功
                 {
+                    //var entity = db.Element<Entity>(per.ObjectId);
+
+                    //DBObjectCollection objs = new DBObjectCollection();
+                    //entity.Explode(objs);
+
                     var households = 0;
+
+                    var entity = db.Element<Entity>(per.ObjectId);
+                    dynamic acadObject = entity.AcadObject;
                     engine.Recognize(db.Database, db.Element<Polyline>(per.ObjectId).Vertices());
                     var ele = engine.Elements;
                     var roomMark = ele.Select(e => (e as ThMEPEngineCore.Model.ThIfcTextNote).Text);

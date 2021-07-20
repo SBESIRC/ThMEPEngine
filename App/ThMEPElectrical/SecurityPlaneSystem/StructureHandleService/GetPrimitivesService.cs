@@ -18,6 +18,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.StructureHandleService
 {
@@ -89,10 +90,18 @@ namespace ThMEPElectrical.StructureHandleService
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markRecEngine = new ThRoomMarkRecognitionEngine();
                 markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
-                 var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
+                var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);
 
+                foreach (var room in rooms)
+                {
+                    if (room.Boundary is MPolygon mPolygon)
+                    {
+                        var mPolygonLoops = mPolygon.Loops();
+                        room.Boundary = mPolygonLoops[0];
+                    }
+                }
                 return rooms;
             }
         }
@@ -182,17 +191,17 @@ namespace ThMEPElectrical.StructureHandleService
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public ThStoreys GetFloorInfo(Polyline polyline)
+        public ThEStoreys GetFloorInfo(Polyline polyline)
         {
             var bufferPoly = polyline.Buffer(100)[0] as Polyline;
-            var storeysRecognitionEngine = new ThStoreysRecognitionEngine();
+            var storeysRecognitionEngine = new ThEStoreysRecognitionEngine();
             using (AcadDatabase db = AcadDatabase.Active())
             {   
                 storeysRecognitionEngine.Recognize(db.Database, bufferPoly.Vertices());
             }
             if (storeysRecognitionEngine.Elements.Count > 0)
             {
-                return storeysRecognitionEngine.Elements[0] as ThStoreys;
+                return storeysRecognitionEngine.Elements[0] as ThEStoreys;
             }
 
             return null;

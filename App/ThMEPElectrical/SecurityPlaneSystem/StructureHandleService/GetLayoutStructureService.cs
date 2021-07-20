@@ -17,9 +17,6 @@ namespace ThMEPElectrical.StructureHandleService
 {
     public class GetLayoutStructureService
     {
-        double angle = 135;
-        double layoutRange = 5000;
-        double blindArea = 1250;
         double length = 200;
         /// <summary>
         /// 计算房间内能够布置摄像头的范围
@@ -27,7 +24,7 @@ namespace ThMEPElectrical.StructureHandleService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        public Polyline GetLayoutRange(Point3d pt, Vector3d dir)
+        public Polyline GetLayoutRange(Point3d pt, Vector3d dir, double angle, double layoutRange, double blindArea)
         {
             var rotateAngle = (angle / 2) * Math.PI / 180;
             var dir1 = dir.RotateBy(rotateAngle, Vector3d.ZAxis);
@@ -64,11 +61,12 @@ namespace ThMEPElectrical.StructureHandleService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        public Tuple<Point3d, Vector3d, double> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
+        public Tuple<Point3d, Vector3d, double, double> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
         {
             door = door.DPSimplify(1);
             var lines = door.GetAllLinesInPolyline().OrderByDescending(x => x.Length).ToList();
             double doorLength = lines.First().Length;
+            double doorWidth = lines.Last().Length;
             Point3d pt1 = new Point3d((lines[0].StartPoint.X + lines[0].EndPoint.X) / 2, (lines[0].StartPoint.Y + lines[0].EndPoint.Y) / 2, 0);
             Point3d pt2 = new Point3d((lines[1].StartPoint.X + lines[1].EndPoint.X) / 2, (lines[1].StartPoint.Y + lines[1].EndPoint.Y) / 2, 0);
             var roomPt = room.GetClosestPointTo(pt1, false);
@@ -77,7 +75,22 @@ namespace ThMEPElectrical.StructureHandleService
             var sp = roomPt.DistanceTo(pt2) > roomPt.DistanceTo(pt1) ? pt2 : pt1;
             var dir = (ep - sp).GetNormal();
 
-            return Tuple.Create(roomPt, dir, doorLength);
+            return Tuple.Create(roomPt, dir, doorLength, doorWidth);
+        }
+
+        /// <summary>
+        /// 计算门中心点
+        /// </summary>
+        /// <param name="door"></param>
+        /// <returns></returns>
+        public Point3d GetDoorCenterPt(Polyline door)
+        {
+            door = door.DPSimplify(1);
+            var lines = door.GetAllLinesInPolyline().OrderByDescending(x => x.Length).ToList();
+            Point3d pt1 = new Point3d((lines[0].StartPoint.X + lines[0].EndPoint.X) / 2, (lines[0].StartPoint.Y + lines[0].EndPoint.Y) / 2, 0);
+            Point3d pt2 = new Point3d((lines[1].StartPoint.X + lines[1].EndPoint.X) / 2, (lines[1].StartPoint.Y + lines[1].EndPoint.Y) / 2, 0);
+            var centerPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+            return centerPt;
         }
 
         /// <summary>
@@ -101,15 +114,16 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
-        /// 找到需要的与房间相交的门
+        /// 找到需要的房间内的柱
         /// </summary>
-        /// <param name="doors"></param>
+        /// <param name="columns"></param>
         /// <param name="room"></param>
         /// <returns></returns>
-        public List<Polyline> GetNeedDoors(List<Polyline> doors, Polyline room)
+        public List<Polyline> GetNeedColumns(List<Polyline> columns, Polyline room)
         {
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
-            return thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
+            var roomColumns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
+            return roomColumns.Cast<Polyline>().ToList();
         }
 
         /// <summary>
@@ -127,18 +141,16 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
-        /// 找到需要的房间内的柱
+        /// 找到需要的与房间相交的门
         /// </summary>
-        /// <param name="columns"></param>
+        /// <param name="doors"></param>
         /// <param name="room"></param>
         /// <returns></returns>
-        public List<Polyline> GetNeedColumns(List<Polyline> columns, Polyline room)
+        public List<Polyline> GetNeedDoors(List<Polyline> doors, Polyline room)
         {
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
-            var roomColumns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
-            return roomColumns.Cast<Polyline>().ToList();
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
+            return thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
         }
-
 
         /// <summary>
         /// 找到房间内需要的墙
@@ -195,7 +207,12 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(laneLst.ToCollection());
                 var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
-                resLines.Add(needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList());
+                var trimLanes = needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
+                if (trimLanes.Count() > 0)
+                {
+                    resLines.Add(trimLanes);
+                }
+
             }
 
             return resLines; 

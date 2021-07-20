@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +10,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class DepthFirstSearch
     {
-        public static void BranchSearch(Point3dEx startPt, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPath,
+        public static void BranchSearch(Point3dEx startPt, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> branchPath,
             List<Point3dEx> loopPath, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> extraNodes)
         {
             const double DisToTerm = 150;
             var cur = startPt;
+            
             var tempPath1 = new List<Point3dEx>();//存储第一条支链
             var tempPath2 = new List<Point3dEx>();//存储第2条支链
             var samePtLs = new List<Point3dEx>();
@@ -22,22 +24,35 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var breakFlag1 = false;
             while (true)
             {
+                if(tempPath1.Count != 0)
+                {
+                    if (tempPath1.Last().Equals(cur))
+                    {
+                        break;
+                    }
+                }
+                
                 tempPath1.Add(cur);//路径添加当前点
                 visited.Add(cur);//访问列表添加当前点
+                
                 foreach (var hp in fireHydrantSysIn.hydrantPosition)
                 {
                     if (hp._pt.DistanceTo(cur._pt) < DisToTerm)//找到终点
                     {
-                        rstPath.Add(tempPath1);
+                        branchPath.Add(tempPath1);
                         breakFlag1 = true;
                         break;
                     }
                     
                 }
-                if(fireHydrantSysIn.ptTypeDic[cur].Equals("MainLoop") && fireHydrantSysIn.ptDic[cur].Count == 1)
+                if (breakFlag1)//路径1遍历结束
+                {
+                    break;
+                }
+                if (fireHydrantSysIn.ptTypeDic[cur].Equals("MainLoop") && fireHydrantSysIn.ptDic[cur].Count == 1)
                 {
                     //是支路的边缘点且邻接点数目为1
-                    rstPath.Add(tempPath1);
+                    branchPath.Add(tempPath1);
                     breakFlag1 = true;
                     break;
                 }
@@ -47,15 +62,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     breakFlag1 = true;
                     break;
                 }
-                if (breakFlag1)//路径1遍历结束
-                {
-                    break;
-                }
+                
                 if (cur.Equals(startPt))//当前点是起始点
                 {
                     foreach (var pt in fireHydrantSysIn.ptDic[cur])
                     {
                         if(loopPath.Contains(pt))//若起始点的临近点是环路点，pass
+                        {
+                            continue;
+                        }
+                        if(visited.Contains(pt))//当前点已经遍历过
                         {
                             continue;
                         }
@@ -72,7 +88,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             continue;
                         }
                         cur = pt;
-                        visited.Add(pt);
+                        //visited.Add(pt);
                         break;
                     }
                 }
@@ -105,19 +121,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 cur = startPt;
                 while (true)
                 {
+                    if (tempPath2.Count != 0)
+                    {
+                        if (tempPath2.Last().Equals(cur))
+                        {
+                            break;
+                        }
+                    }
                     tempPath2.Add(cur);
                     visited.Add(cur);
+                    
                     foreach (var hp in fireHydrantSysIn.hydrantPosition)
                     {
                         if (hp._pt.DistanceTo(cur._pt) < DisToTerm)
                         {
-                            rstPath.Add(tempPath2);
+                            branchPath.Add(tempPath2);
                             return;
                         }
                     }
                     if (fireHydrantSysIn.ptTypeDic[cur].Equals("MainLoop") && fireHydrantSysIn.ptDic[cur].Count == 1)
                     {
-                        rstPath.Add(tempPath2);
+                        branchPath.Add(tempPath2);
                         return;
                     }
                     if (extraNodes.Contains(cur))
@@ -130,6 +154,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         foreach (var pt in fireHydrantSysIn.ptDic[cur])
                         {
                             if (loopPath.Contains(pt))
+                            {
+                                continue;
+                            }
+                            if (visited.Contains(pt))
                             {
                                 continue;
                             }
@@ -161,22 +189,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var rstPath = new List<Point3dEx>(tempPath);
                 var flag = true;
-                if(rstPaths.Count == 0)
+                if(rstPaths.Count == 0)//主环数为0
                 {
-                    rstPaths.Add(rstPath);
+                    rstPaths.Add(rstPath);//把当前路径加入
                 }
-                else
+                else//存在主环
                 {
-                    foreach(var tmpPath in rstPaths.ToArray())
+                    foreach(var tmpPath in rstPaths.ToArray())//主环遍历
                     {
-                        if(tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())
+                        if(tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())//存在同起点和终点的主环
                         {
-                            if(tmpPath.Count < rstPath.Count)
+                            if(tmpPath.Count < rstPath.Count)//取点数多的
                             {
                                 rstPaths.Remove(tmpPath);
                                 rstPaths.Add(rstPath);
                                 flag = false;
-                                foreach(var pt in tmpPath)
+                                foreach(var pt in tmpPath)//额外的点加入列表
                                 {
                                     if(!rstPath.Contains(pt))
                                     {
@@ -210,11 +238,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var subLoopPoint = false;//次环标志
             foreach (List<Point3dEx> nd in fireHydrantSysIn.nodeList)
             {
+                ;
                 if (nd.Contains(cur))
-                {
+                { 
                     subLoopPoint = true;
                     break;
                 }
+                ;
             }
             foreach (Point3dEx p in neighbors)
             {
@@ -249,39 +279,42 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             if (cur.Equals(target))
             {
-                var rstPath = new List<Point3dEx>(tempPath);
-                var flag = true;
-                if (rstPaths.Count == 0)
+                if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.angleList[cur]))
                 {
-                    rstPaths.Add(rstPath);
-                }
-                else
-                {
-                    foreach (var tmpPath in rstPaths.ToArray())
-                    {
-                        if (tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())
-                        {
-                            if (tmpPath.Count < rstPath.Count)
-                            {
-                                rstPaths.Remove(tmpPath);
-                                rstPaths.Add(rstPath);
-                                flag = false;
-                            }
-                            else
-                            {
-                                flag = false;
-                            }
-
-                        }
-                    }
-                    if (flag)
+                    var rstPath = new List<Point3dEx>(tempPath);
+                    var flag = true;
+                    if (rstPaths.Count == 0)
                     {
                         rstPaths.Add(rstPath);
                     }
-                }
-                return;
-            }
+                    else
+                    {
+                        foreach (var tmpPath in rstPaths.ToArray())
+                        {
+                            if (tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())
+                            {
+                                if (tmpPath.Count < rstPath.Count)
+                                {
+                                    rstPaths.Remove(tmpPath);
+                                    rstPaths.Add(rstPath);
+                                    flag = false;
+                                }
+                                else
+                                {
+                                    flag = false;
+                                }
 
+                            }
+                        }
+                        if (flag)
+                        {
+                            rstPaths.Add(rstPath);
+                        }
+                    }
+                    return;
+                }
+                
+            }
             var neighbors = fireHydrantSysIn.ptDic[cur];
             var subLoopPoint = false;
             var subStartPoint = false;

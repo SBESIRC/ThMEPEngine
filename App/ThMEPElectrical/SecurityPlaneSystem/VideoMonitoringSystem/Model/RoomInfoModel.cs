@@ -72,9 +72,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.Model
         EntranceGunCamera,
 
         /// <summary>
+        /// 入口覆盖枪式摄像机（翻转）
+        /// </summary>
+        EntranceGunCameraFlip,
+
+        /// <summary>
         /// 入口覆盖半球摄像机
         /// </summary>
         EntranceDomeCamera,
+
+        /// <summary>
+        /// 入口覆盖半球摄像机（翻转）
+        /// </summary>
+        EntranceDomeCameraFlip,
 
         /// <summary>
         /// 入口覆盖枪式摄像机(带室内保护罩)
@@ -82,9 +92,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.Model
         EntranceGunCameraWithShield,
 
         /// <summary>
-        /// 入口覆盖人脸识别
+        /// 入口覆盖枪式摄像机(带室内保护罩)（翻转）
+        /// </summary>
+        EntranceGunCameraWithShieldFlip,
+
+        /// <summary>
+        /// 入口覆盖人脸识别摄像机
         /// </summary>
         EntranceFaceRecognitionCamera,
+
+        /// <summary>
+        /// 入口覆盖人脸识别摄像机（翻转）
+        /// </summary>
+        EntranceFaceRecognitionCameraFlip,
     }
 
     public enum ConnectType

@@ -55,7 +55,8 @@ namespace ThMEPEngineCore.Model
             {
                 { ThMEPEngineCoreCommon.BEAM_GEOMETRY_STARTPOINT, patterns[1]},
                 { ThMEPEngineCoreCommon.BEAM_GEOMETRY_ENDPOINT, patterns[2]},
-                { ThMEPEngineCoreCommon.BEAM_GEOMETRY_SIZE, patterns[3]}
+                { ThMEPEngineCoreCommon.BEAM_GEOMETRY_SIZE, patterns[3]},
+                { ThMEPEngineCoreCommon.BEAM_GEOMETRY_DISTANCETOFLOOR, patterns[4]}
             };
         }
     }

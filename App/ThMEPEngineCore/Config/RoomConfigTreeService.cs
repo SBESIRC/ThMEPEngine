@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Config
@@ -121,6 +122,37 @@ namespace ThMEPEngineCore.Config
             }
 
             return GetChildNode(node.child.Last(), level);
+        }
+
+        /// <summary>
+        /// 判断两个房间名是否相等
+        /// </summary>
+        /// <param name="roomA"></param>
+        /// <param name="roomB"></param>
+        /// <returns></returns>
+        public static bool CompareRoom(string roomA, string roomB)
+        {
+            if (roomA == roomB)
+            {
+                return true;
+            }
+
+            if (roomA.Contains("*"))
+            {
+                string str = roomA;
+                if (roomA[0] != '*')
+                {
+                    str = '^' + str;
+                }
+                if (roomA[roomA.Length - 1] != '*')
+                {
+                    str = str + '$';
+                }
+                str = str.Replace("*", ".*");
+                return Regex.IsMatch(roomB, str);
+            }
+
+            return false;
         }
 
         /// <summary>

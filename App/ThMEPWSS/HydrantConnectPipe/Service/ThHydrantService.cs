@@ -18,6 +18,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var fireHydrantEngine = new ThHydrantRecognitionEngine())
             {
+                fireHydrantEngine.Recognize(database.Database, selectArea);//从块里取数据
                 fireHydrantEngine.RecognizeMS(database.Database, selectArea);//从本图上取数据
                 foreach (var element in fireHydrantEngine.Datas)
                 {

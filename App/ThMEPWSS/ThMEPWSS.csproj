@@ -25,6 +25,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -35,11 +36,20 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
-    <Compile Include="Assistant\FengDbgTesting.cs" />
-    <Compile Include="Assistant\FengKeys.cs" />
-    <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDPositionDimEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDAxonoExtractor.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThIfcSanitaryTerminalToilate.cs" />
+    <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDCoolSupplyStart.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDInsertService.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDLineExtension.cs" />
+    <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
+    <Compile Include="HydrantConnectPipe\Engine\ThNonBlockElementExtractor.cs" />
+    <Compile Include="HydrantConnectPipe\Model\ThBuildRoom.cs" />
+    <Compile Include="HydrantConnectPipe\Model\ThHydrantConnectPipeConfigInfo.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThBuildRoomService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThElectricWellService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantPipeLineService.cs" />
@@ -127,7 +137,6 @@
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtProcessService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDShortestPathService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCleanLineService.cs" />
-    <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="DrainageSystemDiagram\Assistant\CleanDebugDrawing.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRoomExtractor.cs" />
@@ -135,7 +144,7 @@
     <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDConnectCoolSupplyEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDColdWaterSupplyStartExtractor.cs" />
-    <Compile Include="DrainageSystemDiagram\Model\ThIfcSanitaryTerminalToilate.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilate.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJsonService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
@@ -291,7 +300,6 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
-    <Compile Include="Pipe\Service\ThDrainagePipeSystemService.cs" />
     <Compile Include="Pipe\Service\ThDrainageService.cs" />
     <Compile Include="Pipe\Service\ThDrainageSystemDiagram.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
@@ -360,24 +368,38 @@
     <Compile Include="ThSystemDiagramCmds.THDSPSXT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Command\ThFireHydrantCmd.cs" />
+    <Compile Include="Command\ThFireHydrantCmd.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\General.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\Block.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystem.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PointCompute.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\BlockInsert.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Dist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\MarkLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PipeLineList.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetPipePart.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetInput.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PointAngle.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PtDic.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PtSet.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Rects.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Sort.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PolyLineSplit.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PtInPtList.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\PtOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThExtractHYDTPipeService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
+    <Compile Include="ViewModel\HydrantConnectPipeViewModel.cs" />
+    <Compile Include="ViewModel\ThFireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
@@ -442,12 +464,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="UndergroundFireHydrantSystem\NewFolder1\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ThSystemDiagramCmds.THWDYTGS.cs" />
+    <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

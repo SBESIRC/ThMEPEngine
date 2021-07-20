@@ -8,14 +8,16 @@ using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutAccessControlService
     {
-        public List<AccessControlModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThStoreys floor)
+        public List<AccessControlModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThEStoreys floor)
         {
             HandleAccessControlRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.accessControlSystemTable);
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
@@ -88,7 +90,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
+            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -102,7 +104,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                     }
                 }
             }
-            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.roomA.Contains(connectRoom.Name)).ToList();
+            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -134,7 +136,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             roomBType = LayoutType.Nothing;
 
             bool findRule = false;
-            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.roomA.Contains(roomA.Name)).ToList();
+            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -149,7 +151,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                         }
                         else if (roomAInfo.connectType == ConnectType.Normal)
                         {
-                            if (roomAInfo.roomB.Contains(roomB.Name))
+                            if (roomB.Tags.Any(x=> roomAInfo.roomB.Contains(x)))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;

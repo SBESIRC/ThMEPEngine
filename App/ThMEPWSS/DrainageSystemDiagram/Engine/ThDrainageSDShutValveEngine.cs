@@ -1,39 +1,15 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDShutValveEngine
     {
-        public static List<KeyValuePair<Point3d, Vector3d>> tryTreeFunction(ThDrainageSDDataExchange dataset)
-        {
-            var a = new List<KeyValuePair<Point3d, Vector3d>>();
-            ThDrainageSDTreeNode root = dataset.PipeTreeRoot;
-
-            int i = 0;
-            int r = root.getLeafCount();
-
-            var leaf = root.Child.First().Child.First().Child.First().getLeaf();
-
-            List<ThDrainageSDTreeNode> valve = new List<ThDrainageSDTreeNode>();
-
-
-            var ba = root.Child.First().Child.First().Child.First().isDescendant(root.Child.First());
-
-
-            ba = root.Child.First().Child.First().Child.First().isDescendant(root.Child.First().Child[1]);
-
-
-            var rrr = root.Child.First().Child.First().Child.First().getDescendant();
-
-
-            return a;
-        }
-
-
-
         public static List<KeyValuePair<Point3d, Vector3d>> getShutValvePoint(ThDrainageSDDataExchange dataset)
         {
             var shutValveList = new List<KeyValuePair<Point3d, Vector3d>>();
@@ -41,8 +17,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (dataset.PipeTreeRoot != null)
             {
                 ThDrainageSDTreeNode root = dataset.PipeTreeRoot;
-
-                travelTree(root, "l30tree");
 
                 List<ThDrainageSDTreeNode> cutList = new List<ThDrainageSDTreeNode>();
 
@@ -68,16 +42,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var valve = new KeyValuePair<Point3d, Vector3d>(pt, dir);
 
             return valve;
-        }
-
-        private static void travelTree(ThDrainageSDTreeNode root, string layer)
-        {
-
-            int cs = root.getLeafCount();
-            int dp = root.getDepth();
-            DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("{0}_{1}", dp, cs), layer, (short)(dp % 7), 25, 100);
-
-            root.Child.ForEach(x => travelTree(x, layer));
         }
 
         private static void cutTree(ThDrainageSDTreeNode node, List<ThDrainageSDTreeNode> cutList, ThDrainageSDDataExchange dataset)
@@ -135,7 +99,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-
         private static ThDrainageSDTreeNode findRoot(ThDrainageSDTreeNode node)
         {
             ThDrainageSDTreeNode allroot = null;
@@ -164,7 +127,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     var sibling = node.getSibling();
                     var other = sibling.Sum(x => getLeafCountWithCondition(x, cutList));
 
-                    if (length < moveLength && other < leafNum)
+                    if (length < moveLength * 2 && other < leafNum)
                     {
                         currNode = currNode.Parent;
                     }
@@ -173,14 +136,16 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         bEnd = true;
                     }
                 }
+                else
+                {
+                    bEnd = true;
+                }
             }
 
             return currNode;
         }
 
-
-
-        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList, List<List<ThIfcSanitaryTerminalToilate>> islandGroupList)
+        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList, List<List<ThTerminalToilate>> islandGroupList)
         {
             ThDrainageSDTreeNode newNode = node;
 
@@ -207,7 +172,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList)
+        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
         {
             ThDrainageSDTreeNode newNode = node;
             List<string> HandWashSinkType = new List<string>() { "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
@@ -230,9 +195,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static List<List<ThIfcSanitaryTerminalToilate>> getIslandGroupList(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> GroupList, Dictionary<string, (string, string)> IslandPair)
+        private static List<List<ThTerminalToilate>> getIslandGroupList(Dictionary<string, List<ThTerminalToilate>> GroupList, Dictionary<string, (string, string)> IslandPair)
         {
-            var islandGroupList = new List<List<ThIfcSanitaryTerminalToilate>>();
+            var islandGroupList = new List<List<ThTerminalToilate>>();
 
             List<string> islandTraversal = new List<string>();
 
@@ -241,7 +206,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (islandTraversal.Contains(island.Key) == false)
                 {
 
-                    var group = new List<ThIfcSanitaryTerminalToilate>();
+                    var group = new List<ThTerminalToilate>();
                     group.AddRange(GroupList[island.Value.Item1]);
                     group.AddRange(GroupList[island.Value.Item2]);
                     islandGroupList.Add(group);
@@ -252,7 +217,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
             return islandGroupList;
         }
-
 
         private static int getLeafCountWithCondition(ThDrainageSDTreeNode node, List<ThDrainageSDTreeNode> cutList)
         {
@@ -287,13 +251,47 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-
-        private static ThIfcSanitaryTerminalToilate matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThIfcSanitaryTerminalToilate> terminalList)
+        private static ThTerminalToilate matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
         {
             var tol = new Tolerance(10, 10);
 
             var terminal = terminalList.Where(x => x.SupplyCoolOnWall.Where(pt => pt.IsEqualTo(node.Node, tol)).Count() > 0).FirstOrDefault();
             return terminal;
+        }
+
+        public static List<Line> cutPipe(List<KeyValuePair<Point3d, Vector3d>> valveList, List<Line> pipes)
+        {
+            var tol = new Tolerance(1, 1);
+            var finalLine = new List<Line>();
+
+            double scale = ThDrainageSDCommon.Blk_scale;
+            double blkSize = ThDrainageSDCommon.Blk_Size;
+
+            foreach (var valve in valveList)
+            {
+                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.Key, tol)).ToList();
+                if (line.Count > 0)
+                {
+                    var l = line.First();
+                    var dir = valve.Value;
+                    var blkS = valve.Key - dir * scale * blkSize;
+                    var blkE = valve.Key + dir * scale * blkSize;
+                    var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
+                    var newE2 = blkS == newE ? blkE : blkS;
+
+
+                    var cutpart1 = new Line(l.StartPoint, newE);
+                    var cutpart2 = new Line(newE2, l.EndPoint);
+                    finalLine.Add(cutpart1);
+                    finalLine.Add(cutpart2);
+                    pipes.Remove(l);
+                }
+
+            }
+
+            finalLine.AddRange(pipes);
+
+            return finalLine;
         }
     }
 }

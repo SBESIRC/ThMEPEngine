@@ -18,7 +18,10 @@ namespace ThMEPEngineCore.Engine
             }
             else if(dbObj is Line line)
             {
-                elements.AddRange(Handle(line, matrix));
+                var poly = new Polyline();
+                poly.AddVertexAt(0, new Point2d(line.StartPoint.X, line.StartPoint.Y), 0, 0, 0);
+                poly.AddVertexAt(1, new Point2d(line.EndPoint.X, line.EndPoint.Y), 0, 0, 0);
+                elements.AddRange(Handle(poly, matrix));
             }
         }
 
@@ -44,26 +47,9 @@ namespace ThMEPEngineCore.Engine
             return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
 
-        private List<ThRawIfcBuildingElementData> Handle(Line line, Matrix3d matrix)
-        {
-            List<Curve> curves = new List<Curve>();
-            if (IsBuildElement(line) && CheckLayerValid(line))
-            {
-                var clone = line.WashClone();
-                clone.TransformBy(matrix);
-                curves.Add(clone);
-            }
-            return curves.Select(o => CreateBuildingElementData(o)).ToList();
-        }
-
         public override bool IsBuildElement(Entity entity)
         {
-            if (entity.Hyperlinks.Count > 0)
-            {
-                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
-                return thPropertySet.IsSlab;
-            }
-            return false;
+            return entity.Hyperlinks.Count > 0;
         }
 
         private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)

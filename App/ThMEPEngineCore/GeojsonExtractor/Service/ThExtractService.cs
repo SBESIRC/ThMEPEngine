@@ -8,13 +8,30 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
     {
         public string ElementLayer { get; set; }
         public List<System.Type> Types { get; set; }
+        public string[] SplitLayers
+        {
+            get
+            {
+                return ElementLayer.Split(',');
+            }
+        }
         public ThExtractService()
         {
             ElementLayer = "";
             Types = new List<System.Type>();
         }
         public abstract void Extract(Database db, Point3dCollection pts);
-        public abstract bool IsElementLayer(string layer);
+        public virtual bool IsElementLayer(string layer)
+        {
+            foreach(string single in SplitLayers)
+            {
+                if(single.ToUpper()== layer.ToUpper())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         protected bool IsValidType(Entity ent)
         {
             return Types.Contains(ent.GetType());

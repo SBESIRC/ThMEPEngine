@@ -15,8 +15,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutOneWayVisitorTalkService
     {
-        double buttunWidth = 300;
+        double buttunWidth = 400;
         double cardReaderWidth = 400;
+        double cardReaderLength = 800;
         double angle = 45;
         public List<AccessControlModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
@@ -25,6 +26,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             //计算门信息
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
+            var otherDoorPt = doorCenterPt - roomDoorInfo.Item2 * (roomDoorInfo.Item4 / 2);
 
             //获取构建信息
             var bufferRoom = room.Buffer(5)[0] as Polyline;
@@ -33,9 +36,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1));
-            accessControlModels.Add(CalLayoutIntercom(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
-            accessControlModels.Add(CalLayoutButton(structs, bufferRoom, -roomDoorInfo.Item2, roomDoorInfo.Item1));
+            if (structs.Count <= 0)
+            {
+                return accessControlModels;
+            }
+            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item2));
+            accessControlModels.Add(CalLayoutIntercom(structs, bufferRoom, -roomDoorInfo.Item2, otherDoorPt));
+            accessControlModels.Add(CalLayoutButton(structs, bufferRoom, roomDoorInfo.Item2, roomDoorInfo.Item1));
 
             return accessControlModels;
         }
@@ -58,8 +65,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             }
 
             Buttun buttun = new Buttun();
-            buttun.layoutPt = layoutInfo.Value;
             buttun.layoutDir = dir;
+            buttun.layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
 
             return buttun;
         }
@@ -69,10 +76,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// </summary>
         /// <param name="pt"></param>
         /// <returns></returns>
-        private ElectricLock CalLayoutElectricLock(Point3d pt)
+        private ElectricLock CalLayoutElectricLock(Point3d pt, Vector3d dir)
         {
             ElectricLock electricLock = new ElectricLock();
             electricLock.layoutPt = pt;
+            electricLock.layoutDir = dir;
             return electricLock;
         }
 
@@ -95,9 +103,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             }
 
             Intercom intercom = new Intercom();
-            intercom.layoutPt = layoutInfo.Value;
             intercom.layoutDir = dir;
-
+            intercom.layoutPt = layoutInfo.Value + dir * (cardReaderLength / 2);
             return intercom;
         }
     }

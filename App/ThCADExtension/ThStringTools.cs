@@ -237,5 +237,18 @@ namespace ThCADExtension
             return numBytes.ToString();
         }
 
+        public static bool CompareWithChinesePunctuation(string str1, string str2)
+        {
+            return ToChinesePunctuation(str1) == ToChinesePunctuation(str2);
+        }
+
+        public static string ToChinesePunctuation(string str)
+        {
+            str = str.Replace("(", "（");
+            str = str.Replace(")", "）");
+            str = str.Replace(",", "，");
+            str = str.Replace(" ", "");
+            return str;
+        }
     }
 }

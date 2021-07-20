@@ -28,7 +28,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return areaGeom;
         }
 
-        public static List<ThGeometry> buildCoolPtGeometry(List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static List<ThGeometry> buildCoolPtGeometry(List<ThTerminalToilate> toilateList)
         {
             List<ThGeometry> geom = new List<ThGeometry>();
 
@@ -100,23 +100,23 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return columnGeom;
         }
 
-        public static string getAreaId(List<ThExtractorBase> archiExtractor)
-        {
-            string areaId = "";
+        //public static string getAreaId(List<ThExtractorBase> archiExtractor)
+        //{
+        //    string areaId = "";
 
-            var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
+        //    var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
 
-            if (extractor != null && extractor.Region.Count > 0)
-            {
-                var pl = extractor.Region[0].Geometry as Polyline;
-                var areaPolylineToIdDic = extractor.ToiletGroupId;
-                areaId = areaPolylineToIdDic[pl];
-            }
+        //    if (extractor != null && extractor.Region.Count > 0)
+        //    {
+        //        var pl = extractor.Region[0].Geometry as Polyline;
+        //        var areaPolylineToIdDic = extractor.ToiletGroupId;
+        //        areaId = areaPolylineToIdDic[pl];
+        //    }
 
-            return areaId;
-        }
+        //    return areaId;
+        //}
 
-        public static List<Line> updateToilateModel(List<ThToilateGJson> tGJList, List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static List<Line> updateToilateModel(List<ThToilateGJson> tGJList, List<ThTerminalToilate> toilateList)
         {
             List<Line> subLink = new List<Line>();
 
@@ -127,7 +127,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     //Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
 
-                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.SublinkLength;
+                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.LengthSublink;
 
                     toilate.SupplyCoolOnBranch.Add(subLinkEndPt);
                     //toilate.Dir = gj.Direction;
@@ -141,7 +141,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return subLink;
         }
 
-        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThIfcSanitaryTerminalToilate, List<Point3d>> toilatePtDict)
+        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThTerminalToilate, List<Point3d>> toilatePtDict)
         {
             List<ThToilateGJson> virtualModelList = new List<ThToilateGJson>();
 
@@ -170,7 +170,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return virtualModelList;
         }
 
-        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThIfcSanitaryTerminalToilate, Point3d> virtualPtDict)
+        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThTerminalToilate, Point3d> virtualPtDict)
         {
             List<ThToilateGJson> virtualModelList = new List<ThToilateGJson>();
 

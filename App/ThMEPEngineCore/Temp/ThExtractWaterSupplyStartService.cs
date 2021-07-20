@@ -44,10 +44,5 @@ namespace ThMEPEngineCore.Temp
                 }
             }
         }        
-
-        public override bool IsElementLayer(string layer)
-        {
-            return layer == ElementLayer;
-        }
     }
 }

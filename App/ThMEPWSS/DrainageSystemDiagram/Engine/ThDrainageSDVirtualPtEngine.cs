@@ -24,7 +24,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDVirtualPtEngine
     {
-        public static List<ThToilateGJson> getVirtualPtOfGroup(Point3d supplyStart, Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, List<ThToilateRoom> roomList, out Dictionary<ThIfcSanitaryTerminalToilate, Point3d> virtualPtDict, out Dictionary<string, List<ThIfcSanitaryTerminalToilate>> allToiInGroup)
+        public static List<ThToilateGJson> getVirtualPtOfGroup(Point3d supplyStart, Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, List<ThToilateRoom> roomList, out Dictionary<ThTerminalToilate, Point3d> virtualPtDict, out Dictionary<string, List<ThTerminalToilate>> allToiInGroup)
         {
             //拿到起始点
             List<Point3d> allRoomPt = new List<Point3d>();
@@ -118,10 +118,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// <param name="groupList"></param>
         /// <param name="ptDistDict"></param>
         /// <returns></returns>
-        private static Dictionary<string, Point3d> findVirtualPtGroup(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<Point3d, double> ptDistDict, Dictionary<string, (string, string)> islandPair, out Dictionary<string, List<ThIfcSanitaryTerminalToilate>> allToiInGroup)
+        private static Dictionary<string, Point3d> findVirtualPtGroup(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<Point3d, double> ptDistDict, Dictionary<string, (string, string)> islandPair, out Dictionary<string, List<ThTerminalToilate>> allToiInGroup)
         {
             var ptForGroup = new Dictionary<string, Point3d>();
-            allToiInGroup = new Dictionary<string, List<ThIfcSanitaryTerminalToilate>>();
+            allToiInGroup = new Dictionary<string, List<ThTerminalToilate>>();
 
             List<string> loopedGroup = new List<string>();
 
@@ -129,7 +129,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 if (loopedGroup.Contains(group.Key))
                 {
-                    //跳过处理的岛
+                    //跳过处理过的岛
                     continue;
                 }
 
@@ -161,7 +161,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static KeyValuePair<string, Point3d> findNearPtInIsland(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<Point3d, double> ptDistDict, (string, string) island)
+        private static KeyValuePair<string, Point3d> findNearPtInIsland(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<Point3d, double> ptDistDict, (string, string) island)
         {
             var island1 = groupList[island.Item1];
             var island2 = groupList[island.Item2];
@@ -171,10 +171,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var matrix1 = ThDrainageSDCommonService.getGroupMatrix(pts1);
 
-            var pts1Dict = pts1.ToDictionary(x => x, x => x.TransformBy(matrix1));
+            var pts1Dict = pts1.ToDictionary(x => x, x => x.TransformBy(matrix1.Inverse()));
             pts1 = pts1Dict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
 
-            var pts2Dict = pts2.ToDictionary(x => x, x => x.TransformBy(matrix1));
+            var pts2Dict = pts2.ToDictionary(x => x, x => x.TransformBy(matrix1.Inverse()));
             pts2 = pts2Dict.OrderBy(x => x.Value.X).Select(x => x.Key).ToList();
 
             var pts = new List<Point3d>();
@@ -184,6 +184,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             pts.Add(pts2.Last());
 
             var pt = pts.OrderBy(x => ptDistDict[x]).First();
+            var aaa = pts.ToDictionary(x => x, x => ptDistDict[x]);
 
             var tol = new Tolerance(10, 10);
             if (pts1.First().IsEqualTo(pt, tol))
@@ -233,9 +234,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// <param name="groupList"></param>
         /// <param name="ptForGroup"></param>
         /// <returns></returns>
-        private static Dictionary<ThIfcSanitaryTerminalToilate, Point3d> moveVirtualPt(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList, Dictionary<string, Point3d> ptForGroup, Dictionary<string, (string, string)> islandPair)
+        private static Dictionary<ThTerminalToilate, Point3d> moveVirtualPt(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<string, Point3d> ptForGroup, Dictionary<string, (string, string)> islandPair)
         {
-            var ptForVirtualDict = new Dictionary<ThIfcSanitaryTerminalToilate, Point3d>();
+            var ptForVirtualDict = new Dictionary<ThTerminalToilate, Point3d>();
 
             //no small room
             foreach (var virtualPt in ptForGroup)
@@ -254,10 +255,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// <param name="pt"></param>
         /// <param name="groupToilate"></param>
         /// <returns></returns>
-        private static KeyValuePair<ThIfcSanitaryTerminalToilate, Point3d> moveVirtualPtInGroup(Point3d pt, List<ThIfcSanitaryTerminalToilate> groupToilate)
+        private static KeyValuePair<ThTerminalToilate, Point3d> moveVirtualPtInGroup(Point3d pt, List<ThTerminalToilate> groupToilate)
         {
 
-            KeyValuePair<ThIfcSanitaryTerminalToilate, Point3d> movedPt;
+            KeyValuePair<ThTerminalToilate, Point3d> movedPt;
             Point3d ptTemp = pt;
             Vector3d moveDir;
 
@@ -301,7 +302,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 //moveDir = new Vector3d(0, 0, 0);
             }
 
-            ptTemp = pt + moveDir * ThDrainageSDCommon.MovedLength;
+            ptTemp = pt + moveDir * ThDrainageSDCommon.MoveDistVirtualPt;
 
             movedPt = new(toilate, ptTemp);
 

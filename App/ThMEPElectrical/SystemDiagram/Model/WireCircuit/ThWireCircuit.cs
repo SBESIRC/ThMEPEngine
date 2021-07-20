@@ -63,12 +63,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         /// <summary>
         /// 数据集合
         /// </summary>
-        protected ThFireDistrictModel fireDistrict { get; set; }
+        protected ThDrawModel fireDistrict { get; set; }
 
         /// <summary>
         /// 数据集合
         /// </summary>
-        protected List<ThFireDistrictModel> AllFireDistrictData { get; set; }
+        protected List<ThDrawModel> AllFireDistrictData { get; set; }
 
         /// <summary>
         /// 连接的块的信息
@@ -76,9 +76,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         //public List<ThConnectInfoModel> connectionModels = new List<ThConnectInfoModel>();
 
         /// <summary>
-        /// 绘制方法
+        /// 绘制方法(横线)
         /// </summary>
         public abstract List<Entity> Draw();
+
+        /// <summary>
+        /// 绘制方法(竖线)
+        /// </summary>
+        public abstract Dictionary<int, List<Entity>> DrawVertical();
 
         /// <summary>
         /// 此方法进行回路的初始化
@@ -90,7 +95,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         /// </summary>
         /// <param name="FloorIndex">系统图层数</param>
         /// <param name="fireDistrict">该防火分区数据</param>
-        public void SetFloorIndex(int FloorIndex, ThFireDistrictModel fireDistrict)
+        public void SetFloorIndex(int FloorIndex, ThDrawModel fireDistrict)
         {
             this.FloorIndex = FloorIndex;
             this.fireDistrict = fireDistrict;
@@ -101,7 +106,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         /// </summary>
         /// <param name="FloorIndex">系统图层数</param>
         /// <param name="fireDistrict">该防火分区数据</param>
-        public void SetFloorIndex(int FloorIndex, List<ThFireDistrictModel> fireDistrict)
+        public void SetFloorIndex(int FloorIndex, List<ThDrawModel> fireDistrict)
         {
             this.FloorIndex = FloorIndex;
             this.AllFireDistrictData = fireDistrict;

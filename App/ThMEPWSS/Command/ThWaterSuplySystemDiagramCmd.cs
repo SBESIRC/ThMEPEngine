@@ -318,7 +318,7 @@ namespace ThMEPWSS.Command
                                     acadDatabase.CurrentSpace.Add(lineNote);
 
                                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                                    ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0, new Dictionary<string, string> { { "标高", "H+X.XX" } });
+                                    ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0, new Dictionary<string, string> { { "标高", "X.XX" } });
                                 }
                             }
                         }

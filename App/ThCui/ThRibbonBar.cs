@@ -212,6 +212,18 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
+            //{
+            //    var subPanel = row.AddNewPanel();
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    row.AddNewButton("地下消火栓系统图",
+            //        "天华地下消火栓系统图",
+            //        "THDXXHSXTT",
+            //        "天华地下消火栓系统图",
+            //        "IDI_THCAD_THDXXHSXTT_SMALL",
+            //        "IDI_THCAD_THDXXHSXTT_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
+
             {
                 var subPanel = row.AddNewPanel();
                 var subRow = subPanel.AddNewRibbonRow();
@@ -237,7 +249,7 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THYSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
-                // 地上雨水系统图
+                // 地上给水系统图
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地上给水系统图",
                     "天华地上给水系统图",
@@ -246,19 +258,29 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSXTT_SMALL",
                     "IDI_THCAD_THJSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 地上排水系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上排水系统图",
+                    "天华地上排水系统图",
+                    "THPSXTT",
+                    "天华地上排水系统图",
+                    "IDI_THCAD_THPSXTT_SMALL",
+                    "IDI_THCAD_THPSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
 
-            //{
-            //    var subPanel = row.AddNewPanel();
-            //    var subRow = subPanel.AddNewRibbonRow();
-            //    row.AddNewButton("消火栓",
-            //        "天华消火栓",
-            //        "THXHSJH",
-            //        "天华消火栓",
-            //        "IDI_THCAD_THXHSJH_SMALL",
-            //        "IDI_THCAD_THXHSJH_LARGE",
-            //        RibbonButtonStyle.LargeWithText);
-            //}
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("消火栓校核",
+                    "天华消火栓校核",
+                    "THXHSJH",
+                    "天华消火栓校核",
+                    "IDI_THCAD_THXHSJH_SMALL",
+                    "IDI_THCAD_THXHSJH_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
         }
 
         private static void CreateInventoryPanel(RibbonTabSource tab)

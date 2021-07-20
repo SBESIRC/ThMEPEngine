@@ -7,9 +7,9 @@
   <!-- The manufacturer, for setup package publisher and folder info -->
   <?define Manufacturer = "天华AI研究中心" ?>
   <!-- The version number of this setup package-->
-  <?define Version = "1.4.3" ?>
+  <?define Version = "1.4.4" ?>
   <!-- Product code -->
-  <?define ProductCode = "79BF9352-065F-44D6-953A-CBC0A728B9EA" ?>
+  <?define ProductCode = "AE30A703-3897-42FB-9FB2-EF1C729B4E7A" ?>
   <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
   <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
   <!-- Autoloader path. -->
@@ -25,8 +25,8 @@
   <?define Dotfuscated = "." ?>
   <!-- DevExpress version suffix -->
   <?define DevExpressVersionSuffix = "v17.2" ?>
+  <!-- GTE Path -->
+  <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
   <!-- CGAL path -->
   <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
-  <!-- GDAL path -->
-  <?define GDALPath = "$(var.ProjectDir)\..\..\Externals\GDAL" ?>
 </Include>

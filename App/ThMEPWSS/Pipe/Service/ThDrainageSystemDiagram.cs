@@ -20,11 +20,12 @@ namespace ThMEPWSS.Pipe.Service
     using ThMEPWSS.Diagram.ViewModel;
     using DotNetARX;
     using NetTopologySuite.Geometries;
+    using ThMEPWSS.Pipe.Model;
 
     public partial class DrainageSystemDiagram
     {
 
-        public static void draw1(Point3d basePoint)
+        public static void BeginToDrawDrainageSystemDiagram(Point3d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -398,7 +399,6 @@ namespace ThMEPWSS.Pipe.Service
             {
                 o.PL = new ThwPipeLine();
                 var pl = o.PL;
-                pl.Label1 = "PL1-1,2";
                 pl.PipeRuns = new List<ThwPipeRun>();
                 for (int i = 0; i < storeys.Count; i++)
                 {
@@ -466,7 +466,7 @@ namespace ThMEPWSS.Pipe.Service
             //}
             return o;
         }
-        public static void DrawOutputs1(Point2d basePoint1, double width, ThwOutput output)
+        public static void DrawOutlets1(Point2d basePoint1, double width, ThwOutput output, double dy = -479)
         {
             Point2d pt2, pt3;
             if (output.DirtyWaterWellValues != null)
@@ -478,7 +478,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             {
                 var dx = width - 3600;
-                var vecs = new List<Vector2d> { new Vector2d(0, -479), new Vector2d(-121, -121), new Vector2d(-1879, 0), new Vector2d(0, -600), new Vector2d(5479 + dx, 0), new Vector2d(121, 121), new Vector2d(0, 1079), new Vector2d(-5600 - dx, -1800), new Vector2d(6079 + dx, 0), new Vector2d(121, 121) };
+                var vecs = new List<Vector2d> { new Vector2d(0, dy), new Vector2d(-121, -121), new Vector2d(-1879, 0), new Vector2d(0, -600), new Vector2d(5479 + dx, 0), new Vector2d(121, 121), new Vector2d(0, 1079), new Vector2d(-5600 - dx, -1800), new Vector2d(6079 + dx, 0), new Vector2d(121, 121) };
                 {
                     var segs = vecs.ToGLineSegments(basePoint1);
                     if (output.LinesCount == 1)
@@ -549,6 +549,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static void DrawDiryWaterWells1(Point2d pt, List<string> values)
         {
+            if (values == null) return;
             if (values.Count == 1)
             {
                 DrawDirtyWaterWell(pt, values[0]);
@@ -603,7 +604,7 @@ namespace ThMEPWSS.Pipe.Service
             return start;
         }
 
-        public static void draw6(Point2d basePoint)
+        public static void AbleToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var o = new ThwOutput();
             //o.DirtyWaterWellValues = new List<string>() { "1",  };
@@ -625,7 +626,7 @@ namespace ThMEPWSS.Pipe.Service
             o.LinesCount = 3;
             o.Hanging1 = new Hanging() { FloorDrainsCount = 1, HasDoubleSCurve = true };
             o.Hanging2 = new Hanging() { FloorDrainsCount = 2, HasDoubleSCurve = true };
-            DrawOutputs1(basePoint, 3600, o);
+            DrawOutlets1(basePoint, 3600, o);
         }
         public static void draw5(Point2d basePoint)
         {
@@ -647,21 +648,21 @@ namespace ThMEPWSS.Pipe.Service
 
             DrawVer1(new DrawingOption()
             {
-                basePoint = basePoint,
+                BasePoint = basePoint,
                 OFFSET_X = OFFSET_X,
                 SPAN_X = SPAN_X,
                 HEIGHT = HEIGHT,
                 COUNT = COUNT,
-                storeys = storeys,
-                groups = groups
+                Storeys = storeys,
+                Groups = groups
             });
 
         }
         public static void DrawVer1(DrawingOption option)
         {
-            var maxStoreyIndex = option.maxStoreyIndex;
-            var test = option.test;
-            var layer = option.layer;
+            var maxStoreyIndex = option.MaxStoreyIndex;
+            var test = option.IsDebugging;
+            var layer = option.Layer;
             if (string.IsNullOrWhiteSpace(layer)) layer = "W-DRAI-DOME-PIPE";
             void drawPipe(GLineSegment seg)
             {
@@ -678,16 +679,16 @@ namespace ThMEPWSS.Pipe.Service
                     line.ColorIndex = 256;
                 }
             }
-            var basePoint = option.basePoint;
+            var basePoint = option.BasePoint;
             var OFFSET_X = option.OFFSET_X;
             var SPAN_X = option.SPAN_X;
             var HEIGHT = option.HEIGHT;
             var COUNT = option.COUNT;
-            var groups = option.groups;
-            var storeys = option.storeys;
+            var groups = option.Groups;
+            var storeys = option.Storeys;
             var dy = HEIGHT - 1800.0;
             {
-                var drawStoreyLine = option.drawStoreyLine;
+                var drawStoreyLine = option.DrawStoreyLine;
                 if (drawStoreyLine)
                 {
                     var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
@@ -873,16 +874,16 @@ namespace ThMEPWSS.Pipe.Service
                                 //o.Hanging1 = new Hanging() { FloorDrainsCount = 1, HasDoubleSCurve = true };
                                 //o.Hanging2 = new Hanging() { FloorDrainsCount = 2, HasDoubleSCurve = true };
                                 //drawOutputs(basePt, 3600, o);
-                                if (thwPipeLine.Output != null) DrawOutputs1(basePt, 3600, thwPipeLine.Output);
+                                if (thwPipeLine.Output != null) DrawOutlets1(basePt, 3600, thwPipeLine.Output);
                             }
                         }
                         {
                             if (i == end)
                             {
                                 var dy = -3000;
-                                if (thwPipeLine.Comments != null)
+                                if (thwPipeLine.Labels != null)
                                 {
-                                    foreach (var comment in thwPipeLine.Comments)
+                                    foreach (var comment in thwPipeLine.Labels)
                                     {
                                         if (!string.IsNullOrEmpty(comment))
                                         {
@@ -1327,7 +1328,7 @@ namespace ThMEPWSS.Pipe.Service
         }
 
 
-        public static void draw4(Point2d basePoint)
+        public static void ReadyToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -1456,7 +1457,7 @@ namespace ThMEPWSS.Pipe.Service
 
 
         }
-        public static void draw3(Point2d basePoint)
+        public static void PreparedToDrawDrainageSystemDiagram(Point2d basePoint)
         {
             var OFFSET_X = 2500.0;
             var SPAN_X = 5500.0;
@@ -1541,243 +1542,6 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
         }
-        public static void DrawAiringSymbol(Point2d pt, bool canPeopleBeOnRoof)
-        {
-            var offsetY = canPeopleBeOnRoof ? 500.0 : 2000.0;
-            DrawAiringSymbol(pt, offsetY);
-        }
-        public static void DrawAiringSymbol(Point2d pt, double offsetY)
-        {
-            DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: "W-DRAI-DOME-PIPE", cb: br =>
-            {
-                br.ObjectId.SetDynBlockValue("距离1", offsetY);
-                br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
-            });
-        }
-        public static ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext commandContext { get => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext; set => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = value; }
-        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
-        {
-            Dbg.FocusMainWindow();
-            if (commandContext == null) return;
-            if (commandContext.StoreyContext == null) return;
-            if (commandContext.StoreyContext.thStoreysDatas == null) return;
-            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
-            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb, true))
-            {
-                DU.Dispose();
-                var storeys = commandContext.StoreyContext.thStoreysDatas;
-                List<StoreysItem> storeysItems;
-                List<DrainageDrawingData> drDatas;
-                var range = commandContext.range;
-                if (range != null)
-                {
-                    if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: true)) return;
-                }
-                else
-                {
-                    if (!CollectDrainageData(GeoFac.CreateGeometryEx(storeys.Select(x => x.Boundary.ToPolygon()).Cast<Geometry>().ToList()), adb, out storeysItems, out drDatas, commandContext, noWL: true)) return;
-                }
-                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                var allNumStoreyLabels = allNumStoreys.Select(i => i + "F").ToList();
-                var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
-                var start = allStoreys.Count - 1;
-                var end = 0;
-                var OFFSET_X = 2500.0;
-                var SPAN_X = 5500.0 + 500;
-                var HEIGHT = viewModel?.Params?.StoreySpan ?? 1800.0;
-                var COUNT = pipeGroupItems.Count;
-                var dy = HEIGHT - 1800.0;
-                var __dy = 300;
-                DU.Dispose();
-                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
-                DU.Draw(adb);
-            }
-        }
-
-        public static void draw2(Point3d basePoint)
-        {
-            var OFFSET_X = 2500.0;
-            var SPAN_X = 5500.0;
-            var HEIGHT = 1800.0;
-            //var HEIGHT = 5000.0;
-            var COUNT = 20;
-
-            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-            for (int i = 0; i < storeys.Count; i++)
-            {
-                var storey = storeys[i];
-                var bsPt1 = basePoint.OffsetY(HEIGHT * i);
-                DrawStoreyLine(storey, bsPt1, lineLen);
-            }
-            var outputStartPointOffsets = new Vector2d[COUNT];
-            var groups = Enumerable.Range(1, COUNT).Select(i => GenThwPipeLineGroup(storeys)).ToList();
-
-            {
-                var start = storeys.Count - 1;
-                var end = 0;
-                for (int j = 0; j < COUNT; j++)
-                {
-                    var v = default(Vector2d);
-                    for (int i = start; i >= end; i--)
-                    {
-                        var storey = storeys[i];
-                        var bsPt1 = basePoint.OffsetY(HEIGHT * i);
-                        {
-                            var basePt = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X) + v.ToVector3d();
-
-                            var grp = groups[j];
-                            //if (grp.LinesCount == 2 && grp.PL != null && grp.TL != null)
-                            if (grp.PL != null)
-                            {
-                                var r = grp.PL.PipeRuns.FirstOrDefault(r => r.Storey == storey);
-                                if (r != null)
-                                {
-                                    if (r.HasLongTranslator && r.HasShortTranslator)
-                                    {
-                                        if (r.IsLongTranslatorToLeftOrRight)
-                                        {
-                                            var height1 = LONG_TRANSLATOR_HEIGHT1;
-                                            var points1 = LONG_TRANSLATOR_POINTS;
-                                            var points2 = SHORT_TRANSLATOR_POINTS;
-                                            var lastPt1 = points1.Last();
-                                            NewMethod2(HEIGHT, ref v, basePt, points1, points2, height1);
-                                            if (r.HasCheckPoint)
-                                            {
-                                                DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), true);
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            var points1 = LONG_TRANSLATOR_POINTS.GetYAxisMirror();
-                                            var points2 = SHORT_TRANSLATOR_POINTS.GetYAxisMirror();
-                                            NewMethod3(HEIGHT, ref v, basePt, points1, points2);
-                                            var lastPt1 = points1.Last();
-                                            var height1 = LONG_TRANSLATOR_HEIGHT1;
-                                            if (r.HasCheckPoint)
-                                            {
-                                                DrawPipeCheckPoint(basePt.OffsetXY(lastPt1.X, HEIGHT - height1 + lastPt1.Y - CHECKPOINT_OFFSET_Y), false);
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                        }
-                                    }
-                                    else if (r.HasLongTranslator)
-                                    {
-                                        if (r.IsLongTranslatorToLeftOrRight)
-                                        {
-                                            var lastPt = NewMethod4(HEIGHT, ref v, basePt);
-                                            {
-                                                var startPoint = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
-                                                var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.ToGLineSegments(startPoint.ToPoint3d());
-                                                DrawDomePipes(segs);
-                                                if (r.HasCleaningPort)
-                                                {
-                                                    DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), true, 2);
-                                                }
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            var lastPt = NewMethod5(HEIGHT, ref v, basePt);
-                                            {
-                                                var pt = lastPt.TransformBy(basePt.OffsetY(HEIGHT - LONG_TRANSLATOR_HEIGHT1)).OffsetY(-300);
-                                                var segs = LEFT_LONG_TRANSLATOR_CLEANING_PORT_POINTS.GetYAxisMirror().ToGLineSegments(pt.ToPoint3d());
-                                                DrawDomePipes(segs);
-                                                if (r.HasCheckPoint)
-                                                {
-                                                    DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), false, 2);
-                                                }
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                        }
-                                    }
-                                    else if (r.HasShortTranslator)
-                                    {
-                                        if (r.IsShortTranslatorToLeftOrRight)
-                                        {
-                                            var points = SHORT_TRANSLATOR_POINTS;
-                                            NewMethod1(HEIGHT, ref v, basePt, points);
-                                            if (r.HasCheckPoint)
-                                            {
-                                                DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                            if (r.ShowShortTranslatorLabel)
-                                            {
-                                                var startPt = basePt.ToPoint2d() + v;
-                                                var vecs = new List<Vector2d> { new Vector2d(76, 76), new Vector2d(-424, 424), new Vector2d(-1900, 0) };
-                                                var segs = vecs.ToGLineSegments(startPt);
-                                                segs.RemoveAt(0);
-                                                DrawDraiNoteLines(segs);
-                                                var t = DU.DrawTextLazy("DN100乙字弯", 350, segs.Last().EndPoint);
-                                                SetLabelStylesForDraiNote(t);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            var points = SHORT_TRANSLATOR_POINTS.GetYAxisMirror();
-                                            NewMethod1(HEIGHT, ref v, basePt, points);
-                                            if (r.HasCheckPoint)
-                                            {
-                                                DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), false);
-                                            }
-                                            if (r.HasHorizontalShortLine)
-                                            {
-                                                DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        DrawDomePipes(new GLineSegment(basePt, basePt.OffsetY(HEIGHT)));
-                                        if (r.HasCheckPoint)
-                                        {
-                                            DrawPipeCheckPoint(basePt.OffsetY(HEIGHT / 2), true);
-                                        }
-                                        if (r.HasHorizontalShortLine)
-                                        {
-                                            DrawHorizontalLineOnPipeRun(HEIGHT, basePt);
-                                        }
-                                    }
-
-                                    if (false)
-                                    {
-                                        var vecs = new List<Vector2d> { new Vector2d(0, -700), new Vector2d(-121, -121), new Vector2d(-1259, 0), new Vector2d(-121, -121), new Vector2d(0, -859) };
-                                        var segs = vecs.ToGLineSegments(basePt.OffsetY(HEIGHT));
-                                        DrawDomePipes(segs);
-                                        v += new Vector2d(vecs.Sum(v => v.X), 0);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    outputStartPointOffsets[j] = v;
-                }
-            }
-
-
-        }
-
 
     }
 }

@@ -17,17 +17,13 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Orientation="Horizontal"  Height="30" Margin="10,5,10,5" Focusable="False">
-            <cus:ImageButton IsTabStop="True" TabIndex="0" Content="提取建筑底图信息" x:Name="btnGetReferenceDrawingInfo" Height="24" Margin="0,5,5,0" ImageTextLocation="TextOnly"></cus:ImageButton>
-            <cus:ImageButton IsTabStop="True" TabIndex="1" Content="提取本图建筑信息" x:Name="btnGetThisDrawingInfo" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
-        </StackPanel>
         <StackPanel Grid.Column="1" Grid.ColumnSpan="2"  Orientation="Horizontal"  Height="30" Margin="10,5,10,5" Focusable="False">
             <Label Content="配置原则：" VerticalContentAlignment="Center"  Focusable="False"></Label>
-            <ComboBox Height="22" Width="180" TabIndex="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+            <ComboBox Name="configList" Height="22" Width="180" TabIndex="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionChanged="configList_SelectionChanged"/>
         </StackPanel>
-        <TabControl Name="SecurityPlaneTab" Grid.Row="1" HorizontalAlignment="Left" Height="337" Margin="10,5,10,0" VerticalAlignment="Top" Width="572">
+        <TabControl Name="SecurityPlaneTab" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Left" Height="337" Margin="10,10,10,10" VerticalAlignment="Top" Width="572">
             <TabItem Header="视频监控系统">
-                <DataGrid x:Name="VideoMonitoringGrid" />
+                <DataGrid x:Name="VideoMonitoringGrid"  AutoGenerateColumns="False"/>
             </TabItem>
             <TabItem Header="入侵报警系统">
                 <DataGrid x:Name="IntrusionAlarmGrid" />
@@ -35,9 +31,13 @@
             <TabItem Header="出入口控制系统">
                 <DataGrid x:Name="AccessControlGrid" />
             </TabItem>
+            <TabItem Header="电子巡更系统">
+                <DataGrid x:Name="GuardTourGrid" />
+            </TabItem>
         </TabControl>
         <Grid Grid.Row="1" Grid.Column="1" Margin="10,5,10,5">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -48,14 +48,16 @@
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Content="摄像机均布间距："></Label>
-            <TextBox Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1" />
+            <TextBox Name="videoDistance" Grid.Row="0" Grid.Column="1" Width="130" Height="22" TabIndex="1"/>
             <Label Grid.Row="1" Grid.Column="0" Content="摄像机纵向盲区距离："></Label>
-            <TextBox Grid.Row="1" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="2" />
+            <TextBox x:Name="videoBlindArea" Grid.Row="1" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="2"/>
             <Label Grid.Row="2" Grid.Column="0" Content="摄像机最大成像距离：" VerticalContentAlignment="Center"></Label>
-            <TextBox Grid.Row="2" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3" />
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,5" VerticalAlignment="Bottom">
-                <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
-                <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
+            <TextBox Name="videaMaxArea" Grid.Row="2" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>
+            <Label Grid.Row="3" Grid.Column="0" Content="电子巡更排布间距：" VerticalContentAlignment="Center"></Label>
+            <TextBox x:Name="gtDistance" Grid.Row="3" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>
+            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,10" VerticalAlignment="Bottom">
+                <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnExportTable_Click"></cus:ImageButton>
+                <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnImportTabl1e_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="4" Content="一键布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnLayout_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="5" Content="自动连线" x:Name="btnAutoConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
             </StackPanel>

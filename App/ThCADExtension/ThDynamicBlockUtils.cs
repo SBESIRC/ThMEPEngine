@@ -82,7 +82,11 @@ namespace ThCADExtension
         public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
         {
             var visibility = blockReference.CurrentVisibilityStateValue();
-            return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+            if (!string.IsNullOrEmpty(visibility))
+            {
+                return VisibleEntities(blockReference.Database, blockReference.EffectiveName, visibility);
+            }
+            return new ObjectIdCollection();
         }
 
         /// <summary>
@@ -112,8 +116,8 @@ namespace ThCADExtension
             var visibilityStates = blockReference.DynablockVisibilityStates();
             var properties = blockReference.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
-                .Where(o => o.PropertyName == "可见性" || o.PropertyName == "可见性1");
-            return properties.First().Value as string;
+                .Where(o => o.IsVisibility());
+            return properties.Any() ? properties.First().Value as string : "";
         }
 
         // Reference:
@@ -132,6 +136,24 @@ namespace ThCADExtension
             {
                 blockReference.Explode(entitySet);
             }
+        }
+
+        /// <summary>
+        /// 是否是可见性属性
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static bool IsVisibility(this DynamicBlockReferenceProperty property)
+        {
+            // “可见性”的属性名称是可以改变的，
+            // 没有好的办法去判断某个动态属性是“可见性”
+            // 暂时用白名单的方式罗列出“可见性”属性可能的名称
+            var names = new string[]
+            {
+                "可见性",
+                "可见性1",
+            };
+            return names.Contains(property.PropertyName);
         }
     }
 }

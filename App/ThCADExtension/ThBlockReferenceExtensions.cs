@@ -157,7 +157,7 @@ namespace ThCADExtension
         public static Extents3d GeometricExtentsIgnoreAttribute(this BlockReference br)
         {
             var entitySet = new DBObjectCollection();
-            br.Explode(entitySet);
+            br.ExplodeWithVisible(entitySet);
             var extents = new Extents3d();
             entitySet.Cast<Entity>()
                 .Where(o => !(o is AttributeDefinition))

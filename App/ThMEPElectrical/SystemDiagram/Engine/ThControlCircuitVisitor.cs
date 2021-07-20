@@ -13,7 +13,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
     {
         public override void DoExtract(List<ThEntityData> elements, Entity dbObj, Matrix3d matrix)
         {
-            throw new NotImplementedException();
+            if (dbObj is Curve curve)
+            {
+                elements.AddRange(HandleCurve(curve));
+            }
+            else if (dbObj is DBText text)
+            {
+                elements.AddRange(HandleCurve(text));
+            }
         }
 
         public override void DoExtract(List<ThEntityData> elements, Entity dbObj)
@@ -22,42 +29,53 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             {
                 elements.AddRange(HandleCurve(curve));
             }
+            else if (dbObj is DBText text)
+            {
+                elements.AddRange(HandleCurve(text));
+            }
         }
 
-        private List<ThEntityData> HandleCurve(Curve curve)
+        private List<ThEntityData> HandleCurve(Entity entity)
         {
             var results = new List<ThEntityData>();
-            if (IsSpatialElement(curve) && CheckLayerValid(curve))
+            if (IsSpatialElement(entity) && CheckLayerValid(entity))
             {
-                results.Add(CreateEntityData(curve, ""));
+                results.Add(CreateEntityData(entity, ""));
             }
             return results;
         }
 
         public override bool IsSpatialElement(Entity entity)
         {
-            if (entity is Curve curve)
-            {
-                return true;
-            }
-            return false;
+            return entity is Curve || entity is DBText;
         }
         public override bool CheckLayerValid(Entity entity)
         {
-            return LayerFilter.Where(o => o.Contains(entity.Layer)).Any();
+            if (entity is Curve curve)
+            {
+                return (curve.GetLength()>0 && LayerFilter.Contains(curve.Layer)) || (curve.GetLength() > 100.0 && curve.Layer.Contains("CMTB"));
+            }
+            else if (entity is DBText text)
+            {
+                return text.Layer.Equals("E-FAS-NUMB") && text.TextString.Contains("-WFA");
+            }
+            else
+            {
+                return false;
+            }
         }
-        private ThEntityData CreateEntityData(Curve curve, string description)
+        private ThEntityData CreateEntityData(Entity curve, string description)
         {
             return new ThEntityData()
             {
                 Data = description,
-                Geometry = curve
+                Geometry = curve.Clone() as Entity
             };
         }
 
         public override void DoXClip(List<ThEntityData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

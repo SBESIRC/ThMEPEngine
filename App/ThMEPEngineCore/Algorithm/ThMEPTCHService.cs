@@ -27,6 +27,12 @@ namespace ThMEPEngineCore.Algorithm
             return entity.GetRXClass().DxfName == ThCADCommon.DxfName_TCH_Text;
         }
 
+        public static bool IsTCHValve(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("VALVE");
+        }
+
         /// <summary>
         /// 炸天正单行文字为CAD单行文字
         /// </summary>

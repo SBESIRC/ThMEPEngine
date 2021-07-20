@@ -59,6 +59,7 @@ namespace ThCADCore.NTS
             var bufferPara = new BufferParameters()
             {
                 JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre,
+                EndCapStyle = NetTopologySuite.Operation.Buffer.EndCapStyle.Square
             };
             return polygons.ToNTSMultiPolygon().Buffer(distance, bufferPara).ToDbCollection();
         }

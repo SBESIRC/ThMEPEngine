@@ -60,6 +60,10 @@ namespace ThMEPEngineCore.Temp
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
+                if(Group2Switch)
+                {
+                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
+                }
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -93,6 +97,14 @@ namespace ThMEPEngineCore.Temp
             {
                 Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
             }            
+        }
+
+        public override void Group2(Dictionary<Entity, string> groupId)
+        {
+            if(Group2Switch)
+            {
+                Walls.ForEach(o => Group2Owner.Add(o, FindCurveGroupIds(groupId, o)));
+            }
         }
     }
 }

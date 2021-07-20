@@ -11,7 +11,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
    public  class ThDrainageSDStackEngine
     {
-        public static List<Point3d > getStackPoint(List<ThIfcSanitaryTerminalToilate > terminalList)
+        public static List<Point3d > getStackPoint(List<ThTerminalToilate > terminalList)
         {
             var stackPt = terminalList.SelectMany(x => x.SupplyCoolOnWall).ToList();
 

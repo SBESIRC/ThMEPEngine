@@ -1,14 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Service;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -47,7 +43,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 楼层PolyLine
         /// </summary>
         public Polyline FloorBoundary { get; set; }
-        
+
         public ThFloorModel()
         {
             FireDistricts = new List<ThFireDistrictModel>();
@@ -57,9 +53,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 初始化楼层
         /// </summary>
         /// <param name="storeys"></param>
-        public void InitFloors(AcadDatabase acadDatabase, BlockReference FloofBlockReference, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
+        public void InitFloors(Database database, BlockReference FloofBlockReference, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            FloorBoundary = GetBlockOBB(acadDatabase.Database, FloofBlockReference, FloofBlockReference.BlockTransform);
+            FloorBoundary = GetBlockOBB(database, FloofBlockReference, FloofBlockReference.BlockTransform);
             var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
             var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
             if (FindFireCompartmentsEntity.Count > 0)
@@ -67,7 +63,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 FindFireCompartments.ForEach(o =>
                 {
                     ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
-                    NewFireDistrict.InitFireDistrict(this.FloorNumber,o);
+                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }
@@ -86,7 +82,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 初始化楼层
         /// </summary>
         /// <param name="storeys"></param>
-        public void InitFloors(AcadDatabase acadDatabase, Polyline floorBoundary, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
+        public void InitFloors(Polyline floorBoundary, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
         {
             FloorBoundary = floorBoundary;
             var FindFireCompartmentsEntity = spatialIndex.SelectCrossingPolygon(FloorBoundary);

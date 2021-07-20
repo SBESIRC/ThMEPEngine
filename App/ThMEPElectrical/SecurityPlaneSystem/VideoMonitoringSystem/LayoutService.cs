@@ -10,6 +10,8 @@ using ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService;
 using ThMEPEngineCore.Model;
 using System.Linq;
 using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model.Electrical;
+using ThMEPEngineCore.Config;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
@@ -17,21 +19,26 @@ namespace ThMEPElectrical.VideoMonitoringSystem
     {
         LayoutVideo layoutVideo = new LayoutVideo();
         LayoutVideoByLine layoutVideoByLine = new LayoutVideoByLine();
-        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes, ThStoreys floor)
+        public List<LayoutModel> LayoutFactory(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, List<Line> lanes, ThEStoreys floor)
         {
             //填充数据
             HandleVideoMonitoringRoomService.HandleRoomInfo(ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable);
+
+            //设置参数
+            layoutVideo.blindArea = ThElectricalUIService.Instance.Parameter.videoBlindArea;
+            layoutVideo.layoutRange = ThElectricalUIService.Instance.Parameter.videaMaxArea;
+            layoutVideoByLine.distance = ThElectricalUIService.Instance.Parameter.videoDistance;
             List<LayoutModel> models = new List<LayoutModel>();
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
 
             //沿线均布布置模式
-            var layoutRooms = GeLayoutRooms(rooms);
+            var layoutRooms = GetLayoutRooms(rooms);
             foreach (var lRoom in layoutRooms)
             {
                 var layoutVByLine = layoutVideoByLine.Layout(lanes, doors, lRoom.Key);
-                models.AddRange(CreateModels(lRoom.Value, layoutVByLine)); 
+                models.AddRange(CreateModels(lRoom.Value, layoutVByLine));
             }
-            
+
             //入口控制布置模式
             foreach (var door in doors)
             {
@@ -46,14 +53,14 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                     models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls));
                 }
-                else if (connectRooms.Count >= 2) 
+                else if (connectRooms.Count >= 2)
                 {
                     if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
                     }
-                    else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
+                    if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
@@ -86,6 +93,19 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 case LayoutType.EntranceFaceRecognitionCamera:
                     layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
                     break;
+                case LayoutType.EntranceGunCameraFlip:
+                case LayoutType.EntranceDomeCameraFlip:
+                case LayoutType.EntranceGunCameraWithShieldFlip:
+                case LayoutType.EntranceFaceRecognitionCameraFlip:
+                    layoutModel.Add(layoutVideo.Layout(thRoom, door, walls, columns));
+                    GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+                    var doorPt = getLayoutStructureService.GetDoorCenterPt(door);
+                    layoutModel.ForEach(x =>
+                    {
+                        x.layoutDir = -x.layoutDir;
+                        x.layoutPt = new Point3d((x.layoutPt.X + doorPt.X) / 2, (x.layoutPt.Y + doorPt.Y) / 2, 0);
+                    });
+                    break;
                 case LayoutType.AlongLineGunCamera:
                 case LayoutType.AlongLinePanTiltCamera:
                 case LayoutType.AlongLineDomeCamera:
@@ -108,6 +128,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             List<LayoutModel> resModels = new List<LayoutModel>();
             switch (layoutType)
             {
+                case LayoutType.EntranceGunCameraFlip:
                 case LayoutType.EntranceGunCamera:
                 case LayoutType.AlongLineGunCamera:
                     layoutModels.ForEach(x =>
@@ -127,6 +148,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(panTiltCameraModel);
                     });
                     break;
+                case LayoutType.EntranceDomeCameraFlip:
                 case LayoutType.EntranceDomeCamera:
                 case LayoutType.AlongLineDomeCamera:
                     layoutModels.ForEach(x =>
@@ -137,6 +159,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(domeCameraModel);
                     });
                     break;
+                case LayoutType.EntranceGunCameraWithShieldFlip:
                 case LayoutType.EntranceGunCameraWithShield:
                 case LayoutType.AlongLineGunCameraWithShield:
                     layoutModels.ForEach(x =>
@@ -147,6 +170,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         resModels.Add(gunCameraWithShieldModel);
                     });
                     break;
+                case LayoutType.EntranceFaceRecognitionCameraFlip:
                 case LayoutType.EntranceFaceRecognitionCamera:
                     layoutModels.ForEach(x =>
                     {
@@ -171,7 +195,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Contains(y))).ToList();
+            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -185,7 +209,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                     }
                 }
             }
-            var roomBInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Contains(y))).ToList();
+            var roomBInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -217,29 +241,28 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             roomBType = LayoutType.Nothing;
 
             bool findRule = false;
-            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Contains(y))).ToList();
-            if (roomAInfos.Count > 0)
+            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => roomA.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
+            foreach (var roomAInfo in roomAInfos)
             {
-                foreach (var roomAInfo in roomAInfos)
+                if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
                 {
-                    if (string.IsNullOrEmpty(roomAInfo.floorName) || roomAInfo.floorName == floor)
+                    if (CheckEntranceLayout(roomAInfo.roomAHandle))
                     {
-                        if (CheckEntranceLayout(roomAInfo.roomAHandle))
+                        if (roomAInfo.connectType == ConnectType.AllConnect)
                         {
-                            if (roomAInfo.connectType == ConnectType.AllConnect)
+                            roomAType = roomAInfo.roomAHandle;
+                            roomBType = roomAInfo.roomBHandle;
+                            findRule = true;
+                            break;
+                        }
+                        else if (roomAInfo.connectType == ConnectType.Normal)
+                        {
+                            if (roomB.Tags.Any(y => roomAInfo.roomB.Contains(y)))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;
                                 findRule = true;
-                            }
-                            else if (roomAInfo.connectType == ConnectType.Normal)
-                            {
-                                if (roomB.Tags.Any(y => roomAInfo.roomA.Contains(y)))
-                                {
-                                    roomAType = roomAInfo.roomAHandle;
-                                    roomBType = roomAInfo.roomBHandle;
-                                    findRule = true;
-                                }
+                                break;
                             }
                         }
                     }
@@ -283,7 +306,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// </summary>
         /// <param name="rooms"></param>
         /// <returns></returns>
-        private Dictionary<ThIfcRoom, LayoutType> GeLayoutRooms(List<ThIfcRoom> rooms)
+        private Dictionary<ThIfcRoom, LayoutType> GetLayoutRooms(List<ThIfcRoom> rooms)
         {
             var needRoomNames = HandleVideoMonitoringRoomService.GTRooms.Where(x => x.roomAHandle == LayoutType.AlongLineDomeCamera ||
                 x.roomAHandle == LayoutType.AlongLineGunCamera ||
@@ -295,7 +318,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             {
                 foreach (var nRName in needRoomNames)
                 {
-                    if (nRName.roomA.Contains(room.Name))
+                    if (room.Tags.Any(x => nRName.roomA.Contains(x)))
                     {
                         needRooms.Add(room, nRName.roomAHandle);
                         break;

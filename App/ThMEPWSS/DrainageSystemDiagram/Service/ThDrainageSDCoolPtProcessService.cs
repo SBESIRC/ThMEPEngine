@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
-using ThCADCore.NTS;
+
+using NFox.Cad;
 
 
 namespace ThMEPWSS.DrainageSystemDiagram
@@ -16,9 +15,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
     public class ThDrainageSDCoolPtProcessService
     {
 
-        public static Dictionary<string, List<ThIfcSanitaryTerminalToilate>> classifyToilate(List<ThIfcSanitaryTerminalToilate> toilateList)
+        public static Dictionary<string, List<ThTerminalToilate>> classifyToilate(List<ThTerminalToilate> toilateList)
         {
-            Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupToilate = new Dictionary<string, List<ThIfcSanitaryTerminalToilate>>();
+            Dictionary<string, List<ThTerminalToilate>> groupToilate = new Dictionary<string, List<ThTerminalToilate>>();
 
             //classify
             for (int i = 0; i < toilateList.Count; i++)
@@ -26,7 +25,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 string groupid = toilateList[i].GroupId;
                 if (groupid != null && groupToilate.ContainsKey(groupid) == false)
                 {
-                    groupToilate.Add(groupid, new List<ThIfcSanitaryTerminalToilate>() { toilateList[i] });
+                    groupToilate.Add(groupid, new List<ThTerminalToilate>() { toilateList[i] });
                 }
                 else if (groupid != null)
                 {
@@ -44,14 +43,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// </summary>
         /// <param name="groupList"></param>
         /// <returns></returns>
-        public static Dictionary<string, (string,string)> mergeIsland(Dictionary<string, List<ThIfcSanitaryTerminalToilate>> groupList)
+        public static Dictionary<string, (string, string)> mergeIsland(Dictionary<string, List<ThTerminalToilate>> groupList)
         {
             int TolSameIsland = 800;
 
-            Dictionary<string, (string, string)> mergeIslandGroup = new Dictionary<string, (string, string)> ();
+            Dictionary<string, (string, string)> mergeIslandGroup = new Dictionary<string, (string, string)>();
 
-            var islandGroup = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.islandTag)).ToList();
-            
+            var islandGroup = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.tagIsland)).ToList();
+
             for (int i = 0; i < islandGroup.Count; i++)
             {
                 if (mergeIslandGroup.ContainsKey(islandGroup[i].Key))
@@ -59,7 +58,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     continue;
                 }
                 var pts1 = islandGroup[i].Value.SelectMany(x => x.SupplyCoolOnWall).ToList();
-               
+
                 for (int j = i + 1; j < islandGroup.Count; j++)
                 {
                     var pts2 = islandGroup[j].Value.SelectMany(x => x.SupplyCoolOnWall).ToList();
@@ -104,55 +103,68 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return bReturn;
         }
 
-        /// <summary>
-        /// 有问题 没写完
-        /// </summary>
-        /// <param name="pl"></param>
-        /// <returns></returns>
-        private static List<Point3d> findConcavePT(Polyline pl)
+        public static void classifySmallRoomGroup(ref Dictionary<string, List<ThTerminalToilate>> groupList, List<ThToilateRoom> roomList)
         {
-            var concavePtList = new List<Point3d>();
+            var groupSmall = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.tagSmallRoom)).ToList();
+            var groupSmallString = groupSmall.Select(x => x.Key).ToList();
 
-            var convexPt = pl.GetPoint3dAt(0);
-            int convexIdx = 0;
-
-            for (int i = 0; i < pl.NumberOfVertices; i++)
+            foreach (var groupName in groupSmallString)
             {
-                var pt = pl.GetPoint3dAt(i % pl.NumberOfVertices);
-                if (pt.X < convexPt.X)
+                var room = findRoomToilateBelongsTo(groupList[groupName][0], roomList);
+                var subGroup = new Dictionary<Line, List<ThTerminalToilate>>();
+
+                foreach (var toi in groupList[groupName])
                 {
-                    convexPt = pt;
-                    convexIdx = i;
+                    var wall = findToilateBelongsToWall(toi, room);
+                    if (subGroup.ContainsKey(wall) == false)
+                    {
+                        subGroup.Add(wall, new List<ThTerminalToilate>() { toi });
+                    }
+                    else
+                    {
+                        subGroup[wall].Add(toi);
+                    }
                 }
-                else if (pt.X == convexPt.X && pt.Y > convexPt.Y)
+
+                if (subGroup.Count > 1)
                 {
-                    convexPt = pt;
-                    convexIdx = i;
+                    groupList.Remove(groupName);
+
+                    for (int i = 0; i < subGroup.Count; i++)
+                    {
+                        groupList.Add(String.Format("{0}-{1}", groupName, i), subGroup.ElementAt(i).Value);
+                    }
                 }
             }
-           
-            Vector3d preConvex = pl.GetPoint3dAt((convexIdx - 1) % pl.NumberOfVertices) - convexPt;
-            Vector3d nextConvex = pl.GetPoint3dAt((convexIdx + 1) % pl.NumberOfVertices) - convexPt;
-            var a = preConvex.CrossProduct(nextConvex);
-
-            for (int i = convexIdx + 1; i < pl.NumberOfVertices + convexIdx; i++)
-            {
-                var thisPt = pl.GetPoint3dAt(i % pl.NumberOfVertices);
-                var prePT = pl.GetPoint3dAt((i - 1) % pl.NumberOfVertices);
-                var nextPT = pl.GetPoint3dAt((i + 1) % pl.NumberOfVertices);
-
-                Vector3d preV = thisPt - prePT;
-                Vector3d nextV = nextPT - thisPt;
-                var b = preV.CrossProduct(nextV);
-
-                //if (a*b >0)
-                //{
-
-                //}
-            }
-
-
-            return concavePtList;
         }
+
+        public static Line findToilateToWall(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
+        {
+            Line wall = null;
+            var room = findRoomToilateBelongsTo(toilate, roomList);
+
+            if (room != null)
+            {
+                wall = findToilateBelongsToWall(toilate, room);
+            }
+
+            return wall;
+        }
+
+        public static ThToilateRoom findRoomToilateBelongsTo(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
+        {
+            var room = roomList.Where(x => x.toilate.Contains(toilate)).FirstOrDefault();
+            return room;
+        }
+
+        private static Line findToilateBelongsToWall(ThTerminalToilate toilate, ThToilateRoom room)
+        {
+            var tol = new Tolerance(10, 10);
+            var walls = room.wallList;
+
+            var wall = walls.Where(x => x.ToCurve3d().IsOn(toilate.SupplyCoolOnWall.First(), tol)).FirstOrDefault();
+            return wall;
+        }
+
     }
 }

@@ -8,16 +8,33 @@ namespace ThMEPEngineCore.Temp
     {
         public string ElementLayer { get; set; }
         public List<System.Type> Types { get; set; }
+        public string[] SplitLayers
+        {
+            get
+            {
+                return ElementLayer.Split(',');
+            }
+        }
         public ThExtractService()
         {
             ElementLayer = "";
-            Types = new List<System.Type>();
+            Types = new List<System.Type>();            
         }
         public abstract void Extract(Database db, Point3dCollection pts);
-        public abstract bool IsElementLayer(string layer);
         protected bool IsValidType(Entity ent)
         {
             return Types.Contains(ent.GetType());
+        }
+        public virtual bool IsElementLayer(string layer)
+        {
+            foreach (string elementLayer in SplitLayers)
+            {
+                if(layer.ToUpper() == elementLayer.ToUpper())
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

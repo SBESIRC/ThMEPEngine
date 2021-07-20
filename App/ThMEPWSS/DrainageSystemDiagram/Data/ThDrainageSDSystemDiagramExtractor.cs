@@ -24,15 +24,16 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == ThDrainageSDCommon.Layer_CoolPipe);
+                .Where(o => o.Layer == "W-WSUP-COOL-PIPE");
 
-            List<Line> laneList = laneLines.Select(x => x.WashClone() as Line).ToList();
+            List <Line> laneList = laneLines.Select(x => x.WashClone() as Line).ToList();
 
             laneList = laneList.Where(x => x != null).ToList();
             if (transformer != null)
             {
                 laneList.ForEach(x => transformer.Transform(x));
             }
+           
             laneList.ForEach(x => objs.Add(x));
 
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);

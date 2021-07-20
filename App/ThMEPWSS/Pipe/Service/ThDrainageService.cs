@@ -19,6 +19,7 @@
     using NetTopologySuite.Operation.Overlay;
     using NetTopologySuite.Algorithm;
     using DU = ThMEPWSS.Assistant.DrawUtils;
+    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
     public class RainSystemDrawingData
     {
         public List<string> RoofLabels = new List<string>();
@@ -190,13 +191,13 @@ pt,
             var f = NearestNeighbourGeometryF(geos);
             return pt => f(pt.ToNTSPoint());
         }
-        public static Func<Geometry, Geometry> NearestNeighbourGeometryF(List<Geometry> geos)
+        public static Func<Geometry, T> NearestNeighbourGeometryF<T>(List<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return geometry => null;
             else if (geos.Count == 1) return geometry => geos[0];
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return geometry => engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, itemDist);
+            return geometry => (T)engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, itemDist);
         }
         public static Func<Point3d, int, List<Geometry>> NearestNeighboursPoint3dF(List<Geometry> geos)
         {
@@ -522,6 +523,44 @@ pt,
             public double MinY;
             public double MaxX;
             public double MaxY;
+            public static GLineSegment GetCenterLine(IEnumerable<GLineSegment> segs)
+            {
+                var o = new Extents2dCalculator();
+                var c = 0;
+                var s = .0;
+                foreach (var seg in segs)
+                {
+                    var angle = seg.ToVector2d().Angle.AngleToDegree();
+                    if (angle >= 180.0) angle -= 180.0;
+                    s += angle;
+                    ++c;
+                    o.Update(seg);
+                }
+                if (c == 0) throw new ArgumentException();
+                var avg = s / c;
+                var r = o.ToGRect();
+                var center = r.Center;
+                if (avg >= 90.0) avg -= 90.0;
+
+                {
+                    var angle = avg.AngleFromDegree();
+                    Vector2d vec;
+                    if (0 <= avg && avg <= 45.0)
+                    {
+                        vec = new Vector2d(r.Width / 2, Math.Tan(angle) * r.Width / 2);
+                    }
+                    else if (45.0 < avg && avg <= 90.0)
+                    {
+                        vec = new Vector2d(r.Height / 2 / Math.Tan(angle), r.Height / 2);
+                    }
+                    else
+                    {
+                        throw new Exception(avg.ToString());
+                    }
+
+                    return new GLineSegment(center + vec, center - vec);
+                }
+            }
             public static Extents2d Calc(IEnumerable<GLineSegment> segs)
             {
                 var o = new Extents2dCalculator();
@@ -600,18 +639,64 @@ pt,
                 var center = ext.GetCenter();
                 if (center.GetDistanceTo(Point2d.Origin) > work_around)
                 {
-                    var v = center.ToVector2d();
-                    var m1 = Matrix2d.Displacement(-v);
-                    var m2 = Matrix2d.Displacement(v);
-                    return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                    var v = -center.ToVector2d();
+                    if (Dbg._)
+                    {
+                        var m1 = Matrix2d.Displacement(v);
+                        var m2 = Matrix2d.Displacement(-v);
+                        return GetCenterLine(segs.Select(seg => seg.TransformBy(ref m1)).ToList()).TransformBy(ref m2);
+                    }
+                    else
+                    {
+                        return GetCenterLine(segs.Select(seg => seg.Offset(v)).ToList()).Offset(-v);
+                    }
                 }
             }
             return GetCenterLine(segs);
+        }
+        public static IEnumerable<GLineSegment> GetLines(Geometry geo)
+        {
+            if (geo is LineString ls)
+            {
+                var arr = ls.Coordinates;
+                for (int i = 0; i < arr.Length - 1; i++)
+                {
+                    yield return new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
+                }
+            }
+            else if (geo is GeometryCollection mls)
+            {
+                foreach (var _g in mls.Geometries)
+                {
+                    foreach (var r in GetLines(_g))
+                    {
+                        yield return r;
+                    }
+                }
+            }
+        }
+        public static IEnumerable<Point2d> GetPoints(Geometry geo)
+        {
+            if (geo is Point pt)
+            {
+                yield return pt.ToAcGePoint2d();
+            }
+            else if (geo is GeometryCollection mls)
+            {
+                foreach (var _g in mls.Geometries)
+                {
+                    foreach (var r in GetPoints(_g))
+                    {
+                        yield return r;
+                    }
+                }
+            }
         }
         public static Geometry CreateGeometry(IEnumerable<Geometry> geomList)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geomList);
         }
+        public static Geometry CreateGeometryEx<T>(List<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
         public static Geometry CreateGeometry(params Geometry[] geos)
         {
@@ -651,9 +736,9 @@ pt,
             });
             return geosGroup;
         }
-        public static List<List<Geometry>> GroupGeometries(List<Geometry> geos)
+        public static List<List<T>> GroupGeometries<T>(List<T> geos)where T: Geometry
         {
-            static void GroupGeometries(List<Geometry> geos, List<List<Geometry>> geosGroup)
+            static void GroupGeometries(List<T> geos, List<List<T>> geosGroup)
             {
                 if (geos.Count == 0) return;
                 var pairs = _GroupGeometriesToKVIndex(geos).ToArray();
@@ -671,7 +756,7 @@ pt,
                 });
             }
 
-            var geosGroup = new List<List<Geometry>>();
+            var geosGroup = new List<List<T>>();
             GroupGeometries(geos, geosGroup);
             return geosGroup;
         }
@@ -707,10 +792,10 @@ pt,
             };
             return shapeFactory.CreateCircle();
         }
-        public static Func<Geometry, List<Geometry>> CreateContainsSelector(List<Geometry> geos)
+        public static Func<Geometry, List<T>> CreateContainsSelector<T>(List<T> geos) where T : Geometry
         {
-            if (geos.Count == 0) return r => new List<Geometry>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
@@ -741,11 +826,11 @@ pt,
                 return engine.Query(getEnvelope(item)).Where(g => test(g)).ToList();
             };
         }
-        public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex(List<Geometry> geos)
+        public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> geos)where T: Geometry
         {
             if (geos.Count == 0) yield break;
             geos = geos.Distinct().ToList();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             for (int i = 0; i < geos.Count; i++)
             {
@@ -802,12 +887,25 @@ pt,
                             {
                                 if (f(gvs[i], gvs[j]))
                                 {
-                                    flags[i] = true;
-                                    flags[j] = true;
                                     var seg = new GLineSegment(gvs[i].StartPoint, gvs[j].StartPoint);
-                                    if (seg.Length > 0)
+                                    if (!seg.StartPoint.Equals(seg.EndPoint))
                                     {
-                                        yield return seg;
+
+                                        if (killer == null)
+                                        {
+                                            yield return seg;
+                                            flags[i] = true;
+                                            flags[j] = true;
+                                        }
+                                        else
+                                        {
+                                            if (!seg.ToLineString().Intersects(killer))
+                                            {
+                                                yield return seg;
+                                                flags[i] = true;
+                                                flags[j] = true;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -818,169 +916,6 @@ pt,
         }
     }
 #pragma warning disable
-    public class DrainageCadData
-    {
-        public List<Geometry> Storeys;
-        public List<Geometry> Labels;
-        public List<Geometry> LabelLines;
-        public List<Geometry> DLines;
-        public List<Geometry> VLines;
-        public List<Geometry> VerticalPipes;
-        public List<Geometry> WrappingPipes;
-        public List<Geometry> FloorDrains;
-        public List<Geometry> WaterPorts;
-        public List<Geometry> WashingMachines;
-        public List<Geometry> CleaningPorts;
-        public List<Geometry> SideFloorDrains;
-        public void Init()
-        {
-            Storeys ??= new List<Geometry>();
-            Labels ??= new List<Geometry>();
-            LabelLines ??= new List<Geometry>();
-            DLines ??= new List<Geometry>();
-            VLines ??= new List<Geometry>();
-            VerticalPipes ??= new List<Geometry>();
-            WrappingPipes ??= new List<Geometry>();
-            FloorDrains ??= new List<Geometry>();
-            WaterPorts ??= new List<Geometry>();
-            WashingMachines ??= new List<Geometry>();
-            CleaningPorts ??= new List<Geometry>();
-            SideFloorDrains ??= new List<Geometry>();
-        }
-        public static DrainageCadData Create(DrainageGeoData data)
-        {
-            var bfSize = 10;
-            var o = new DrainageCadData();
-            o.Init();
-            o.Storeys.AddRange(data.Storeys.Select(x => x.ToPolygon()));
-            o.Labels.AddRange(data.Labels.Select(x => x.Boundary.ToPolygon()));
-
-            if (false) o.LabelLines.AddRange(data.LabelLines.Select(NewMethod(bfSize)));
-            else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
-            o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
-            o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
-            o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
-            if (false) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
-            else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
-            o.FloorDrains.AddRange(data.FloorDrains.Select(ConvertFloorDrainsF()));
-            o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
-            o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
-            o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
-            o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
-            return o;
-        }
-
-        private static Func<GRect, Polygon> ConvertWrappingPipesF()
-        {
-            return x => x.ToPolygon();
-        }
-
-        private static Func<GLineSegment, Geometry> NewMethod(int bfSize)
-        {
-            return x => x.Buffer(bfSize);
-        }
-        public static Func<Point2d, Point> ConvertSideFloorDrains()
-        {
-            return x => x.ToNTSPoint();
-        }
-        public static Func<Point2d, Polygon> ConvertCleaningPortsF()
-        {
-            return x => new GCircle(x, 40).ToCirclePolygon(36);
-        }
-
-        public static Func<GRect, Polygon> ConvertWashingMachinesF()
-        {
-            return x => x.ToPolygon();
-        }
-
-        public static Func<GRect, Polygon> ConvertWaterPortsLargerF()
-        {
-            return x => x.Center.ToGCircle(1500).ToCirclePolygon(6);
-        }
-
-        private static Func<GRect, Polygon> ConvertWaterPortsF()
-        {
-            return x => x.ToPolygon();
-        }
-
-        public static Func<GRect, Polygon> ConvertFloorDrainsF()
-        {
-            return x => x.ToPolygon();
-        }
-
-        public static Func<GRect, Polygon> ConvertVerticalPipesF()
-        {
-            return x => x.ToPolygon();
-        }
-
-        private static Func<GRect, Polygon> ConvertVerticalPipesPreciseF()
-        {
-            return x => new GCircle(x.Center, x.InnerRadius).ToCirclePolygon(36);
-        }
-
-        public static Func<GLineSegment, LineString> ConvertVLinesF()
-        {
-            return x => x.ToLineString();
-        }
-
-        public static Func<GLineSegment, LineString> ConvertDLinesF()
-        {
-            return x => x.ToLineString();
-        }
-
-        public static Func<GLineSegment, LineString> ConvertLabelLinesF()
-        {
-            return x => x.Extend(.1).ToLineString();
-        }
-
-        public List<Geometry> GetAllEntities()
-        {
-            var ret = new List<Geometry>(4096);
-            ret.AddRange(Storeys);
-            ret.AddRange(Labels);
-            ret.AddRange(LabelLines);
-            ret.AddRange(DLines);
-            ret.AddRange(VLines);
-            ret.AddRange(VerticalPipes);
-            ret.AddRange(WrappingPipes);
-            ret.AddRange(FloorDrains);
-            ret.AddRange(WaterPorts);
-            ret.AddRange(WashingMachines);
-            ret.AddRange(CleaningPorts);
-            ret.AddRange(SideFloorDrains);
-            return ret;
-        }
-        public List<DrainageCadData> SplitByStorey()
-        {
-            var lst = new List<DrainageCadData>(this.Storeys.Count);
-            if (this.Storeys.Count == 0) return lst;
-            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
-            foreach (var storey in this.Storeys)
-            {
-                var objs = f(storey);
-                var o = new DrainageCadData();
-                o.Init();
-                o.Labels.AddRange(objs.Where(x => this.Labels.Contains(x)));
-                o.LabelLines.AddRange(objs.Where(x => this.LabelLines.Contains(x)));
-                o.DLines.AddRange(objs.Where(x => this.DLines.Contains(x)));
-                o.VLines.AddRange(objs.Where(x => this.VLines.Contains(x)));
-                o.VerticalPipes.AddRange(objs.Where(x => this.VerticalPipes.Contains(x)));
-                o.WrappingPipes.AddRange(objs.Where(x => this.WrappingPipes.Contains(x)));
-                o.FloorDrains.AddRange(objs.Where(x => this.FloorDrains.Contains(x)));
-                o.WaterPorts.AddRange(objs.Where(x => this.WaterPorts.Contains(x)));
-                o.WashingMachines.AddRange(objs.Where(x => this.WashingMachines.Contains(x)));
-                o.CleaningPorts.AddRange(objs.Where(x => this.CleaningPorts.Contains(x)));
-                o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
-                lst.Add(o);
-            }
-            return lst;
-        }
-        public DrainageCadData Clone()
-        {
-            return (DrainageCadData)MemberwiseClone();
-        }
-    }
-
     public class RainSystemCadData
     {
         public List<Geometry> Storeys;
@@ -1089,60 +1024,6 @@ pt,
         public RainSystemCadData Clone()
         {
             return (RainSystemCadData)MemberwiseClone();
-        }
-    }
-    public class DrainageGeoData
-    {
-        public List<GRect> Storeys;
-        public List<CText> Labels;
-        public List<GLineSegment> LabelLines;
-        public List<GLineSegment> DLines;//排水立管专用转管
-        public List<GLineSegment> VLines;//通气立管专用转管
-        public List<GRect> VerticalPipes;
-        public List<GRect> WrappingPipes;
-        public List<GRect> FloorDrains;
-        public List<GRect> WaterPorts;
-        public List<string> WaterPortLabels;
-        public List<GRect> WashingMachines;
-        public List<Point2d> CleaningPorts;
-        public List<Point2d> SideFloorDrains;
-        public void Init()
-        {
-            Storeys ??= new List<GRect>();
-            Labels ??= new List<CText>();
-            LabelLines ??= new List<GLineSegment>();
-            DLines ??= new List<GLineSegment>();
-            VLines ??= new List<GLineSegment>();
-            VerticalPipes ??= new List<GRect>();
-            WrappingPipes ??= new List<GRect>();
-            FloorDrains ??= new List<GRect>();
-            WaterPorts ??= new List<GRect>();
-            WaterPortLabels ??= new List<string>();
-            WashingMachines ??= new List<GRect>();
-            CleaningPorts ??= new List<Point2d>();
-            SideFloorDrains ??= new List<Point2d>();
-        }
-        public void FixData()
-        {
-            Init();
-            Storeys = Storeys.Where(x => x.IsValid).Distinct().ToList();
-            Labels = Labels.Where(x => x.Boundary.IsValid).Distinct().ToList();
-            LabelLines = LabelLines.Where(x => x.Length > 0).Distinct().ToList();
-            DLines = DLines.Where(x => x.Length > 0).Distinct().ToList();
-            VLines = VLines.Where(x => x.Length > 0).Distinct().ToList();
-            VerticalPipes = VerticalPipes.Where(x => x.IsValid).Distinct().ToList();
-            WrappingPipes = WrappingPipes.Where(x => x.IsValid).Distinct().ToList();
-            FloorDrains = FloorDrains.Where(x => x.IsValid).Distinct().ToList();
-            WaterPorts = WaterPorts.Where(x => x.IsValid).Distinct().ToList();
-            WashingMachines = WashingMachines.Where(x => x.IsValid).Distinct().ToList();
-        }
-        public DrainageGeoData Clone()
-        {
-            return (DrainageGeoData)MemberwiseClone();
-        }
-        public DrainageGeoData DeepClone()
-        {
-            return this.ToCadJson().FromCadJson<DrainageGeoData>();
         }
     }
     public class RainSystemGeoData

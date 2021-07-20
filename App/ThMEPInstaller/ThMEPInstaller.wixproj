@@ -28,7 +28,6 @@
     <Compile Include="Electrical.wxs" />
     <Compile Include="External.wxs" />
     <Compile Include="FanSelection.wxs" />
-    <Compile Include="GDAL.wxs" />
     <Compile Include="HVAC.wxs" />
     <Compile Include="Internal.wxs" />
     <Compile Include="Lighting.wxs" />

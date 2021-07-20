@@ -1,20 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
-using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
-using DotNetARX;
+﻿using System;
 using Linq2Acad;
+using System.Linq;
+using ThCADExtension;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.SystemDiagram.Model;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
-    public  class ThAutoFireAlarmSystemVisitor : ThDistributionElementExtractionVisitor
+    public class ThAutoFireAlarmSystemVisitor : ThDistributionElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -65,11 +62,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             bool IsRequired = false;
             ThBlockConfigModel.BlockConfig.ForEach(o =>
             {
-                switch (o.StatisticMode)
-                {
-                    case StatisticType.BlockName:
+            switch (o.StatisticMode)
+            {
+                case StatisticType.BlockName:
                         {
-                            if (o.BlockName == blkref.Name)
+                            if (o.BlockName == blkref.Name || (o.HasAlias && o.AliasList.Contains(blkref.Name)))
                             {
                                 IsRequired = true;
                                 return;
@@ -120,7 +117,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             return true;
         }
-        
+
         private bool IsDistributeElementBlock(BlockReference blkref)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkref.Database))

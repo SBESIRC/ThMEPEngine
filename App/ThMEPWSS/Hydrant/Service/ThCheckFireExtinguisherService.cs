@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Diagnostics;
 #endif
 
 namespace ThMEPWSS.Hydrant.Service
@@ -39,7 +40,11 @@ namespace ThMEPWSS.Hydrant.Service
 
         public void Check(Database db, Point3dCollection pts)
         {
+            ThStopWatchService.Start();
             var extractors = Extract(db, pts); //获取数据
+            ThStopWatchService.Stop();
+            ThStopWatchService.Print("提取数据耗时：");
+            ThStopWatchService.ReStart();
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
             Rooms = roomExtractor.Rooms; //获取房间
 
@@ -67,7 +72,10 @@ namespace ThMEPWSS.Hydrant.Service
                     var regions = hydrant.Validate(geoContent, context);
                     Covers = ThHydrantResultParseService.Parse(regions);
                 }
-            });            
+            });
+
+            ThStopWatchService.Stop();
+            ThStopWatchService.Print("保护区域计算耗时：");
         }
 
         public List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
@@ -79,35 +87,45 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.ArchitectureWallLayer,
                     },
                     new ThShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.ShearWallLayer,
-                    },
-                    new ThColumnExtractor()
-                    {
-                        UseDb3Engine=true,
-                        IsolateSwitch=true,
-                        ElementLayer = AiLayerManager.ColumnLayer,
-                    },
+                    },                    
                     new ThHydrantDoorOpeningExtractor()
                     { 
                         UseDb3Engine=false,
-                        ElementLayer = AiLayerManager.DoorOpeningLayer,
+                        FilterMode = FilterMode.Cross,
+                        ElementLayer = "AI-Door,AI-门,门",
                     },
                     new ThExternalSpaceExtractor()
                     {
                         UseDb3Engine=false,
+                        FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.OuterBoundaryLayer,
                     }, //暂时通过图层判断
                     new ThRoomExtractor()
                     {
                         UseDb3Engine=true,
+                        FilterMode = FilterMode.Cross,
                     },
+
                 };
+            if (FireHydrantVM.Parameter.IsThinkIsolatedColumn)
+            {
+                extractors.Add(new ThColumnExtractor()
+                {
+                    UseDb3Engine = true,
+                    IsolateSwitch = true,
+                    FilterMode = FilterMode.Cross,
+                    ElementLayer = AiLayerManager.ColumnLayer,
+                });
+            }
             extractors.ForEach(o => o.Extract(db, pts));
             return extractors;
         }
@@ -152,8 +170,12 @@ namespace ThMEPWSS.Hydrant.Service
                 Covers.ForEach(o =>
                 {
                     var ents = new List<Entity>();
-                    ents.Add(o.Item1.Clone() as Entity);
-                    ents.Add(new Circle(o.Item2, Vector3d.ZAxis, 200.0));
+                    var cover = o.Item1.Clone() as Entity;
+                    cover.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
+                    ents.Add(cover);
+                    var circle = new Circle(o.Item2, Vector3d.ZAxis, 200.0);
+                    circle.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
+                    ents.Add(circle);
                     ents.CreateGroup(acadDb.Database, colorIndex++);
                 });
             }

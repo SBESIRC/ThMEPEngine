@@ -58,6 +58,10 @@
         /// <summary>
         /// 车道线
         /// </summary>
+        FireproofShutter,
+        /// <summary>
+        /// 防火卷帘
+        /// </summary>
         LaneLine,
         /// <summary>
         /// 接闪带
@@ -77,6 +81,10 @@
         ParkingStall,
         /// <summary>
         /// 房间
+        /// </summary>
+        Railing,
+        /// <summary>
+        /// 栏杆
         /// </summary>
         Room,
         /// <summary>

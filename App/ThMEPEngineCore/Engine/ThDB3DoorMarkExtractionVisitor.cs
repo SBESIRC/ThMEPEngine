@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Engine
                 clone.TransformBy(matrix);
                 texts.Add(clone);
             }
-            return texts.Select(o => CreateBuildingElementData(o)).ToList();
+            return texts.Select(o => CreateBuildingElementData(o)).Where(o=> (o.Geometry as Polyline).Area>1e-6).ToList();
         }
 
         private ThRawIfcBuildingElementData CreateBuildingElementData(DBText dbText)

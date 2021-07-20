@@ -21,7 +21,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         public override void Extract(Database database)
         {
-            throw new NotImplementedException();
+            var visitor = new ThControlCircuitVisitor()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            var extractor = new ThEntityCommonExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);    // 提取MS
+            Results = visitor.Results;
         }
 
         public override void ExtractFromMS(Database database)
@@ -33,30 +40,29 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             var extractor = new ThEntityCommonExtractor();
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);    // 提取MS
-            Results = visitor.Results;
+            Results.AddRange(visitor.Results);
         }
     }
 
     public class ThControlCircuitRecognitionEngine : ThEntityCommonRecognitionEngine
     {
         public List<string> LayerFilter { get; set; }
-        //ThAutoFireAlarmSystemRecognitionEngine BlockReferenceEngine;
         public ThControlCircuitRecognitionEngine()
         {
-            //BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine();
             LayerFilter = new List<string>();
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            //BlockReferenceEngine.Recognize(database, polygon);
-            throw new NotImplementedException();
+            var engine = new ThControlCircuitExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            //BlockReferenceEngine.RecognizeMS(database, polygon);
-            //BlockReferenceEngine.Elements.ForEach(data => Elements.Add(new ThEntityData() { Geometry = data.Outline }));
-
             var engine = new ThControlCircuitExtractionEngine()
             {
                 LayerFilter = this.LayerFilter,

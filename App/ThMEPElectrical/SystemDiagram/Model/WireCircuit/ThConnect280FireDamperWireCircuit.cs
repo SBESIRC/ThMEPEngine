@@ -52,7 +52,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * (FloorIndex - 1) + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1925, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
                 Result.Add(Endline3);
 
-                InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Scale3d(100, 100, 100), Math.PI, new Dictionary<string, string>() { { "N", this.fireDistrict.Data.BlockData.BlockStatistics["防排抽烟机"].ToString() } });
+                var objid = InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Scale3d(100, 100, 100), Math.PI, new Dictionary<string, string>() { { "N", this.fireDistrict.Data.BlockData.BlockStatistics["防排抽烟机"].ToString() } });
+                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                {
+                    BlockReference br = acad.Element<BlockReference>(objid);
+                    Result.Add(br);
+                }
                 #endregion
                 if (FireCompartmentParameter.FixedPartType != 3)
                 {
@@ -69,9 +74,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return Result;
         }
 
+        // 横线不支持画竖线方法
+        public override Dictionary<int, List<Entity>> DrawVertical()
+        {
+            throw new NotSupportedException();
+        }
+
         public override void InitCircuitConnection()
         {
-            this.CircuitColorIndex = 3;
+            this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
             this.CircuitLayer = "E-CTRL-WIRE";
             this.CircuitLinetype = "ByLayer";
             this.CircuitLayerLinetype = "BORDER2";

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{79BF9352-065F-44D6-953A-CBC0A728B9EA}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{AE30A703-3897-42FB-9FB2-EF1C729B4E7A}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -53,12 +53,17 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
+                <Command Local="THExtractSlab" Global="THExtractSlab" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
+                <Command Local="THExtractWindow" Global="THExtractWindow" />
+                <Command Local="THExtractCornice" Global="THExtractCornice" />
+                <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -68,12 +73,17 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
+                <Command Local="THExtractSlab" Global="THExtractSlab" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
+                <Command Local="THExtractWindow" Global="THExtractWindow" />
+                <Command Local="THExtractCornice" Global="THExtractCornice" />
+                <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -83,12 +93,17 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
+                <Command Local="THExtractSlab" Global="THExtractSlab" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
+                <Command Local="THExtractWindow" Global="THExtractWindow" />
+                <Command Local="THExtractCornice" Global="THExtractCornice" />
+                <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -216,6 +231,7 @@
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
+                <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -235,6 +251,8 @@
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
+				<Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
+				<Command Local="THJSDY" Global="THJSDY" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -254,6 +272,8 @@
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
+                <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
+                <Command Local="THJSDY" Global="THJSDY" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -352,6 +372,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
@@ -359,6 +380,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -367,6 +389,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
@@ -374,6 +397,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -382,6 +406,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
@@ -389,6 +414,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>

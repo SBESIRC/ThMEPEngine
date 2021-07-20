@@ -13,24 +13,36 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
 {
     public class LayoutGTAlongLaneService
     {
-        double layoutStairDis = 6000;
-        double layoutSpace = 15000;
+        public double layoutSpace = 15000;
+        double layoutStairDis = 8000;
+        double modelWidth = 300;
 
-        public LayoutGTAlongLaneService(double space = 15000, double stairDis = 6000)
+        public LayoutGTAlongLaneService(double space = 15000, double stairDis = 8000)
         {
             layoutSpace = space;
             layoutStairDis = stairDis;
         }
 
-        public List<(Point3d, Vector3d)> Layout(List<List<Line>> lanes, List<Polyline> columns, List<Point3d> stairPts)
+        public List<(Point3d, Vector3d)> Layout(List<List<Line>> lanes, List<Polyline> columns, List<Polyline> walls, List<Point3d> stairPts)
         {
             List<(Point3d, Vector3d)> laneLayoutInfo = new List<(Point3d, Vector3d)>();
+            var connectPts = new List<Point3d>(stairPts);
             foreach (var lane in lanes)
             {
                 var separateCols = SeparateColumnsByLine(columns, lane, 6000);
+                var separateWalls = SeparateColumnsByLine(walls, lane, 6000);
                 var upColumns = separateCols[0];
-                var usefulPts = CalClosetStairPts(lane, stairPts);
-                laneLayoutInfo.AddRange(CalLayoutPtInfo(lane, usefulPts, upColumns));
+                var upWalls = separateCols[0];
+                if (separateCols[1].Count > upColumns.Count)
+                {
+                    upColumns = separateCols[1];
+                    upWalls = separateCols[1];
+                }
+                upWalls = FilterWalls(upWalls, lane, 800, 6000);
+                var usefulPts = CalClosetStairPts(lane, connectPts);
+                var layoutPts = CalLayoutPtInfo(lane, usefulPts, upColumns, upWalls);
+                laneLayoutInfo.AddRange(layoutPts);
+                connectPts.AddRange(layoutPts.Select(x => x.Item1));
             }
 
             return laneLayoutInfo;
@@ -43,10 +55,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
         /// <param name="usefulPts"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        private List<(Point3d, Vector3d)> CalLayoutPtInfo(List<Line> lane, List<Point3d> usefulPts, List<Polyline> columns)
+        private List<(Point3d, Vector3d)> CalLayoutPtInfo(List<Line> lane, List<Point3d> usefulPts, List<Polyline> columns, List<Polyline> walls)
         {
             CalLaneLayoutInfo(lane, out Point3d sPt, out Point3d ePt, out Vector3d dir);
-            List<Point3d> allPts = usefulPts.Select(x => UtilService.GetProjectPtOnLane(lane, x)).ToList();
+            List<Point3d> projectPts = usefulPts.Select(x => UtilService.GetProjectPtOnLane(lane, x)).ToList();
+            var allPts = new List<Point3d>(projectPts);
             allPts.Add(sPt);
             allPts.Add(ePt);
             var orderPts = UtilService.OrderPoints(allPts, dir);
@@ -59,24 +72,39 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 var distance = p1.DistanceTo(p2);
                 if (distance > layoutSpace)
                 {
-                    var num = Math.Floor(distance / layoutSpace);
-                    var moveLength = distance / num;
+                    var num = Math.Ceiling(distance / layoutSpace);
+                    var moveLength = distance / (num - 1);
                     var indexPt = p1;
                     for (int j = 0; j < num; j++)
                     {
-                        indexPt = indexPt + moveLength * dir;
-                        var closetCol = columns.OrderBy(x => x.Distance(indexPt)).First();
-                        columns.Remove(closetCol);
-                        var layoutPt = GetColumnLayoutPoint(closetCol, indexPt, dir);
-                        if (layoutPt != null)
+                        (Point3d, Vector3d)? colLayoutPt = null;
+                        (Point3d, Vector3d)? wallLayoutPt = null;
+                        if (columns.Count > 0 )
                         {
-                            layoutInfo.Add(layoutPt.Value);
+                            var closetCol = columns.OrderBy(x => x.Distance(indexPt)).First();
+                            columns.Remove(closetCol);
+                            colLayoutPt = GetColumnLayoutPoint(closetCol, indexPt, dir);
                         }
+                        if (walls.Count > 0)
+                        {
+                            var closetWall = walls.OrderBy(x => x.Distance(indexPt)).First();
+                            wallLayoutPt = GetWallLayoutPoint(closetWall, indexPt, dir);
+                        }
+                        
+                        if (colLayoutPt != null && (wallLayoutPt == null || colLayoutPt.Value.Item1.DistanceTo(indexPt) < wallLayoutPt.Value.Item1.DistanceTo(indexPt)))
+                        {
+                            layoutInfo.Add(colLayoutPt.Value);
+                        }
+                        if (wallLayoutPt != null && (colLayoutPt == null || wallLayoutPt.Value.Item1.DistanceTo(indexPt) < colLayoutPt.Value.Item1.DistanceTo(indexPt)))
+                        {
+                            layoutInfo.Add(wallLayoutPt.Value);
+                        }
+                        indexPt = indexPt + moveLength * dir;
                     }
                 }
             }
 
-            return layoutInfo;
+            return layoutInfo.Where(x=> !projectPts.Any(y =>y.DistanceTo(x.Item1) < layoutStairDis / 2)).ToList();
         }
 
         /// <summary>
@@ -107,6 +135,50 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
             {
                 layoutDir = -layoutDir;
             }
+            layoutPt = layoutPt + layoutDir * (modelWidth / 2);
+
+            return (layoutPt, layoutDir);
+        }
+
+
+        /// <summary>
+        /// 计算墙上排布点和方向
+        /// </summary>
+        /// <param name="wall"></param>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        private (Point3d, Vector3d)? GetWallLayoutPoint(Polyline wall, Point3d pt, Vector3d dir)
+        {
+            var layoutLine = GetLayoutStructLine(wall, pt, dir, out Point3d closetPt);
+            if (layoutLine == null)
+            {
+                return null;
+            }
+
+            Point3d sPt = layoutLine.StartPoint;
+            Point3d ePt = layoutLine.EndPoint;
+            Vector3d moveDir = (ePt - sPt).GetNormal();
+
+            //计算排布点
+            var layoutPt = closetPt;
+            if (sPt.DistanceTo(layoutPt) < modelWidth)
+            {
+                layoutPt = layoutPt + moveDir * (modelWidth - sPt.DistanceTo(layoutPt));
+            }
+            if (ePt.DistanceTo(layoutPt) < modelWidth)
+            {
+                layoutPt = layoutPt - moveDir * (modelWidth - ePt.DistanceTo(layoutPt));
+            }
+
+            //计算排布方向
+            var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
+            var compareDir = (pt - layoutPt).GetNormal();
+            if (layoutDir.DotProduct(compareDir) < 0)
+            {
+                layoutDir = -layoutDir;
+            }
+            layoutPt = layoutPt + layoutDir * (modelWidth / 2);
 
             return (layoutPt, layoutDir);
         }
@@ -159,11 +231,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                     xDir.Z, yDir.Z, zDir.Z, 0,
                     0.0, 0.0, 0.0, 1.0});
             var pts = lane.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint })
-                .Select(x => x.TransformBy(matrix))
+                .Select(x => x.TransformBy(matrix.Inverse()))
                 .ToList();
 
-            sPt = pts.OrderBy(x => x.X).First();
-            ePt = pts.OrderByDescending(x => x.X).First();
+            sPt = pts.OrderBy(x => x.X).First().TransformBy(matrix);
+            ePt = pts.OrderByDescending(x => x.X).First().TransformBy(matrix);
             dir = (maxLengthLane.EndPoint - maxLengthLane.StartPoint).GetNormal();
         }
 
@@ -187,7 +259,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
         private List<List<Polyline>> SeparateColumnsByLine(List<Polyline> columns, List<Line> lines, double length)
         {
             var newLines = lines.Select(x => x.Normalize()).ToList();
-            List<Polyline> linePolys = new List<Polyline>();
+            List<Polyline> upLinePolys = new List<Polyline>();
+            List<Polyline> downLinePolys = new List<Polyline>();
             foreach (var line in newLines)
             {
                 var bufferLength = length;
@@ -206,25 +279,51 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                         bufferLength = -bufferLength;
                     }
                 }
-                linePolys.AddRange(new DBObjectCollection() { line }.SingleSidedBuffer(bufferLength).Cast<Polyline>().ToList());
+                upLinePolys.AddRange(new DBObjectCollection() { line }.SingleSidedBuffer(bufferLength).Cast<Polyline>().ToList());
+                downLinePolys.AddRange(new DBObjectCollection() { line }.SingleSidedBuffer(-bufferLength).Cast<Polyline>().ToList());
             }
-
+            
             List<Polyline> upPolyline = new List<Polyline>();
             List<Polyline> downPolyline = new List<Polyline>();
             foreach (var col in columns)
             {
-                var intersecRes = linePolys.Where(x => x.Contains(col) || x.Intersects(col)).ToList();
-                if (intersecRes.Count > 0)
+                var upIntersecRes = upLinePolys.Where(x => x.Contains(col) || x.Intersects(col)).ToList();
+                if (upIntersecRes.Count > 0)
                 {
                     upPolyline.Add(col);
                 }
-                else
+                var downIntersecRes = downPolyline.Where(x => x.Contains(col) || x.Intersects(col)).ToList();
+                if (downIntersecRes.Count > 0)
                 {
                     downPolyline.Add(col);
                 }
             }
 
             return new List<List<Polyline>>() { upPolyline, downPolyline };
+        }
+
+        /// <summary>
+        /// 过滤墙
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="lines"></param>
+        /// <param name="expandLength"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
+        private List<Polyline> FilterWalls(List<Polyline> walls, List<Line> lines, double expandLength, double tol)
+        {
+            if (walls.Count <= 0)
+            {
+                return walls;
+            }
+            var wallCollections = walls.ToCollection();
+            var resPolys = lines.SelectMany(x =>
+            {
+                var linePoly = UtilService.ExpandLine(x, expandLength, tol);
+                return linePoly.Intersection(wallCollections).Cast<Polyline>().ToList();
+            }).ToList();
+
+            return resPolys;
         }
     }
 }
