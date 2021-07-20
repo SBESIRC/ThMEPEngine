@@ -1,45 +1,40 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
+using ThCADCore.NTS;
 using System.Collections.Generic;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using NFox.Cad;
-using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThFiredistrictExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
+    class ThFireApartExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
     {
-        public List<Polyline> Firedistrict { get; private set; }
+        public List<Polyline> FireAparts { get; private set; }
 
         public List<StoreyInfo> StoreyInfos { get; set; }
 
-        public ThFiredistrictExtractor()
+        public Dictionary<Entity, string> FireApartIds { get; private set; }
+
+        public ThFireApartExtractor()
         {
-            Firedistrict = new List<Polyline>();
-            Category = "FireDistrict";
+            FireAparts = new List<Polyline>();
+            Category = "FireApart";
             StoreyInfos = new List<StoreyInfo>();
+            FireApartIds = new Dictionary<Entity, string>();
         }
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            Firedistrict.ForEach(o =>
+            FireAparts.ForEach(o =>
             {
                 var geometry = new ThGeometry();
+                geometry.Properties.Add(IdPropertyName, FireApartIds[o]);
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
-                {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
-                }
-                geometry.Boundary = o;
+                geometry.Properties.Add(ParentIdPropertyName, BuildString(GroupOwner, o));
+                //geometry.Boundary = o;
                 geos.Add(geometry);
             });
 
@@ -59,17 +54,17 @@ namespace ThMEPEngineCore.Temp
                     ElementLayer = this.ElementLayer,
                 };
                 extractService.Extract(database, pts);
-                Firedistrict = extractService.Polys;
+                FireAparts = extractService.Polys;
             }
             // 如果楼层框线没有防火分区，就认为楼层框线是一个防火分区
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(Firedistrict.ToCollection());
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(FireAparts.ToCollection());
             StoreyInfos.ForEach(o =>
             {
                 if(spatialIndex.SelectWindowPolygon(o.Boundary).Count==0)
                 {
                     var bufferService = new Service.ThNTSBufferService();
                     var fireApartOutline = bufferService.Buffer(o.Boundary ,- 1.0) as Polyline;
-                    Firedistrict.Add(fireApartOutline);
+                    FireAparts.Add(fireApartOutline);
                 }
             });
         }
@@ -78,14 +73,13 @@ namespace ThMEPEngineCore.Temp
         {
             if (GroupSwitch)
             {
-                Firedistrict.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+                FireAparts.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
             }
         }
 
-        public Dictionary<Entity,string> GetFireAPartIds()
+        public void BuildFireAPartIds()
         {
             //只有分组才能获取
-            var results = new Dictionary<Entity, string>();
             StoreyInfos.ForEach(o =>
             {
                 var fireAparts = GroupOwner.Where(g => g.Value.Contains(o.Id)).Select(g => g.Key).ToList();
@@ -106,15 +100,14 @@ namespace ThMEPEngineCore.Temp
                 fireAparts.ForEach(f =>
                 {
                     string number = startIndex++.ToString().PadLeft(2, '0');
-                    results.Add(f , startCode + number);
+                    FireApartIds.Add(f , startCode + number);
                 });
             });
-            return results;
         }
 
         public void Print(Database database)
         {
-            Firedistrict.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+            FireAparts.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
     }
 }

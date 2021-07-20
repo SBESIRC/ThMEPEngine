@@ -457,6 +457,7 @@
     <Compile Include="Temp\IParse.cs" />
     <Compile Include="Temp\IPrint.cs" />
     <Compile Include="Temp\IRead.cs" />
+    <Compile Include="Temp\ISetStorey.cs" />
     <Compile Include="Temp\IShearWallData.cs" />
     <Compile Include="Temp\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="Temp\ThArchitectureOutlineInfo.cs" />
@@ -472,10 +473,16 @@
     <Compile Include="Temp\ThExtractOuterOtherColumnService.cs" />
     <Compile Include="Temp\ThExtractArcService.cs" />
     <Compile Include="Temp\ThExtractTextService.cs" />
+    <Compile Include="Temp\ThFaArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFaBeamExtractor.cs" />
+    <Compile Include="Temp\ThFaColumnExtractor.cs" />
     <Compile Include="Temp\ThFaDoorOpeningExtractor.cs" />
     <Compile Include="Temp\ThFaFireproofshutterExtractor.cs" />
-    <Compile Include="Temp\ThFiredistrictExtractor.cs" />
+    <Compile Include="Temp\ThFaRailingExtractor.cs" />
+    <Compile Include="Temp\ThFaRoomExtractor.cs" />
+    <Compile Include="Temp\ThFaShearWallExtractor.cs" />
+    <Compile Include="Temp\ThFaWindowExtractor.cs" />
+    <Compile Include="Temp\ThFireApartExtractor.cs" />
     <Compile Include="Temp\ThFireproofShutterExtractor.cs" />
     <Compile Include="Temp\ThHoleExtractor.cs" />
     <Compile Include="Temp\ThLightningReceivingBeltExtractor.cs" />

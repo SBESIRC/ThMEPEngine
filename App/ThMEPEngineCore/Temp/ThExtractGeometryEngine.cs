@@ -45,10 +45,6 @@ namespace ThMEPEngineCore.Temp
         {
             Extrators.ForEach(o => (o as IGroup).Group(groupId));
         }
-        public void Group2(Dictionary<Entity, string> group2Id)
-        {
-            Extrators.ForEach(o => o.Group2(group2Id));
-        }
         public void Print(Database database)
         {
             Extrators.ForEach(o => (o as IPrint).Print(database));

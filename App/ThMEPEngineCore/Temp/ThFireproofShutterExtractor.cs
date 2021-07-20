@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
@@ -24,18 +23,10 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
-                {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
-                }
+                geometry.Properties.Add(ParentIdPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
-
             return geos;
         }
 
@@ -61,14 +52,6 @@ namespace ThMEPEngineCore.Temp
             if (GroupSwitch)
             {
                 FireproofShutter.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
-            }
-        }
-
-        public override void Group2(Dictionary<Entity, string> groupId)
-        {
-            if(Group2Switch)
-            {
-                FireproofShutter.ForEach(o => Group2Owner.Add(o, FindCurveGroupIds(groupId, o)));
             }
         }
 

@@ -3,17 +3,17 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, IBuildGeometry
+    public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, IBuildGeometry, ISetStorey
     {
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
+        private List<StoreyInfo> StoreyInfos { get; set; }
         private const string NeibourFireApartIdsPropertyName = "NeibourFireApartIds";
 
         public ThFaFireproofshutterExtractor()
@@ -27,14 +27,13 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
+                var parentId = BuildString(GroupOwner, o);
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
+                    var storeyInfo = Query(o);
+                    parentId = storeyInfo.Id;
                 }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
-                }
+                geometry.Properties.Add(ParentIdPropertyName, parentId);
                 if (FireDoorNeibourIds.ContainsKey(o))
                 {
                     geometry.Properties.Add(NeibourFireApartIdsPropertyName, string.Join(",", FireDoorNeibourIds[o]));
@@ -62,6 +61,17 @@ namespace ThMEPEngineCore.Temp
                     throw new NotSupportedException();
                 }
             });
+        }
+
+        public void Set(List<StoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
+
+        public StoreyInfo Query(Entity entity)
+        {
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new StoreyInfo();
         }
     }
 }

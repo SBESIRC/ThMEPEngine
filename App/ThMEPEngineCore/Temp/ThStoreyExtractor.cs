@@ -117,12 +117,12 @@ namespace ThMEPEngineCore.Temp
         public StoreyInfo(ThStoreys storey)
         {
             Storey = storey;
-            Id = Guid.NewGuid().ToString();
+            Id = storey.ObjectId != ObjectId.Null ? Storey.ObjectId.Handle.ToString() : ""; // Guid.NewGuid().ToString();
             Parse();
         }
         public StoreyInfo()
         {
-            Id = Guid.NewGuid().ToString();
+            Id = ""; 
         }
         private void Parse()
         {

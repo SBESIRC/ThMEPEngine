@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThRailingExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup
+    public class ThRailingExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup
     {
         public List<Polyline> Railing { get; private set; }
         public ThRailingExtractor()
@@ -24,18 +24,13 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
+                if(GroupSwitch)
                 {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner,o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
-
             return geos;
         }
 
@@ -63,14 +58,6 @@ namespace ThMEPEngineCore.Temp
             if (GroupSwitch)
             {
                 Railing.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
-            }
-        }
-
-        public override void Group2(Dictionary<Entity, string> groupId)
-        {
-            if (Group2Switch)
-            {
-                Railing.ForEach(o => Group2Owner.Add(o, FindCurveGroupIds(groupId, o)));
             }
         }
 
