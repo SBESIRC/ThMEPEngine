@@ -30,7 +30,10 @@ namespace ThMEPElectrical.SystemDiagram.Service
         public static int FireBroadcastingCount = 20;
 
         /// <summary>
-        /// 底部固定部分:1.包含消防室 2.不含消防室 3.仅绘制计数模块
+        /// 底部固定部分:
+        /// 1.包含消防室 
+        /// 2.不含消防室 
+        /// 3.仅绘制计数模块
         /// </summary>
         public static int FixedPartType = 1;
 
@@ -40,5 +43,19 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// V2.0 按回路区分
         /// </summary>
         public static int SystemDiagramGenerationType = 1;
+
+        /// <summary>
+        /// 系统图展示效果： 
+        /// 1. 完全展开
+        /// 2. 按楼层/防火分区合并
+        /// </summary>
+        public static int DiagramDisplayEffect = 1;
+
+        /// <summary>
+        /// 是否为每个楼层分组： 
+        /// 1. 是
+        /// 2. 否
+        /// </summary>
+        public static int DiagramCreateGroup = 1;
     }
 }

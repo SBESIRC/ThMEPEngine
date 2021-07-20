@@ -33,10 +33,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private List<Entity> GlobleEntityData;
         private ThCADCoreNTSSpatialIndex GlobalBlockInfoSpatialIndex;
         private List<Entity> FloorEntityData;
+        private List<string> WireCircuitNameList;
 
         public ThAutoFireAlarmSystemModelFromWireCircuit()
         {
             floors = new List<ThFloorModel>();
+            WireCircuitNameList = new List<string>();
         }
 
         /// <summary>
@@ -129,7 +131,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                         FloorName = sobj.Storeys[0] + "F",
                                         FloorNumber = sobj.Storeys[0],
                                         IsMultiFloor = true,
-                                        MulitFloorName = sobj.Storeys
+                                        MulitFloors = sobj.Storeys,
+                                        MulitFloorName = sobj.StoreyTypeString,
+                                        MulitStoreyNumber = sobj.StoreyNumber
                                     };
                                     NewFloor.InitFloors(adb.Database, blk, fireCompartments, spatialIndex);
                                     Floors.Add(NewFloor);
@@ -143,7 +147,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             }
 
-            //统计楼层内防火分区计数
+            //统计楼层内回路计数
             Floors.ForEach(floor =>
             {
                 //定位楼层数据
@@ -167,50 +171,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
 
             });
-            //分解复数楼层
-            Floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
-            {
-                floor.MulitFloorName.ForEach(o =>
-                {
-                    var newfloor = new ThFloorModel();
-                    newfloor.IsMultiFloor = false;
-                    newfloor.FloorName = o + "F";
-                    newfloor.FloorNumber = o;
-                    floor.FireDistricts.ForEach(x =>
-                    {
-                        var names = x.FireDistrictName.Split('-');
-                        string OldName = names[0];
-                        names[0] = newfloor.FloorName;
-                        var newFireDistrict = new ThFireDistrictModel()
-                        {
-                            FireDistrictName = string.Join("-", names),
-                            DrawFireDistrict = x.DrawFireDistrict,
-                            DrawFireDistrictNameText = newfloor.FloorNumber == floor.MulitFloorName[0] ? x.DrawFireDistrictNameText : false,
-                            TextPoint = x.TextPoint,
-                            Data = x.Data,
-                            FireDistrictNo = x.FireDistrictNo,
-                            WireCircuits = new List<ThAlarmControlWireCircuitModel>()
-                        };
-                        x.WireCircuits.ForEach(cw =>
-                        {
-                            newFireDistrict.WireCircuits.Add(new ThAlarmControlWireCircuitModel()
-                            {
-                                DrawWireCircuit = cw.DrawWireCircuit,
-                                DrawWireCircuitText = newfloor.FloorNumber == floor.MulitFloorName[0] ? cw.DrawWireCircuitText : false,
-                                TextPoint = cw.TextPoint,
-                                WireCircuitName = cw.WireCircuitName.Replace(OldName, newfloor.FloorName),
-                                WireCircuitNo = cw.WireCircuitNo,
-                                Data = cw.Data,
-                                Graph = cw.Graph,
-                                BlockCount = cw.BlockCount,
-                            });
-                        });
-                        newfloor.FireDistricts.Add(newFireDistrict);
-                        Floors.Add(newfloor);
-                    });
-                });
-            });
-            return Floors.Where(o => !o.IsMultiFloor).ToList();
+
+            return Floors;
         }
 
         /// <summary>
@@ -279,88 +241,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         protected override void PrepareData()
         {
-            var AllFireDistrictsData = GetFireDistrictsInfo();
-            List<ThDrawModel> AllData = new List<ThDrawModel>();
-            AllData = DataProcessingAndConversion(AllFireDistrictsData, out List<string> warningMsg);
+            List<string> warningMsg = DataProcessing();
             warningMsg.ForEach(msg => Active.Editor.WriteLine($"\n{msg}"));
+            var AllData = GetDrawModelInfo();
             this.DrawData = AllData;
-        }
-
-        /// <summary>
-        /// 获取所有的防火分区信息
-        /// </summary>
-        /// <returns></returns>
-        private List<ThFireDistrictModel> GetFireDistrictsInfo()
-        {
-            return this.floors.OrderBy(x => { x.FireDistricts = x.FireDistricts.Where(f => f.WireCircuits.Count > 0).OrderBy(y => y.FireDistrictNo).ToList(); return x.FloorNumber; }).SelectMany(o => o.FireDistricts).Where(f => f.DrawFireDistrict).ToList();
-        }
-
-        /// <summary>
-        /// 数据处理，按业务需求处理数据并进行数据转换
-        /// </summary>
-        /// <param name="allData"></param>
-        /// <returns></returns>
-        private List<ThDrawModel> DataProcessingAndConversion(List<ThFireDistrictModel> allData, out List<string> Msg)
-        {
-            List<KeyValuePair<string, ThAlarmControlWireCircuitModel>> WireCircuitModels = new List<KeyValuePair<string, ThAlarmControlWireCircuitModel>>();
-            Msg = new List<string>();
-            List<string> warningMsg = new List<string>();
-            //正常的防火分区
-            var NormalFireDistricts = allData.Where(f => f.FireDistrictNo != -1).ToList();
-            allData.Where(f => f.FireDistrictNo == -1).ForEach(f =>
-            {
-                var FindData = NormalFireDistricts.FirstOrDefault(o => o.FireDistrictName == f.FireDistrictName);
-                if (FindData.IsNull())
-                {
-                    NormalFireDistricts.Add(f);
-                }
-                else
-                {
-                    FindData.WireCircuits.AddRange(f.WireCircuits);
-                }
-            });
-            NormalFireDistricts.ForEach(o =>
-            {
-                o.WireCircuits.OrderBy(x => x.WireCircuitNo).ForEach(x =>
-                {
-                    if (x.DrawWireCircuit)
-                    {
-                        int index = WireCircuitModels.FindLastIndex(y => y.Value.WireCircuitName == x.WireCircuitName);
-                        if (index == -1)
-                        {
-                            if (x.BlockCount > 32)
-                            {
-                                warningMsg.Add($"违反强条！检测到回路{x.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{x.BlockCount}个点，请复核。");
-                            }
-                            WireCircuitModels.Add(new KeyValuePair<string, ThAlarmControlWireCircuitModel>(o.FireDistrictName, x));
-                        }
-                        else
-                        {
-                            string Name = WireCircuitModels[index].Key;
-                            var data = WireCircuitModels[index].Value + x;
-                            if (data.BlockCount > 32)
-                            {
-                                warningMsg.Add($"违反强条！检测到回路{x.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{data.BlockCount}个点，请复核。");
-                            }
-                            WireCircuitModels[index] = new KeyValuePair<string, ThAlarmControlWireCircuitModel>(Name, data);
-                        }
-                    }
-                });
-            });
-
-            WireCircuitModels.ForEach(o =>
-            {
-                if (o.Value.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
-                    o.Value.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
-            });
-            Msg.AddRange(warningMsg);
-            return WireCircuitModels.Select(o => new ThDrawModel()
-            {
-                FireDistrictName = o.Key,
-                Data = o.Value.Data,
-                DrawCircuitName = true,
-                WireCircuitName = o.Value.WireCircuitName
-            }).ToList();
         }
 
         /// <summary>
@@ -383,6 +267,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     if (!string.IsNullOrWhiteSpace(wc.WireCircuitName))
                     {
                         wc.DrawWireCircuitText = false;
+                        if (!WireCircuitNameList.Contains(wc.WireCircuitName))
+                        {
+                            WireCircuitNameList.Add(wc.WireCircuitName);
+                        }
                         if (wc.WireCircuitName.Contains(fireDistrictName))
                         {
                             wc.WireCircuitNo = int.Parse(wc.WireCircuitName.Replace(fireDistrictName + "-WFA", ""));
@@ -408,8 +296,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     int max_No = fireDistrict.WireCircuits.Max(o => o.WireCircuitNo);
                     fireDistrict.WireCircuits.Where(o => o.DrawWireCircuit && o.DrawWireCircuitText).ForEach(o =>
                     {
+                        while (WireCircuitNameList.Contains(fireDistrictName + "-WFA" + (max_No + 1).ToString("00")))
+                        {
+                            max_No++;
+                        }
                         o.WireCircuitNo = ++max_No;
                         o.WireCircuitName = fireDistrictName + "-WFA" + o.WireCircuitNo.ToString("00");
+                        if (!WireCircuitNameList.Contains(o.WireCircuitName))
+                        {
+                            WireCircuitNameList.Add(o.WireCircuitName);
+                        }
                     });
                 }
             }
@@ -417,6 +313,204 @@ namespace ThMEPElectrical.SystemDiagram.Model
             {
                 throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        /// 数据处理，按业务需求处理数据
+        /// </summary>
+        /// <param name="allData"></param>
+        /// <returns></returns>
+        private List<string> DataProcessing()
+        {
+            var warningMsg = new List<string>();
+            //正常的防火分区
+            this.floors.ForEach(floor => floor.FireDistricts.ForEach(o =>
+            {
+                o.WireCircuits = o.WireCircuits.Where(x => x.DrawWireCircuit).ToList();
+            }));
+            var NormalFireDistricts = this.floors.SelectMany(o => o.FireDistricts).Where(f => f.FireDistrictNo != -1).ToList();
+            for (int i = 0; i < this.floors.Count; i++)
+            {
+                ThFloorModel floor = this.floors[i];
+                List<ThFireDistrictModel> fireCompartments = new List<ThFireDistrictModel>();
+                floor.FireDistricts.Where(f => f.FireDistrictNo == -1).ForEach(o =>
+                {
+                    var fireDistrict = NormalFireDistricts.FirstOrDefault(f => f.FireDistrictName == o.FireDistrictName);
+                    if (!fireDistrict.IsNull())
+                    {
+                        //fireDistrict.WireCircuits.AddRange(o.WireCircuits);
+                        o.WireCircuits.ForEach(x =>
+                        {
+                            if (fireDistrict.WireCircuits.Count(y => y.WireCircuitName == x.WireCircuitName) > 0)
+                            {
+                                for (int j = 0; j < fireDistrict.WireCircuits.Count; j++)
+                                {
+                                    var wirecircuit = fireDistrict.WireCircuits[j];
+                                    if (wirecircuit.WireCircuitName == x.WireCircuitName)
+                                    {
+                                        wirecircuit += x;
+                                        fireDistrict.WireCircuits[j] = wirecircuit;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                fireDistrict.WireCircuits.Add(x);
+                            }
+                        });
+                        fireCompartments.Add(o);
+                    }
+                });
+                floor.FireDistricts.RemoveAll(o => fireCompartments.Contains(o));
+                floor.FireDistricts = floor.FireDistricts.OrderBy(o => 
+                {
+                    o.WireCircuits = o.WireCircuits.OrderBy(x => x.WireCircuitNo).ToList();
+                    return  o.FireDistrictNo;
+                }).ToList();
+            }
+            this.floors.ForEach(x => x.FireDistricts.ForEach(y => y.WireCircuits.ForEach(o =>
+            {
+                if (o.BlockCount > 32)
+                {
+                    warningMsg.Add($"违反强条！检测到回路{o.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{o.BlockCount}个点，请复核。");
+                }
+                if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
+                    o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
+            })));
+
+            if (FireCompartmentParameter.DiagramDisplayEffect == 1)
+            {
+                //分解复数楼层
+                this.floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
+                {
+                    floor.MulitFloors.ForEach(o =>
+                    {
+                        var newfloor = new ThFloorModel();
+                        newfloor.IsMultiFloor = false;
+                        newfloor.FloorName = o + "F";
+                        newfloor.FloorNumber = o;
+                        floor.FireDistricts.ForEach(x =>
+                        {
+                            var names = x.FireDistrictName.Split('-');
+                            string OldName = names[0];
+                            names[0] = newfloor.FloorName;
+                            var newFireDistrict = new ThFireDistrictModel()
+                            {
+                                FireDistrictName = string.Join("-", names),
+                                DrawFireDistrict = x.DrawFireDistrict,
+                                DrawFireDistrictNameText = newfloor.FloorNumber == floor.MulitFloors[0] ? x.DrawFireDistrictNameText : false,
+                                TextPoint = x.TextPoint,
+                                Data = x.Data,
+                                FireDistrictNo = x.FireDistrictNo,
+                                WireCircuits = new List<ThAlarmControlWireCircuitModel>()
+                            };
+                            x.WireCircuits.ForEach(cw =>
+                            {
+                                newFireDistrict.WireCircuits.Add(new ThAlarmControlWireCircuitModel()
+                                {
+                                    DrawWireCircuit = cw.DrawWireCircuit,
+                                    DrawWireCircuitText = newfloor.FloorNumber == floor.MulitFloors[0] ? cw.DrawWireCircuitText : false,
+                                    TextPoint = cw.TextPoint,
+                                    WireCircuitName = cw.WireCircuitName.Replace(OldName, newfloor.FloorName),
+                                    WireCircuitNo = cw.WireCircuitNo,
+                                    Data = cw.Data,
+                                    Graph = cw.Graph,
+                                    BlockCount = cw.BlockCount,
+                                });
+                            });
+                            newfloor.FireDistricts.Add(newFireDistrict);
+                        });
+                        this.floors.Add(newfloor);
+                    });
+                    this.floors = this.floors.Where(o => !o.IsMultiFloor).ToList();
+                });
+            }
+            else
+            {
+                //合并同防火分区的所有回路
+                this.floors.ForEach(o =>
+                {
+                    for (int i = 0; i < o.FireDistricts.Count; i++)
+                    {
+                        ThFireDistrictModel fireDistrictModel = o.FireDistricts[i];
+                        if (fireDistrictModel.WireCircuits.Count > 0)
+                        {
+                            ThAlarmControlWireCircuitModel wireCircuitModel = fireDistrictModel.WireCircuits[0];
+                            for (int j = 1; j < fireDistrictModel.WireCircuits.Count; j++)
+                            {
+                                wireCircuitModel += fireDistrictModel.WireCircuits[j];
+                            }
+                            wireCircuitModel.MulitWireCircuitName = MergeInts(fireDistrictModel.WireCircuits.Select(x => x.WireCircuitNo));
+                            fireDistrictModel.WireCircuits = new List<ThAlarmControlWireCircuitModel>() { wireCircuitModel };
+                        }
+                    }
+                });
+            }
+            return warningMsg;
+        }
+
+        /// <summary>
+        /// 获取DrawModelList
+        /// </summary>
+        /// <returns></returns>
+        private List<ThDrawModel> GetDrawModelInfo()
+        {
+            return this.floors.OrderBy(o => o.FloorNumber).SelectMany(o =>
+            {
+                List<ThDrawModel> drawModels = new List<ThDrawModel>();
+                o.FireDistricts.OrderBy(x => x.FireDistrictNo).ForEach(x => x.WireCircuits.ForEach(y =>
+                {
+                    string fireDistrictName = o.IsMultiFloor ? $"{o.MulitFloorName}:{o.MulitStoreyNumber}F-{x.FireDistrictNo}" : x.FireDistrictName;
+                    drawModels.Add(new ThDrawModel()
+                    {
+                        FireDistrictName = fireDistrictName,
+                        Data = y.Data,
+                        DrawCircuitName = true,
+                        WireCircuitName = FireCompartmentParameter.DiagramDisplayEffect == 1 ? y.WireCircuitName : "WFA" + y.MulitWireCircuitName,
+                        FloorCount = o.IsMultiFloor ? o.MulitFloors.Count : 1,
+                    });
+                }));
+                return drawModels;
+            }).ToList();
+        }
+
+        /// <summary>
+        /// 合并int集合
+        /// </summary>
+        public string MergeInts(IEnumerable<int> ints)
+        {
+            if (ints.Count() == 1)
+                return ints.First().ToString("00");
+
+            string CollectionNumberStr = string.Empty;
+
+            List<string> CollectionNumberStrArr = new List<string>();
+            if (ints != null && ints.Count() > 0)
+            {
+                var query = ints.OrderBy(p => p).Aggregate<int, List<List<int>>>(null, (m, n) =>
+                {
+                    if (m == null)
+                        return new List<List<int>>() { new List<int>() { n } };
+                    if (m.Last().Last() != n - 1)
+                        m.Add(new List<int>() { n });
+                    else
+                        m.Last().Add(n);
+                    return m;
+                });
+                query.ForEach(p =>
+                {
+                    int First = p.First();
+                    int Last = p.Last();
+
+                    if (First == Last)
+                        CollectionNumberStrArr.Add(First.ToString("00"));
+                    else
+                        CollectionNumberStrArr.Add(First.ToString("00") + "-" + Last.ToString("00"));
+                });
+                CollectionNumberStr = CollectionNumberStr.Trim();
+            }
+            return CollectionNumberStr = string.Join(",", CollectionNumberStrArr);
         }
     }
 }

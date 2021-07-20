@@ -43,7 +43,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0)
                 {
-                    FireHydrantPumpCount += AreaData.Data.BlockData.BlockStatistics["消火栓泵"];
+                    FireHydrantPumpCount += AreaData.Data.BlockData.BlockStatistics["消火栓泵"] * AreaData.FloorCount;
                     FireHydrantPumpMaxFloor = FloorNum + 1;
                     if (FireHydrantPumpMinFloor == 0)
                         FireHydrantPumpMinFloor = FloorNum + 1;

@@ -40,7 +40,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     BlockReference br = acad.Element<BlockReference>(objid);
                     Result.Add(br);
                 }
-                SumCount += FindCount;
+                SumCount += FindCount * AreaData.FloorCount;
                 ResultDic.Add(FloorNum + 1, Result);
             }
             if (FireCompartmentParameter.FixedPartType != 3)

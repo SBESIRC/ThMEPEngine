@@ -87,16 +87,39 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 List<Entity> Result = new List<Entity>();
                 var floorData = this.AllFireDistrictData[i];
-                DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
-                Text.TextString = floorData.FireDistrictName;
-                Text.Position = new Point3d(-1500, OuterFrameLength * i + 1500, 0);
-                Text.AlignmentPoint = Text.Position;
-                Result.Add(Text);
+                if(floorData.FireDistrictName.Length<10)
+                {
+                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    Text.TextString = floorData.FireDistrictName;
+                    Text.Position = new Point3d(-1500, OuterFrameLength * i + 1500, 0);
+                    Text.AlignmentPoint = Text.Position;
+                    Result.Add(Text);
+                }
+                else
+                {
+                    int Findindex = 0;
+                    Findindex = floorData.FireDistrictName.IndexOf(',') + 1;
+                    if (Findindex < 1)
+                    {
+                        Findindex = floorData.FireDistrictName.IndexOf('F') + 1;
+                    }
+                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    Text.TextString = floorData.FireDistrictName.Substring(0,Findindex);
+                    Text.Position = new Point3d(-1500, OuterFrameLength * i + 1800, 0);
+                    Text.AlignmentPoint = Text.Position;
+                    Result.Add(Text);
+
+                    DBText Text1 = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    Text1.TextString = floorData.FireDistrictName.Substring(Findindex,floorData.FireDistrictName.Length- Findindex);
+                    Text1.Position = new Point3d(-1500, OuterFrameLength * i + 1200, 0);
+                    Text1.AlignmentPoint = Text1.Position;
+                    Result.Add(Text1);
+                }
                 if (floorData.DrawCircuitName)
                 {
                     DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                     WireCircuitText.TextString = floorData.WireCircuitName;
-                    WireCircuitText.Position = new Point3d(13500, OuterFrameLength * i + 2200, 0);
+                    WireCircuitText.Position = new Point3d(16500, OuterFrameLength * i + 2200, 0);
                     WireCircuitText.AlignmentPoint = WireCircuitText.Position;
                     Result.Add(WireCircuitText);
                 }

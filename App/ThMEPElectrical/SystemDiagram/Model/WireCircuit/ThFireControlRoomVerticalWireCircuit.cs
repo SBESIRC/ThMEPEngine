@@ -35,7 +35,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 int Count = AreaData.Data.BlockData.BlockStatistics["防排抽烟机"];
                 if (Count > 0)
                 {
-                    SmokeMachineCount += Count;
+                    SmokeMachineCount += Count * AreaData.FloorCount;
                     FireControlRoomMaxFloor = Math.Max(FireControlRoomMaxFloor, FloorNum + 1);
                     Result.AddRange(DrawFireControlRoomLine(currentIndex, FloorNum, SmokeMachineCount));
                 }

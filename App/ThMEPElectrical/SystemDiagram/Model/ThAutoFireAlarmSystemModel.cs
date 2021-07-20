@@ -232,7 +232,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
 
                 //加入组
-                Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                if (FireCompartmentParameter.DiagramCreateGroup == 1)
+                {
+                    Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                }
             }
         }
 

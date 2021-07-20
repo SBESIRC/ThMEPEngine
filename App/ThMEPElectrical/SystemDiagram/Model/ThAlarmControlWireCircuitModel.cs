@@ -23,6 +23,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public int WireCircuitNo { get; set; } = 0;
 
         /// <summary>
+        /// 合并线路名称
+        /// </summary>
+        public string MulitWireCircuitName { get; set; }
+
+        /// <summary>
         /// 块权重计数
         /// </summary>
         public int BlockCount { get; set; }
@@ -138,6 +143,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             ThAlarmControlWireCircuitModel newWireCircuitModel = new ThAlarmControlWireCircuitModel()
             {
                 WireCircuitName = x.WireCircuitName,
+                WireCircuitNo=x.WireCircuitNo,
                 TextPoint = x.TextPoint.Equals(Point3d.Origin) ? y.TextPoint : x.TextPoint,
                 Data = x.Data + y.Data,
                 BlockCount = x.BlockCount + y.BlockCount,

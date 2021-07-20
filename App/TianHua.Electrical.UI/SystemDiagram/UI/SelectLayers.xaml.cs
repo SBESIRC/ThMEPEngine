@@ -40,6 +40,20 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         /// </summary>
         private int DiagramGenerationType = 1;
 
+        /// <summary>
+        /// 系统图展示效果： 
+        /// 1. 完全展开
+        /// 2. 按楼层/防火分区合并
+        /// </summary>
+        private int DisplayEffect = 1;
+
+        /// <summary>
+        /// 是否为每个楼层分组： 
+        /// 1. 是
+        /// 2. 否
+        /// </summary>
+        private int CreateGroup = 1;
+
         public SelectLayers()
         {
             InitializeComponent();
@@ -94,6 +108,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 else
                     PublicSectionType = 3;
 
+
                 if(commondType==1 && viewModel.SelectCheckFiles == null || viewModel.SelectCheckFiles.Count == 0)
                 {
                     MessageBox.Show("数据错误：未获取到至少一张要统计的图纸，无法进行后续操作,请重新选择", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -101,6 +116,8 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 }
 
                 DiagramGenerationType = DistinguishByFireCompartment.IsChecked.Value ? 1 : 2;
+                DisplayEffect = ShowAllDiagram.IsChecked.Value ? 1 : 2;
+                CreateGroup = ConfirmGroup.IsChecked.Value ? 1 : 2;
 
                 FireCompartmentParameter.LayerNames = SelectLayers;
                 FireCompartmentParameter.ChoiseFileNames = SelectFileNames;
@@ -109,6 +126,8 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 FireCompartmentParameter.ShortCircuitIsolatorCount = int.Parse(ShortCircuitIsolatorTxt.Text);
                 FireCompartmentParameter.FixedPartType = PublicSectionType;
                 FireCompartmentParameter.SystemDiagramGenerationType = DiagramGenerationType;
+                FireCompartmentParameter.DiagramDisplayEffect = DisplayEffect;
+                FireCompartmentParameter.DiagramCreateGroup = CreateGroup;
 
                 this.DialogResult = true;
                 this.Close();
