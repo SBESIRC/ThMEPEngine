@@ -38,7 +38,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 foreach (var item in structs)
                 {
-                    db.ModelSpace.Add(item);
+                    //db.ModelSpace.Add(item);
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
@@ -64,13 +64,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <returns></returns>
         private Buttun CalLayoutButton(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
         {
+            var checkDir = doorDir;
             var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, buttunWidth, true).FirstOrDefault();
+            if (layoutInfo.Key == null)
+            {
+                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2)
+                    .Where(x => (x.Value - doorPt).DotProduct(doorDir) > 0)
+                    .FirstOrDefault();
+                checkDir = (doorPt - layoutInfo.Value).GetNormal();
+            }
             if (layoutInfo.Key == null)
             {
                 return null;
             }
             var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (doorDir.DotProduct(dir) < 0)
+            if (checkDir.DotProduct(dir) < 0)
             {
                 dir = -dir;
             }
@@ -105,13 +114,22 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <returns></returns>
         private Intercom CalLayoutIntercom(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
         {
+            var checkDir = doorDir;
             var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, cardReaderWidth, true).FirstOrDefault();
+            if (layoutInfo.Key == null)
+            {
+                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2)
+                    .Where(x => (x.Value - doorPt).DotProduct(doorDir) > 0)
+                    .FirstOrDefault();
+                checkDir = (doorPt - layoutInfo.Value).GetNormal();
+            }
             if (layoutInfo.Key == null)
             {
                 return null;
             }
             var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (doorDir.DotProduct(dir) < 0)
+            if (checkDir.DotProduct(dir) < 0)
             {
                 dir = -dir;
             }
