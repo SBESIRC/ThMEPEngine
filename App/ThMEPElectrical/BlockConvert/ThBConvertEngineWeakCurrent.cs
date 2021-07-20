@@ -72,8 +72,9 @@ namespace ThMEPElectrical.BlockConvert
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < tolerance
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
+                var targetBlockDataPosition= new Point3d().TransformBy(targetBlockData.MCS2WCS);
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockDataPosition) < tolerance
+                    ? targetBlockDataPosition : targetBlockData.GetCentroidPoint();
                 var srcBlockDataPosition = new Point3d().TransformBy(srcBlockData.MCS2WCS);
                 var srcBlockDataPoint = srcBlockData.GetCentroidPoint().DistanceTo(srcBlockDataPosition) < tolerance
                     ? srcBlockDataPosition : srcBlockData.GetCentroidPoint();
@@ -90,7 +91,8 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var dynamicProperties = srcBlockData.CustomProperties;
-                double length = 0, width = 0;
+                double width = ThBConvertCommon.default_fire_valve_width;
+                double length = ThBConvertCommon.default_fire_valve_length;
                 if (srcBlockData.CustomProperties.Contains("长度"))
                 {
                     length = (double)dynamicProperties.GetValue("长度");
@@ -99,10 +101,11 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     width = (double)dynamicProperties.GetValue("宽度或直径");
                 }
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                var srcBlockDataPosition = new Point3d(width / 2, -length / 2, 0).TransformBy(srcBlockData.MCS2WCS);
-                var offset = targetPoint.GetVectorTo(srcBlockDataPosition);
+                var targetBlockDataPosition = new Point3d().TransformBy(targetBlockData.MCS2WCS);
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockDataPosition) < 100
+                    ? targetBlockDataPosition : targetBlockData.GetCentroidPoint();
+                var srcBlockDataPoint = new Point3d(width / 2, -length / 2, 0).TransformBy(srcBlockData.MCS2WCS);
+                var offset = targetPoint.GetVectorTo(srcBlockDataPoint);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
@@ -119,15 +122,23 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 double rotation = srcBlockReference.Rotation;
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                var targetBlockDataPosition = new Point3d().TransformBy(targetBlockData.MCS2WCS);
+                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockDataPosition) < 100
+                    ? targetBlockDataPosition : targetBlockData.GetCentroidPoint();
+                if (srcBlockReference.EffectiveName.Contains("室内消火栓平面"))
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
                 }
                 else
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
+                    if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                    {
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
+                    }
+                    else
+                    {
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
+                    }
                 }
             }
         }

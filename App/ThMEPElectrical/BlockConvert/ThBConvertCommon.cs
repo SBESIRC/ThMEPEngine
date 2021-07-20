@@ -4,6 +4,8 @@
     {
         public static readonly double default_voltage = 380;
         public static readonly double radian_tolerance = 1e-6;
+        public const double default_fire_valve_width = 0.0;
+        public const double default_fire_valve_length = 320.0;
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_NAME = "块名";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER = "目标图层";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
