@@ -101,9 +101,9 @@
                     </Grid>
 
                 </Border>
-                <Grid Margin="0" Grid.Row="1" Focusable="False">
-                    <ContentPresenter HorizontalAlignment="Stretch" Focusable="False" Width="Auto"/>
-                </Grid>
+                <AdornerDecorator Grid.Row="1" Focusable="False" Margin="0">
+                    <ContentPresenter  HorizontalAlignment="Stretch" Focusable="False" Width="Auto"/>
+                </AdornerDecorator>
             </Grid>
         </Border>
     </ControlTemplate>

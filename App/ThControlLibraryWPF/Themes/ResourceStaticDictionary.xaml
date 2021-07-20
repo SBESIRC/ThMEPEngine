@@ -30,6 +30,15 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <Style TargetType="{x:Type localCus:InputTextBox}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorderColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBoxForegroundColor}"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="HintText" Value=""/>
+        <Setter Property="FocusBorderColor" Value="{StaticResource TextBoxFocusBorderColor}"/>
+    </Style>
     
     <!--图片按钮样式-->
     <Style TargetType="{x:Type localCus:ImageButton}">
@@ -107,13 +116,21 @@
     <Style TargetType="Label">
         <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
     </Style>
-    
+
+    <!--Start DataGrid相关样式-->
+    <Style TargetType="DataGrid">
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource DataGridHorizontalGridLinesBrushColor}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{StaticResource DataGridVerticalGridLinesBrushColor}"/>
+    </Style>
     <Style TargetType="DataGridColumnHeader">
         <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
-        <Setter Property="Background" Value="#F2F2F2"></Setter>
-        <Setter Property="Foreground" Value="Black"></Setter>
+        <Setter Property="Background" Value="{StaticResource DataGridHeadBackgroundColor}"></Setter>
+        <Setter Property="Foreground" Value="{StaticResource DataGridHeadForegroundColor}"></Setter>
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="#D5D5D5" />
+        <Setter Property="BorderBrush" Value="{StaticResource DataGridHeadBorderColor}" />
         <Setter Property="FontWeight" Value="Black"></Setter>
         <Setter Property="Height" Value="30"></Setter>
     </Style>
@@ -121,7 +138,7 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="#176BD1"/>
+                <Setter Property="Background" Value="{StaticResource DataGridRowSelectBackgroundColor}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -138,4 +155,5 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!--End DataGrid样式-->
 </ResourceDictionary>

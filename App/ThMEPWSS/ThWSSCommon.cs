@@ -50,5 +50,21 @@
         public const string Layout_PipeCasingLayerName = "W-BUSH";
 
         public const string Layout_TextStyle = "TH-STYLE3";
+
+        public const string Layout_FireHydrantPipeLineLayerName = "W-FRPT-HYDT-PIPE";                  //消火栓管线图层名称
+        public const string Layout_FireHydrantTextLayerName = "W-FRPT-HYDT-DIMS";                      //消火栓文字图层名称
+        public const string Layout_FireHydrantDescriptionLayerName = "W-WSUP-NOTE";
+        public const string Layout_FireHydrantEqumLayerName = "W-FRPT-HYDT-EQPM";
+        public const string Layout_FireHydrantBlockName = "室内消火栓系统1";
+        public const string Layout_FireHydrantLayerName = "W-FRPT-HYDT";
+        public const string Layout_ButterflyValveBlcokName = "蝶阀";
+        public const string Layout_ExhaustValveSystemBlockName = "自动排气阀系统1";
+        public const string Layout_LevelBlockName = "标高";
+        public const string Layout_CheckValveBlockName = "止回阀";
+        public const string Layout_ShutOffValve = "截止阀";
+        public const string Layout_SafetyValve = "安全阀";
+        public const string Layout_LevelLayerName = "W-NOTE";
+        public const string Layout_ConnectionReserveBlcokName = "接驳预留";
+
     }
 }
