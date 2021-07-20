@@ -212,17 +212,17 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            {
-                var subPanel = row.AddNewPanel();
-                var subRow = subPanel.AddNewRibbonRow();
-                row.AddNewButton("地下消火栓系统图",
-                    "天华地下消火栓系统图",
-                    "THDXXHSXTT",
-                    "天华地下消火栓系统图",
-                    "IDI_THCAD_THDXXHSXTT_SMALL",
-                    "IDI_THCAD_THDXXHSXTT_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            //{
+            //    var subPanel = row.AddNewPanel();
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    row.AddNewButton("地下消火栓系统图",
+            //        "天华地下消火栓系统图",
+            //        "THDXXHSXTT",
+            //        "天华地下消火栓系统图",
+            //        "IDI_THCAD_THDXXHSXTT_SMALL",
+            //        "IDI_THCAD_THDXXHSXTT_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
 
             {
                 var subPanel = row.AddNewPanel();
