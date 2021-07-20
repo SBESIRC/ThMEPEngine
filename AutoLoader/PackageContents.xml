@@ -380,6 +380,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THXHSXTT" Global="THXHSXTT" />
 				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
@@ -397,6 +398,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THXHSXTT" Global="THXHSXTT" />
 				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
@@ -414,6 +416,7 @@
                 <Command Local="THJSXTT" Global="THJSXTT" />
                 <Command Local="THXHSJH" Global="THXHSJH" />
                 <Command Local="THPYSPM" Global="THPYSPM" />
+				<Command Local="THXHSXTT" Global="THXHSXTT" />
 				<Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
             </Commands>
         </ComponentEntry>
