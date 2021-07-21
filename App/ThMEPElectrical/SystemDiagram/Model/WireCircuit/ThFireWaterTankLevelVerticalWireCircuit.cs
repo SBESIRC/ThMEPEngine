@@ -41,7 +41,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消防水池"] > 0)
                 {
-                    FireExtinguisherPoolCount += AreaData.Data.BlockData.BlockStatistics["消防水池"];
+                    FireExtinguisherPoolCount += AreaData.Data.BlockData.BlockStatistics["消防水池"] * AreaData.FloorCount;
                     if (FireExtinguisherPoolMinFloor == 0)
                     {
                         FireExtinguisherPoolMinFloor = FloorNum + 1;

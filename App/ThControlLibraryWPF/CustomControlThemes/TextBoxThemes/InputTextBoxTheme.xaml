@@ -1,0 +1,99 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ThControlLibraryWPF.CustomControl"
+                    xmlns:localBase ="clr-namespace:ThControlLibraryWPF">
+    <localBase:BackgroundMultiConverter x:Key="backgroundConverter"/>
+    <Style TargetType="{x:Type local:InputTextBox}">
+        <!--禁用中文输入-->
+        <Setter Property="InputMethod.IsInputMethodEnabled" Value="False"/>
+        <!--禁用右键菜单-->
+        <Setter Property="ContextMenu" Value="{x:Null}"/>
+        <!--输入是如果可以为空是设置Input为string-->
+        <Setter Property="TextBoxInputType" Value="InputString"/>
+        <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="Local"/>
+        <Setter Property="KeyboardNavigation.TabIndex" Value="1"/>
+        <Setter Property="IsTabStop" Value="True"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Width" Value="Auto"/>
+        <Setter Property="TextBoxInputType" Value="InputString"/>
+        <Setter Property="BorderBrush" Value="Black"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FocusBorderColor" Value="#2A69C0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=_tbInput}"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:InputTextBox}">
+                    <Border Background="{TemplateBinding Background}" x:Name="_tbBorder"
+                            BorderBrush="{Binding BorderBrush,RelativeSource={RelativeSource TemplatedParent},Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                            BorderThickness="{TemplateBinding BorderThickness}" Margin="0" Padding="0"
+                            CornerRadius="{TemplateBinding CornerRadius}" 
+                            >
+                        <Grid Margin="0" Background="Transparent">
+                            <TextBlock Grid.Column="1" x:Name="_tbHint" Padding="2" Focusable="False" IsEnabled="False" ContextMenu="{x:Null}" Opacity="0.6" VerticalAlignment="Center" Visibility="Collapsed"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       IsHitTestVisible="False"
+                                       InputMethod.IsInputMethodEnabled="False"
+                                       Margin="{TemplateBinding TextMargin}"
+                                       Text="{TemplateBinding HintText}"
+                                       Foreground="{TemplateBinding Foreground}"/>
+                            <TextBox x:Name="_tbInput" 
+                                     VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                     HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                     VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                     HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                     IsHitTestVisible="True"
+                                     TabIndex="{Binding Path=TabIndex, RelativeSource={RelativeSource AncestorType={x:Type local:InputTextBox}}}"
+                                     Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, Mode=TwoWay}"
+                                     ContextMenu="{x:Null}"
+                                     FontSize="{TemplateBinding FontSize}"
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     CaretBrush ="{TemplateBinding CaretBrush}"
+                                     Margin="{TemplateBinding TextMargin}"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     Grid.Column="1" 
+                                     BorderThickness="0" 
+                                     Background="Transparent"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="_tbInput" Property="Text" Value="{x:Null}">
+                            <Setter TargetName="_tbHint" Property="Visibility" Value="Visible"></Setter>
+                        </Trigger>
+                        <Trigger SourceName="_tbInput" Property="Text" Value="">
+                            <Setter TargetName="_tbHint" Property="Visibility" Value="Visible"></Setter>
+                        </Trigger>
+                        <Trigger SourceName="_tbInput" Property="IsFocused" Value="True">
+                            <Setter Property="BorderBrush" TargetName="_tbBorder">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource backgroundConverter}" NotifyOnSourceUpdated="True" ConverterParameter="borderOverBackground">
+                                        <Binding Path="FocusBorderColor" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                        <Binding Path="BorderBrush" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="TextBoxInputType" Value="InputString">
+                            <Setter TargetName="_tbInput" Property="InputMethod.IsInputMethodEnabled"  Value="True"></Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!--<Setter Property="Validation.ErrorTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <AdornedElementPlaceholder Name="customAdorner"></AdornedElementPlaceholder>
+                        <Label ContextMenu="{x:Null}" IsTabStop="False" Content="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}" BorderThickness="0" Margin="5,0,0,0" Foreground="Red" VerticalContentAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
+</ResourceDictionary>

@@ -30,9 +30,19 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public bool IsMultiFloor { get; set; } = false;
 
         /// <summary>
+        /// 多楼层包含层数
+        /// </summary>
+        public List<int> MulitFloors { get; set; }
+
+        /// <summary>
         /// 多楼层名称
         /// </summary>
-        public List<int> MulitFloorName { get; set; }
+        public string MulitFloorName { get; set; }
+        
+        /// <summary>
+        /// 多楼层名称
+        /// </summary>
+        public string MulitStoreyNumber { get; set; }
 
         /// <summary>
         /// 防火分区信息

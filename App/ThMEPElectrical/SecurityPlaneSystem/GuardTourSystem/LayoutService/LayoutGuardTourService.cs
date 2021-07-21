@@ -3,14 +3,11 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService

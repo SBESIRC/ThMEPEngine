@@ -13,10 +13,12 @@
     <SolidColorBrush x:Key="ButtonForegroundColor" Color="Black"/>
     <SolidColorBrush x:Key="ButtonMouseOverBackgroundColor" Color="#176BD1"/>
     <SolidColorBrush x:Key="ButtonMouseOverForegroundColor" Color="White"/>
-    
+
+    <SolidColorBrush x:Key="TextBoxForegroundColor" Color="Black"/>
     <SolidColorBrush x:Key="TextBoxBorderColor" Color="Gray"/>
     <SolidColorBrush x:Key="TextBoxBorderErrorColor" Color="Red"/>
     <SolidColorBrush x:Key="TextBoxBackgroundColor" Color="Transparent"/>
+    <SolidColorBrush x:Key="TextBoxFocusBorderColor" Color="#569DE5"/>
 
     <SolidColorBrush x:Key="CommonBorderColor" Color="Gray"/>
 
@@ -25,4 +27,11 @@
 
     <SolidColorBrush x:Key="RadioButtonBorderColor" Color="Gray"/>
     <SolidColorBrush x:Key="RadioButtonFocusBorderColor" Color="#0286EB"/>
+
+    <SolidColorBrush x:Key="DataGridHeadBackgroundColor" Color="#F2F2F2"/>
+    <SolidColorBrush x:Key="DataGridHeadForegroundColor" Color="Black"/>
+    <SolidColorBrush x:Key="DataGridHeadBorderColor" Color="#D5D5D5"/>
+    <SolidColorBrush x:Key="DataGridRowSelectBackgroundColor" Color="#176BD1"/>
+    <SolidColorBrush x:Key="DataGridHorizontalGridLinesBrushColor" Color="Gray"/>
+    <SolidColorBrush x:Key="DataGridVerticalGridLinesBrushColor" Color="Gray"/>
 </ResourceDictionary>

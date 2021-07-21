@@ -270,7 +270,7 @@ namespace ThMEPHVAC.Model
         public static void Move_to_origin(Point3d align_p, DBObjectCollection line_set)
         {
             var dis_mat = Matrix3d.Displacement(-align_p.GetAsVector());
-            foreach (Line l in line_set)
+            foreach (Curve l in line_set)
                 l.TransformBy(dis_mat);
         }
     }

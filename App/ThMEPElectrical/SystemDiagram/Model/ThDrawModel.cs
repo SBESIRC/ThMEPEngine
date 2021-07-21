@@ -14,5 +14,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public bool DrawCircuitName { get; set; } = false;
 
         public string WireCircuitName { get; set; }
+
+        public int FloorCount { get; set; } = 1;
     }
 }

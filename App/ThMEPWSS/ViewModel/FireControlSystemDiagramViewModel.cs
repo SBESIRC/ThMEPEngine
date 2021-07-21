@@ -22,37 +22,100 @@ namespace ThMEPWSS.ViewModel
                 RaisePropertyChanged("ZoneID");
             }
         }
-
-        private int _StartFloor;
-
-        public int StartFloor
+        /// <summary>
+        /// 开始楼层
+        /// </summary>
+        private string _startFloor { get; set; }
+        /// <summary>
+        /// 开始楼层
+        /// </summary>
+        public string StartFloor 
         {
-            get
-            { return _StartFloor; }
-            set
+            get { return _startFloor; }
+            set 
             {
-                _StartFloor = value;
+                _startFloor = value;
                 RaisePropertyChanged("StartFloor");
             }
         }
-
-        private int _EndFloor;
-
-        public int EndFloor
+        /// <summary>
+        /// 结束楼层
+        /// </summary>
+        private string _endFloor { get; set; }
+        /// <summary>
+        /// 结束楼层
+        /// </summary>
+        public string EndFloor 
         {
-            get { return _EndFloor; }
+            get { return _endFloor; }
             set 
-            { 
-                _EndFloor = value;
+            {
+                _endFloor = value;
                 RaisePropertyChanged("EndFloor");
             }
         }
-
-
+        public bool IsEffective() 
+        {
+            if (string.IsNullOrEmpty(this._startFloor) && string.IsNullOrEmpty(this._endFloor))
+            {
+                return true;
+            }
+            else if (string.IsNullOrEmpty(this._startFloor) || string.IsNullOrEmpty(this._endFloor))
+            {
+                return false;
+            }
+            else 
+            {
+                int intStart = -9999;
+                int intEnd = 9999;
+                if(!int.TryParse(_startFloor,out intStart) || !int.TryParse(_endFloor,out intEnd)) 
+                    return false;
+                if (intStart >= intEnd)
+                    return false;
+                return true;
+            }
+        }
+        public int? GetIntStartFloor()
+        {
+            if (!string.IsNullOrEmpty(this._startFloor)) 
+            {
+                int intStart = -9999;
+                if (int.TryParse(_startFloor, out intStart)) 
+                    return intStart;
+            }
+            return null;
+        }
+        public int? GetIntEndFloor() 
+        {
+            if (!string.IsNullOrEmpty(this._endFloor))
+            {
+                int endStart = -9999;
+                if (int.TryParse(_endFloor, out endStart))
+                    return endStart;
+            }
+            return null;
+        }
     }
     public class FireControlSystemDiagramViewModel : NotifyPropertyChangedBase
     {
+        public FireControlSystemDiagramViewModel()
+        {
+            ZoneConfigs = new ObservableCollection<ZoneSetupViewModel>();
+            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 1, StartFloor = "1" });
+            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 2 });
+            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 3 });
+            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 4 });
+
+            FireTypes = new ObservableCollection<UListItemData>();
+            FireTypes.Add(new UListItemData("单栓", 1));
+            FireTypes.Add(new UListItemData("单栓带卷盘", 2));
+            ComBoxFireTypeSelectItem = FireTypes.FirstOrDefault();
+        }
+
         private double _FaucetFloor = 1800; //mm
+        /// <summary>
+        /// 楼层线间距
+        /// </summary>
         public double FaucetFloor
         {
             get
@@ -66,8 +129,11 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
-        private int _serialnumber = 1; 
-        public int Serialnumber
+        private string _serialnumber = "1";
+        /// <summary>
+        /// 单元编号
+        /// </summary>
+        public string Serialnumber
         {
             get
             {
@@ -81,6 +147,9 @@ namespace ThMEPWSS.ViewModel
         }
 
         private int _countsgeneral = 4;
+        /// <summary>
+        /// 普通层消火栓数量
+        /// </summary>
         public int CountsGeneral
         {
             get
@@ -95,6 +164,9 @@ namespace ThMEPWSS.ViewModel
         }
 
         private int _countsrefuge = 4;
+        /// <summary>
+        /// 避难层消火栓数量
+        /// </summary>
         public int CountsRefuge
         {
             get
@@ -108,35 +180,44 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
-        private bool _isRoof =true;
-        public bool IsRoof
+        private bool _isRoofRing =true;
+        /// <summary>
+        /// 屋顶成环
+        /// </summary>
+        public bool IsRoofRing
         {
             get
             {
-                return _isRoof;
+                return _isRoofRing;
             }
             set
             {
-                _isRoof = value;
+                _isRoofRing = value;
                 RaisePropertyChanged("IsRoof");
             }
         }
 
-        private bool _isTopLayer;
-        public bool IsTopLayer
+        private bool _isTopLayerRing;
+        /// <summary>
+        /// 顶层成环
+        /// </summary>
+        public bool IsTopLayerRing
         {
             get
             {
-                return _isTopLayer;
+                return _isTopLayerRing;
             }
             set
             {
-                _isTopLayer = value;
+                _isTopLayerRing = value;
                 RaisePropertyChanged("IsTopLayer");
             }
         }
 
         private bool _isTower = true;
+        /// <summary>
+        /// 塔楼（生成对象）
+        /// </summary>
         public bool IsTower 
         { 
             get
@@ -151,7 +232,9 @@ namespace ThMEPWSS.ViewModel
         }
 
         private bool _isManagementBuilding;
-
+        /// <summary>
+        /// 管理用房（生成对象）
+        /// </summary>
         public bool IsManagementBuilding
         {
             get { return _isManagementBuilding; }
@@ -159,6 +242,17 @@ namespace ThMEPWSS.ViewModel
             { 
                 _isManagementBuilding = value;
                 RaisePropertyChanged("IsManagementBuilding");
+            }
+        }
+        
+        private bool _haveTestFireHydrant { get; set; }
+        public bool HaveTestFireHydrant 
+        {
+            get { return _haveTestFireHydrant; }
+            set 
+            {
+                _haveTestFireHydrant = value;
+                RaisePropertyChanged("HaveTestFireHydrant");
             }
         }
         private ObservableCollection<ZoneSetupViewModel> _ZoneConfigs;
@@ -175,14 +269,27 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
-        public FireControlSystemDiagramViewModel()
+        
+
+        private ObservableCollection<UListItemData> _fireTypes { get; set; }
+        public ObservableCollection<UListItemData> FireTypes 
         {
-            
-            ZoneConfigs = new ObservableCollection<ZoneSetupViewModel>();
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 1, StartFloor = 1 });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 2 });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 3 });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 4 });
+            get { return _fireTypes; }
+            set 
+            {
+                _fireTypes = value;
+                RaisePropertyChanged("FireTypes");
+            }
+        }
+        private UListItemData _comboxFireTypeSelect { get; set; }
+        public UListItemData ComBoxFireTypeSelectItem 
+        {
+            get { return _comboxFireTypeSelect; }
+            set 
+            {
+                _comboxFireTypeSelect = value;
+                RaisePropertyChanged("ComBoxFireTypeSelectItem");
+            }
         }
 
     }

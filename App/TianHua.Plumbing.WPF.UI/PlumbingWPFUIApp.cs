@@ -13,10 +13,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
+        uiFireControlSystem uiTHXHSXTT;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
+            uiTHXHSXTT = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -130,6 +132,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var ui = new UiHydrantConnectPipe();
             AcadApp.ShowModelessWindow(ui);
+        }
+        /// <summary>
+        /// 消火栓系统图（目前只实现了塔楼部分）
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THXHSXTT", CommandFlags.Modal)]
+        public void THXHSXTT()
+        {
+            if (null != uiTHXHSXTT && uiTHXHSXTT.IsLoaded)
+                return;
+
+            uiTHXHSXTT = new uiFireControlSystem();
+            AcadApp.ShowModelessWindow(uiTHXHSXTT);
         }
     }
 }

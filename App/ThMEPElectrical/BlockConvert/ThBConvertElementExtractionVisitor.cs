@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using System.Linq;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -21,12 +23,17 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            var xclip = blockReference.XClipInfo();
-            if (xclip.IsValid)
-            {
-                xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
-            }
+            //var xclip = blockReference.XClipInfo();
+            //if (xclip.IsValid)
+            //{
+            //    xclip.TransformBy(matrix);
+            //    var center = xclip.Polygon.GeometricExtents.CenterPoint();
+            //    var transformer = new ThMEPOriginTransformer(center);
+            //    transformer.Transform(xclip.Polygon);
+            //    elements.Select(o => o.Geometry).ForEach(o => transformer.Transform(o));
+            //    elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            //    elements.Select(o => o.Geometry).ForEach(o => transformer.Reset(o));
+            //}
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
