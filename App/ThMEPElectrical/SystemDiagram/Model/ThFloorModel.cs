@@ -32,7 +32,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <summary>
         /// 多楼层包含层数
         /// </summary>
-        public List<int> MulitFloors { get; set; }
+        public List<string> MulitFloors { get; set; }
 
         /// <summary>
         /// 多楼层名称

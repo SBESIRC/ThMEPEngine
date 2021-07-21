@@ -132,8 +132,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 {
                                     ThFloorModel NewFloor = new ThFloorModel
                                     {
-                                        FloorName = sobj.StoreyNumber.Contains("B") ? sobj.StoreyNumber : sobj.Storeys[0] + "F",
-                                        FloorNumber = sobj.StoreyNumber.Contains("B") ? -sobj.Storeys[0] : sobj.Storeys[0]
+                                        FloorName = sobj.Storeys[0],
+                                        FloorNumber = sobj.Storeys[0].GetFloorNumber()
                                     };
                                     NewFloor.InitFloors(adb.Database, blk, fireCompartments, spatialIndex);
                                     Floors.Add(NewFloor);
@@ -142,8 +142,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 {
                                     ThFloorModel NewFloor = new ThFloorModel
                                     {
-                                        FloorName = sobj.Storeys[0] + "F",
-                                        FloorNumber = sobj.Storeys[0],
+                                        FloorName = sobj.Storeys[0],
+                                        FloorNumber = sobj.Storeys[0].GetFloorNumber(),
                                         IsMultiFloor = true,
                                         MulitFloors = sobj.Storeys,
                                         MulitFloorName=sobj.StoreyTypeString,
@@ -411,8 +411,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     {
                         var newfloor = new ThFloorModel();
                         newfloor.IsMultiFloor = false;
-                        newfloor.FloorName = o + "F";
-                        newfloor.FloorNumber = o;
+                        newfloor.FloorName = o;
+                        newfloor.FloorNumber = o.GetFloorNumber();
                         floor.FireDistricts.ForEach(x =>
                         {
                             var names = x.FireDistrictName.Split('-');
@@ -421,7 +421,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             {
                                 FireDistrictName = string.Join("-", names),
                                 DrawFireDistrict = x.DrawFireDistrict,
-                                DrawFireDistrictNameText = newfloor.FloorNumber == floor.MulitFloors[0] ? x.DrawFireDistrictNameText : false,
+                                DrawFireDistrictNameText = newfloor.FloorName == floor.MulitFloors[0] ? x.DrawFireDistrictNameText : false,
                                 TextPoint = x.TextPoint,
                                 Data = x.Data,
                                 FireDistrictNo = x.FireDistrictNo

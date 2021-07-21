@@ -214,6 +214,7 @@
     <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Extension\ThAFASGraphExtension.cs" />
     <Compile Include="SystemDiagram\Extension\ThDBObbExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThEStoreysExtension.cs" />
     <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromFireCompartment.cs" />
