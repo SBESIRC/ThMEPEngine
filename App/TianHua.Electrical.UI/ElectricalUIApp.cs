@@ -129,8 +129,8 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModelessDialog(BasementLightingUI);
         }
 
-        [CommandMethod("TIANHUACAD", "THSPS", CommandFlags.Modal)]
-        public void THSPS()
+        [CommandMethod("TIANHUACAD", "THAFPM", CommandFlags.Modal)]
+        public void THAFPM()
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
