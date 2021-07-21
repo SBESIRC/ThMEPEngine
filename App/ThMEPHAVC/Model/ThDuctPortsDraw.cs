@@ -502,7 +502,7 @@ namespace ThMEPHVAC.Model
                 mat = org_dis_mat * mat;
                 ThDuctPortsDrawService.Draw_lines(mainlines.geo, mat, service.geo_layer, out ObjectIdList geo_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.flg_layer, out ObjectIdList flg_ids);
-                ThDuctPortsDrawService.Draw_lines(mainlines.center_line, Matrix3d.Identity, service.center_layer, out ObjectIdList center_ids);
+                ThDuctPortsDrawService.Draw_lines(mainlines.center_line, org_dis_mat, service.center_layer, out ObjectIdList center_ids);
                 var param = ThDuctPortsService.Create_duct_modify_param(mainlines, duct_size, info.AirVolume, start_id);
                 ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, param);
                 Draw_mainline_text_info(angle, center_point, info, ref pre_duct_size_text);
