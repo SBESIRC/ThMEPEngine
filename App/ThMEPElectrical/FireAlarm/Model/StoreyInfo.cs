@@ -5,9 +5,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.Model.Common;
 
@@ -57,7 +55,7 @@ namespace ThMEPElectrical.FireAlarm.Model
             Boundary = GetBoundary();
             BasePoint = GetBasePoint();
         }
-        private string GetFloorNumber()
+        protected virtual string GetFloorNumber()
         {
             var attributeDic = Storey.ObjectId.GetAttributesInBlockReference(true);
             foreach (var item in attributeDic)
@@ -69,7 +67,7 @@ namespace ThMEPElectrical.FireAlarm.Model
             }
             return "";
         }
-        private string GetFloorRange()
+        protected virtual string GetFloorRange()
         {
             var attributeDic = Storey.ObjectId.GetAttributesInBlockReference(true);
             foreach (var item in attributeDic)
@@ -129,7 +127,7 @@ namespace ThMEPElectrical.FireAlarm.Model
                 return OriginFloorNumber;
             }
         }
-        private Polyline GetBoundary()
+        protected virtual Polyline GetBoundary()
         {
             if (Storey.ObjectId.IsErased || Storey.ObjectId.IsNull || !Storey.ObjectId.IsValid)
             {
@@ -141,7 +139,7 @@ namespace ThMEPElectrical.FireAlarm.Model
                 return br.ToOBB(br.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
             }
         }
-        private string GetBasePoint()
+        protected virtual string GetBasePoint()
         {
             using (var acadDb = AcadDatabase.Use(Storey.ObjectId.Database))
             {
