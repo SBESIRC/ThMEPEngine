@@ -106,6 +106,7 @@
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
     <Compile Include="IO\ExcelService\ReadExcelService.cs" />
+    <Compile Include="IO\IOService\IOOperateService.cs" />
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />

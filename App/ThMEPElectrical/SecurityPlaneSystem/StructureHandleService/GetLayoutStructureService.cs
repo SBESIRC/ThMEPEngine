@@ -162,7 +162,10 @@ namespace ThMEPElectrical.StructureHandleService
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
-
+            if (needWalls.Count <= 0)
+            {
+                return new List<Polyline>();
+            }
             needWalls = room.Intersection(needWalls);
             return range.Intersection(needWalls).Cast<Polyline>().ToList();
         }
