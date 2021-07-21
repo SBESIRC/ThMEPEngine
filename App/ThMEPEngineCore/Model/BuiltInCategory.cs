@@ -60,6 +60,10 @@
         /// </summary>
         FireproofShutter,
         /// <summary>
+        /// 防火分区
+        /// </summary>
+        FireApart,
+        /// <summary>
         /// 防火卷帘
         /// </summary>
         LaneLine,

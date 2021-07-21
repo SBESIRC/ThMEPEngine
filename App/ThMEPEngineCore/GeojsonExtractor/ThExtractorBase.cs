@@ -46,7 +46,6 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// </summary>
         protected double LoopBufferLength = 10.0;
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
-        protected Dictionary<Entity, List<string>> Group2Owner { get; set; }
         public ThExtractorBase()
         {
             Category = "";
@@ -71,6 +70,21 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var enlarge = bufferService.Buffer(loop, LoopBufferLength) as Polyline;
             var spatialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
             return spatialIndex.SelectWindowPolygon(enlarge).Cast<Entity>().ToList();
+        }
+        protected string BuildString(Dictionary<Entity, List<string>> owners, Entity curve, string linkChar = ";")
+        {
+            if (owners.ContainsKey(curve))
+            {
+                return string.Join(linkChar, owners[curve]);
+            }
+            return "";
+        }
+        protected List<string> FindCurveGroupIds(Dictionary<Entity, string> groupId, Entity curve)
+        {
+            var ids = new List<string>();
+            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
+            groups.ForEach(g => ids.Add(groupId[g]));
+            return ids;
         }
     }
     public enum SwitchStatus

@@ -1,51 +1,54 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
+using ThMEPElectrical.FireAlarm.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace FireAlarm.Data
 {
-    public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IPrint, IGroup,IGroup2
+    public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IPrint, IGroup
     {
         public ThFaArchitectureWallExtractor()
         {
         }
-        public override List<ThGeometry> BuildGeometries()
+        private List<StoreyInfo> StoreyInfos { get; set; }
+        public new List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                if (GroupSwitch)
+                var parentId = BuildString(GroupOwner, o);
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.GroupIdPropertyName, ThFireAlarmUtils.BuildString(GroupOwner, o));
+                    var storeyInfo = Query(o);
+                    parentId = storeyInfo.Id;
                 }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.Group2IdPropertyName, ThFireAlarmUtils.BuildString(Group2Owner, o));
-                }
+                geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
             return geos;
         }
+
+        public StoreyInfo Query(Entity entity)
+        {
+            //ToDo
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new StoreyInfo();
+        }
+
+        public void Set(List<StoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
         public void Group(Dictionary<Entity, string> groupId)
         {
-            if(GroupSwitch)
-            {
-                Walls.ForEach(o => GroupOwner.Add(o, ThFireAlarmUtils.FindCurveGroupIds(groupId, o)));
-            }
-        }
-        public void Group2(Dictionary<Entity, string> groupId)
-        {
-            if (Group2Switch)
-            {
-                Walls.ForEach(o => Group2Owner.Add(o, ThFireAlarmUtils.FindCurveGroupIds(groupId, o)));
-            }
+            Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
     }
 }

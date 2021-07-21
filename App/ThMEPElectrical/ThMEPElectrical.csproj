@@ -118,6 +118,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="FireAlarm\Data\ThFaArchitectureWallExtractor.cs" />
     <Compile Include="FireAlarm\Data\ThEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFireApartExtractor.cs" />
     <Compile Include="FireAlarm\Model\EStoreyInfo.cs" />
     <Compile Include="FireAlarm\Model\StoreyInfo.cs" />
     <Compile Include="FireAlarm\Service\ThFireAlarmUtils.cs" />
