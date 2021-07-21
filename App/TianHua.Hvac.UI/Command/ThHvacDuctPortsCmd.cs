@@ -151,7 +151,7 @@ namespace TianHua.Hvac.UI.Command
         }
         private DBObjectCollection Pre_proc(ObjectIdCollection objs)
         {
-            var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).ToCollection();
+            var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
             ThDuctPortsDrawService.Move_to_origin(start_point, lines);
             var service = new ThLaneLineCleanService();
             var res = ThLaneLineEngine.Explode(service.Clean(lines));
