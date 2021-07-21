@@ -111,7 +111,14 @@ namespace ThMEPElectrical
             "吸气式感烟火灾探测器",
             "图像型火灾探测器",
         };
-
+        public static readonly List<string> NotInAlarmControlWireCircuitBlockNames = new List<string>() { 
+            "E-BFAS030", 
+            "E-BFAS031", 
+            "E-BFAS220", 
+            "E-BFAS410-2", 
+            "E-BFAS410-3", 
+            "E-BFAS410-4" 
+        };
 
         //按回路区分部分
         //连接点允许误差

@@ -57,10 +57,17 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     case StatisticType.BlockName:
                         {
-                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
-                            if(o.HasAlias)
+                            if (ThAutoFireAlarmSystemCommon.NotInAlarmControlWireCircuitBlockNames.Contains(o.BlockName))
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = 0;//寻路算法不统计不属于自动报警控制总线的块
+                            }
+                            else
+                            {
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                                if (o.HasAlias)
+                                {
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                }
                             }
                             break;
                         }

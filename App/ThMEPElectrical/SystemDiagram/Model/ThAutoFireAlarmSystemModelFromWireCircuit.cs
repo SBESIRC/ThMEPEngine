@@ -32,8 +32,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private Dictionary<Entity, List<KeyValuePair<string, string>>> GlobleBlockAttInfoDic;
         private Dictionary<Entity, List<KeyValuePair<string, string>>> FloorBlockAttInfoDic;
         private List<Entity> GlobleEntityData;
+        private List<Entity> GlobleNotInAlarmControlWireCircuitData;//剔除非火灾自动报警总线的模块
         private ThCADCoreNTSSpatialIndex GlobalBlockInfoSpatialIndex;
+        private ThCADCoreNTSSpatialIndex FloorNotInAlarmControlWireCircuitIndex;
         private List<Entity> FloorEntityData;
+        private List<Entity> FloorNotInAlarmControlWireCircuitData;
         private List<string> WireCircuitNameList;
 
         public ThAutoFireAlarmSystemModelFromWireCircuit()
@@ -49,6 +52,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             GlobleBlockAttInfoDic = elements;
             GlobleEntityData = Entitydata;
+            GlobleNotInAlarmControlWireCircuitData = Entitydata.Where(o => o is BlockReference br && ThAutoFireAlarmSystemCommon.NotInAlarmControlWireCircuitBlockNames.Contains(br.Name)).ToList();
             var dbObjs = Entitydata.ToCollection();
             GlobalBlockInfoSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
@@ -62,7 +66,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             var dbObjs = GlobalBlockInfoSpatialIndex.SelectCrossingPolygon(polygon);
             FloorEntityData = GlobleEntityData.Where(o => dbObjs.Contains(o)).ToList();
+            FloorNotInAlarmControlWireCircuitData = GlobleNotInAlarmControlWireCircuitData.Where(o => dbObjs.Contains(o)).ToList();
             FloorBlockAttInfoDic = GlobleBlockAttInfoDic.Where(o => dbObjs.Contains(o.Key)).ToDictionary(x => x.Key, y => y.Value);
+            FloorNotInAlarmControlWireCircuitIndex = new ThCADCoreNTSSpatialIndex(FloorNotInAlarmControlWireCircuitData.ToCollection());
         }
 
         /// <summary>
@@ -258,6 +264,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             var polygon = fireDistrict.FireDistrictBoundary;
             if (polygon is Polyline || polygon is MPolygon)
             {
+                fireDistrict.NotInAlarmControlWireCircuitData = FloorNotInAlarmControlWireCircuitIndex.SelectCrossingPolygon(polygon).Cast<BlockReference>().ToList();
                 var DataSpatialIndex = new ThCADCoreNTSSpatialIndex(graphsDic.Keys.Select(o => new DBPoint(o)).ToCollection());
                 var dbObjs = DataSpatialIndex.SelectCrossingPolygon(polygon).Cast<DBPoint>().Select(o => o.Position);
                 var GraphData = graphsDic.Where(o => dbObjs.Contains(o.Key));
@@ -359,6 +366,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 fireDistrict.WireCircuits.Add(x);
                             }
                         });
+                        fireDistrict.NotInAlarmControlWireCircuitData.AddRange(o.NotInAlarmControlWireCircuitData);
                         fireCompartments.Add(o);
                     }
                 });
@@ -369,15 +377,28 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     return  o.FireDistrictNo;
                 }).ToList();
             }
-            this.floors.ForEach(x => x.FireDistricts.ForEach(y => y.WireCircuits.ForEach(o =>
+            this.floors.ForEach(x => x.FireDistricts.ForEach(y =>
             {
-                if (o.BlockCount > 32)
+                var FirstWireCircuit = y.WireCircuits.Where(o => o.WireCircuitNo > 0).OrderBy(o => o.WireCircuitNo).FirstOrDefault();
+                if(!FirstWireCircuit.IsNull())
                 {
-                    warningMsg.Add($"违反强条！检测到回路{o.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{o.BlockCount}个点，请复核。");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS030");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS031");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["火灾报警电话"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS220");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["火灾应急广播扬声器-2"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS410-2");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["火灾应急广播扬声器-3"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS410-3");
+                    FirstWireCircuit.Data.BlockData.BlockStatistics["火灾应急广播扬声器-4"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS410-4");
                 }
-                if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
-                    o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
-            })));
+                y.WireCircuits.ForEach(o =>
+                {
+                    if (o.BlockCount > 32)
+                    {
+                        warningMsg.Add($"违反强条！检测到回路{o.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{o.BlockCount}个点，请复核。");
+                    }
+                    if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
+                        o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
+                });
+            }));
 
             if (FireCompartmentParameter.DiagramDisplayEffect == 1)
             {

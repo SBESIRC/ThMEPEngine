@@ -73,7 +73,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 FindFireCompartments.ForEach(o =>
                 {
                     ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
-                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    NewFireDistrict.InitFireDistrict(this.FloorName, o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }
@@ -83,7 +83,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     FireDistrictName = this.FloorName
                 };
-                NewFireDistrict.InitFireDistrict(this.FloorNumber, FloofBlockReference);
+                NewFireDistrict.InitFireDistrict(this.FloorName, FloofBlockReference);
                 this.FireDistricts.Add(NewFireDistrict);
             }
         }
@@ -102,7 +102,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 FindFireCompartments.ForEach(o =>
                 {
                     ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
-                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    NewFireDistrict.InitFireDistrict(this.FloorName, o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }

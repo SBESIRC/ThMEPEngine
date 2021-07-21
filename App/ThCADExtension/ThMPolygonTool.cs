@@ -15,6 +15,11 @@ namespace ThCADExtension
             SystemObjects.DynamicLinker.LoadModule("AcMPolygonObj" + ver + ".dbx", false, false);
         }
 
+        public static MPolygon CreateMPolygon(Curve shell)
+        {
+            return CreateMPolygon(shell, new List<Curve>());
+        }
+
         public static MPolygon CreateMPolygon(Curve shell, List<Curve> holes)
         {
             MPolygon mPolygon = new MPolygon();

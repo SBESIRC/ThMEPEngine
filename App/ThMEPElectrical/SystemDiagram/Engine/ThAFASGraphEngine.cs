@@ -44,8 +44,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         private Dictionary<Entity, List<KeyValuePair<string, string>>> globleBlockAttInfoDic { get; set; }
 
-        private List<string> NotInAlarmControlWireCircuit { get; set; }
-
         //短路隔离器规则
         private Func<Entity, bool> SIRule = (e) =>
         {
@@ -71,7 +69,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             {
                 if (e is BlockReference br)
                 {
-                    GlobleNTSMappingDic.Add(db.GetBlockReferenceOBB(br), br);
+                    GlobleNTSMappingDic.Add(ThMPolygonTool.CreateMPolygon(db.GetBlockReferenceOBB(br)), br);
                 }
                 else
                 {
@@ -81,7 +79,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             SpatialIndex = new ThCADCoreNTSSpatialIndex(GlobleNTSMappingDic.Keys.ToCollection());
             CacheDataCollection = new List<Entity>();
             CacheSINodeCollection = new List<Entity>();
-            NotInAlarmControlWireCircuit = new List<string>() { "E-BFAS030", "E-BFAS031", "E-BFAS220", "E-BFAS330", "E-BFAS410-2", "E-BFAS410-3", "E-BFAS410-4" };
             this.Database = db;
             this.globleBlockAttInfoDic = blockAttInfoDic;
             this.IsJF = isJF;
@@ -414,7 +411,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <returns></returns>
         private bool IsAlarmControlWireCircuitBlock(BlockReference blk)
         {
-            return globleBlockAttInfoDic.ContainsKey(blk) && !NotInAlarmControlWireCircuit.Contains(blk.Name);
+            return globleBlockAttInfoDic.ContainsKey(blk) && !ThAutoFireAlarmSystemCommon.NotInAlarmControlWireCircuitBlockNames.Contains(blk.Name);
         }
 
         /// <summary>

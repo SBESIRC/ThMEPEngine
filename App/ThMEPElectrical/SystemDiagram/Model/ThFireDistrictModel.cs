@@ -50,11 +50,13 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public List<ThAlarmControlWireCircuitModel> WireCircuits { get; set; }
 
+        public List<BlockReference> NotInAlarmControlWireCircuitData { get; set; }
+
         /// <summary>
         /// 初始化楼层（无防火分区）
         /// </summary>
         /// <param name="FireDistrictBlockReference">楼层块</param>
-        public void InitFireDistrict(int floorNumber, BlockReference FireDistrictBlockReference)
+        public void InitFireDistrict(string floorNumber, BlockReference FireDistrictBlockReference)
         {
             this.FireDistrictNo = 1;
             this.FireDistrictBoundary = new Polyline() { Closed = true };
@@ -66,14 +68,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 初始化楼层(防火分区)
         /// </summary>
         /// <param name="FireDistrict"></param>
-        internal void InitFireDistrict(int floorNumber, ThFireCompartment FireDistrict)
+        internal void InitFireDistrict(string floorNumber, ThFireCompartment FireDistrict)
         {
             this.FireDistrictBoundary = FireDistrict.Boundary;
-            //using (Linq2Acad.AcadDatabase acad= Linq2Acad.AcadDatabase.Active())
-            //{
-            //    FireDistrictBoundary.ColorIndex = 2;
-            //    acad.ModelSpace.Add(FireDistrictBoundary);
-            //}
             this.WireCircuits = new List<ThAlarmControlWireCircuitModel>();
             if (string.IsNullOrWhiteSpace(FireDistrict.Number))
             {
@@ -90,7 +87,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             else
             {
                 string[] FireDistrictInfo = FireDistrict.Number.Split('-');
-                if (FireDistrictInfo[0].Replace('B', '-').Contains(floorNumber.ToString()))//防火分区和楼层一致才能说明该防火分区属于本楼层
+                if (FireDistrictInfo[0] == floorNumber || (FireDistrictInfo[0].Contains('F') && floorNumber.Contains('F') && FireDistrictInfo[0].Replace("F", "") == floorNumber.Replace("F", "")))//防火分区和楼层一致才能说明该防火分区属于本楼层
                     this.FireDistrictNo = int.Parse(FireDistrictInfo[1]);
                 else
                 {
