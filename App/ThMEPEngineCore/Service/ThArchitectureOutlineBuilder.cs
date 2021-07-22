@@ -36,40 +36,54 @@ namespace ThMEPEngineCore.Service
             //认为里面的数据均已进行了Simplifier的处理
             var cleanData = Buffer(_polygons, ProOffsetDistance);
             cleanData = Union(cleanData);
+            //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(cleanData.Cast<Entity>().ToList(), AcHelper.Active.Database,1);
+            var temp1 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
-                cleanData.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
-                cleanData.Remove(o);
+                temp1.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
             });
+            cleanData = temp1; 
             cleanData = Union(cleanData);
+            //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(cleanData.Cast<Entity>().ToList(), AcHelper.Active.Database, 1);
+            var temp2 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
-                cleanData.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
-                cleanData.Remove(o);
+                temp2.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
             });
+            cleanData = temp2;
             cleanData = Buffer(cleanData, -ProOffsetDistance);
             cleanData = FilterSmallArea(cleanData, ProAREATOLERANCE);
             cleanData = PostProcess(cleanData);
+            cleanData = Union(cleanData);
             Results = cleanData.Cast<Polyline>().ToList();
         }
         private DBObjectCollection PostProcess(DBObjectCollection objs)
         {
             var result = FilterSmallArea(objs, PostAREATOLERANCE);
-            result = Buffer(result, PostOffsetDistance);
-            result = FilterSmallArea(result, PostBufferAREATOLERANCE);
-            result = Buffer(result, -PostOffsetDistance);
+            //result = Buffer(result, PostOffsetDistance);
+            //result = FilterSmallArea(result, PostBufferAREATOLERANCE);
+            //result = Buffer(result, -PostOffsetDistance);
             result = Buffer(result, ExpansionJointLength);
+            result = Union(result);
             result = Buffer(result, -ExpansionJointLength);
-            return FilterSmallArea(result, PostBufferAREATOLERANCE);
+            result = FilterSmallArea(result, PostBufferAREATOLERANCE);
+            return result;
         }
         private DBObjectCollection Union(DBObjectCollection objs)
         {
             var result = objs.UnionPolygons();
+            //return result;
             return FilterSmallArea(result, ProAREATOLERANCE);
         }
         private DBObjectCollection Buffer(DBObjectCollection objs,double disttance)
         {
-            return objs.BufferPolygons(disttance);
+            DBObjectCollection result = new DBObjectCollection();
+            var bufferService = new ThNTSBufferService();
+            foreach(Entity obj in objs)
+            {
+                result.Add(bufferService.Buffer(obj, disttance));
+            }
+            return result;
         }
         private DBObjectCollection PreProcess(DBObjectCollection objs)
         {
@@ -99,8 +113,8 @@ namespace ThMEPEngineCore.Service
     }
     public abstract class ModelData
     {
-        protected DBObjectCollection _shearWalls;
-        protected DBObjectCollection _columns; 
+        public DBObjectCollection _shearWalls;
+        public DBObjectCollection _columns; 
         public ModelData(Database database, Point3dCollection polygon)
         {
             _shearWalls = new DBObjectCollection();
@@ -122,10 +136,11 @@ namespace ThMEPEngineCore.Service
 
     public class Model1Data : ModelData
     {
-        private readonly DBObjectCollection _archWall;
-        private readonly DBObjectCollection _doors;
-        private readonly DBObjectCollection _windows;
-        private readonly DBObjectCollection _cornices;
+        public readonly DBObjectCollection _archWall;
+        public readonly DBObjectCollection _doors;
+        public readonly DBObjectCollection _windows;
+        public readonly DBObjectCollection _cornices;
+        public readonly DBObjectCollection _slab;
         public Model1Data(Database database, Point3dCollection polygon) : base(database,polygon)
         {
             _archWall = new DBObjectCollection();
@@ -144,6 +159,10 @@ namespace ThMEPEngineCore.Service
             var corniceEngine = new ThDB3CorniceRecognitionEngine();
             corniceEngine.Recognize(database, polygon);
             _cornices = corniceEngine.Geometries;
+            _slab = new DBObjectCollection();
+            var slabEngine = new ThDB3SlabRecognitionEngine();
+            slabEngine.Recognize(database, polygon);
+            _slab = slabEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
@@ -155,19 +174,21 @@ namespace ThMEPEngineCore.Service
             _doors.Cast<Entity>().ForEach(o => results.Add(o));
             _windows.Cast<Entity>().ForEach(o => results.Add(o));
             _cornices.Cast<Entity>().ForEach(o => results.Add(o));
+            _slab.Cast<Entity>().ForEach(o => results.Add(o));
             return results;
         }
     }
     public class Model2Data : ModelData
     {
-        private readonly DBObjectCollection _beams;
+        public readonly DBObjectCollection _beams;
+        public ThBeamConnectRecogitionEngine BeamEngine { get; private set; }
         public Model2Data(Database database, Point3dCollection polygon)
         {
             _beams = new DBObjectCollection();
-            var beamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
-            _beams = beamEngine.BeamEngine.Geometries;
-            _shearWalls = beamEngine.ShearWallEngine.Geometries;
-            _columns = beamEngine.ColumnEngine.Geometries;
+            BeamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
+            _beams = BeamEngine.BeamEngine.Geometries;
+            _shearWalls = BeamEngine.ShearWallEngine.Geometries;
+            _columns = BeamEngine.ColumnEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
