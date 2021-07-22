@@ -75,6 +75,11 @@ namespace ThMEPElectrical.BlockConvert
             {
                 return match.Groups[2].Value;
             }
+            Match match2 = Regex.Match(value, @"^(.+)$");
+            if (match2.Success)
+            {
+                return match2.Groups[1].Value + "KW";
+            }
             return string.Empty;
         }
 
