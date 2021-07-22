@@ -1,13 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using Linq2Acad;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
-using System;
+using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -67,9 +63,35 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         private List<ThEntityData> DoExtract(Entity e, ThEntityCommonExtractionVistor visitor)
         {
             var results = new List<ThEntityData>();
-            if (visitor.CheckLayerValid(e))
+            //处理天正元素
+            if (e.GetType().Name.ToUpper().Contains("IMP"))
             {
-                visitor.DoExtract(results, e);
+                //自定义元素
+                try
+                {
+                    if (!ThMEPTCHService.IsTCHElement(e))
+                        return results;
+                    var dBObject = ThMEPTCHService.ExplodeTCHElement(e);
+                    if (null == dBObject || dBObject.Count < 1)
+                        return results;
+                    foreach (Entity entity in dBObject)
+                    {
+                        results.AddRange(DoExtract(entity, visitor));
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    //自定义元素可能会无法炸开，这里不进行处理
+                }
+
+            }
+            //正常元素
+            else
+            {
+                if (visitor.CheckLayerValid(e))
+                {
+                    visitor.DoExtract(results, e);
+                }
             }
             return results;
         }
