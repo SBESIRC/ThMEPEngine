@@ -33,12 +33,13 @@ namespace ThMEPElectrical.BlockConvert
             blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(target.Attributes));
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                ThBConvertDbUtils.UpdateLayerSettings(layer);
                 var block = acadDatabase.Element<Entity>(blkRef, true);
-                block.LayerId = ThBConvertDbUtils.BlockLayer(ThBConvertCommon.LAYER_BLOCK_STRONGCURRENT, 2);
+                block.Layer = layer;
             }
         }
 

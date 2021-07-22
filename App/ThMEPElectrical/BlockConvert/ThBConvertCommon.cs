@@ -11,9 +11,6 @@
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
 
-        public static readonly string LAYER_BLOCK_WEAKCURRENT = "E-FAS-DEVC";
-        public static readonly string LAYER_BLOCK_STRONGCURRENT = "E-UNIV-DIAG";
-
         public static readonly string PROPERTY_POWER_VOLTAGE = "电压";
         public static readonly string PROPERTY_POWER_QUANTITY = "电量";
         public static readonly string PROPERTY_LOAD_USAGE = "负载用途";

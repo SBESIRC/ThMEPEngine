@@ -125,7 +125,6 @@ namespace ThMEPElectrical.Command
                         var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
                         srcBlocks.Select(o => o.Data as ThBlockReferenceData)
-                            //.Where(o => o.Database.Filename.StartsWith(prefix))
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
                             .ForEach(o =>
                             {
@@ -168,7 +167,9 @@ namespace ThMEPElectrical.Command
                                 {
                                     // 导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                                    var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                                    var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                                    currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
 
                                     // 插入新的块引用
                                     var scale = new Scale3d(Scale);
@@ -216,7 +217,7 @@ namespace ThMEPElectrical.Command
                                     // 设置块引用的数据库属性
                                     refIds.Cast<ObjectId>().ForEach(b =>
                                     {
-                                        engine.SetDatbaseProperties(b, o);
+                                        engine.SetDatbaseProperties(b, o, targetBlockLayer);
                                     });
                                 }
                             });

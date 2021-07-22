@@ -48,6 +48,6 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockReference"></param>
-        public abstract void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+        public abstract void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer);
     }
 }

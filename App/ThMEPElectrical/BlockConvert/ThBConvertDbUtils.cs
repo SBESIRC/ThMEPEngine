@@ -6,17 +6,7 @@ namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertDbUtils
     {
-        public static ObjectId BlockLayer(string name, short colorIndex)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                LayerTools.AddLayer(acadDatabase.Database, name);
-                LayerTools.SetLayerColor(acadDatabase.Database, name, colorIndex);
-                UpdateLayerSettings(name);
-                return acadDatabase.Layers.ElementOrDefault(name).ObjectId;
-            };
-        }
-        private static void UpdateLayerSettings(string name)
+        public static void UpdateLayerSettings(string name)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
