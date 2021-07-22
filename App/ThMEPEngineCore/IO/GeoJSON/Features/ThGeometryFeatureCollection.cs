@@ -2,7 +2,7 @@
 using NetTopologySuite.Features;
 using ThMEPEngineCore.Model;
 
-namespace ThMEPEngineCore.Features
+namespace ThMEPEngineCore.IO.GeoJSON
 {
     public class ThGeometryFeatureCollection
     {

@@ -11,6 +11,7 @@ using ThMEPEngineCore.Model.Common;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {

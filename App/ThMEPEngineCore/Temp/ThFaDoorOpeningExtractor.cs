@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using NFox.Cad;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -74,7 +72,7 @@ namespace ThMEPEngineCore.Temp
         private bool IsFireDoor(ThIfcDoor door)
         {
             //ToDO
-            return door.Code.ToUpper().Contains("FM");
+            return door.Spec.ToUpper().Contains("FM");
         }
 
         public void Set(List<StoreyInfo> storeyInfos)

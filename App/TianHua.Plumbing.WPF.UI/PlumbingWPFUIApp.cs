@@ -121,7 +121,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void THDXXHSXTT()
         {
             var uiDrainage = new uiFireHydrantSystem();
-            Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowModelessWindow(uiDrainage);
+            AcadApp.ShowModelessWindow(uiDrainage);
         }
 
         /// <summary>

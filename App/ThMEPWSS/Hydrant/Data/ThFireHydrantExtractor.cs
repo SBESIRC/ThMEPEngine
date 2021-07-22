@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -19,7 +20,7 @@ namespace ThMEPWSS.Hydrant.Data
         /// </summary>
         private double MaxDistanceToRoom = 200.0;
         public List<DBPoint> FireHydrants { get; set; }
-        private List<ThIfcRoom> Rooms { get; set; }  
+        private List<ThIfcRoom> Rooms { get; set; }
         private Dictionary<DBPoint, Polyline> HydrantOutline { get; set; }
         public ThFireHydrantExtractor()
         {
@@ -43,9 +44,9 @@ namespace ThMEPWSS.Hydrant.Data
                 var obb = o.Outline as Polyline;
                 var center = GetCenter(obb);
                 HydrantOutline.Add(new DBPoint(center), obb);
-            });      
+            });
             FireHydrants = HydrantOutline.Select(o => o.Key).ToList();
-            if(FilterMode == FilterMode.Window)
+            if (FilterMode == FilterMode.Window)
             {
                 FireHydrants = FilterWindowPolygon(pts, FireHydrants.Cast<Entity>().ToList()).Cast<DBPoint>().ToList();
             }
@@ -72,7 +73,7 @@ namespace ThMEPWSS.Hydrant.Data
         public void Print(Database database)
         {
             FireHydrants
-                .Select(o=>new Circle(o.Position,Vector3d.ZAxis,5.0))
+                .Select(o => new Circle(o.Position, Vector3d.ZAxis, 5.0))
                 .Cast<Entity>().ToList()
                 .CreateGroup(database, ColorIndex);
         }
@@ -84,8 +85,8 @@ namespace ThMEPWSS.Hydrant.Data
             {
                 var obb = HydrantOutline[o];
                 var width = GetRectangleWidth(obb);
-                var disDic = DistancToRoom(o.Position, rooms, width/2.0);
-                if(disDic.Count>0)
+                var disDic = DistancToRoom(o.Position, rooms, width / 2.0);
+                if (disDic.Count > 0)
                 {
                     var closestRoom = disDic.OrderBy(m => m.Value).First().Key;
                     var newPt = MovePtToRoom(o.Position, closestRoom);
@@ -111,13 +112,13 @@ namespace ThMEPWSS.Hydrant.Data
             });
             return results;
         }
-        private Dictionary<Entity,double> DistancToRoom(Point3d pt, List<ThIfcRoom> rooms,double width)
+        private Dictionary<Entity, double> DistancToRoom(Point3d pt, List<ThIfcRoom> rooms, double width)
         {
             var result = new Dictionary<Entity, double>();
             rooms.ForEach(r =>
             {
                 var dis = r.Boundary.ToNTSPolygon().Dictance(pt);
-                if(dis<= width+MaxDistanceToRoom)
+                if (dis <= width + MaxDistanceToRoom)
                 {
                     result.Add(r.Boundary, dis);
                 }
@@ -128,7 +129,7 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var closePt = ThCADCoreNTSDistance.GetClosePoint(room.ToNTSPolygon(), pt);
             var vec = pt.GetVectorTo(closePt);
-            int increAng = 5; 
+            int increAng = 5;
             int count = 360 / increAng;
             for (int i = 5; i <= 10; i++)
             {

@@ -1,20 +1,19 @@
 ﻿using NFox.Cad;
 using DotNetARX;
 using System.Linq;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
-{    
-    public class ThColumnExtractor: ThExtractorBase,IPrint
+{
+    public class ThColumnExtractor : ThExtractorBase, IPrint
     {
         public List<Polyline> Columns { get; private set; }
         private List<ThIfcRoom> Rooms { get; set; }
@@ -30,7 +29,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var geos = new List<ThGeometry>();
             var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
             Columns.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 var isolate = isolateColumns.Contains(o);
@@ -38,15 +37,15 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 geometry.Boundary = o;
                 if (IsolateSwitch) // 表示只传入孤立的柱
                 {
-                    if(isolate)
+                    if (isolate)
                     {
                         geos.Add(geometry);
                     }
-                }                
+                }
                 else
                 {
                     geos.Add(geometry);
-                }                
+                }
             });
             return geos;
         }
@@ -82,7 +81,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public void Print(Database database)
         {
-            Columns.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);            
+            Columns.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
     }
 }

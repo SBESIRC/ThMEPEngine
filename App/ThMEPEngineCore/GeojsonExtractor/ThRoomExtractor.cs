@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public ThRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
-            TESSELLATE_ARC_LENGTH = 50.0;            
+            TESSELLATE_ARC_LENGTH = 50.0;
             Category = BuiltInCategory.Room.ToString();
         }
         public override List<ThGeometry> BuildGeometries()
@@ -43,7 +43,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 using (var roomEngine = new ThRoomBuilderEngine())
                 {
@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     Clean();
                     Rooms.ForEach(o =>
                     {
-                        if(string.IsNullOrEmpty(o.Name) && o.Tags.Count>0)
+                        if (string.IsNullOrEmpty(o.Name) && o.Tags.Count > 0)
                         {
                             o.Name = string.Join(";", o.Tags.ToArray());
                         }
@@ -69,7 +69,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             }
         }
         private void Clean()
-        {            
+        {
             using (var instance = new ThCADCoreNTSArcTessellationLength(TESSELLATE_ARC_LENGTH))
             {
                 var simplifier = new ThElementSimplifier()
@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                         simplifier.Tessellate(objs);
                         objs = simplifier.MakeValid(objs);
                         objs = simplifier.Normalize(objs);
-                        if(objs.Count>0)
+                        if (objs.Count > 0)
                         {
                             Rooms[i].Boundary = objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
                         }
@@ -96,11 +96,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     }
                     else if (Rooms[i].Boundary is MPolygon mPolygon)
                     {
-                        var polygon = mPolygon.ToNTSPolygon(); 
+                        var polygon = mPolygon.ToNTSPolygon();
                         Rooms[i].Boundary = polygon.ToDbMPolygon();
                     }
                 }
-            }  
+            }
         }
 
         public void Print(Database database)

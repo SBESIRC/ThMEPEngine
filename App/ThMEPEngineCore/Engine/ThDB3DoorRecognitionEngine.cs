@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.Engine
             // 创建门
             var buildDoor = new ThBuildDoorService();
             buildDoor.Build(buildService.Results);
-            buildDoor.Outlines.ForEach(o => Elements.Add(new ThIfcDoor { Outline = o.Item1, Code=o.Item2 })) ;
+            buildDoor.Outlines.ForEach(o => Elements.Add(new ThIfcDoor { Outline = o.Item1, Spec=o.Item2 })) ;
         }
         private List<ThRawIfcBuildingElementData> GetDoorStones(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {

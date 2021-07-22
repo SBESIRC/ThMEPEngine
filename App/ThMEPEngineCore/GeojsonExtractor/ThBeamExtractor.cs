@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
