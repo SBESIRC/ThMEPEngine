@@ -1,7 +1,6 @@
 ﻿using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -125,17 +124,12 @@ namespace ThCADExtension
         // https://forums.autodesk.com/t5/net/explode-dynamic-block-with-visibility-states/td-p/3643036
         public static void ExplodeWithVisible(this BlockReference blockReference, DBObjectCollection entitySet)
         {
-            entitySet.Clear();
-            if (blockReference.IsDynamicBlock)
-            {
-                var objs = new DBObjectCollection();
-                blockReference.Explode(objs);
-                objs.Cast<Entity>().Where(e => e.Visible).ForEach(e => entitySet.Add(e));
-            }
-            else
-            {
-                blockReference.Explode(entitySet);
-            }
+            var objs = new DBObjectCollection();
+            blockReference.Explode(objs);
+            entitySet = objs.Cast<Entity>()
+                .Where(e => e.Visible)
+                .Where(e => e.Bounds.HasValue)
+                .ToCollection();
         }
 
         /// <summary>
