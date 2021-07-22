@@ -124,12 +124,13 @@ namespace ThCADExtension
         // https://forums.autodesk.com/t5/net/explode-dynamic-block-with-visibility-states/td-p/3643036
         public static void ExplodeWithVisible(this BlockReference blockReference, DBObjectCollection entitySet)
         {
+            entitySet.Clear();
             var objs = new DBObjectCollection();
             blockReference.Explode(objs);
-            entitySet = objs.Cast<Entity>()
+            objs.Cast<Entity>()
                 .Where(e => e.Visible)
                 .Where(e => e.Bounds.HasValue)
-                .ToCollection();
+                .ForEachDbObject(o => entitySet.Add(o));
         }
 
         /// <summary>
