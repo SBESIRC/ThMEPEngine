@@ -1,9 +1,9 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 
 namespace ThCADExtension
 {

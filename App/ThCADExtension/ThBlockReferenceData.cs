@@ -12,12 +12,14 @@ namespace ThCADExtension
         public string BlockLayer { get; set; }
         public string EffectiveName { get; set; }
         public Database Database { get; set; }
-        public Matrix3d MCS2WCS { get; set; }
+        public ObjectId ObjId { get; set; }
+        public Matrix3d OwnerSpace2WCS { get; set; }
         public Matrix3d BlockTransform { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
         public DynamicBlockReferencePropertyCollection CustomProperties { get; set; }
         public ThBlockReferenceData(ObjectId blockRef)
         {
+            ObjId = blockRef;
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
@@ -26,11 +28,11 @@ namespace ThCADExtension
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
-            MCS2WCS = BlockTransform;
+            OwnerSpace2WCS = Matrix3d.Identity;
         }
         public ThBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
         {
-            MCS2WCS = transfrom;
+            ObjId = blockRef;
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
@@ -39,7 +41,7 @@ namespace ThCADExtension
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
-            MCS2WCS = BlockTransform.PreMultiplyBy(transfrom);
+            OwnerSpace2WCS = transfrom;
         }
     }
 }

@@ -175,11 +175,11 @@ namespace ThMEPElectrical.Command
                                     var engine = CreateConvertEngine(mode);
                                     var objId = engine.Insert(targetBlockName, scale, o);
 
-                                    // 将新插入的块引用调整到源块引用所在的位置
-                                    engine.TransformBy(objId, o);
+                                    // 设置新插入的块引用的角度
+                                    engine.Rotate(objId, o);
 
-                                    // 微调
-                                    engine.Adjust(objId, o);
+                                    // 设置新插入的块引用位置
+                                    engine.Displacement(objId, o);
 
                                     // 设置动态块可见性
                                     engine.SetVisibilityState(objId, o);
