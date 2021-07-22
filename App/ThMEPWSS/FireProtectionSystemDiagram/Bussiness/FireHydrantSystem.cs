@@ -21,6 +21,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         double _valveToMainLineLength = 600.0;//主线的蝶阀连接到支线的阀和线的整体宽度
         double _bottomLineOverLenght = 300.0;//底部线突出高度
         double _valveToMainBottomHeight = 300.0;//蝶阀高度下沉高度
+        double _xTextAddLength = 60;//图中的立管线X标注的长度增加
         Point3d _ringPoint;
         public FireHydrantSystem(FloorGroupData floorGroup, List<FloorDataModel> floorDatas, FireControlSystemDiagramViewModel vm)
             :base(floorGroup,floorDatas,vm)
@@ -393,6 +394,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             }
             var dbText = _AddTextToCreateElems(xStr, bottomPoint, 0, false, "W-FRPT-NOTE");
             FireProtectionSysCommon.GetTextHeightWidth(new List<DBText> { dbText }, out double textHeight, out double textWidth);
+            textWidth += _xTextAddLength;
             int floorCount = endFloor - startFloor;
             var startLevelPoint = pipeFirstLevelPoint + _yAxis.MultiplyBy((startFloor - _minFloor)*_floorSpace);
             var lineElements = new List<LineElementCreate>();
@@ -420,10 +422,10 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             }
             if (floorCount <= 7)
             {
-                int addFloor = floorCount / 2;
+                int addFloor = startFloor == _minFloor? 2: floorCount / 2;
                 var textPoint1 = startLevelPoint + _yAxis.MultiplyBy(addFloor * _floorSpace + _floorSpace / 2);
-                var dis = textPoint1.Y - bottomPoint.Y - textWidth / 2;
-                lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), dis));
+                var dis = textPoint1.Y - bottomPoint.Y - textWidth/2;
+                lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), dis,textWidth,_xTextAddLength/2));
                 //添加文字
                 if (addAreaDim)
                 {
@@ -434,20 +436,23 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             else
             {
                 var textPoint1 = startLevelPoint + _yAxis.MultiplyBy(2 * _floorSpace + _floorSpace / 2);
-                var firstDis = textPoint1.Y - bottomPoint.Y;
-                lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), firstDis));
+                var firstDis = textPoint1.Y - bottomPoint.Y - textWidth/2;
+                lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), firstDis, textWidth, _xTextAddLength / 2));
                 if (addAreaDim)
                 {
                     var raiseFloorUpPoint = startLevelPoint + _yAxis.MultiplyBy(2 * _floorSpace + _floorSpace);
                     _RaiseLinePointAddGroupAreaNum(raiseFloorUpPoint, areaStr, isLeft);
                 }
-                var textPoint2 = startLevelPoint + _yAxis.MultiplyBy((floorCount - 2) * _floorSpace + _floorSpace / 2);
-                var secondDis = textPoint2.Y - bottomPoint.Y - firstDis - textWidth;
-                lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), secondDis));
-                if (addAreaDim)
+                if (pipeNum > -1 && pipeNum < _raisePipeCount) 
                 {
-                    var raiseFloorUpPoint = startLevelPoint + _yAxis.MultiplyBy((floorCount - 2) * _floorSpace + _floorSpace);
-                    _RaiseLinePointAddGroupAreaNum(raiseFloorUpPoint, areaStr, isLeft);
+                    var textPoint2 = startLevelPoint + _yAxis.MultiplyBy((floorCount - 2) * _floorSpace + _floorSpace / 2);
+                    var secondDis = textPoint2.Y - bottomPoint.Y - firstDis - textWidth*3/2;
+                    lineElements.Add(new LineElementCreate(new CreateDBTextElement(bottomPoint, dbText, ThWSSCommon.Layout_FireHydrantTextLayerName, ThWSSCommon.Layout_TextStyle), secondDis, textWidth, _xTextAddLength / 2));
+                    if (addAreaDim)
+                    {
+                        var raiseFloorUpPoint = startLevelPoint + _yAxis.MultiplyBy((floorCount - 2) * _floorSpace + _floorSpace);
+                        _RaiseLinePointAddGroupAreaNum(raiseFloorUpPoint, areaStr, isLeft);
+                    }
                 }
             }
             _LineCreateElement(bottomPoint, lineEndPoint, lineElements);

@@ -110,6 +110,8 @@ namespace ThMEPWSS.ViewModel
             FireTypes.Add(new UListItemData("单栓", 1));
             FireTypes.Add(new UListItemData("单栓带卷盘", 2));
             ComBoxFireTypeSelectItem = FireTypes.FirstOrDefault();
+
+            HaveHandPumpConnection = true;
         }
 
         private double _FaucetFloor = 1800; //mm
@@ -269,7 +271,16 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
-        
+        private bool _haveHandPumpConnection { get; set; }
+        public bool HaveHandPumpConnection 
+        {
+            get { return _haveHandPumpConnection; }
+            set 
+            {
+                _haveHandPumpConnection = value;
+                RaisePropertyChanged("HaveHandPumpConnection");
+            }
+        }
 
         private ObservableCollection<UListItemData> _fireTypes { get; set; }
         public ObservableCollection<UListItemData> FireTypes 

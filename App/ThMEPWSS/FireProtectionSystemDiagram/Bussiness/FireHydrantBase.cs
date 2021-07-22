@@ -50,6 +50,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         protected double _butterflyValveWidth = 240;//蝶阀宽度
         protected double _raiseDistanceToStartDefault = 5000;//竖直立管距离起点距离
         protected string _areaAttr = "";
+        protected bool _haveHandPumpConnection = false;
         public FireHydrantBase(FloorGroupData floorGroup, List<FloorDataModel> floorDatas, FireControlSystemDiagramViewModel vm)
         {
             _floorGroup = floorGroup;
@@ -70,7 +71,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             _createBlocks = new List<CreateBlockInfo>();
             _xAxis = Vector3d.XAxis;
             _yAxis = Vector3d.YAxis;
-
+            _haveHandPumpConnection = vm.HaveHandPumpConnection;
             InitData(vm);
         }
         void InitData(FireControlSystemDiagramViewModel vm)
@@ -81,6 +82,8 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             _refugeLineInts = new List<int>();
             _raisePipeCount = Math.Max(_fireHCount, _refugeFireHCount);
             var mid = (int)_fireHCount / 2;
+            mid = mid >= 1 ? mid : 1;
+            _raisePipeCount += _fireHCount == 1 ? 1 : 0;
             for (int i = 0; i < _refugeFireHCount - _fireHCount; i++)
                 _refugeLineInts.Add(mid + i);
             _topRingInRoof = vm.IsRoofRing;
@@ -101,7 +104,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         protected bool _HaveMaxRing(int floor)
         {
             //避难层30层以下不添加大回路
-            return floor >= 30;
+            return _haveHandPumpConnection && floor >= 30;
         }
         protected double _GetButterflyValveDistanceToLine()
         {
@@ -279,8 +282,11 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 if (item.enumElement == EnumElementType.Text)
                 {
                     FireProtectionSysCommon.GetTextHeightWidth(new List<DBText> { item.createDBText.dbText }, out double textHeight, out double textWidth);
-                    var textCreatePoint = blockStartPoint - yAxis.MultiplyBy(textHeight / 2);
-                    blockEndPoint = blockStartPoint + lineDir.MultiplyBy(textWidth);
+                    if (item.width < 0) 
+                    {
+                        blockEndPoint = blockStartPoint + lineDir.MultiplyBy(textWidth);
+                    }
+                    var textCreatePoint = blockStartPoint + lineDir.MultiplyBy(item.previousOffSet) - yAxis.MultiplyBy(textHeight / 2);
                     var addText = FireProtectionSysCommon.GetAddDBText(item.createDBText.dbText.TextString, item.createDBText.dbText.Height, textCreatePoint, item.createDBText.layerName, item.createDBText.textStyle);
                     addText.Rotation = lineDir.GetAngleTo(_xAxis, -Vector3d.ZAxis);
                     _createDBTexts.Add(new CreateDBTextElement(textCreatePoint, addText, item.createDBText.layerName, item.createDBText.textStyle));

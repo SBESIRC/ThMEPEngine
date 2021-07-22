@@ -31,6 +31,8 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var startFloor = _floorDatas.Min(c => c.floorNum);
             for (int i = 0; i < _raisePipeCount; i++)
             {
+                if (_fireHCount == 1 && i == _raisePipeCount - 1)
+                    continue;
                 var lineSp = lineStartPoint + _xAxis.MultiplyBy(i * _raisePipeSpace);
                 lineDir = _FireInRaisePipeRight(i) ? _xAxis : _xAxis.Negate();
                 bool isRefuge = _refugeLineInts.Any(c => c == i);

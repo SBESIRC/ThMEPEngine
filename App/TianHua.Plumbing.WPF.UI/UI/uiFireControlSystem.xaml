@@ -68,6 +68,7 @@
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -90,6 +91,8 @@
                 <Label Grid.Row="3" Grid.Column="0" Content="避难层消火栓："></Label>
                 <cus:InputTextBox Grid.Row="3" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Grid.Row="3" Grid.Column="2"  Content="个" Margin="5,0,0,0" Width="Auto"></Label>
+                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="存在手台泵接驳口" VerticalAlignment="Center" 
+                          VerticalContentAlignment="Center" IsChecked="{Binding HaveHandPumpConnection,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <Label Content="最高成环楼层:" Width="Auto" FontWeight="Black" Height="25"></Label>
             <StackPanel Orientation="Horizontal">

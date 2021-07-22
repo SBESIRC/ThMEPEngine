@@ -14,20 +14,24 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Models
         public EnumPosition enumPosition { get; }
         public double width { get; }
         public double marginPrevious { get; }
-        public LineElementCreate(CreateDBTextElement createDBText, double marginPrevious)
+        public double previousOffSet { get; }
+        public LineElementCreate(CreateDBTextElement createDBText, double marginPrevious,double textWidth,double offSet)
         {
             this.enumElement = EnumElementType.Text;
             this.enumPosition = EnumPosition.LeftBottom;
             this.createDBText = createDBText;
             this.marginPrevious = marginPrevious;
+            this.width = textWidth;
+            this.previousOffSet = offSet;
         }
-        public LineElementCreate(CreateBlockInfo createBlock, double width, double marginPrevious, EnumPosition enumPosition)
+        public LineElementCreate(CreateBlockInfo createBlock, double width, double marginPrevious, EnumPosition enumPosition,double offSet=0)
         {
             this.createBlock = createBlock;
             this.enumElement = EnumElementType.Block;
             this.enumPosition = enumPosition;
             this.width = width;
             this.marginPrevious = marginPrevious;
+            this.previousOffSet = offSet;
         }
     }
     enum EnumElementType
