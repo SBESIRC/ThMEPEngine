@@ -15,11 +15,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             if (dbObj is Curve curve)
             {
-                elements.AddRange(HandleCurve(curve));
+                elements.AddRange(HandleCurve(curve, matrix));
             }
             else if (dbObj is DBText text)
             {
-                elements.AddRange(HandleCurve(text));
+                elements.AddRange(HandleCurve(text, matrix));
             }
         }
 
@@ -27,20 +27,20 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         {
             if (dbObj is Curve curve)
             {
-                elements.AddRange(HandleCurve(curve));
+                elements.AddRange(HandleCurve(curve, Matrix3d.Identity));
             }
             else if (dbObj is DBText text)
             {
-                elements.AddRange(HandleCurve(text));
+                elements.AddRange(HandleCurve(text, Matrix3d.Identity));
             }
         }
 
-        private List<ThEntityData> HandleCurve(Entity entity)
+        private List<ThEntityData> HandleCurve(Entity entity, Matrix3d matrix)
         {
             var results = new List<ThEntityData>();
             if (IsSpatialElement(entity) && CheckLayerValid(entity))
             {
-                results.Add(CreateEntityData(entity, ""));
+                results.Add(CreateEntityData(entity, "", matrix));
             }
             return results;
         }
@@ -64,12 +64,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 return false;
             }
         }
-        private ThEntityData CreateEntityData(Entity curve, string description)
+        private ThEntityData CreateEntityData(Entity curve, string description, Matrix3d matrix)
         {
             return new ThEntityData()
             {
                 Data = description,
-                Geometry = curve.Clone() as Entity
+                Geometry = curve.GetTransformedCopy(matrix),
             };
         }
 
