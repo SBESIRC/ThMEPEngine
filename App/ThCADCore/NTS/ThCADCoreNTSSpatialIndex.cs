@@ -84,11 +84,7 @@ namespace ThCADCore.NTS
                 else if (obj is MPolygon mPolygon)
                 {
                     return mPolygon.ToNTSPolygon();
-                }
-                else if (obj is BlockReference reference)
-                {
-                    return reference.GeometricExtentsIgnoreAttribute().ToNTSPolygon();
-                }                
+                }              
                 else if (obj is Entity entity)
                 {
                     try
