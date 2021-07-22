@@ -170,11 +170,15 @@ namespace ThMEPElectrical.Command
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
                                     currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                     currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+                                    var targetBlock = currentDb.Blocks.Element(targetBlockName);
 
                                     // 插入新的块引用
                                     var scale = new Scale3d(Scale);
                                     var engine = CreateConvertEngine(mode);
                                     var objId = engine.Insert(targetBlockName, scale, o);
+
+                                    // 设置目标块图层顺序
+                                    engine.FixWipeOutDrawOrder(targetBlock);
 
                                     // 设置新插入的块引用的角度
                                     engine.Rotate(objId, o);

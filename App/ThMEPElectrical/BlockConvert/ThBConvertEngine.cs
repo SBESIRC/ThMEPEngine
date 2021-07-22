@@ -49,5 +49,13 @@ namespace ThMEPElectrical.BlockConvert
         /// <param name="blkRef"></param>
         /// <param name="srcBlockReference"></param>
         public abstract void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockReference"></param>
+        public abstract void FixWipeOutDrawOrder(BlockTableRecord btr);
+
     }
 }

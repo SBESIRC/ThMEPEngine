@@ -128,5 +128,10 @@ namespace ThMEPElectrical.BlockConvert
                 }
             }
         }
+
+        public override void FixWipeOutDrawOrder(BlockTableRecord btr)
+        {
+            //
+        }
     }
 }

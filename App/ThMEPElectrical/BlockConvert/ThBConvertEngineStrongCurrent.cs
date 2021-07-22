@@ -222,5 +222,36 @@ namespace ThMEPElectrical.BlockConvert
 
             // 
         }
+
+        public override void FixWipeOutDrawOrder(BlockTableRecord btr)
+        {
+            using (var acadDatabase = AcadDatabase.Use(btr.Database))
+            {
+                var wipeouts = new ObjectIdCollection();
+                var lines = new ObjectIdCollection();
+                foreach (ObjectId objId in btr)
+                {
+                    var entity = acadDatabase.Element<Entity>(objId);
+                    if (entity is Wipeout)
+                    {
+                        wipeouts.Add(entity.ObjectId);
+                    }
+                    if (entity is Line)
+                    {
+                        lines.Add(entity.ObjectId);
+                    }
+                }
+                if (wipeouts.Count > 0)
+                {
+                    var drawOrder = acadDatabase.Element<DrawOrderTable>(btr.DrawOrderTableId, true);
+                    drawOrder.MoveToBottom(wipeouts);
+                }
+                if (lines.Count > 0)
+                {
+                    var drawOrder = acadDatabase.Element<DrawOrderTable>(btr.DrawOrderTableId, true);
+                    drawOrder.MoveToBottom(lines);
+                }
+            }
+        }
     }
 }
