@@ -16,10 +16,6 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
-    <Reference Include="ManagedLibrary.v16, Version=1.0.7865.34335, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug-NET45\ManagedLibrary.v16.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -327,6 +323,9 @@
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
@@ -338,6 +337,9 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

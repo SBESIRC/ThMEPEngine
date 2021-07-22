@@ -1,26 +1,25 @@
 ﻿#if (ACAD2016 || ACAD2018)
 using AcHelper;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using CLI;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPElectrical.DCL.Data;
-using ThMEPElectrical.DCL.Service;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
+using ThMEPElectrical.DCL.Data;
+using ThMEPElectrical.DCL.Service;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using CLI;
 #endif
+
+using System;
+using AcHelper.Commands;
 
 namespace ThMEPElectrical.Command
 {
