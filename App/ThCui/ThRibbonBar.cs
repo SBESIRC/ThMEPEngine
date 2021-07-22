@@ -258,15 +258,29 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSXTT_SMALL",
                     "IDI_THCAD_THJSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
 
                 // 地上排水系统图
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地上排水系统图",
                     "天华地上排水系统图",
                     "THPSXTT",
                     "天华地上排水系统图",
                     "IDI_THCAD_THPSXTT_SMALL",
                     "IDI_THCAD_THPSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 地上消火栓系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上消火栓系统",
+                    "天华地上消火栓系统图",
+                    "THXHSXTT",
+                    "天华地上消火栓系统图",
+                    "IDI_THCAD_THXHSXTT_SMALL",
+                    "IDI_THCAD_THXHSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
 
