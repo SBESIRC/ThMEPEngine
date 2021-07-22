@@ -463,7 +463,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var textLinePoint = raiseUpPoint - _yAxis.MultiplyBy(areaTextHeight + _textOffSet*2 + 150);
             var textLineStartPoint = textLinePoint + _yAxis.MultiplyBy(150) - (isLeft ? _xAxis.MultiplyBy(150) : _xAxis.Negate().MultiplyBy(150));
             var textLineEndPoint = textLineStartPoint + (isLeft ? _xAxis.Negate().MultiplyBy(areaTextWidth + _textOffSet*2) : _xAxis.MultiplyBy(areaTextWidth + _textOffSet*2));
-            var textCreatePoint = (isLeft ? textLineEndPoint : textLineStartPoint) + _xAxis.MultiplyBy(_textOffSet*2);
+            var textCreatePoint = (isLeft ? textLineEndPoint : textLineStartPoint) + _xAxis.MultiplyBy(_textOffSet*2) +_yAxis.MultiplyBy(_xTextAddLength/2);
             _AddTextToCreateElems(areaStr, textCreatePoint, 0, true, "W-FRPT-NOTE");
             _AddLineToCreateElems(textLinePoint, textLineStartPoint,true,"W-FRPT-NOTE");
             _AddLineToCreateElems(textLineStartPoint, textLineEndPoint, true, "W-FRPT-NOTE");

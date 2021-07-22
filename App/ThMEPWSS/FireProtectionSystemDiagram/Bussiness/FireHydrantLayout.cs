@@ -72,7 +72,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 var text = _AddTextToCreateElems(_secondFirePipeDN, lineEp, 0,false);
                 FireProtectionSysCommon.GetTextHeightWidth(new List<DBText> { text }, out double textHeight, out double textWidth);
                 var textCreatePoint = lineSp + layoutSideDir.MultiplyBy(_textOffSet);
-                textCreatePoint += _yAxis.Negate().MultiplyBy(textHeight + _textOffSet);
+                textCreatePoint += _yAxis.Negate().MultiplyBy(textHeight + _textOffSet+30);
                 if (layoutSideDir.X < 0)
                 {
                     textCreatePoint += layoutSideDir.MultiplyBy(textWidth);
