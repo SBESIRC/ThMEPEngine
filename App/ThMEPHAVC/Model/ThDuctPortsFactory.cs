@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPHVAC.Model
 {
@@ -9,17 +12,50 @@ namespace ThMEPHVAC.Model
     {
         public DBObjectCollection geo;
         public DBObjectCollection flg;
+        public List<Point3d> ports;
+        public List<Point3d> ports_ext;
         public DBObjectCollection center_line;
         public Line_Info(){ }
-        public Line_Info(DBObjectCollection geo_, DBObjectCollection flg_, DBObjectCollection center_line_)
+        public Line_Info(DBObjectCollection geo, 
+                         DBObjectCollection flg, 
+                         DBObjectCollection center_line,
+                         List<Point3d> ports,
+                         List<Point3d> ports_ext)
         {
-            geo = geo_;
-            flg = flg_;
-            center_line = center_line_;
+            this.geo = geo;
+            this.flg = flg;
+            this.ports = ports;
+            this.ports_ext = ports_ext;
+            this.center_line = center_line;
         }
     }
     public class ThDuctPortsFactory
     {
+        public static Line_Info Create_reducing(DBObjectCollection seg_outlines)
+        {
+            double extend = 45;
+            var geo = new DBObjectCollection();
+            var flg = new DBObjectCollection();
+            var center_line = new DBObjectCollection();
+            var pre_up = seg_outlines[0] as Line;
+            var pre_down = seg_outlines[1] as Line;
+            var latter_up = seg_outlines[2] as Line;
+            var latter_down = seg_outlines[3] as Line;
+            var pre_up_port = pre_up.EndPoint;
+            var pre_down_port = pre_down.EndPoint;
+            var latter_up_port = (latter_up.Length - 1 < 1e-3) ? latter_up.EndPoint : latter_up.StartPoint;
+            var latter_down_port = (latter_down.Length - 1 < 1e-3) ? latter_down.EndPoint : latter_down.StartPoint;
+            geo.Add(new Line(pre_up_port, latter_up_port));
+            geo.Add(new Line(pre_down_port, latter_down_port));
+            Vector3d dir_vec = (pre_up_port - pre_down_port).GetNormal();
+            flg.Add(new Line(pre_up_port + dir_vec * extend, pre_down_port - dir_vec * extend));
+            dir_vec = (latter_up_port - latter_down_port).GetNormal();
+            flg.Add(new Line(latter_up_port + dir_vec * extend, latter_down_port - dir_vec * extend));
+            center_line.Add(new Line(ThDuctPortsService.Get_mid_point(pre_up_port, pre_down_port),
+                                     ThDuctPortsService.Get_mid_point(latter_up_port, latter_down_port)));
+            ThDuctPortsService.Get_ports(center_line[0] as Line, out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(geo, flg, center_line, ports, ports_ext);
+        }
         public static Line_Info Create_cross(double i_width, double o_width1, double o_width2, double o_width3)
         {
             if (o_width1 > o_width3)
@@ -161,50 +197,60 @@ namespace ThMEPHVAC.Model
                                                        sideSmallEndInnerPipeLine,
                                                        smallOutterArc,
                                                        mainSmallToSideSmallArc };
-            var cross_flg = new DBObjectCollection() { mainBigEndLine,
-                                                       mainSmallEndLine,
-                                                       sideBigEndLine,
-                                                       sideSmallEndLine };
+            double ext = 45;
+            var cross_flg = new DBObjectCollection() { ThDuctPortsService.Extend_line(mainBigEndLine, ext),
+                                                       ThDuctPortsService.Extend_line(mainSmallEndLine, ext),
+                                                       ThDuctPortsService.Extend_line(sideBigEndLine, ext),
+                                                       ThDuctPortsService.Extend_line(sideSmallEndLine, ext)};
             var cross_centerline = new DBObjectCollection() { new Line(Point3d.Origin, Get_mid_point(mainBigEndLine)),
                                                               new Line(Point3d.Origin, Get_mid_point(mainSmallEndLine)),
                                                               new Line(Point3d.Origin, Get_mid_point(sideBigEndLine)),
                                                               new Line(Point3d.Origin, Get_mid_point(sideSmallEndLine))};
-            return new Line_Info(cross_geo, cross_flg, cross_centerline);
+
+            ThDuctPortsService.Get_ports(cross_centerline.Cast<Line>().ToList(), out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(cross_geo, cross_flg, cross_centerline, ports, ports_ext);
         }
-        public static Line_Info Create_r_tee_outlines(double i_width, double o_width1, double o_width2)
+        public static Line_Info Create_tee(double main_width, double branch, double other, Tee_Type type)
         {
-            var endlines = Create_r_tee_endline(i_width, o_width1, o_width2);
-            return Create_r_tee_geometries(endlines, i_width, o_width1);
+            if (type == Tee_Type.BRANCH_VERTICAL_WITH_OTTER)
+                return Create_r_tee_outlines(main_width, branch, other);
+            else
+                return Create_v_tee_outlines(main_width, branch, other);
         }
-        public static Line_Info Create_v_tee_outlines(double i_width, double o_width1, double o_width2)
+        private static Line_Info Create_r_tee_outlines(double main_width, double branch, double other)
         {
-            var endlines = Create_v_tee_endline(i_width, o_width1, o_width2);
-            return Create_v_tee_geometries(endlines, i_width, o_width1, o_width2);
+            var endlines = Create_r_tee_endline(main_width, branch, other);
+            return Create_r_tee_geometries(endlines, main_width, branch);
         }
-        private static DBObjectCollection Create_v_tee_endline(double i_width, double o_width1, double o_width2)
+        private static Line_Info Create_v_tee_outlines(double main_width, double branch, double other)
+        {
+            var endlines = Create_v_tee_endline(main_width, branch, other);
+            return Create_v_tee_geometries(endlines, main_width, branch, other);
+        }
+        private static DBObjectCollection Create_v_tee_endline(double main_width, double branch, double other)
         {
             //右向弯管
-            double xOft = (i_width + o_width1) * 0.5 + 50;
-            double yOft = 0.5 * o_width1;
+            double xOft = (main_width + branch) * 0.5 + 50;
+            double yOft = 0.5 * branch;
             double ext = 45;
-            Line branchEndLine = new Line()
+            var branchEndLine = new Line()
             {
                 StartPoint = new Point3d(xOft, yOft + ext, 0),
                 EndPoint = new Point3d(xOft, -yOft - ext, 0),
             };
-            xOft = -(i_width + o_width2) * 0.5 - 50;
-            yOft = 0.5 * o_width2;
+            xOft = -(main_width + other) * 0.5 - 50;
+            yOft = 0.5 * other;
             //左向弯管
-            Line mainSmallEndLine = new Line()
+            var mainSmallEndLine = new Line()
             {
                 StartPoint = new Point3d(xOft, yOft + ext, 0),
                 EndPoint = new Point3d(xOft, -yOft - ext, 0),
             };
-            xOft = 0.5 * i_width;
-            double branch_width = o_width1 > o_width2 ? o_width1 : o_width2;
+            xOft = 0.5 * main_width;
+            double branch_width = branch > other ? branch : other;
             yOft = -branch_width - 50;
             //输入
-            Line mainBigEndLine = new Line()
+            var mainBigEndLine = new Line()
             {
                 StartPoint = new Point3d(xOft + ext, yOft, 0),
                 EndPoint = new Point3d(-xOft - ext, yOft, 0),
@@ -217,27 +263,27 @@ namespace ThMEPHVAC.Model
                 mainSmallEndLine
             };
         }
-        private static DBObjectCollection Create_r_tee_endline(double i_width, double o_width1, double o_width2)
+        private static DBObjectCollection Create_r_tee_endline(double main_width, double branch, double other)
         {
             //创建支路端线
-            double xOft = (i_width + o_width1) * 0.5 + 50;
-            double yOft = 0.5 * o_width1;
+            double xOft = (main_width + branch) * 0.5 + 50;
+            double yOft = 0.5 * branch;
             double ext = 45;
             Line branchEndLine = new Line()
             {
                 StartPoint = new Point3d(xOft, yOft + ext, 0),
                 EndPoint = new Point3d(xOft, -yOft - ext, 0),
             };
-            xOft = 0.5 * o_width2;
-            yOft = 0.5 * o_width1 + 100;
+            xOft = 0.5 * other;
+            yOft = 0.5 * branch + 100;
             //创建主路小端端线
             Line mainSmallEndLine = new Line()
             {
                 StartPoint = new Point3d(xOft + ext, yOft, 0),
                 EndPoint = new Point3d(-xOft - ext, yOft, 0),
             };
-            xOft = 0.5 * i_width;
-            yOft = -o_width1 - 50;
+            xOft = 0.5 * main_width;
+            yOft = -branch - 50;
             //创建主路大端端线
             Line mainBigEndLine = new Line()
             {
@@ -256,44 +302,45 @@ namespace ThMEPHVAC.Model
         {
             double R1 = 0.5 * (i_width + l_width);
             double R2 = 0.5 * (i_width + r_width);
-            Point3d left_circle_cp = new Point3d(-R1, -l_width, 0);
-            Point3d right_circle_cp = new Point3d(R2, -r_width, 0);
-            Arc left_inner_arc = new Arc(left_circle_cp, 0.5 * l_width, 0, 0.5 * Math.PI);
-            Arc right_inner_arc = new Arc(right_circle_cp, 0.5 * r_width, 0.5 * Math.PI, Math.PI);
-            Point3d floor_left = new Point3d(-0.5 * i_width, -l_width - 50, 0);
-            Point3d floor_right = new Point3d(0.5 *  i_width, -r_width - 50, 0);
-            Line left_inner_arc_v_extend = new Line(left_inner_arc.StartPoint, floor_left);
-            Line right_inner_arc_v_extend = new Line(right_inner_arc.EndPoint, floor_right);
-            Line left_inner_arc_h50_extend = new Line(left_inner_arc.EndPoint, left_inner_arc.EndPoint + new Vector3d(-50, 0, 0));
-            Line right_inner_arc_h50_extend = new Line(right_inner_arc.StartPoint, right_inner_arc.StartPoint + new Vector3d(50, 0, 0));
-            Vector3d oft = new Vector3d(0, l_width, 0);
-            Line left_outter_arc_h50_extend = new Line(left_inner_arc_h50_extend.StartPoint + oft, left_inner_arc_h50_extend.EndPoint + oft);
+            var left_circle_cp = new Point3d(-R1, -l_width, 0);
+            var right_circle_cp = new Point3d(R2, -r_width, 0);
+            var left_inner_arc = new Arc(left_circle_cp, 0.5 * l_width, 0, 0.5 * Math.PI);
+            var right_inner_arc = new Arc(right_circle_cp, 0.5 * r_width, 0.5 * Math.PI, Math.PI);
+            var floor_left = new Point3d(-0.5 * i_width, -l_width - 50, 0);
+            var floor_right = new Point3d(0.5 *  i_width, -r_width - 50, 0);
+            var left_inner_arc_v_extend = new Line(left_inner_arc.StartPoint, floor_left);
+            var right_inner_arc_v_extend = new Line(right_inner_arc.EndPoint, floor_right);
+            var left_inner_arc_h50_extend = new Line(left_inner_arc.EndPoint, left_inner_arc.EndPoint + new Vector3d(-50, 0, 0));
+            var right_inner_arc_h50_extend = new Line(right_inner_arc.StartPoint, right_inner_arc.StartPoint + new Vector3d(50, 0, 0));
+            var oft = new Vector3d(0, l_width, 0);
+            var left_outter_arc_h50_extend = new Line(left_inner_arc_h50_extend.StartPoint + oft, left_inner_arc_h50_extend.EndPoint + oft);
             oft = new Vector3d(0, r_width, 0);
-            Line right_outter_arc_h50_extend = new Line(right_inner_arc_h50_extend.StartPoint + oft, right_inner_arc_h50_extend.EndPoint + oft);
+            var right_outter_arc_h50_extend = new Line(right_inner_arc_h50_extend.StartPoint + oft, right_inner_arc_h50_extend.EndPoint + oft);
 
-            Arc left_aux_arc = new Arc(left_circle_cp, 1.5 * l_width, 0, 0.5 * Math.PI);
-            Arc right_aux_arc = new Arc(right_circle_cp, 1.5 * r_width, 0.5 * Math.PI, Math.PI);
-            Point3dCollection intersect_points = new Point3dCollection();
-            IntPtr ptr = new IntPtr();
+            var left_aux_arc = new Arc(left_circle_cp, 1.5 * l_width, 0, 0.5 * Math.PI);
+            var right_aux_arc = new Arc(right_circle_cp, 1.5 * r_width, 0.5 * Math.PI, Math.PI);
+            var intersect_points = new Point3dCollection();
+            var ptr = new IntPtr();
             left_aux_arc.IntersectWith(right_aux_arc, Intersect.OnBothOperands, intersect_points, ptr, ptr);
 
-            Arc left_otter_arc = new Arc();
-            Arc right_otter_arc = new Arc();
+            var left_otter_arc = new Arc();
+            var right_otter_arc = new Arc();
             if (intersect_points.Count != 0)
             {
                 Point3d p = intersect_points[0];
                 left_otter_arc.CreateArcSCE(p, left_circle_cp, left_outter_arc_h50_extend.StartPoint);
                 right_otter_arc.CreateArcSCE(right_outter_arc_h50_extend.StartPoint, right_circle_cp, p);
             }
-            Line endline1 = endlines[0] as Line;
-            Line endline2 = endlines[1] as Line;
-            Line endline3 = endlines[2] as Line;
-            var tee_flg = new DBObjectCollection() { new Line(Point3d.Origin, Get_mid_point(endline1)),
-                                                     new Line(Point3d.Origin, Get_mid_point(endline2)),
-                                                     new Line(Point3d.Origin, Get_mid_point(endline3))};
+            var branchEndLine = endlines[0] as Line;
+            var mainBigEndLine = endlines[1] as Line;
+            var mainSmallEndLine = endlines[2] as Line;
+            var org_p = Point3d.Origin;
+            var tee_center_line = new DBObjectCollection() { new Line(org_p, Get_mid_point(branchEndLine)),
+                                                             new Line(org_p, Get_mid_point(mainBigEndLine)),
+                                                             new Line(org_p, Get_mid_point(mainSmallEndLine))};
             if (Math.Abs(floor_left.Y - floor_right.Y) > 1e-3)
             {
-                Line supplement = new Line();
+                Line supplement;
                 if (r_width > l_width)
                 {
                     Point3d aux_p = new Point3d(floor_left.X, floor_right.Y, 0);
@@ -315,7 +362,8 @@ namespace ThMEPHVAC.Model
                                                          left_otter_arc,
                                                          right_otter_arc,
                                                          supplement };
-                return new Line_Info(outline, endlines, tee_flg);
+                ThDuctPortsService.Get_ports(tee_center_line.Cast<Line>().ToList(), out List<Point3d> ports1, out List<Point3d> ports_ext1);
+                return new Line_Info(outline, endlines, tee_center_line, ports1, ports_ext1);
             }
             var tee_outline = new DBObjectCollection()
             {
@@ -330,53 +378,54 @@ namespace ThMEPHVAC.Model
                 left_otter_arc,
                 right_otter_arc
             };
-            return new Line_Info(tee_outline, endlines, tee_flg);
+            ThDuctPortsService.Get_ports(tee_center_line.Cast<Line>().ToList(), out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(tee_outline, endlines, tee_center_line, ports, ports_ext);
         }
         private static Line_Info Create_r_tee_geometries(DBObjectCollection endlines, double i_width, double o_width1)
         {
             double ext = 45;
-            Line branchEndLine = endlines[0].Clone() as Line;
+            var branchEndLine = endlines[0].Clone() as Line;
             branchEndLine.StartPoint += new Vector3d(0, -ext, 0);
             branchEndLine.EndPoint += new Vector3d(0, ext, 0);
-            Line mainBigEndLine = endlines[1].Clone() as Line;
+            var mainBigEndLine = endlines[1].Clone() as Line;
             mainBigEndLine.StartPoint += new Vector3d(-ext, 0, 0);
             mainBigEndLine.EndPoint += new Vector3d(ext, 0, 0);
-            Line mainSmallEndLine = endlines[2].Clone() as Line;
+            var mainSmallEndLine = endlines[2].Clone() as Line;
             mainSmallEndLine.StartPoint += new Vector3d(-ext, 0, 0);
             mainSmallEndLine.EndPoint += new Vector3d(ext, 0, 0);
 
             //创建支路50mm直管段
-            Line branchUpStraightLine = new Line()
+            var branchUpStraightLine = new Line()
             {
                 StartPoint = branchEndLine.StartPoint,
                 EndPoint = branchEndLine.StartPoint + new Vector3d(-50, 0, 0),
             };
-            Line branchBelowStraightLine = new Line()
+            var branchBelowStraightLine = new Line()
             {
                 StartPoint = branchEndLine.EndPoint,
                 EndPoint = branchEndLine.EndPoint + new Vector3d(-50, 0, 0),
             };
 
             //创建支路下侧圆弧过渡段
-            Point3d circleCenter = new Point3d(0.5 * (i_width + o_width1), -o_width1, 0);
-            Arc branchInnerArc = new Arc(circleCenter, 0.5 * o_width1, 0.5 * Math.PI, Math.PI);
+            var circleCenter = new Point3d(0.5 * (i_width + o_width1), -o_width1, 0);
+            var branchInnerArc = new Arc(circleCenter, 0.5 * o_width1, 0.5 * Math.PI, Math.PI);
 
             //创建支路上侧圆弧过渡段
             //首先创建主路上端小管道的内侧线作为辅助线以便于后续计算圆弧交点
-            Ray branchAuxiliaryRay = new Ray()
+            var branchAuxiliaryRay = new Ray()
             {
                 BasePoint = mainSmallEndLine.StartPoint,
                 SecondPoint = mainSmallEndLine.StartPoint + new Vector3d(0, -5000, 0)
             };
-            Circle branchAuxiliaryCircle = new Circle()
+            var branchAuxiliaryCircle = new Circle()
             {
                 Center = circleCenter,
                 Radius = 1.5 * o_width1
             };
-            Point3dCollection Intersectpoints = new Point3dCollection();
-            IntPtr ptr = new IntPtr();
+            var Intersectpoints = new Point3dCollection();
+            var ptr = new IntPtr();
             branchAuxiliaryRay.IntersectWith(branchAuxiliaryCircle, Intersect.OnBothOperands, Intersectpoints, ptr, ptr);
-            Arc branchOuterArc = new Arc();
+            var branchOuterArc = new Arc();
             if (Intersectpoints.Count != 0)
             {
                 Point3d Intersectpointinarc = Intersectpoints[0];
@@ -391,24 +440,24 @@ namespace ThMEPHVAC.Model
             }
 
             //创建主路外侧管线
-            Line outerStraightLine = new Line()
+            var outerStraightLine = new Line()
             {
                 StartPoint = mainBigEndLine.EndPoint,
                 EndPoint = mainBigEndLine.EndPoint + new Vector3d(0, 50, 0),
             };
-            Line outerObliqueLine = new Line()
+            var outerObliqueLine = new Line()
             {
                 StartPoint = outerStraightLine.EndPoint,
                 EndPoint = mainSmallEndLine.EndPoint,
             };
 
             //创建主路内侧管线
-            Line innerUpLine = new Line()
+            var innerUpLine = new Line()
             {
                 StartPoint = mainSmallEndLine.StartPoint,
                 EndPoint = branchOuterArc.EndPoint,
             };
-            Line innerBelowLine = new Line()
+            var innerBelowLine = new Line()
             {
                 StartPoint = mainBigEndLine.StartPoint,
                 EndPoint = branchInnerArc.EndPoint,
@@ -425,34 +474,35 @@ namespace ThMEPHVAC.Model
             var tee_center_line = new DBObjectCollection() {new Line(Point3d.Origin, Get_mid_point(branchEndLine)),
                                                             new Line(Point3d.Origin, Get_mid_point(mainBigEndLine)),
                                                             new Line(Point3d.Origin, Get_mid_point(mainSmallEndLine))};
-            return new Line_Info(tee_outline, endlines, tee_center_line);
+            ThDuctPortsService.Get_ports(tee_center_line.Cast<Line>().ToList(), out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(tee_outline, endlines, tee_center_line, ports, ports_ext);
         }
         public static Line_Info Create_elbow(double angle, double width)
         {
             double extend_len = 50;
             double cos_angle = Math.Cos(angle);
             double sin_angle = Math.Sin(angle);
-            Point3d center_point = new Point3d(-0.7 * width, -Math.Abs(0.7 * width * Math.Tan(0.5 * angle)), 0);
+            var center_point = new Point3d(-0.7 * width, -Math.Abs(0.7 * width * Math.Tan(0.5 * angle)), 0);
             //创建弯头内外侧圆弧
-            Arc outerarc = new Arc(center_point, 1.2 * width, 0, angle);
-            Arc innerarc = new Arc(center_point, 0.2 * width, 0, angle);
+            var outerarc = new Arc(center_point, 1.2 * width, 0, angle);
+            var innerarc = new Arc(center_point, 0.2 * width, 0, angle);
             //创建弯头两端的50mm延申段
-            Line outerendextendline = new Line()
+            var outerendextendline = new Line()
             {
                 StartPoint = outerarc.EndPoint,
                 EndPoint = outerarc.EndPoint + new Vector3d(-extend_len * sin_angle, extend_len * cos_angle, 0),
             };
-            Line innerendextendline = new Line()
+            var innerendextendline = new Line()
             {
                 StartPoint = innerarc.EndPoint,
                 EndPoint = innerarc.EndPoint + new Vector3d(-extend_len * sin_angle, extend_len * cos_angle, 0),
             };
-            Line outerstartextendline = new Line()
+            var outerstartextendline = new Line()
             {
                 StartPoint = outerarc.StartPoint,
                 EndPoint = outerarc.StartPoint + new Vector3d(0, -extend_len, 0),
             };
-            Line innerstartextendline = new Line()
+            var innerstartextendline = new Line()
             {
                 StartPoint = innerarc.StartPoint,
                 EndPoint = innerarc.StartPoint + new Vector3d(0, -extend_len, 0),
@@ -463,13 +513,13 @@ namespace ThMEPHVAC.Model
                                                            innerendextendline,
                                                            outerstartextendline,
                                                            innerstartextendline};
-            Arc center_arc = new Arc(center_point, 0.7 * width, 0, angle);
-            Line center_arc_extendline1 = new Line()
+            var center_arc = new Arc(center_point, 0.7 * width, 0, angle);
+            var center_arc_extendline1 = new Line()
             {
                 StartPoint = center_arc.EndPoint,
                 EndPoint = center_arc.EndPoint + new Vector3d(-extend_len * sin_angle, extend_len * cos_angle, 0),
             };
-            Line center_arc_extendline2 = new Line()
+            var center_arc_extendline2 = new Line()
             {
                 StartPoint = center_arc.StartPoint,
                 EndPoint = center_arc.StartPoint + new Vector3d(0, -extend_len, 0),
@@ -478,13 +528,16 @@ namespace ThMEPHVAC.Model
                                                               center_arc_extendline1,
                                                               center_arc_extendline2};
             var flg1 = new Line(innerstartextendline.EndPoint, outerstartextendline.EndPoint);
-            Vector3d dir_vec = (flg1.EndPoint - flg1.StartPoint).GetNormal();
+            var dir_vec = (flg1.EndPoint - flg1.StartPoint).GetNormal();
+            extend_len = 45;
             flg1 = new Line(flg1.StartPoint - dir_vec * extend_len, flg1.EndPoint + dir_vec * extend_len);
             var flg2 = new Line(innerendextendline.EndPoint, outerendextendline.EndPoint);
             dir_vec = (flg2.EndPoint - flg2.StartPoint).GetNormal();
             flg2 = new Line(flg2.StartPoint - dir_vec * extend_len, flg2.EndPoint + dir_vec * extend_len);
             var elbow_flg = new DBObjectCollection() { flg1, flg2 };
-            return new Line_Info(elbow_outline, elbow_flg, elbow_centerline);
+            var tmp_center_line = new DBObjectCollection() { elbow_centerline[1], elbow_centerline[2]};
+            ThDuctPortsService.Get_ports(tmp_center_line.Cast<Line>().ToList(), out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(elbow_outline, elbow_flg, elbow_centerline, ports, ports_ext);
         }
         public static void Get_duct_geo_flg_center_line( Line l,
                                                          double width,
@@ -509,8 +562,28 @@ namespace ThMEPHVAC.Model
             flg.Add(new Line(l1.EndPoint, l2.EndPoint));
             center_line.Add(l);
         }
-        public static DBObjectCollection Create_duct(double length, 
-                                                     double width)
+        public static Line_Info Create_duct(Point2d sp, Point2d ep, double width)
+        {
+            var aux_line = new Line() { StartPoint = sp.ToPoint3d(), EndPoint = ep.ToPoint3d()};
+            var dir_vec = ThDuctPortsService.Get_edge_direction(aux_line);
+            var l_v_vec = ThDuctPortsService.Get_left_vertical_vec(dir_vec);
+            var r_v_vec = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var sp1 = aux_line.StartPoint + l_v_vec * 0.5 * width;
+            var sp2 = aux_line.StartPoint + r_v_vec * 0.5 * width;
+            var ep1 = aux_line.EndPoint + l_v_vec * 0.5 * width;
+            var ep2 = aux_line.EndPoint + r_v_vec * 0.5 * width;
+
+            var geo = new DBObjectCollection() { new Line(sp1, ep1), new Line(sp2, ep2) };
+            sp1 += l_v_vec * 50;
+            sp2 += r_v_vec * 50;
+            ep1 += l_v_vec * 50;
+            ep2 += r_v_vec * 50;
+            var flg = new DBObjectCollection() { new Line(sp1, sp2), new Line(ep1, ep2) };
+            var center_line = new DBObjectCollection() { aux_line };
+            ThDuctPortsService.Get_ports(aux_line, out List<Point3d> ports, out List<Point3d> ports_ext);
+            return new Line_Info(geo, flg, center_line, ports, ports_ext);
+        }
+        public static DBObjectCollection Create_duct(double length, double width)
         {
             //绘制辅助中心线
             var auxiliaryCenterLine = new Line()
@@ -531,55 +604,41 @@ namespace ThMEPHVAC.Model
                 ductBelowLine,
             };
         }
-
-        public static DBObjectCollection Create_reducing_duct_geo(double length, double big_width, double small_width)
+        public static DBObjectCollection Create_reducing_geo(Line center_line, double big_width, double small_width)
         {
-            //绘制辅助中心线
-            Line center_line = new Line()
-            {
-                StartPoint = new Point3d(-length * 0.5, 0, 0),
-                EndPoint = new Point3d(length * 0.5, 0, 0),
-            };
-            Point3d p1 = center_line.StartPoint + new Vector3d(0, big_width * 0.5, 0);
-            Point3d p2 = center_line.StartPoint + new Vector3d(0, -big_width * 0.5, 0);
-            Point3d p3 = center_line.EndPoint + new Vector3d(0, small_width * 0.5, 0);
-            Point3d p4 = center_line.EndPoint + new Vector3d(0, -small_width * 0.5, 0);
-            Line up_hypotenuse = new Line(p1, p3);
-            Line down_hypotenuse = new Line(p2, p4);
+            var dir_vec = ThDuctPortsService.Get_edge_direction(center_line);
+            var left = ThDuctPortsService.Get_left_vertical_vec(dir_vec);
+            var right = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var p1 = center_line.StartPoint + left * big_width * 0.5;
+            var p2 = center_line.StartPoint + right * big_width * 0.5;
+            var p3 = center_line.EndPoint + left * small_width * 0.5;
+            var p4 = center_line.EndPoint + right * small_width * 0.5;
+            var up_hypotenuse = new Line(p1, p3);
+            var down_hypotenuse = new Line(p2, p4);
             return new DBObjectCollection()
             {
                 up_hypotenuse,
                 down_hypotenuse
             };
         }
-        public static DBObjectCollection Create_reducing_duct_flg(DBObjectCollection reducing_duct_geo)
+        public static DBObjectCollection Create_reducing_flg(DBObjectCollection reducing_duct_geo)
         {
-            Line up_hypotenuse = reducing_duct_geo[0] as Line;
-            Line down_hypotenuse = reducing_duct_geo[1] as Line;
-
-            return new DBObjectCollection()
-            {
-                new Line(up_hypotenuse.StartPoint, down_hypotenuse.StartPoint),
-                new Line(up_hypotenuse.EndPoint, down_hypotenuse.EndPoint)
-            };
+            double dis = 45;
+            var up_hypotenuse = reducing_duct_geo[0] as Line;
+            var down_hypotenuse = reducing_duct_geo[1] as Line;
+            var l1 = new Line(up_hypotenuse.StartPoint, down_hypotenuse.StartPoint);
+            var dir_vec = ThDuctPortsService.Get_edge_direction(l1);
+            var dis_vec = dis * dir_vec;
+            l1 = new Line(l1.StartPoint - dis_vec, l1.EndPoint + dis_vec);
+            var l2 = new Line(up_hypotenuse.EndPoint, down_hypotenuse.EndPoint);
+            dir_vec = ThDuctPortsService.Get_edge_direction(l2);
+            dis_vec = dis * dir_vec;
+            l2 = new Line(l2.StartPoint - dis_vec, l2.EndPoint + dis_vec);
+            return new DBObjectCollection() { l1, l2 };
         }
-        public static DBObjectCollection Create_port()
+        public static DBObjectCollection Create_reducing_center(Line l)
         {
-            double width = 320 * 0.5;
-            double height = 640 * 0.5;
-            Point3d corner1 = new Point3d(-width, -height, 0);
-            Point3d corner2 = new Point3d( width, -height, 0);
-            Point3d corner3 = new Point3d( width,  height, 0);
-            Point3d corner4 = new Point3d(-width,  height, 0);
-
-            return new DBObjectCollection()
-            {
-                new Line(corner1, corner2),
-                new Line(corner2, corner3),
-                new Line(corner3, corner4),
-                new Line(corner4, corner1),
-                new Line(corner4, corner2),
-            };
+            return new DBObjectCollection() { new Line(l.StartPoint, l.EndPoint) };
         }
         private static Point3d Get_mid_point(Line l)
         {

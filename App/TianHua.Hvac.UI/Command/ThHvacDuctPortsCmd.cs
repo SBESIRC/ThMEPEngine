@@ -74,7 +74,7 @@ namespace TianHua.Hvac.UI.Command
                 };
                 var sf = ThSelectionFilterTool.Build(dxfNames);
                 center_lines = Get_center_line("请选择中心线", out string layer, sf);
-                 if (center_lines.Count == 0)
+                if (center_lines.Count == 0)
                     return;
                 var mat = Matrix3d.Displacement(start_point.GetAsVector());
                 ThDuctPortsDrawService.Draw_lines(center_lines, mat, layer, out _);
@@ -164,6 +164,7 @@ namespace TianHua.Hvac.UI.Command
             lines = ThLaneLineEngine.CleanZeroCurves(lines);
             lines = lines.LineMerge();
             lines = ThLaneLineEngine.Explode(lines);
+            
             return lines;
         }
     }

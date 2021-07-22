@@ -37,7 +37,16 @@ namespace TianHua.Hvac.UI
         [CommandMethod("TIANHUACAD", "THDKFPMFG", CommandFlags.Modal)]
         public void THDKFPMFG()
         {
-            using (var cmd = new ThHvacDuctPortModifyCmd())
+            using (var cmd = new ThHvacDuctModifyCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDKFPMXG", CommandFlags.Modal)]
+        public void THDKFPMXG()
+        {
+            using (var cmd = new ThHvacPortModifyCmd())
             {
                 cmd.Execute();
             }

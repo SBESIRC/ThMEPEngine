@@ -83,10 +83,10 @@ namespace ThMEPHVAC.Model
         }
 
         private Endline_seg_Info Break_duct_by_port(Endline_Info cur_info,
-                                                         Endline_Info pre_info,
-                                                         Endline_Info next_info,
-                                                         bool is_first,
-                                                         ref string duct_size_info)
+                                                    Endline_Info pre_info,
+                                                    Endline_Info next_info,
+                                                    bool is_first,
+                                                    ref string duct_size_info)
         {
             var port_seg = new Endline_seg_Info();
             Line proc_line = Get_real_proc_line(cur_info, pre_info, next_info, is_first, ref duct_size_info);
@@ -257,10 +257,10 @@ namespace ThMEPHVAC.Model
             double cur_duct_width = Get_duct_width(is_first, cur_air_volumn, ref duct_size_info);
             double src_shrink = (Math.Abs(pre_elbow_open_angle) < 1e-3) ?
                                  cur_info.direct_edge.SourceShrink :
-                                 Get_elbow_shrink(pre_elbow_open_angle, cur_duct_width, 0, 0.7);
+                                 ThDuctPortsShapeService.Get_elbow_shrink(pre_elbow_open_angle, cur_duct_width, 0, 0.7);
             double dst_shrink = (Math.Abs(next_elbow_open_angle) < 1e-3) ?
                                  cur_info.direct_edge.TargetShrink :
-                                 Get_elbow_shrink(next_elbow_open_angle, next_duct_start_width, 0, 0.7);
+                                 ThDuctPortsShapeService.Get_elbow_shrink(next_elbow_open_angle, next_duct_start_width, 0, 0.7);
             return Get_shrink_line(cur_info, src_shrink, dst_shrink);
         }
         private Line Get_shrink_line(Endline_Info cur_info, double src_shrink, double dst_shrink)
@@ -462,7 +462,7 @@ namespace ThMEPHVAC.Model
             double open_angle = Get_elbow_open_angle(info);
             if (Math.Abs(in_width - out_width) < 1e-3)
             {
-                double shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                 Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
                 Duct_src_shrink(anay_res, shrink_len, info, 1);
             }
@@ -470,33 +470,19 @@ namespace ThMEPHVAC.Model
             {
                 if (in_width > out_width)
                 {
-                    double shrink_len = Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
+                    double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
                     Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
-                    shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                    shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                     Duct_src_shrink(anay_res, shrink_len, info, 1);
                 }
                 else
                 {
-                    double shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                    double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                     Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
-                    shrink_len = Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
+                    shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
                     Duct_src_shrink(anay_res, shrink_len, info, 1);
                 }
             }
-        }
-        private double Get_elbow_shrink(double open_angle, double width, double reducing_len, double K)
-        {
-            if (open_angle > 0.5 * Math.PI)
-            {
-                Point2d center_point = new Point2d(-0.7 * width, -Math.Abs(0.7 * width * Math.Tan(0.5 * (Math.PI - open_angle))));
-                return Math.Abs(center_point.Y) + reducing_len + 50;
-            }
-            else if (Math.Abs(open_angle - 0.5 * Math.PI) < 1e-3)
-                return K * (width + reducing_len) + 50;
-            else if (open_angle > 0 && open_angle < 0.5 * Math.PI)
-                throw new NotImplementedException();
-            else
-                return 0;
         }
         private double Get_elbow_open_angle(Special_graph_Info info)
         {

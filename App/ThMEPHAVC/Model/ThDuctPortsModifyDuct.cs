@@ -1,0 +1,491 @@
+﻿using System;
+using System.Collections.Generic;
+using DotNetARX;
+using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
+namespace ThMEPHVAC.Model
+{
+    public class ThDuctPortsModifyDuct
+    {
+        private Tolerance tor;
+        private Handle start_handle;
+        private Point2d start_point;
+        private Vector3d org_dis_vec;
+        private Matrix3d org_dis_mat;
+        private ThDuctPortsDrawService service;
+        private List<Duct_modify_param> ducts;
+        private List<Valve_modify_param> valves;
+        private List<Entity_modify_param> shapes;
+        private List<Text_modify_param> texts;
+        private Duct_modify_param cur_line;
+        private DuctPortsParam in_param;
+        public ThDuctPortsModifyDuct(ObjectId[] ids, 
+                                 string modify_size,
+                                 Duct_modify_param param)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                Read_X_data(param.start_handle, db);
+                if (ducts.Count == 0 || ids.Length != 9)
+                    return;
+                Init(param.start_handle);
+                Get_select_line_info(ids[4], out Point2d f_detect, out Point2d l_detect);
+                var org_f_detect = f_detect;
+                var org_l_detect = l_detect;
+                Search_cur_line(f_detect, l_detect);
+                if (cur_line == null)
+                    return;
+                Modify_entity(modify_size, ref f_detect, out bool f_is_dirct_duct);
+                cur_line.sp = f_detect;
+                Modify_entity(modify_size, ref l_detect, out bool l_is_dirct_duct);
+                var direct_flag = l_is_dirct_duct || f_is_dirct_duct;
+                if (!direct_flag)
+                    Draw_modify_duct(f_detect, l_detect, modify_size, param.air_volume);
+                Update_text(f_detect, l_detect, direct_flag, modify_size);
+                Update_cur_duct_valve(org_f_detect, f_detect, org_l_detect, l_detect, modify_size);
+            }
+        }
+        private void Read_X_data(Handle start_handle_, AcadDatabase db)
+        {
+            var start_id = new ObjectId[] { db.Database.GetObjectId(false, start_handle_, 0) };
+            ThDuctPortsInterpreter.Get_basic_param(start_id, out in_param, out start_point);
+            ThDuctPortsInterpreter.Get_shapes(out shapes);
+            ThDuctPortsInterpreter.Get_ducts(out ducts);
+            ThDuctPortsInterpreter.Get_valves(out valves);
+            ThDuctPortsInterpreter.Get_texts(out texts);
+        }
+        private void Init(Handle start_handle_)
+        {
+            start_handle = start_handle_;
+            tor = new Tolerance(1e-3, 1e-3);
+            var start_3d_p = new Point3d(start_point.X, start_point.Y, 0);
+            org_dis_vec = start_3d_p.GetAsVector();
+            org_dis_mat = Matrix3d.Displacement(org_dis_vec);
+            service = new ThDuctPortsDrawService(in_param.scenario, in_param.scale);
+            var mat = Matrix2d.Displacement(-start_point.GetAsVector());
+            Move_duct_to_org(mat);
+            Move_shape_to_org(mat);
+            Move_valve_to_org(mat);
+            Move_text_to_org(mat);
+        }
+        private void Move_duct_to_org(Matrix2d mat)
+        {
+            foreach (var duct in ducts)
+            {
+                duct.sp = duct.sp.TransformBy(mat);
+                duct.ep = duct.ep.TransformBy(mat);
+            }
+        }
+        private void Move_shape_to_org(Matrix2d mat)
+        {
+            foreach (var shape in shapes)
+            {
+                for (int i = 0; i < shape.pos.Count; ++i)
+                {
+                    shape.pos[i] = shape.pos[i].TransformBy(mat);
+                    shape.pos_ext[i] = shape.pos_ext[i].TransformBy(mat);
+                }
+            }
+        }
+        private void Move_valve_to_org(Matrix2d mat)
+        {
+            foreach (var valve in valves)
+            {
+                valve.judge_p = valve.judge_p.TransformBy(mat);
+                valve.insert_p = valve.insert_p.TransformBy(mat);
+            }
+        }
+        private void Move_text_to_org(Matrix2d mat)
+        {
+            foreach (var valve in texts)
+                valve.center_point = valve.center_point.TransformBy(mat);
+        }
+        private void Search_cur_line(Point2d f_detect, Point2d l_detect)
+        {
+            for (int i = 0; i < ducts.Count; ++i)
+            {
+                var duct = ducts[i];
+                if (ThDuctPortsService.Is_same_line(f_detect, l_detect, duct.sp, duct.ep, tor))
+                {
+                    cur_line = ducts[i];
+                    break;
+                }
+            }
+        }
+        private void Draw_modify_duct(Point2d f_detect, Point2d l_detect, string duct_size, double air_volume)
+        {
+            double cur_duct_width = ThDuctPortsService.Get_width(duct_size);
+            var duct = ThDuctPortsFactory.Create_duct(f_detect, l_detect, cur_duct_width);
+            var duct_param = ThDuctPortsService.Create_duct_modify_param(duct, duct_size, air_volume, start_handle);
+            service.Draw_shape(duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids, 
+                                                  out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+            ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+        }
+        private void Modify_entity(string modify_duct_width, ref Point2d detect_p, out bool is_direct_duct)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                is_direct_duct = false;
+                Search_connected_shape(detect_p, out int shape_idx, out int port_idx, out Entity_modify_param shape);
+                if (shape_idx == -1 || shape.handle == ObjectId.Null.Handle)
+                    return;
+                if (shape.type == "Reducing")
+                    Do_proc_reducing(port_idx, modify_duct_width, shape, out is_direct_duct, ref detect_p);
+                else if (shape.type == "Elbow")
+                    Do_proc_elbow(port_idx, modify_duct_width, shape, ref detect_p);
+                else if (shape.type == "Tee")
+                    Do_proc_tee(port_idx, modify_duct_width, shape, ref detect_p);
+                else if (shape.type == "Cross")
+                    Do_proc_cross(port_idx, modify_duct_width, shape, ref detect_p);
+                else
+                    throw new NotImplementedException();
+            }
+        }
+        private void Do_proc_reducing(int port_idx,
+                                      string modify_size,
+                                      Entity_modify_param red,
+                                      out bool is_direct_duct,
+                                      ref Point2d detect_p)
+        {
+            is_direct_duct = false;
+            var p = red.pos[(port_idx + 1) % 2];
+            Search_2_port_neig_duct(p, out int connect_duct_idx);
+            var e = Search_reducing_conn_elbow(p);
+            if (connect_duct_idx == -1 && e.handle == ObjectId.Null.Handle)
+                return;
+            if (connect_duct_idx >= 0)
+                Draw_reducing_connect_duct(connect_duct_idx, modify_size, out is_direct_duct);
+            if (!is_direct_duct)
+            {
+                var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(red, port_idx, modify_size);
+                var flg1 = reducing_geo.flg[0] as Line;
+                var flg2 = reducing_geo.flg[1] as Line;
+                if (ThDuctPortsService.Is_equal(flg1.Length, flg2.Length))
+                    Update_detect_p(ref detect_p, reducing_geo);
+                else
+                    Update_reducing(reducing_geo);
+            }
+            ThDuctPortsDrawService.Clear_graph(red.handle);
+        }
+        private void Update_detect_p(ref Point2d detect_p, Line_Info reducing_geo)
+        {
+            var l = reducing_geo.center_line[0] as Line;
+            var dis1 = detect_p.GetDistanceTo(l.StartPoint.ToPoint2D());
+            var dis2 = detect_p.GetDistanceTo(l.EndPoint.ToPoint2D());
+            detect_p = dis1 > dis2 ? l.StartPoint.ToPoint2D() : l.EndPoint.ToPoint2D();
+        }
+        private void Do_proc_elbow(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            var dir_vec = (cur_line.ep - cur_line.sp).GetNormal();
+            var dis1 = cur_line.sp.GetDistanceTo(detect_p);
+            var dis2 = cur_line.ep.GetDistanceTo(detect_p);
+            if (elbow.port_widths[0] > modify_width)
+            {
+                // 需要改变elbow的宽度
+                var open_angle = ThDuctPortsShapeService.Get_elbow_open_angle(elbow);
+                var elbow_geo = ThDuctPortsFactory.Create_elbow(open_angle, modify_width);
+                var shrink_change_len = Get_elbow_shrink_change(elbow.port_widths[0], modify_width, open_angle);
+                var p = elbow.pos[(port_idx + 1) % 2];
+                Search_2_port_neig_duct(p, out int connect_duct_idx);
+                var mat = ThDuctPortsShapeService.Create_elbow_trans_mat(elbow);
+                var new_elbow = ThDuctPortsService.Create_special_modify_param(elbow_geo, start_handle, "Elbow", mat);
+                Update_new_shape(elbow_geo, mat, new_elbow);
+                if (connect_duct_idx >= 0)
+                    Draw_elbow_connect_duct(shrink_change_len, connect_duct_idx, modify_duct_width, p);
+                Modify_reducing_with_elbow(p, modify_width, open_angle, elbow);
+                var dis_vec = dir_vec * shrink_change_len;
+                detect_p = dis1 < dis2 ? cur_line.sp - dis_vec : cur_line.ep + dis_vec;
+                ThDuctPortsDrawService.Clear_graph(elbow.handle);
+            }
+            else
+            {
+                // 添加变径
+                var dis_vec = dir_vec * 1000;
+                var p = dis1 < dis2 ? cur_line.sp + dis_vec : cur_line.ep - dis_vec;
+                var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(p, detect_p, modify_width, elbow.port_widths[0]);
+                Update_reducing(reducing_geo);
+                detect_p = p;
+            }
+        }
+        private void Do_proc_tee(int port_idx, string modify_duct_size, Entity_modify_param tee, ref Point2d detect_p)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_size);
+            var mat = ThDuctPortsShapeService.Create_tee_trans_mat(tee);
+            var tee_geo = ThDuctPortsReDrawFactory.Create_tee(tee, port_idx, modify_width);
+            Search_tee_neig_duct(port_idx, tee.pos, out List<int> connect_duct_idx);
+            Draw_shape_connect_duct(port_idx, tee_geo.center_line, mat, connect_duct_idx, tee.pos);
+            var new_tee = ThDuctPortsService.Create_special_modify_param(tee_geo, start_handle, "Tee", mat);
+            Update_new_shape(tee_geo, mat, new_tee);
+            var l = tee_geo.center_line[port_idx] as Line;
+            detect_p = l.EndPoint.TransformBy(mat).ToPoint2D();
+            ThDuctPortsDrawService.Clear_graph(tee.handle);
+        }
+        private void Do_proc_cross(int port_idx, string modify_duct_size, Entity_modify_param cross, ref Point2d detect_p)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_size);
+            var mat = ThDuctPortsShapeService.Create_cross_trans_mat(cross);
+            var cross_geo = ThDuctPortsReDrawFactory.Create_cross(cross, port_idx, modify_width);
+            Search_tee_neig_duct(port_idx, cross.pos, out List<int> connect_duct_idx);
+            Draw_shape_connect_duct(port_idx, cross_geo.center_line, mat, connect_duct_idx, cross.pos);
+            var new_param = ThDuctPortsService.Create_special_modify_param(cross_geo, start_handle, "Cross", mat);
+            Update_new_shape(cross_geo, mat, new_param);
+            var l = cross_geo.center_line[port_idx] as Line;
+            detect_p = l.EndPoint.TransformBy(mat).ToPoint2D();
+            ThDuctPortsDrawService.Clear_graph(cross.handle);
+        }
+        private void Modify_reducing_with_elbow(Point2d p, 
+                                                double modify_width,
+                                                double open_angle,
+                                                Entity_modify_param elbow)
+        {
+            var e = Search_reducing_conn_elbow(p);
+            if (e.handle != ObjectId.Null.Handle)
+            {
+                var shrink_change_len = Get_elbow_shrink_change(elbow.port_widths[0], modify_width, open_angle);
+                var sp = e.pos[0];
+                var ep = e.pos[1];
+                var dir_vec = (ep - sp).GetNormal();
+                var dis1 = p.GetDistanceTo(sp);
+                var dis2 = p.GetDistanceTo(ep);
+                var new_sp = dis1 > dis2 ? sp : sp - dir_vec * shrink_change_len;
+                var new_ep = dis1 < dis2 ? ep : ep + dir_vec * shrink_change_len;
+                var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(new_sp, new_ep, e.port_widths[0], modify_width);
+                Update_reducing(reducing_geo);
+                ThDuctPortsDrawService.Clear_graph(e.handle);
+            }
+        }
+        private Entity_modify_param Search_reducing_conn_elbow(Point2d p)
+        {
+            foreach (var e in shapes)
+            {
+                foreach (var pos in e.pos)
+                    if (p.IsEqualTo(pos, tor))
+                        return e;
+            }
+            return new Entity_modify_param();
+        }
+        private double Get_elbow_shrink_change(double org_width, double modify_width, double open_angle)
+        {
+            var org_shrink = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, org_width, 0, 0.7);
+            var cur_shrink = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, modify_width, 0, 0.7);
+            return Math.Abs(org_shrink - cur_shrink);
+        }
+        private void Update_reducing(Line_Info reducing_geo)
+        {
+            var param = ThDuctPortsService.Create_reducing_modify_param(reducing_geo, start_handle);
+            service.Draw_shape(reducing_geo, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+            ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
+            shapes.Add(param);
+        }
+        private void Update_new_shape(Line_Info geo, Matrix3d mat, Entity_modify_param new_param)
+        {
+            service.Draw_shape(geo, org_dis_mat * mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+            ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, new_param);
+            shapes.Add(new_param);
+        }
+        private void Search_2_port_neig_duct(Point2d p, out int connect_duct_idx)
+        {
+            connect_duct_idx = -1;
+            for (int j = 0; j < ducts.Count; ++j)
+            {
+                var duct = ducts[j];
+                if (p.IsEqualTo(duct.sp, tor) || p.IsEqualTo(duct.ep, tor))
+                    connect_duct_idx = j;
+            }
+        }
+        private void Search_tee_neig_duct(int cur_port_idx, List<Point2d> shape_pos, out List<int> connect_duct_idx)
+        {
+            connect_duct_idx = new List<int>();
+            for (int i = 0; i < shape_pos.Count; ++i)
+            {
+                if (i == cur_port_idx)
+                    continue;
+                var p = shape_pos[i];
+                for (int j = 0; j < ducts.Count; ++j)
+                {
+                    var duct = ducts[j];
+                    if (p.IsEqualTo(duct.sp, tor) || p.IsEqualTo(duct.ep, tor))
+                    {
+                        connect_duct_idx.Add(j);
+                        ThDuctPortsDrawService.Clear_graph(duct.handle);
+                    }
+                }
+            }
+        }
+        private void Draw_reducing_connect_duct(int connect_duct_idx, string duct_size, out bool is_direct_duct)
+        {
+            is_direct_duct = false;
+            var connect_line = ducts[connect_duct_idx];
+            double width = ThDuctPortsService.Get_width(duct_size);
+            if (duct_size == connect_line.duct_size)
+            {
+                is_direct_duct = true;
+                ThDuctPortsService.Get_max(cur_line.sp, cur_line.ep, connect_line.sp, connect_line.ep, out Point2d p1, out Point2d p2);
+                var new_duct = ThDuctPortsFactory.Create_duct(p1, p2, width);
+                service.Draw_shape(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, duct_size, cur_line.air_volume, start_handle);
+                ThDuctPortsDrawService.Clear_graph(connect_line.handle);
+                ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+            }
+        }
+        private void Draw_elbow_connect_duct(double shrink_change_len, 
+                                             int connect_duct_idx, 
+                                             string modify_duct_width, 
+                                             Point2d detect_p)
+        {
+            var connect_line = ducts[connect_duct_idx];
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            var connect_width = ThDuctPortsService.Get_width(connect_line.duct_size);
+            var dir_vec = (connect_line.ep - connect_line.sp).GetNormal();
+            var dis1 = connect_line.sp.GetDistanceTo(detect_p);
+            var dis2 = connect_line.ep.GetDistanceTo(detect_p);
+            var dis_vec = dir_vec * shrink_change_len;
+            var new_sp = dis1 > dis2 ? connect_line.sp : connect_line.sp + dis_vec;
+            var new_ep = dis1 < dis2 ? connect_line.ep : connect_line.ep - dis_vec;
+            var new_duct = ThDuctPortsFactory.Create_duct(new_sp, new_ep, connect_width);
+            service.Draw_shape(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+            var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, connect_line.duct_size, connect_line.air_volume, start_handle);
+            ThDuctPortsDrawService.Clear_graph(connect_line.handle);
+            ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+
+            Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
+        }
+        private void Insert_reducing(double connect_width, 
+                                     double modify_width, 
+                                     Point2d new_sp, 
+                                     Point2d new_ep, 
+                                     Point2d detect_p,
+                                     Vector2d dis_vec)
+        {
+            if (connect_width > modify_width)
+            {
+                var dis1 = detect_p.GetDistanceTo(new_sp);
+                var dis2 = detect_p.GetDistanceTo(new_ep);
+                var reducing_geo = (dis1 < dis2) ?
+                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, connect_width, modify_width) :
+                    ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, connect_width, modify_width);
+                Update_reducing(reducing_geo);
+            }
+        }
+        private void Draw_shape_connect_duct(int cur_port_idx, 
+                                             DBObjectCollection center, 
+                                             Matrix3d mat, 
+                                             List<int> connect_duct_idx,
+                                             List<Point2d> org_detect_p)
+        {
+            int inc = 0;
+            if (connect_duct_idx.Count + 1 != center.Count)
+                return;
+            for (int i = 0; i < center.Count; ++i)
+            {
+                var l = center[i].Clone() as Line;
+                l.TransformBy(mat);
+                if (i == cur_port_idx)
+                    continue;
+                var connect_line = ducts[connect_duct_idx[inc++]];
+                var connect_width = ThDuctPortsService.Get_width(connect_line.duct_size);
+                var sp = l.EndPoint.ToPoint2D();
+                var new_duct = (sp.GetDistanceTo(connect_line.sp) > sp.GetDistanceTo(connect_line.ep)) ?
+                                ThDuctPortsFactory.Create_duct(sp, connect_line.sp, connect_width) :
+                                ThDuctPortsFactory.Create_duct(sp, connect_line.ep, connect_width);
+                service.Draw_shape(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, connect_line.duct_size, connect_line.air_volume, start_handle);
+                ducts.Add(duct_param);
+                ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+                Update_valve(org_detect_p[i], sp, connect_width);
+            }
+        }
+        private void Update_text(Point2d f_detect, 
+                                 Point2d l_detect, 
+                                 bool direct_flag,
+                                 string modify_size)
+        {
+            var f_p = new Point3d(f_detect.X, f_detect.Y, 0);
+            var l_p = new Point3d(l_detect.X, l_detect.Y, 0);
+            var l = new Line(f_p, l_p);
+            for (int i = 0; i < texts.Count; ++i)
+            {
+                var cur_t = texts[i];
+                var p = new Point3d(cur_t.center_point.X, cur_t.center_point.Y, 0);
+                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
+                double width = ThDuctPortsService.Get_width(cur_line.duct_size);
+                if (dis < (width + 501))
+                {
+                    ThDuctPortsDrawService.Clear_graph(cur_t.handle);
+                    if (!direct_flag)
+                        service.text_service.Re_draw_text(cur_t, modify_size, in_param);
+                }
+            }
+        }
+        private void Update_cur_duct_valve(Point2d org_f_detect, 
+                                           Point2d f_detect, 
+                                           Point2d org_l_detect, 
+                                           Point2d l_detect,
+                                           string modify_duct_width)
+        {
+            double new_width = ThDuctPortsService.Get_width(modify_duct_width);
+            Update_valve(org_f_detect, f_detect, new_width);
+            Update_valve(org_l_detect, l_detect, new_width);
+        }
+        private void Update_valve(Point2d detect_p, Point2d new_p, double new_width)
+        {
+            foreach (var valve in valves)
+            {
+                if (valve.judge_p.IsEqualTo(detect_p, tor))
+                {
+                    var dir_vec = ThDuctPortsService.Get_dir_vec(valve.rotate_angle - Math.PI * 0.5);
+                    var vertical_r = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+                    var valve_service = new ThDuctPortsDrawValve(valve.valve_visibility, valve.valve_name, valve.valve_layer);
+                    var insert_p = new_p + vertical_r * new_width * 0.5 + start_point.GetAsVector();
+                    valve_service.Insert_valve(new_p, insert_p, new_width, valve.rotate_angle, valve.text_angle);
+                    ThDuctPortsDrawService.Clear_graph(valve.handle);
+                }
+            }
+        }
+        private void Get_select_line_info(ObjectId id, out Point2d detect1, out Point2d detect2)
+        {
+            Line l;
+            using (var db = AcadDatabase.Active())
+            {
+                l = db.Element<Entity>(id) as Line;
+            }
+            var sp = l.StartPoint.ToPoint2D();
+            var ep = l.EndPoint.ToPoint2D();
+            var mat = Matrix2d.Displacement(-start_point.GetAsVector());
+            detect1 = sp.TransformBy(mat);
+            detect2 = ep.TransformBy(mat);
+            ThDuctPortsDrawService.Remove_group_by_comp(id);
+        }
+        private void Search_connected_shape(Point2d detect_p, out int shape_idx, out int port_idx, out Entity_modify_param shape)
+        {
+            port_idx = -1;
+            shape_idx = -1;
+            shape = new Entity_modify_param();
+            for (int i = 0; i < shapes.Count; ++i)
+            {
+                var e = shapes[i];
+                for (int j = 0; j < e.pos.Count; ++j)
+                {
+                    if (detect_p.IsEqualTo(e.pos[j], tor))
+                    {
+                        shape_idx = i;
+                        port_idx = j;
+                        shape = shapes[shape_idx];
+                        shapes.RemoveAt(shape_idx);
+                        break;
+                    }
+                }
+                if (port_idx != -1)
+                    break;
+            }
+        }
+    }
+}

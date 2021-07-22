@@ -152,8 +152,7 @@ namespace ThMEPHVAC.Model
             }
             spatial_index = new ThCADCoreNTSSpatialIndex(center_lines_);
         }
-        private void Remove_center_line(Merged_endline_Info info,
-                                        DBObjectCollection center_lines_)
+        private void Remove_center_line(Merged_endline_Info info, DBObjectCollection center_lines_)
         {
             int idx = 0;
             var edge = info.segments[0].direct_edge;
@@ -161,7 +160,7 @@ namespace ThMEPHVAC.Model
             for (int i = 0; i < center_lines_.Count; ++i)
             {
                 Line l = center_lines_[i] as Line;
-                if (Is_same_line(line, l))
+                if (ThDuctPortsService.Is_same_line(line, l, point_tor))
                 {
                     idx = i;
                     break;
@@ -200,7 +199,8 @@ namespace ThMEPHVAC.Model
                 for (int j = 0; j < info.segments.Count; ++j)
                 {
                     var seg = info.segments[j];
-                    if (Is_same_line(l, seg.direct_edge.Source.Position, seg.direct_edge.Target.Position))
+                    if (ThDuctPortsService.Is_same_line(l, seg.direct_edge.Source.Position, 
+                                                           seg.direct_edge.Target.Position, point_tor))
                         return new Pair_coor (i, j);
                 }
             }
@@ -209,7 +209,8 @@ namespace ThMEPHVAC.Model
         public int Search_main_duct_idx(Line l)
         {
             for (int i = 0; i < main_ducts.Count; ++i)
-                if (Is_same_line(l, main_ducts[i].Source.Position, main_ducts[i].Target.Position))
+                if (ThDuctPortsService.Is_same_line(l, main_ducts[i].Source.Position, 
+                                                       main_ducts[i].Target.Position, point_tor))
                     return i;
             return -1;
         }
@@ -411,7 +412,7 @@ namespace ThMEPHVAC.Model
                 {
                     lines_ptr.Add(new Endline_Info(Create_directed_edge_by_line(current_line, search_point, 0, 0, 0)));
                 }
-                if (res.Count > 1 || Is_same_line(start_line, current_line))
+                if (res.Count > 1 || ThDuctPortsService.Is_same_line(start_line, current_line, point_tor))
                 {
                     merged_endlines.Add(new Merged_endline_Info(lines_ptr, ui_duct_size));
                     endline_enable = false;
@@ -436,41 +437,19 @@ namespace ThMEPHVAC.Model
             Line cur_line = new Line(edge.Source.Position, edge.Target.Position);
             foreach (Line l in exclude_lines)
             {
-                if (Is_same_line(cur_line, l))
+                if (ThDuctPortsService.Is_same_line(cur_line, l, point_tor))
                     return true;
             }
             return false;
         }
-        private bool Is_same_line(Line l1, Line l2)
-        {
-            Point3d sp1 = l1.StartPoint;
-            Point3d ep1 = l1.EndPoint;
-            Point3d sp2 = l2.StartPoint;
-            Point3d ep2 = l2.EndPoint;
-            if ((sp1.IsEqualTo(sp2, point_tor) && ep1.IsEqualTo(ep2, point_tor)) ||
-                (sp1.IsEqualTo(ep2, point_tor) && ep1.IsEqualTo(sp2, point_tor)))
-            {
-                return true;
-            }
-            return false;
-        }
-        private bool Is_same_line(Line l1, Point3d sp, Point3d ep)
-        {
-            Point3d sp1 = l1.StartPoint;
-            Point3d ep1 = l1.EndPoint;
-            if ((sp1.IsEqualTo(sp, point_tor) && ep1.IsEqualTo(ep, point_tor)) ||
-                (sp1.IsEqualTo(ep, point_tor) && ep1.IsEqualTo(sp, point_tor)))
-            {
-                return true;
-            }
-            return false;
-        }
+        
         private Endline_Info Search_endline(Line l)
         {
             foreach (var info in merged_endlines)
             {
                 foreach (var seg in info.segments)
-                    if (Is_same_line(l, seg.direct_edge.Source.Position, seg.direct_edge.Target.Position))
+                    if (ThDuctPortsService.Is_same_line(l, seg.direct_edge.Source.Position, 
+                                                           seg.direct_edge.Target.Position, point_tor))
                         return seg;
             }
             return null;
