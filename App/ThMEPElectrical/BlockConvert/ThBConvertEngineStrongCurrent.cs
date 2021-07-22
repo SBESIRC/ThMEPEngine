@@ -119,8 +119,8 @@ namespace ThMEPElectrical.BlockConvert
                     base_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 }
                 double rotation = srcBlockData.Rotation;
-                var basePointAfterRotation = new Point3d(base_x, base_y, 0).
-                    TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin));
+                var basePointAfterRotation = new Vector3d(base_x, base_y, 0).
+                    TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin).PreMultiplyBy(srcBlockData.OwnerSpace2WCS));
                 var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
                 var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
                 var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
