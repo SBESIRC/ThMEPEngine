@@ -432,6 +432,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
+                <Command Local="THDKFPMFG" Global="THDKFPMFG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -442,6 +443,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
+                <Command Local="THDKFPMFG" Global="THDKFPMFG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -452,6 +454,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
+                <Command Local="THDKFPMFG" Global="THDKFPMFG" />
             </Commands>
         </ComponentEntry>
     </Components>
