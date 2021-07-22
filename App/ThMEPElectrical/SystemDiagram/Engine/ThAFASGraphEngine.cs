@@ -13,6 +13,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -423,7 +424,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         public BlockReference FindNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
         {
             sharedPath.Add(sourceElement);
-
             var space = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
             var results = SpatialIndex.SelectCrossingPolygon(space);
             results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
@@ -468,6 +468,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         }
                         else if (results[0] is Curve curve)
                         {
+                            if (CMTBRule(curve))
+                                return null;
                             if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
                                 return FindNextPath(ref sharedPath, curve, true);
@@ -502,8 +504,9 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         public Dictionary<BlockReference, List<Curve>> FindRootNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
         {
             Dictionary<BlockReference, List<Curve>> FindPath = new Dictionary<BlockReference, List<Curve>>();
+            if (sharedPath.Contains(sourceElement))
+                return FindPath;
             sharedPath.Add(sourceElement);
-
             var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
             var probeResults = SpatialIndex.SelectCrossingPolygon(probe);
             probeResults = probeResults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
@@ -548,6 +551,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         }
                         else if (probeResults[0] is Curve curve)
                         {
+                            if (CMTBRule(curve))
+                                return FindPath;
                             if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
                                 return FindRootNextPath(ref sharedPath, curve, true);
@@ -622,6 +627,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
                             foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
                             {
+                                if (CMTBRule(targetline))
+                                    continue;
                                 var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
                                 var ang = mainVec.GetAngleTo(branchVec);
                                 if (ang > Math.PI)
