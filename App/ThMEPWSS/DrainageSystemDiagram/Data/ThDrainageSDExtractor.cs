@@ -4,39 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using NFox.Cad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
 
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-
-using ThMEPWSS.Engine;
-
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDExtractor : ThExtractorBase
     {
-        public List<ThTerminalToilate> SanTmnList { get; private set; }
-        private List<ThIfcSanitaryTerminalToilate > IfcSanList { get; set; }
+        public List<ThTerminalToilet> SanTmnList { get; private set; }
+        private List<ThIfcSanitaryTerminalToilet > IfcSanList { get; set; }
         public ThMEPOriginTransformer Transfer { get; set; }
 
         public ThDrainageSDExtractor()
         {
-            Category = BuiltInCategory.WaterSupplyPoint.ToString();
-            SanTmnList = new List<ThTerminalToilate>();
-            IfcSanList = new List<ThIfcSanitaryTerminalToilate>();
+            Category = "CoolSupplyWater";
+            SanTmnList = new List<ThTerminalToilet>();
+            IfcSanList = new List<ThIfcSanitaryTerminalToilet>();
         }
 
         public override void Extract(Database database, Point3dCollection pts)
@@ -68,19 +59,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 foreach (var element in recEngine.Elements)
                 {
-                    var toModel = element as ThIfcSanitaryTerminalToilate;
+                    var toModel = element as ThIfcSanitaryTerminalToilet;
                     IfcSanList.Add(toModel);
                 }
             }
 
             //change IfcSanModel to this project model
-            SanTmnList.AddRange(IfcSanList.Select(x => new ThTerminalToilate(x.Outline, x.Type)));
+            SanTmnList.AddRange(IfcSanList.Select(x => new ThTerminalToilet(x.Outline, x.Type)));
         }
 
         public override List<ThGeometry> BuildGeometries()
         {
             var results = new List<ThGeometry>();
-            //results.AddRange(BuildToilateDrains());
+
             return results;
         }
 
@@ -131,11 +122,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         }
         public override void Recognize(List<ThRawIfcDistributionElementData> originDatas, Point3dCollection polygon)
         {
-            //var engine = new ThDrainageSDExtractionEngine();
-            //engine.Extract(database);
-            //engine.ExtractFromMS(database);
-            //var originDatas = engine.Results;
-
+        
             if (polygon.Count > 0)
             {
                 var dbObjs = originDatas.Select(o => o.Geometry).ToCollection();
@@ -145,7 +132,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
 
             // 通过获取的OriginData 分类
-            Elements.AddRange(originDatas.Select(x => new ThIfcSanitaryTerminalToilate (x.Geometry, x.Data as string)));
+            Elements.AddRange(originDatas.Select(x => new ThIfcSanitaryTerminalToilet (x.Geometry, x.Data as string)));
         }
     }
 

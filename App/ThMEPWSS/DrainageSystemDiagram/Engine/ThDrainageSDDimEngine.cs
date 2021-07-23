@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using NFox.Cad;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -22,13 +17,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 var groupList = dataset.GroupList;
                 var alreadyDimArea = new List<Polyline>();
 
+                //设置躲避的线
                 var allIsolateLine = new List<Line>();
                 var roomLine = dataset.roomList.SelectMany(x => x.wallList).ToList();
                 var pipes = dataset.Pipes;
-                //var toilateLine = dataset.TerminalList.Select(x => new Line(x.Boundary.GetPoint3dAt(0), x.Boundary.GetPoint3dAt(3))).ToList();
+                //var toiletLine = dataset.TerminalList.Select(x => new Line(x.Boundary.GetPoint3dAt(0), x.Boundary.GetPoint3dAt(3))).ToList();
                 allIsolateLine.AddRange(roomLine);
                 allIsolateLine.AddRange(pipes);
-                //allIsolateLine.AddRange(toilateLine);
+                //allIsolateLine.AddRange(toiletLine);
 
                 foreach (var group in groupList)
                 {
@@ -45,7 +41,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     {
                         //岛
                         baseLineDict = ThDrainageSDDimService.getDimAreaBaseLineIsland(group.Value, dataset.roomList, orderPts);
-
                     }
                     else
                     {
@@ -64,10 +59,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     toDimInfo(dimArea, possibleDimArea, out var dir, out var dist);
 
-                    //var dimPt = pts[0] + dir * dist;
-                    //double rotation = dir.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
-                    //var dim = toDim(baseLineDict[possibleDimArea[dimArea]], rotation, dimPt);
-                    var dim = toDim(baseLineDict[possibleDimArea[dimArea]], dir,dist , pts[0]);
+                    var dim = toDim(baseLineDict[possibleDimArea[dimArea]], dir, dist, pts[0]);
 
                     alreadyDimArea.Add(dimArea);
 
@@ -76,15 +68,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     if (group.Key.Contains(ThDrainageSDCommon.tagIsland))
                     {
-                        //岛
-                        var orderPtsIsland = horizontalForIslandInfo(possibleDimArea[dimArea], orderPts, baseLineDict[possibleDimArea[dimArea]], out dir, out dist);
+                        //岛独有的垂直标注
+                        var orderPtsIsland = verticalForIslandInfo(possibleDimArea[dimArea], orderPts, baseLineDict[possibleDimArea[dimArea]], out dir, out dist);
+                        var verticalDim = toDim(orderPtsIsland, dir, dist, orderPtsIsland.First());
 
-                        //dimPt = orderPtsIsland.First() + dir * dist;
-                        //rotation = dir.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
-                        //var hotizontalDim = toDim(orderPtsIsland, rotation, dimPt);
-                        var hotizontalDim = toDim(orderPtsIsland, dir,dist , orderPtsIsland.First());
-
-                        positionDim.AddRange(hotizontalDim);
+                        positionDim.AddRange(verticalDim);
                     }
                 }
             }
@@ -103,7 +91,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static List<Point3d> horizontalForIslandInfo(Line baseLine, List<Point3d> orderPts,List<Point3d> orderPtsDim, out Vector3d dir, out double dist)
+        private static List<Point3d> verticalForIslandInfo(Line baseLine, List<Point3d> orderPts, List<Point3d> orderPtsDim, out Vector3d dir, out double dist)
         {
             var tol = new Tolerance(10, 10);
             var horiPts = new List<Point3d>();
@@ -111,16 +99,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (baseLine.StartPoint.IsEqualTo(orderPts.First(), tol))
             {
                 horiPts.Add(orderPts.Last());
-                horiPts.Add(orderPtsDim.Last ()) ;
+                horiPts.Add(orderPtsDim.Last());
                 dirD = baseLine.EndPoint - orderPts.Last();
             }
             else
             {
                 horiPts.Add(orderPts.First());
-                horiPts.Add(orderPtsDim .First());
+                horiPts.Add(orderPtsDim.First());
                 dirD = baseLine.StartPoint - orderPts.First();
             }
-
             dist = dirD.Length;
             dir = dirD.GetNormal();
 
@@ -147,8 +134,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 dim.Rotation = rotation;
 
                 positionDim.Add(dim);
-
-
             }
 
             return positionDim;

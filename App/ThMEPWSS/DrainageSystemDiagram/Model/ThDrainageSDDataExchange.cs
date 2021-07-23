@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.DrainageSystemDiagram
@@ -15,11 +10,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public ThDrainageSDRegion Region { get; set; }
 
-        public List<ThToilateRoom > roomList { get; set; }
+        public List<ThToiletRoom > roomList { get; set; }
 
-        public List<ThTerminalToilate> TerminalList { get; set; }
+        public List<ThTerminalToilet> TerminalList { get; set; }
 
-        public Dictionary <string,List<ThTerminalToilate>> GroupList { get; set; }
+        public Dictionary <string,List<ThTerminalToilet>> GroupList { get; set; }
 
         public Dictionary<string, (string, string)> IslandPair { get; set; }
 

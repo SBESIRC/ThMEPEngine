@@ -36,14 +36,23 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
+    <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />
-    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDAxonoExtractor.cs" />
-    <Compile Include="DrainageSystemDiagram\Data\ThIfcSanitaryTerminalToilate.cs" />
+    <Compile Include="DrainageSystemAD\Engine\ThDrainageADConvertEngine.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDADBlkOutput.cs" />
+    <Compile Include="DrainageSystemAD\Model\ThDrainageSDADDataExchange.cs" />
+    <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertLineService.cs" />
+    <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertValveService.cs" />
+    <Compile Include="DrainageSystemAD\Service\ThDrainageADLineService.cs" />
+    <Compile Include="DrainageSystemDiagram\Data\ThIfcSanitaryTerminalToilet.cs" />
+    <Compile Include="DrainageSystemAD\Model\ThDrainageSDADValve.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDDimEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDCoolSupplyStart.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDimService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDInsertService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDLineExtension.cs" />
+    <Compile Include="DrainageSystemAD\ThDrainageADCommon.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />
@@ -128,7 +137,6 @@
     <Compile Include="DrainageSystemAG\Services\ClearLoadBlockServices.cs" />
     <Compile Include="DrainageSystemAG\Services\CreateBlockService.cs" />
     <Compile Include="DrainageSystemDiagram\Data\IAreaId.cs" />
-    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRegionExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDSystemDiagramExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDShutValveEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDAngleValvesEngine.cs" />
@@ -138,8 +146,8 @@
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDVirtualPtEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDVirtualColumnEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDTreeNode.cs" />
-    <Compile Include="DrainageSystemDiagram\Model\ThToilateGJson.cs" />
-    <Compile Include="DrainageSystemDiagram\Model\ThToilateRoom.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThToiletGJson.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThToiletRoom.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCommonService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDConnectSubService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDDeserializeGJsonService.cs" />
@@ -153,8 +161,7 @@
     <Compile Include="DrainageSystemDiagram\ThDrainageSDCommon.cs" />
     <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDConnectCoolSupplyEngine.cs" />
-    <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDColdWaterSupplyStartExtractor.cs" />
-    <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilate.cs" />
+    <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilet.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDToGJsonService.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
@@ -478,6 +485,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ThSystemDiagramCmds.THJSZC.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

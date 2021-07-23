@@ -87,15 +87,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static void ClearFinalDrawing(Polyline transFrame = null, ThMEPOriginTransformer transformer = null)
+        public static void ClearFinalDrawing(List<string> sLayerName, Polyline transFrame = null, ThMEPOriginTransformer transformer = null)
         {
-            var sLayerName = new List<string>();
-            sLayerName.Add(ThDrainageSDCommon.Layer_CoolPipe);
-            sLayerName.Add(ThDrainageSDCommon.Layer_Stack);
-            sLayerName.Add(ThDrainageSDCommon.Layer_AngleValves);
-            sLayerName.Add(ThDrainageSDCommon.Layer_ShutValve);
-            sLayerName.Add(ThDrainageSDCommon.Layer_Dim);
-
             ClearDrawing(sLayerName, transFrame, transformer);
         }
     }

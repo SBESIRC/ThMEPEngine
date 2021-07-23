@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
-using ThMEPEngineCore.Model;
-using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThTerminalToilate
+    public class ThTerminalToilet
     {
         public BlockReference blk { get; set; }
         public string Uuid { get; set; }
@@ -23,7 +18,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public List<Point3d> SupplyCoolOnBranch { get; set; }
 
         public Point3d SupplyWarm { get; set; }
-
         public Point3d SupplyWarmSec { get; set; }
         public Point3d Sewage { get; set; }
         public Point3d SewageSec { get; set; }
@@ -32,9 +26,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public string GroupId { get; set; }
         public string AreaId { get; set; }
 
-        public ThTerminalToilate(Entity geometry, string blkName)
+        public ThTerminalToilet(Entity geometry, string blkName)
         {
-            blk = geometry as BlockReference;
+            var geom = geometry as BlockReference;
+            blk = geom.Clone () as BlockReference;
+            Boundary = geom.ToOBB(geom.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
+
             Type = blkName;
             SupplyCool = new List<Point3d>();
             SupplyCoolOnWall = new List<Point3d>();
@@ -53,9 +50,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public void setInfo()
         {
-
             Uuid = Guid.NewGuid().ToString();
-            Boundary = blk.ToOBB(blk.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
+      
             Boundary = turnBoundary(Boundary);
             Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
 

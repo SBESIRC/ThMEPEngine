@@ -12,12 +12,12 @@ using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageToilateRoomExtractor : ThExtractorBase, IAreaId
+    public class ThDrainageToiletRoomExtractor : ThExtractorBase, IAreaId
     {
         public string AreaId { get; private set; }
         public static string AreaIdPropertyName = "AreaId";
         public List<ThIfcRoom> Rooms { get; private set; }
-        public ThDrainageToilateRoomExtractor()
+        public ThDrainageToiletRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
             Category = BuiltInCategory.Space.ToString();

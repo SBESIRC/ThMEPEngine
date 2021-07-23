@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -15,13 +13,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDDimService
     {
-        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLine(List<ThTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
+        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLine(List<ThTerminalToilet> toiletInGroup, List<ThToiletRoom> roomList, List<Point3d> orderPts)
         {
 
             Dictionary<Line, List<Point3d>> baseLine = new Dictionary<Line, List<Point3d>>();
 
             //普通组，小房间细分组，单各组
-            var wall = ThDrainageSDCoolPtProcessService.findToilateToWall(toilateInGroup[0], roomList);
+            var wall = ThDrainageSDCoolPtProcessService.findToiletToWall(toiletInGroup[0], roomList);
             if (wall != null)
             {
                 baseLine = getDimAreaBaseLine(orderPts, wall);
@@ -31,14 +29,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLineIsland(List<ThTerminalToilate> toilateInGroup, List<ThToilateRoom> roomList, List<Point3d> orderPts)
+        public static Dictionary<Line, List<Point3d>> getDimAreaBaseLineIsland(List<ThTerminalToilet> toiletInGroup, List<ThToiletRoom> roomList, List<Point3d> orderPts)
         {
             //岛
             var baseLine = new Dictionary<Line, List<Point3d>>();
 
-            var room = ThDrainageSDCoolPtProcessService.findRoomToilateBelongsTo(toilateInGroup.First(), roomList);
+            var room = ThDrainageSDCoolPtProcessService.findRoomToiletBelongsTo(toiletInGroup.First(), roomList);
             var wallPt = room.outlinePtList;
-            var dir = toilateInGroup.First().Dir;
+            var dir = toiletInGroup.First().Dir;
             var tempLine = new Line(orderPts.Last(), orderPts.First());
             var tol = new Tolerance(10, 10);
 
@@ -145,10 +143,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return baseLine;
         }
 
-        public static Dictionary<Polyline, Line> getPossibleDimArea(Dictionary<Line, List<Point3d>> baseLine, string groupName, List<ThTerminalToilate> toilateInGroup)
+        public static Dictionary<Polyline, Line> getPossibleDimArea(Dictionary<Line, List<Point3d>> baseLine, string groupName, List<ThTerminalToilet> toiletInGroup)
         {
             var possibleDimArea = new Dictionary<Polyline, Line>();
-            var dir = toilateInGroup.First().Dir;
+            var dir = toiletInGroup.First().Dir;
 
             if (groupName.Contains(ThDrainageSDCommon.tagIsland) == false)
             {
@@ -159,7 +157,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 possibleDimArea.Add(polyOuterBase2, baseLine.Last().Key);
             }
 
-            var moveDist = getInnerMoveDist(toilateInGroup, baseLine.First().Key);
+            var moveDist = getInnerMoveDist(toiletInGroup, baseLine.First().Key);
 
             int i = 0;
             while (i < 3)
@@ -205,12 +203,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static double getInnerMoveDist(List<ThTerminalToilate> toilateInGroup, Line baseline)
+        private static double getInnerMoveDist(List<ThTerminalToilet> toiletInGroup, Line baseline)
         {
             double dist = ThDrainageSDCommon.LengthSublink * 2;
-            double maxY = (toilateInGroup.First().Boundary.GetPoint3dAt(0) - toilateInGroup.First().Boundary.GetPoint3dAt(1)).Length;
+            double maxY = (toiletInGroup.First().Boundary.GetPoint3dAt(0) - toiletInGroup.First().Boundary.GetPoint3dAt(1)).Length;
 
-            var pts = toilateInGroup.Select(x => x.Boundary.GetPoint3dAt(0)).ToList();
+            var pts = toiletInGroup.Select(x => x.Boundary.GetPoint3dAt(0)).ToList();
 
             var ptsMatrix = new List<Point3d>() { baseline.StartPoint, baseline.EndPoint };
 
@@ -218,7 +216,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var ptsDict = pts.ToDictionary(x => x, x => x.TransformBy(matrix.Inverse()));
 
             maxY = ptsDict.OrderByDescending(x => Math.Abs(x.Value.Y)).First().Value.Y;
-
 
             dist = Math.Abs(maxY) + ThDrainageSDCommon.MoveDistDimInner;
 
