@@ -73,7 +73,8 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool CheckLayerValid(Entity curve)
         {
-            return true;
+            var layer = curve.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
+            return !layer.IsFrozen && !layer.IsOff && !layer.IsHidden && !layer.IsLocked;
         }
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
