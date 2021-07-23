@@ -49,12 +49,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     Line Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (floorNum - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
                     ResultDic[floorNum].Add(Endline);
                 }
-                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireControlRoomMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireControlRoomMaxFloor - 1) + 1900, 0));
+                Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireControlRoomMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (FireControlRoomMaxFloor - 1) + 1100, 0));
                 ResultDic[FireControlRoomMaxFloor].Add(Endline1);
                 //设置线型
                 ResultDic.Values.ForEach(x =>
                 {
-                    x.ForEach(o =>
+                    x.Where(o => !(o is BlockReference)).ForEach(o =>
                     {
                         o.Linetype = this.CircuitLinetype;
                         o.Layer = this.CircuitLayer;

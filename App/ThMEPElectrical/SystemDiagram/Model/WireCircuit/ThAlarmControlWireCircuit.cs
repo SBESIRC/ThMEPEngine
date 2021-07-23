@@ -1,11 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.SystemDiagram.Service;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 {
@@ -107,7 +105,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             #endregion
 
             //设置线型
-            Result.ForEach(o =>
+            Result.Where(o => !(o is BlockReference)).ForEach(o =>
             {
                 o.Linetype = this.CircuitLinetype;
                 o.Layer = this.CircuitLayer;
