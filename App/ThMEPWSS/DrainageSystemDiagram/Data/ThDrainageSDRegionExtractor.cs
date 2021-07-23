@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
 
@@ -12,12 +8,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Engine;
-
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

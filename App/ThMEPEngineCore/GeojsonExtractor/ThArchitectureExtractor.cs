@@ -1,6 +1,5 @@
 ﻿using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
@@ -9,11 +8,11 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
-{    
-    public class ThArchitectureExtractor : ThExtractorBase,IPrint
+{
+    public class ThArchitectureExtractor : ThExtractorBase, IPrint
     {
         public List<Entity> Walls { get; protected set; }
         private List<ThIfcRoom> Rooms { get; set; }
@@ -29,7 +28,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var geos = new List<ThGeometry>();
             var isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
             Walls.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 var isolate = isolateShearwalls.Contains(o);
@@ -37,11 +36,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 geometry.Boundary = o;
                 if (IsolateSwitch) //表示只传入孤立建筑墙
                 {
-                    if(isolate)
+                    if (isolate)
                     {
                         geos.Add(geometry);
                     }
-                }                
+                }
                 else
                 {
                     geos.Add(geometry);
@@ -52,7 +51,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 using (var engine = new ThDB3ArchWallRecognitionEngine())
                 {
@@ -69,7 +68,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 instance.Extract(database, pts);
                 Walls = instance.Polys.Cast<Entity>().ToList();
             }
-            if(FilterMode == FilterMode.Window)
+            if (FilterMode == FilterMode.Window)
             {
                 Walls = FilterWindowPolygon(pts, Walls);
             }
@@ -81,7 +80,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public void Print(Database database)
         {
-            Walls.CreateGroup(database,ColorIndex);
+            Walls.CreateGroup(database, ColorIndex);
         }
     }
 }

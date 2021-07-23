@@ -22,19 +22,20 @@ namespace ThMEPHVAC.Model
         public string dimension_layer;
         public string port_mark_layer;
         public string valve_name;
-        public string block_name;
+        public string port_name;
         public string start_name;
         public string port_mark_name;
         private string valve_visibility;
         public ThDuctPortsDrawDim dim_service;
         public ThDuctPortsDrawValve valve_service;
         public ThDuctPortsDrawText text_service;
+        public ThDuctPortsDrawPort port_service;
         public ThDuctPortsDrawService(string scenario, string scale)
         {
             valve_name = "风阀";
             start_name = "AI-风管起点";
             port_mark_name = "风口标注";
-            block_name = "风口-AI研究中心";
+            port_name = "风口-AI研究中心";
             valve_visibility = "多叶调节风阀";
             Set_layer(scenario);
             Import_Layer_Block();
@@ -42,6 +43,7 @@ namespace ThMEPHVAC.Model
             dim_service = new ThDuctPortsDrawDim(dimension_layer, scale);
             valve_service = new ThDuctPortsDrawValve(valve_visibility, valve_name, valve_layer);
             text_service = new ThDuctPortsDrawText(duct_size_layer);
+            port_service = new ThDuctPortsDrawPort(port_layer, port_name);
         }
         private void Set_layer(string scenario)
         {
@@ -105,7 +107,7 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(dimension_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(port_mark_layer));
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(port_mark_name), false);
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(block_name), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(port_name), false);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(valve_name), false);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(start_name), false);
                 currentDb.DimStyles.Import(blockDb.DimStyles.ElementOrDefault("TH-DIM150"));
@@ -182,7 +184,7 @@ namespace ThMEPHVAC.Model
         }
         public ObjectId Insert_start_flag(Point3d p)
         {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Active())
             {
                 return acadDb.ModelSpace.ObjectId.InsertBlockReference(start_layer, start_name, p, new Scale3d(), 0);
             }
@@ -234,6 +236,24 @@ namespace ThMEPHVAC.Model
             rotate_angle = data.Rotation;
             pos = data.Position;
         }
+        public static void Get_port_dyn_block_properity(ObjectId obj,
+                                                        out Point3d pos,
+                                                        out string port_range,
+                                                        out double port_height,
+                                                        out double port_width,
+                                                        out double rotate_angle)
+        {
+            var data = new ThBlockReferenceData(obj);
+            var properity = data.CustomProperties;
+            port_width = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER) ?
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER) : 0;
+            port_height = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT) ?
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT) : 0;
+            port_range = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE) ?
+                    (string)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE) : String.Empty;
+            rotate_angle = data.Rotation;
+            pos = data.Position;
+        }
         public static void Set_port_dyn_block_properity(ObjectId obj, double port_width, double port_height, string port_range)
         {
             var data = new ThBlockReferenceData(obj);
@@ -257,7 +277,7 @@ namespace ThMEPHVAC.Model
                 var ids = id.GetGroups();
                 foreach (var g_id in ids)
                 {
-                    g_id.RemoveXData("Info");
+                    g_id.RemoveXData(ThHvacCommon.RegAppName_DuctInfo);
                     Remove_group(g_id);
                 }
             }
@@ -269,7 +289,7 @@ namespace ThMEPHVAC.Model
                 using (var db = AcadDatabase.Active())
                 {
                     var g_id = db.Database.GetObjectId(false, handle, 0);
-                    g_id.RemoveXData("Info");
+                    g_id.RemoveXData(ThHvacCommon.RegAppName_DuctInfo);
                     Remove_group(g_id);
                 }
             }

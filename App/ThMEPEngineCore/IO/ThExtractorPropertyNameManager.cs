@@ -1,4 +1,4 @@
-﻿namespace ThMEPEngineCore.GeojsonExtractor
+﻿namespace ThMEPEngineCore.IO
 {
     public class ThExtractorPropertyNameManager
     {
@@ -13,6 +13,13 @@
         public readonly static string FloorTypePropertyName = "FloorType";
         public readonly static string BasePointPropertyName = "BasePoint";
         public readonly static string ParentIdPropertyName = "ParentId";
+        public readonly static string UseagePropertyName = "Useage";
+        public readonly static string BottomDistanceToFloorPropertyName = "BottomDistanceToFloor";
+        public readonly static string WidthPropertyName = "Width";
+        public readonly static string HeightPropertyName = "Height";
+        public readonly static string SpecPropertyName = "Spec";
+        public readonly static string AnglePropertyName = "Angle";
+        public readonly static string ThicknessPropertyName = "Thickness";
         public readonly static string BelongedArchOutlineIdPropertyName = "BelongedArchOutlineId";
     }
 }

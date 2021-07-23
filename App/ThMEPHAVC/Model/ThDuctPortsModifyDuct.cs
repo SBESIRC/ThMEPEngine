@@ -19,11 +19,10 @@ namespace ThMEPHVAC.Model
         private List<Valve_modify_param> valves;
         private List<Entity_modify_param> shapes;
         private List<Text_modify_param> texts;
+        private List<Port_modify_param> ports;
         private Duct_modify_param cur_line;
         private DuctPortsParam in_param;
-        public ThDuctPortsModifyDuct(ObjectId[] ids, 
-                                 string modify_size,
-                                 Duct_modify_param param)
+        public ThDuctPortsModifyDuct(ObjectId[] ids, string modify_size, Duct_modify_param param)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -55,6 +54,7 @@ namespace ThMEPHVAC.Model
             ThDuctPortsInterpreter.Get_ducts(out ducts);
             ThDuctPortsInterpreter.Get_valves(out valves);
             ThDuctPortsInterpreter.Get_texts(out texts);
+            ThDuctPortsInterpreter.Get_ports(out ports);
         }
         private void Init(Handle start_handle_)
         {
@@ -69,6 +69,7 @@ namespace ThMEPHVAC.Model
             Move_shape_to_org(mat);
             Move_valve_to_org(mat);
             Move_text_to_org(mat);
+            Move_port_to_org(mat);
         }
         private void Move_duct_to_org(Matrix2d mat)
         {
@@ -102,6 +103,11 @@ namespace ThMEPHVAC.Model
             foreach (var valve in texts)
                 valve.center_point = valve.center_point.TransformBy(mat);
         }
+        private void Move_port_to_org(Matrix2d mat)
+        {
+            foreach (var port in ports)
+                port.pos = port.pos.TransformBy(mat);
+        }
         private void Search_cur_line(Point2d f_detect, Point2d l_detect)
         {
             for (int i = 0; i < ducts.Count; ++i)
@@ -114,14 +120,75 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Draw_modify_duct(Point2d f_detect, Point2d l_detect, string duct_size, double air_volume)
+        private void Draw_modify_duct(Point2d f_detect, Point2d l_detect, string modify_size, double air_volume)
         {
-            double cur_duct_width = ThDuctPortsService.Get_width(duct_size);
+            double cur_duct_width = ThDuctPortsService.Get_width(modify_size);
             var duct = ThDuctPortsFactory.Create_duct(f_detect, l_detect, cur_duct_width);
-            var duct_param = ThDuctPortsService.Create_duct_modify_param(duct, duct_size, air_volume, start_handle);
+            var duct_param = ThDuctPortsService.Create_duct_modify_param(duct, modify_size, air_volume, start_handle);
             service.Draw_shape(duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids, 
                                                   out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
             ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+            Update_port(modify_size);
+        }
+        private void Update_port(string modify_size)
+        {
+            if (ports.Count > 0)
+            {
+                if (in_param.port_range.Contains("侧"))
+                {
+                    var neig_port_idx = Search_neig_port();
+                    Do_update_port(neig_port_idx, modify_size);
+                }
+            }
+        }
+        private void Do_update_port(List<int> neig_port_idx, string modify_size)
+        {
+            var line = ThDuctPortsService.Covert_duct_to_line(cur_line);
+            var dir_vec = ThDuctPortsService.Get_edge_direction(line);
+            var l_vec = ThDuctPortsService.Get_left_vertical_vec(dir_vec);
+            var r_vec = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var org_width = ThDuctPortsService.Get_width(cur_line.duct_size);
+            var cur_width = ThDuctPortsService.Get_width(modify_size);
+            var extend_len = (cur_width - org_width) * 0.5;
+            var sp = new Point3d(start_point.X, start_point.Y, 0);
+            var mat = Matrix3d.Displacement(sp.GetAsVector());
+            for (int i = 0; i < neig_port_idx.Count; ++i)
+            {
+                var port = ports[neig_port_idx[i]];
+                var p = new Point3d(port.pos.X, port.pos.Y, 0);
+                var vec = p - line.StartPoint;
+                ThDuctPortsDrawService.Clear_graph(port.handle);
+                double z = dir_vec.CrossProduct(vec).Z;
+                if (z < 0)
+                {
+                    var new_pos = p + r_vec * extend_len;
+                    new_pos = new_pos.TransformBy(mat);
+                    service.port_service.Insert_port(new_pos, port.rotate_angle, port.port_width, port.port_height, port.port_range);
+                }
+                else if (z > 0)
+                {
+                    var new_pos = p + l_vec * extend_len;
+                    new_pos = new_pos.TransformBy(mat);
+                    service.port_service.Insert_port(new_pos, port.rotate_angle, port.port_width, port.port_height, port.port_range);
+                }
+                else
+                    throw new NotImplementedException();
+            }
+        }
+        private List<int> Search_neig_port()
+        {
+            var width = ThDuctPortsService.Get_width(cur_line.duct_size);
+            var line = ThDuctPortsService.Covert_duct_to_line(cur_line);
+            var neig_port = new List<int>();
+            for (int i = 0; i < ports.Count; ++i)
+            {
+                var port = ports[i];
+                var p = new Point3d(port.pos.X, port.pos.Y, 0);
+                var dis = line.GetClosestPointTo(p, false).DistanceTo(p);
+                if (Math.Abs(dis - 0.5 * width) < 1e-3)
+                    neig_port.Add(i);
+            }
+            return neig_port;
         }
         private void Modify_entity(string modify_duct_width, ref Point2d detect_p, out bool is_direct_duct)
         {
@@ -284,7 +351,7 @@ namespace ThMEPHVAC.Model
         private void Update_new_shape(Line_Info geo, Matrix3d mat, Entity_modify_param new_param)
         {
             service.Draw_shape(geo, org_dis_mat * mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
-                                                          out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                                                       out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
             ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, new_param);
             shapes.Add(new_param);
         }
@@ -317,21 +384,22 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Draw_reducing_connect_duct(int connect_duct_idx, string duct_size, out bool is_direct_duct)
+        private void Draw_reducing_connect_duct(int connect_duct_idx, string modify_size, out bool is_direct_duct)
         {
             is_direct_duct = false;
             var connect_line = ducts[connect_duct_idx];
-            double width = ThDuctPortsService.Get_width(duct_size);
-            if (duct_size == connect_line.duct_size)
+            double width = ThDuctPortsService.Get_width(modify_size);
+            if (modify_size == connect_line.duct_size)
             {
                 is_direct_duct = true;
                 ThDuctPortsService.Get_max(cur_line.sp, cur_line.ep, connect_line.sp, connect_line.ep, out Point2d p1, out Point2d p2);
                 var new_duct = ThDuctPortsFactory.Create_duct(p1, p2, width);
                 service.Draw_shape(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
                                                           out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
-                var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, duct_size, cur_line.air_volume, start_handle);
+                var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, modify_size, cur_line.air_volume, start_handle);
                 ThDuctPortsDrawService.Clear_graph(connect_line.handle);
                 ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+                Update_port(modify_size);
             }
         }
         private void Draw_elbow_connect_duct(double shrink_change_len, 

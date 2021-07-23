@@ -11,8 +11,8 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.FireAlarm.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.IO;
 
 namespace FireAlarm.Data
 {
@@ -66,10 +66,10 @@ namespace FireAlarm.Data
             var spatialIndex = new ThCADCoreNTSSpatialIndex(FireAparts.ToCollection());
             StoreyInfos.ForEach(o =>
             {
-                if(spatialIndex.SelectWindowPolygon(o.Boundary).Count==0)
+                if (spatialIndex.SelectWindowPolygon(o.Boundary).Count == 0)
                 {
                     var bufferService = new ThNTSBufferService();
-                    var fireApartOutline = bufferService.Buffer(o.Boundary ,- 1.0) as Polyline;
+                    var fireApartOutline = bufferService.Buffer(o.Boundary, -1.0) as Polyline;
                     FireAparts.Add(fireApartOutline);
                 }
             });
@@ -87,7 +87,7 @@ namespace FireAlarm.Data
             {
                 var fireAparts = GroupOwner.Where(g => g.Value.Contains(o.Id)).Select(g => g.Key).ToList();
                 string startCode = "";
-                switch(o.StoreyType)
+                switch (o.StoreyType)
                 {
                     case "大屋面":
                         startCode = "JF";
@@ -103,7 +103,7 @@ namespace FireAlarm.Data
                 fireAparts.ForEach(f =>
                 {
                     string number = startIndex++.ToString().PadLeft(2, '0');
-                    FireApartIds.Add(f , startCode + number);
+                    FireApartIds.Add(f, startCode + number);
                 });
             });
         }

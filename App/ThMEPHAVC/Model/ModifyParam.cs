@@ -4,21 +4,31 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.Model
 {
+    public class Port_modify_param
+    {
+        public Point2d pos;
+        public Handle handle;
+        public string port_range;
+        public double port_width;
+        public double port_height;
+        public double rotate_angle;
+        public Port_modify_param() { }
+    }
     public class Text_modify_param
     {
+        public Point3d pos;
         public Handle handle;
         public Point2d center_point;
         public string text_string;
         public double rotate_angle;
-        public Point3d pos;
         public Text_modify_param(Handle handle, Point2d center_point, string text_string,
                                  double rotate_angle, Point3d pos)
         {
+            this.pos = pos;
             this.handle = handle;
             this.text_string = text_string;
             this.center_point = center_point;
             this.rotate_angle = rotate_angle;
-            this.pos = pos;
         }
     }
     public class Valve_modify_param
@@ -34,18 +44,6 @@ namespace ThMEPHVAC.Model
         public double height;
         public double text_angle;
         public Valve_modify_param() { }
-        public Valve_modify_param(string valve_name, string valve_layer, string valve_visibility,
-                                  Point2d judge_p, double angle, double width, double height, double text_angle)
-        {
-            this.valve_name = valve_name;
-            this.valve_layer = valve_layer;
-            this.valve_visibility = valve_visibility;
-            this.judge_p = judge_p;
-            this.rotate_angle = angle;
-            this.width = width;
-            this.height = height;
-            this.text_angle = text_angle;
-        }
     }
     public class Entity_modify_param
     {

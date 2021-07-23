@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
+﻿using ThMEPEngineCore.Model;
 using NetTopologySuite.Features;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Features
+namespace ThMEPEngineCore.IO.GeoJSON
 {
     public class ThColumnFeatureCollection
     {

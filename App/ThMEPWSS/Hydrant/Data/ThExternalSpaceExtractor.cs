@@ -13,10 +13,11 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.Hydrant.Data
 {
-    public class ThExternalSpaceExtractor : ThExtractorBase, IPrint,IClean
+    public class ThExternalSpaceExtractor : ThExtractorBase, IPrint, IClean
     {
         /// <summary>
         /// 由建筑轮廓往外括形成的的空间
@@ -35,7 +36,7 @@ namespace ThMEPWSS.Hydrant.Data
         public override void Extract(Database database, Point3dCollection pts)
         {
             var results = new DBObjectCollection();
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 // 通过计算或指定的规则获取
                 // TODO
@@ -49,22 +50,22 @@ namespace ThMEPWSS.Hydrant.Data
                 var outlines = datas.Query(database, pts);
                 results = Clean(outlines.ToCollection());
             }
-            
+
             IBuffer iBuffer = new ThNTSBufferService();
             results.Cast<Entity>().ForEach(o =>
             {
                 var bufferEnt = iBuffer.Buffer(o, OffsetDis);
-                if(bufferEnt is Polyline shell)
+                if (bufferEnt is Polyline shell)
                 {
                     var mPolygon = ThMPolygonTool.CreateMPolygon(shell, new List<Curve> { o.Clone() as Polyline });
                     ExternalSpaces.Add(mPolygon);
                 }
-                else if(bufferEnt is MPolygon mPolygon)
+                else if (bufferEnt is MPolygon mPolygon)
                 {
                     throw new NotSupportedException();
-                }                
+                }
             });
-            if(FilterMode ==  FilterMode.Window)
+            if (FilterMode == FilterMode.Window)
             {
                 ExternalSpaces = FilterWindowPolygon(pts, ExternalSpaces);
             }
@@ -84,7 +85,7 @@ namespace ThMEPWSS.Hydrant.Data
 
         public void Print(Database database)
         {
-            ExternalSpaces.CreateGroup(database,ColorIndex);
+            ExternalSpaces.CreateGroup(database, ColorIndex);
         }
 
         public DBObjectCollection Clean(DBObjectCollection objs)

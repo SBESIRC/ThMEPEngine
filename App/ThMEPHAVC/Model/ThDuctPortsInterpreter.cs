@@ -6,6 +6,7 @@ using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -13,7 +14,7 @@ namespace ThMEPHVAC.Model
     {
         public static void Get_basic_param(ObjectId[] obj_list, out DuctPortsParam param, out Point2d start_point)
         {
-            var list = Do_get_value_list(obj_list, "Basic");
+            var list = Do_get_value_list(obj_list, ThHvacCommon.RegAppName_DuctBasic);
             var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
             if (!values.Any())
             {
@@ -25,9 +26,10 @@ namespace ThMEPHVAC.Model
                 scale = (string)values.ElementAt(0).Value,
                 scenario = (string)values.ElementAt(1).Value,
                 elevation = Double.Parse((string)values.ElementAt(2).Value),
-                main_height = Double.Parse((string)values.ElementAt(3).Value)
+                main_height = Double.Parse((string)values.ElementAt(3).Value),
+                port_range = (string)values.ElementAt(4).Value,
             };
-            start_point = ThDuctPortsService.Covert_obj_to_point(values.ElementAt(4).Value);
+            start_point = ThDuctPortsService.Covert_obj_to_point(values.ElementAt(5).Value);
         }
         public static void Get_shapes(out List<Entity_modify_param> shapes)
         {
@@ -36,7 +38,7 @@ namespace ThMEPHVAC.Model
             foreach(var id in shapeIds)
             {
                 var ids = new ObjectId[] { id };
-                var entity_list = Do_get_value_list(ids, "Info");
+                var entity_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_DuctInfo);
                 shapes.Add(Get_entity_param(entity_list, id.Handle));
             }
         }
@@ -47,16 +49,23 @@ namespace ThMEPHVAC.Model
             foreach (var id in ductIds)
             {
                 var ids = new ObjectId[] { id };
-                var duct_list = Do_get_value_list(ids, "Info");
+                var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_DuctInfo);
                 ducts.Add(Get_duct_param(duct_list, id.Handle));
             }
         }
         public static void Get_valves(out List<Valve_modify_param> valves)
         {
             valves = new List<Valve_modify_param>();
-            var valveIds = ThDuctPortsReadComponent.Read_valve_ids();
+            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风阀");
             foreach (var id in valveIds)
-                valves.Add(Get_valve_param(id));
+                valves.Add(Get_valve_param(id, "风阀"));
+        }
+        public static void Get_ports(out List<Port_modify_param> ports)
+        {
+            ports = new List<Port_modify_param>();
+            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风口-AI研究中心");
+            foreach (var id in valveIds)
+                ports.Add(Get_port_param(id));
         }
         public static void Get_texts(out List<Text_modify_param> texts)
         {
@@ -73,7 +82,7 @@ namespace ThMEPHVAC.Model
                                          text.Rotation,
                                          text.Position);
         }
-        private static Valve_modify_param Get_valve_param(ObjectId id)
+        private static Valve_modify_param Get_valve_param(ObjectId id, string valve_name)
         {
             var param = new Valve_modify_param();
             ThDuctPortsDrawService.Get_valve_dyn_block_properity(id, out Point3d insert_p, out double width, 
@@ -81,7 +90,7 @@ namespace ThMEPHVAC.Model
             var dir_vec = ThDuctPortsService.Get_dir_vec(rotate_angle - Math.PI * 0.5);
             var vertical_r = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
             param.handle = id.Handle;
-            param.valve_name = "风阀";
+            param.valve_name = valve_name;
             param.valve_layer = id.GetBlockLayer();
             param.valve_visibility = valve_visibility;
             param.insert_p = insert_p.ToPoint2D();
@@ -90,6 +99,19 @@ namespace ThMEPHVAC.Model
             param.width = width;
             param.height = height;
             param.text_angle = text_angle;
+            return param;
+        }
+        private static Port_modify_param Get_port_param(ObjectId id)
+        {
+            var param = new Port_modify_param();
+            ThDuctPortsDrawService.Get_port_dyn_block_properity(id, out Point3d pos, out string port_range, 
+                out double port_height, out double port_width, out double rotate_angle);
+            param.handle = id.Handle;
+            param.rotate_angle = rotate_angle;
+            param.port_width = port_width;
+            param.port_height = port_height;
+            param.port_range = port_range;
+            param.pos = pos.ToPoint2D();
             return param;
         }
         public static Duct_modify_param Get_duct_param(TypedValueList list, Handle group_handle)
@@ -163,7 +185,7 @@ namespace ThMEPHVAC.Model
                     var g_ids = id.GetGroups();
                     if (g_ids == null)
                         continue;
-                    list = Do_get_value_list(g_ids, "Info");
+                    list = Do_get_value_list(g_ids, ThHvacCommon.RegAppName_DuctInfo);
                     if (list == null)
                         continue;
                     if (list.Count != 0)

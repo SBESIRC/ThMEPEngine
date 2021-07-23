@@ -7,13 +7,12 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThCADCore.NTS;
 using NFox.Cad;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
-{    
-    public class ThShearwallExtractor : ThExtractorBase,IPrint
+{
+    public class ThShearwallExtractor : ThExtractorBase, IPrint
     {
         public List<Entity> Walls { get; private set; }
         private List<ThIfcRoom> Rooms { get; set; }
@@ -28,12 +27,12 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             var geos = new List<ThGeometry>();
             var isolateShearwalls = new List<Entity>();
-            if(IsolateSwitch)
+            if (IsolateSwitch)
             {
                 isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
             }
             Walls.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 var isolate = isolateShearwalls.Contains(o);
@@ -41,11 +40,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 geometry.Boundary = o;
                 if (IsolateSwitch) // 表示只传入孤立的剪力墙
                 {
-                    if(isolate)
+                    if (isolate)
                     {
                         geos.Add(geometry);
                     }
-                }                
+                }
                 else
                 {
                     geos.Add(geometry);
@@ -56,7 +55,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 using (var engine = new ThShearWallRecognitionEngine())
                 {

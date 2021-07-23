@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -51,7 +52,7 @@ namespace ThMEPWSS.Hydrant.Data
         public void Print(Database database)
         {
             FireExtinguishers
-                .Select(o=>new Circle(o.Position,Vector3d.ZAxis,5.0))
+                .Select(o => new Circle(o.Position, Vector3d.ZAxis, 5.0))
                 .Cast<Entity>().ToList()
                 .CreateGroup(database, ColorIndex);
         }

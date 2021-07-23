@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
     public abstract class ThIfcObject
     {
         public string Uuid { get; set; }
+        
+        public ThIfcObject()
+        {            
+            Uuid = Guid.NewGuid().ToString();
+        }
     }
 }

@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.FlushPoint.Data
 {
-    public class ThParkingStallExtractor : ThExtractorBase,IPrint
+    public class ThParkingStallExtractor : ThExtractorBase, IPrint
     {
         public List<Curve> ParkingStalls { get; set; }
         private List<string> BlockNames { get; set; }
@@ -20,7 +21,7 @@ namespace ThMEPWSS.FlushPoint.Data
             Category = BuiltInCategory.ParkingStall.ToString();
             ParkingStalls = new List<Curve>();
             BlockNames = new List<string>() { "车位", "Park", "Car", "子母", "电车" };
-            LayerNames = new List<string>() { "AE-EQPM-CAR", "CARS", "车位", "子母车", "微型车", "电车"};
+            LayerNames = new List<string>() { "AE-EQPM-CAR", "CARS", "车位", "子母车", "微型车", "电车" };
         }
 
         public override void Extract(Database database, Point3dCollection pts)
@@ -63,8 +64,8 @@ namespace ThMEPWSS.FlushPoint.Data
 
         private bool CheckBlockNameQualified(Entity entity)
         {
-            if(entity is BlockReference br)
-            {                
+            if (entity is BlockReference br)
+            {
                 string name = br.GetEffectiveName().ToUpper();
                 return BlockNames.Where(o => name.Contains(o.ToUpper())).Any();
             }
@@ -78,7 +79,7 @@ namespace ThMEPWSS.FlushPoint.Data
 
         public void Print(Database database)
         {
-            ParkingStalls.Cast<Entity>().ToList().CreateGroup(database,ColorIndex);
+            ParkingStalls.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
     }
 }

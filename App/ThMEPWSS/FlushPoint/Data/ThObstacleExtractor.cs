@@ -8,10 +8,11 @@ using ThMEPWSS.FlushPoint.Service;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.FlushPoint.Data
 {
-    public class ThObstacleExtractor : ThExtractorBase,IPrint
+    public class ThObstacleExtractor : ThExtractorBase, IPrint
     {
         public Dictionary<string, List<Curve>> ObstacleDic { get; private set; }
 

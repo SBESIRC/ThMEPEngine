@@ -20,6 +20,10 @@
         /// </summary>
         BigRoof,
         /// <summary>
+        /// 建筑楼层
+        /// </summary>
+        BuildingStorey,
+        /// <summary>
         /// 中心线
         /// </summary>
         CenterLine,
@@ -47,6 +51,10 @@
         /// 排水设施
         /// </summary>
         DrainageFacility,
+        /// <summary>
+        /// 
+        /// </summary>
+        Distribution,
         /// <summary>
         /// 设备
         /// </summary>
@@ -79,6 +87,10 @@
         /// 外墙形成的边界
         /// </summary>
         OuterBoundary,
+        /// <summary>
+        /// 在墙上开的洞
+        /// </summary>
+        Opening,
         /// <summary>
         /// 停车位
         /// </summary>
@@ -119,6 +131,14 @@
         /// 楼层框线
         /// </summary>
         StoreyBorder,
+        /// <summary>
+        /// 场地
+        /// </summary>
+        Site,
+        /// <summary>
+        /// 楼梯
+        /// </summary>
+        Stair,
         /// <summary>
         /// 窗户
         /// </summary>

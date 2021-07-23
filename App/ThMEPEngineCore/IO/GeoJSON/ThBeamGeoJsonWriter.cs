@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Features;
 using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO.GeoJSON
