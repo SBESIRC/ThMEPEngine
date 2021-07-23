@@ -34,6 +34,7 @@
     <Compile Include="Model\ThDuctPortsDistribute.cs" />
     <Compile Include="Model\ThDuctPortsDraw.cs" />
     <Compile Include="Model\ThDuctPortsDrawDim.cs" />
+    <Compile Include="Model\ThDuctPortsDrawPort.cs" />
     <Compile Include="Model\ThDuctPortsDrawPortMark.cs" />
     <Compile Include="Model\ThDuctPortsDrawService.cs" />
     <Compile Include="Model\ThDuctPortsDrawText.cs" />

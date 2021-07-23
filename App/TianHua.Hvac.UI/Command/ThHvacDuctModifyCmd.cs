@@ -32,21 +32,25 @@ namespace TianHua.Hvac.UI.Command
                 MessageForAdding = prompt,
                 RejectObjectsOnLockedLayers = true,
                 AllowSubSelections = false,
+                SingleOnly = true
             };
             var result = Active.Editor.GetSelection(options);
+            param = new Duct_modify_param();
             if (result.Status == PromptStatus.OK)
             {
                 var objIds = result.Value.GetObjectIds();
                 var list = ThDuctPortsInterpreter.Get_value_list(objIds);
+                if (list == null)
+                {
+                    ThDuctPortsService.Prompt_msg("请使用最新管道生成工具生成XData");
+                    return null;
+                }
                 var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
                 param = ThDuctPortsInterpreter.Get_duct_param(list, groupId.Handle);
                 return objIds;
             }
             else
-            {
-                param = new Duct_modify_param();
                 return null;
-            }
         }
     }
 }

@@ -257,7 +257,7 @@ namespace ThMEPHVAC.Model
             {
                 var info = infos[i];
                 var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
-                Draw_ports(info);
+                service.port_service.Draw_ports(info, in_param, org_dis_vec, port_width, port_height);
                 service.text_service.Draw_duct_size_info(duct_size_info);
                 Collect_duct_geo(geo_set, cur_seg);
                 Record_pre_seg_info(cur_seg, duct_text_info, info, ref pre_seg, ref pre_duct_size, ref pre_air_volume);
@@ -342,34 +342,6 @@ namespace ThMEPHVAC.Model
                                              new Line(outline1.EndPoint, outline2.EndPoint)};
             ThDuctPortsService.Get_ports(l, out List<Point3d> ports, out List<Point3d> ports_ext);
             return new Line_Info(outlines, flg, center_line, ports, ports_ext);
-        }
-        private void Draw_ports(Duct_ports_Info info)
-        {
-            using (var db = Linq2Acad.AcadDatabase.Active())
-            {
-                var dir_vec = ThDuctPortsService.Get_edge_direction(info.l);
-                double angle = ThDuctPortsService.Get_port_rotate_angle(dir_vec);
-                foreach (var pos in info.ports_info)
-                {
-                    if (in_param.port_range.Contains("下"))
-                    {
-                        var p = ThDuctPortsService.Get_down_port_insert_pos(dir_vec, pos.position, port_width, port_height);
-                        p += org_dis_vec;
-                        var obj = db.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, p, new Scale3d(), angle);
-                        ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, in_param.port_range);
-                    }
-                    else
-                    {
-                        ThDuctPortsService.Get_side_port_insert_pos(dir_vec, pos.position, info.width, port_width, out Point3d pL, out Point3d pR);
-                        pL += org_dis_vec;
-                        pR += org_dis_vec;
-                        var obj = db.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, pL, new Scale3d(), angle + Math.PI * 0.5);
-                        ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, in_param.port_range);
-                        obj = db.ModelSpace.ObjectId.InsertBlockReference(service.port_layer, service.block_name, pR, new Scale3d(), angle - Math.PI * 0.5);
-                        ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, in_param.port_range);
-                    }
-                }
-            }
         }
         private void Collect_special_shape_ids(Line_Info info,
                                                ObjectIdList geo_ids,

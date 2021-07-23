@@ -501,5 +501,17 @@ namespace ThMEPHVAC.Model
                 return Double.Parse(s);
             throw new NotImplementedException();
         }
+        public static void Prompt_msg(string message)
+        {
+            Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(message);
+        }
+        public static Line Covert_duct_to_line(Duct_modify_param param)
+        {
+            var sp_2 = param.sp;
+            var ep_2 = param.ep;
+            var sp = new Point3d(sp_2.X, sp_2.Y, 0);
+            var ep = new Point3d(ep_2.X, ep_2.Y, 0);
+            return new Line(sp, ep);
+        }
     }
 }

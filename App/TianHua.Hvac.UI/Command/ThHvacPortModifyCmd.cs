@@ -15,7 +15,6 @@ namespace TianHua.Hvac.UI.Command
             var ids = Get_start_node("选择起始节点");
             if (ids == null)
                 return;
-
         }
         private ObjectId[] Get_start_node(string prompt)
         {
@@ -27,14 +26,7 @@ namespace TianHua.Hvac.UI.Command
                 AllowSubSelections = false,
             };
             var result = Active.Editor.GetSelection(options);
-            if (result.Status == PromptStatus.OK)
-            {
-                return result.Value.GetObjectIds();
-            }
-            else
-            {
-                return null;
-            }
+            return (result.Status == PromptStatus.OK) ? result.Value.GetObjectIds() : null;
         }
     }
 }
