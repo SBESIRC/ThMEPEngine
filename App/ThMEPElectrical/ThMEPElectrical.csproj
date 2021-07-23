@@ -93,6 +93,7 @@
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThDclCommand.cs" />
+    <Compile Include="Command\ThFireAlarmCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
     <Compile Include="Command\ThInsertStoreyCommand.cs" />
@@ -128,6 +129,12 @@
     <Compile Include="DCL\Service\ThStruOuterVerticalComponentRecognizer.cs" />
     <Compile Include="DCL\Service\ThArchOuterVerticalComponentRecognizer.cs" />
     <Compile Include="DCL\Service\ThOuterVerticalComponentRecognizer.cs" />
+    <Compile Include="FireAlarm\Data\ThEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaArchitectureWallExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFireApartExtractor.cs" />
+    <Compile Include="FireAlarm\Model\EStoreyInfo.cs" />
+    <Compile Include="FireAlarm\Model\StoreyInfo.cs" />
+    <Compile Include="FireAlarm\Service\ThFireAlarmUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
