@@ -171,10 +171,21 @@ namespace ThMEPElectrical.Command
                                     currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                     currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
 
+                                    // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
+                                    // 修正插入动态块的图层顺序
+                                    if (targetBlockName == "电动机及负载标注")
+                                    {
+                                        var wipeOut = new ThBConvertWipeOut();
+                                        wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
+                                    }  
+
                                     // 插入新的块引用
                                     var scale = new Scale3d(Scale);
                                     var engine = CreateConvertEngine(mode);
                                     var objId = engine.Insert(targetBlockName, scale, o);
+
+                                    // 设置新插入的块引用的镜像变化
+                                    engine.Mirror(objId, o);
 
                                     // 设置新插入的块引用的角度
                                     engine.Rotate(objId, o);

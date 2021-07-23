@@ -128,5 +128,69 @@ namespace ThMEPElectrical.BlockConvert
                 }
             }
         }
+
+        public override void Mirror(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var targetScale = targetBlockData.ScaleFactors;
+                var srcScale = srcBlockData.ScaleFactors;
+                var scale = new Scale3d(targetScale.X * srcScale.X, targetScale.Y * srcScale.Y, targetScale.Z * srcScale.Z);
+                var mirror = Matrix3d.Identity;
+                if (scale.X < 0)
+                {
+                    if (scale.Y < 0)
+                    {
+                        if (scale.Z < 0)  //x<0,y<0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(Point3d.Origin);
+                        }
+                        else  //x<0,y<0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 0, 1)));
+                        }
+                    }
+                    else
+                    {
+                        if (scale.Z < 0)  //x<0,y>0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
+                        }
+                        else  //x<0,y>0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(0, 1, 0), new Vector3d(0, 0, 1)));
+                        }
+                    }
+                }
+                else
+                {
+                    if (scale.Y < 0)
+                    {
+                        if (scale.Z < 0)  //x>0,y<0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(1, 0, 0)));
+                        }
+                        else  //x>0,y<0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(1, 0, 0), new Vector3d(0, 0, 1)));
+                        }
+                    }
+                    else
+                    {
+                        if (scale.Z < 0)  //x>0,y>0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0)));
+                        }
+                        else  //x>0,y>0,z>0
+                        {
+                            //
+                        }
+                    }
+                }
+                blockReference.TransformBy(mirror);
+            }
+        }
     }
 }

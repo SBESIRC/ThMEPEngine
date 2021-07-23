@@ -9,6 +9,7 @@ namespace ThCADExtension
     {
         public double Rotation { get; set; }
         public Point3d Position { get; set; }
+        public Scale3d ScaleFactors { get; set; }
         public string BlockLayer { get; set; }
         public string EffectiveName { get; set; }
         public Database Database { get; set; }
@@ -23,6 +24,7 @@ namespace ThCADExtension
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
+            ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
             CustomProperties = blockRef.GetDynProperties();
@@ -36,6 +38,7 @@ namespace ThCADExtension
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
+            ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
             CustomProperties = blockRef.GetDynProperties();

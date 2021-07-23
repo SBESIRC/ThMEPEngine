@@ -20,10 +20,20 @@ namespace ThMEPElectrical.BlockConvert
                 var entities = new DBObjectCollection();
                 var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
                 blkref.ExplodeWithVisible(entities);
-                entities = entities.Cast<Entity>()
+                if (data.EffectiveName.Contains("防火阀"))
+                {
+                    entities = entities.Cast<Entity>()
+                    .Where(e => e.Layer != "DEFPOINTS")
+                    .Where(e => e is Circle || e is BlockReference)
+                    .ToCollection();
+                }
+                else
+                {
+                    entities = entities.Cast<Entity>()
                     .Where(e => e.Layer != "DEFPOINTS")
                     .Where(e => e is Curve || e is BlockReference)
                     .ToCollection();
+                }
                 if (entities.Count == 0)
                 {
                     return Point3d.Origin;
