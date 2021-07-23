@@ -165,7 +165,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 GraphEngine.InitGraph();
                 GraphEngine.DrawCrossAlarms();
                 //GraphEngine.DrawGraphs();
-                Active.Editor.WriteLine($"\n违反强条！{floor.FloorName}层共{GraphEngine.CrossAlarmCount}个穿越防火分区处总线未设置短路隔离器，见标注×处");
+                if (GraphEngine.CrossAlarmCount > 0)
+                {
+                    Active.Editor.WriteLine($"\n违反强条！{floor.FloorName}层共{GraphEngine.CrossAlarmCount}个穿越防火分区处总线未设置短路隔离器，见标注×处");
+                }
                 var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
                 int Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
                 string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;

@@ -935,6 +935,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// </summary>
         public void DrawCrossAlarms()
         {
+            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(Database))
             using (AcadDatabase acad = AcadDatabase.Use(Database))
             {
                 this.CrossAlarms.ForEach(o =>
