@@ -47,6 +47,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" Guid="{5292C98D-05A6-44AB-82A9-913B6283CC4A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NPOI.OpenXmlFormats.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" Guid="{70B632FF-F99A-4B4A-BC56-65B3128D8BBE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -92,6 +95,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Debug" Guid="{F6AE14B1-462B-4E17-B751-542219493E14}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NPOI.OpenXmlFormats.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Debug" Guid="{BBDC50BC-ED83-4DA8-9C47-D24EE5BC51E5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -136,6 +142,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" Guid="{7F40AEE7-9DE0-4DE0-A387-183B541ECF36}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NPOI.OpenXmlFormats.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Debug" Guid="{5C9C53AC-8F40-461D-9D83-F149C091BB05}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ICSharpCode.SharpZipLib.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -183,6 +192,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" Guid="{21ACB337-C860-4F60-B538-1BDB0693CF1C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NPOI.OpenXmlFormats.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" Guid="{A4DF40B5-D3B5-44BF-9548-1BC222042808}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -228,6 +240,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Release" Guid="{30D6430E-5959-4D1F-9025-7D512EAF7304}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NPOI.OpenXmlFormats.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Release" Guid="{1974C84C-6688-4EE0-A88C-FD6BCBD7748D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ICSharpCode.SharpZipLib.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -272,6 +287,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" Guid="{616DE045-5BBF-4812-B1D7-FF72E50EAE8A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NPOI.OpenXmlFormats.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Release" Guid="{C31CBB3A-7D6B-407C-BFB9-3EAB15B20CDF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ICSharpCode.SharpZipLib.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -322,6 +340,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -366,6 +387,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OOXML_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXml4Net_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_OpenXmlFormats_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
