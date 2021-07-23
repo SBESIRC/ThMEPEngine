@@ -54,7 +54,7 @@ namespace ThMEPWSS.FlushPoint.Service
             using (var currentDb = AcadDatabase.Active())
             using (var blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), true);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WashPointLayerName), false);
                 SetLayerDefaults(LayoutData.WashPointLayerName);
             }
