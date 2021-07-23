@@ -198,23 +198,11 @@ namespace ThCADCore.NTS
         /// <summary>
         /// Fence Selection
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        public DBObjectCollection SelectFence(Polyline polyline)
+        public DBObjectCollection SelectFence(Entity entity)
         {
-            var geometry = ToNTSGeometry(polyline);
-            return FenceFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
-        }
-
-        /// <summary>
-        /// Fence Selection
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public DBObjectCollection SelectFence(Line line)
-        {
-            var geometry = ToNTSGeometry(line);
+            var geometry = ToNTSGeometry(entity);
             return FenceFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
