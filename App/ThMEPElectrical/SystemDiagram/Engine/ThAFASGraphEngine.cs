@@ -13,7 +13,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -23,10 +22,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         private Dictionary<Entity, Entity> GlobleNTSMappingDic;
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+        private List<Point3d> CrossAlarms { get; set; }
+        private ThCADCoreNTSSpatialIndex FireCompartmentIndex { get; set; }
 
         public Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> GraphsDic { get; set; }
 
-        public Database Database { get; set; }
+        private Database Database { get; set; }
+
+        public int CrossAlarmCount { get { return CrossAlarms.Count; } }
 
         /// <summary>
         /// 全部数据集合
@@ -61,9 +64,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             return e is Curve cur && cur.Layer.Contains("CMTB");
         };
 
-        public ThAFASGraphEngine(Database db, List<Entity> Datas, Dictionary<Entity, List<KeyValuePair<string, string>>> blockAttInfoDic, bool isJF = false)
+        public ThAFASGraphEngine(Database db, List<Entity> Datas, Dictionary<Entity, List<KeyValuePair<string, string>>> blockAttInfoDic, IEnumerable<Entity> fireCompartments, bool isJF = false)
         {
             GraphsDic = new Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>>();
+            CrossAlarms = new List<Point3d>();
             GlobleNTSMappingDic = new Dictionary<Entity, Entity>();
             DataCollection = Datas;
             Datas.ForEach(e =>
@@ -78,6 +82,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 }
             });
             SpatialIndex = new ThCADCoreNTSSpatialIndex(GlobleNTSMappingDic.Keys.ToCollection());
+            FireCompartmentIndex = new ThCADCoreNTSSpatialIndex(fireCompartments.ToCollection());
             CacheDataCollection = new List<Entity>();
             CacheSINodeCollection = new List<Entity>();
             this.Database = db;
@@ -351,8 +356,13 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             var nextElement = FindNextElement(existingElement, TargetEntity);
             foreach (var item in nextElement)
             {
+                //碰到配电箱
+                if(FASRule(item.Key))
+                {
+                    //Do Not
+                }
                 //是短路隔离器
-                if (SIRule(item.Key))
+                else if (SIRule(item.Key))
                 {
                     List<Entity> nextLoops;
                     if (item.Value.Count > 0)
@@ -421,9 +431,19 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <param name="sourceElement">已存在的曲线</param>
         /// <param name="space">探针</param>
         /// <returns></returns>
-        public BlockReference FindNextPath(ref List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
+        public BlockReference FindNextPath(ref List<Curve> sharedPath,ref List<Point3d> AlarmPoint, Curve sourceElement, bool IsStartPoint)
         {
             sharedPath.Add(sourceElement);
+            var fireCpmpartmentresults = FireCompartmentIndex.SelectFence(sourceElement);
+            if(fireCpmpartmentresults.Count>0)
+            {
+                foreach (Entity fireCpmpartmenBounder in fireCpmpartmentresults.Cast<Entity>())
+                {
+                    var pts = new Point3dCollection();
+                    sourceElement.IntersectWith(fireCpmpartmenBounder, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    AlarmPoint.AddRange(pts.Cast<Point3d>());
+                }
+            }
             var space = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThAutoFireAlarmSystemCommon.ConnectionTolerance * 2);
             var results = SpatialIndex.SelectCrossingPolygon(space);
             results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
@@ -454,7 +474,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             if (longProbeLineResults.Count > 0)
                             {
                                 bool isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint) > point.DistanceTo(longProbeLineResults[0].EndPoint);
-                                return FindNextPath(ref sharedPath, longProbeLineResults[0], isStartPoint);
+                                return FindNextPath(ref sharedPath,ref AlarmPoint, longProbeLineResults[0], isStartPoint);
                             }
                         }
                         break;
@@ -472,11 +492,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                                 return null;
                             if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
-                                return FindNextPath(ref sharedPath, curve, true);
+                                return FindNextPath(ref sharedPath, ref AlarmPoint, curve, true);
                             }
                             else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                             {
-                                return FindNextPath(ref sharedPath, curve, false);
+                                return FindNextPath(ref sharedPath, ref AlarmPoint, curve, false);
                             }
                         }
                         break;
@@ -709,20 +729,31 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     if (CMTBRule(curve))
                         continue;
                     List<Curve> sharedPath = new List<Curve>();
+                    List<Point3d> AlarmPoint = new List<Point3d>();
                     var blockobb = Buffer(sourceElement, 0);
                     if (blockobb.Contains(curve.StartPoint) || blockobb.Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
-                        var NextBlk = FindNextPath(ref sharedPath, curve, false);
+                        var NextBlk = FindNextPath(ref sharedPath, ref AlarmPoint, curve, false);
                         if (!NextBlk.IsNull() && !NextElements.ContainsKey(NextBlk))
                         {
+                            if (!SIRule(NextBlk) && !FASRule(NextBlk))
+                            {
+                                CrossAlarms.AddRange(AlarmPoint);
+                            }
                             NextElements.Add(NextBlk, sharedPath);
                         }
                     }
                     else if (blockobb.Contains(curve.EndPoint) || blockobb.Distance(curve.EndPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
-                        var NextBlk = FindNextPath(ref sharedPath, curve, true);
+                        var NextBlk = FindNextPath(ref sharedPath, ref AlarmPoint, curve, true);
                         if (!NextBlk.IsNull() && !NextElements.ContainsKey(NextBlk))
+                        {
+                            if (!SIRule(NextBlk) && !FASRule(NextBlk))
+                            {
+                                CrossAlarms.AddRange(AlarmPoint);
+                            }
                             NextElements.Add(NextBlk, sharedPath);
+                        }
                     }
                 }
             }
@@ -896,6 +927,21 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         colorindex++;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 画穿越防火分区警告标识
+        /// </summary>
+        public void DrawCrossAlarms()
+        {
+            using (AcadDatabase acad = AcadDatabase.Use(Database))
+            {
+                this.CrossAlarms.ForEach(o =>
+                {
+                    var newDBText = new DBText() { Height = 800, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "×", Position = o, AlignmentPoint = o, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };
+                    acad.ModelSpace.Add(newDBText);
+                });
             }
         }
     }

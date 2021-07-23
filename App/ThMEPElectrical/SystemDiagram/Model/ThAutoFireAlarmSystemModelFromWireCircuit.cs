@@ -80,6 +80,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <returns></returns>
         public override List<ThFloorModel> InitStoreys(AcadDatabase adb, List<ThIfcSpatialElement> storeys, List<ThFireCompartment> fireCompartments)
         {
+            InsertBlockService.ImportFireDistrictLayerAndStyle(adb.Database);
             List<ThFloorModel> Floors = new List<ThFloorModel>();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(fireCompartments.Select(e => e.Boundary).ToCollection());
             //初始化楼层
@@ -160,9 +161,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 //定位楼层数据
                 GetFloorBlockInfo(floor.FloorBoundary);
                 //初始化寻路引擎
-                ThAFASGraphEngine GraphEngine = new ThAFASGraphEngine(adb.Database, FloorEntityData, FloorBlockAttInfoDic, floor.FloorName == "JF");
+                ThAFASGraphEngine GraphEngine = new ThAFASGraphEngine(adb.Database, FloorEntityData, FloorBlockAttInfoDic, floor.FireDistricts.Select(o => o.FireDistrictBoundary), floor.FloorName == "JF");
                 GraphEngine.InitGraph();
+                GraphEngine.DrawCrossAlarms();
                 //GraphEngine.DrawGraphs();
+                Active.Editor.WriteLine($"\n违反强条！{floor.FloorName}层共{GraphEngine.CrossAlarmCount}个穿越防火分区处总线未设置短路隔离器，见标注×处");
                 var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
                 int Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
                 string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
@@ -208,7 +211,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     Rotation = blkrefs.Rotation;
                 }
-                InsertBlockService.ImportFireDistrictLayerAndStyle(db);
                 var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
                 var WireCircuittextStyle = acadDatabase.TextStyles.Element("TH-STYLE3");
                 List<Entity> DrawEntitys = new List<Entity>();
