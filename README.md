@@ -25,6 +25,10 @@ Win10
 
 [Learn Productivity Tips and Tricks for the Debugger in Visual Studio](https://docs.microsoft.com/en-us/visualstudio/debugger/debugger-tips-and-tricks?view=vs-2019)
 
+# Performance tips
+
+[Visual Studio performance tips and tricks](https://docs.microsoft.com/en-us/visualstudio/ide/visual-studio-performance-tips-and-tricks?view=vs-2019)
+
 # AutoCAD.NET tips
 
 [Cleaning up after yourself: how and when to dispose of AutoCAD objects in .NET](https://www.keanw.com/2008/06/cleaning-up-aft.html)
