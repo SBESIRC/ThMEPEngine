@@ -1,34 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
 using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-
-
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDVirtualColumnEngine
     {
-        public static List<Polyline> getVirtualColumn(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<string, (string, string)> islandPair, Dictionary<string, List<ThTerminalToilate>> allToiInGroup, Dictionary<ThTerminalToilate, Point3d> virtualPtDict)
+        public static List<Polyline> getVirtualColumn(Dictionary<string, List<ThTerminalToilet>> groupList, Dictionary<string, (string, string)> islandPair, Dictionary<string, List<ThTerminalToilet>> allToiInGroup, Dictionary<ThTerminalToilet, Point3d> virtualPtDict)
         {
             var virtualColumn = new List<Polyline>();
 
             foreach (var group in groupList)
             {
-
                 if (islandPair.ContainsKey(group.Key))
                 {
                     //岛
@@ -38,10 +26,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else if (allToiInGroup.ContainsKey(group.Key))
                 {
                     //小空间
-                    var toilate = allToiInGroup[group.Key];
-                    foreach (var t in toilate)
+                    var toilet = allToiInGroup[group.Key];
+                    foreach (var t in toilet)
                     {
-                        var poly = getVitualColumnForToilates(t);
+                        var poly = getVitualColumnForToilet(t);
                         if (poly != null && poly.NumberOfVertices > 0)
                         {
                             virtualColumn.Add(poly);
@@ -53,7 +41,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     //普通组
                     if (group.Value.SelectMany(x => x.SupplyCoolOnWall).Count() == 1)
                     {
-                        var poly = getVitualColumnForToilates(group.Value.First());
+                        var poly = getVitualColumnForToilet(group.Value.First());
                         if (poly != null && poly.NumberOfVertices > 0)
                         {
                             virtualColumn.Add(poly);
@@ -64,7 +52,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return virtualColumn;
         }
 
-        private static List<Polyline> getVitualColumnForIsland(Dictionary<string, List<ThTerminalToilate>> groupList, (string, string) island)
+        private static List<Polyline> getVitualColumnForIsland(Dictionary<string, List<ThTerminalToilet>> groupList, (string, string) island)
         {
             List<Polyline> columns = new List<Polyline>();
 
@@ -78,7 +66,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static Polyline getVitualColumnForStrightGroup(List<ThTerminalToilate> group)
+        private static Polyline getVitualColumnForStrightGroup(List<ThTerminalToilet> group)
         {
             Polyline column = new Polyline();
 
@@ -108,22 +96,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="toilate"></param>
+        /// <param name="toilet"></param>
         /// <returns></returns>
-        private static Polyline getVitualColumnForToilates(ThTerminalToilate toilate)
+        private static Polyline getVitualColumnForToilet(ThTerminalToilet toilet)
         {
             Polyline column = new Polyline();
 
-            double verticalLength = ThDrainageSDCommon.LengthSublink-100 ;
+            double verticalLength = ThDrainageSDCommon.LengthSublink - 100;
             double length = 100;
 
-            Vector3d dir = toilate.Dir;
-            Vector3d dirLeft = toilate.Dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
-            Vector3d dirRight = toilate.Dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis).GetNormal();
+            Vector3d dir = toilet.Dir;
+            Vector3d dirLeft = toilet.Dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
+            Vector3d dirRight = toilet.Dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis).GetNormal();
 
-            var pt1 = toilate.SupplyCoolOnWall.First() + dirLeft * (length/2);
+            var pt1 = toilet.SupplyCoolOnWall.First() + dirLeft * (length / 2);
             var pt2 = pt1 + dir * verticalLength;
-            var pt3 = pt2 + dirRight * length ;
+            var pt3 = pt2 + dirRight * length;
             var pt4 = pt3 - dir * verticalLength;
 
             column.AddVertexAt(column.NumberOfVertices, pt1.ToPoint2d(), 0, 0, 0);
@@ -134,9 +122,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             column.Closed = true;
 
             return column;
-
-
         }
     }
-
 }

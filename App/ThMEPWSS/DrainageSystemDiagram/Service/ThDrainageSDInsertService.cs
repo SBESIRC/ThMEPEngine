@@ -1,32 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Linq2Acad;
+using DotNetARX;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using DotNetARX;
+
 using ThCADExtension;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDInsertService
     {
-        public static void InsertConnectLine(List<Line> lines)
+        public static void InsertConnectPipe(List<Line> lines)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var templateLayer = getTemplateLayerName(ThDrainageSDCommon.Layer_CoolPipe, ThDrainageSDCommon.Layer_Suffix);
                 acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_CoolPipe, templateLayer);
 
-                //acadDatabase.Database.ImportLinetype();
                 for (int i = 0; i < lines.Count(); i++)
                 {
                     var linkLine = lines[i];
-                    //linkLine.Linetype = ThDrainageSDCommon.LineType;
                     linkLine.Layer = ThDrainageSDCommon.Layer_CoolPipe;
                     linkLine.Color = Color.FromColorIndex(ColorMethod.ByLayer, (short)ColorIndex.BYLAYER);
                     acadDatabase.ModelSpace.Add(linkLine);
@@ -50,30 +47,38 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static void InsertBlk(List<KeyValuePair<Point3d, Vector3d>> blks, string layer, string blkname, Dictionary<string, string> attNameValues)
+        public static void InsertValve(List<ThDrainageSDADBlkOutput> convertedValve)
         {
+            var layer = ThDrainageSDCommon.Layer_Valves;
+
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(layer);
-                acadDatabase.Database.ImportBlock(blkname);
+
+                var allBlkName = convertedValve.Select(x => x.name).Distinct().ToList();
+                allBlkName.ForEach(x => acadDatabase.Database.ImportBlock(x));
 
                 double scale = ThDrainageSDCommon.Blk_scale;
                 double blkSize = 0;
 
-                for (int i = 0; i < blks.Count(); i++)
+                for (int i = 0; i < convertedValve.Count(); i++)
                 {
-                    var blk = blks[i];
-                    var pt = blk.Key + blk.Value * scale * blkSize;
-                    double rotateAngle = Vector3d.XAxis.GetAngleTo(blk.Value, Vector3d.ZAxis);
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        layer,
-                        blkname,
-                        pt,
-                        new Scale3d(scale),
-                        rotateAngle,
-                        attNameValues
-                    );
+                    var valve = convertedValve[i];
+                    var pt = valve.position + valve.dir * scale * blkSize;
+                    double rotateAngle = Vector3d.XAxis.GetAngleTo(valve.dir, Vector3d.ZAxis);
 
+                    var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                           layer,
+                           valve.name,
+                           pt,
+                           new Scale3d(scale),
+                           rotateAngle,
+                          new Dictionary<string, string>()
+                       );
+                    foreach (var dynamic in valve.visibility)
+                    {
+                        id.SetDynBlockValue(dynamic.Key, dynamic.Value);
+                    }
                 }
             }
         }
@@ -99,7 +104,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
         }
-
 
         private static string getTemplateLayerName(string layerName, string suffix)
         {
@@ -193,8 +197,5 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return layerRecord;
         }
-
-
-
     }
 }

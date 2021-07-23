@@ -1,19 +1,21 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
+
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDDeserializeGJsonService
     {
-        public static List<ThToilateGJson> getGroupPt(string GeoJsonString)
+        public static List<ThToiletGJson> getGroupPt(string GeoJsonString)
         {
-            List<ThToilateGJson> groupedSupplyPt = new List<ThToilateGJson>();
+            List<ThToiletGJson> groupedSupplyPt = new List<ThToiletGJson>();
 
             var serializer = GeoJsonSerializer.Create();
 
@@ -30,7 +32,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         var dirArr = f.Attributes["Direction"] as List<object>;
                         var dirVector = new Vector3d(double.Parse(dirArr[0].ToString()), double.Parse(dirArr[1].ToString()), 0).GetNormal();
 
-                        var item = new ThToilateGJson()
+                        var item = new ThToiletGJson()
                         {
                             Pt = new Point3d(coordinates[0].X, coordinates[0].Y, 0),
                             Direction = dirVector,
@@ -48,7 +50,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return groupedSupplyPt;
 
         }
-
 
         public static List<Line> getBranchLineList(string GeoJsonString)
         {
@@ -84,9 +85,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
 
-
             return branchList;
-
         }
     }
 }

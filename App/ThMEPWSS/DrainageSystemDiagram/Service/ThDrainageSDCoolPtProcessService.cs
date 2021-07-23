@@ -1,49 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using NFox.Cad;
 
-
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDCoolPtProcessService
     {
 
-        public static Dictionary<string, List<ThTerminalToilate>> classifyToilate(List<ThTerminalToilate> toilateList)
+        public static Dictionary<string, List<ThTerminalToilet>> classifyToilet(List<ThTerminalToilet> toiletList)
         {
-            Dictionary<string, List<ThTerminalToilate>> groupToilate = new Dictionary<string, List<ThTerminalToilate>>();
+            Dictionary<string, List<ThTerminalToilet>> groupToilet = new Dictionary<string, List<ThTerminalToilet>>();
 
             //classify
-            for (int i = 0; i < toilateList.Count; i++)
+            for (int i = 0; i < toiletList.Count; i++)
             {
-                string groupid = toilateList[i].GroupId;
-                if (groupid != null && groupToilate.ContainsKey(groupid) == false)
+                string groupid = toiletList[i].GroupId;
+                if (groupid != null && groupToilet.ContainsKey(groupid) == false)
                 {
-                    groupToilate.Add(groupid, new List<ThTerminalToilate>() { toilateList[i] });
+                    groupToilet.Add(groupid, new List<ThTerminalToilet>() { toiletList[i] });
                 }
                 else if (groupid != null)
                 {
-                    groupToilate[groupid].Add(toilateList[i]);
+                    groupToilet[groupid].Add(toiletList[i]);
                 }
             }
 
-            return groupToilate;
-
+            return groupToilet;
         }
-
 
         /// <summary>
         /// 不支持3组岛合并 只有两两合并.可能有bug
         /// </summary>
         /// <param name="groupList"></param>
         /// <returns></returns>
-        public static Dictionary<string, (string, string)> mergeIsland(Dictionary<string, List<ThTerminalToilate>> groupList)
+        public static Dictionary<string, (string, string)> mergeIsland(Dictionary<string, List<ThTerminalToilet>> groupList)
         {
             int TolSameIsland = 800;
 
@@ -80,7 +75,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             var bReturn = false;
 
-
             for (int i = 0; i < pts1.Count; i++)
             {
                 if (bReturn == true)
@@ -98,27 +92,25 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
 
-
-
             return bReturn;
         }
 
-        public static void classifySmallRoomGroup(ref Dictionary<string, List<ThTerminalToilate>> groupList, List<ThToilateRoom> roomList)
+        public static void classifySmallRoomGroup(ref Dictionary<string, List<ThTerminalToilet>> groupList, List<ThToiletRoom> roomList)
         {
             var groupSmall = groupList.Where(x => x.Key.Contains(ThDrainageSDCommon.tagSmallRoom)).ToList();
             var groupSmallString = groupSmall.Select(x => x.Key).ToList();
 
             foreach (var groupName in groupSmallString)
             {
-                var room = findRoomToilateBelongsTo(groupList[groupName][0], roomList);
-                var subGroup = new Dictionary<Line, List<ThTerminalToilate>>();
+                var room = findRoomToiletBelongsTo(groupList[groupName][0], roomList);
+                var subGroup = new Dictionary<Line, List<ThTerminalToilet>>();
 
                 foreach (var toi in groupList[groupName])
                 {
-                    var wall = findToilateBelongsToWall(toi, room);
+                    var wall = findToiletBelongsToWall(toi, room);
                     if (subGroup.ContainsKey(wall) == false)
                     {
-                        subGroup.Add(wall, new List<ThTerminalToilate>() { toi });
+                        subGroup.Add(wall, new List<ThTerminalToilet>() { toi });
                     }
                     else
                     {
@@ -138,33 +130,32 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static Line findToilateToWall(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
+        public static Line findToiletToWall(ThTerminalToilet toilet, List<ThToiletRoom> roomList)
         {
             Line wall = null;
-            var room = findRoomToilateBelongsTo(toilate, roomList);
+            var room = findRoomToiletBelongsTo(toilet, roomList);
 
             if (room != null)
             {
-                wall = findToilateBelongsToWall(toilate, room);
+                wall = findToiletBelongsToWall(toilet, room);
             }
 
             return wall;
         }
 
-        public static ThToilateRoom findRoomToilateBelongsTo(ThTerminalToilate toilate, List<ThToilateRoom> roomList)
+        public static ThToiletRoom findRoomToiletBelongsTo(ThTerminalToilet toilet, List<ThToiletRoom> roomList)
         {
-            var room = roomList.Where(x => x.toilate.Contains(toilate)).FirstOrDefault();
+            var room = roomList.Where(x => x.toilet.Contains(toilet)).FirstOrDefault();
             return room;
         }
 
-        private static Line findToilateBelongsToWall(ThTerminalToilate toilate, ThToilateRoom room)
+        private static Line findToiletBelongsToWall(ThTerminalToilet toilet, ThToiletRoom room)
         {
             var tol = new Tolerance(10, 10);
             var walls = room.wallList;
 
-            var wall = walls.Where(x => x.ToCurve3d().IsOn(toilate.SupplyCoolOnWall.First(), tol)).FirstOrDefault();
+            var wall = walls.Where(x => x.ToCurve3d().IsOn(toilet.SupplyCoolOnWall.First(), tol)).FirstOrDefault();
             return wall;
         }
-
     }
 }

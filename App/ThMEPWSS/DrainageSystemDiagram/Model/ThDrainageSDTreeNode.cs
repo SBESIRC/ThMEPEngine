@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-
-using ThCADExtension;
-using ThMEPEngineCore.Model;
-using ThCADCore.NTS;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -53,9 +46,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     descendant.AddRange(c.getDescendant());
                 }
-
             }
-
 
             return descendant;
         }

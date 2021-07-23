@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using AcHelper;
 using NFox.Cad;
-using Linq2Acad;
 using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -33,20 +21,28 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        private static ThDrainageSDTreeNode buildPipeTree(List<Line> allLines, Point3d supplyStart)
+        public static ThDrainageSDTreeNode buildPipeTree(List<Line> allLines, Point3d supplyStart, bool simplifyLine = true)
         {
-            var lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
+            List<Line> lines = null;
+
+            if (simplifyLine == true)
+            {
+                lines = ThDrainageSDCleanLineService.simplifyLine(allLines);
+            }
+            else
+            {
+                lines = allLines;
+            }
 
             var root = buildTree(lines, supplyStart);
 
-            printTree(root, "l063tree");
+           // printTree(root, "l063tree");
 
             return root;
         }
 
         public static void printTree(ThDrainageSDTreeNode root, string layer)
         {
-
             int cs = root.getLeafCount();
             int dp = root.getDepth();
             DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("{0}_{1}", dp, cs), layer, (short)(dp % 7), 25, 100);
@@ -85,7 +81,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     var lStart = startPt;
 
-                    if (l.EndPoint.IsEqualTo(lStart, new Tolerance(10, 10)))
+                    if (l.EndPoint.IsEqualTo(lStart, tol))
                     {
                         var ept = l.StartPoint;
                         l.StartPoint = startPt;

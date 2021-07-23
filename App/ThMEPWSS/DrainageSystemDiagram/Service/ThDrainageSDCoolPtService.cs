@@ -1,50 +1,40 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using ThCADExtension;
-using ThCADCore.NTS;
-
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDCoolPtService
     {
-        public static void findCoolSupplyPt(List<ThToilateRoom> roomList, List<ThTerminalToilate> toilateList, out List<ThTerminalToilate> aloneToilate)
+        public static void findCoolSupplyPt(List<ThToiletRoom> roomList, List<ThTerminalToilet> toiletList, out List<ThTerminalToilet> aloneToilet)
         {
-            aloneToilate = new List<ThTerminalToilate>();
+            aloneToilet = new List<ThTerminalToilet>();
 
-            foreach (var terminal in toilateList)
+            foreach (var terminal in toiletList)
             {
-                var room = roomList.Where(x => x.toilate.Contains(terminal));
+                var room = roomList.Where(x => x.toilet.Contains(terminal));
                 if (room.Count() == 0)
                 {
-                    aloneToilate.Add(terminal);
+                    aloneToilet.Add(terminal);
                 }
                 else
                 {
                     var wallList = room.First().wallList;
-                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToilateToWall,false);
+                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToiletToWall, false);
                     terminal.SupplyCoolOnWall = ptOnWall;
                 }
             }
         }
 
-        public static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilate terminal, int TolClosedWall,bool toilateFaceSide)
+        public static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall, bool toiletFaceSide)
         {
             List<Point3d> ptOnWall = new List<Point3d>();
             var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
-            var parallelWall = findParallelWall(closeWall, terminal, toilateFaceSide);
+            var parallelWall = findParallelWall(closeWall, terminal, toiletFaceSide);
 
             Line closestWall = null;
             if (parallelWall.Count > 1)
@@ -71,45 +61,41 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return ptOnWall;
         }
 
-        private static List<Line> findParallelWall(List<Line> wallList, ThTerminalToilate terminal,bool toilateFaceSide)
+        private static List<Line> findParallelWall(List<Line> wallList, ThTerminalToilet terminal, bool toiletFaceSide)
         {
             List<Line> parallelWall = new List<Line>();
             if (wallList.Count > 0)
             {
                 parallelWall = wallList.Where(wall =>
-               {
-                   //var wallDir = (wall.EndPoint - wall.StartPoint).GetNormal();
-                   //var angle = wallDir.GetAngleTo(terminal.Dir);
+                {
+                    var ptOnWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
+                    var ptToWallDir = (terminal.SupplyCool[0] - ptOnWall).GetNormal();
+                    var angle = ptToWallDir.GetAngleTo(terminal.Dir);
 
-                   var ptOnWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
-                   var ptToWallDir = (terminal.SupplyCool[0] - ptOnWall).GetNormal() ;
-                   var angle = ptToWallDir.GetAngleTo(terminal.Dir);
+                    var bReturn = false;
+                    if (toiletFaceSide == false)
+                    {
+                        if (Math.Abs(Math.Cos(angle)) >= Math.Cos(10 * Math.PI / 180))
+                        {
+                            bReturn = true;
+                        }
+                    }
+                    else
+                    {
+                        if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
+                        {
+                            bReturn = true;
+                        }
+                    }
+                    return bReturn;
 
-                   var bReturn = false;
-                   if (toilateFaceSide == false)
-                   {
-                       if (Math.Abs(Math.Cos(angle)) >= Math.Cos(10 * Math.PI / 180))
-                       {
-                           bReturn = true;
-                       }
-                   }
-                   else
-                   {
-                       if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
-                       {
-                           bReturn = true;
-                       }
-                   }
-                  
-
-                   return bReturn;
-               }).ToList();
+                }).ToList();
             }
             return parallelWall;
         }
 
 
-        private static List<Line> findNearbyWall(List<Line> wallList, ThTerminalToilate terminal, int TolClosedWall)
+        private static List<Line> findNearbyWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall)
         {
             List<Line> closeWall = new List<Line>();
             if (wallList.Count > 0)

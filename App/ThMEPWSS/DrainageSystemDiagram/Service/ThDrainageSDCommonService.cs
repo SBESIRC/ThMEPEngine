@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
-using ThCADCore.NTS;
 using ThMEPEngineCore.GeojsonExtractor;
 
 

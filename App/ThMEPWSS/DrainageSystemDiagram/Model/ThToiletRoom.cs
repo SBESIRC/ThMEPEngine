@@ -1,40 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using ThCADExtension;
-using ThMEPEngineCore.Model;
-using ThCADCore.NTS;
-
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThToilateRoom
+    public class ThToiletRoom
     {
         public Polyline outline { get; private set; }
         public List<Line> wallList { get; private set; }
-        public List<ThTerminalToilate> toilate { get; private set; }
+        public List<ThTerminalToilet> toilet { get; private set; }
         public string name { get; private set; }
         public int type { get; private set; } //1:大空间 0:小空间 -1：没有厕所
 
         private List<string> typeName = new List<string>() { "工具间", "清洁间", "第三卫", "无障碍卫","儿童" };
         public List<Point3d> outlinePtList { get; private set; }
-        public ThToilateRoom(Polyline outline, string name, List<ThTerminalToilate> tolilate)
+        public ThToiletRoom(Polyline outline, string name, List<ThTerminalToilet> toilet)
         {
             this.outline = outline;
             this.name = name;
-            this.toilate = tolilate;
+            this.toilet = toilet;
 
             outlinePtList = ThDrainageSDCommonService.getPT(this.outline);
             wallList = buildRoomWall();
             type = isLargeRoom();
         }
-
- 
 
         private List<Line> buildRoomWall()
         {
@@ -56,7 +47,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             int t = -2;
 
-            if (t == -2 && toilate.Count == 0)
+            if (t == -2 && toilet.Count == 0)
             {
                 t = -1;
             }
