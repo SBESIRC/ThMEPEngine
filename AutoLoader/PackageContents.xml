@@ -328,6 +328,7 @@
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THCDZM" Global="THCDZM" />
+				<Command Local="THHZXT" Global="THHZXT" />
 				<Command Local="THAFPM" Global="THAFPM" />
             </Commands>
         </ComponentEntry>
@@ -340,6 +341,7 @@
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THCDZM" Global="THCDZM" />
+				<Command Local="THHZXT" Global="THHZXT" />
 				<Command Local="THAFPM" Global="THAFPM" />
             </Commands>
         </ComponentEntry>
