@@ -11,15 +11,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public class Point3dEx : IEquatable<Point3dEx>
     {
+        public double Tolerance = 5; //mm
         public Point3d _pt;
         public Point3dEx(Point3d pt)
         {
             _pt = pt;
         }
 
-        public Point3dEx(double x, double y, double z)
+        public Point3dEx(double x, double y, double z,double tol = 5)
         {
             _pt = new Point3d(x, y, z);
+            Tolerance = tol;
         }
 
         public override int GetHashCode()
@@ -28,8 +30,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
         public bool Equals(Point3dEx other)
         {
-            var tolerance = 5; //mm
-            return Math.Abs(other._pt.X - this._pt.X) < tolerance && Math.Abs(other._pt.Y - this._pt.Y) < tolerance;
+            return Math.Abs(other._pt.X - this._pt.X) < Tolerance && Math.Abs(other._pt.Y - this._pt.Y) < Tolerance;
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -6,6 +7,8 @@ using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using ThCADExtension;
+
 
 namespace ThCADCore.NTS
 {
@@ -36,7 +39,36 @@ namespace ThCADCore.NTS
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
+        public static bool Contains2(this AcPolygon polygon, Point3d pt)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            Line line = new Line(pt, new Point3d(0, 0, 0));
+            polygon.IntersectWith(line, Intersect.OnBothOperands, pts, 0, 0);
+             
+            return pts.Count % 2 != 0;
+        }
+        public static bool Contains3(this AcPolygon polygon, Point3d pt)
+        {
+            DBObjectCollection dbobjColl = new DBObjectCollection();
+            polygon.Explode(dbobjColl);
 
+            var targetLineSeg = new LineSegment2d(Point2d.Origin, pt.ToPoint2D());
+            int nCross = 0;
+
+            foreach (var obj in dbobjColl)
+            {
+                var lineObj = obj as Line;
+                if (lineObj == null) continue;
+
+                var lineSeg = new LineSegment2d(lineObj.StartPoint.ToPoint2D(), lineObj.EndPoint.ToPoint2D());
+
+                
+                if (targetLineSeg.IntersectWith(lineSeg) == null) continue;
+
+                nCross++;
+            }
+            return nCross % 2 == 1;
+        }
         public static bool ContainsOrOnBoundary(this AcPolygon polygon, Point3d pt)
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());

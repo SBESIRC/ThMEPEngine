@@ -52,16 +52,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         {
             var cloneHoles = _holes.Select(x => x.Clone() as Polyline).ToList();
             cloneHoles.ForEach(x => x.TransformBy(ucsMatrix));
-            holes = cloneHoles.Select(x => {
-                var bbx = GetBoungdingBox(x);
-                Polyline polyline = new Polyline() { Closed = true };
-                for (int i = 0; i < bbx.Count(); i++)
-                {
-                    polyline.AddVertexAt(i, bbx[i].ToPoint2D(), 0, 0, 0);
-                }
-                return polyline;
-            })
-            .SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
+            holes = cloneHoles.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
         }
 
         /// <summary>
@@ -71,8 +62,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         /// <param name="_endPt"></param>
         public void SetStartAndEndInfo(Point3d _startPt, Line _endLine)
         {
-            startPt = _startPt;
-            endLine = _endLine;
+            startPt = _startPt.TransformBy(ucsMatrix);
+            endLine = _endLine.Clone() as Line;
+            endLine.TransformBy(ucsMatrix);
             CreateMap();
         }
 
@@ -83,7 +75,19 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         /// <returns></returns>
         public bool ContainsPt(Point3d point)
         {
-            return polyline.Contains(point);
+            return polyline.Contains(point.TransformBy(ucsMatrix));
+        }
+
+        /// <summary>
+        /// 判断线是否在地图内
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public bool ContainsLine(Line line)
+        {
+            var tempLine = line.Clone() as Line;
+            tempLine.TransformBy(ucsMatrix);
+            return polyline.Intersects(tempLine);
         }
 
         /// <summary>
@@ -93,6 +97,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         /// <returns></returns>
         public Polyline CreatePath(List<Point3d> points)
         {
+            points = points.Select(x => x.TransformBy(ucsMatrix.Inverse())).ToList();
             if (points == null || points.Count <= 0)
             {
                 return null;
@@ -124,6 +129,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
             pts.Add(startPt);
             pts.Add(endLine.StartPoint);
             pts.Add(endLine.EndPoint);
+            pts.Distinct();
 
             double minX = bbox[0].X;
             double minY = bbox[0].Y;
@@ -139,15 +145,41 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
             var mapLines = FilterRepeatLines(mapXLines);
             mapLines.AddRange(FilterRepeatLines(mapYLines));
             var handleLines = ThMEPLineExtension.LineSimplifier(mapLines.ToCollection(), 500, 100.0, 1, Math.PI / 180.0);
+            handleLines.AddRange(AddUsefulLines(handleLines, startPt, minX, minY, maxX, maxY));
+            handleLines.AddRange(AddUsefulLines(handleLines, endLine.StartPoint, minX, minY, maxX, maxY));
+            handleLines.AddRange(AddUsefulLines(handleLines, endLine.EndPoint, minX, minY, maxX, maxY));
             var nodedLines = GetNodedMapLines(handleLines);
             cellLines = FilterHoleLines(nodedLines);
             using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
                 foreach (var item in cellLines)
                 {
-                    //db.ModelSpace.Add(item);
+                    //var S = item;
+                    //S.TransformBy(ucsMatrix.Inverse());
+                    //db.ModelSpace.Add(S);
                 }
             }
+        }
+
+        /// <summary>
+        /// 补充点,避免起点或者终点线被过滤
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="pt"></param>
+        /// <param name="minX"></param>
+        /// <param name="minY"></param>
+        /// <param name="maxX"></param>
+        /// <param name="maxY"></param>
+        private List<Line> AddUsefulLines(List<Line> lines, Point3d pt, double minX, double minY, double maxX, double maxY)
+        {
+            List<Line> resLines = new List<Line>();
+            if (!lines.Any(x=>x.GetClosestPointTo(pt, false).DistanceTo(pt) < 0.01))
+            {
+                resLines.Add(new Line(new Point3d(minX, pt.Y, 0), new Point3d(maxX, pt.Y, 0)));
+                resLines.Add(new Line(new Point3d(pt.X, minY, 0), new Point3d(pt.X, maxY, 0)));
+            }
+
+            return resLines;
         }
 
         /// <summary>
@@ -163,7 +195,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
                 var firLine = lines[0];
                 filLines.Add(firLine);
                 lines.Remove(firLine);
-                var interLines = lines.Where(x => x.Distance(firLine) < 5).ToList();
+                var interLines = lines.Where(x => x.Distance(firLine) < 0.001).ToList();
                 foreach (var line in interLines)
                 {
                     lines.Remove(line);
@@ -250,6 +282,12 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
             foreach (var hole in holes)
             {
                 var bufferHole = hole.Buffer(bufferDistance)[0] as Polyline;
+                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+                {
+                    var s = bufferHole.Clone() as Polyline;
+                    s.TransformBy(ucsMatrix.Inverse());
+                    //db.ModelSpace.Add(s);
+                }
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(resLines.ToCollection());
                 var intersectLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferHole).Cast<Curve>().ToList();
                 foreach (Line line in intersectLines)

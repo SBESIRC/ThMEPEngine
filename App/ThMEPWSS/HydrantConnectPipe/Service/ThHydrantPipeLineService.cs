@@ -28,9 +28,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
             List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn,selectArea);
-
             loopLines = GetMainPipeLines(pipeLines,pipeMarks, fireHydrantSysIn);
             branchLines = pipeLines.Except(loopLines).ToList();
+            loopLines = PipeLineList.CleanLaneLines3(loopLines);
+            branchLines = PipeLineList.CleanLaneLines3(branchLines);
         }
         private void RemovePipeLines(ref List<Line> pipeLines,ref FireHydrantSystemIn fireHydrantSysIn,List<ThHydrantPipeMark> marks)
         {

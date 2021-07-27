@@ -44,6 +44,7 @@
     <Compile Include="Algorithm\AStarAlgorithm\CompassDirectionsHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ICostGetter.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ToLineCostGetter.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ToLineCostGetterEx.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ToPointCostGetter.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\GeometryHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\Map.cs" />

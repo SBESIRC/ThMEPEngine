@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
     public class AStarRoutePlanner<T>
     {
         Map<T> map;
-        ICostGetter costGetter = null;
+        public ICostGetter costGetter { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
         public AStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800)
@@ -42,6 +42,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //设置障碍物
             map.SetObstacle(holes);
         }
+        public void SetRoom(List<Entity> holes)
+        {
+            map.SetRoom(holes);
+        }
 
         #region Plan
         public Polyline Plan(Point3d start)
@@ -53,7 +57,11 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             {
                 return null;
             }
-
+            if(costGetter is ToLineCostGetterEx cGetter)
+            {
+                cGetter.RoomCast = map.roomCast;
+                costGetter = cGetter;
+            }
             RoutePlanData<T> routePlanData = new RoutePlanData<T>(map);
 
             //设置起点

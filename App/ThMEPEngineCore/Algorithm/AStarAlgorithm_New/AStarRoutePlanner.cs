@@ -38,14 +38,14 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New
         #region Plan
         public Polyline Plan(Point3d start, Line endLine)
         {
-            //初始化起点终点信息
-            map.SetStartAndEndInfo(start, endLine);
-
             //判断起点和终点是否在框线内
-            if (!map.ContainsPt(start) || !map.ContainsPt(endLine.EndPoint) || !map.ContainsPt(endLine.StartPoint))
+            if (!map.ContainsPt(start) || !map.ContainsLine(endLine))
             {
                 return null;
             }
+
+            //初始化起点终点信息
+            map.SetStartAndEndInfo(start, endLine);
 
             RoutePlanData routePlanData = new RoutePlanData(map);
 
@@ -65,7 +65,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New
             AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
             var resPts = adjustAStarPath.AdjustPath(resNodes, routePlanData.CellMap.holes, routePlanData.CellMap.polyline);
 
-            //var path = map.CreatePath(resNodes.Select(x => x.Location).ToList());
             var path = map.CreatePath(resPts);
             return path;
         }
