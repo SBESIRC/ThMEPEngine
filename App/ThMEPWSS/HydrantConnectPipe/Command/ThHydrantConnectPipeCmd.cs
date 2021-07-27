@@ -111,10 +111,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 //}
                 foreach (var hydrantPipe in hydrantPipes)
                 {
-                    //if(hydrantPipe.PipePosition.DistanceTo(new Point3d(442850.7,746846.2,0.0)) > 10)
-                    //{
-                    //    continue;
-                    //}
                     //创建路径
                     pathService.SetStartPoint(hydrantPipe.PipePosition);//设置立管点为起始点
                     var path = pathService.CreateHydrantPath(false);

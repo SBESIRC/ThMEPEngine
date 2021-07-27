@@ -346,7 +346,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 //                pts.Add(line.EndPoint);
             }
             //构造frame
-            var frame = ThHydrantConnectPipeUtils.CreateMapFrame(pts, 10000);
+            var frame = ThHydrantConnectPipeUtils.CreateMapFrame(pts, 5000);
             var dbObjects = HoleIndex.SelectCrossingPolygon(frame);
             var rst = new List<Polyline>();
             foreach (var dbobject in dbObjects)
@@ -448,7 +448,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarOptimizeRoutePlanner aStarRoute = new AStarOptimizeRoutePlanner(frame, dir,300, 50);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
 
             //var costGetter = new ToLineCostGetterEx();
             //aStarRoute.costGetter = costGetter;
@@ -457,7 +457,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             //----设置房间
             //aStarRoute.SetRoom(rooms);
             //----计算路径
-            var path = aStarRoute.Plan(startPt, closetLane);
+            var path = aStarRoute.Plan(startPt);
 
             return path;
         }
