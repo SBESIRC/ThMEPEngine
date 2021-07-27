@@ -74,6 +74,11 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());
         }
 
+        public static bool LineIntersects(this AcPolygon polygon, Entity entity)
+        {
+            return polygon.ToNTSLineString().Intersects(entity.ToNTSGeometry());
+        }
+
         public static AcPolygon OBB(this AcPolygon polygon)
         {
             // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好

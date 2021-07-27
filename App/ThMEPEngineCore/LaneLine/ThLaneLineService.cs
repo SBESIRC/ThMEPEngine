@@ -60,11 +60,11 @@ namespace ThMEPEngineCore.LaneLine
                 }
                 return resPoly;
             })
-                .Select(y =>
-                {
-                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
-                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
-                }).ToList();
+            .Select(y =>
+            {
+                var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+            }).ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
             var nodeGeo = objs.ToNTSNodedLineStrings();
