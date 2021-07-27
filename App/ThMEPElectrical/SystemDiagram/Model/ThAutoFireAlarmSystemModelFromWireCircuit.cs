@@ -2,20 +2,18 @@
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
-using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using System.Collections.Generic;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
-using ThMEPElectrical.SystemDiagram.Engine;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
 using ThMEPElectrical.SystemDiagram.Extension;
 
 namespace ThMEPElectrical.SystemDiagram.Model
@@ -203,9 +201,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <param name="addFloorss"></param>
         public override void DrawFloorsNum(Database db, List<ThFloorModel> addFloorss)
         {
+            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(db))
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
-                HostApplicationServices.WorkingDatabase = db;
                 double Rotation = 0.00;
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()
@@ -376,16 +374,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     }
                 });
                 floor.FireDistricts.RemoveAll(o => fireCompartments.Contains(o));
-                floor.FireDistricts = floor.FireDistricts.OrderBy(o => 
+                floor.FireDistricts = floor.FireDistricts.OrderBy(o =>
                 {
                     o.WireCircuits = o.WireCircuits.OrderBy(x => x.WireCircuitNo).ToList();
-                    return  o.FireDistrictNo;
+                    return o.FireDistrictNo;
                 }).ToList();
             }
             this.floors.ForEach(x => x.FireDistricts.ForEach(y =>
             {
                 var FirstWireCircuit = y.WireCircuits.Where(o => o.WireCircuitNo > 0).OrderBy(o => o.WireCircuitNo).FirstOrDefault();
-                if(!FirstWireCircuit.IsNull())
+                if (!FirstWireCircuit.IsNull())
                 {
                     FirstWireCircuit.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS030");
                     FirstWireCircuit.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] = y.NotInAlarmControlWireCircuitData.Count(br => br.Name == "E-BFAS031");

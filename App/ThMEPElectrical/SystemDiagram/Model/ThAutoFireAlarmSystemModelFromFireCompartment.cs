@@ -1,19 +1,17 @@
 ﻿using System;
-using AcHelper;
 using NFox.Cad;
+using AcHelper;
 using Linq2Acad;
-using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -146,8 +144,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                         FloorNumber = sobj.Storeys[0].GetFloorNumber(),
                                         IsMultiFloor = true,
                                         MulitFloors = sobj.Storeys,
-                                        MulitFloorName=sobj.StoreyTypeString,
-                                        MulitStoreyNumber=sobj.StoreyNumber
+                                        MulitFloorName = sobj.StoreyTypeString,
+                                        MulitStoreyNumber = sobj.StoreyNumber
                                     };
                                     NewFloor.InitFloors(adb.Database, blk, fireCompartments, spatialIndex);
                                     Floors.Add(NewFloor);
@@ -235,9 +233,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <param name="addFloorss"></param>
         public override void DrawFloorsNum(Database db, List<ThFloorModel> addFloorss)
         {
+            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(db))
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
-                HostApplicationServices.WorkingDatabase = db;
                 double Rotation = 0.00;
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()
@@ -262,8 +260,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         }
                     });
                 });
-                //HostApplicationServices.WorkingDatabase = db;
-
                 foreach (Entity item in DrawEntitys)
                 {
                     acadDatabase.ModelSpace.Add(item);
@@ -381,7 +377,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private void DataProcessing()
         {
             //正常的防火分区
-            var NormalFireDistricts = this.floors.SelectMany(o=>o.FireDistricts).Where(f => f.FireDistrictNo != -1).ToList();
+            var NormalFireDistricts = this.floors.SelectMany(o => o.FireDistricts).Where(f => f.FireDistrictNo != -1).ToList();
             for (int i = 0; i < this.floors.Count; i++)
             {
                 ThFloorModel floor = this.floors[i];
@@ -389,7 +385,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 floor.FireDistricts.Where(f => f.FireDistrictNo == -1).ForEach(o =>
                 {
                     var fireDistrict = NormalFireDistricts.FirstOrDefault(f => f.FireDistrictName == o.FireDistrictName);
-                    if(!fireDistrict.IsNull())
+                    if (!fireDistrict.IsNull())
                     {
                         fireDistrict.Data += o.Data;
                         fireCompartments.Add(o);
@@ -399,8 +395,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
             }
             this.floors.ForEach(x => x.FireDistricts.ForEach(o =>
             {
-                  if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
-                      o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
+                if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
+                    o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
             }));
             if (FireCompartmentParameter.DiagramDisplayEffect == 1)
             {

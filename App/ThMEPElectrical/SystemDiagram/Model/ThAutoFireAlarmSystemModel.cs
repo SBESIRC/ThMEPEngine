@@ -1,15 +1,16 @@
-﻿using Linq2Acad;
-using System.Collections.Generic;
+﻿using System;
+using Linq2Acad;
+using DotNetARX;
+using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
-using DotNetARX;
-using System.Linq;
-using Dreambuild.AutoCAD;
-using System;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -36,8 +37,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             PrepareData();
             using (var acadDatabase = AcadDatabase.Active())
+            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(acadDatabase.Database))
             {
-                HostApplicationServices.WorkingDatabase = acadDatabase.Database;
                 //设置全局偏移量
                 InsertBlockService.SetOffset(Offset, ConversionMatrix);
                 //初始化所有需要画的线并导入图层/线型等信息

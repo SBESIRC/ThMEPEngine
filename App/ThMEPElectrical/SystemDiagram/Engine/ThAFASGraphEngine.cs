@@ -881,6 +881,22 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
 
         /// <summary>
+        /// 画穿越防火分区警告标识
+        /// </summary>
+        public void DrawCrossAlarms()
+        {
+            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(Database))
+            using (AcadDatabase acad = AcadDatabase.Use(Database))
+            {
+                this.CrossAlarms.ForEach(o =>
+                {
+                    var newDBText = new DBText() { Height = 800, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "×", Position = o, AlignmentPoint = o, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };
+                    acad.ModelSpace.Add(newDBText);
+                });
+            }
+        }
+
+        /// <summary>
         /// 画寻路算法路径，不要删掉，排查问题时很有用
         /// </summary>
         public void DrawGraphs()
@@ -927,22 +943,6 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         colorindex++;
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// 画穿越防火分区警告标识
-        /// </summary>
-        public void DrawCrossAlarms()
-        {
-            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(Database))
-            using (AcadDatabase acad = AcadDatabase.Use(Database))
-            {
-                this.CrossAlarms.ForEach(o =>
-                {
-                    var newDBText = new DBText() { Height = 800, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "×", Position = o, AlignmentPoint = o, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };
-                    acad.ModelSpace.Add(newDBText);
-                });
             }
         }
     }
