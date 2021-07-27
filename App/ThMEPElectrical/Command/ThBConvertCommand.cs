@@ -204,21 +204,24 @@ namespace ThMEPElectrical.Command
                                     var refIds = new ObjectIdCollection();
                                     if (rule.Explodable())
                                     {
-                                        var blkref = currentDb.Element<BlockReference>(objId, true);
+                                        ExplodeWithErase(objId, refIds);
 
-                                        // 
-                                        void handler(object s, ObjectEventArgs e)
+                                        // 如果是“单台潜水泵”，继续炸一次
+                                        var objIds = new ObjectIdCollection();
+                                        foreach(ObjectId item in refIds)
                                         {
-                                            if (e.DBObject is BlockReference reference)
+                                            if (item.GetBlockName() == "单台潜水泵")
                                             {
-                                                refIds.Add(e.DBObject.ObjectId);
+                                                ExplodeWithErase(item, objIds);
+                                            }
+                                            else
+                                            {
+                                                objIds.Add(item);
                                             }
                                         }
-                                        currentDb.Database.ObjectAppended += handler;
-                                        blkref.ExplodeToOwnerSpace();
-                                        currentDb.Database.ObjectAppended -= handler;
 
-                                        blkref.Erase();
+                                        // 获取最终结果
+                                        refIds = objIds;
                                     }
                                     else
                                     {
@@ -234,6 +237,25 @@ namespace ThMEPElectrical.Command
                             });
                     }
                 }
+            }
+        }
+
+        private void ExplodeWithErase(ObjectId objId, ObjectIdCollection results)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var blkref = currentDb.Element<BlockReference>(objId, true);
+
+                // Explode
+                var objs = new DBObjectCollection();
+                blkref.ExplodeWithVisible(objs);
+                foreach (Entity item in objs)
+                {
+                    results.Add(currentDb.ModelSpace.Add(item));
+                }
+
+                // Erase
+                blkref.Erase();
             }
         }
 
