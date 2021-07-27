@@ -68,7 +68,7 @@ namespace ThMEPElectrical.BlockConvert
                 name.Contains("冷水机组") ||
                 name.Contains("冷却塔"))
             {
-                TransformByBase(blkRef, srcBlockData);
+                TransformByFansCenter(blkRef, srcBlockData);
             }
             else if (name.Contains("潜水泵"))
             {
@@ -81,56 +81,53 @@ namespace ThMEPElectrical.BlockConvert
         }
 
         /// <summary>
-        /// 按几何中心调整位置
+        /// 过滤图层后，按几何中心调整位置，并设置标注位置
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        private void TransformByFansCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var scrCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
+                var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
+                var scrApproCentriod = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var offset = Point3d.Origin.TransformBy(targetMCS2WCS).GetVectorTo(scrApproCentriod);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
-            }
-        }
-        
-        /// <summary>
-        /// 按设备基点调整位置
-        /// </summary>
-        /// <param name="blkRef"></param>
-        /// <param name="srcBlockData"></param>
-        private void TransformByBase(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var dynamicProperties = srcBlockData.CustomProperties;
+
+                var targetProperties = targetBlockData.CustomProperties;
+                var srcProperties = srcBlockData.CustomProperties;
                 double base_x = 0, base_y = 0;
-                if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
+                double label_x = 0, label_y = 0;
+                if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
                 {
-                    base_x = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
+                    base_x = (double)targetProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
                 }
-                if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
+                if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
                 {
-                    base_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                    base_y = (double)targetProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                }
+                if (targetProperties.Contains("位置1 X") && srcProperties.Contains("标注基点 X"))
+                {
+                    label_x = (double)srcProperties.GetValue("标注基点 X");
+                }
+                else if (targetProperties.Contains("位置1 X") && srcProperties.Contains("位置1 X"))
+                {
+                    label_x = (double)srcProperties.GetValue("位置1 X");
+                }
+                if (targetProperties.Contains("位置1 Y") && srcProperties.Contains("标注基点 Y"))
+                {
+                    label_y = (double)srcProperties.GetValue("标注基点 Y");
+                }
+                else if (targetProperties.Contains("位置1 X") && srcProperties.Contains("位置1 X"))
+                {
+                    label_y = (double)srcProperties.GetValue("位置1 Y");
                 }
                 double rotation = srcBlockData.Rotation;
-                var basePointAfterRotation = new Vector3d(base_x, base_y, 0).
-                    TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, Point3d.Origin).PreMultiplyBy(srcBlockData.OwnerSpace2WCS));
-                var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
-                var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
-                var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
-                var srcBlockDataPoint = new Point3d(
-                    srcBlockDataPosition.X + basePointAfterRotation.X,
-                    srcBlockDataPosition.Y + basePointAfterRotation.Y,
-                    srcBlockDataPosition.Z + basePointAfterRotation.Z);
-                var offset = Point3d.Origin.TransformBy(targetMCS2WCS).GetVectorTo(srcBlockDataPoint);
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
+                var labelPointAfterRotation = new Vector3d(base_x + label_x, base_y + label_y, 0);
+                targetProperties.SetValue("位置1 X", labelPointAfterRotation.X);
+                targetProperties.SetValue("位置1 Y", labelPointAfterRotation.Y);
             }
         }
 
@@ -174,6 +171,24 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     targetProperties.SetValue("角度1", srcProperties.GetValue("角度1"));
                 }
+            }
+        }
+
+        /// <summary>
+        /// 按几何中心调整位置
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockData"></param>
+        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
+                var scrCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 

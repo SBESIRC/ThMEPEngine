@@ -79,7 +79,7 @@ namespace ThMEPElectrical.BlockConvert
         }
 
         /// <summary>
-        /// 按插入点调整位置
+        /// 按位置点调整位置
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
