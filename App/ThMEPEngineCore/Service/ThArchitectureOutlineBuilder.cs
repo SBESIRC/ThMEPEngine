@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.Service
         private const double PostOffsetDistance = -500.0;
         private const double PostAREATOLERANCE = 5000000.0;
         private const double PostBufferAREATOLERANCE = 0.0;
-        private const double ExpansionJointLength = 151.0;
+        private const double ExpansionJointLength = 300.0;
         private const double ExtendLineLength = 5.0;
         public ThArchitectureOutlineBuilder(DBObjectCollection polygons)
         {

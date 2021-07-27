@@ -3,6 +3,9 @@ using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+using System.Linq;
+using System;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -13,6 +16,10 @@ namespace ThMEPEngineCore.Engine
             if (dbObj is Polyline polyline)
             {
                 elements.AddRange(Handle(polyline, matrix));
+            }
+            else if(dbObj is Line line)
+            {
+                elements.AddRange(Handle(line, matrix));
             }
         }
 
@@ -36,6 +43,30 @@ namespace ThMEPEngineCore.Engine
                 });
             }
             return results;
+        }
+
+        private List<ThRawIfcBuildingElementData> Handle(Line line, Matrix3d matrix)
+        {
+            List<Curve> curves = new List<Curve>();
+            if (IsBuildElement(line) && CheckLayerValid(line))
+            {
+                var newLine = line.WashClone() as Line;
+                newLine.TransformBy(matrix);
+
+                var poly = new Polyline();
+                poly.AddVertexAt(0, new Point2d(newLine.StartPoint.X, newLine.StartPoint.Y), 0, 0, 0);
+                poly.AddVertexAt(1, new Point2d(newLine.EndPoint.X, newLine.EndPoint.Y), 0, 0, 0);
+                curves.Add(poly);
+            }
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
+        }
+
+        private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)
+        {
+            return new ThRawIfcBuildingElementData()
+            {
+                Geometry = curve,
+            };
         }
 
         public override bool IsBuildElement(Entity entity)
