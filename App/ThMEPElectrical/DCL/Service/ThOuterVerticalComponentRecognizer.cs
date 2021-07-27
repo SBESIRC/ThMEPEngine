@@ -134,12 +134,12 @@ namespace ThMEPElectrical.DCL.Service
             var columnSpatialIndex = new ThCADCoreNTSSpatialIndex(OuterColumns);
             foreach(var item in OuterArchOutlineID)
             {
-               var objs =  columnSpatialIndex.SelectWindowPolygon(item.Key);
+                var objs = columnSpatialIndex.SelectCrossingPolygon(item.Key);
                objs.Cast<Entity>().ForEach(e => results.Add(e, item.Value));
             }
             foreach (var item in InnerOutlineBufferDic)
             {
-                var objs = columnSpatialIndex.SelectWindowPolygon(item.Value);
+                var objs = columnSpatialIndex.SelectCrossingPolygon(item.Value);
                 objs.Cast<Entity>().ForEach(e => 
                 {
                     if(!results.ContainsKey(e))
@@ -161,12 +161,12 @@ namespace ThMEPElectrical.DCL.Service
             var shearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(OuterShearwalls);
             foreach (var item in OuterArchOutlineID)
             {
-                var objs = shearwallSpatialIndex.SelectWindowPolygon(item.Key);
+                var objs = shearwallSpatialIndex.SelectCrossingPolygon(item.Key);
                 objs.Cast<Entity>().ForEach(e => results.Add(e, item.Value));
             }
             foreach (var item in InnerOutlineBufferDic)
             {
-                var objs = shearwallSpatialIndex.SelectWindowPolygon(item.Value);
+                var objs = shearwallSpatialIndex.SelectCrossingPolygon(item.Value);
                 objs.Cast<Entity>().ForEach(e =>
                 {
                     if (!results.ContainsKey(e))

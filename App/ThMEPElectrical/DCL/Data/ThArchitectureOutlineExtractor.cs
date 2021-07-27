@@ -12,6 +12,9 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using NFox.Cad;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.DCL.Data
 {
@@ -98,6 +101,56 @@ namespace ThMEPElectrical.DCL.Data
                 }
             }
             return "";
+        }
+        /// <summary>
+        /// 将第二层轮廓线复制进第一层。暂时不处理洞口
+        /// </summary>
+        /// <param name="storeyInfos"></param>
+        public void MoveSecondToFirst(List<ThEStoreyInfo> storeyInfos)
+        {
+            //
+            if (OuterArchOutlineIdDic.Count == 0)
+                return;
+            var firstStorey = storeyInfos.Where(o => o.StoreyNumber.Contains("1F")).First();
+            var secondStorey = storeyInfos.Where(o => o.StoreyNumber.Contains("2F")).First();
+            var firtbasepoint = firstStorey.BasePoint.Split(',');
+            var secondbasepoint = secondStorey.BasePoint.Split(',');
+            if (firtbasepoint.Length != 2 || secondbasepoint.Length != 2)
+                return;
+            //Boundary为楼层框线，并不是建筑轮廓线。建立两者的联系
+            var boundaryOuterArchlineDic = GetStoryOuterLineDic(storeyInfos);
+            Matrix3d transform = new Matrix3d(new double[]{1, 0, 0, double.Parse(firtbasepoint[0]) - double.Parse(secondbasepoint[0]),
+                                                           0, 1, 0, double.Parse(firtbasepoint[1]) - double.Parse(secondbasepoint[1]),
+                                                           0, 0, 1, 0,
+                                                           0, 0, 0, 1});
+            //移除所有的除洞口外的一楼，因为一楼的不会闭合
+            boundaryOuterArchlineDic[firstStorey.Boundary].ForEach(o=>
+            {
+                if(OuterArchOutlineIdDic.ContainsKey(o))
+                    OuterArchOutlineIdDic.Remove(o);
+            });
+            boundaryOuterArchlineDic[secondStorey.Boundary].ForEach(o =>
+            {
+                //拿到第二层的形状，并进行平移变换
+                var firsrstoryarchline = boundaryOuterArchlineDic[secondStorey.Boundary];
+                firsrstoryarchline.ForEach(e =>
+                {
+                    var poly = (Polyline)(e.Clone());
+                    poly.TransformBy(transform);
+                    OuterArchOutlineIdDic.Add(poly, Guid.NewGuid().ToString());
+                });
+            });
+        }
+        private Dictionary<Entity,List<Entity>> GetStoryOuterLineDic(List<ThEStoreyInfo> storeyInfos)
+        {
+            Dictionary<Entity, List<Entity>> res = new Dictionary<Entity, List<Entity>>();
+            ThCADCoreNTSSpatialIndex outerArchlineIndex = new ThCADCoreNTSSpatialIndex(OuterArchOutlineIdDic.Keys.ToCollection());
+            storeyInfos.ForEach(o =>
+            {
+                var outerArchlineInBoundary = outerArchlineIndex.SelectWindowPolygon(o.Boundary).Cast<Entity>().ToList();
+                res.Add(o.Boundary, outerArchlineInBoundary);
+            });
+            return res;
         }
     }
 }

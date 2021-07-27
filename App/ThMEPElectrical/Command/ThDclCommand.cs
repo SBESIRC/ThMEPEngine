@@ -58,6 +58,15 @@ namespace ThMEPElectrical.Command
                     levelIndex = ner.Value;
                 }
                 short colorIndex = 1;
+
+                var storeyExtractor = new ThEStoreyExtractor()
+                {
+                    ColorIndex = colorIndex++,
+                    GroupSwitch = false,
+                    UseDb3Engine = true,
+                };
+                storeyExtractor.Extract(acadDatabase.Database, pts);
+
                 var architectureOutlineExtractor = new ThArchitectureOutlineExtractor()
                 {
                     ColorIndex = colorIndex++,
@@ -66,6 +75,14 @@ namespace ThMEPElectrical.Command
                     IsolateSwitch = false,
                 };
                 architectureOutlineExtractor.Extract(acadDatabase.Database, pts);
+                architectureOutlineExtractor.MoveSecondToFirst(storeyExtractor.Storeys);//拿到所有的建筑轮廓线
+                //List<Entity> outlinelist = new List<Entity>();
+                //foreach(var item in architectureOutlineExtractor.OuterArchOutlineIdDic.Keys)
+                //{
+                //    outlinelist.Add(item);
+                //}
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlinelist, AcHelper.Active.Database, 1);
+
 
                 //构建外圈构件
 
@@ -79,7 +96,7 @@ namespace ThMEPElectrical.Command
                         OuterOutlines = architectureOutlineExtractor.OuterArchOutlineIdDic.Keys.ToList(),
                         InnerOutlines = architectureOutlineExtractor.InnerArchOutlineIdDic.Keys.ToList()
                     };
-                    outerRecognizer = new ThArchOuterVerticalComponentRecognizer(componentData)
+                    outerRecognizer = new ThArchOuterVerticalComponentRecognizer(componentData,architectureOutlineExtractor)
                     {
                         OuterArchOutlineID = architectureOutlineExtractor.OuterArchOutlineIdDic,
                         InnterArchOutlineID = architectureOutlineExtractor.InnerArchOutlineIdDic
@@ -104,14 +121,7 @@ namespace ThMEPElectrical.Command
                 outerRecognizer.Recognize();//识别仅仅是区分外圈构件和其他构件
 
                 var extractors = new List<ThExtractorBase>()
-                {
-                    new ThEStoreyExtractor()
-                    {
-                        ColorIndex=colorIndex++,
-                        GroupSwitch=false,
-                        UseDb3Engine=true,
-                        IsolateSwitch=false,
-                    },
+                {                   
                     new ThLightningReceivingBeltExtractor
                     {
                         ColorIndex=colorIndex++,
@@ -143,11 +153,12 @@ namespace ThMEPElectrical.Command
 
                 extractors.ForEach(e => e.Extract(acadDatabase.Database, pts));
                 extractors.Add(architectureOutlineExtractor);
+                extractors.Add(storeyExtractor);
                 extractors.ForEach(e =>
                 {
                     if(e is IGroup iGroup)
                     {
-                        iGroup.Group((extractors[0] as ThEStoreyExtractor).StoreyIds);
+                        iGroup.Group((extractors[4] as ThEStoreyExtractor).StoreyIds);
                     }
                 });
                 extractors.ForEach(o => (o as IPrint).Print(acadDatabase.Database));

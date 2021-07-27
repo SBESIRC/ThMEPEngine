@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Service
@@ -20,6 +22,7 @@ namespace ThMEPEngineCore.Service
         private const double PostAREATOLERANCE = 5000000.0;
         private const double PostBufferAREATOLERANCE = 0.0;
         private const double ExpansionJointLength = 151.0;
+        private const double ExtendLineLength = 5.0;
         public ThArchitectureOutlineBuilder(DBObjectCollection polygons)
         {
             Results = new List<Polyline>();
@@ -28,34 +31,44 @@ namespace ThMEPEngineCore.Service
 
         public void Build()
         {
-            if(_polygons.Count==0 || _polygons is null)
+            if (_polygons.Count==0 || _polygons is null)
             {
                 return;
             }
+            var transPolygons = TransPolygons();
             //var cleanData = PreProcess(Polygons);
             //认为里面的数据均已进行了Simplifier的处理
-            var cleanData = Buffer(_polygons, ProOffsetDistance);
+            var cleanData = Buffer(transPolygons, ProOffsetDistance);
             cleanData = Union(cleanData);
+            
             //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(cleanData.Cast<Entity>().ToList(), AcHelper.Active.Database,1);
             var temp1 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
                 temp1.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
             });
-            cleanData = temp1; 
+            cleanData = temp1;          
             cleanData = Union(cleanData);
-            //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(cleanData.Cast<Entity>().ToList(), AcHelper.Active.Database, 1);
             var temp2 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
                 temp2.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
-            });
+            });          
             cleanData = temp2;
             cleanData = Buffer(cleanData, -ProOffsetDistance);
             cleanData = FilterSmallArea(cleanData, ProAREATOLERANCE);
             cleanData = PostProcess(cleanData);
+            //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(cleanData.Cast<Entity>().ToList(), AcHelper.Active.Database, 1);
             cleanData = Union(cleanData);
             Results = cleanData.Cast<Polyline>().ToList();
+        }
+        private DBObjectCollection TransPolygons()
+        {
+            var results = new DBObjectCollection();
+            var lines = new List<Line>();
+            _polygons.Cast<Polyline>().ForEach(o => lines.AddRange(o.ToLines()));
+            lines = lines.Select(o => o.ExtendLine(ExtendLineLength)).ToList();
+            return lines.ToCollection().Polygons();
         }
         private DBObjectCollection PostProcess(DBObjectCollection objs)
         {
@@ -64,9 +77,10 @@ namespace ThMEPEngineCore.Service
             //result = FilterSmallArea(result, PostBufferAREATOLERANCE);
             //result = Buffer(result, -PostOffsetDistance);
             result = Buffer(result, ExpansionJointLength);
+            //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(result.Cast<Entity>().ToList(), AcHelper.Active.Database, 1);
             result = Union(result);
             result = Buffer(result, -ExpansionJointLength);
-            result = FilterSmallArea(result, PostBufferAREATOLERANCE);
+            //result = FilterSmallArea(result, PostBufferAREATOLERANCE);
             return result;
         }
         private DBObjectCollection Union(DBObjectCollection objs)
@@ -81,7 +95,11 @@ namespace ThMEPEngineCore.Service
             var bufferService = new ThNTSBufferService();
             foreach(Entity obj in objs)
             {
-                result.Add(bufferService.Buffer(obj, disttance));
+                var entity = bufferService.Buffer(obj, disttance);
+                if(entity!=null)
+                {
+                    result.Add(entity);
+                }    
             }
             return result;
         }

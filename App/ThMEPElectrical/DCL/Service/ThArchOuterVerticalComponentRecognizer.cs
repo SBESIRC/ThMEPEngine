@@ -20,6 +20,17 @@ namespace ThMEPElectrical.DCL.Service
             OuterOutlineBufferDic = Buffer(InputData.OuterOutlines, -OuterArchOutlineOffsetLength);
             InnerOutlineBufferDic = Buffer(InputData.InnerOutlines, HoleArchOutlineOffsetLength);
         }
+        /// <summary>
+        /// 用新的建筑轮廓线去寻找外圈构件
+        /// </summary>
+        /// <param name="inputData"></param>
+        public ThArchOuterVerticalComponentRecognizer(ThOuterVertialComponentData inputData, ThArchitectureOutlineExtractor extractor)
+        {
+            if (inputData is ThArchOuterVertialComponentData data)
+                InputData = data;
+            OuterOutlineBufferDic = Buffer(extractor.OuterArchOutlineIdDic.Keys.ToList(), -OuterArchOutlineOffsetLength);
+            InnerOutlineBufferDic = Buffer(extractor.InnerArchOutlineIdDic.Keys.ToList(), HoleArchOutlineOffsetLength);
+        }
         public override void Recognize()
         {
             //创建柱和剪力墙的索引

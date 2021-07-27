@@ -18,10 +18,7 @@ namespace ThMEPEngineCore.Engine
             }
             else if(dbObj is Line line)
             {
-                var poly = new Polyline();
-                poly.AddVertexAt(0, new Point2d(line.StartPoint.X, line.StartPoint.Y), 0, 0, 0);
-                poly.AddVertexAt(1, new Point2d(line.EndPoint.X, line.EndPoint.Y), 0, 0, 0);
-                elements.AddRange(Handle(poly, matrix));
+                elements.AddRange(Handle(line,matrix));
             }
         }
 
@@ -43,6 +40,22 @@ namespace ThMEPEngineCore.Engine
                 var clone = polyline.WashClone();
                 clone.TransformBy(matrix);
                 curves.Add(clone);
+            }
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
+        }
+
+        private List<ThRawIfcBuildingElementData> Handle(Line line, Matrix3d matrix)
+        {
+            List<Curve> curves = new List<Curve>();
+            if (IsBuildElement(line) && CheckLayerValid(line))
+            {
+                var newLine = line.WashClone() as Line;
+                newLine.TransformBy(matrix);
+
+                var poly = new Polyline();
+                poly.AddVertexAt(0, new Point2d(newLine.StartPoint.X, newLine.StartPoint.Y), 0, 0, 0);
+                poly.AddVertexAt(1, new Point2d(newLine.EndPoint.X, newLine.EndPoint.Y), 0, 0, 0);
+                curves.Add(poly);
             }
             return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
