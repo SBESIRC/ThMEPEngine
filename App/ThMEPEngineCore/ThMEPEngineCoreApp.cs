@@ -22,6 +22,7 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.IO.GeoJSON;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
 
 namespace ThMEPEngineCore
 {
@@ -975,6 +976,77 @@ namespace ThMEPEngineCore
                         o.SetDatabaseDefaults();
                     });
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THASTAR", CommandFlags.Modal)]
+        public void THASTAR()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var frame = acdb.Element<Polyline>(result.Value.GetObjectIds()[0]);
+
+                var cirNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Circle)).DxfName,
+                };
+                filter = ThSelectionFilterTool.Build(cirNames);
+                result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var pt = acdb.Element<Circle>(result.Value.GetObjectIds()[0]).Center;
+
+                var lineNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                };
+                filter = ThSelectionFilterTool.Build(lineNames);
+                result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var line = acdb.Element<Line>(result.Value.GetObjectIds()[0]);
+
+                var holeNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                filter = ThSelectionFilterTool.Build(holeNames);
+                result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                List<Polyline> holes = new List<Polyline>();
+                foreach (var item in result.Value.GetObjectIds())
+                {
+                    holes.Add(acdb.Element<Polyline>(item));
+                }
+
+                AStarOptimizeRoutePlanner aStarOptimizeRoute = new AStarOptimizeRoutePlanner(frame, (line.EndPoint - line.StartPoint).GetNormal());
+                aStarOptimizeRoute.SetObstacle(holes);
+                var res = aStarOptimizeRoute.Plan(pt, line);
+                acdb.ModelSpace.Add(res);
             }
         }
     }

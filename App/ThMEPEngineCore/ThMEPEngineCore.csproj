@@ -56,6 +56,14 @@
     <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\PointMap.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\RoutePlanMap.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\AdjustAStarPath.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\AStarRoutePlanner.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\CostGetterService\ICostGetter.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\CostGetterService\ToLineCostGetter.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\GeometryHelper.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\MapService\Map.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\Model\AStarNode.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm_New\Model\RoutePlanData.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
