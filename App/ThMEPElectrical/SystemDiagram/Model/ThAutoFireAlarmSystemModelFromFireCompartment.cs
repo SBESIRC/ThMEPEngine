@@ -233,9 +233,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <param name="addFloorss"></param>
         public override void DrawFloorsNum(Database db, List<ThFloorModel> addFloorss)
         {
-            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(db))
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
             {
+                HostApplicationServices.WorkingDatabase = db;
                 double Rotation = 0.00;
                 var blkrefs = acadDatabase.ModelSpace
                .OfType<BlockReference>()

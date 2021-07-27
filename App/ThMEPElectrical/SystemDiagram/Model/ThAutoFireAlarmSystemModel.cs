@@ -37,8 +37,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
         {
             PrepareData();
             using (var acadDatabase = AcadDatabase.Active())
-            using (var dbSwitch = new ThDbWorkingDatabaseSwitch(acadDatabase.Database))
             {
+                HostApplicationServices.WorkingDatabase = acadDatabase.Database;
                 //设置全局偏移量
                 InsertBlockService.SetOffset(Offset, ConversionMatrix);
                 //初始化所有需要画的线并导入图层/线型等信息
