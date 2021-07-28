@@ -163,6 +163,7 @@ namespace ThMEPElectrical.Command
                 });
                 extractors.ForEach(o => (o as IPrint).Print(acadDatabase.Database));
 
+#if DEBUG
                 var geos = new List<ThGeometry>();
                 extractors.ForEach(e => geos.AddRange(e.BuildGeometries()));
 
@@ -176,6 +177,7 @@ namespace ThMEPElectrical.Command
                 var parseResults = ThDclResultParseService.Parse(result);
                 var printService = new ThDclPrintService(acadDatabase.Database, "AI-DCL");
                 printService.Print(parseResults);
+#endif
             }
         }
 #else
