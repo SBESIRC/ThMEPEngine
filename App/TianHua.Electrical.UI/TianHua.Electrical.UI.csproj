@@ -8,11 +8,12 @@
     <OutputType>Library</OutputType>
     <RootNamespace>TianHua.Electrical.UI</RootNamespace>
     <AssemblyName>TianHua.Electrical.UI</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -64,6 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\ElectricalUIDbExtension.cs" />
+    <Compile Include="CapitalConverter\CapitalConverterUI.xaml.cs">
+      <DependentUpon>CapitalConverterUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
     <Compile Include="fmBasementLighting.cs">
@@ -240,6 +245,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Page Include="CapitalConverter\CapitalConverterUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
