@@ -15,15 +15,7 @@ namespace ThMEPEngineCore.Engine
         }
         public override bool IsAnnotationElement(Entity entity)
         {
-            if (entity is DBText dBText)
-            {
-                return dBText.TextString.Contains('-');
-            }
-            else if (entity is MText mText)
-            {
-                return mText.Contents.Contains('-');
-            }
-            return false;
+            return entity is DBText || entity is MText;
         }
 
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj, Matrix3d matrix)

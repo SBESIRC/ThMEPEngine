@@ -29,10 +29,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private ThCADCoreNTSSpatialIndex GlobalBlockInfoSpatialIndex;
         private List<ThIfcDistributionFlowElement> FloorBlockInfo;
         private ThCADCoreNTSSpatialIndex FloorBlockInfoSpatialIndex;
+        private List<string> FireCompartmentNameList;
 
         public ThAutoFireAlarmSystemModelFromFireCompartment()
         {
             floors = new List<ThFloorModel>();
+            FireCompartmentNameList = new List<string>();
         }
 
         /// <summary>
@@ -161,6 +163,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             //统计楼层内防火分区计数
             Floors.ForEach(floor =>
             {
+                FireCompartmentNameList.AddRange(floor.FireDistricts.Where(o => !o.DrawFireDistrictNameText).Select(o => o.FireDistrictName));
                 var FloorBlockInfo = GetFloorBlockInfo(floor.FloorBoundary);
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
@@ -176,8 +179,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
                 floor.FireDistricts.Where(f => f.DrawFireDistrict && f.DrawFireDistrictNameText).ToList().ForEach(o =>
                 {
-                    o.FireDistrictNo = ++Max_FireDistrictNo;
+                    Max_FireDistrictNo++;
+                    while (FireCompartmentNameList.Contains(FloorName + "-" + Max_FireDistrictNo))
+                    {
+                        Max_FireDistrictNo++;
+                    }
+                    o.FireDistrictNo = Max_FireDistrictNo;
                     o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
+                    FireCompartmentNameList.Add(o.FireDistrictName);
                 });
             });
             return Floors;
@@ -204,6 +213,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 var FloorBlockInfo = GetFloorBlockInfo(floor.FloorBoundary);
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
+                    fireDistrict.FireDistrictNo = 0;//该楼层属于虚拟楼层，需手动调整防火分区归属权
                     fireDistrict.Data = new DataSummary()
                     {
                         BlockData = FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary)
@@ -376,18 +386,44 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <returns></returns>
         private void DataProcessing()
         {
-            //正常的防火分区
-            var NormalFireDistricts = this.floors.SelectMany(o => o.FireDistricts).Where(f => f.FireDistrictNo != -1).ToList();
+            //全部防火分区
+            var AllFireZones = this.floors.SelectMany(o => o.FireDistricts).ToList();
+            //合并同名称楼层
+            var NormalFireDistricts = new List<ThFireDistrictModel>();
+            AllFireZones.ForEach(o =>
+            {
+                int index = NormalFireDistricts.FindIndex(x => x.FireDistrictName == o.FireDistrictName);
+                if (index >= 0)
+                {
+                    NormalFireDistricts[index].Data += o.Data;
+                }
+                else
+                {
+                    NormalFireDistricts.Add(o);
+                }
+            });
+            //计算楼层合并关系
             for (int i = 0; i < this.floors.Count; i++)
             {
                 ThFloorModel floor = this.floors[i];
                 List<ThFireDistrictModel> fireCompartments = new List<ThFireDistrictModel>();
-                floor.FireDistricts.Where(f => f.FireDistrictNo == -1).ForEach(o =>
+                floor.FireDistricts.ForEach(o =>
                 {
                     var fireDistrict = NormalFireDistricts.FirstOrDefault(f => f.FireDistrictName == o.FireDistrictName);
-                    if (!fireDistrict.IsNull())
+                    if (fireDistrict.IsNull())
                     {
-                        fireDistrict.Data += o.Data;
+                        //已被别的楼层合并完成，本楼层直接忽略
+                        fireCompartments.Add(o);
+                    }
+                    else if(o.FireDistrictNo != -1)
+                    {
+                        //正常防火分区，合并所有重名防火分区数据
+                        o.Data = fireDistrict.Data;
+                        NormalFireDistricts.Remove(fireDistrict);
+                    }
+                    else
+                    {
+                        //不属于本楼层的防火分区，不执行合并操作，忽略掉
                         fireCompartments.Add(o);
                     }
                 });

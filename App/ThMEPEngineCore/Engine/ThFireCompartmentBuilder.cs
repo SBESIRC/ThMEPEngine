@@ -1,16 +1,14 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using NetTopologySuite.Geometries;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
-using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -18,9 +16,12 @@ namespace ThMEPEngineCore.Engine
     {
         public List<string> LayerFilter { get; set; }
 
+        public Dictionary<Entity, List<string>> InvalidResults { get; set; }
+
         public ThFireCompartmentBuilder()
         {
             LayerFilter = new List<string>();
+            InvalidResults = new Dictionary<Entity, List<string>>();
         }
 
         //
@@ -40,7 +41,6 @@ namespace ThMEPEngineCore.Engine
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             return Build(FireCompartmentGeometry, marks);
         }
-
         public List<ThFireCompartment> BuildFromMS(Database db, ObjectIdCollection objs)
         {
             var outlineEngine = new ThFireCompartmentOutlineRecognitionEngine()
@@ -57,9 +57,7 @@ namespace ThMEPEngineCore.Engine
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             return Build(FireCompartmentGeometry, marks);
         }
-
-
-        public List<ThFireCompartment> Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
+        private List<ThFireCompartment> Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
         {
             if (rooms.Count == 0)
                 return new List<ThFireCompartment>();
@@ -74,11 +72,24 @@ namespace ThMEPEngineCore.Engine
                 var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
                 if (objs.Count > 0)
                 {
-                    var mark = marks.First(o => objs.Contains(o.Geometry) & !choisemark.Contains(o.Geometry));
-                    if (!mark.IsNull())
+                    var mark = marks.Where(o => objs.Contains(o.Geometry) & !choisemark.Contains(o.Geometry)).ToList();
+                    var FindMarkCount = mark.Count();
+                    if (FindMarkCount == 0)
                     {
-                        choisemark.Add(mark.Geometry);
-                        FireCompartment.Number = mark.Text;
+                        //没有找到防火分区名称，说明设计师没画
+                        //do not
+                    }
+                    else if (FindMarkCount == 1)
+                    {
+                        //找到防火分区名称，为防火分区命名
+                        FireCompartment.Number = mark.First().Text;
+                        choisemark.AddRange(mark.Select(o=>o.Geometry)); 
+                    }
+                    else
+                    {
+                        //防火分区有多个名称，属于设计师画错，填充到错误Map
+                        choisemark.AddRange(mark.Select(o => o.Geometry));
+                        InvalidResults.Add(FireCompartment.Boundary, mark.Select(o => o.Text).ToList());
                     }
                 }
             }
