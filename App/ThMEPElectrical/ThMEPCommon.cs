@@ -29,6 +29,7 @@ namespace ThMEPElectrical
         public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
 
         //安放平面
+        public const string FRAME_LAYER_NAME = "AD-FLOOR-AREA";                         //视频监控系统放置图层
         //----视频监控系统
         public const string VM_LAYER_NAME = "E-VSCS-DEVC";                              //视频监控系统放置图层
         public const string GUNCAMERA_BLOCK_NAME = "E-BVSCS110";                        //枪式摄像机图块

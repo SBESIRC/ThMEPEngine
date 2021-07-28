@@ -28,7 +28,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             List<LayoutModel> models = new List<LayoutModel>();
             foreach (var door in doors)
             {
-                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                var bufferDoor = door.Buffer(15)[0] as Polyline;
                 var connectRooms = getLayoutStructureService.GetNeedTHRooms(bufferDoor, rooms);
                 if (connectRooms.Count <= 0)
                 {

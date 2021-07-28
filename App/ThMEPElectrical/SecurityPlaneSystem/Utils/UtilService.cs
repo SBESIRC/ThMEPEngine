@@ -206,7 +206,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                         }
 
                         var layoutPt = sPt + lineDir * (blockWidth / 2);
-                        resLayoutInfo.Add(line, layoutPt);
+                        if ((layoutPt - doorPt).GetNormal().DotProduct(dir) > 0)
+                        {
+                            resLayoutInfo.Add(line, layoutPt);
+                        }
                     }
                 }
             }

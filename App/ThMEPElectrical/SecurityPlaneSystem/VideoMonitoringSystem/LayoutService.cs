@@ -42,7 +42,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             //入口控制布置模式
             foreach (var door in doors)
             {
-                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                var bufferDoor = door.Buffer(15)[0] as Polyline;
                 var connectRooms = getLayoutStructureService.GetNeedTHRooms(bufferDoor, rooms);
                 if (connectRooms.Count <= 0)
                 {
@@ -68,7 +68,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 }
             }
 
-            return models;
+            return models.Where(x => !x.layoutPt.IsEqualTo(Point3d.Origin)).ToList();
         }
 
         /// <summary>

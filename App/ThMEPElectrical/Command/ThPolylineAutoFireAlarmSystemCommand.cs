@@ -51,6 +51,14 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
+                if (builder.InvalidResults.Count > 0)
+                {
+                    foreach (var invalid in builder.InvalidResults)
+                    {
+                        Active.Editor.WriteLine($"\n检测到有防火分区内有不止一个命名，请先手动处理。名称[{string.Join(",", invalid.Value)}]");
+                    }
+                    return;
+                }
 
                 //加载块集合配置文件白名单
                 ThBlockConfigModel.Init();

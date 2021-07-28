@@ -35,10 +35,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             }
             //计算门信息
             var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item2);
+            var controller = layoutControllerService.LayoutController(structs, door, doorCenterPt, doorInfo.Item2);
 
             //布置探测器
             LayoutHositingDetectorService layoutHositingDetectorService = new LayoutHositingDetectorService();

@@ -44,7 +44,7 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
@@ -124,19 +124,19 @@ namespace ThMEPElectrical.Command
                 }
                 else if (model is InfraredWallDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR" } });
                 }
                 else if (model is DoubleWallDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR/M" } });
                 }
                 else if (model is InfraredHositingDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR" } });
                 }
                 else if (model is DoubleHositingDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR/M" } });
                 }
                 else if (model is SoundLightAlarm)
                 {

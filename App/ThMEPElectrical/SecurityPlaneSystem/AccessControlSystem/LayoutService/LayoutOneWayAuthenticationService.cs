@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,13 +29,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             //计算门信息
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
             var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
-            var otherDoorPt = doorCenterPt - roomDoorInfo.Item2 * (roomDoorInfo.Item4 / 2);
 
             //获取构建信息
-            var bufferRoom = room.Buffer(5)[0] as Polyline;
+            var bufferRoom = room.Buffer(15)[0] as Polyline;
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
+            structs = structs.ToCollection().UnionPolygons().Cast<Polyline>().ToList();
             using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
                 foreach (var item in structs)
@@ -43,8 +44,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            var button = CalLayoutButton(structs, door, roomDoorInfo.Item2, roomDoorInfo.Item1);
-            var cardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, otherDoorPt);
+            var button = CalLayoutButton(structs, door, roomDoorInfo.Item2, doorCenterPt);
+            var cardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, doorCenterPt);
             if (button != null) accessControlModels.Add(button);
             if (cardReader != null) accessControlModels.Add(cardReader);
             accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item2));
@@ -66,9 +67,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             if (layoutInfo.Key == null)
             {
                 var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, buttunWidth * 2)
-                    .Where(x=>(x.Value - doorPt).DotProduct(doorDir) > 0)
-                    .FirstOrDefault();
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                if (layoutInfo.Key == null)
+                {
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                }
                 checkDir = (doorPt - layoutInfo.Value).GetNormal();
             }
             if (layoutInfo.Key == null)
@@ -116,9 +119,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             if (layoutInfo.Key == null)
             {
                 var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2)
-                    .Where(x => (x.Value - doorPt).DotProduct(doorDir) > 0)
-                    .FirstOrDefault(); ;
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                if (layoutInfo.Key == null)
+                {
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                }
                 checkDir = (doorPt - layoutInfo.Value).GetNormal();
             }
             if (layoutInfo.Key == null)

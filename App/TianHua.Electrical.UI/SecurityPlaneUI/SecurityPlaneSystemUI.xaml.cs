@@ -71,6 +71,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.GuardTourSystem))
                 {
+                    ThElectricalUIService.Instance.Parameter.guardTourSystemTable = table;
                     GuardTourGrid.ItemsSource = table.DefaultView;
                     List<string> configLst = new List<string>() { "是", "否" };
                     SetGridValue(GuardTourGrid, table, configLst);
