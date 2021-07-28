@@ -51,6 +51,7 @@ namespace TianHua.Electrical.UI
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var uiCapitalConverter = new CapitalConverterUI();
+                uiCapitalConverter.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 AcadApp.ShowModalWindow(uiCapitalConverter);
                 if (!uiCapitalConverter.GoOn)
                 {
