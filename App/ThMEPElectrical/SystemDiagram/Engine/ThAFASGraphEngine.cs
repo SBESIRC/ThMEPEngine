@@ -738,7 +738,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         {
                             if (!SIRule(NextBlk) && !FASRule(NextBlk))
                             {
-                                CrossAlarms.AddRange(AlarmPoint);
+                                //过滤掉延伸出去但未进入其他防火分区的问题
+                                if (AlarmPoint.Count > 1)
+                                {
+                                    CrossAlarms.AddRange(AlarmPoint);
+                                }
                             }
                             NextElements.Add(NextBlk, sharedPath);
                         }
@@ -750,7 +754,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         {
                             if (!SIRule(NextBlk) && !FASRule(NextBlk))
                             {
-                                CrossAlarms.AddRange(AlarmPoint);
+                                //过滤掉延伸出去但未进入其他防火分区的问题
+                                if (AlarmPoint.Count > 1)
+                                {
+                                    CrossAlarms.AddRange(AlarmPoint);
+                                }
                             }
                             NextElements.Add(NextBlk, sharedPath);
                         }
