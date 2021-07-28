@@ -96,6 +96,14 @@ namespace ThMEPElectrical.Command
                             Active.Editor.WriteLine($"\n检测到{doc.Name}图纸有未正确命名的防火分区，请先手动命名");
                             return;
                         }
+                        if (builder.InvalidResults.Count > 0)
+                        {
+                            foreach (var invalid in builder.InvalidResults)
+                            {
+                                Active.Editor.WriteLine($"\n检测到有防火分区内有不止一个命名，请先手动处理。名称[{string.Join(",", invalid.Value)}]");
+                            }
+                            return;
+                        }
 
                         //获取块引擎附加信息
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();
