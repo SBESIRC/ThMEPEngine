@@ -26,7 +26,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
 
             //获取构建信息
-            var bufferRoom = room.Buffer(5)[0] as Polyline;
+            var bufferRoom = room.Buffer(15)[0] as Polyline;
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);

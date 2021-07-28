@@ -42,7 +42,7 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
@@ -84,6 +84,17 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    using (AcadDatabase db = AcadDatabase.Active())
+                    {
+                        //foreach (var item in walls)
+                        //{
+                        //    db.ModelSpace.Add(item);
+                        //}
+                        //foreach (var item in columns)
+                        //{
+                        //    db.ModelSpace.Add(item);
+                        //}
+                    }
                     var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
                     //布置
@@ -128,7 +139,7 @@ namespace ThMEPElectrical.Command
                 double rotateAngle = Vector3d.XAxis.GetAngleTo(model.layoutDir, Vector3d.ZAxis);
                 if (model is Buttun)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.BUTTON_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.BUTTON_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "E" } });
                 }
                 else if (model is CardReader)
                 {
@@ -136,7 +147,7 @@ namespace ThMEPElectrical.Command
                 }
                 else if (model is ElectricLock)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.ELECTRICLOCK_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.AC_LAYER_NAME, ThMEPCommon.ELECTRICLOCK_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "EL" } });
                 }
                 else if (model is Intercom)
                 {

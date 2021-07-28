@@ -32,20 +32,21 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             {
                 return null;
             }
-            var bufferRoom = room.Buffer(10)[0] as Polyline;
+            var bufferRoom = room.Buffer(50)[0] as Polyline;
             var nCols = getLayoutStructureService.GetNeedColumns(columns, bufferRoom, poly);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom, poly);
             using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
                 //db.ModelSpace.Add(poly);
-                //foreach (var item in nWalls)
-                //{
-                //    db.ModelSpace.Add(item);
-                //}
+                foreach (var item in nWalls)
+                {
+                    //db.ModelSpace.Add(item);
+                }
             }
             //计算布置点位
             var checkDoors = new List<Polyline>(doors);
             checkDoors.Remove(door);
+            checkDoors = checkDoors.Select(x => x.Buffer(-5)[0] as Polyline).ToList();
             var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors);
             pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors));
             var checkRoom = room.Buffer(-10)[0] as Polyline;
@@ -128,6 +129,13 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             List<Polyline> checkStru = new List<Polyline>(walls);
             checkStru.AddRange(columns);
             checkStru.AddRange(doors);
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var s in doors)
+                {
+                    //db.ModelSpace.Add(s);
+                }
+            }
             foreach (var wall in walls)
             {
                 var bufferWall = wall.Buffer(bufferWidth)[0] as Polyline;
@@ -159,9 +167,32 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <returns></returns>
         private bool CheckIntersectWithStruc(Line checkLine, List<Polyline> strus)
         {
+            var leftMatrix = Matrix3d.Rotation(Math.PI / 180 * 2, Vector3d.ZAxis, checkLine.StartPoint);
+            var leftLine = checkLine.Clone() as Line;
+            leftLine.TransformBy(leftMatrix.Inverse());
+            var rightMatrix = Matrix3d.Rotation(Math.PI / 180 * -2, Vector3d.ZAxis, checkLine.StartPoint);
+            var rightLine = checkLine.Clone() as Line;
+            rightLine.TransformBy(rightMatrix.Inverse());
+            using (Linq2Acad.AcadDatabase db =Linq2Acad.AcadDatabase.Active())
+            {
+                //db.ModelSpace.Add(leftLine);
+                //db.ModelSpace.Add(rightLine);
+                //foreach (var item in strus)
+                //{
+                //    db.ModelSpace.Add(item);
+                //}
+            }
             foreach (var wall in strus)
             {
                 if (wall.Intersects(checkLine))
+                {
+                    return false;
+                }
+                if (wall.Intersects(leftLine))
+                {
+                    return false;
+                }
+                if (wall.Intersects(rightLine))
                 {
                     return false;
                 }

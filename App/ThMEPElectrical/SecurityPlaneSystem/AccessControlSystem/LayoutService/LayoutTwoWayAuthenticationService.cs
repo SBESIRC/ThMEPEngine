@@ -26,17 +26,16 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             //计算门信息
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
             var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
-            var otherDoorPt = doorCenterPt - roomDoorInfo.Item2 * (roomDoorInfo.Item3 / 2);
 
             //获取构建信息
-            var bufferRoom = room.Buffer(5)[0] as Polyline;
+            var bufferRoom = room.Buffer(15)[0] as Polyline;
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            var inCardReader = CalLayoutCardReader(structs, door, roomDoorInfo.Item2, roomDoorInfo.Item1);
-            var outCardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, otherDoorPt);
+            var inCardReader = CalLayoutCardReader(structs, door, roomDoorInfo.Item2, doorCenterPt);
+            var outCardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, doorCenterPt);
             if (inCardReader != null) accessControlModels.Add(inCardReader);
             if (outCardReader != null) accessControlModels.Add(outCardReader);
             accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1, roomDoorInfo.Item2));
@@ -72,9 +71,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             if (layoutInfo.Key == null)
             {
                 var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2)
-                    .Where(x => (x.Value - doorPt).DotProduct(doorDir) > 0)
-                    .FirstOrDefault();
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                if (layoutInfo.Key == null)
+                {
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
+                }
                 checkDir = (doorPt - layoutInfo.Value).GetNormal();
             }
             if (layoutInfo.Key == null)

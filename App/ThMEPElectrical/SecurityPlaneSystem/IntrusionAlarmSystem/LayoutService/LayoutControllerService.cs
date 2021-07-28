@@ -21,8 +21,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var checkDir = doorDir;
             if (layoutInfo.Key == null)
             {
-                var dir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, dir, doorPt, door, angle, blockWidth).FirstOrDefault();
+                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                if (layoutInfo.Key == null)
+                {
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                }
                 checkDir = (doorPt - layoutInfo.Value).GetNormal();
             }
             if (layoutInfo.Key == null)
