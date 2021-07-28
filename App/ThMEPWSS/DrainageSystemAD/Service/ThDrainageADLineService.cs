@@ -89,6 +89,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return startPt;
         }
+      
 
         private static Dictionary<Point3d, List<Line>> lineNode(List<Line> lines)
         {

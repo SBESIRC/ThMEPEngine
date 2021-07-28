@@ -13,6 +13,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static int length_pipe_end = 270;
         public static int length_stack_end_break = 70;
 
+        public static int diameterDim_move_x = 50;
+        public static int diameterDim_move_y = 30;
+        public static string diameterDN_visi_pre = "DN";
+
+        public static int tol_diaDim = 350;
         public static int tol_pipe_end = 500;
         public static int tol_StackR = 100;
 
@@ -22,6 +27,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static string blkName_stack = "带定位立管";
         public static string blkName_angleValve = "给水角阀平面";
         public static string blkName_dim = "给水管径50";
+        public static double blk_scale_end = 1;
 
         public static List<string> LayerFilter = new List<string>()
                                                     {
@@ -100,12 +106,81 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static Dictionary<string, List<string>> endValve_dir_name = new Dictionary<string, List<string>>  {
                                                             {"给水角阀",new List<string>() {"向右","向前","向左","向后"}},
-                                                            {"感应式冲洗阀",new List<string>() {"向右水平", "向前水平", "向左水平", "向后水平"} },
+                                                            {"感应式冲洗阀",new List<string>() {"向右水平", "向后水平", "向左水平", "向前水平" } }, //前后和其他反着的
                                                             {"延时自闭阀" ,new List<string>() {"向右水平", "向前水平", "向左水平", "向后水平"} },
                                                             {"水龙头1", new List<string>() { "向右","向前","向左","向后" } },
                                                             {"淋浴器系统", new List<string>() {"向右","向前","向左","向后" } },
                                                             {"浴缸系统", new List<string>() {"向右","向前","向左","向后" } },
                                                         };
 
+        public static Dictionary<string, double> cool_supply_equivalent = new Dictionary<string, double>
+                                                        {
+                                                            {"A-Toilet-1",0.75 },
+                                                            {"A-Toilet-2",0.75 },
+                                                            {"A-Toilet-3",0.75 },
+                                                            {"A-Toilet-4",0.75 },
+                                                            {"A-Kitchen-3",1},
+                                                            {"A-Kitchen-4",1},
+                                                            {"小便器",0.5},
+                                                            {"A-Toilet-5",0.5 },
+                                                            {"蹲便器",0.5 },
+                                                            {"A-Kitchen-9",1 },
+                                                            {"A-Toilet-6",0.75 },
+                                                            {"A-Toilet-7",0.75 },
+                                                            {"A-Toilet-8",1.2 },
+                                                            {"A-Toilet-9",1 },
+                                                            {"儿童坐便器",0.5 },
+                                                            {"儿童洗脸盆",0.75 },
+                                                            {"儿童小便器",0.5 },
+                                                        };
+
+        public static Dictionary<string, double> cool_supply_flow = new Dictionary<string, double>
+                                                        {
+                                                            {"A-Toilet-1",0.15 },
+                                                            {"A-Toilet-2",0.15 },
+                                                            {"A-Toilet-3",0.15 },
+                                                            {"A-Toilet-4",0.25 },
+                                                            {"A-Kitchen-3",0.2},
+                                                            {"A-Kitchen-4",0.2},
+                                                            {"小便器",0.1},
+                                                            {"A-Toilet-5",0.1 },
+                                                            {"蹲便器",1.2 },
+                                                            {"A-Kitchen-9",0.2 },
+                                                            {"A-Toilet-6",0.15 },
+                                                            {"A-Toilet-7",0.15 },
+                                                            {"A-Toilet-8",0.24 },
+                                                            {"A-Toilet-9",0.2 },
+                                                            {"儿童坐便器",0.1 },
+                                                            {"儿童洗脸盆",0.15 },
+                                                            {"儿童小便器",0.1 },
+                                                        };
+
+        public static Dictionary<int, double> cool_supply_flow_diam = new Dictionary<int, double>() {
+                                                            {20,0.0213},
+                                                            {25,0.0273},
+                                                            {32,0.0354},
+                                                            {40,0.0413},
+                                                            {50,0.0527},
+                                                            {65,0.0681},
+                                                            {80,0.0809},
+                                                            {100,0.1063},
+                                                            {125,0.131},
+                                                            {150,0.1593},
+                                                            {200,0.2071}
+                                                        };
+
+        public static Dictionary<int, (double, double)> cool_supply_diamFlowRange = new Dictionary<int, (double, double)>{
+                                                            {20,(0,0.8)},
+                                                            {25,(0,1)},
+                                                            {32,(0,1)},
+                                                            {40,(0,1)},
+                                                            {50,(0,1.2)},
+                                                            {65,(0,1.2)},
+                                                            {80,(0,1.5)},
+                                                            {100,(0,1.5)},
+                                                            {125,(0,1.5)},
+                                                            {150,(0,1.5)},
+                                                            {200,(0,1.5)}
+                                                        };
     }
 }

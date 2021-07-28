@@ -41,6 +41,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var valve = new ThDrainageSDADBlkOutput(pt);
             valve.dir = dir;
             valve.name = ThDrainageSDCommon.Blk_ShutValves;
+            valve.blkSize = ThDrainageSDCommon.Blk_size_ShutValves;
+            valve.scale = ThDrainageSDCommon.Blk_scale_ShutValves;
 
             return valve;
         }
@@ -258,23 +260,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return terminal;
         }
 
-        public static List<Line> cutPipe(List<ThDrainageSDADBlkOutput > valveList, List<Line> pipes)
+        public static List<Line> cutPipe(List<ThDrainageSDADBlkOutput> valveList, List<Line> pipes)
         {
             var tol = new Tolerance(1, 1);
             var finalLine = new List<Line>();
 
-            double scale = ThDrainageSDCommon.Blk_scale;
-            double blkSize = ThDrainageSDCommon.Blk_Size;
-
             foreach (var valve in valveList)
             {
-                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position , tol)).ToList();
+                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position, tol)).ToList();
                 if (line.Count > 0)
                 {
                     var l = line.First();
                     var dir = valve.dir;
-                    var blkS = valve.position - dir * scale * blkSize;
-                    var blkE = valve.position + dir * scale * blkSize;
+                    double scale = valve.scale;
+                    double blkSize = valve.blkSize;
+                    var blkS = valve.position - dir * scale * blkSize / 2;
+                    var blkE = valve.position + dir * scale * blkSize / 2;
                     var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
                     var newE2 = blkS == newE ? blkE : blkS;
 

@@ -24,6 +24,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public Line centerLine { get; private set; }
 
+        public double scale { get; private set; }
+
         public ThDrainageSDADValve(Entity outline, string blkName)
         {
             var blkOri = outline as BlockReference;
@@ -40,6 +42,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             boundary = blkOri.ToOBB(blkOri.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
             dir = (boundary.GetPoint3dAt(2) - boundary.GetPoint3dAt(1)).GetNormal();
             centerLine = getCenterLine();
+            scale = Math.Abs(blkOri.ScaleFactors.X);
         }
 
         /// <summary>

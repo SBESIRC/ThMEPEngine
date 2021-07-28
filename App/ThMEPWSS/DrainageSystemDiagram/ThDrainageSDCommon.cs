@@ -44,10 +44,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static string Layer_Dim = "W-WSUP-DIMS";
         public static string Style_Dim = "TH-DIM50-W";
         public static int Dia_Stack = 25;
+
         public static string Blk_AngleValves = "给水角阀平面";
         public static string Blk_ShutValves = "截止阀";
-        public static double Blk_scale = 1;
-        public static int Blk_Size = 150;
+        public static double Blk_scale_AngleValves = 1;
+        public static double Blk_scale_ShutValves = 0.6;
+        public static int Blk_size_ShutValves = 300;
+        public static int Blk_size_AngleValves = 300;
+
         public static string Visibility_AngleValves_key = "可见性1";
         public static string Visibility_AngleValves_Value = "不带锁";
 

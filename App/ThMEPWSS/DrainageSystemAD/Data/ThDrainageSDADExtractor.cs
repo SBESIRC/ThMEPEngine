@@ -17,7 +17,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDAxonoExtractor : ThExtractorBase
     {
-
         public List<ThTerminalToilet> SanTmnList { get; private set; }
         public List<Line> pipes { get; set; }
 

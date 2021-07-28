@@ -15,6 +15,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public Dictionary<string, string> visibility { get; set; }
 
+        public double scale { get; set; }
+
+        public double blkSize { get; set; }
+
         public ThDrainageSDADBlkOutput(Point3d pt)
         {
             position = pt;

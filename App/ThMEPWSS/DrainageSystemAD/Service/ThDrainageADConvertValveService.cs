@@ -33,6 +33,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     valveOutput.name = valveList[i].type;
                     valveOutput.dir = dir;
                     valveOutput.visibility.Add(ThDrainageADCommon.visiName1_valve, valveList[i].visibility);
+                    valveOutput.scale = valveList[i].scale;
+                    valveOutput.blkSize = valveList[i].centerLine.Length;
                     valveCon.Add(valveOutput);
 
                     //删除pipe
@@ -55,7 +57,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 //最近和同方向
                 var ptTemp = allSupplyPt.Where(x => x.DistanceTo(node.Node) <= ThDrainageSDCommon.TolToiletToWall);
                 var dirNode = (node.Parent.Node - node.Node).GetNormal();
-               
+
                 var ptTempSameDir = ptTemp.Where(x =>
                 {
                     var bReturn = false;
@@ -67,8 +69,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     else
                     {
                         //dirSupply = dirSupply.GetNormal();
-                        var toi = toiletList.Where(t=> t.SupplyCool.Contains(x)).First();
-                        dirSupply = toi.Dir .GetNormal();
+                        var toi = toiletList.Where(t => t.SupplyCool.Contains(x)).First();
+                        dirSupply = toi.Dir.GetNormal();
                         var cos = dirSupply.DotProduct(dirNode) / (dirNode.Length * dirSupply.Length);
                         if (cos >= Math.Cos(5 * Math.PI / 180))
                         {
@@ -100,6 +102,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 endValveOutput.name = ThDrainageADCommon.toi_end_name[toi.Type];
                 var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode);
                 endValveOutput.visibility.Add(ThDrainageADCommon.visiName_valve, visi);
+                endValveOutput.scale = ThDrainageADCommon.blk_scale_end;
+                
                 valveEndCon.Add(endValveOutput);
             }
 

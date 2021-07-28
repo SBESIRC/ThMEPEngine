@@ -22,7 +22,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     valve.dir = t.Dir;
                     valve.name = ThDrainageSDCommon.Blk_AngleValves;
                     valve.visibility.Add(ThDrainageSDCommon.Visibility_AngleValves_key, ThDrainageSDCommon.Visibility_AngleValves_Value);
-
+                    valve.scale = ThDrainageSDCommon.Blk_scale_AngleValves;
+                    valve.blkSize = ThDrainageSDCommon.Blk_size_AngleValves;
                     angleValves.Add(valve);
                 });
             });

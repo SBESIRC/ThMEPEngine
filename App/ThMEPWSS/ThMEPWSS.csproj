@@ -40,6 +40,7 @@
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />
     <Compile Include="DrainageSystemAD\Engine\ThDrainageADConvertEngine.cs" />
+    <Compile Include="DrainageSystemAD\Service\ThDrainageADDiameterDim.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDADBlkOutput.cs" />
     <Compile Include="DrainageSystemAD\Model\ThDrainageSDADDataExchange.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertLineService.cs" />

@@ -58,15 +58,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 var allBlkName = convertedValve.Select(x => x.name).Distinct().ToList();
                 allBlkName.ForEach(x => acadDatabase.Database.ImportBlock(x));
 
-                double scale = ThDrainageSDCommon.Blk_scale;
-                double blkSize = 0;
-
                 for (int i = 0; i < convertedValve.Count(); i++)
                 {
                     var valve = convertedValve[i];
-                    var pt = valve.position + valve.dir * scale * blkSize;
+                    var pt = valve.position;
                     double rotateAngle = Vector3d.XAxis.GetAngleTo(valve.dir, Vector3d.ZAxis);
-
+                    double scale = valve.scale;
+                
                     var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                            layer,
                            valve.name,
