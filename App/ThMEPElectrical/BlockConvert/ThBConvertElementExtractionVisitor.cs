@@ -23,24 +23,18 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            //var xclip = blockReference.XClipInfo();
-            //if (xclip.IsValid)
-            //{
-            //    xclip.TransformBy(matrix);
-            //    var center = xclip.Polygon.GeometricExtents.CenterPoint();
-            //    var transformer = new ThMEPOriginTransformer(center);
-            //    transformer.Transform(xclip.Polygon);
-            //    elements.Select(o => o.Geometry).ForEach(o => transformer.Transform(o));
-            //    elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
-            //    elements.Select(o => o.Geometry).ForEach(o => transformer.Reset(o));
-            //}
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid && elements.Count != 0) 
+            {
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
         {
-            if (ent is BlockReference br)
+            if (ent is Curve curve)
             {
-                return xclip.Contains(br.GeometricExtents.ToRectangle());
+                return xclip.Contains(curve);
             }
             else
             {

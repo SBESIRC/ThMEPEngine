@@ -31,6 +31,7 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     entities = entities.Cast<Entity>()
                     .Where(e => e.Layer == "0" || e.Layer.Contains("H-EQUP"))
+                    .Where(e => !e.Layer.Contains("DIMS"))
                     .Where(e => e is Curve || e is BlockReference)
                     .ToCollection();
                 }
