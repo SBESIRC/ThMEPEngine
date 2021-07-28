@@ -100,34 +100,46 @@ namespace ThMEPElectrical.BlockConvert
                 var srcProperties = srcBlockData.CustomProperties;
                 double base_x = 0, base_y = 0;
                 double label_x = 0, label_y = 0;
-                if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
+                if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
                 {
-                    base_x = (double)targetProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
+                    base_x = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
                 }
-                if (targetProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
+                if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
                 {
-                    base_y = (double)targetProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                    base_y = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 }
-                if (targetProperties.Contains("位置1 X") && srcProperties.Contains("标注基点 X"))
+                if (srcProperties.Contains("标注基点 X"))
                 {
                     label_x = (double)srcProperties.GetValue("标注基点 X");
                 }
-                else if (targetProperties.Contains("位置1 X") && srcProperties.Contains("位置1 X"))
+                else if (srcProperties.Contains("位置1 X"))
                 {
                     label_x = (double)srcProperties.GetValue("位置1 X");
                 }
-                if (targetProperties.Contains("位置1 Y") && srcProperties.Contains("标注基点 Y"))
+                if (srcProperties.Contains("标注基点 Y"))
                 {
                     label_y = (double)srcProperties.GetValue("标注基点 Y");
                 }
-                else if (targetProperties.Contains("位置1 X") && srcProperties.Contains("位置1 X"))
+                else if (srcProperties.Contains("位置1 X"))
                 {
                     label_y = (double)srcProperties.GetValue("位置1 Y");
                 }
+
                 double rotation = srcBlockData.Rotation;
-                var labelPointAfterRotation = new Vector3d(base_x + label_x, base_y + label_y, 0);
-                targetProperties.SetValue("位置1 X", labelPointAfterRotation.X);
-                targetProperties.SetValue("位置1 Y", labelPointAfterRotation.Y);
+                var labelPoint = new Vector3d(label_x - base_x, label_y - base_y, 0);
+                if (targetProperties.Contains("位置1 X") && targetProperties.Contains("位置1 Y"))
+                {
+                    if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                    {
+                        targetProperties.SetValue("位置1 X", -labelPoint.X);
+                        targetProperties.SetValue("位置1 Y", -labelPoint.Y);
+                    }
+                    else
+                    {
+                        targetProperties.SetValue("位置1 X", labelPoint.X);
+                        targetProperties.SetValue("位置1 Y", labelPoint.Y);
+                    }
+                }
             }
         }
 
