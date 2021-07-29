@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPElectrical.BlockConvert;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.Command
 {
@@ -117,7 +118,7 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    var prefix = Category == ConvertCategory.WSS ? "W" : "H";
+                    XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
                         ConvertMode mode = Mode & rule.Mode;
@@ -126,7 +127,20 @@ namespace ThMEPElectrical.Command
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
                         srcBlocks.Select(o => o.Data as ThBlockReferenceData)
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
-                            .ForEach(o =>
+                            .Where(o =>
+                            {
+                                string name = "";
+                                ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
+                                switch (Category)
+                                {
+                                    case ConvertCategory.WSS:
+                                        return name.StartsWith("W");
+                                    case ConvertCategory.HVAC:
+                                        return name.StartsWith("H");
+                                    default:
+                                        return true;
+                                }
+                            }).ForEach(o =>
                             {
                                 // 获取转换后的块信息
                                 ThBlockConvertBlock transformedBlock = null;
