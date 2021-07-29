@@ -16,6 +16,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
     {
         public static void InsertConnectPipe(List<Line> lines)
         {
+            if (lines==null || lines.Count() ==0)
+            {
+                return;
+            }
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var templateLayer = getTemplateLayerName(ThDrainageSDCommon.Layer_CoolPipe, ThDrainageSDCommon.Layer_Suffix);
@@ -33,6 +37,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void InsertStackPoint(List<Point3d> pts)
         {
+            if (pts == null || pts.Count() == 0)
+            {
+                return;
+            }
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_Stack);
@@ -49,6 +57,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void InsertValve(List<ThDrainageSDADBlkOutput> convertedValve)
         {
+            if (convertedValve == null || convertedValve.Count() == 0)
+            {
+                return;
+            }
+
             var layer = ThDrainageSDCommon.Layer_Valves;
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -83,6 +96,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void InsertDim(List<RotatedDimension> dims)
         {
+            if (dims == null || dims.Count() == 0)
+            {
+                return;
+            }
+
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(ThDrainageSDCommon.Layer_Dim);
@@ -122,7 +140,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     currentDb.Blocks.Import(item, false);
                 }
-
             }
         }
 

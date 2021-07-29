@@ -14,37 +14,38 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static List<Line> linkGroupSub(Dictionary<string, List<ThTerminalToilet>> groupList, Dictionary<ThTerminalToilet, Point3d> ptForVirtualDict, Dictionary<string, (string, string)> islandPare, List<Line> branchList)
         {
             var subBranch = new List<Line>();
-
-            foreach (var group in groupList)
+            if (branchList.Count > 0)
             {
-                var toiletInVirtualList = group.Value.Where(x => ptForVirtualDict.ContainsKey(x)).ToList();
-
-                if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == false)
+                foreach (var group in groupList)
                 {
-                    var leadToi = toiletInVirtualList.First();
-                    var vpt = ptForVirtualDict[leadToi];
+                    var toiletInVirtualList = group.Value.Where(x => ptForVirtualDict.ContainsKey(x)).ToList();
 
-                    //普通组
-                    subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
-                    subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
+                    if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == false)
+                    {
+                        var leadToi = toiletInVirtualList.First();
+                        var vpt = ptForVirtualDict[leadToi];
 
+                        //普通组
+                        subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
+                        subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
+
+                    }
+
+                    if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == true)
+                    {
+                        //岛 vpt组
+                        var leadToi = toiletInVirtualList.First();
+                        var vpt = ptForVirtualDict[leadToi];
+                        subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
+                        subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
+
+                        //岛 另外一组
+                        var otherPair = groupList.Where(x => x.Key == islandPare[group.Key].Item2).First();
+                        subBranch.AddRange(linkSubInGroupNormal(otherPair, out var orderOtherPts));
+                        subBranch.AddRange(linkSubToVirtualForIsland(vpt, orderOtherPts, otherPair.Value, branchList));
+                    }
                 }
-
-                if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == true)
-                {
-                    //岛 vpt组
-                    var leadToi = toiletInVirtualList.First();
-                    var vpt = ptForVirtualDict[leadToi];
-                    subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
-                    subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
-
-                    //岛 另外一组
-                    var otherPair = groupList.Where(x => x.Key == islandPare[group.Key].Item2).First();
-                    subBranch.AddRange(linkSubInGroupNormal(otherPair, out var orderOtherPts));
-                    subBranch.AddRange(linkSubToVirtualForIsland(vpt, orderOtherPts, otherPair.Value, branchList));
-                                    }
             }
-
             return subBranch;
         }
 
@@ -131,7 +132,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     bReturn = false;
                 }
-                if (branch.Key.ToCurve3d().IsOn(branch.Value, tol) ==false)
+                if (branch.Key.ToCurve3d().IsOn(branch.Value, tol) == false)
                 {
                     bReturn = false;
                 }

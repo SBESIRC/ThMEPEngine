@@ -18,8 +18,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             var blkName = new List<string>() { ThDrainageADCommon.blkName_angleValve, ThDrainageADCommon.blkName_dim };
 
-            var valveCenLines = valveList.Where(x => blkName.Contains(x.type) == false).Select(x => x.centerLine).ToList();
-            valveCenLines.ForEach(x => pipes.Add(x.Clone() as Line ));
+            if (valveList.Count > 0)
+            {
+                var valveCenLines = valveList.Where(x => blkName.Contains(x.type) == false).Select(x => x.centerLine).ToList();
+                valveCenLines.ForEach(x => pipes.Add(x.Clone() as Line));
+            }
         }
 
         /// <summary>
@@ -89,8 +92,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return startPt;
         }
-      
 
+        public static Point3d findStartPoint(List<Line> pipes, Point3d startPt)
+        {
+            var startPtOnLine = new Point3d();
+            var tol = 200;
+
+            var ptList = pipes.Select(x => x.StartPoint).ToList();
+            ptList.AddRange(pipes.Select(x => x.EndPoint));
+            var closePT = ptList.Where(x => x.DistanceTo(startPt) <= tol);
+            if (closePT.Count() > 0)
+            {
+                startPtOnLine = closePT.OrderBy(x => x.DistanceTo(startPt)).First();
+            }
+            return startPtOnLine;
+        }
         private static Dictionary<Point3d, List<Line>> lineNode(List<Line> lines)
         {
             var pointList = new Dictionary<Point3d, List<Line>>();

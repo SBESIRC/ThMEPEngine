@@ -24,7 +24,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        private static void convertNode( ThDrainageSDTreeNode child, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertDict, List<Point3d> stackNotInEnd, ref int stackDir)
+        private static void convertNode(ThDrainageSDTreeNode child, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertDict, List<Point3d> stackNotInEnd, ref int stackDir)
         {
             var parent = child.Parent;
             var bIsStackNode = isStackNode(parent, child, stackNotInEnd);
@@ -112,17 +112,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return bReturn;
         }
 
-        public static Dictionary<ThDrainageSDTreeNode, List<Line>> addEndStackPipe(List<ThDrainageSDTreeNode> endNode, List<Line> convertedPipes, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertDict)
+        public static Dictionary<ThDrainageSDTreeNode, List<Line>> addEndStackPipe(Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> endToiDict, List<Line> convertedPipes, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertDict)
         {
             var endStackPipe = new Dictionary<ThDrainageSDTreeNode, List<Line>>();
             var dir = -Vector3d.YAxis.GetNormal();
             var end_length = ThDrainageADCommon.length_stack_end;
             var break_length = ThDrainageADCommon.length_stack_end_break;
 
-            foreach (var end in endNode)
+            foreach (var endPair in endToiDict)
             {
-                endStackPipe.Add(end, new List<Line>());
+                var end = endPair.Key;
 
+                endStackPipe.Add(end, new List<Line>());
                 var endPt = convertDict[end].Node + dir * end_length;
                 var endLineTemp = new Line(convertDict[end].Node, endPt);
 

@@ -85,10 +85,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     currNode = ifChildHasAllHandWashSink(currNode, dataset.TerminalList);
                     currNode = ifNodeLineTooShort(currNode, cutList);
 
-                    cutList.Add(currNode);
-                    currNode.Parent.Child.Remove(currNode);
-                    var allRoot = findRoot(currNode);
-                    currNode = allRoot;
+                    if (currNode.Parent != null)
+                    {
+                        cutList.Add(currNode);
+                        currNode.Parent.Child.Remove(currNode);
+                        var allRoot = findRoot(currNode);
+                        currNode = allRoot;
+                    }
                 }
                 else
                 {
@@ -265,26 +268,29 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var tol = new Tolerance(1, 1);
             var finalLine = new List<Line>();
 
-            foreach (var valve in valveList)
+            if (valveList != null && valveList.Count > 0)
             {
-                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position, tol)).ToList();
-                if (line.Count > 0)
+                foreach (var valve in valveList)
                 {
-                    var l = line.First();
-                    var dir = valve.dir;
-                    double scale = valve.scale;
-                    double blkSize = valve.blkSize;
-                    var blkS = valve.position - dir * scale * blkSize / 2;
-                    var blkE = valve.position + dir * scale * blkSize / 2;
-                    var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
-                    var newE2 = blkS == newE ? blkE : blkS;
+                    var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position, tol)).ToList();
+                    if (line.Count > 0)
+                    {
+                        var l = line.First();
+                        var dir = valve.dir;
+                        double scale = valve.scale;
+                        double blkSize = valve.blkSize;
+                        var blkS = valve.position - dir * scale * blkSize / 2;
+                        var blkE = valve.position + dir * scale * blkSize / 2;
+                        var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
+                        var newE2 = blkS == newE ? blkE : blkS;
 
 
-                    var cutpart1 = new Line(l.StartPoint, newE);
-                    var cutpart2 = new Line(newE2, l.EndPoint);
-                    finalLine.Add(cutpart1);
-                    finalLine.Add(cutpart2);
-                    pipes.Remove(l);
+                        var cutpart1 = new Line(l.StartPoint, newE);
+                        var cutpart2 = new Line(newE2, l.EndPoint);
+                        finalLine.Add(cutpart1);
+                        finalLine.Add(cutpart2);
+                        pipes.Remove(l);
+                    }
                 }
             }
 

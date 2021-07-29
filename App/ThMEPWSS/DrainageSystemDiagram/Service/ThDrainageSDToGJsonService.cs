@@ -79,7 +79,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             virtualColumn.ForEach(vcl =>
               {
                   var geometry = new ThGeometry();
-
+                  
                   geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Column.ToString());
                   geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, areaId);
 
@@ -99,7 +99,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             foreach (var gj in tGJList)
             {
                 var toilet = toiletList.Where(toi => gj.Id.Contains(toi.Uuid)).FirstOrDefault();
-                if (toilet != null)
+                if (toilet != null )
                 {
                     //轴测图判断最重点位所属厕所也要用到支线方向，所以不要轻易支线计算的方向 toilet.Dir
                     Point3d subLinkEndPt = gj.Pt + toilet.Dir * ThDrainageSDCommon.LengthSublink;

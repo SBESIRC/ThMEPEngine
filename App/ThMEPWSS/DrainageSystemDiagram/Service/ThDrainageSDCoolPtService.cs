@@ -37,17 +37,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var parallelWall = findParallelWall(closeWall, terminal, toiletFaceSide);
 
             Line closestWall = null;
-            if (parallelWall.Count > 1)
+            if (parallelWall.Count > 0)
             {
                 var parallelWallDistDict = parallelWall.ToDictionary(x => x, x => x.GetDistToPoint(terminal.Boundary.GetPoint3dAt(1), false));
                 parallelWallDistDict = parallelWallDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
                 closestWall = parallelWallDistDict.First().Key;
             }
-            else if (parallelWall.Count == 1)
-            {
-                closestWall = parallelWall[0];
-            }
-
+         
             if (closestWall != null)
             {
                 //靠墙

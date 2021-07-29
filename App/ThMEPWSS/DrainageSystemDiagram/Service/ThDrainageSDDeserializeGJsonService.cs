@@ -57,34 +57,41 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var serializer = GeoJsonSerializer.Create();
 
-            using (var stringReader = new StringReader(GeoJsonString))
-            using (var jsonReader = new JsonTextReader(stringReader))
+            try
             {
-                var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-
-                foreach (var f in features)
+                using (var stringReader = new StringReader(GeoJsonString))
+                using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == ThDrainageSDCommon.GJPipe)
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+
+                    foreach (var f in features)
                     {
-                        if (f.Geometry.GeometryType.Equals("LineString"))
+                        if (f.Attributes.Exists("Category") && f.Attributes["Category"].ToString() == ThDrainageSDCommon.GJPipe)
                         {
-                            var coordinates = f.Geometry.Coordinates;
-                            var linePts = new List<Point3d>();
-                            foreach (var coord in coordinates)
+                            if (f.Geometry.GeometryType.Equals("LineString"))
                             {
-                                linePts.Add(new Point3d(coord.X, coord.Y, 0));
+                                var coordinates = f.Geometry.Coordinates;
+                                var linePts = new List<Point3d>();
+                                foreach (var coord in coordinates)
+                                {
+                                    linePts.Add(new Point3d(coord.X, coord.Y, 0));
+                                }
+
+                                var list = Enumerable.Range(0, linePts.Count - 1)
+                                          .Select(index => new Line(linePts[index], linePts[index + 1]))
+                                          .ToList();
+
+                                branchList.AddRange(list);
                             }
-
-                            var list = Enumerable.Range(0, linePts.Count - 1)
-                                      .Select(index => new Line(linePts[index], linePts[index + 1]))
-                                      .ToList();
-
-                            branchList.AddRange(list);
                         }
                     }
                 }
             }
-
+            catch
+            {
+               
+            }
+            
             return branchList;
         }
     }

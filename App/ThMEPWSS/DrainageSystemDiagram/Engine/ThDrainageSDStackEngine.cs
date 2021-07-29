@@ -9,7 +9,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
     {
         public static List<Point3d> getStackPoint(List<ThTerminalToilet> terminalList)
         {
-            var stackPt = terminalList.SelectMany(x => x.SupplyCoolOnWall).ToList();
+            var stackPt = new List<Point3d>();
+            if (terminalList!=null && terminalList.Count > 0)
+            {
+                stackPt = terminalList.SelectMany(x => x.SupplyCoolOnWall).ToList();
+            }
 
             return stackPt;
         }

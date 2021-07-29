@@ -27,6 +27,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             if (filteredRoom == null || toiletList == null || filteredRoom.Count == 0 || toiletList.Count == 0)
             {
+                ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.noRoomToilet);
                 return allLink;
             }
 

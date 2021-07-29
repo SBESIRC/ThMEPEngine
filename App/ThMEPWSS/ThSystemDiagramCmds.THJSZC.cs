@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Linq2Acad;
-
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using AcHelper;
+using Linq2Acad;
+
 using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.DrainageSystemDiagram;
 using ThCADExtension;
+using ThCADCore.NTS;
+
+using ThMEPWSS.DrainageSystemDiagram;
 
 namespace ThMEPWSS
 {
@@ -18,17 +21,17 @@ namespace ThMEPWSS
     {
         [CommandMethod("TIANHUACAD", "THJSZC", CommandFlags.Modal)]
         public void ThDStoAxonometricDrawing()
-        {
-            //取框线
-            var regionPts = SelectRecPoints("\n请框选给水管,选择左上角点", "\n请框选给水管,再选择右下角点");
-            if (regionPts.Item1 == regionPts.Item2)
+        {   
+            //取起点
+            var startPt = SelectPoint("\n请选择给水起点");
+            if (startPt == Point3d.Origin)
             {
                 return;
             }
 
-            //取起点
-            var startPt = SelectPoint("\n请选择给水起点");
-            if (startPt == Point3d.Origin)
+            //取框线
+            var regionPts = SelectRecPoints("\n请框选给水管,选择左上角点", "\n请框选给水管,再选择右下角点");
+            if (regionPts.Item1 == regionPts.Item2)
             {
                 return;
             }
@@ -46,9 +49,15 @@ namespace ThMEPWSS
                 return;
             }
 
+            if (frame.Contains(startPt) == false)
+            {
+                ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
+                return;
+            }
+
             //var frameCenter = new Point3d((regionPts.Item1.X + regionPts.Item2.X) / 2, (regionPts.Item1.Y + regionPts.Item2.Y) / 2, 0);
             //var frameCenter = regionPts.Item1;
-           
+
             ////转换坐标系
             //Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
@@ -83,36 +92,35 @@ namespace ThMEPWSS
             dataset.stackList = stackList;
             dataset.startPt = startPt;
 
-            ThDrainageADConvertEngine.convertDiagram(dataset);
+            ThDrainageADConvertEngine.convertDiagram(dataset,out var convertedPipes,out var convertedValve);
 
             //transform result to user appoint point
             var drawPlaceMatrix = Matrix3d.Displacement(drawPlace - startPt);
-            dataset.convertedPipes.ForEach(x => x.TransformBy(drawPlaceMatrix));
-            dataset.convertedValve.ForEach(x => x.TransformBy(drawPlaceMatrix));
+            convertedPipes.ForEach(x => x.TransformBy(drawPlaceMatrix));
+            convertedValve.ForEach(x => x.TransformBy(drawPlaceMatrix));
 
             //final print
-            ThDrainageSDInsertService.InsertConnectPipe(dataset.convertedPipes);
-            ThDrainageSDInsertService.InsertValve(dataset.convertedValve);
-
-            
-        }
-
-        private static Polyline toFrame(Tuple<Point3d, Point3d> leftRight)
-        {
-            var pl = new Polyline();
-            var ptRT = new Point2d(leftRight.Item2.X, leftRight.Item1.Y);
-            var ptLB = new Point2d(leftRight.Item1.X, leftRight.Item2.Y);
-
-            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item1.ToPoint2D(), 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item2.ToPoint2D(), 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
-
-            pl.Closed = true;
-
-            return pl;
+            ThDrainageSDInsertService.InsertConnectPipe(convertedPipes);
+            ThDrainageSDInsertService.InsertValve(convertedValve);
 
         }
+
+        //private static Polyline toFrame(Tuple<Point3d, Point3d> leftRight)
+        //{
+        //    var pl = new Polyline();
+        //    var ptRT = new Point2d(leftRight.Item2.X, leftRight.Item1.Y);
+        //    var ptLB = new Point2d(leftRight.Item1.X, leftRight.Item2.Y);
+
+        //    pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item1.ToPoint2D(), 0, 0, 0);
+        //    pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
+        //    pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item2.ToPoint2D(), 0, 0, 0);
+        //    pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
+
+        //    pl.Closed = true;
+
+        //    return pl;
+
+        //}
 
 
         [CommandMethod("TIANHUACAD", "ThCleanZCFinalDraw", CommandFlags.Modal)]

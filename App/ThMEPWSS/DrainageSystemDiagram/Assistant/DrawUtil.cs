@@ -106,6 +106,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ShowGeometry(Point3d pt, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int r = 200, string symbol = "C")
         {
+            if (pt == null || pt == Point3d.Origin )
+            {
+                return;
+            }
+
             Entity clone = null;
 
             if (symbol == "C")
@@ -136,6 +141,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ShowGeometry(Point3d pt, string s, string LayerName, int colorIndex = 3, int lineWeightNum = 25, double hight = 1000)
         {
+            if (pt == null || pt == Point3d.Origin)
+            {
+                return;
+            }
 
             DBText text = new DBText();
             text.Position = pt;
@@ -175,6 +184,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ShowGeometry(Point3d pt, Vector3d dir, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int l = 200)
         {
+            if (pt == null || pt == Point3d.Origin)
+            {
+                return;
+            }
             dir = dir.GetNormal();
             var ptE = pt + dir * l;
 

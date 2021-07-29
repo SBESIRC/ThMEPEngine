@@ -53,6 +53,7 @@
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDInsertService.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDLineExtension.cs" />
     <Compile Include="DrainageSystemAD\ThDrainageADCommon.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDMessageServie.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />

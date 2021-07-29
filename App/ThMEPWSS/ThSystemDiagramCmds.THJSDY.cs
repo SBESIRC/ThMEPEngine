@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using AcHelper;
-using Linq2Acad;
-
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using AcHelper;
+using Linq2Acad;
+using GeometryExtensions;
+
+using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPWSS.DrainageSystemDiagram;
 using ThCADExtension;
+
+using ThMEPWSS.DrainageSystemDiagram;
 
 namespace ThMEPWSS
 {
@@ -23,14 +26,13 @@ namespace ThMEPWSS
         public void ThRouteMainPipe()
         {
 #if (ACAD2016 || ACAD2018)
+
             //取起点
             var startPt = SelectPoint("\n请选择给水起点");
             if (startPt == Point3d.Origin)
             {
                 return;
             }
-            var areaId = Guid.NewGuid().ToString();
-            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
 
             //取框线
             var regionPts = SelectRecPoints("\n请框选洁具,选择左上角点", "\n请框选洁具,再选择右下角点");
@@ -39,18 +41,23 @@ namespace ThMEPWSS
                 return;
             }
 
-            var region = new ThDrainageSDRegion(regionPts, areaId);
-            var frame = region.Frame;
+            var frame = toFrame(regionPts);
             if (frame == null || frame.NumberOfVertices == 0)
             {
                 return;
             }
 
-            var dataSet = new ThDrainageSDDataExchange();
-            dataSet.AreaID = areaId;
-            dataSet.SupplyStart = supplyPt;
-            dataSet.Region = region;
+            if (frame.Contains(startPt) == false)
+            {
+                //Active.Editor .WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
+               ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
+                return;
+            }
 
+            var areaId = Guid.NewGuid().ToString();
+            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
+            var region = new ThDrainageSDRegion(frame, areaId);
+          
             ////转换坐标系
             //Polyline transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
@@ -59,6 +66,11 @@ namespace ThMEPWSS
             //    transFrame = transPoly(frame, ref transformer);
             //}
             //var pts = transFrame.VerticesEx(100.0);
+
+            var dataSet = new ThDrainageSDDataExchange();
+            dataSet.AreaID = areaId;
+            dataSet.SupplyStart = supplyPt;
+            dataSet.Region = region;
 
             //取厕所
             var pts = frame.VerticesEx(100.0);
@@ -103,6 +115,7 @@ namespace ThMEPWSS
             allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l20Valves", 11, 25, 100));
 
             ThDrainageSDTreeService.buildPipeTree(dataSet);
+            ThDrainageSDTreeService.printTree(dataSet.PipeTreeRoot, "l063tree");
 
             var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
             allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l31ShutValves", 50, 35, 200));
@@ -119,93 +132,6 @@ namespace ThMEPWSS
             ThDrainageSDInsertService.InsertValve(allShutValve);
             ThDrainageSDInsertService.InsertDim(allDims);
 #endif
-        }
-
-        [CommandMethod("TIANHUACAD", "THPIPETEST", CommandFlags.Modal)]
-        public void ThPipeTreeTest()
-        {
-            //取起点
-            var startPt = SelectPoint("\n请选择给水起点");
-            if (startPt == Point3d.Origin)
-            {
-                return;
-            }
-            var areaId = Guid.NewGuid().ToString();
-            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
-
-            //取框线
-            var regionPts = SelectRecPoints("\n请框选洁具,选择左上角点", "\n请框选洁具,再选择右下角点");
-            if (regionPts.Item1 == regionPts.Item2)
-            {
-                return;
-            }
-
-            var region = new ThDrainageSDRegion(regionPts, areaId);
-            var frame = region.Frame;
-            if (frame == null || frame.NumberOfVertices == 0)
-            {
-                return;
-            }
-
-            var dataSet = new ThDrainageSDDataExchange();
-            dataSet.AreaID = areaId;
-            dataSet.SupplyStart = supplyPt;
-            dataSet.Region = region;
-
-            ////转换坐标系
-            //Polyline transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-            //if (frame != null && frame.NumberOfVertices > 0)
-            //{
-            //    transFrame = transPoly(frame, ref transformer);
-            //}
-            //var pts = transFrame.VerticesEx(100.0);
-
-            //取厕所
-            var pts = frame.VerticesEx(100.0);
-            List<ThTerminalToilet> allToiletList = null;
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var drainageExtractor = new ThDrainageSDExtractor();
-                drainageExtractor.Transfer = transformer;
-                drainageExtractor.Extract(acadDb.Database, pts);
-                allToiletList = drainageExtractor.SanTmnList;
-            }
-
-            //取房间,建筑
-            List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
-            using (var acadDb = AcadDatabase.Active())
-            {
-                archiExtractor = new List<ThExtractorBase>()
-                {
-                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
-                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
-                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
-                    new ThDrainageToiletRoomExtractor() { ColorIndex = 6,GroupSwitch=true },
-                };
-
-                archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
-                archiExtractor.ForEach(o =>
-                {
-                    if (o is IAreaId needAreaID)
-                    {
-                        needAreaID.setAreaId(areaId);
-                    }
-                });
-            }
-
-            var allPipeOri = new List<Line>();
-            using (var acadDb = AcadDatabase.Active())
-            {
-                allPipeOri = ThDrainageSDSystemDiagramExtractor.GetSD(frame, acadDb, transformer);
-            }
-
-            //清理线和线头
-            //var lines2 = ThDrainageSDCleanLineService.simplifyLineTest(allPipeOri);
-            var nodes = ThDrainageSDTreeService.buildPipeTreeTest(allPipeOri, dataSet.SupplyStart.Pt);
-
-            // ThDrainageSDDimEngine.positionDimTry(nodes);
-
         }
 
         private static Polyline selectFrame()
@@ -241,7 +167,7 @@ namespace ThMEPWSS
             return polyline;
         }
 
-        private Tuple<Point3d, Point3d> SelectRecPoints(string commandSuggestStrLeft,string commandSuggestStrRight)
+        private Tuple<Point3d, Point3d> SelectRecPoints(string commandSuggestStrLeft, string commandSuggestStrRight)
         {
             var ptLeftRes = Active.Editor.GetPoint(commandSuggestStrLeft);
             Point3d leftDownPt = Point3d.Origin;
@@ -257,7 +183,10 @@ namespace ThMEPWSS
             var ptRightRes = Active.Editor.GetCorner(commandSuggestStrRight, leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
+                var rightTopPt = ptRightRes.Value;
+                leftDownPt = leftDownPt.TransformBy(Active.Editor.UCS2WCS());
+                rightTopPt = rightTopPt.TransformBy(Active.Editor.UCS2WCS());
+                return Tuple.Create(leftDownPt, rightTopPt);
             }
             else
             {
@@ -272,6 +201,7 @@ namespace ThMEPWSS
             if (ptLeftRes.Status == PromptStatus.OK)
             {
                 pt = ptLeftRes.Value;
+                pt = pt.TransformBy(Active.Editor.UCS2WCS());
             }
             return pt;
         }
@@ -296,6 +226,22 @@ namespace ThMEPWSS
             }
 
             return transPoly;
+        }
+
+        private static Polyline toFrame(Tuple<Point3d, Point3d> leftRight)
+        {
+            var pl = new Polyline();
+            var ptRT = new Point2d(leftRight.Item2.X, leftRight.Item1.Y);
+            var ptLB = new Point2d(leftRight.Item1.X, leftRight.Item2.Y);
+
+            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item1.ToPoint2D(), 0, 0, 0);
+            pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
+            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item2.ToPoint2D(), 0, 0, 0);
+            pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
+
+            pl.Closed = true;
+
+            return pl;
         }
 
 
@@ -346,7 +292,7 @@ namespace ThMEPWSS
                 sLayerName.Add(ThDrainageSDCommon.Layer_Valves);
                 sLayerName.Add(ThDrainageSDCommon.Layer_Dim);
 
-                CleanDebugDrawings.ClearFinalDrawing(sLayerName,transFrame, transformer);
+                CleanDebugDrawings.ClearFinalDrawing(sLayerName, transFrame, transformer);
             }
 
         }

@@ -56,7 +56,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 //最近和同方向
                 var ptTemp = allSupplyPt.Where(x => x.DistanceTo(node.Node) <= ThDrainageSDCommon.TolToiletToWall);
-                var dirNode = (node.Parent.Node - node.Node).GetNormal();
+                var dirNode = new Vector3d();
+                if (node.Parent != null)
+                {
+                    dirNode = (node.Parent.Node - node.Node).GetNormal();
+                }
 
                 var ptTempSameDir = ptTemp.Where(x =>
                 {
@@ -80,11 +84,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     return bReturn;
                 });
 
-                var ptTempClose = ptTempSameDir.OrderBy(x => x.DistanceTo(node.Node)).First();
+                var ptTempClose = ptTempSameDir.OrderBy(x => x.DistanceTo(node.Node)).FirstOrDefault();
 
                 var toilet = toiletList.Where(x => x.SupplyCool.Contains(ptTempClose)).FirstOrDefault();
 
-                toiDict.Add(node, toilet);
+                if (node != null && toilet != null)
+                {
+                    toiDict.Add(node, toilet);
+                }
             }
 
             return toiDict;
@@ -98,13 +105,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 var endValveOutput = new ThDrainageSDADBlkOutput(end.Value.Last().EndPoint);
                 endValveOutput.dir = new Vector3d(1, 0, 0);
-                var toi = toiDict[end.Key];
-                endValveOutput.name = ThDrainageADCommon.toi_end_name[toi.Type];
-                var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode);
-                endValveOutput.visibility.Add(ThDrainageADCommon.visiName_valve, visi);
-                endValveOutput.scale = ThDrainageADCommon.blk_scale_end;
-                
-                valveEndCon.Add(endValveOutput);
+
+                var hasToi = toiDict.TryGetValue(end.Key, out var toi);
+
+                if (hasToi == true)
+                {
+                    endValveOutput.name = ThDrainageADCommon.toi_end_name[toi.Type];
+                    var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode);
+                    endValveOutput.visibility.Add(ThDrainageADCommon.visiName_valve, visi);
+                    endValveOutput.scale = ThDrainageADCommon.blk_scale_end;
+                    valveEndCon.Add(endValveOutput);
+                }
             }
 
             return valveEndCon;
@@ -117,6 +128,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var angle = dir.GetAngleTo(Vector3d.XAxis, -Vector3d.ZAxis);
             var dirInx = -1;
+            var visibility = ThDrainageADCommon.endValve_dir_name[name][0];
 
             if (359 * Math.PI / 180 <= angle || angle <= 1 * Math.PI / 180)
             {
@@ -135,7 +147,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 dirInx = 3;
             }
 
-            var visibility = ThDrainageADCommon.endValve_dir_name[name][dirInx];
+            if (dirInx != -1)
+            {
+                visibility = ThDrainageADCommon.endValve_dir_name[name][dirInx];
+            }
 
             return visibility;
         }

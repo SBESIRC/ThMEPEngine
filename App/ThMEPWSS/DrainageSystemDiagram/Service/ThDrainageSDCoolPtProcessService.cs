@@ -20,11 +20,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             for (int i = 0; i < toiletList.Count; i++)
             {
                 string groupid = toiletList[i].GroupId;
-                if (groupid != null && groupToilet.ContainsKey(groupid) == false)
+                if (groupid != null && groupid!="" && groupToilet.ContainsKey(groupid) == false)
                 {
                     groupToilet.Add(groupid, new List<ThTerminalToilet>() { toiletList[i] });
                 }
-                else if (groupid != null)
+                else if (groupid != null && groupid != "")
                 {
                     groupToilet[groupid].Add(toiletList[i]);
                 }

@@ -17,7 +17,5 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public List<Circle> stackList { get; set; }
         public Point3d startPt { get; set; }
 
-        public List<Line> convertedPipes { get; set; }
-        public List<ThDrainageSDADBlkOutput> convertedValve { get; set; }
     }
 }
