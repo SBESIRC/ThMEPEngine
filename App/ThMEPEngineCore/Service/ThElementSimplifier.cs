@@ -22,33 +22,33 @@ namespace ThMEPEngineCore.Service
             TESSELLATE_ARC_LENGTH = 10.0;
         }
 
-        public override DBObjectCollection Simplify(DBObjectCollection windows)
+        public override DBObjectCollection Simplify(DBObjectCollection objs)
         {
-            var objs = new DBObjectCollection();
-            windows.Cast<AcPolygon>().ForEach(o =>
+            var results = new DBObjectCollection();
+            objs.Cast<AcPolygon>().ForEach(o =>
             {
                 // 由于投影误差，DB3切出来的墙线中有非常短的线段（长度<1mm)
                 // 这里使用简化算法，剔除掉这些非常短的线段
-                objs.Add(o.DPSimplify(DISTANCE_TOLERANCE));
+                results.Add(o.DPSimplify(DISTANCE_TOLERANCE));
             });
-            return objs;
+            return results;
         }
 
-        public override DBObjectCollection Normalize(DBObjectCollection walls)
+        public override DBObjectCollection Normalize(DBObjectCollection objs)
         {
-            var objs = new DBObjectCollection();
-            foreach (AcPolygon wall in walls)
+            var results = new DBObjectCollection();
+            foreach (AcPolygon obj in objs)
             {
-                wall.Buffer(-OFFSET_DISTANCE)
+                obj.Buffer(-OFFSET_DISTANCE)
                     .Cast<AcPolygon>()
                     .ForEach(o =>
                     {
                         o.Buffer(OFFSET_DISTANCE)
                         .Cast<AcPolygon>()
-                        .ForEach(e => objs.Add(e));
+                        .ForEach(e => results.Add(e));
                     });
             }
-            return objs;
+            return results;
         }
         public override DBObjectCollection Tessellate(DBObjectCollection curves)
         {
