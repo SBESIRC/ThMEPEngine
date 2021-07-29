@@ -32,6 +32,7 @@ namespace ThMEPWSS.Pipe.Model
         public const string PipeDiameter = "给水管径100";
         public const string PRValveDetail = "减压阀详图";
         public const string FloorFraming = "楼层框定";
+        public const string Casing = "套管系统";
     }
 
 
@@ -60,6 +61,7 @@ namespace ThMEPWSS.Pipe.Model
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Elevation));//标高
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PipeDiameter));//给水管经100
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PRValveDetail));//减压阀详图
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Casing));//套管系统
             }
         }
     }

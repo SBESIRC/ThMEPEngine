@@ -396,6 +396,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockInsert.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Dist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
@@ -482,7 +483,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="UndergroundFireHydrantSystem\NewFolder1\" />
     <Folder Include="WaterWellPumpLayout\Model\" />
   </ItemGroup>
   <ItemGroup>

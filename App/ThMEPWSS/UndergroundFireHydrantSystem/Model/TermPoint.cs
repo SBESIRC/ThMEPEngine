@@ -4,6 +4,7 @@ using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
@@ -15,20 +16,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line StartLine { get; set; }//标注起始线
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
-
-        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 
-
+        public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器
         private double Tolerance { get; set; }//容差
-
         public TermPoint(Point3dEx ptEx)
         {
             PtEx = ptEx;
             Tolerance = 100;
         }
 
-        public void SetLines(List<Line> labelLine)
+        public void SetLines(FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine)
         {
-            
+            var distDic = new Dictionary<Line, double>();//线的距离字典
             foreach(var l in labelLine)
             {
                 if(l is null)
@@ -41,10 +39,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 
                 if(PtEx._pt.DistanceTo(spt._pt) < Tolerance || PtEx._pt.DistanceTo(ept._pt) < Tolerance) 
                 {
-                    StartLine = l;
+                    distDic.Add(l, Math.Min(PtEx._pt.DistanceTo(spt._pt), PtEx._pt.DistanceTo(ept._pt)));
                 }
             }
+            if(distDic.Count > 0)
+            {
+                distDic.OrderBy(o => o.Value);
+                StartLine = distDic.Keys.First();
+            }
             if(StartLine is null)
+            {
+                return;
+            }
+            var adjs = fireHydrantSysIn.leadLineDic[StartLine];
+            if (adjs.Count > 1)
             {
                 return;
             }
@@ -100,16 +108,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             foreach(var obj in DBObjs)
             {
-                //var br = obj as DBText;
-                //PipeNumber = br.TextString;
-                if (obj is DBText)
+                if (obj is DBText br)
                 {
-                    var br = obj as DBText;
                     PipeNumber = br.TextString;
                 }
                 else
                 {
-
                     var ad = (obj as Entity).AcadObject;
                     dynamic o = ad;
                     if ((o.ObjectName as string).Equals("TDbText"))
@@ -129,6 +133,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//消火栓范围
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+            if(PipeNumber.Contains("水泵接合器"))
+            {
+                Type = 4;
+                return;
+            }
             if(DBObjs.Count == 0)
             {
                 Type = 2;//只供给其他区域

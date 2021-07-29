@@ -22,7 +22,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Line> TextLine { get; set; }
         public List<DBText> TextList { get; set; }
         public Dictionary<Point3d, double> PipeInterrupted { get; set; }
+        public List<Point3d> GateValve { get; set; }
         public List<Point3d> Valve { get; set; }
+        public HashSet<Point3d> IsGateValve { get; set; }
+        public List<Point3d> IsCasing { get; set; }
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
@@ -35,8 +38,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             TextList = new List<DBText>();
             PipeInterrupted = new Dictionary<Point3d, double>();
             Valve = new List<Point3d>();
+            IsGateValve = new HashSet<Point3d>();
+            IsCasing = new List<Point3d>();
+            GateValve = new List<Point3d>();
             FireHydrant = new List<Point3d>();
-            var opt = new PromptPointOptions("指定消火栓系统图插入点");
+            var opt = new PromptPointOptions("指定消火栓系统图插入点: \n");
             InsertPoint = Active.Editor.GetPoint(opt).Value;
             DNList = new List<DBText>();
         }
@@ -71,11 +77,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach(var valve in Valve)
                 {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "蝶阀",
+                    string valveName = "蝶阀";
+                    if (IsGateValve.Contains(valve))
+                    {
+                        valveName = "闸阀";
+                    }
+                    
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", valveName,
                     valve, new Scale3d(1, 1, 1), 0);
                 }
-
-                foreach(var fh in FireHydrant)
+                foreach(var casing in IsCasing)
+                {
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "套管系统",
+                    casing, new Scale3d(1, 1, 1), 0);
+                    objID.SetDynBlockValue("可见性", "放水套管水平");
+                }
+                foreach (var fh in FireHydrant)
                 {
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-PIPE", "室内消火栓系统", 
                         fh, new Scale3d(1, 1, 1), 0);
@@ -100,11 +117,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3dEx> hydrantPosition { get; set; }
         public Dictionary<Point3dEx, TermPoint> termPointDic { get; set; }
         public Dictionary<Point3dEx, List<Point3dEx>> ptDic { get; set; }
+        public Dictionary<Line, List<Line>> leadLineDic { get; set; }
         public Dictionary<LineSegEx, string> ptDNDic { get; set; }
         public Dictionary<Point3dEx, string> SlashDic { get; set; }
-
+        public double textWidth { get; set; }
+        public double pipeWidth { get; set; }
         public bool ValveIsBkReference { get; set; }
-
+        public List<Point3d> GateValves { get; set; }
         public FireHydrantSystemIn()
         {
             markLineList = new List<List<Line>>();//环管标记所在直线
@@ -115,8 +134,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             hydrantPosition = new List<Point3dEx>(); //消火栓端点
             termPointDic = new Dictionary<Point3dEx, TermPoint>();//端点字典对
             ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//当前点和邻接点字典对
+            leadLineDic = new Dictionary<Line, List<Line>>();//引线和邻接线字典对
             ptDNDic = new Dictionary<LineSegEx, string>();//当前点的DN字典对
             SlashDic = new Dictionary<Point3dEx, string>();//斜点的DN字典对
+            GateValves = new List<Point3d>(); //闸阀中点位置
         }
     }
 }

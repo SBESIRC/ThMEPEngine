@@ -31,6 +31,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    Math.Abs(Math.Abs(ComputeAngle(line1) - ComputeAngle(line2)) - 2 * Math.PI) < angleError;
         }
 
+        public static bool IsParallelLine(Line line1, Line line2, double angleError)
+        {
+            return Math.Abs(line1.Angle - line2.Angle) < angleError ||
+                   Math.Abs(line1.Angle - line2.Angle - Math.PI) < angleError ||
+                   Math.Abs(line1.Angle - line2.Angle - 2 * Math.PI) < angleError;
+        }
+
         public static bool IsParallelLine(double angle1, double angle2)
         {
             double angleError = 0.035;

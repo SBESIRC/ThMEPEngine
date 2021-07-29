@@ -20,20 +20,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var pt2 = new Point3d();
                 if(i != 0)//对于多主环点的情况，我们只需要绘制第一对即可
                 {
-                    if(fireHydrantSysIn.ptTypeDic[rstPath[i-1]].Equals("MainLoop"))
+                    if(fireHydrantSysIn.ptTypeDic[rstPath[i-1]].Equals("MainLoop") || fireHydrantSysIn.ptTypeDic[rstPath[i - 1]].Equals("Branch"))
+                    {
+                        return stPt;
+                    }
+                    if(fireHydrantSysIn.ptTypeDic[rstPath[i - 1]].Equals("Valve"))
                     {
                         return stPt;
                     }
                 }
-                if (fireHydrantSysIn.ptTypeDic[rstPath[i + 1]].Equals("Valve"))
-                {
-                    pt2 = new Point3d(stPt.X + 1200 - valveWidth / 2, stPt.Y, 0);
-                }
-                else
-                {
-                    pt2 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-                }
-
+                pt2 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
                 stPt = pt2;
 
@@ -92,14 +88,37 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }  
         }
 
-        public static Point3d GetValvePoint(ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, ref bool valveCheck)
+        public static Point3d GetValvePoint(Point3dEx valve, ref FireHydrantSystemOut fireHydrantSysOut, Point3d stPt, ref bool valveCheck,
+            FireHydrantSystemIn fireHydrantSysIn)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                if(fireHydrantSysIn.ptTypeDic[valve].Contains("casing"))
+                {
+                    fireHydrantSysOut.IsCasing.Add(new Point3d(stPt.X + 100, stPt.Y, 0));
+                }
                 if (valveCheck)
                 {
+                    var flag = false;
                     fireHydrantSysOut.Valve.Add(stPt);
-                    stPt = new Point3d(stPt.X + 240, stPt.Y, 0);
+                    foreach(var pt in fireHydrantSysIn.GateValves)
+                    {
+                        if(valve._pt.DistanceTo(pt) < 250)
+                        {
+                            fireHydrantSysOut.IsGateValve.Add(stPt);
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(flag)
+                    {
+                        stPt = new Point3d(stPt.X + 300, stPt.Y, 0);
+                    }
+                    else
+                    {
+                        stPt = new Point3d(stPt.X + 240, stPt.Y, 0);
+
+                    }
                     valveCheck = false;
                 }
                 else

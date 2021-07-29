@@ -30,7 +30,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
         public bool Equals(Point3dEx other)
         {
-            return Math.Abs(other._pt.X - this._pt.X) < Tolerance && Math.Abs(other._pt.Y - this._pt.Y) < Tolerance;
+            var tolerance = 1; //mm
+            return Math.Abs(other._pt.X - this._pt.X) < tolerance && Math.Abs(other._pt.Y - this._pt.Y) < tolerance;
         }
     }
 
@@ -102,7 +103,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });
                 fireHydrantSysIn.ptTypeDic.Add(pt1, type);
-
             }
 
             if (fireHydrantSysIn.ptDic.ContainsKey(pt2))
@@ -121,7 +121,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 fireHydrantSysIn.ptDic.Add(pt2, new List<Point3dEx>() { pt1 });
                 fireHydrantSysIn.ptTypeDic.Add(pt2, type);
-
             }
         }
 
@@ -164,7 +163,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-
         public static void SetPointType(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3dEx>> rstPaths)
         {
             foreach(var ptls in rstPaths)
@@ -196,7 +194,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                 }
             }
-            
         }
     }
 }
