@@ -79,12 +79,12 @@ namespace ThMEPWSS.Command
 
                 //楼层信息绘制
                 LevelFloorUtil levelFloor = new LevelFloorUtil(floorWidth, _vm.FaucetFloor);
-                foreach (var item in floorDatas) 
+                foreach (var item in floorDatas)
                 {
                     levelFloor.AddFloorLevel(new LevelFloor(item.floorNum, item.floorLevel, string.Format("{0}F", item.floorNum)));
                 }
                 var last = floorDatas.Last();
-                levelFloor.AddFloorLevel(new LevelFloor(last.floorNum+1, last.floorLevel, string.Format("RF", last.floorNum)));
+                levelFloor.AddFloorLevel(new LevelFloor(last.floorNum + 1, last.floorLevel, string.Format("RF", last.floorNum)));
                 levelFloor.CreateFloorLines(acdb.Database, startPoint);
 
                 //最后生成数据

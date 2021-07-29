@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;

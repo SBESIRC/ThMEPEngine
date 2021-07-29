@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.Runtime;
 using ThCADExtension;
 using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Engine;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using Linq2Acad;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;

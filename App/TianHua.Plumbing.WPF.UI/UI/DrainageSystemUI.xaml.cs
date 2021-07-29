@@ -12,18 +12,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class DrainageSystemUI : ThCustomWindow
     {
-        private DrainageSystemDiagramViewModel ViewModel = new DrainageSystemDiagramViewModel();
+        private DrainageSystemDiagramViewModel viewModel = new DrainageSystemDiagramViewModel();
         public DrainageSystemUI()
         {
             InitializeComponent();
-            this.DataContext = ViewModel;
-            Loaded += (s, e) => { ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = ViewModel, window = this }; };
-            Closed += (s, e) => { ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null; };
+            this.DataContext = viewModel;
+            Loaded += (s, e) => { ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext =new ThMEPWSS.ReleaseNs.DrainageSystemNs.CommandContext() { ViewModel = viewModel, window = this }; };
+            Closed += (s, e) => { ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = null; };
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var uiParams = new DrainageSystemParamsUI(ViewModel.Params);
+            var uiParams = new DrainageSystemParamsUI(viewModel.Params);
             uiParams.ShowDialog();
 
         }
@@ -33,7 +33,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
-                ThMEPWSS.Pipe.Service.DrainageSystemDiagram.DrawDrainageSystemDiagram(ViewModel);
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(viewModel);
             }
             catch (Exception ex)
             {
@@ -43,7 +43,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ImageButton_Click_1(object sender, RoutedEventArgs e)
         {
-            ViewModel.CollectFloorListDatas();
+            try
+            {
+                viewModel.CollectFloorListDatas();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         //这明明是“新建楼层图框”
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)

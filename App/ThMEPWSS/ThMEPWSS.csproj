@@ -35,7 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
-    <Compile Include="Assistant\FengDbgTest.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />
@@ -79,6 +78,7 @@
     <Compile Include="HydrantConnectPipe\Service\ThStructureWallService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThWindWellService.cs" />
     <Compile Include="Hydrant\Data\ThHydrantDoorOpeningExtractor.cs" />
+    <Compile Include="Pipe\Service\ThDataItemExtension.cs" />
     <Compile Include="Pipe\Service\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />

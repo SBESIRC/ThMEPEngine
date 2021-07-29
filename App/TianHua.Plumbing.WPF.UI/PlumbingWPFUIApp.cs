@@ -62,7 +62,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
-            if (ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext != null) return;
+            if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext != null) return;
             var ui = new uiRainSystem();
             AcadApp.ShowModelessWindow(ui);
         }
@@ -72,7 +72,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THPSXTT", CommandFlags.Modal)]
         public void ThCreateDrainageSystemDiagram()
         {
-            if (ThMEPWSS.Pipe.Service.ThDrainageService.commandContext != null) return;
+            if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext != null) return;
             var ui = new DrainageSystemUI();
             AcadApp.ShowModelessWindow(ui);
         }

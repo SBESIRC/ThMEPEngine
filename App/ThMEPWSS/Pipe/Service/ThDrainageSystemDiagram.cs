@@ -6,14 +6,13 @@ namespace ThMEPWSS.Pipe.Service
     using System.Linq;
     using System.Collections.Generic;
     using ThMEPWSS.JsonExtensionsNs;
-    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-    using DU = ThMEPWSS.Assistant.DrawUtils;
+    using static ThMEPWSS.Assistant.DrawUtils;
     using Autodesk.AutoCAD.Geometry;
     using Dreambuild.AutoCAD;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
     using ThMEPWSS.Uitl.ExtensionsNs;
-    using ThMEPWSS.DebugNs;
+    using ThMEPWSS.ReleaseNs;
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
     using Linq2Acad;
     using ThMEPWSS.Assistant;
@@ -666,13 +665,13 @@ namespace ThMEPWSS.Pipe.Service
             if (string.IsNullOrWhiteSpace(layer)) layer = "W-DRAI-DOME-PIPE";
             void drawPipe(GLineSegment seg)
             {
-                var line = DU.DrawLineSegmentLazy(seg);
+                var line = DrawLineSegmentLazy(seg);
                 line.Layer = layer;
                 line.ColorIndex = 256;
             }
             void drawPipes(IEnumerable<GLineSegment> segs)
             {
-                var lines = DU.DrawLineSegmentsLazy(segs);
+                var lines = DrawLineSegmentsLazy(segs);
                 foreach (var line in lines)
                 {
                     line.Layer = layer;
@@ -887,7 +886,7 @@ namespace ThMEPWSS.Pipe.Service
                                     {
                                         if (!string.IsNullOrEmpty(comment))
                                         {
-                                            DU.DrawTextLazy(comment, 350, info.EndPoint.OffsetY(dy));
+                                            DrawTextLazy(comment, 350, info.EndPoint.OffsetY(dy));
                                         }
                                         dy -= 350;
                                     }
@@ -1310,7 +1309,7 @@ namespace ThMEPWSS.Pipe.Service
         public static void DrawNoteText(string text, Point2d pt)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
-            var t = DU.DrawTextLazy(text, 350, pt);
+            var t = DrawTextLazy(text, 350, pt);
             SetLabelStylesForDraiNote(t);
         }
 
@@ -1447,15 +1446,6 @@ namespace ThMEPWSS.Pipe.Service
                     }
                 }
             }
-
-
-            for (int j = 0; j < COUNT; j++)
-                for (int i = 0; i < storeys.Count; i++)
-                {
-                    Dbg.ShowXLabel(arrarr[j, i].EndPoint);
-                }
-
-
         }
         public static void PreparedToDrawDrainageSystemDiagram(Point2d basePoint)
         {

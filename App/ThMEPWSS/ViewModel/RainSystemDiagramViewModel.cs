@@ -16,7 +16,6 @@ using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Pipe;
-using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 
 namespace ThMEPWSS.Diagram.ViewModel
@@ -72,7 +71,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 try
                 {
-                    ThRainSystemService.InitFloorListDatas();
+                    ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.CollectFloorListDatasEx();
                 }
                 catch (System.Exception ex)
                 {
@@ -119,12 +118,12 @@ namespace ThMEPWSS.Diagram.ViewModel
                 if (DateTime.Now == DateTime.MinValue)
                 {
                     //框选
-                    ThDrainageService.CollectFloorListDatas();
+                    Pipe.Service.ThDrainageService.CollectFloorListDatas();
                 }
                 else
                 {
                     //点选
-                    ThDrainageService.CollectFloorListDatasEx();
+                    ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectFloorListDatasEx();
                 }
             }
             catch (System.Exception ex)
@@ -322,7 +321,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private bool _HasAirConditionerFloorDrain = true;
+        private bool _HasAirConditionerFloorDrain = false;
         public bool HasAirConditionerFloorDrain
         {
             get
@@ -336,7 +335,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private bool _HasAiringForCondensePipe = true;
+        private bool _HasAiringForCondensePipe = false;
         public bool HasAiringForCondensePipe
         {
             get
@@ -350,7 +349,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private bool _CouldHavePeopleOnRoof = true;
+        private bool _CouldHavePeopleOnRoof = false;
         public bool CouldHavePeopleOnRoof
         {
             get

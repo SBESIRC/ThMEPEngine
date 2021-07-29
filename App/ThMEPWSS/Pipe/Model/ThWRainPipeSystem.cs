@@ -13,7 +13,6 @@ using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Model

@@ -9,9 +9,10 @@ using ThCADExtension;
 using ThMEPWSS.Uitl;
 using System.Linq;
 using NetTopologySuite.Geometries;
-using ThMEPWSS.DebugNs;
+using ThMEPWSS.ReleaseNs;
 using ThCADCore.NTS;
 using DotNetARX;
+using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
@@ -219,7 +220,7 @@ namespace ThMEPWSS.CADExtensionsNs
         }
         public static LinearRing ToLinearRing(this GRect r)
         {
-            return new LinearRing(Pipe.Service.GeoNTSConvertion.ConvertToCoordinateArray(r));
+            return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
         }
         public static LineString ToLineString(this IList<Point3d> pts)
         {
@@ -258,7 +259,7 @@ namespace ThMEPWSS.CADExtensionsNs
         public static List<Geometry> ToGeometryList(this IEnumerable<Geometry> source) => source.ToList();
         public static Polygon ToCirclePolygon(this GCircle circle, int numPoints, bool larger = true)
         {
-            return Pipe.Service.GeoFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
+            return GeoFac.CreateCirclePolygon(center: circle.Center, radius: circle.Radius, numPoints: numPoints, larger: larger);
         }
         public static LineString ToLineString(this GLineSegment seg)
         {

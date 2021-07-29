@@ -12,11 +12,11 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using ThUtilExtensionsNs;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {

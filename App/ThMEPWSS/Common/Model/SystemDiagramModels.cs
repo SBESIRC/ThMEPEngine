@@ -592,6 +592,10 @@ namespace ThMEPWSS.Uitl
             MaxX = Math.Max(x1, x2);
             MaxY = Math.Max(y1, y2);
         }
+        public GRect OffsetXY(Vector2d v)
+        {
+            return this.OffsetXY(v.X, v.Y);
+        }
         public GRect OffsetXY(double deltaX, double deltaY)
         {
             return new GRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
@@ -741,6 +745,8 @@ namespace ThMEPWSS.Uitl
         public double MaxX => Math.Max(X1, X2);
         public double MinY => Math.Min(Y1, Y2);
         public double MaxY => Math.Max(Y1, Y2);
+        public double Width => MaxX - MinX;
+        public double Height => MaxY - MinY;
         public double AngleDegree
         {
             get

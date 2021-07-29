@@ -3,6 +3,7 @@ using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.ReleaseNs.RainSystemNs;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -16,10 +17,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             InitializeComponent();
             this.DataContext = ViewModel;
-            Loaded += (s, e) => { ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext = new ThMEPWSS.Pipe.Service.ThRainSystemService.CommandContext() { rainSystemDiagramViewModel = ViewModel, window = this }; };
-            Closed += (s, e) => { ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext = null; };
+            Loaded += (s, e) => { ThRainService.commandContext = new ThRainService.CommandContext() { ViewModel = ViewModel, window = this }; };
+            Closed += (s, e) => { ThRainService.commandContext = null; };
+            //this.Title += " 最后更新：2021/7/26 15:43";
         }
-
+     
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
             var uiParams = new uiRainSystemParams(ViewModel.Params);
@@ -30,10 +32,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         //run command
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new ThRainSystemDiagramCmd(ViewModel))
-            {
-                cmd.Execute();
-            }
+            RainDiagram.DrawRainDiagram(ViewModel);
         }
 
         //Init storeys
