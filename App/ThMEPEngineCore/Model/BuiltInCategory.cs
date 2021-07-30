@@ -40,6 +40,10 @@
         /// </summary>
         ConnectPort,
         /// <summary>
+        /// 引下线
+        /// </summary>
+        Conductor,
+        /// <summary>
         /// 门
         /// </summary>
         Door,

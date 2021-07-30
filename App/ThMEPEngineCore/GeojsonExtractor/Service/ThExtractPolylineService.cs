@@ -5,6 +5,7 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
@@ -23,7 +24,7 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
                 Polys = acadDatabase.ModelSpace
                     .OfType<Polyline>()
                     .Where(o => IsElementLayer(o.Layer))
-                    .Select(o=>o.Clone() as Polyline)
+                    .Select(o=>(o.Clone() as Polyline).Tessellate(TesslateLength))
                     .ToList();
                 if(pts.Count>=3)
                 {

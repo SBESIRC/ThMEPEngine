@@ -45,6 +45,8 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// 房间框线处理后导致区域变化
         /// </summary>
         protected double LoopBufferLength = 10.0;
+
+        protected double TesslateLength = 10.0;
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         public ThExtractorBase()
         {

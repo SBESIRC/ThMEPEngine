@@ -97,6 +97,7 @@
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThExtractBlockReferenceService.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcBuildingStoreyFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcCurtainWallFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcParkingStallFeature.cs" />
@@ -134,8 +135,8 @@
     <Compile Include="IO\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
-    <Compile Include="GeojsonExtractor\ThEStoreyExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThStoreyExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThEStoreyExtractor.cs" />
     <Compile Include="IO\ExcelService\ReadExcelService.cs" />
     <Compile Include="IO\IOService\IOOperateService.cs" />
     <Compile Include="Model\Electrical\ThEStoreys.cs" />

@@ -21,5 +21,6 @@
         public readonly static string AnglePropertyName = "Angle";
         public readonly static string ThicknessPropertyName = "Thickness";
         public readonly static string BelongedArchOutlineIdPropertyName = "BelongedArchOutlineId";
+        public readonly static string ClassPropertyName = "Class";
     }
 }

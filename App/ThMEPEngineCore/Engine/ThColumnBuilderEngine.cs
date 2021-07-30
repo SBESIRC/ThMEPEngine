@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
@@ -10,7 +11,6 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 
 namespace ThMEPEngineCore.Engine
 {
@@ -30,9 +30,10 @@ namespace ThMEPEngineCore.Engine
             var columnExtractor = new ThColumnExtractionEngine();
             columnExtractor.Extract(db);
             var db3ColumnExtractor = new ThDB3ColumnExtractionEngine();
-            db3ColumnExtractor.Extract(db);
-            columnExtractor.Results.ForEach(e=>columns.Add(e.Geometry));
+            db3ColumnExtractor.Extract(db);         
+            columnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
             db3ColumnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
+            columns = Buffer(columns, -1.0);
 
             //移动到原点
             var center = GetCenter(columns);
@@ -47,6 +48,7 @@ namespace ThMEPEngineCore.Engine
             }
             columns = FilterInRange(columns, newPts);
             columns = Preprocess(columns);
+            columns = Buffer(columns, 1.0);
             transformer.Reset(columns);
 
             return columns.Cast<Polyline>().Select(e => ThIfcColumn.Create(e)).ToList();
@@ -98,6 +100,24 @@ namespace ThMEPEngineCore.Engine
             {
                 return objs;
             }
+        }
+        private DBObjectCollection Buffer(DBObjectCollection objs,double length)
+        {
+            var results = new DBObjectCollection();
+            var bufferService = new ThNTSBufferService();
+            objs.Cast<Entity>().ForEach(e =>
+            {
+                var entity = bufferService.Buffer(e,length);
+                if(entity!=null && GetArea(entity)>=1.0)
+                {
+                    results.Add(entity);
+                }
+            });
+            return results;
+        }
+        private double GetArea(Entity polygon)
+        {
+            return polygon.ToNTSPolygon().Area;
         }
     }
 }

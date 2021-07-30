@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -22,6 +23,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             Category = BuiltInCategory.Column.ToString();
             Columns = new List<Polyline>();
             Rooms = new List<ThIfcRoom>();
+            TesslateLength = 5.0;
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -54,11 +56,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             if (UseDb3Engine)
             {
-                using (var columnEngine = new ThColumnRecognitionEngine())
-                {
-                    columnEngine.Recognize(database, pts);
-                    Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToList();
-                }
+                var columnBuilder = new ThColumnBuilderEngine();
+                Columns = columnBuilder
+                    .Build(database, pts)
+                    .Select(o=>o.Outline as Polyline)
+                    .ToList();
             }
             else
             {
@@ -67,7 +69,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Columns = instance.Polys;
+                Columns = instance.Polys.Select(o=>o.TessellatePolylineWithArc(TesslateLength)).ToList();
             }
             if (FilterMode == FilterMode.Window)
             {

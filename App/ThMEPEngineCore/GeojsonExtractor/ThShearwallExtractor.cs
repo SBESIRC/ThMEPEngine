@@ -9,6 +9,7 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using NFox.Cad;
 using ThMEPEngineCore.IO;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -21,6 +22,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             Category = BuiltInCategory.ShearWall.ToString();
             Walls = new List<Entity>();
             Rooms = new List<ThIfcRoom>();
+            TesslateLength = 100.0;
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -58,9 +60,12 @@ namespace ThMEPEngineCore.GeojsonExtractor
             if (UseDb3Engine)
             {
                 using (var engine = new ThShearWallRecognitionEngine())
+                using (var db3Engine = new ThDB3ShearWallRecognitionEngine())
                 {
                     engine.Recognize(database, pts);
+                    db3Engine.Recognize(database, pts);
                     engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                    db3Engine.Elements.ForEach(o => Walls.Add(o.Outline));
                 }
             }
             else
@@ -70,7 +75,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Walls = instance.Polys.Cast<Entity>().ToList();
+
+                Walls = instance.Polys
+                    .Select(o=>o.TessellatePolylineWithArc(TesslateLength))
+                    .Cast<Entity>()
+                    .ToList();
             }
             if (FilterMode == FilterMode.Window)
             {

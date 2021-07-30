@@ -7,34 +7,32 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Common;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Model.Electrical;
 using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
-    public class ThEStoreyExtractor : ThExtractorBase, IPrint
+    public class ThStoreyExtractor : ThExtractorBase, IPrint
     {
-        public List<ThEStoreyInfo> Storeys { get; private set; }
-        private const double TesslateLength =200.0;
-        public Dictionary<string, string> StoreyNumberMap { get; set; }
-        public ThEStoreyExtractor()
+        public List<ThStoreyInfo> Storeys { get; private set; }
+        public ThStoreyExtractor()
         {
             UseDb3Engine = true;
-            Storeys = new List<ThEStoreyInfo>();
+            TesslateLength = 200.0;
+            Storeys = new List<ThStoreyInfo>();
             Category = BuiltInCategory.StoreyBorder.ToString();
-            StoreyNumberMap = new Dictionary<string, string>();
         }
 
         public override void Extract(Database database, Point3dCollection pts)
         {
             if (UseDb3Engine)
             {
-                var engine = new ThEStoreysRecognitionEngine();
+                var engine = new ThStoreysRecognitionEngine();
                 engine.Recognize(database, pts);
-                Storeys = engine.Elements.Cast<ThEStoreys>().Select(o=>new ThEStoreyInfo(o)).ToList();                
+                Storeys = engine.Elements.Cast<ThStoreys>().Select(o=>new ThStoreyInfo(o)).ToList();                
             }
             else
             {
@@ -45,8 +43,6 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 var curve = ThTesslateService.Tesslate(o.Boundary, TesslateLength);
                 o.Boundary = curve as Polyline;
             });
-
-            Sort();
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -56,10 +52,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.FloorTypePropertyName, o.StoreyType);
-                if (o.StoreyNumber == "")
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);
-                else
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, StoreyNumberMap[o.StoreyNumber]);                
+                geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);                
                 geometry.Properties.Add(ThExtractorPropertyNameManager.IdPropertyName, o.Id);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.BasePointPropertyName, o.BasePoint);
                 geometry.Boundary = o.Boundary;
@@ -88,16 +81,5 @@ namespace ThMEPEngineCore.GeojsonExtractor
             }
         }
 
-        private void Sort()
-        {
-            //ToDO
-            Storeys = Storeys.Where(o => !(o.StoreyNumber.Contains('B'))).ToList();
-            Storeys.OrderBy(o => double.Parse(o.StoreyNumber));
-            for(int i=1;i<=Storeys.Count;i++)
-            {
-                if(Storeys[i-1].StoreyNumber!="")
-                    StoreyNumberMap.Add(Storeys[i-1].StoreyNumber, i + "F");
-            }
-        }
     }
 }

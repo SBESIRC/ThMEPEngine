@@ -93,6 +93,7 @@
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThGroundGridCommand.cs" />
     <Compile Include="Command\ThDclCommand.cs" />
     <Compile Include="Command\ThFireAlarmCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherShearWallExtractor.cs" />
@@ -141,6 +143,12 @@
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
     <Compile Include="Geometry\MPolygonProfileFinder.cs" />
+    <Compile Include="GroundingGrid\Data\ThEarthConductorExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThDownConductorExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThFloorOutlineExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundColumnExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundShearwallExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundWireExtractor.cs" />
     <Compile Include="Layout\ILayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
@@ -260,6 +268,7 @@
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThGroundGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
