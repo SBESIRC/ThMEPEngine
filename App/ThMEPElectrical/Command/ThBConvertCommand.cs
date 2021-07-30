@@ -9,13 +9,14 @@ using ThCADExtension;
 using AcHelper.Commands;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Algorithm;
-using ThMEPElectrical.BlockConvert;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using ThMEPElectrical.BlockConvert;
+using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Command
 {
@@ -131,12 +132,14 @@ namespace ThMEPElectrical.Command
                             {
                                 string name = "";
                                 ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
+                                Regex r = new Regex(@"[a-zA-Z]+");
+                                Match m = r.Match(name);
                                 switch (Category)
                                 {
                                     case ConvertCategory.WSS:
-                                        return name.StartsWith("W");
+                                        return m.Value == "W" || m.Value == "w";
                                     case ConvertCategory.HVAC:
-                                        return name.StartsWith("H");
+                                        return m.Value == "H" || m.Value == "h";
                                     default:
                                         return true;
                                 }
