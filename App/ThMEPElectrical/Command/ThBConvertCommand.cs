@@ -132,14 +132,18 @@ namespace ThMEPElectrical.Command
                             {
                                 string name = "";
                                 ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
-                                Regex r = new Regex(@"[a-zA-Z]+");
+                                Regex r = new Regex(@"([a-zA-Z])");
                                 Match m = r.Match(name);
+                                if (!m.Success)
+                                {
+                                    return false;
+                                }
                                 switch (Category)
                                 {
                                     case ConvertCategory.WSS:
-                                        return m.Value == "W" || m.Value == "w";
+                                        return m.Groups[1].Value.ToUpper() == "W";
                                     case ConvertCategory.HVAC:
-                                        return m.Value == "H" || m.Value == "h";
+                                        return m.Groups[1].Value.ToUpper() == "H";
                                     default:
                                         return true;
                                 }
