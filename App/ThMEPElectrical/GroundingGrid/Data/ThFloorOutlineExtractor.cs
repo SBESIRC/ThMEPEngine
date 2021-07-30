@@ -17,6 +17,7 @@ namespace ThMEPElectrical.GroundingGrid.Data
         public ThFloorOutlineExtractor()
         {
             Outlines = new List<Polyline>();
+            Category = BuiltInCategory.ArchitectureOutline.ToString();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {

@@ -18,6 +18,7 @@ namespace ThMEPElectrical.GroundingGrid.Data
         {
             Wires = new List<Curve>();
             TesslateLength = 50.0;
+            Category = BuiltInCategory.LightningReceivingBelt.ToString();
         }        
 
         public override void Extract(Database database, Point3dCollection pts)

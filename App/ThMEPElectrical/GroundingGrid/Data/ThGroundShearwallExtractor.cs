@@ -18,6 +18,7 @@ namespace ThMEPElectrical.GroundingGrid.Data
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
+                geos.Add(geometry);
             });
             return geos;
         }
