@@ -170,6 +170,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THHZXT_SMALL",
             "IDI_THCAD_THHZXT_LARGE",
             RibbonButtonStyle.LargeWithText);
+
+            // 提资转换
+            row.AddNewButton("提资转换",
+            "天华提资转换",
+            "THTZZH",
+            "天华提资转换",
+            "IDI_THCAD_THTZZH_SMALL",
+            "IDI_THCAD_THTZZH_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
