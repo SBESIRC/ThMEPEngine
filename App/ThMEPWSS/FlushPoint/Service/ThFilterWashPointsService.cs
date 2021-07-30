@@ -21,7 +21,7 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             var drainageDitchService = new ThDrainageDitchNearbyService(DrainFacilityExtractor.DrainageDitches, Rooms);
             var collectWellService = new ThCollectingWellNearbyService(
-                DrainFacilityExtractor.CollectingWells.Cast<Polyline>().ToList());
+                DrainFacilityExtractor.CollectingWells.Cast<Polyline>().ToList(), Rooms);
             LayoutInfo.NearbyPoints = washPoints.Where(o => drainageDitchService.Find(o) || collectWellService.Find(o)).ToList();
             LayoutInfo.FarawayPoints = washPoints.Where(o => !LayoutInfo.NearbyPoints.Contains(o)).ToList();
         }

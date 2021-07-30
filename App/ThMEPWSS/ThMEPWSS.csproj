@@ -63,6 +63,7 @@
     <Compile Include="FireProtectionSystemDiagram\Models\FloorDataModel.cs" />
     <Compile Include="FireProtectionSystemDiagram\Models\LineElementCreate.cs" />
     <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
+    <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThNonBlockElementExtractor.cs" />
