@@ -98,7 +98,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
                 
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
-            fireHydrantSysIn.textWidth = textWidth - 800;
+            fireHydrantSysIn.textWidth = textWidth/525*350;
             fireHydrantSysIn.pipeWidth = textWidth + 200;
         }
     }
