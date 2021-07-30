@@ -777,7 +777,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             Results = new List<Entity>();
         }
 
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth)
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth, ref double textHeight)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -798,7 +798,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (bkr is Entity ent)
                     {
-                        ExplodeText(ent, dbTextCollection, ref textWidth);
+                        ExplodeText(ent, dbTextCollection, ref textWidth, ref textHeight);
                     }
                 }
 
@@ -815,7 +815,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    layer.ToUpper() == "W-RAIN-NOTE";
         }
 
-        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth)
+        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref double textHeight)
         {
             if (ent is DBText dbText)//DBText直接添加
             {
@@ -843,6 +843,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X"))
                     {
                         textWidth = tWidth;
+                        textHeight = (text as DBText).Height;
                     }
                     dBObjects.Add((DBObject)text);
                 }
@@ -856,7 +857,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (obj is Entity ent1)
                     {
-                        ExplodeText(ent1, dBObjects, ref textWidth);
+                        ExplodeText(ent1, dBObjects, ref textWidth, ref textHeight);
                     }
                 }
             }
