@@ -8,26 +8,23 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPortMark
     {
-        public static void Insert_mark( int port_num,
-                                        double air_volumn,
+        public static void Insert_mark( DuctPortsParam param,
                                         double port_width,
                                         double port_height,
-                                        string scale,
-                                        string port_name,
                                         string port_mark_name,
                                         string port_mark_layer,
                                         Point3d p)
         {
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
-            double h = ThDuctPortsService.Get_text_height(scale);
+            double h = ThDuctPortsService.Get_text_height(param.scale);
             double scale_h = h * 2 / 3;
-            double single_port_volume = air_volumn / port_num;
+            double single_port_volume = param.air_volume / param.port_num;
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(scale_h, scale_h, 1), 0,
-                          new Dictionary<string, string> { { "风口名称", port_name },
+                          new Dictionary<string, string> { { "风口名称", param.port_name },
                                                            { "尺寸", port_size },
-                                                           { "数量", port_num.ToString() },
+                                                           { "数量", param.port_num.ToString() },
                                                            { "风量", single_port_volume.ToString("0.")} });
             }
         }

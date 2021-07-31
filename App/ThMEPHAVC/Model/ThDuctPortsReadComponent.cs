@@ -11,24 +11,49 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsReadComponent
     {
-        public static DBObjectCollection Read_all_component()
+        public static Dictionary<Polyline, ObjectId> Read_all_component()
         {
+            var bounds2IdDic = new Dictionary<Polyline, ObjectId>();
             using (var db = AcadDatabase.Active())
             {
-                var comps = new DBObjectCollection();
                 var groups = db.Groups;
                 foreach (var g in groups)
                 {
-                    var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_Info);
                     if (list != null)
                     {
                         var poly = new Polyline();
-                        var bound = g.Bounds.Value;
-                        poly.CreateRectangle(bound.MinPoint.ToPoint2D(), bound.MaxPoint.ToPoint2D());
-                        comps.Add(poly);
+                        Get_group_bound(g, out Point3d low_left_p, out Point3d high_right_p);
+                        poly.CreateRectangle(low_left_p.ToPoint2D(), high_right_p.ToPoint2D());
+                        bounds2IdDic.Add(poly, g.ObjectId);
                     }
                 }
-                return comps;
+                return bounds2IdDic;
+            }
+        }
+        private static void Get_group_bound(Group g, out Point3d low_left_p, out Point3d high_right_p)
+        {
+            Extents3d? groupExtents = null;
+            using (var db = AcadDatabase.Active())
+            {
+                low_left_p = high_right_p = Point3d.Origin;
+                var g_ids = g.GetAllEntityIds();
+                foreach (var id in g_ids)
+                {
+                    var e = db.Element<Entity>(id);
+                    if (groupExtents == null)
+                    {
+                        groupExtents = e.Bounds;
+                        low_left_p = groupExtents.Value.MinPoint;
+                        high_right_p = groupExtents.Value.MaxPoint;
+                    }
+                    else
+                    {
+                        var cur_bound = (Extents3d)e.Bounds;
+                        low_left_p = ThDuctPortsService.Get_min_point(low_left_p, cur_bound.MinPoint);
+                        high_right_p = ThDuctPortsService.Get_max_point(high_right_p, cur_bound.MaxPoint);
+                    }
+                }
             }
         }
         public static List<ObjectId> Read_shape_ids()
@@ -40,7 +65,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var list = id.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var list = id.GetXData(ThHvacCommon.RegAppName_Info);
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -61,7 +86,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var list = id.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var list = id.GetXData(ThHvacCommon.RegAppName_Info);
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -73,16 +98,32 @@ namespace ThMEPHVAC.Model
             }
             return ids;
         }
+        public static List<BlockReference> Read_blk_by_name(string blk_name)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var blks = db.ModelSpace.OfType<BlockReference>();
+                return blks.Where(b => b.GetEffectiveName().Contains(blk_name)).ToList();
+            }
+        }
         public static List<ObjectId> Read_blk_ids_by_name(string blk_name)
         {
             var ids = new List<ObjectId>();
             using (var db = AcadDatabase.Active())
             {
                 var blks = db.ModelSpace.OfType<BlockReference>();
-                var valveBlks = blks.Where(b => b.GetEffectiveName().Contains(blk_name));
-                ids.AddRange(valveBlks.Select(blk => blk.ObjectId));
+                var selected_blks = blks.Where(b => b.GetEffectiveName().Contains(blk_name));
+                ids.AddRange(selected_blks.Select(blk => blk.ObjectId));
             }
             return ids;
+        }
+        public static List<BlockReference> Read_all_port_by_name(string port_name)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var blks = db.ModelSpace.OfType<BlockReference>();
+                return blks.Where(b => b.GetEffectiveName().Contains(port_name)).ToList();
+            }
         }
         public static List<DBText> Read_texts()
         {
@@ -100,6 +141,30 @@ namespace ThMEPHVAC.Model
             }
             return texts;
         }
+        public static List<AlignedDimension> Read_dimension()
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var dimensions = new List<AlignedDimension>();
+                var dims = db.ModelSpace.OfType<AlignedDimension>();
+                foreach (var d in dims)
+                {
+                    dimensions.Add(d);
+                }
+                return dimensions;
+            }
+        }
+        public static List<Leader> Read_leader()
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var leaders = new List<Leader>();
+                var leads = db.ModelSpace.OfType<Leader>();
+                foreach (var l in leads)
+                    leaders.Add(l);
+                return leaders;
+            }
+        }
         public static Dictionary<string, Tuple<Point3d, string>> GetPortsOfGroup(ObjectId groupId)
         {
             var rst = new Dictionary<string, Tuple<Point3d, string>>();
@@ -107,9 +172,7 @@ namespace ThMEPHVAC.Model
             var id2GroupDic = GetObjectId2GroupDic();
             if (!id2GroupDic.ContainsKey(groupId))
                 return rst;
-
             var groupObj = id2GroupDic[groupId];
-
             var allObjIdsInGroup = groupObj.GetAllEntityIds();
             using (var db = AcadDatabase.Active())
             {
@@ -118,7 +181,7 @@ namespace ThMEPHVAC.Model
                     var entity = db.Element<Entity>(id);
                     if (!(entity is DBPoint))
                         continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Info);
                     if (ptXdata != null)
                     {
                         var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -152,7 +215,7 @@ namespace ThMEPHVAC.Model
                     var entity = db.Element<Entity>(id);
                     if (!(entity is DBPoint))
                         continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Info);
                     if (ptXdata != null)
                     {
                         var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -176,7 +239,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var info = id.GetXData(ThHvacCommon.RegAppName_DuctInfo);
+                    var info = id.GetXData(ThHvacCommon.RegAppName_Info);
                     if (info != null)
                         dic.Add(id, g);
                 }

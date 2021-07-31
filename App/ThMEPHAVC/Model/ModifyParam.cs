@@ -82,8 +82,6 @@ namespace ThMEPHVAC.Model
         public Point2d ep;
         public Handle handle;
         public Handle start_handle;
-        public Handle duct_size_handle;
-        public Handle elevation_handle;
         public string duct_size;
         public double air_volume;
         public string type;

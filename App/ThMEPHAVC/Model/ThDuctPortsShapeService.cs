@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPHVAC.Model
@@ -17,8 +15,7 @@ namespace ThMEPHVAC.Model
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             var big_vec = new Vector3d(in_2big.X, in_2big.Y, 0);
             double rotate_angle =  Get_cross_trans_info(inner_width, outter_width, in_vec, big_vec, out bool is_flip);
-            var shrink_len = cross.port_widths[idx] + 50;
-            var center_point = cross.pos[0] - in_2vec * shrink_len;
+            var center_point = Get_entity_center_p(cross);
             return ThDuctPortsService.Get_trans_mat(is_flip, rotate_angle, center_point);
         }
         public static Matrix3d Create_tee_trans_mat(Entity_modify_param tee)
@@ -28,8 +25,7 @@ namespace ThMEPHVAC.Model
             var branch_vec = new Vector3d(branch_2vec.X, branch_2vec.Y, 0);
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             double rotate_angle = Get_tee_trans_info(in_vec, branch_vec, out bool is_flip);
-            var shrink_len = Get_tee_main_shrink(tee);
-            var center_point = tee.pos[1] - in_2vec * shrink_len;
+            var center_point = Get_entity_center_p(tee);
             return ThDuctPortsService.Get_trans_mat(is_flip, rotate_angle, center_point);
         }
         public static Matrix3d Create_elbow_trans_mat(Entity_modify_param elbow)
@@ -37,12 +33,44 @@ namespace ThMEPHVAC.Model
             var in_2vec = elbow.pos[0] - elbow.pos_ext[0];
             var out_2vec = elbow.pos[1] - elbow.pos_ext[1];
             double open_angle = in_2vec.GetAngleTo(out_2vec);
-            var shrink_len = Get_elbow_shrink(open_angle, elbow.port_widths[0], 0, 0.7);
-            var center_point = elbow.pos[0] - in_2vec * shrink_len;
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             var out_vec = new Vector3d(out_2vec.X, out_2vec.Y, 0);
+            var center_point = Get_entity_center_p(elbow);
             double rotate_angle = Get_elbow_trans_info(open_angle, in_vec, out_vec, out bool is_flip);
             return ThDuctPortsService.Get_trans_mat(is_flip, rotate_angle, center_point);
+        }
+        public static Point2d Get_entity_center_p(Entity_modify_param entity)
+        {
+            if (entity.type == "Elbow")
+                return Get_elbow_center_p(entity);
+            else if (entity.type == "Tee")
+                return Get_tee_center_p(entity);
+            else if (entity.type == "Cross")
+                return Get_cross_center_p(entity);
+            else
+                throw new NotImplementedException();
+        }
+        public static Point2d Get_cross_center_p(Entity_modify_param cross)
+        {
+            var in_2vec = cross.pos[0] - cross.pos_ext[0];
+            double inner_width = cross.port_widths[2];
+            double outter_width = cross.port_widths[3];
+            int idx = inner_width > outter_width ? 2 : 3;
+            var shrink_len = cross.port_widths[idx] + 50;
+            return cross.pos[0] - in_2vec * shrink_len;
+        }
+        public static Point2d Get_tee_center_p(Entity_modify_param tee)
+        {
+            var in_2vec = tee.pos[1] - tee.pos_ext[1];
+            var shrink_len = Get_tee_main_shrink(tee);
+            return tee.pos[1] - in_2vec * shrink_len;
+        }
+        public static Point2d Get_elbow_center_p(Entity_modify_param elbow)
+        {
+            var in_2vec = elbow.pos[0] - elbow.pos_ext[0];
+            var open_angle = Get_elbow_open_angle(elbow);
+            var shrink_len = Get_elbow_shrink(open_angle, elbow.port_widths[0], 0, 0.7);
+            return elbow.pos[0] - in_2vec * shrink_len;
         }
         public static double Get_cross_trans_info(double inner_width,
                                                   double outter_width,

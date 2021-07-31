@@ -37,21 +37,26 @@ namespace TianHua.Hvac.UI.Command
             }
             if (!Get_duct_port_info())
                 return;
-            if (in_param.scale == null)
-                return;
-            if (in_param.port_range.Contains("侧"))
-                in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
             ThDuctPortsDrawService.Move_to_origin(start_point, exclude_line);
             var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, Point3d.Origin, in_param);
+            graph_res.Get_start_line(center_lines, Point3d.Origin, out Point3d search_point);
+            graph_res.Set_duct_air_volume(in_param.port_num, search_point, center_lines);
+            graph_res.Set_special_shape_info(search_point);
             if (graph_res.merged_endlines.Count == 0)
             {
                 ThDuctPortsService.Prompt_msg("选择错误起始点");
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
-            var judger = new ThDuctPortsJudger(start_point, graph_res.merged_endlines, adjust_graph.endline_segs);
+            var judger = new ThDuctPortsJudger(start_point, graph_res.is_recreate, graph_res.merged_endlines, adjust_graph.endline_segs);
             var painter = new ThDuctPortsDraw(start_point, in_param, judger.dir_align_points, judger.ver_align_points);
             painter.Draw(graph_res, adjust_graph);
+            Modify_port_num();
+        }
+        private void Modify_port_num()
+        {
+            if (in_param.port_range.Contains("侧"))
+                in_param.port_num *= 2;
         }
         private void Get_center_line_start_point(out DBObjectCollection center_lines)
         {
@@ -87,10 +92,14 @@ namespace TianHua.Hvac.UI.Command
                 in_param.elevation = dlg.elevation;
                 in_param.port_size = dlg.port_size;
                 in_param.port_name = dlg.port_name;
-                in_param.air_volumn = dlg.air_volume;
+                in_param.air_volume = dlg.air_volume;
                 in_param.port_range = dlg.port_range;
                 in_param.in_duct_size = dlg.duct_size;
                 in_param.air_speed = dlg.air_speed;
+                if (in_param.scale == null)
+                    return false;
+                if (in_param.port_range.Contains("侧"))
+                    in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
                 return true;
             }
             return false;

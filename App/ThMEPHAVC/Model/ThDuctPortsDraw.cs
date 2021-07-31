@@ -64,16 +64,8 @@ namespace ThMEPHVAC.Model
             if (last_seg.segs.Count == 0)
                 return;
             var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
-            if (ports.Count < 2)
-                return;
             Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0) + org_dis_vec;
-            ThDuctPortsDrawPortMark.Insert_mark(in_param.port_num,
-                                                in_param.air_volumn,
-                                                port_width,
-                                                port_height,
-                                                in_param.scale,
-                                                in_param.port_name,
-                                                service.port_mark_name, service.port_mark_layer, p);
+            ThDuctPortsDrawPortMark.Insert_mark(in_param, port_width, port_height, service.port_mark_name, service.port_mark_layer, p);
             ThDuctPortsDrawPortMark.Insert_leader(Get_mark_base_point(ports) + org_dis_vec, p, service.port_mark_layer);
         }
         private Point3d Get_mark_base_point(List<Port_Info> ports)

@@ -277,7 +277,7 @@ namespace ThMEPHVAC.Model
                 var ids = id.GetGroups();
                 foreach (var g_id in ids)
                 {
-                    g_id.RemoveXData(ThHvacCommon.RegAppName_DuctInfo);
+                    g_id.RemoveXData(ThHvacCommon.RegAppName_Info);
                     Remove_group(g_id);
                 }
             }
@@ -289,7 +289,7 @@ namespace ThMEPHVAC.Model
                 using (var db = AcadDatabase.Active())
                 {
                     var g_id = db.Database.GetObjectId(false, handle, 0);
-                    g_id.RemoveXData(ThHvacCommon.RegAppName_DuctInfo);
+                    //g_id.RemoveXData(ThHvacCommon.RegAppName_Info);
                     Remove_group(g_id);
                 }
             }

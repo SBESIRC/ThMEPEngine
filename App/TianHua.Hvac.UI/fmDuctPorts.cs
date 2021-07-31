@@ -23,7 +23,7 @@ namespace TianHua.Hvac.UI
         public fmDuctPorts(DuctPortsParam param)
         {
             InitializeComponent();
-            if (Math.Abs(param.air_volumn) > 1e-3)
+            if (Math.Abs(param.air_volume) > 1e-3)
             {
                 comboBox2.Text = param.scenario;
                 Scenario_init();
@@ -43,7 +43,7 @@ namespace TianHua.Hvac.UI
 
         private void Component_init(DuctPortsParam param)
         {
-            textBox2.Text = param.air_volumn.ToString();
+            textBox2.Text = param.air_volume.ToString();
             textBox3.Text = param.air_speed.ToString();
             textBox4.Text = param.elevation.ToString();
             textBox7.Text = param.port_num.ToString();

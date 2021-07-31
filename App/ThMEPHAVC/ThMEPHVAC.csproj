@@ -47,7 +47,7 @@
     <Compile Include="Model\ThDuctPortsReadComponent.cs" />
     <Compile Include="Model\ThDuctPortsRecoder.cs" />
     <Compile Include="Model\ThDuctPortsModifyDuct.cs" />
-    <Compile Include="Model\ThDuctPortsReDraw.cs" />
+    <Compile Include="Model\ThDuctPortsModifyPort.cs" />
     <Compile Include="Model\ThDuctPortsReDrawFactory.cs" />
     <Compile Include="Model\ThDuctPortsService.cs" />
     <Compile Include="Model\ThDuctPortsShapeService.cs" />

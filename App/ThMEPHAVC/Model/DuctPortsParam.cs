@@ -6,7 +6,7 @@ namespace ThMEPHVAC.Model
     {
         public int port_num;
         public double air_speed;
-        public double air_volumn;
+        public double air_volume;
         public double elevation;
         public double main_height;
         public string scale;

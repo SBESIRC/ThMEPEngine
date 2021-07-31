@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
-using System.Text.RegularExpressions;
+using DotNetARX;
 
 namespace ThMEPHVAC.Model
 {
@@ -232,9 +233,9 @@ namespace ThMEPHVAC.Model
                                                     out Point3d pL, 
                                                     out Point3d pR)
         {
-            var vertical_left = ThDuctPortsService.Get_left_vertical_vec(dir_vec);
+            var vertical_left = Get_left_vertical_vec(dir_vec);
             pL = pos + dir_vec * (port_width * 0.5) + vertical_left * (duct_width * 0.5);
-            var vertical_right = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var vertical_right = Get_right_vertical_vec(dir_vec);
             pR = pos - dir_vec * (port_width * 0.5) + vertical_right * (duct_width * 0.5);
         }
         public static double Get_port_rotate_angle(Vector3d dir_vec)
@@ -451,7 +452,7 @@ namespace ThMEPHVAC.Model
         }
         public static bool Is_in_mirror_range(Point2d p, Line l)
         {
-            var vertical_p = ThDuctPortsService.Get_vertical_point(p, l);
+            var vertical_p = Get_vertical_point(p, l);
             return Mid_point_is_in_line(vertical_p, l);
         }
         private static bool Mid_point_is_in_line(Point2d p, Line l)
@@ -466,7 +467,7 @@ namespace ThMEPHVAC.Model
         }
         public static double Point_to_line(Point2d p, Line l)
         {
-            var vertical_p = ThDuctPortsService.Get_vertical_point(p, l);
+            var vertical_p = Get_vertical_point(p, l);
             return vertical_p.GetDistanceTo(p);
         }
         public static bool Is_equal(double a, double b)
@@ -512,6 +513,27 @@ namespace ThMEPHVAC.Model
             var sp = new Point3d(sp_2.X, sp_2.Y, 0);
             var ep = new Point3d(ep_2.X, ep_2.Y, 0);
             return new Line(sp, ep);
+        }
+        public static Point3d Get_max_point(Point3d p1, Point3d p2)
+        {
+            double max_x = Math.Max(p1.X, p2.X);
+            double max_y = Math.Max(p1.Y, p2.Y);
+            return new Point3d(max_x, max_y, 0);
+        }
+        public static Point3d Get_min_point(Point3d p1, Point3d p2)
+        {
+            double min_x = Math.Min(p1.X, p2.X);
+            double min_y = Math.Min(p1.Y, p2.Y);
+            return new Point3d(min_x, min_y, 0);
+        }
+        public static Polyline Get_line_extend(Line l, double ext_len)
+        {
+            var pl = new Polyline();
+            var dir_vec = Get_edge_direction(l);
+            var l_vec = Get_left_vertical_vec(dir_vec);
+            var r_vec = Get_right_vertical_vec(dir_vec);
+            pl.CreateRectangle((l.StartPoint + l_vec * ext_len).ToPoint2D(), (l.EndPoint + r_vec * ext_len).ToPoint2D());
+            return pl;
         }
     }
 }

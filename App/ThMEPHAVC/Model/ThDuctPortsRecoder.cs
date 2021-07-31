@@ -48,12 +48,11 @@ namespace ThMEPHVAC.Model
                     { (int)DxfCode.ExtendedDataAsciiString, param.air_volume.ToString("0.00")},
                     { (int)DxfCode.ExtendedDataAsciiString, param.duct_size},
                 };
-                id.AddXData(ThHvacCommon.RegAppName_DuctInfo, value_list);
+                id.AddXData(ThHvacCommon.RegAppName_Info, value_list);
 
                 double width = ThDuctPortsService.Get_width(param.duct_size);
                 var widths = new List<double>() { width, width };
                 SetPortInfoXdata(ports_ids, ext_ports_ids, widths);
-
                 return id.Handle;
             }
         }
@@ -75,7 +74,7 @@ namespace ThMEPHVAC.Model
                     { (int)DxfCode.ExtendedDataAsciiString, param.start_id.ToString()},
                     { (int)DxfCode.ExtendedDataAsciiString, param.type}
                 };
-                id.AddXData(ThHvacCommon.RegAppName_DuctInfo, value_list);
+                id.AddXData(ThHvacCommon.RegAppName_Info, value_list);
                 SetPortInfoXdata(ports_ids, ext_ports_ids, param.port_widths);
 
                 return id.Handle;
@@ -93,7 +92,7 @@ namespace ThMEPHVAC.Model
                     { (int)DxfCode.ExtendedDataAsciiString, widths[i].ToString()}
                 };
 
-                ports_ids[i].AddXData(ThHvacCommon.RegAppName_DuctInfo, port_value_list);
+                ports_ids[i].AddXData(ThHvacCommon.RegAppName_Info, port_value_list);
             }
 
             //set port ext xdata
@@ -105,7 +104,7 @@ namespace ThMEPHVAC.Model
                     { (int)DxfCode.ExtendedDataAsciiString, i.ToString()},
                 };
 
-                ext_ports_ids[i].AddXData(ThHvacCommon.RegAppName_DuctInfo, ext_port_value_list);
+                ext_ports_ids[i].AddXData(ThHvacCommon.RegAppName_Info, ext_port_value_list);
             }
         }
         private static ObjectIdList Collect_ids(ObjectIdList geo_ids, 

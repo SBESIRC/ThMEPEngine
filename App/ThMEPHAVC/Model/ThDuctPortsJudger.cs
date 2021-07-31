@@ -22,9 +22,30 @@ namespace ThMEPHVAC.Model
         private List<Line> crossing_h_grid_set;
         private ThCADCoreNTSSpatialIndex grid_spatial_index;
         public ThDuctPortsJudger(Point3d start_pos_,
+                                 bool is_recreate,
                                  List<Merged_endline_Info> endline, 
                                  List<Endline_seg_Info> endline_segs)
         {
+            Init(start_pos_);
+            if (!is_recreate)
+            {
+                Inner_shrink(endline_segs);
+                var grids = Get_grid_lines();
+                Move_to_org(grids);
+                var grid_lines = Filter_h_v_grid_line(grids);
+                grids.Clear();
+                if (grid_lines.Count > 0)
+                {
+                    grid_spatial_index = new ThCADCoreNTSSpatialIndex(grid_lines);
+                    Seperate_v_and_h_grid(grid_lines, v_grid_set, h_grid_set);
+                    Get_crossing_grid(endline);
+                    Adjust_port_by_wall(endline_segs);
+                    Adjust_end_endline_width(endline_segs);
+                }
+            }
+        }
+        private void Init(Point3d start_pos_)
+        {   
             align_limit = 500;
             start_pos = start_pos_;
             dir_align_points = new List<Point2d>();
@@ -33,19 +54,6 @@ namespace ThMEPHVAC.Model
             h_grid_set = new List<Line>();
             crossing_v_grid_set = new List<Line>();
             crossing_h_grid_set = new List<Line>();
-            Inner_shrink(endline_segs);
-            var grids = Get_grid_lines();
-            Move_to_org(grids);
-            var grid_lines = Filter_h_v_grid_line(grids);
-            grids.Clear();
-            if (grid_lines.Count > 0)
-            {
-                grid_spatial_index = new ThCADCoreNTSSpatialIndex(grid_lines);
-                Seperate_v_and_h_grid(grid_lines, v_grid_set, h_grid_set);
-                Get_crossing_grid(endline);
-                Adjust_port_by_wall(endline_segs);
-                Adjust_end_endline_width(endline_segs);
-            }
         }
         private DBObjectCollection Filter_h_v_grid_line(DBObjectCollection grid_lines)
         {

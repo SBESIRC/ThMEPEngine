@@ -20,6 +20,7 @@ namespace ThMEPHVAC.Model
             {
                 param = new DuctPortsParam();
                 start_point = Point2d.Origin;
+                return;
             }
             param = new DuctPortsParam
             {
@@ -29,18 +30,21 @@ namespace ThMEPHVAC.Model
                 main_height = Double.Parse((string)values.ElementAt(3).Value),
                 port_range = (string)values.ElementAt(4).Value,
             };
-            start_point = ThDuctPortsService.Covert_obj_to_point(values.ElementAt(5).Value);
+            var blk = obj_list[0].GetEntity() as BlockReference;
+            start_point = blk.Position.ToPoint2D();
         }
         public static void Get_shapes(out List<Entity_modify_param> shapes)
         {
             shapes = new List<Entity_modify_param>();
             var shapeIds = ThDuctPortsReadComponent.Read_shape_ids();
             foreach(var id in shapeIds)
-            {
-                var ids = new ObjectId[] { id };
-                var entity_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_DuctInfo);
-                shapes.Add(Get_entity_param(entity_list, id.Handle));
-            }
+                shapes.Add(Get_shape_by_id(id));
+        }
+        public static Entity_modify_param Get_shape_by_id(ObjectId id)
+        {
+            var ids = new ObjectId[] { id };
+            var entity_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Info);
+            return Get_entity_param(entity_list, id.Handle);
         }
         public static void Get_ducts(out List<Duct_modify_param> ducts)
         {
@@ -49,7 +53,7 @@ namespace ThMEPHVAC.Model
             foreach (var id in ductIds)
             {
                 var ids = new ObjectId[] { id };
-                var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_DuctInfo);
+                var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Info);
                 ducts.Add(Get_duct_param(duct_list, id.Handle));
             }
         }
@@ -101,7 +105,7 @@ namespace ThMEPHVAC.Model
             param.text_angle = text_angle;
             return param;
         }
-        private static Port_modify_param Get_port_param(ObjectId id)
+        public static Port_modify_param Get_port_param(ObjectId id)
         {
             var param = new Port_modify_param();
             ThDuctPortsDrawService.Get_port_dyn_block_properity(id, out Point3d pos, out string port_range, 
@@ -142,12 +146,12 @@ namespace ThMEPHVAC.Model
             if (list.Count > 0)
             {
                 var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                if (!values.Any())
-                    return param;
                 int inc = 0;
                 param.handle = group_handle;
                 param.start_id = ThDuctPortsService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
                 param.type = (string)values.ElementAt(inc++).Value;
+                if (!values.Any() || param.type == "Duct")
+                    return param;
                 using (var db = AcadDatabase.Active())
                 {
                     var id = db.Database.GetObjectId(false, group_handle, 0);
@@ -175,6 +179,19 @@ namespace ThMEPHVAC.Model
             }
             return list;
         }
+        public static string Get_entity_type(ObjectId id)
+        {
+            var list = id.GetXData(ThHvacCommon.RegAppName_Info);
+            if (list != null)
+            {
+                var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
+                if (values.Any())
+                {
+                    return (string)values.ElementAt(1).Value;
+                }
+            }
+            return String.Empty;
+        }
         public static TypedValueList Get_value_list(ObjectId[] obj_ids)
         {
             using (var db = AcadDatabase.Active())
@@ -185,7 +202,7 @@ namespace ThMEPHVAC.Model
                     var g_ids = id.GetGroups();
                     if (g_ids == null)
                         continue;
-                    list = Do_get_value_list(g_ids, ThHvacCommon.RegAppName_DuctInfo);
+                    list = Do_get_value_list(g_ids, ThHvacCommon.RegAppName_Info);
                     if (list == null)
                         continue;
                     if (list.Count != 0)
