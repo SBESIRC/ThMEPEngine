@@ -1,6 +1,6 @@
 ﻿using NetTopologySuite.Features;
 
-namespace ThMEPEngineCore.DataSet
+namespace ThMEPEngineCore.Data
 {
     public class ThMEPDataSet
     {

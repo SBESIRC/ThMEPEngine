@@ -76,8 +76,8 @@
     <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
-    <Compile Include="DataSet\ThMEPDataSet.cs" />
-    <Compile Include="DataSet\ThMEPDataSetFactory.cs" />
+    <Compile Include="Data\ThMEPDataSet.cs" />
+    <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
@@ -185,11 +185,6 @@
     <Compile Include="BeamInfo\Utils\ThOverkillDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
-    <Compile Include="BuildRoom\Interface\IRoomBuildData.cs" />
-    <Compile Include="BuildRoom\Interface\IRoomBuilder.cs" />
-    <Compile Include="BuildRoom\Interface\IRoomFilter.cs" />
-    <Compile Include="BuildRoom\Service\ThExplodeService.cs" />
-    <Compile Include="BuildRoom\Service\ThFilterService.cs" />
     <Compile Include="Service\ThNTSBufferService.cs" />
     <Compile Include="Service\ThNTSBuildAreaService.cs" />
     <Compile Include="Service\ThNTSSimilarityMeasureService.cs" />
@@ -243,7 +238,6 @@
     <Compile Include="Model\ThIfcRailing.cs" />
     <Compile Include="Model\ThIfcSensor.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
-    <Compile Include="BuildRoom\Service\ThBuildRoomDataService.cs" />
     <Compile Include="Service\ThBreakDrainageFacilityService.cs" />
     <Compile Include="Service\ThContourRelationQueryService.cs" />
     <Compile Include="Service\ThDrainageFacilityCleanService.cs" />

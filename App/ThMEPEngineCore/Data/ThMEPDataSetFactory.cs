@@ -1,4 +1,4 @@
-﻿namespace ThMEPEngineCore.DataSet
+﻿namespace ThMEPEngineCore.Data
 {
     public abstract class ThMEPDataSetFactory
     {
