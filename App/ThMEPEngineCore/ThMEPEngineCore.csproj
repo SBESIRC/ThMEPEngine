@@ -76,6 +76,8 @@
     <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="DataSet\ThMEPDataSet.cs" />
+    <Compile Include="DataSet\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
