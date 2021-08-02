@@ -73,7 +73,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             double textWidth = 1300;
             double textHeight = 525;
             var textEngine = new ThExtractLabelText();//提取文字
-            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textHeight);
+            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth);
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
 
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线

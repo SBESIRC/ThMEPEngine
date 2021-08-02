@@ -814,7 +814,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    layer.ToUpper() == "W-RAIN-NOTE";
         }
 
-        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref double textHeight)
+        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth)
         {
             if (ent is DBText dbText)//DBText直接添加
             {
@@ -856,7 +856,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (obj is Entity ent1)
                     {
-                        ExplodeText(ent1, dBObjects, ref textWidth, ref textHeight);
+                        ExplodeText(ent1, dBObjects, ref textWidth);
                     }
                 }
             }

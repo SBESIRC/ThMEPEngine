@@ -55,7 +55,7 @@ namespace ThMEPWSS.ViewModel
                         var valueDic = new Dictionary<string, string>();
                         valueDic.Add("节点1", "A");
                         valueDic.Add("节点2", "A'");
-                        var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", WaterSuplyBlockNames.SubLoopMark,
+                        var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", WaterSuplyBlockNames.LoopNodeMark,
                                     pt.Value, new Scale3d(1, 1, 1), 0, valueDic);
                     }
                 }
