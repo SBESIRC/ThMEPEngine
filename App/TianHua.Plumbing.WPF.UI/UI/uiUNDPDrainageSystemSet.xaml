@@ -1,0 +1,35 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiUNDPDrainageSystemSet"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    WindowStartupLocation="CenterOwner"
+                    Title="参数设置"
+                    SizeToContent="Height"
+                    Width="150"
+             mc:Ignorable="d" >
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="楼层线间距"></Label>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" >
+            <TextBox Width="100" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding UndpdsFloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=LostFocus,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" Height="25" VerticalAlignment="Bottom">
+            </TextBox>
+            <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+        </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="确认" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly" Content="取消" Width="50" Height="24" Margin="30,0,0,0" Name="Cancle" Click="Cancle_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

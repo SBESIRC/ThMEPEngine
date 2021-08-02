@@ -76,7 +76,7 @@ namespace ThMEPWSS.Pipe.Service
                 for(int j=i;j< names.Count;j++)
                 {
                     Tuple<string, string> value = Tuple.Create("","");
-                    if (int.Parse(names[i].Item1)< int.Parse(names[j].Item1))
+                    if (int.Parse(names[i].Item1.Trim('B'))< int.Parse(names[j].Item1.Trim('B')))
                     {
                         value = names[i];
                         names[i] = names[j];
