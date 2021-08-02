@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using System.Linq;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -22,18 +24,17 @@ namespace ThMEPElectrical.BlockConvert
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
-            if (xclip.IsValid)
+            if (xclip.IsValid && elements.Count != 0) 
             {
-                xclip.TransformBy(matrix);
                 elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
             }
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
         {
-            if (ent is BlockReference br)
+            if (ent is Curve curve)
             {
-                return xclip.Contains(br.GeometricExtents.ToRectangle());
+                return xclip.Contains(curve);
             }
             else
             {
@@ -66,7 +67,8 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool CheckLayerValid(Entity curve)
         {
-            return true;
+            var layer = curve.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
+            return !layer.IsFrozen && !layer.IsOff && !layer.IsHidden;
         }
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)

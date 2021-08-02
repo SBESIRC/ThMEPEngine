@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
@@ -20,8 +21,6 @@ using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-
 namespace ThMEPWSS.Pipe.Model
 {
     public struct VT1<T1>
@@ -134,10 +133,7 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWRainSystemDiagram : ThWSystemDiagram
     {
         private int VerticalStoreyLineSpan;
-
-        //sorted from base to top
         public List<ThWSDStorey> WSDStoreys { get; set; } = new List<ThWSDStorey>();
-
         public List<ThWRoofRainPipeSystem> RoofVerticalRainPipes { get; set; } = new List<ThWRoofRainPipeSystem>();
         public List<ThWBalconyRainPipeSystem> BalconyVerticalRainPipes { get; set; } = new List<ThWBalconyRainPipeSystem>();
         public List<ThWCondensePipeSystem> CondenseVerticalRainPipes { get; set; } = new List<ThWCondensePipeSystem>();
@@ -160,10 +156,8 @@ namespace ThMEPWSS.Pipe.Model
         {
             CollectData(storeys);
         }
-
         private void CollectData(List<ThIfcSpatialElement> storeys)
         {
-            // Init WSDStoreys
             using (var adb = AcadDatabase.Active())
             {
                 var LargeRoofVPTexts = new List<string>();
@@ -173,20 +167,17 @@ namespace ThMEPWSS.Pipe.Model
                     {
                         var blk = adb.Element<BlockReference>(sobj.ObjectId);
                         var pts = blk.GeometricExtents.ToRectangle().Vertices();
-
                         switch (sobj.StoreyType)
                         {
                             case StoreyType.LargeRoof:
                                 {
                                     LargeRoofVPTexts = thRainSystemService.GetVerticalPipeNotes(pts);
-
                                     var vps1 = new List<ThWSDPipe>();
                                     LargeRoofVPTexts.ForEach(pt =>
                                     {
                                         thRainSystemService.VerticalPipeLabelToDNDict.TryGetValue(pt, out string dn);
                                         vps1.Add(new ThWSDPipe() { Label = pt, DN = dn });
                                     });
-
                                     WSDStoreys.Add(new ThWSDStorey() { Label = $"RF", Range = pts, VerticalPipes = vps1, ObjectID = sobj.ObjectId, BlockRef = blk });
                                     break;
                                 }
@@ -195,14 +186,11 @@ namespace ThMEPWSS.Pipe.Model
                                     var smallRoofVPTexts = thRainSystemService.GetVerticalPipeNotes(pts);
                                     var rf1Storey = new ThWSDStorey() { Label = $"RF+1", Range = pts, ObjectID = sobj.ObjectId, BlockRef = blk };
                                     WSDStoreys.Add(rf1Storey);
-
                                     if (LargeRoofVPTexts.Count > 0)
                                     {
                                         var rf2VerticalPipeText = smallRoofVPTexts.Except(LargeRoofVPTexts);
-
                                         if (rf2VerticalPipeText.Count() == 0)
                                         {
-                                            //just has rf + 1, do nothing
                                             var vps1 = new List<ThWSDPipe>();
                                             smallRoofVPTexts.ForEach(pt =>
                                             {
@@ -213,7 +201,6 @@ namespace ThMEPWSS.Pipe.Model
                                         }
                                         else
                                         {
-                                            //has rf + 1, rf + 2
                                             var rf1VerticalPipeObjects = new List<ThWSDPipe>();
                                             var rf1VerticalPipeTexts = smallRoofVPTexts.Except(rf2VerticalPipeText);
                                             rf1VerticalPipeTexts.ForEach(pt =>
@@ -222,14 +209,12 @@ namespace ThMEPWSS.Pipe.Model
                                                 rf1VerticalPipeObjects.Add(new ThWSDPipe() { Label = pt, DN = dn });
                                             });
                                             rf1Storey.VerticalPipes = rf1VerticalPipeObjects;
-
                                             var rf2VerticalPipeObjects = new List<ThWSDPipe>();
                                             rf2VerticalPipeText.ForEach(pt =>
                                             {
                                                 thRainSystemService.VerticalPipeLabelToDNDict.TryGetValue(pt, out string dn);
                                                 rf2VerticalPipeObjects.Add(new ThWSDPipe() { Label = pt, DN = dn });
                                             });
-
                                             WSDStoreys.Add(new ThWSDStorey() { Label = $"RF+2", Range = pts, VerticalPipes = rf2VerticalPipeObjects, ObjectID = sobj.ObjectId, BlockRef = blk });
                                         }
                                     }
@@ -249,30 +234,17 @@ namespace ThMEPWSS.Pipe.Model
         }
         public void InitVerticalPipeSystems(Point3dCollection range)
         {
-            //var sw = new Stopwatch();
-            //sw.Start();
-
-            //Init Roof Pipe Systems
             InitRoofPipeSystems(range);
-            //Dbg.PrintLine(sw.Elapsed.TotalSeconds.ToString());
-
-            //Init Balcony Pipe Systems
             InitBalconyPipeSystems(range);
-            //Dbg.PrintLine(sw.Elapsed.TotalSeconds.ToString());
-
-            //Init Condense Pipe Systems
             InitCondensePipeSystems(range);
-            //Dbg.PrintLine(sw.Elapsed.TotalSeconds.ToString());
             var sv = thRainSystemService;
             var condensePipesCache = new Cache<Point3dCollection, List<Entity>>(rg =>
             {
                 return sv.FiltByRect(rg, sv.CondensePipes).ToList();
-                //return sv.GetCondensePipes(rg);
             });
             var floorDrainsCache = new Cache<Point3dCollection, List<Entity>>(rg =>
             {
                 return sv.FiltByRect(rg, sv.FloorDrains).ToList();
-                //return sv.GetFloorDrains(rg);
             });
             foreach (var sys in BalconyVerticalRainPipes)
             {
@@ -296,16 +268,12 @@ namespace ThMEPWSS.Pipe.Model
                     r.HasBrokenCondensePipe = sv.HasBrokenCondensePipe(r.Storey.Range, r.MainRainPipe.Label);
                 }
             }
-            //sw.Stop();
-
         }
-
         private void CollectEnts<T>(Cache<Point3dCollection, List<Entity>> condensePipesCache, Cache<Point3dCollection, List<Entity>> floorDrainsCache, T sys) where T : ThWRainPipeSystem
         {
             CollectCondensePipes(condensePipesCache, sys);
             CollectFloorDrains(floorDrainsCache, sys);
         }
-
         private void CollectFloorDrains<T>(Cache<Point3dCollection, List<Entity>> floorDrainsCache, T sys) where T : ThWRainPipeSystem
         {
             foreach (var r in sys.PipeRuns)
@@ -319,7 +287,6 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-
         private void CollectCondensePipes<T>(Cache<Point3dCollection, List<Entity>> condensePipesCache, T sys) where T : ThWRainPipeSystem
         {
             foreach (var r in sys.PipeRuns)
@@ -333,7 +300,6 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-
         public ThWSDStorey GetHigerStorey(ThWSDStorey storey)
         {
             if (storey == null) return null;
@@ -363,13 +329,10 @@ namespace ThMEPWSS.Pipe.Model
             if (i - 1 >= 0) return WSDStoreys[i - 1];
             return null;
         }
-
         private void InitRoofPipeSystems(Point3dCollection selectedRange)
         {
-            //1. get all notes of roof vertical pipes
             var allRoofPipeNotes = thRainSystemService.GetRoofVerticalPipeNotes(selectedRange);
             var distinctRoofPipeNotes = allRoofPipeNotes.Distinct().ToList();
-
             foreach (var roofPipeNote in distinctRoofPipeNotes)
             {
                 var rainPipeSystem = new ThWRoofRainPipeSystem() { VerticalPipeId = roofPipeNote };
@@ -379,7 +342,6 @@ namespace ThMEPWSS.Pipe.Model
                 AddPipeRunsForRoof(roofPipeNote, rainPipeSystem, PipeRuns, dn);
                 SetCheckPoints(PipeRuns);
                 rainPipeSystem.PipeRuns = PipeRuns;
-                //set output type of pipe system
                 rainPipeSystem.OutputType = thRainSystemService.GetPipeOutputType(WSDStoreys.First().Range, roofPipeNote);
                 SetCheckPoints(rainPipeSystem);
                 this.RoofVerticalRainPipes.Add(rainPipeSystem);
@@ -387,7 +349,6 @@ namespace ThMEPWSS.Pipe.Model
         }
         private void InitCondensePipeSystems(Point3dCollection selectedRange)
         {
-            //1. get all notes of roof vertical pipes
             var allCondensePipeNotes = thRainSystemService.GetCondenseVerticalPipeNotes(selectedRange);
             var distinctCondensePipeNotes = allCondensePipeNotes.Distinct().ToList();
             foreach (var condensePipeNote in distinctCondensePipeNotes)
@@ -395,25 +356,17 @@ namespace ThMEPWSS.Pipe.Model
                 var rainPipeSystem = new ThWCondensePipeSystem() { VerticalPipeId = condensePipeNote };
                 var PipeRuns = new List<ThWRainPipeRun>();
                 AddPipeRunsForCondensePipe(condensePipeNote, rainPipeSystem, PipeRuns);
-                //set check points for every pipe
                 SetCheckPoints(PipeRuns);
                 rainPipeSystem.PipeRuns = PipeRuns;
-                //set output type of pipe system
                 rainPipeSystem.OutputType = thRainSystemService.GetPipeOutputType(WSDStoreys.First().Range, condensePipeNote);
                 SetCheckPoints(rainPipeSystem);
                 this.CondenseVerticalRainPipes.Add(rainPipeSystem);
             }
         }
-
         private void AddPipeRunsForCondensePipe(string condensePipeNote, ThWCondensePipeSystem rainPipeSystem, List<ThWRainPipeRun> PipeRuns)
         {
             foreach (var s in WSDStoreys)
             {
-                //var pipeCenter = new Point3d();
-                //var brst0 = thRainSystemService.GetCenterOfVerticalPipe(s.Range, roofPipeNote, ref pipeCenter);
-
-                //if (!brst0) continue;
-
                 if (s.Label.Equals("RF+2"))
                 {
                     if (s.VerticalPipes.Select(vp => vp.Label).Contains(condensePipeNote))
@@ -453,16 +406,13 @@ namespace ThMEPWSS.Pipe.Model
                                 PipeType = VerticalPipeType.CondenseVerticalPipe,
                                 TranslatorType = translatorType
                             }
-                            //todo: set check point
                         });
                     }
                 }
             }
         }
-
         private void InitBalconyPipeSystems(Point3dCollection selectedRange)
         {
-            //1. get all notes of roof vertical pipes
             var allBalconyPipeNotes = thRainSystemService.GetBalconyVerticalPipeNotes(selectedRange);
             var distinctBalconyPipeNotes = allBalconyPipeNotes.Distinct().ToList();
             foreach (var balconyPipeNote in distinctBalconyPipeNotes)
@@ -472,21 +422,15 @@ namespace ThMEPWSS.Pipe.Model
                 AddPipeRunsForBalcony(balconyPipeNote, rainPipeSystem, PipeRuns);
                 SetCheckPoints(PipeRuns);
                 rainPipeSystem.PipeRuns = PipeRuns;
-                //set output type of pipe system
                 rainPipeSystem.OutputType = thRainSystemService.GetPipeOutputType(WSDStoreys.First().Range, balconyPipeNote);
                 SetCheckPoints(rainPipeSystem);
                 this.BalconyVerticalRainPipes.Add(rainPipeSystem);
             }
         }
-
         private void AddPipeRunsForBalcony(string balconyPipeNote, ThWBalconyRainPipeSystem rainPipeSystem, List<ThWRainPipeRun> PipeRuns)
         {
             foreach (var s in WSDStoreys)
             {
-                //var pipeCenter = new Point3d();
-                //var brst0 = thRainSystemService.GetCenterOfVerticalPipe(s.Range, roofPipeNote, ref pipeCenter);
-
-                //if (!brst0) continue;
                 if (s.Label.Equals("RF+2"))
                 {
                     if (s.VerticalPipes.Select(vp => vp.Label).Contains(balconyPipeNote))
@@ -526,16 +470,13 @@ namespace ThMEPWSS.Pipe.Model
                                 PipeType = VerticalPipeType.BalconyVerticalPipe,
                                 TranslatorType = translatorType
                             }
-                            //todo: set check point
                         });
                     }
                 }
             }
         }
-
         public static void SetCheckPoints(List<ThWRainPipeRun> runs)
         {
-            //set check points for every pipe
             for (int i = 1; i < runs.Count; i++)
             {
                 if (runs[i - 1].TranslatorPipe.TranslatorType == TranslatorTypeEnum.Long)
@@ -543,7 +484,6 @@ namespace ThMEPWSS.Pipe.Model
                     runs[i].CheckPoint.HasCheckPoint = true;
                 }
             }
-
         }
         public static void SetCheckPoints(ThWRainPipeSystem sys)
         {
@@ -554,7 +494,6 @@ namespace ThMEPWSS.Pipe.Model
             }
             foreach (var run in sys.PipeRuns)
             {
-                //1楼据说都要有检查口
                 if (run.Storey?.Label == "1F")
                 {
                     if (sys.PipeRuns.Count > 1 || sys.WaterBucket.Storey != null)
@@ -564,7 +503,6 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-
         private TranslatorTypeEnum GetTranslatorType(ThWSDStorey s, string verticalPipeID)
         {
             var ret = thRainSystemService.GetTranslatorType(s.Range, verticalPipeID);
@@ -574,17 +512,11 @@ namespace ThMEPWSS.Pipe.Model
             }
             return ret;
         }
-
         private void AddPipeRunsForRoof(string roofPipeNote, ThWRoofRainPipeSystem rainPipeSystem, List<ThWRainPipeRun> PipeRuns, string dn)
         {
             bool bSetWaterBucket = false;
             foreach (var s in WSDStoreys)
             {
-                //var pipeCenter = new Point3d();
-                //var brst0 = thRainSystemService.GetCenterOfVerticalPipe(s.Range, roofPipeNote, ref pipeCenter);
-
-                //if (!brst0) continue;
-
                 if (s.Label.Equals("RF+2"))
                 {
                     if (s.VerticalPipes.Select(vp => vp.Label).Contains(roofPipeNote))
@@ -605,7 +537,6 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     var pipes = thRainSystemService.GetRoofVerticalPipeNotes(s.Range);
                     var translatorType = GetTranslatorType(s, roofPipeNote);
-
                     if (pipes.Contains(roofPipeNote))
                     {
                         PipeRuns.Add(new ThWRainPipeRun()
@@ -624,36 +555,27 @@ namespace ThMEPWSS.Pipe.Model
                                 PipeType = VerticalPipeType.RoofVerticalPipe,
                                 TranslatorType = translatorType
                             }
-                            //todo: set check point
                         });
                     }
                 }
                 if (bSetWaterBucket == false)
                 {
-                    //water bucket, too slow
                     Point3d roofPipeCenter = new Point3d();
                     var brst = thRainSystemService.GetCenterOfVerticalPipe(s.Range, roofPipeNote, ref roofPipeCenter);
-
                     if (brst)
                     {
                         var waterBucketType = thRainSystemService.thGravityService.GetRelatedSideWaterBucket(roofPipeCenter);
-
-                        //side
                         if (!waterBucketType.Equals(WaterBucketEnum.None))
                         {
                             if (s.VerticalPipes.Select(p => p.Label).Contains(roofPipeNote))
                             {
-                                //Dbg.ShowWhere(roofPipeCenter);
                                 rainPipeSystem.WaterBucket = new ThWSDWaterBucket() { Type = waterBucketType, Storey = s, DN = dn };
                                 bSetWaterBucket = true;
                             }
                         }
                     }
-
-                    //gravity
                     if (bSetWaterBucket == false)
                     {
-                        //尝试通过对位得到重力雨水斗
                         var allWaterBucketsInThisRange = thRainSystemService.thGravityService.GetRelatedGravityWaterBucket(s.Range);
                         if (allWaterBucketsInThisRange.Count > 0)
                         {
@@ -661,49 +583,41 @@ namespace ThMEPWSS.Pipe.Model
                             if (lowerStorey != null)
                             {
                                 Point3d roofPipeCenterInLowerStorey = new Point3d();
-
                                 var brst2 = thRainSystemService.GetCenterOfVerticalPipe(lowerStorey.Range, roofPipeNote, ref roofPipeCenterInLowerStorey);
                                 if (brst2)
                                 {
                                     var lowerBasePt = lowerStorey.Position;
                                     var pipeCenterInLowerUcs = new Point3d(roofPipeCenterInLowerStorey.X - lowerBasePt.X, roofPipeCenterInLowerStorey.Y - lowerBasePt.Y, 0);
-
-                                    //compute ucs
                                     foreach (var wbe in allWaterBucketsInThisRange)
                                     {
                                         var minPt = wbe.MinPoint;
                                         var maxPt = wbe.MaxPoint;
-
                                         var basePt = s.Position;
-
                                         var minPtInUcs = new Point3d(minPt.X - basePt.X, minPt.Y - basePt.Y, 0);
                                         var maxPtInUcs = new Point3d(maxPt.X - basePt.X, maxPt.Y - basePt.Y, 0);
-
                                         var extentInUcs = new Extents3d(minPtInUcs, maxPtInUcs);
-
                                         if (extentInUcs.IsPointIn(pipeCenterInLowerUcs))
                                         {
-                                            //Dbg.ShowWhere(new ThWGRect(minPt, maxPt));
                                             rainPipeSystem.WaterBucket = new ThWSDWaterBucket() { Type = WaterBucketEnum.Gravity, Storey = s, DN = dn };
                                             bSetWaterBucket = true;
                                             PipeRuns.Add(
-                                                new ThWRainPipeRun()
+                                            new ThWRainPipeRun()
+                                            {
+                                                Storey = s,
+                                                MainRainPipe = new ThWSDPipe()
                                                 {
-                                                    Storey = s,
-                                                    MainRainPipe = new ThWSDPipe()
-                                                    {
-                                                        Label = roofPipeNote,
-                                                        PipeType = VerticalPipeType.RoofVerticalPipe,
-                                                        DN = dn
-                                                    },
-                                                    TranslatorPipe = new ThWSDTranslatorPipe()
-                                                    {
-                                                        DN = dn,
-                                                        Label = "",
-                                                        PipeType = VerticalPipeType.RoofVerticalPipe
-                                                    }
+                                                    Label = roofPipeNote,
+                                                    PipeType = VerticalPipeType.RoofVerticalPipe,
+                                                    DN = dn
+                                                },
+                                                TranslatorPipe = new ThWSDTranslatorPipe()
+                                                {
+                                                    DN = dn,
+                                                    Label = "",
+                                                    PipeType = VerticalPipeType.RoofVerticalPipe
                                                 }
-                                                );
+                                            }
+                                            );
                                             break;
                                         }
                                     }
@@ -711,17 +625,13 @@ namespace ThMEPWSS.Pipe.Model
                             }
                         }
                     }
-
-                    //for gravity bucket, still need to check label
                     if (bSetWaterBucket == false)
                     {
-                        //尝试通过 label 得到重力雨水斗
                         var hasWaterBucket = thRainSystemService.HasGravityLabelConnected(s.Range, roofPipeNote);
                         if (hasWaterBucket)
                         {
                             rainPipeSystem.WaterBucket = new ThWSDWaterBucket() { Type = WaterBucketEnum.Gravity, Storey = GetHigerStorey(s), DN = dn };
                             bSetWaterBucket = true;
-
                             PipeRuns.Add(new ThWRainPipeRun()
                             {
                                 Storey = GetHigerStorey(s),
@@ -737,9 +647,7 @@ namespace ThMEPWSS.Pipe.Model
                                     Label = "",
                                     PipeType = VerticalPipeType.RoofVerticalPipe,
                                 }
-                                //todo: set check point
                             });
-
                             break;
                         }
                     }
@@ -748,29 +656,19 @@ namespace ThMEPWSS.Pipe.Model
         }
         public static double VERTICAL_STOREY_SPAN => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.StoreySpan ?? 2000;
         public const double HORIZONTAL_STOREY_SPAN = 5500;
-
-
-
-
-
-
         private void SortRainPipeGroup<T>(List<List<T>> pipeGroups) where T : ThWRainPipeSystem
         {
             foreach (var g in pipeGroups)
             {
                 g.Sort();
             }
-
             pipeGroups.Sort(
-                    delegate (List<T> x, List<T> y)
-                    {
-                        return x.First().CompareTo(y.First());
-                    }
-                );
+            delegate (List<T> x, List<T> y)
+            {
+                return x.First().CompareTo(y.First());
+            }
+            );
         }
-
-
-
         public void Draw(Point3d basePt)
         {
             var roofRainPipesGroup = RoofVerticalRainPipes.GroupBy(rs => rs).Select(x => x.ToList()).ToList();
@@ -779,10 +677,7 @@ namespace ThMEPWSS.Pipe.Model
             SortRainPipeGroup(roofRainPipesGroup);
             SortRainPipeGroup(balconyRainPipesGroup);
             SortRainPipeGroup(condenseRainPipesGroup);
-
             var storeyLineLength = HORIZONTAL_STOREY_SPAN * (roofRainPipesGroup.Count + balconyRainPipesGroup.Count + condenseRainPipesGroup.Count + 2);
-
-            //draw horizental storey lines
             var sdCtxs = new List<StoreyDrawingContext>();
             for (int i = 0; i < WSDStoreys.Count; i++)
             {
@@ -793,26 +688,22 @@ namespace ThMEPWSS.Pipe.Model
                 ctx.StoreyDrawingContexts = sdCtxs;
                 sdCtxs.Add(ctx);
             }
-
             for (int i = 0; i < WSDStoreys.Count; i++)
             {
                 var s = WSDStoreys[i];
                 s.Draw(sdCtxs[i]);
             }
-            //draw roof pipe line systems
             var k = 0;
             foreach (var g in roofRainPipesGroup)
             {
                 DrawSystem(basePt, sdCtxs, k, g);
                 k++;
             }
-            //draw balcony pipe line systems
             foreach (var g in balconyRainPipesGroup)
             {
                 DrawSystem(basePt, sdCtxs, k, g);
                 k++;
             }
-            //draw condense pipe line systems
             foreach (var g in condenseRainPipesGroup)
             {
                 DrawSystem(basePt, sdCtxs, k, g);
@@ -836,7 +727,6 @@ namespace ThMEPWSS.Pipe.Model
             ctx.ThWRainPipeSystemGroup = g;
             ctx.VerticalPipeType = GetVerticalPipeType(typeof(T));
             sys.Draw(ctx);
-            //DrawUtils.DrawTextLazy(sys.OutputType.OutputType.ToString(), 200, ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X));
             DrawOutputs(g, ctx);
         }
         public HashSet<ThWRainPipeSystem> ScatteredOutputs = new HashSet<ThWRainPipeSystem>();
@@ -874,7 +764,6 @@ namespace ThMEPWSS.Pipe.Model
                         else
                         {
                             var pt = ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(floor)].BasePoint.ReplaceX(_basePt.X);
-                            //Dbg.ShowWhere(pt);
                             pt = pt.OffsetXY(-1500, 150);
                             if (floor == "RF")
                             {
@@ -892,18 +781,12 @@ namespace ThMEPWSS.Pipe.Model
                 }
                 if (output.HasDrivePipe)
                 {
-                    //DrawUtils.DrawTextLazy("HasDrivePipe", basePt.OffsetX(900));
-                    Dr.DrawWrappingPipe(basePt.OffsetX(1400));
-                    //Dbg.ShowWhere(basePt);
                 }
                 switch (output.OutputType)
                 {
                     case RainOutputTypeEnum.None:
-
                         break;
                     case RainOutputTypeEnum.WaterWell:
-                        //Dr.DrawWaterWell(pt.OffsetY(y));
-                        //Dr.DrawWaterWell(bsPt, $"{j}");
                         if (drawedLabels.Contains(output.Label))
                         {
                             k--;//序号回退，防止占位
@@ -915,11 +798,8 @@ namespace ThMEPWSS.Pipe.Model
                         pt2 = bsPt;
                         break;
                     case RainOutputTypeEnum.RainPort:
-                        //Dr.DrawRainPort(pt.OffsetY(y));
-                        //Dr.DrawRainPort(bsPt);
                         if (j == 0)
                         {
-                            //var points=new Point2d[]{new Point2d(0,0),new Point2d(-200,-200),new Point2d(-1800,-200)};
                             var pt = basePt;
                             {
                                 Dr.DrawRainPort(pt.OffsetX(400));//雨水口
@@ -929,7 +809,6 @@ namespace ThMEPWSS.Pipe.Model
                         }
                         break;
                     case RainOutputTypeEnum.DrainageDitch:
-                        //DrawUtils.DrawTextLazy("DrainageDitch", pt.OffsetY(y));
                         DrawUtils.DrawTextLazy("DrainageDitch", bsPt);
                         break;
                     default:
@@ -949,7 +828,6 @@ namespace ThMEPWSS.Pipe.Model
                 line.Layer = "W-RAIN-PIPE";
                 line.ColorIndex = 256;
             }
-            //DrawUtils.DrawTextLazy(xx, 300, basePt.ReplaceY(y - 2000));
         }
         public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
         {
@@ -986,7 +864,6 @@ namespace ThMEPWSS.Pipe.Model
                 dg.RoofVerticalRainPipes.Add(sys);
                 for (int i = 0; i < dg.WSDStoreys.Count; i++)
                 {
-
                     var run = new ThWRainPipeRun()
                     {
                         MainRainPipe = new ThWSDPipe() { Label = id, DN = "DN100" },
@@ -1032,17 +909,16 @@ namespace ThMEPWSS.Pipe.Model
                     sys.PipeRuns.Add(run);
                 }
             }
-
-
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
+            ThMEPWSS.Common.Utils.FocusMainWindow();
+            using (var lockDoc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
                 var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                var basePt = Dbg.SelectPoint();
+                var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+                var rst = Active.Editor.GetPoint(basePtOptions);
+                if (rst.Status != PromptStatus.OK) return;
+                var basePt = rst.Value;
                 dg.Draw(basePt);
             }
         }

@@ -25,6 +25,28 @@ namespace ThMEPEngineCore.CAD
             return xrefs;
         }
 
+        public static void XRefNodeName(GraphNode node, Database xref, ref string name)
+        {
+            // https://adndevblog.typepad.com/autocad/2012/06/finding-all-xrefs-in-the-current-database-using-cnet.html
+            for (int i = 0; i < node.NumOut; i++)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    var child = node.Out(i) as XrefGraphNode;
+                    if (child.XrefStatus == XrefStatus.Resolved)
+                    {
+                        if (child.Database == xref)
+                        {
+                            name = child.Name;
+                            break;
+                        }
+
+                        XRefNodeName(child, xref, ref name);
+                    }
+                }
+            }
+        }
+
         public static string XRefPath(this XrefGraphNode xrefGraphNode)
         {
             var block = xrefGraphNode.BlockTableRecordId;

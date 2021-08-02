@@ -56,7 +56,7 @@ namespace ThMEPEngineCore.Engine
             }
             curves.ForEach(o =>
                 {
-                    if (o is Polyline polyline && polyline.Area > 0.0)
+                    if (o is Polyline polyline && polyline.Length>1e-6)
                     {
                         Elements.Add(ThIfcSlab.Create(polyline));
                     }

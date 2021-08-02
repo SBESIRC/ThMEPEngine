@@ -1,19 +1,19 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThFaDoorOpeningExtractor : ThDoorOpeningExtractor, IBuildGeometry
+    public class ThFaDoorOpeningExtractor : ThDoorOpeningExtractor, IBuildGeometry, ISetStorey
     {
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
+        private List<StoreyInfo> StoreyInfos { get; set; }
         private const string NeibourFireApartIdsPropertyName = "NeibourFireApartIds";
         private const string UsePropertyName = "Use";
         public ThFaDoorOpeningExtractor()
@@ -29,11 +29,13 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 if (GroupSwitch)
                 {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Outline));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Outline));
+                    var parentId = BuildString(GroupOwner, o.Outline);
+                    if (string.IsNullOrEmpty(parentId))
+                    {
+                        var storeyInfo = Query(o.Outline);
+                        parentId = storeyInfo.Id;
+                    }
+                    geometry.Properties.Add(ParentIdPropertyName, parentId);
                 }
                 if(FireDoorNeibourIds.ContainsKey(o.Outline))
                 {
@@ -70,7 +72,18 @@ namespace ThMEPEngineCore.Temp
         private bool IsFireDoor(ThIfcDoor door)
         {
             //ToDO
-            return door.Code.ToUpper().Contains("FM");
+            return door.Spec.ToUpper().Contains("FM");
+        }
+
+        public void Set(List<StoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
+
+        public StoreyInfo Query(Entity entity)
+        {
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity)); ;
+            return results.Count() > 0 ? results.First() : new StoreyInfo();
         }
     }
 }

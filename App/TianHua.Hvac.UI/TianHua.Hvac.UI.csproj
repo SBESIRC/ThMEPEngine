@@ -56,9 +56,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command\ThHvacDuctPortModifyCmd.cs" />
+    <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\THHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="fmBypass.cs">
       <SubType>Form</SubType>
     </Compile>

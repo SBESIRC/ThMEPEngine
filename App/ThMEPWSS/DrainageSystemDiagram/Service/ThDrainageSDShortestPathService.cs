@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -16,7 +14,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     class ThDrainageSDShortestPathService
     {
-        public static double[,] createGraphForArea(List<ThToilateRoom> roomList, out List<Point3d> allPtGraph)
+        public static double[,] createGraphForArea(List<ThToiletRoom> roomList, out List<Point3d> allPtGraph)
         {
             allPtGraph = new List<Point3d>();
             double[,] cost = null;
@@ -38,25 +36,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return cost;
         }
 
-        private static double[,] createGraphForRoom(ThToilateRoom room, out List<Point3d> ptGraph)
+        private static double[,] createGraphForRoom(ThToiletRoom room, out List<Point3d> ptGraph)
         {
             ptGraph = new List<Point3d>();
             var roomPt = new List<Point3d>();
             roomPt.AddRange(room.outlinePtList);
 
-            var toilateOnWallPts = InsertToilateToWall(room);
+            var toiletOnWallPts = InsertToiletToWall(room);
 
-            intersectToilateOnWallToRoomOutline(toilateOnWallPts, roomPt);
+            intersectToiletOnWallToRoomOutline(toiletOnWallPts, roomPt);
 
             roomPt = roomPt.Distinct().ToList();
-
 
             int roomOutlineCount = roomPt.Count();
 
             ptGraph.AddRange(roomPt);
-            ptGraph.AddRange(room.toilate.SelectMany(x => x.SupplyCoolOnBranch));
-
-
+            ptGraph.AddRange(room.toilet.SelectMany(x => x.SupplyCoolOnBranch));
 
             var cost = createGraph(ptGraph, room.outline, roomOutlineCount);
 
@@ -80,7 +75,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     if (i == j ||
                         (i < roomOutlineCount && j < roomOutlineCount && i == j - 1) ||
                         (i == 0 && j == roomOutlineCount - 1))
-                    //if (i == j)
                     {
                         bBuild = true;
                         bCheck = true;
@@ -98,14 +92,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
                                 bBuild = false;
                                 bCheck = true;
                             }
-
                         }
 
                         if (bCheck == false && room.Contains(line.GetCenter()) == false)
                         {
                             bBuild = false;
                         }
-
                     }
 
                     if (bBuild == true)
@@ -213,7 +205,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //初始化distance，这是出发点到各点的初始距离
             for (int i = 0; i < n; i++)
             {
-                //distance[i] = cost[0, i];
                 distance[i] = cost[g, i];
             }
 
@@ -275,15 +266,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return path;
         }
 
-        private static List<Point3d> InsertToilateToWall(ThToilateRoom room)
+        private static List<Point3d> InsertToiletToWall(ThToiletRoom room)
         {
             List<Point3d> pl = new List<Point3d>();
             var tol = new Tolerance(10, 10);
             int tolCloseWallForIsland = 10000;
 
-            foreach (var toilate in room.toilate)
+            foreach (var toilet in room.toilet)
             {
-                toilate.SupplyCoolOnWall.ForEach(ptOnWall =>
+                toilet.SupplyCoolOnWall.ForEach(ptOnWall =>
                 {
                     var onWall = room.wallList.Where(wall => wall.ToCurve3d().IsOn(ptOnWall, tol));
                     if (onWall.Count() > 0)
@@ -294,8 +285,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     {
                         //岛
                         var wallList = room.wallList;
-                        var ptOnWallIsland = ThDrainageSDCoolPtService.findPtOnWall(wallList, toilate, tolCloseWallForIsland,true);
-                        //ptOnWallIsland.ForEach(x => DrawUtils.ShowGeometry(x, "l0islandOnWall",3,25,30));
+                        var ptOnWallIsland = ThDrainageSDCoolPtService.findPtOnWall(wallList, toilet, tolCloseWallForIsland, true);
                         pl.AddRange(ptOnWallIsland);
                     }
                 });
@@ -304,7 +294,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return pl;
         }
 
-        private static void intersectToilateOnWallToRoomOutline(List<Point3d> ptsOnWall, List<Point3d> outline)
+        private static void intersectToiletOnWallToRoomOutline(List<Point3d> ptsOnWall, List<Point3d> outline)
         {
             var tol = new Tolerance(10, 10);
             foreach (var pt in ptsOnWall)
@@ -320,7 +310,5 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
         }
-
-
     }
 }

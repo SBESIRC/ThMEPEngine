@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DU = ThMEPWSS.Assistant.DrawUtils;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Uitl;

@@ -7,13 +7,13 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThCADCore.NTS;
 using NFox.Cad;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.IO;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor
-{    
-    public class ThShearwallExtractor : ThExtractorBase,IPrint
+{
+    public class ThShearwallExtractor : ThExtractorBase, IPrint
     {
         public List<Entity> Walls { get; private set; }
         private List<ThIfcRoom> Rooms { get; set; }
@@ -22,18 +22,19 @@ namespace ThMEPEngineCore.GeojsonExtractor
             Category = BuiltInCategory.ShearWall.ToString();
             Walls = new List<Entity>();
             Rooms = new List<ThIfcRoom>();
+            TesslateLength = 100.0;
         }
 
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
             var isolateShearwalls = new List<Entity>();
-            if(IsolateSwitch)
+            if (IsolateSwitch)
             {
                 isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
             }
             Walls.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 var isolate = isolateShearwalls.Contains(o);
@@ -41,11 +42,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 geometry.Boundary = o;
                 if (IsolateSwitch) // 表示只传入孤立的剪力墙
                 {
-                    if(isolate)
+                    if (isolate)
                     {
                         geos.Add(geometry);
                     }
-                }                
+                }
                 else
                 {
                     geos.Add(geometry);
@@ -56,12 +57,15 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 using (var engine = new ThShearWallRecognitionEngine())
+                using (var db3Engine = new ThDB3ShearWallRecognitionEngine())
                 {
                     engine.Recognize(database, pts);
+                    db3Engine.Recognize(database, pts);
                     engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                    db3Engine.Elements.ForEach(o => Walls.Add(o.Outline));
                 }
             }
             else
@@ -71,7 +75,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Walls = instance.Polys.Cast<Entity>().ToList();
+
+                Walls = instance.Polys
+                    .Select(o=>o.TessellatePolylineWithArc(TesslateLength))
+                    .Cast<Entity>()
+                    .ToList();
             }
             if (FilterMode == FilterMode.Window)
             {

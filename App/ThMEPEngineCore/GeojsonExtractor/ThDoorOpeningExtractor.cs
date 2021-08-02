@@ -8,14 +8,14 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
-    public class ThDoorOpeningExtractor : ThExtractorBase,IPrint
+    public class ThDoorOpeningExtractor : ThExtractorBase, IPrint
     {
         public List<Polyline> Doors { get; set; }
-        
+
         public ThDoorOpeningExtractor()
         {
             Doors = new List<Polyline>();
@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3Engine)
+            if (UseDb3Engine)
             {
                 using (var doorEngine = new ThDB3DoorRecognitionEngine())
                 {
@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             }
             if (FilterMode == FilterMode.Window)
             {
-                Doors = FilterWindowPolygon(pts,Doors.Cast<Entity>().ToList()).Cast<Polyline>().ToList();
+                Doors = FilterWindowPolygon(pts, Doors.Cast<Entity>().ToList()).Cast<Polyline>().ToList();
             }
         }
 

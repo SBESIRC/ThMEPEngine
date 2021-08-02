@@ -1,24 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using AcHelper;
 using NFox.Cad;
-using Linq2Acad;
 using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
-using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -42,16 +34,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         private static List<Line> extendLine(List<Line> lines)
         {
-
             lines = lines.Select(y =>
-                {
-                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
-                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
-                }).ToList();
-
+                    {
+                        var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                        return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+                    }).ToList();
 
             return lines;
-
         }
 
         private static List<Line> breakLine(List<Line> lines)
@@ -99,9 +88,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
 
-
             lines.RemoveAll(l => ptClean.Contains(l));
-
         }
 
         private static Dictionary<Point3d, List<Line>> getPtCount(List<Line> lines)
@@ -156,10 +143,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             lines = simplifiedLines;
             //DrawUtils.ShowGeometry(simplifiedLines, "l061link", 0);
 
-
             //lines = breakLine(simplifiedLines);
             //DrawUtils.ShowGeometry(lines, "l29link", 190);
-
 
             return lines;
         }

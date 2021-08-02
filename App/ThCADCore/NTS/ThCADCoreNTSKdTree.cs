@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using NetTopologySuite.Index.KdTree;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries;
 
 namespace ThCADCore.NTS
 {
@@ -46,5 +47,15 @@ namespace ThCADCore.NTS
         {
             return Nodes.Where(o => o.Value.Contains(pt)).First().Key.Coordinate.ToAcGePoint3d();
         }
+
+        public List<Point3d> Query(Polyline pl)
+        {
+            var minPt = pl.GeometricExtents.MinPoint.ToPoint2D();
+            var maxPt = pl.GeometricExtents.MaxPoint.ToPoint2D();
+            var nodes = this.Tree.Query(new Envelope(minPt.X, minPt.Y, maxPt.X, maxPt.Y));
+
+            return nodes.Select(n =>n.Coordinate.ToAcGePoint3d()).ToList();
+        }
+
     }
 }

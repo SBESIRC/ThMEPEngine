@@ -1,96 +1,124 @@
 ﻿using System;
+using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsRecoder
     {
-        public static ObjectId Create_duct_group(ObjectIdList geo_ids,
-                                                 ObjectIdList flg_ids,
-                                                 ObjectIdList center_ids,
-                                                 Duct_modify_param param)
+        public static void Attach_start_param( ObjectId id, 
+                                               Point2d start_point,
+                                               DuctPortsParam param)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Active())
             {
-                var ids = Collect_ids(geo_ids, flg_ids, center_ids);
+                var value_list = new TypedValueList
+                {
+                    { (int)DxfCode.ExtendedDataAsciiString, param.scale},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.scenario},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.elevation},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.main_height},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.port_range},
+                    { (int)DxfCode.ExtendedDataAsciiString, start_point.ToString()}
+                };
+                id.AddXData(ThHvacCommon.RegAppName_DuctBasic, value_list);
+            }
+        }
+        public static Handle Create_duct_group(ObjectIdList geo_ids,
+                                               ObjectIdList flg_ids,
+                                               ObjectIdList center_ids,
+                                               ObjectIdList ports_ids,
+                                               ObjectIdList ext_ports_ids,
+                                               Duct_modify_param param)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var ids = Collect_ids(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids);
                 if (ids.Count == 0)
-                    return ObjectId.Null;
+                    return ObjectId.Null.Handle;
                 var id = GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), ids);
                 var value_list = new TypedValueList
                 {
-                    { (int)DxfCode.ExtendedDataAsciiString, param.identity_info.start_id},
-                    { (int)DxfCode.ExtendedDataAsciiString, id.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.start_handle.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, "Duct"},
                     { (int)DxfCode.ExtendedDataAsciiString, param.air_volume.ToString("0.00")},
-                    { (int)DxfCode.ExtendedDataAsciiString, param.duct_size}
+                    { (int)DxfCode.ExtendedDataAsciiString, param.duct_size},
                 };
-                for (int i = 0; i < param.identity_info.pos.Count; ++i)
-                {
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.identity_info.pos[i].ToString());
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.identity_info.pos_ext[i].ToString());
-                }
-                id.AddXData("Duct", value_list);
-                return id;
+                id.AddXData(ThHvacCommon.RegAppName_Info, value_list);
+
+                double width = ThDuctPortsService.Get_width(param.duct_size);
+                var widths = new List<double>() { width, width };
+                SetPortInfoXdata(ports_ids, ext_ports_ids, widths);
+                return id.Handle;
             }
         }
-        public static ObjectId Create_reducing_group(ObjectIdList geo_ids,
-                                                     ObjectIdList flg_ids,
-                                                     ObjectIdList center_ids,
-                                                     Duct_modify_param param)
+        public static Handle Create_group( ObjectIdList geo_ids,
+                                           ObjectIdList flg_ids,
+                                           ObjectIdList center_ids,
+                                           ObjectIdList ports_ids,
+                                           ObjectIdList ext_ports_ids,
+                                           Entity_modify_param param)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
-                var ids = Collect_ids(geo_ids, flg_ids, center_ids);
+                var ids = Collect_ids(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids);
                 if (ids.Count == 0)
-                    return ObjectId.Null;
+                    return ObjectId.Null.Handle;
                 var id = GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), ids);
                 var value_list = new TypedValueList
                 {
-                    { (int)DxfCode.ExtendedDataAsciiString, param.identity_info.start_id},
-                    { (int)DxfCode.ExtendedDataAsciiString, id.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.start_id.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.type}
                 };
-                for (int i = 0; i < param.identity_info.pos.Count; ++i)
-                {
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.identity_info.pos[i].ToString());
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.identity_info.pos_ext[i].ToString());
-                }
-                id.AddXData("Reducing", value_list);
-                return id;
+                id.AddXData(ThHvacCommon.RegAppName_Info, value_list);
+                SetPortInfoXdata(ports_ids, ext_ports_ids, param.port_widths);
+
+                return id.Handle;
             }
         }
-        public static ObjectId Create_group(ObjectIdList geo_ids,
-                                            ObjectIdList flg_ids,
-                                            ObjectIdList center_ids,
-                                            string entity_name,
-                                            Entity_modify_param param)
+        private static void SetPortInfoXdata(ObjectIdList ports_ids, ObjectIdList ext_ports_ids, List<double> widths)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            //set port xdata
+            for (int i = 0; i < ports_ids.Count; ++i)
             {
-                var ids = Collect_ids(geo_ids, flg_ids, center_ids);
-                if (ids.Count == 0)
-                    return ObjectId.Null;
-                var id = GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), ids);
-                var value_list = new TypedValueList
+                var port_value_list = new TypedValueList
                 {
-                    { (int)DxfCode.ExtendedDataAsciiString, param.start_id},
-                    { (int)DxfCode.ExtendedDataAsciiString, id.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, "Port"},
+                    { (int)DxfCode.ExtendedDataAsciiString, i.ToString()},
+                    { (int)DxfCode.ExtendedDataAsciiString, widths[i].ToString()}
                 };
-                for (int i = 0; i < param.pos.Count; ++i)
+
+                ports_ids[i].AddXData(ThHvacCommon.RegAppName_Info, port_value_list);
+            }
+
+            //set port ext xdata
+            for (int i = 0; i < ext_ports_ids.Count; ++i)
+            {
+                var ext_port_value_list = new TypedValueList
                 {
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.pos[i].ToString());
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, param.pos_ext[i].ToString());
-                }
-                id.AddXData(entity_name, value_list);
-                return id;
+                    { (int)DxfCode.ExtendedDataAsciiString, "PortExt"},
+                    { (int)DxfCode.ExtendedDataAsciiString, i.ToString()},
+                };
+
+                ext_ports_ids[i].AddXData(ThHvacCommon.RegAppName_Info, ext_port_value_list);
             }
         }
-        private static ObjectIdList Collect_ids(ObjectIdList geo_ids, ObjectIdList flg_ids, ObjectIdList center_ids)
+        private static ObjectIdList Collect_ids(ObjectIdList geo_ids, 
+                                                ObjectIdList flg_ids, 
+                                                ObjectIdList center_ids,
+                                                ObjectIdList ports_ids,
+                                                ObjectIdList ext_ports_ids)
         {
             var ids = new ObjectIdList();
             ids.AddRange(geo_ids);
             ids.AddRange(flg_ids);
             ids.AddRange(center_ids);
+            ids.AddRange(ports_ids);
+            ids.AddRange(ext_ports_ids);
             return ids;
         }
     }

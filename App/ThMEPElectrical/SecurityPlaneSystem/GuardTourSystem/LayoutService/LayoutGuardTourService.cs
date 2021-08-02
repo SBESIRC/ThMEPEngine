@@ -3,14 +3,11 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
@@ -41,7 +38,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 }
 
                 var room = thRoom.Boundary as Polyline;
-                var bufferRoom = room.Buffer(5)[0] as Polyline;
+                var bufferRoom = room.Buffer(15)[0] as Polyline;
                 var nDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
                 var nColumns = getLayoutStructureService.GetNeedColumns(columns, room);
                 var nLanes = getLayoutStructureService.GetNeedLanes(lanes, bufferRoom);

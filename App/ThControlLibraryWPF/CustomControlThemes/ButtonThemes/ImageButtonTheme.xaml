@@ -15,7 +15,7 @@
         <Setter Property="BorderBrush" Value="Gray"/>
         <Setter Property="MouseOverBackground" Value="#176BD1"/>
         <Setter Property="MouseOverForeground" Value="White"/>
-        <!--控件不设置背景色时 Background="{x:Null}" 这会影响一些事件的触发，没有颜射时可以设置Background="Transparent"-->
+        <!--控件不设置背景色时 Background="{x:Null}" 这会影响一些事件的触发，没有颜色时可以设置Background="Transparent"-->
         <Setter Property="Background" Value="#F8F8F8"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>

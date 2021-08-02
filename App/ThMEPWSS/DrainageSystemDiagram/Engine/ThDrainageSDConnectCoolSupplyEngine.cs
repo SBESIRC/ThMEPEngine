@@ -2,42 +2,45 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Dreambuild.AutoCAD;
+
+using CLI;
+
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
-using CLI;
+
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDConnectCoolSupplyEngine
     {
-        public static List<Line> ThConnectCoolSupplyEngine(List<ThExtractorBase> archiExtractor, List<ThTerminalToilate> allToilateList, ThDrainageSDDataExchange dataSet)
+        public static List<Line> ThConnectCoolSupplyEngine(List<ThExtractorBase> archiExtractor, List<ThTerminalToilet> allToiletList, ThDrainageSDDataExchange dataSet)
         {
             var allLink = new List<Line>();
 
-            var toilateList = allToilateList.Where(x => x.SupplyCool.Count > 0).ToList();
+            var toiletList = allToiletList.Where(x => x.SupplyCool.Count > 0).ToList();
 
             //所有空间建model 包括没有厕所的空间（后续建图需要）
             var roomPolyList = ThDrainageSDRoomService.getRoomList(archiExtractor);
-            var roomList = ThDrainageSDRoomService.buildRoomModel(roomPolyList, toilateList);
+            var roomList = ThDrainageSDRoomService.buildRoomModel(roomPolyList, toiletList);
             var filteredRoom = ThDrainageSDRoomService.filtRoomList(roomList);
 
-            if (filteredRoom == null || toilateList == null || filteredRoom.Count == 0 || toilateList.Count == 0)
+            if (filteredRoom == null || toiletList == null || filteredRoom.Count == 0 || toiletList.Count == 0)
             {
+                ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.noRoomToilet);
                 return allLink;
             }
 
             var supplyStart = dataSet.SupplyStart.Pt;
-            toilateList.ForEach(x => x.AreaId = dataSet.AreaID);
+            toiletList.ForEach(x => x.AreaId = dataSet.AreaID);
 
             //确定每个厕所在墙上的给水点位
-            ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toilateList, out var aloneToilate);
-            //toilateList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
+            ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
+            //toiletList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
 
             ///////////收缩外框
             //ThDrainageSDRoomService.shrinkRoom(archiExtractor);
-            //var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
+            //var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToiletRoomExtractor)) as ThDrainageToiletRoomExtractor;
             //roomExtractor.Rooms.ForEach(room =>
             //{
             //    DrawUtils.ShowGeometry(room.Boundary, "l0room", 44);
@@ -49,7 +52,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var forGroupJson = ThDrainageSDToGJsonService.buildArchiGeometry(archiExtractor);
             forGroupJson.AddRange(dataSet.Region.BuildGeometries());
             forGroupJson.AddRange(dataSet.SupplyStart.BuildGeometries());
-            forGroupJson.AddRange(ThDrainageSDToGJsonService.buildCoolPtGeometry(toilateList));
+            forGroupJson.AddRange(ThDrainageSDToGJsonService.buildCoolPtGeometry(toiletList));
             var forGroupJsonString = ThGeoOutput.Output(forGroupJson);
             //string path = @"D:\project\2.drainage\jsonSample\2-1.input.geojson";
             //File.WriteAllText(path, forGroupJsonString);
@@ -61,13 +64,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //解析分组，更新点位信息
             var tGJList = ThDrainageSDDeserializeGJsonService.getGroupPt(groupOutput);
-            var subLink = ThDrainageSDToGJsonService.updateToilateModel(tGJList, toilateList);
+            var subLink = ThDrainageSDToGJsonService.updateToiletModel(tGJList, toiletList);
             allLink.AddRange(subLink);
             DrawUtils.ShowGeometry(subLink, "l05sub", 130);
             ////////////////////
 
             //找主线虚拟点位
-            var groupList = ThDrainageSDCoolPtProcessService.classifyToilate(toilateList);
+            var groupList = ThDrainageSDCoolPtProcessService.classifyToilet(toiletList);
             ThDrainageSDCoolPtProcessService.classifySmallRoomGroup(ref groupList, roomList);
 
             var islandPair = ThDrainageSDCoolPtProcessService.mergeIsland(groupList);
@@ -109,12 +112,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //清理线和线头
             var lines = ThDrainageSDCleanLineService.simplifyLine(allLink);
-            var ptOnWall = toilateList.SelectMany(x => x.SupplyCoolOnWall).ToList();
+            var ptOnWall = toiletList.SelectMany(x => x.SupplyCoolOnWall).ToList();
             ptOnWall.Add(supplyStart);
             ThDrainageSDCleanLineService.cleanNoUseLines(ptOnWall, ref lines);
 
             dataSet.roomList = roomList;
-            dataSet.TerminalList = toilateList;
+            dataSet.TerminalList = toiletList;
             dataSet.IslandPair = islandPair;
             dataSet.GroupList = groupList;
             dataSet.Pipes = lines;

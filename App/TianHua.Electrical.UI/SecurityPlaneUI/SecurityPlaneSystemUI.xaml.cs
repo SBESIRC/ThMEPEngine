@@ -12,6 +12,8 @@ using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Service;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.IO.ExcelService;
+using ThMEPEngineCore.IO.IOService;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI.SecurityPlaneUI
 {
@@ -22,15 +24,21 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     {
         static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "SecurityPlaneConfig");
         static string defaultFile = "上海地区住宅-安防配置表.xlsx";
-        static string url = urlFolder + "\\" + defaultFile;
+        static string installUrl = urlFolder + "\\" + defaultFile;
+        static string configFolderUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\SecurityPlaneConfig";
+        static string configFileUrl = configFolderUrl + "\\" + defaultFile;
+
         DataSet configSet = null;
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
 
             //设置填充listview
-            var dataSet = GetExcelContent(url);
+            var dataSet = GetExcelContent(installUrl);
             SetListView(dataSet);
+
+            //创建默认Url
+            CheckDefaultUrl();
 
             //设置默认值
             SetDefaultValue();
@@ -63,6 +71,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.GuardTourSystem))
                 {
+                    ThElectricalUIService.Instance.Parameter.guardTourSystemTable = table;
                     GuardTourGrid.ItemsSource = table.DefaultView;
                     List<string> configLst = new List<string>() { "是", "否" };
                     SetGridValue(GuardTourGrid, table, configLst);
@@ -75,6 +84,18 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             if (ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable != null)
             {
                 ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree = RoomConfigTreeService.CreateRoomTree(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable);
+            }
+        }
+
+        /// <summary>
+        /// 检查并创建默认url
+        /// </summary>
+        private void CheckDefaultUrl()
+        {
+            IOOperateService.CreateFolder(configFolderUrl);
+            if (!IOOperateService.FileExist(configFileUrl))
+            {
+                SavaExcel(configFileUrl);
             }
         }
 
@@ -116,7 +137,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// </summary>
         private void SetDefaultValue()
         {
-            string[] files = Directory.GetFiles(urlFolder + @"\", "*.xls");
+            string[] files = Directory.GetFiles(configFolderUrl + @"\", "*.xls");
             List<string> fileLst = new List<string>();
             foreach (string file in files)
             {
@@ -163,38 +184,25 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         }
 
         /// <summary>
-        /// 一键布置
+        /// 存储成excel到特定路径
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnLayout_Click(object sender, RoutedEventArgs e)
+        /// <param name="url"></param>
+        private void SavaExcel(string url)
         {
-            //聚焦到CAD
-            SetFocusToDwgView();
+            DataSet dataSet = new DataSet();
+            dataSet.Merge(((DataView)VideoMonitoringGrid.ItemsSource).Table);
+            dataSet.Merge(((DataView)IntrusionAlarmGrid.ItemsSource).Table);
+            dataSet.Merge(((DataView)AccessControlGrid.ItemsSource).Table);
+            dataSet.Merge(((DataView)GuardTourGrid.ItemsSource).Table);
+            dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.Configs]);
+            dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
 
-            //发送命令
-            if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
-            {
-                if (!CheckVMSystem()) return;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THVMSYSTEM");
-            }
-            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem)
-            {
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THIASYSTEM");
-            }
-            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.AccessControlSystem)
-            {
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THACSYSTEM");
-            }
-            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.GuardTourSystem)
-            {
-                if (!CheckGTSystem()) return;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THGTSYSTEM");
-            }
-
-            this.Hide();
+            //存储成excel
+            ReadExcelService excelService = new ReadExcelService();
+            excelService.ConvertExcelToDataSet(dataSet, url);
         }
 
+        #region check输入
         /// <summary>
         /// 检查视频监控系统输入
         /// </summary>
@@ -260,6 +268,41 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 return true;
             }
         }
+        #endregion
+
+        #region 事件
+        /// <summary>
+        /// 一键布置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnLayout_Click(object sender, RoutedEventArgs e)
+        {
+            //聚焦到CAD
+            SetFocusToDwgView();
+
+            //发送命令
+            if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
+            {
+                if (!CheckVMSystem()) return;
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THVMSYSTEM");
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem)
+            {
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THIASYSTEM");
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.AccessControlSystem)
+            {
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THACSYSTEM");
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.GuardTourSystem)
+            {
+                if (!CheckGTSystem()) return;
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THGTSYSTEM");
+            }
+
+            this.Hide();
+        }
 
         /// <summary>
         /// 导入excel
@@ -282,7 +325,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 //存储成excel
                 var fileArray = file.Split("\\".ToCharArray());
                 var flieName = fileArray[fileArray.Length - 1];
-                string newPath = urlFolder + "\\" + flieName;
+                string newPath = configFolderUrl + "\\" + flieName;
                 ReadExcelService excelService = new ReadExcelService();
                 excelService.ConvertExcelToDataSet(dataSet, newPath);
 
@@ -305,17 +348,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             {
                 var localFilePath = dialog.FileName.ToString();
 
-                DataSet dataSet = new DataSet();
-                dataSet.Merge(((DataView)VideoMonitoringGrid.ItemsSource).Table);
-                dataSet.Merge(((DataView)IntrusionAlarmGrid.ItemsSource).Table);
-                dataSet.Merge(((DataView)AccessControlGrid.ItemsSource).Table);
-                dataSet.Merge(((DataView)GuardTourGrid.ItemsSource).Table);
-                dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.Configs]);
-                dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
-
-                //存储成excel
-                ReadExcelService excelService = new ReadExcelService();
-                excelService.ConvertExcelToDataSet(dataSet, localFilePath);
+                SavaExcel(localFilePath);
             }
         }
 
@@ -326,12 +359,13 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// <param name="e"></param>
         private void configList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string file = urlFolder + "\\" + configList.SelectedItem.ToString();
+            string file = configFolderUrl + "\\" + configList.SelectedItem.ToString();
 
             //设置填充listview
             var dataSet = GetExcelContent(file);
             SetListView(dataSet);
         }
+        #endregion
 
         /// <summary>
         /// 聚焦到CAD

@@ -13,10 +13,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
+        uiFireControlSystem uiTHXHSXTT;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
+            uiTHXHSXTT = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -60,7 +62,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
-            if (ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext != null) return;
+            if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext != null) return;
             var ui = new uiRainSystem();
             AcadApp.ShowModelessWindow(ui);
         }
@@ -70,7 +72,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THPSXTT", CommandFlags.Modal)]
         public void ThCreateDrainageSystemDiagram()
         {
-            if (ThMEPWSS.Pipe.Service.ThDrainageService.commandContext != null) return;
+            if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext != null) return;
             var ui = new DrainageSystemUI();
             AcadApp.ShowModelessWindow(ui);
         }
@@ -119,7 +121,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void THDXXHSXTT()
         {
             var uiDrainage = new uiFireHydrantSystem();
-            Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowModelessWindow(uiDrainage);
+            AcadApp.ShowModelessWindow(uiDrainage);
         }
 
         /// <summary>
@@ -130,6 +132,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var ui = new UiHydrantConnectPipe();
             AcadApp.ShowModelessWindow(ui);
+        }
+        /// <summary>
+        /// 消火栓系统图（目前只实现了塔楼部分）
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THXHSXTT", CommandFlags.Modal)]
+        public void THXHSXTT()
+        {
+            if (null != uiTHXHSXTT && uiTHXHSXTT.IsLoaded)
+                return;
+
+            uiTHXHSXTT = new uiFireControlSystem();
+            AcadApp.ShowModelessWindow(uiTHXHSXTT);
         }
     }
 }

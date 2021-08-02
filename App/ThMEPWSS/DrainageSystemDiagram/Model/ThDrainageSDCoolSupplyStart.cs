@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -36,7 +33,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             return geos;
         }
-
     }
 
     public class ThDrainageSDRegion
@@ -51,27 +47,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public Polyline Frame { get; private set; }
 
-        public ThDrainageSDRegion(Tuple<Point3d, Point3d> leftRight, string areaId)
+        public ThDrainageSDRegion(Polyline Frame, string areaId)
         {
             AreaId = areaId;
-            Frame = toFrame(leftRight);
-        }
-
-        private Polyline toFrame(Tuple<Point3d, Point3d> leftRight)
-        {
-            var pl = new Polyline();
-            var ptRT = new Point2d(leftRight.Item2.X, leftRight.Item1.Y);
-            var ptLB = new Point2d(leftRight.Item1.X, leftRight.Item2.Y);
-
-            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item1.ToPoint2D(), 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item2.ToPoint2D(), 0, 0, 0);
-            pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
-
-            pl.Closed = true;
-
-            return pl;
-
+            this.Frame = Frame;
         }
 
         public List<ThGeometry> BuildGeometries()

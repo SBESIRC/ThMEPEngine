@@ -1,20 +1,20 @@
 ﻿using NFox.Cad;
 using DotNetARX;
 using System.Linq;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.IO;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor
-{    
-    public class ThColumnExtractor: ThExtractorBase,IPrint
+{
+    public class ThColumnExtractor : ThExtractorBase, IPrint
     {
         public List<Polyline> Columns { get; private set; }
         private List<ThIfcRoom> Rooms { get; set; }
@@ -23,6 +23,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             Category = BuiltInCategory.Column.ToString();
             Columns = new List<Polyline>();
             Rooms = new List<ThIfcRoom>();
+            TesslateLength = 5.0;
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -30,7 +31,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var geos = new List<ThGeometry>();
             var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
             Columns.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 var isolate = isolateColumns.Contains(o);
@@ -38,15 +39,15 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 geometry.Boundary = o;
                 if (IsolateSwitch) // 表示只传入孤立的柱
                 {
-                    if(isolate)
+                    if (isolate)
                     {
                         geos.Add(geometry);
                     }
-                }                
+                }
                 else
                 {
                     geos.Add(geometry);
-                }                
+                }
             });
             return geos;
         }
@@ -55,11 +56,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             if (UseDb3Engine)
             {
-                using (var columnEngine = new ThColumnRecognitionEngine())
-                {
-                    columnEngine.Recognize(database, pts);
-                    Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToList();
-                }
+                var columnBuilder = new ThColumnBuilderEngine();
+                Columns = columnBuilder
+                    .Build(database, pts)
+                    .Select(o=>o.Outline as Polyline)
+                    .ToList();
             }
             else
             {
@@ -68,7 +69,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Columns = instance.Polys;
+                Columns = instance.Polys.Select(o=>o.TessellatePolylineWithArc(TesslateLength)).ToList();
             }
             if (FilterMode == FilterMode.Window)
             {
@@ -82,7 +83,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public void Print(Database database)
         {
-            Columns.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);            
+            Columns.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
     }
 }

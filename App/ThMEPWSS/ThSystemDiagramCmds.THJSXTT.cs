@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.Runtime;
 using ThCADExtension;
 using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Engine;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using Linq2Acad;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
@@ -143,29 +142,30 @@ namespace ThMEPWSS
         {
             using (var db = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个框");//交互界面
-                var engine = new ThRoomMarkRecognitionEngine();//创建厨房识别引擎
+                var per = Active.Editor.GetEntity("\n选择一个对象");//交互界面
+                //var engine = new ThRoomMarkRecognitionEngine();//创建厨房识别引擎
                 if (per.Status == PromptStatus.OK)//框选择成功
                 {
-                    //var entity = db.Element<Entity>(per.ObjectId);
-
-                    //DBObjectCollection objs = new DBObjectCollection();
-                    //entity.Explode(objs);
-
-                    var households = 0;
+                    //var households = 0;
 
                     var entity = db.Element<Entity>(per.ObjectId);
-                    dynamic acadObject = entity.AcadObject;
-                    engine.Recognize(db.Database, db.Element<Polyline>(per.ObjectId).Vertices());
-                    var ele = engine.Elements;
-                    var roomMark = ele.Select(e => (e as ThMEPEngineCore.Model.ThIfcTextNote).Text);
-                    foreach (var mark in roomMark)
-                    {
-                        if (mark == "厨房")
-                        {
-                            households += 1;
-                        }
-                    }
+
+
+                   
+                    var objCollection = new DBObjectCollection();
+                    entity.Explode(objCollection);
+                    ;
+                    //dynamic acadObject = entity.AcadObject;
+                    //engine.Recognize(db.Database, db.Element<Polyline>(per.ObjectId).Vertices());
+                    //var ele = engine.Elements;
+                    //var roomMark = ele.Select(e => (e as ThMEPEngineCore.Model.ThIfcTextNote).Text);
+                    //foreach (var mark in roomMark)
+                    //{
+                    //    if (mark == "厨房")
+                    //    {
+                    //        households += 1;
+                    //    }
+                    //}
                 }
             }
         }

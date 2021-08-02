@@ -595,7 +595,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ", "ESF", "SPF", "SSF", "APE", "AC" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FJ", "ESF", "SPF", "SSF", "APEa", "ACa" } } },
                 HasMultipleBlocks = true,
                 CoefficientOfExpansion = 5,
                 AssociatedBlocks = new List<ThBlockModel>()
@@ -780,7 +780,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "XHSB", "XFB", "XHS" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "XHSB", "XFB", "XHS","APEf" } } },
                 HasMultipleBlocks = true,
                 CoefficientOfExpansion = 5,
                 AssociatedBlocks = new List<ThBlockModel>()
@@ -825,7 +825,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0),
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "PLB", "PL" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "PLB", "PL", "APEf" } } },
                 HasMultipleBlocks = true,
                 CoefficientOfExpansion = 5,
                 AssociatedBlocks = new List<ThBlockModel>()

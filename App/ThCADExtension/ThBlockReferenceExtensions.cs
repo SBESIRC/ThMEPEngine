@@ -154,17 +154,6 @@ namespace ThCADExtension
             }
         }
 
-        public static Extents3d GeometricExtentsIgnoreAttribute(this BlockReference br)
-        {
-            var entitySet = new DBObjectCollection();
-            br.ExplodeWithVisible(entitySet);
-            var extents = new Extents3d();
-            entitySet.Cast<Entity>()
-                .Where(o => !(o is AttributeDefinition))
-                .ForEach(o => extents.AddExtents(o.GeometricExtents));
-            return extents;
-        }
-
         // mimic the Burst command
         //  https://adndevblog.typepad.com/autocad/2015/06/programmatically-mimic-the-burst-command.html
         public static void Burst(this BlockReference blockReference, DBObjectCollection blockEntities)

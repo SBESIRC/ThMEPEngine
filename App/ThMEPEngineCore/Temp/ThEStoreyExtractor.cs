@@ -9,7 +9,6 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model.Common;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Electrical;
@@ -54,20 +53,12 @@ namespace ThMEPEngineCore.Temp
             Storeys.ForEach(o =>
             {
                 var geometry = new ThGeometry();
+                geometry.Properties.Add(IdPropertyName, o.Storey.ObjectId.Handle.ToString());
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
-                {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Boundary));
-                }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Boundary));
-                }
                 geometry.Properties.Add(FloorTypePropertyName, o.StoreyType);
                 geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);                
-                geometry.Properties.Add(IdPropertyName, o.Id);
                 geometry.Properties.Add(BasePointPropertyName, o.BasePoint);
-                geometry.Boundary = o.Boundary;
+                //geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
             return geos;
@@ -93,19 +84,19 @@ namespace ThMEPEngineCore.Temp
             get
             {
                 var result = new Dictionary<Entity, string>();
-                Storeys.ForEach(o => result.Add(o.Boundary, o.Id));
+                Storeys.ForEach(o => result.Add(o.Boundary, o.Storey.ObjectId.Handle.ToString()));
                 return result;
             }
         }
     }
     public class EStoreyInfo:StoreyInfo
     {        
-        private ThEStoreys Storey { get; set; }
+        public ThEStoreys Storey { get; private set; }
 
         public EStoreyInfo(ThEStoreys storey)
         {
             Storey = storey;
-            Id = Guid.NewGuid().ToString();
+            Id = storey.ObjectId != ObjectId.Null ? Storey.ObjectId.Handle.ToString() : ""; // Guid.NewGuid().ToString();
             Parse();
         }
         private void Parse()

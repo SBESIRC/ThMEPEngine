@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ThMEPHVAC.Model
 {
@@ -8,8 +7,8 @@ namespace ThMEPHVAC.Model
         public ThDuctResourceDistribute(List<Merged_endline_Info> merged_endlines, double air_volumn, int port_num)
         {
             Statistic_endline_info(merged_endlines, out double total_len, out int total_seg_num);
-            Distrib_port_num(merged_endlines, total_len, total_seg_num, port_num);
-            Distrib_total_air_volumn(merged_endlines, air_volumn, port_num);
+            Distrib_port_num(merged_endlines, total_len, port_num);
+            Distrib_total_air_volume(merged_endlines, air_volumn, port_num);
             Set_duct_in_air_volume(merged_endlines);
         }
 
@@ -48,7 +47,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        public void Distrib_total_air_volumn(List<Merged_endline_Info> merged_endlines, double air_volumn, int ports_num)
+        public void Distrib_total_air_volume(List<Merged_endline_Info> merged_endlines, double air_volumn, int ports_num)
         {
             double average_air_volume = (double)air_volumn / ports_num;
             foreach (var info in merged_endlines)
@@ -66,7 +65,6 @@ namespace ThMEPHVAC.Model
         }
         private void Distrib_port_num( List<Merged_endline_Info> merged_endlines,
                                        double total_len,
-                                       int total_seg_num,
                                        int dis_port_num)
         {
             int have_dis_port_num = 0;

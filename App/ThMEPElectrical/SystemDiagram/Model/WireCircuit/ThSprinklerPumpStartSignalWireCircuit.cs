@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 var AreaData = AllFireDistrictData[FloorNum];
                 if (AreaData.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
                 {
-                    SprayPumpCount += AreaData.Data.BlockData.BlockStatistics["喷淋泵"];
+                    SprayPumpCount += AreaData.Data.BlockData.BlockStatistics["喷淋泵"] * AreaData.FloorCount;
                     SprayPumpMaxFloor = FloorNum + 1;
                     if (SprayPumpMinFloor == 0)
                         SprayPumpMinFloor = FloorNum + 1;

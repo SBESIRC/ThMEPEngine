@@ -2,16 +2,16 @@
 using System.Linq;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThHoleExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup
+    class ThHoleExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup, ISetStorey
     {
         public List<Polyline> Hole { get; private set; }
+        private List<StoreyInfo> StoreyInfos { get; set; }
 
         public ThHoleExtractor()
         {
@@ -26,18 +26,16 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
+                var parentId = BuildString(GroupOwner, o);
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
+                    var storeyInfo = Query(o);
+                    parentId = storeyInfo.Id;
                 }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o));
-                }
+                geometry.Properties.Add(ParentIdPropertyName, parentId);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
-
             return geos;
         }
 
@@ -65,17 +63,20 @@ namespace ThMEPEngineCore.Temp
                 Hole.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
             }
         }
-
-        public override void Group2(Dictionary<Entity, string> groupId)
-        {
-            if (Group2Switch)
-            {
-                Hole.ForEach(o => Group2Owner.Add(o, FindCurveGroupIds(groupId, o)));
-            }
-        }
         public void Print(Database database)
         {
             Hole.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+        }
+
+        public void Set(List<StoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
+
+        public StoreyInfo Query(Entity entity)
+        {
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new StoreyInfo();
         }
     }
 }

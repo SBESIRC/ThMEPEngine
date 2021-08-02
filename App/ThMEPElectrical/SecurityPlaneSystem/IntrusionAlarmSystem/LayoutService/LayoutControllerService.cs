@@ -15,10 +15,25 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         double angle = 45;
         double blockWidth = 300;
         double blockLength = 500;
-        public ControllerModel LayoutController(List<Polyline> structs, Polyline polylibe, Point3d doorPt, Vector3d doorDir)
+        public ControllerModel LayoutController(List<Polyline> structs, Polyline door, Point3d doorPt, Vector3d doorDir)
         {
-            var layoutInfo = UtilService.CalLayoutInfo(structs, polylibe, doorDir, doorPt, angle, blockWidth).First();
-            var controller = CalControllerInfo(layoutInfo, doorDir);
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, blockWidth, true).FirstOrDefault();
+            var checkDir = doorDir;
+            if (layoutInfo.Key == null)
+            {
+                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                if (layoutInfo.Key == null)
+                {
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                }
+                checkDir = (doorPt - layoutInfo.Value).GetNormal();
+            }
+            if (layoutInfo.Key == null)
+            {
+                return null;
+            }
+            var controller = CalControllerInfo(layoutInfo, checkDir);
 
             return controller;
         }

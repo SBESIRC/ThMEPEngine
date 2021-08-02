@@ -10,7 +10,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
 {
     public class ThWindWell : ThIfcBuildingElement
     {
-        public Polyline ElementObb { get; set; }
         public static ThWindWell Create(Entity data)
         {
             var windWell = new ThWindWell
@@ -18,10 +17,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 Uuid = Guid.NewGuid().ToString(),
                 Outline = data
             };
-            if(data is Polyline)
-            {
-                windWell.ElementObb = data as Polyline;
-            }
             return windWell;
         }
     }

@@ -1,62 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
-using ThCADExtension;
-using ThCADCore.NTS;
-
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDConnectSubService
     {
-        public static List<Line> linkGroupSub(Dictionary<string, List<ThTerminalToilate>> groupList, Dictionary<ThTerminalToilate, Point3d> ptForVirtualDict, Dictionary<string, (string, string)> islandPare, List<Line> branchList)
+        public static List<Line> linkGroupSub(Dictionary<string, List<ThTerminalToilet>> groupList, Dictionary<ThTerminalToilet, Point3d> ptForVirtualDict, Dictionary<string, (string, string)> islandPare, List<Line> branchList)
         {
             var subBranch = new List<Line>();
-
-
-            foreach (var group in groupList)
+            if (branchList.Count > 0)
             {
-                var toilateInVirtualList = group.Value.Where(x => ptForVirtualDict.ContainsKey(x)).ToList();
-
-                if (toilateInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == false)
+                foreach (var group in groupList)
                 {
-                    var leadToi = toilateInVirtualList.First();
-                    var vpt = ptForVirtualDict[leadToi];
+                    var toiletInVirtualList = group.Value.Where(x => ptForVirtualDict.ContainsKey(x)).ToList();
 
-                    //普通组
-                    subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
-                    subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
+                    if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == false)
+                    {
+                        var leadToi = toiletInVirtualList.First();
+                        var vpt = ptForVirtualDict[leadToi];
 
-                }
+                        //普通组
+                        subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
+                        subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
 
-                if (toilateInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == true)
-                {
-                    //岛 vpt组
-                    var leadToi = toilateInVirtualList.First();
-                    var vpt = ptForVirtualDict[leadToi];
-                    subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
-                    subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
+                    }
 
-                    //岛 另外一组
-                    var otherPair = groupList.Where(x => x.Key == islandPare[group.Key].Item2).First();
-                    subBranch.AddRange(linkSubInGroupNormal(otherPair, out var orderOtherPts));
-                    subBranch.AddRange(linkSubToVirtualForIsland(vpt, orderOtherPts, otherPair.Value, branchList));
+                    if (toiletInVirtualList.Count > 0 && islandPare.ContainsKey(group.Key) == true)
+                    {
+                        //岛 vpt组
+                        var leadToi = toiletInVirtualList.First();
+                        var vpt = ptForVirtualDict[leadToi];
+                        subBranch.AddRange(linkSubInGroupNormal(group, out var orderPts));
+                        subBranch.AddRange(linkSubToVirtualForNormal(vpt, orderPts, branchList));
 
+                        //岛 另外一组
+                        var otherPair = groupList.Where(x => x.Key == islandPare[group.Key].Item2).First();
+                        subBranch.AddRange(linkSubInGroupNormal(otherPair, out var orderOtherPts));
+                        subBranch.AddRange(linkSubToVirtualForIsland(vpt, orderOtherPts, otherPair.Value, branchList));
+                    }
                 }
             }
-
             return subBranch;
         }
 
-        private static List<Line> linkSubInGroupNormal(KeyValuePair<string, List<ThTerminalToilate>> group, out List<Point3d> orderPts)
+        private static List<Line> linkSubInGroupNormal(KeyValuePair<string, List<ThTerminalToilet>> group, out List<Point3d> orderPts)
         {
             var subBranch = new List<Line>();
 
@@ -95,7 +88,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return subBranch;
         }
 
-        private static List<Line> linkSubToVirtualForIsland(Point3d vPt, List<Point3d> orderOtherPts, List<ThTerminalToilate> group, List<Line> branchList)
+        private static List<Line> linkSubToVirtualForIsland(Point3d vPt, List<Point3d> orderOtherPts, List<ThTerminalToilet> group, List<Line> branchList)
         {
 
             var subBranch = new List<Line>();
@@ -139,7 +132,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 {
                     bReturn = false;
                 }
-                if (branch.Key.ToCurve3d().IsOn(branch.Value, tol) ==false)
+                if (branch.Key.ToCurve3d().IsOn(branch.Value, tol) == false)
                 {
                     bReturn = false;
                 }

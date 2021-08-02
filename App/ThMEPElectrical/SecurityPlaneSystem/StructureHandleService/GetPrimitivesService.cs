@@ -96,11 +96,11 @@ namespace ThMEPElectrical.StructureHandleService
 
                 foreach (var room in rooms)
                 {
-                    if (room.Boundary is MPolygon mPolygon)
-                    {
-                        var mPolygonLoops = mPolygon.Loops();
-                        room.Boundary = mPolygonLoops[0];
-                    }
+                    //if (room.Boundary is MPolygon mPolygon)
+                    //{
+                    //    var mPolygonLoops = mPolygon.Loops();
+                    //    room.Boundary = mPolygonLoops[0];
+                    //}
                 }
                 return rooms;
             }

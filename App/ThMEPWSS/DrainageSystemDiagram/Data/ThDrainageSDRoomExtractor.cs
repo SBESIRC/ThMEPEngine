@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -11,16 +8,16 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Engine;
-
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
-    public class ThDrainageToilateRoomExtractor : ThExtractorBase, IAreaId
+    public class ThDrainageToiletRoomExtractor : ThExtractorBase, IAreaId
     {
         public string AreaId { get; private set; }
         public static string AreaIdPropertyName = "AreaId";
         public List<ThIfcRoom> Rooms { get; private set; }
-        public ThDrainageToilateRoomExtractor()
+        public ThDrainageToiletRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
             Category = BuiltInCategory.Space.ToString();

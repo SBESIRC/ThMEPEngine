@@ -12,11 +12,11 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using ThUtilExtensionsNs;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -30,7 +30,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var lines = ThDrainageSystemServiceGeoCollector.GetLines(
-                    acadDatabase.ModelSpace.OfType<Entity>().ToList(), 
+                    acadDatabase.ModelSpace.OfType<Entity>().ToList(),
                     layer => layer is "W-FRPT-1-HYDT-PIPE" or "W-FRPT-HYDT-PIPE");
                 return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())
                     (polygon.ToRect().ToPolygon()).
@@ -39,6 +39,55 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
     }
 
+    //public class ThExtractValveService//提取阀门
+    //{
+    //    public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+    //    {
+    //        var objs = new DBObjectCollection();
+    //        using (var acadDatabase = AcadDatabase.Use(database))
+    //        {
+    //            var Results = acadDatabase
+    //               .ModelSpace
+    //               .OfType<Entity>()
+    //               .Where(o => IsHYDTPipeLayer(o.Layer));
+    //            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+    //            var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+    //            // 阀块
+    //            dbObjs.Cast<Entity>()
+    //                .Where(e => e is BlockReference)
+    //                .Where(e => IsValveBlock((BlockReference)e))
+    //                .ForEach(e => objs.Add(e));
+    //            // 天正阀
+    //            foreach(var obj in dbObjs)
+    //            {
+    //                if((obj as Entity).IsTCHValve())
+    //                {
+    //                    var dbColl = new DBObjectCollection();
+    //                    (obj as Entity).Explode(dbColl);
+    //                    dbColl.Cast<Entity>()
+    //                        .Where(e => e is BlockReference)
+    //                        .Where(e => IsValve((e as BlockReference).Name))
+    //                        .ForEach(e => objs.Add(e));
+    //                }
+    //            }
+    //            return objs;
+    //        }
+    //    }
+    //    private bool IsHYDTPipeLayer(string layer)
+    //    {
+    //        return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
+    //    }
+
+    //    private bool IsValveBlock(BlockReference blockReference)
+    //    {
+    //        var blkName = blockReference.GetEffectiveName().ToUpper();
+    //        return blkName == "蝶阀" || blkName.Contains("316");
+    //    }
+    //    private bool IsValve(string valveName)
+    //    {
+    //        return valveName.Contains("蝶阀") || valveName.Contains("316");
+    //    }
+    //}
     public class ThExtractValveService//提取阀门
     {
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
@@ -72,9 +121,111 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private bool IsValveBlock(BlockReference blockReference)
         {
             var blkName = blockReference.GetEffectiveName().ToUpper();
-            return blkName == "蝶阀" || blkName.Contains("VALVE");
+            return blkName.Contains("阀") || blkName.Contains("VALVE");
         }
     }
+
+    public class ThExtractGateValveService//提取闸阀
+    {
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+        {
+            var objs = new DBObjectCollection();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Results = acadDatabase
+                   .ModelSpace
+                   .OfType<Entity>()
+                   .Where(o => IsHYDTPipeLayer(o.Layer));
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                // 阀块
+                dbObjs.Cast<Entity>()
+                    .Where(e => e is BlockReference)
+                    .Where(e => IsValveBlock((BlockReference)e))
+                    .ForEach(e => objs.Add(e));
+                // 天正阀
+                foreach (var obj in dbObjs)
+                {
+                    if ((obj as Entity).IsTCHValve())
+                    {
+                        var dbColl = new DBObjectCollection();
+                        (obj as Entity).Explode(dbColl);
+                        dbColl.Cast<Entity>()
+                            .Where(e => e is BlockReference)
+                            .Where(e => IsValve((e as BlockReference).Name))
+                            .ForEach(e => objs.Add(e));
+                    }
+                }
+                return objs;
+            }
+        }
+        private bool IsHYDTPipeLayer(string layer)
+        {
+            return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
+        }
+
+        private bool IsValveBlock(BlockReference blockReference)
+        {
+            var blkName = blockReference.GetEffectiveName().ToUpper();
+            return blkName.Contains("截止阀") ||
+                   blkName.Contains("闸阀") ||
+                   blkName.Contains("296");
+        }
+        private bool IsValve(string valveName)
+        {
+            return valveName.Contains("截止阀") ||
+                   valveName.Contains("296") ||
+                   valveName.Contains("闸阀");
+        }
+
+        public List<Point3d> GetGateValveSite(DBObjectCollection objs)
+        {
+            var pts = new List<Point3d>();
+            foreach (var db in objs)
+            {
+                var br = db as BlockReference;
+                var pt1 = br.GeometricExtents.MaxPoint;
+                var pt2 = br.GeometricExtents.MinPoint;
+                var pt = General.GetMidPt(pt1, pt2);
+                pts.Add(pt);
+            }
+            return pts;
+        }
+    }
+
+
+
+    public class ThExtractCasing//提取套管
+    {
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+        {
+            var objs = new List<Point3dEx>();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Results = acadDatabase
+                   .ModelSpace
+                   .OfType<BlockReference>()
+                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsValveBlock(o));
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+
+                return dbObjs;
+            }
+        }
+        private bool IsHYDTPipeLayer(string layer)
+        {
+            return layer.ToUpper() == "W-BUSH";
+        }
+
+        private bool IsValveBlock(BlockReference blockReference)
+        {
+            var blkName = blockReference.GetEffectiveName().ToUpper();
+            return blkName.Contains("套管");
+        }
+    }
+
+
+
 
     public class ThExtractHydrant//提取管道末端标记
     {
@@ -84,69 +235,236 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public DBObjectCollection DBobjsResults { get; private set; }
         public DBObjectCollection DBObjs1 { get; private set; }
         public List<Point3dEx> HydrantPosition { get; private set; }
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon)
+        public DBObjectCollection Extract(AcadDatabase acadDatabase, Point3dCollection polygon)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
-            {
-                Results = acadDatabase.ModelSpace
-                   .OfType<Entity>()
-                   .Where(o => o.Layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
-                          o.Layer.ToUpper() == "W-FRPT-EXTG" ||
-                          o.Layer.ToUpper() == "W-FRPT-HYDT");
 
-                Results1 = acadDatabase.ModelSpace
+            Results = acadDatabase.ModelSpace
+               .OfType<Entity>()
+               .Where(o => o is not Circle)
+               .Where(o => !IsTCHPipeFitting(o))
+               .Where(o => o.Layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
+                           o.Layer.ToUpper() == "W-WSUP-COOL-PIPE" ||
+                           o.Layer.ToUpper() == "W-FRPT-EXTG" ||
+                           o.Layer.ToUpper() == "W-FRPT-HYDT" ||
+                           o.Layer.ToUpper() == "W-RAIN-EQPM" ||
+                           o.Layer.ToUpper() == "W-WSUP-DIMS" ||
+                           o.Layer.ToUpper() == "0");
+
+            //var targets = Results.Cast<Entity>()
+            //.Where(o => o.ObjectId.Handle.Value.Equals(921180));
+            //var objs2 = new DBObjectCollection();
+            //(targets.First() as Entity).Explode(objs2);
+
+            Results1 = acadDatabase.ModelSpace
                    .OfType<Circle>()
                    .Where(o => o.Layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
                           o.Layer.ToUpper() == "W-FRPT-EXTG" ||
                           o.Layer.ToUpper() == "W-FRPT-HYDT");
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+            DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
-                //spatialIndex不支持圆
-                var map = new Dictionary<Polyline, Circle>();
-                Results1.ToList().ForEach(o => map.Add(o.ToRectangle(), o));
-                var spatialIndex1 = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
-                DBObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
+            //spatialIndex不支持圆
+            var map = new Dictionary<Polyline, Circle>();
+            Results1.ToList().ForEach(o => map.Add(o.ToRectangle(), o));
+            var spatialIndex1 = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
+            DBObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
 
-                DBobjsResults = new DBObjectCollection();
-                foreach(var db in DBObjs)
+            DBobjsResults = new DBObjectCollection();
+            foreach (DBObject db in DBObjs)
+            {
+                if (db is Entity entity)
                 {
-                    if(db is BlockReference)
+                    if (entity is BlockReference br)
                     {
-                        if(IsNotTermCircle(db as BlockReference))//是一些其他东西就不要炸了
+                        if (br.GetEffectiveName().Contains("带定位立管"))
                         {
+                            var circle = ExplodeDWLG(br);
+                            DBobjsResults.Add(circle);
                             continue;
-                        }
-                        if(IsPipeTermBlock(db as BlockReference))//带定位立管也不要炸，炸了很麻烦
-                        {
-                            var circle = new Circle((db as BlockReference).GetCenter(), new Vector3d(0,0,1), 50);
-                            DBobjsResults.Add((DBObject)circle);
-                            continue;
-                        }
-                        var br = new DBObjectCollection();//其余的块通通炸掉
-                        (db as BlockReference).Explode(br);
-                        foreach(var d in br)
-                        {
-                            if(d is Circle)
-                            {
-                                DBobjsResults.Add((DBObject)d);
-                            }
                         }
                     }
+
+                    AddBlockReference(acadDatabase, DBobjsResults, entity);
                 }
-                foreach(var db in DBObjs1)
-                {
-                    DBobjsResults.Add(map[db as Polyline]);
-                }
-                
-                return DBobjsResults;
+
             }
+            foreach (var db in DBObjs1)
+            {
+                DBobjsResults.Add(map[db as Polyline]);
+            }
+
+            return DBobjsResults;
+        }
+
+        public static Circle ExplodeDWLG(BlockReference br)//炸定位立管
+        {
+            var objColl = new DBObjectCollection();
+            br.Explode(objColl);
+            foreach (var c in objColl)
+            {
+                if (c is Circle circle)
+                {
+                    if (circle.Radius > 20)
+                    {
+                        return new Circle(new Point3d(circle.Center.X, circle.Center.Y, 0), new Vector3d(0, 0, 1), 50);
+                    }
+                }
+            }
+            return new Circle();
+        }
+
+        public static void AddBlockReference(AcadDatabase acadDatabase, DBObjectCollection DBobjs, Entity entity)
+        {
+            if (IsTCHPipeFitting(entity))
+            {
+                return;
+            }
+            if (IsTCHPipe(entity))//传入类型为天正pipe
+            {
+                var entity2 = acadDatabase.Element<Entity>(entity.ObjectId);
+                var objCollection = new DBObjectCollection();
+                if(entity2 is null)
+                {
+                    return;
+                }
+                entity2.Explode(objCollection);
+                objCollection.Cast<Entity>()
+                    .Where(o => o is Circle)
+                    .ForEach(o => DBobjs.Add((DBObject)o));
+                return;
+            }
+            else if (entity is BlockReference bkr)//传入类型为 BlockReference
+            {
+                if (bkr.Name.Contains("设计区"))
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();//创建 object 集合
+                var blockRecordId = bkr.BlockTableRecord;//提取 block ID
+                var btr = acadDatabase.Blocks.Element(blockRecordId);
+                int indx = 0;
+                foreach (var entId in btr)
+                {
+                    var dbObj = acadDatabase.Element<Entity>(entId);
+                    if (dbObj.Bounds is null)
+                    {
+                        continue;
+                    }
+                    if (dbObj is BlockReference br)
+                    {
+
+                        if (br.GetEffectiveName().Contains("室内消火栓平面") || br.GetEffectiveName().Contains("蝶阀") ||
+                            br.GetEffectiveName().Contains("灭火器") || br.GetEffectiveName().Contains("水流指示器") ||
+                            br.GetEffectiveName().Contains("压力表"))
+                        {
+                            indx += 1;
+                            continue;
+                        }
+                        else if (br.GetEffectiveName().Contains("带定位立管"))
+                        {
+                            var objs1 = new DBObjectCollection();//创建 object 集合
+                            if(bkr is null)
+                            {
+                                continue;
+                            }
+                            bkr.Explode(objs1);
+                            if (indx > objs1.Count - 1)
+                            {
+                                continue;
+                            }
+                            if (objs1[indx] is BlockReference bk)
+                            {
+                                var circle = ExplodeDWLG(bk);
+                                DBobjs.Add(circle);
+                            }
+                            indx += 1;
+                            continue;
+                        }
+                        else
+                        {
+                            var objs1 = new DBObjectCollection();//创建 object 集合
+                            if(br is not null)
+                            {
+                                br.Explode(objs1);
+                                if (indx > objs1.Count - 1)
+                                {
+                                    continue;
+                                }
+                                if (objs1[indx] is Entity ent)
+                                    AddBlockReference(acadDatabase, DBobjs, ent);
+                                indx += 1;
+                                continue;
+                            }
+                            
+                        }
+                    }
+
+                    else if (dbObj is Circle circle)//为圆
+                    {
+                        var rstCircle = new Circle(new Point3d(circle.Center.X, circle.Center.Y, 0), new Vector3d(0, 0, 1), 50);
+                        DBobjs.Add(rstCircle);
+                    }
+
+                    if (IsTCHPipe(dbObj))//传入类型为天正pipe
+                    {
+                        var entity2 = acadDatabase.Element<Entity>(entity.ObjectId);
+                        var objCollection = new DBObjectCollection();
+                        if(entity2 is null)
+                        {
+                            continue;
+                        }
+                        entity2.Explode(objCollection);
+                        objCollection.Cast<Entity>()
+                            .Where(o => o is Circle)
+                            .ForEach(o => DBobjs.Add((DBObject)o));
+                        foreach(Entity ent in objCollection)
+                        {
+                            if(IsTCHPipe(ent))
+                            {
+                                var subObjs = new DBObjectCollection();
+                                ent.Explode(subObjs);
+                                subObjs.Cast<Entity>()
+                            .Where(o => o is Circle)
+                            .ForEach(o => DBobjs.Add((DBObject)o));
+                            }
+                        }
+                        return;
+                    }
+
+
+                }
+            }
+
+            else if (entity is Circle circle)//为圆
+            {
+                DBobjs.Add(circle);
+            }
+            else
+            {
+                return;
+            }
+
+
+
+        }
+
+
+        public static bool IsTCHPipe(Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.Equals("TCH_PIPE");
+        }
+
+        public static bool IsTCHPipeFitting(Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.Equals("TCH_PIPEFITTING");
         }
 
         public bool IsNotTermCircle(BlockReference br)
         {
-            if(br.GetEffectiveName().Contains("室内消火栓平面"))
+            if (br.GetEffectiveName().Contains("室内消火栓平面"))
             {
                 return true;
             }
@@ -154,7 +472,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 return true;
             }
-            if(br.GetEffectiveName().Contains("灭火器"))
+            if (br.GetEffectiveName().Contains("灭火器"))
             {
                 return true;
             }
@@ -179,16 +497,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             HydrantPosition = new List<Point3dEx>();
 
-            foreach(var db in DBobjsResults)
+            foreach (var db in DBobjsResults)
             {
                 var centerPt = (db as Circle).Center;
                 var pt = new Point3dEx(new Point3d(centerPt.X, centerPt.Y, 0));
-                if(!HydrantPosition.Contains(pt))
+                if (!HydrantPosition.Contains(pt))
                 {
                     HydrantPosition.Add(pt);
                 }
             }
-            
+
             return HydrantPosition;
         }
     }
@@ -237,7 +555,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 pos.Add(pt2);
                 poisition.Add(pos);
             }
- 
+
             return poisition;
         }
     }
@@ -330,12 +648,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     }
 
 
-    public class ThExtractLabelLine
+    public class ThExtractLabelLine//引线提取
     {
-        public IEnumerable<Curve> Results { get; private set; }
-        public IEnumerable<Entity> Results1 { get; private set; }
-        public DBObjectCollection DBObjs { get; private set; }
-        public DBObjectCollection DBObjs1 { get; private set; }
+        public DBObjectCollection DbTextCollection { get; private set; }
         public List<Line> LabelPosition { get; private set; }
 
         public ThExtractLabelLine()
@@ -346,66 +661,39 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
-                   .ModelSpace
-                   .OfType<Curve>()
-                   .Where(o => IsHYDTPipeElement(o) && IsHYDTPipeLayer(o.Layer));
-
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
-
-                Results1 = acadDatabase
+                var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => o.Layer.ToUpper() == "W-FRPT-HYDT-DIMS" || 
-                               o.Layer.ToUpper() == "W-RAIN-NOTE" ||
-                               o.Layer.ToUpper() == "W-FRPT-NOTE");
+                   .Where(o => IsHYDTPipeLayer(o.Layer));
 
-                var spatialIndex1 = new ThCADCoreNTSSpatialIndex(Results1.ToCollection());
-                DBObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
-                string objName = "";
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
-                for (int i = 0; i < DBObjs1.Count; i++)
+                DbTextCollection = new DBObjectCollection();
+
+                var bkrCollection = new DBObjectCollection();
+                DBObjs.Cast<Entity>()
+                    .Where(o => o is Entity)
+                    .ForEach(o => bkrCollection.Add(o));
+                foreach (var bkr in bkrCollection)
                 {
-                    var db = DBObjs1[i];
-                    if (db is BlockReference)
+                    if (bkr is Entity ent)
                     {
-                        objName = (db as BlockReference).GetEffectiveName();
-                    }
-                    else
-                    {
-                        var ad = (db as Entity).AcadObject;
-                        dynamic o = ad;
-                        objName = o.ObjectName;
-
-                    }
-                    if (!IsMarkLine(objName))
-                    {
-                        DBObjs1.RemoveAt(i);
-                        i -= 1;
+                        ExplodeLabelLine(ent, DbTextCollection);
                     }
                 }
 
-                if(DBObjs.Count != 0)
-                {
-                    return DBObjs;
-                }
-                else
-                {
-                    return DBObjs1;
-                }
+                return DbTextCollection;
             }
         }
         private bool IsHYDTPipeLayer(string layer)
         {
             return layer.ToUpper() == "W-RAIN-DIMS" ||
+                   layer.ToUpper() == "W-RAIN-NOTE" ||
                    layer.ToUpper() == "W-DRAI-DIMS" ||
                    layer.ToUpper() == "W-WSUP-DIMS" ||
+                   layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-DIMS";
-        }
-        private bool IsHYDTPipeElement(Curve curve)
-        {
-            return curve is Polyline || curve is Line;
         }
 
         private bool IsMarkLine(string str)
@@ -413,53 +701,71 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return str.Equals("TDbSymbMultiLeader") || str.Equals("TDbText");
         }
 
+
         public List<Line> CreateLabelLineList()
         {
-            LabelPosition = new List<Line>();
-            if(DBObjs.Count != 0)
-            {
-                foreach (var db in DBObjs)
-                {
-                    if (db is Polyline)
-                    {
-                        var fl = db as Polyline;
-                        var ptPre = fl.GetPoint3dAt(0);
-                        for (int i = 1; i < fl.NumberOfVertices; i++)
-                        {
-                            var pti = fl.GetPoint3dAt(i);
-                            var pt1 = new Point3dEx(ptPre.X, ptPre.Y, 0);
-                            var pt2 = new Point3dEx(pti.X, pti.Y, 0);
+            var LabelPosition = new List<Line>();
 
-                            LabelPosition.Add(new Line(pt1._pt, pt2._pt));
-                            ptPre = fl.GetPoint3dAt(i);
-                        }
-                    }
-                    else
-                    {
-                        var line = db as Line;
-                        var br = db as BlockReference;
-                        var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
-                        var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
-                        LabelPosition.Add(new Line(pt1, pt2));
-                    }
-                }
-            }
-            else
+            if (DbTextCollection.Count != 0)
             {
-                foreach (var db in DBObjs1)
+                foreach (var db in DbTextCollection)
                 {
-                    var br = new DBObjectCollection();
-                    (db as Entity).Explode(br);
-                    foreach(var line in br)
-                    {
-                        LabelPosition.Add(line as Line);
-                    }
+                    var line = db as Line;
+                    var br = db as BlockReference;
+                    var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
+                    var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
+                    LabelPosition.Add(new Line(pt1, pt2));
                 }
             }
-          
+
             return LabelPosition;
         }
+
+        private void ExplodeLabelLine(Entity ent, DBObjectCollection dBObjects)
+        {
+            if (ent == null) return;
+
+            if (ent is Line line)// Line 直接添加
+            {
+                if (!line.Layer.ToUpper().Contains("DEFPOINTS"))
+                {
+                    dBObjects.Add(line);
+                }
+                return;
+            }
+            if (ent is Polyline pline)
+            {
+                if (pline.Layer.ToUpper().Contains("DEFPOINTS"))
+                {
+                    return;
+                }
+            }
+            if (ent is AlignedDimension || ent is Arc || ent is DBText || ent is Circle || ent.IsTCHText())//炸出圆 和 天正单行文字 就退出
+            {
+                return;
+            }
+            try
+            {
+                var dbObjs = new DBObjectCollection();
+                ent.Explode(dbObjs);
+                foreach (var obj in dbObjs)
+                {
+                    if (obj is Entity ent1)
+                    {
+                        ExplodeLabelLine(ent1, dBObjects);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
     }
+
+
+
 
     public class ThExtractLabelText//文字提取
     {
@@ -471,7 +777,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             Results = new List<Entity>();
         }
 
-        public void Extract(Database database)
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -479,14 +785,86 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    .ModelSpace
                    .OfType<Entity>()
                    .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                var dbTextCollection = new DBObjectCollection();
+
+                var bkrCollection = new DBObjectCollection();//筛选BlockRefrence
+                DBObjs.Cast<Entity>()
+                    .Where(o => o is Entity)
+                    .ForEach(o => bkrCollection.Add(o));
+                foreach (var bkr in bkrCollection)
+                {
+                    if (bkr is Entity ent)
+                    {
+                        ExplodeText(ent, dbTextCollection, ref textWidth);
+                    }
+                }
+                return dbTextCollection;
             }
         }
         private bool IsHYDTPipeLayer(string layer)
         {
-            return layer.ToUpper() == "W-RAIN-DIMS" || 
-                   layer.ToUpper() == "W-FRPT-HYDT-DIMS" || 
+            return layer.ToUpper() == "W-RAIN-DIMS" ||
+                   layer.ToUpper() == "W-FRPT-HYDT-DIMS" ||
                    layer.ToUpper() == "W-WSUP-DIMS" ||
+                   layer.ToUpper() == "W-DRAI-DIMS" ||
+                   layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-RAIN-NOTE";
+        }
+
+        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth)
+        {
+            if (ent is DBText dbText)//DBText直接添加
+            {
+                if (!dbText.TextString.Contains("DN"))
+                {
+                    var tWidth = Math.Abs((ent as Entity).GeometricExtents.MaxPoint.X - (ent as Entity).GeometricExtents.MinPoint.X);
+                    if (tWidth > textWidth && (ent as DBText).TextString.Contains("X"))
+                    {
+                        textWidth = tWidth;
+                    }
+                    dBObjects.Add(ent);
+                }
+                return;
+            }
+            if (ent is AlignedDimension || ent is Arc || ent is Line || ent is Circle || ent is Polyline)//炸成线就退出
+            {
+                return;
+            }
+            if (ent.IsTCHText())//天正单行文字,先炸后添加
+            {
+                var texts = ent.ExplodeTCHText();
+                foreach (var text in texts)
+                {
+                    var tWidth = Math.Abs((text as Entity).GeometricExtents.MaxPoint.X - (text as Entity).GeometricExtents.MinPoint.X);
+                    if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X"))
+                    {
+                        textWidth = tWidth;
+                        //textHeight = (text as DBText).Height;
+                    }
+                    dBObjects.Add((DBObject)text);
+                }
+                return;
+            }
+            try
+            {
+                var dbObjs = new DBObjectCollection();
+                ent.Explode(dbObjs);
+                foreach (var obj in dbObjs)
+                {
+                    if (obj is Entity ent1)
+                    {
+                        ExplodeText(ent1, dBObjects, ref textWidth);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
         }
     }
 
@@ -500,7 +878,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
 
         }
-        public void Extract(Database database)
+        public void Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -509,20 +887,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    .OfType<Entity>()
                    .Where(o => IsHYDTPipeLayer(o.Layer))
                    .ToList();
-                
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+
+
                 DBobjs = new DBObjectCollection();
-                foreach (var db in Results)
+                foreach (var db in dbObjs)
                 {
-                    if(db is BlockReference)
+                    if (db is BlockReference)
                     {
-                        if(IsFireHydrant((db as BlockReference).GetEffectiveName()))
+                        if (IsFireHydrant((db as BlockReference).GetEffectiveName()))
                         {
                             DBobjs.Add((DBObject)db);
                         }
                         else
                         {
                             var objs = new DBObjectCollection();
-                            
+
                             var blockRecordId = (db as BlockReference).BlockTableRecord;
                             var btr = acadDatabase.Blocks.Element(blockRecordId);
 
@@ -533,7 +915,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 var dbObj = acadDatabase.Element<Entity>(entId);
                                 if (dbObj is BlockReference)
                                 {
-                                    if(IsFireHydrant((dbObj as BlockReference).GetEffectiveName()))
+                                    if (IsFireHydrant((dbObj as BlockReference).GetEffectiveName()))
                                     {
                                         indxFlag = true;
                                         break;
@@ -541,13 +923,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 }
                                 indx += 1;
                             }
-                         
+
                             (db as BlockReference).Explode(objs);
-                            if(indxFlag)
+                            if (indxFlag)
                             {
+                                if (indx > objs.Count - 1)
+                                {
+                                    continue;
+                                }
                                 DBobjs.Add((DBObject)objs[indx]);
                             }
-                     
+
                         }
                     }
                 }
@@ -555,7 +941,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
         private bool IsHYDTPipeLayer(string layer)
         {
-            return layer.ToUpper() == "W-FRPT-HYDT";
+            return layer.ToUpper() == "W-FRPT-HYDT" || layer.ToUpper() == "0";
         }
 
         private bool IsFireHydrant(string valve)
@@ -569,10 +955,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public List<Entity> Results { get; private set; }
         public DBObjectCollection DBObjs { get; private set; }
         public DBObjectCollection DBObjsResult { get; private set; }
-        
+
         public ThExtractPipeDN()
         {
-            
+
         }
 
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
@@ -590,20 +976,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 DBObjsResult = new DBObjectCollection();
                 foreach (var db in DBObjs)
                 {
-                    if(db is DBText)
+                    if (db is DBText)
                     {
                         if ((db as DBText).TextString.Contains("DN"))
                         {
                             DBObjsResult.Add((DBObject)db);
                         }
                     }
-                    else if(db is Line)
+                    else if (db is Line)
                     {
                         continue;
                     }
-                    else if(db is BlockReference)
-                    { 
-                        if((db as BlockReference).GetEffectiveName().Equals("消火栓环管标记"))
+                    else if (db is BlockReference)
+                    {
+                        if ((db as BlockReference).GetEffectiveName().Equals("消火栓环管标记"))
                         {
                             continue;
                         }
@@ -614,7 +1000,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         var objID = (db as BlockReference).ObjectId;
                         var val = objID.GetDynBlockValue("可见性");
                         ;
-                        if(val?.Contains("DN")==true)
+                        if (val?.Contains("DN") == true)
                         {
                             var DNtext = new DBText();
                             DNtext.TextString = val;
@@ -627,24 +1013,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             var objs = new DBObjectCollection();
                             (db as BlockReference).Explode(objs);
                             ;
-                            foreach(var obj in objs)
+                            foreach (var obj in objs)
                             {
-                                if(obj is DBText)
+                                if (obj is DBText)
                                 {
                                     ;
                                 }
-                                else if(obj is BlockReference)
+                                else if (obj is BlockReference)
                                 {
                                     ;
                                     var objs1 = new DBObjectCollection();
                                     (obj as BlockReference).Explode(objs1);
                                     ;
-                                    foreach(var obj1 in objs1)
+                                    foreach (var obj1 in objs1)
                                     {
-                                        if(obj1 is DBText)
+                                        if (obj1 is DBText)
                                         {
                                             ;
-                                            if((obj1 as DBText)?.TextString.Contains("DN") == true)
+                                            if ((obj1 as DBText)?.TextString.Contains("DN") == true)
                                             {
                                                 ;
                                             }
@@ -672,21 +1058,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         var objs = new DBObjectCollection();
                         (db as Entity).Explode(objs);
                         ;
-                        foreach(var obj in objs)
+                        foreach (var obj in objs)
                         {
-                            if(obj is DBText)
+                            if (obj is DBText)
                             {
                                 DBObjsResult.Add((DBObject)obj);
                             }
                         }
                     }
-                    
+
                 }
                 return DBObjsResult;
             }
         }
 
-        
+
         private bool IsPipeDNLayer(string layer)
         {
             return (layer.ToUpper().Equals("W-FRPT-NOTE") ||
@@ -702,7 +1088,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var nums = 0;
 
-                if(leadLineDic[lead].Count < segLineDic[lead].Count)
+                if (leadLineDic[lead].Count < segLineDic[lead].Count)
                 {
                     nums = leadLineDic[lead].Count;
                 }
@@ -711,7 +1097,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     nums = segLineDic[lead].Count;
                 }
 
-                for(int i = 0;  i < nums; i++)
+                for (int i = 0; i < nums; i++)
                 {
                     var slashPt = leadLineDic[lead][i];//对于每个斜边
                     var line = segLineDic[lead][i];//提取每个短线
@@ -719,12 +1105,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(DBObjsResult.ToDBObjectList().ToCollection());
                     var dbObj = spatialIndex.SelectCrossingPolygon(rectArea);
-                    if(dbObj.Count == 0)
+                    if (dbObj.Count == 0)
                     {
                         continue;//跳过空边
                     }
-                    
-                    if((dbObj[0] as DBText).TextString.Contains("DN"))
+
+                    if ((dbObj[0] as DBText).TextString.Contains("DN"))
                     {
                         slashDic.Add(new Point3dEx(slashPt), (dbObj[0] as DBText).TextString);
                         continue;
@@ -762,23 +1148,23 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
-                foreach(var db in DBObjs)
+                foreach (var db in DBObjs)
                 {
-                    if(db is DBText)
+                    if (db is DBText)
                     {
                         continue;
                     }
-                    if(db is Line)//线段直接添加
+                    if (db is Line)//线段直接添加
                     {
                         DBObjResults.Add((DBObject)db);
                     }
-                    else if(db is Polyline)//多段线打断添加
+                    else if (db is Polyline)//多段线打断添加
                     {
                         var pline = db as Polyline;
                         for (int i = 0; i < pline.NumberOfVertices - 1; i++)
                         {
                             var pt1 = pline.GetPoint3dAt(i);
-                            var pt2 = pline.GetPoint3dAt(i+1);
+                            var pt2 = pline.GetPoint3dAt(i + 1);
                             DBObjResults.Add((DBObject)new Line(pt1, pt2));
                         }
                     }
@@ -788,7 +1174,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         (db as Entity).Explode(br);
                         foreach (var l in br)
                         {
-                            if(l is Line)
+                            if (l is Line)
                             {
                                 DBObjResults.Add((DBObject)l);
                             }
@@ -808,14 +1194,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public List<Point3d> ExtractSlash()
         {
             var SlashPts = new List<Point3d>();
-            foreach(var db in DBObjResults)
+            foreach (var db in DBObjResults)
             {
                 var line = db as Line;
-                if(PointAngle.IsSplashLine(line))
+                if (PointAngle.IsSplashLine(line))
                 {
                     var pt1 = line.StartPoint;
                     var pt2 = line.EndPoint;
-                    var pt = new Point3d((pt1.X + pt2.X)/2,(pt1.Y + pt2.Y)/2,0);//中点作为斜线代表点
+                    var pt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);//中点作为斜线代表点
                     SlashPts.Add(pt);
                 }
             }
@@ -832,15 +1218,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var ptList = new List<Point3d>();
                 if (!PointAngle.IsSplashLine(line))//不是斜线才可能是引线
                 {
-                    foreach(var pt in SlashPts)//遍历斜线点
+                    foreach (var pt in SlashPts)//遍历斜线点
                     {
-                        if(PtOnLine.PtIsOnLine(pt ,line))//斜线在引线上
+                        if (PtOnLine.PtIsOnLine(pt, line))//斜线在引线上
                         {
                             ptList.Add(pt);//添加
                         }
                     }
                 }
-                
+
                 if (ptList.Count != 0)//引线存在斜线
                 {
                     //对斜线点进行排序，按照从左到右或者从上到下
@@ -850,19 +1236,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             return leadLineDic;
         }
-       
+
         public Dictionary<Line, List<Line>> ExtractSegLine(Dictionary<Line, List<Point3d>> leadLineDic)
         {
             var segLineDic = new Dictionary<Line, List<Line>>();
             foreach (var lead in leadLineDic.Keys)
             {
                 var lineList = new List<Line>();
-                foreach(var db in DBObjResults)
+                foreach (var db in DBObjResults)
                 {
                     var line = db as Line;
-                    if(!PointAngle.IsSplashLine(line) && !leadLineDic.Keys.Contains(line))
+                    if (!PointAngle.IsSplashLine(line) && !leadLineDic.Keys.Contains(line))
                     {
-                        if(PtOnLine.PtIsOnLine(line.StartPoint, lead) || PtOnLine.PtIsOnLine(line.EndPoint, lead))
+                        if (PtOnLine.PtIsOnLine(line.StartPoint, lead) || PtOnLine.PtIsOnLine(line.EndPoint, lead))
                         {
                             lineList.Add(line);
                         }
@@ -873,10 +1259,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             return segLineDic;
         }
-        
 
-       
+
+
     }
 
 
 }
+

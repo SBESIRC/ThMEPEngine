@@ -19,7 +19,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
             List<KeyValuePair<Polyline, (Point3d, Vector3d)>> layoutPts = new List<KeyValuePair<Polyline, (Point3d, Vector3d)>>();
             foreach (var sRoom in stairRooms)
             {
-                var thSRoom = sRoom.Boundary as Polyline;
+                var thSRoom = getLayoutStructureService.GetUseRoomBoundary(sRoom);
                 var bufferSRoom = thSRoom.Buffer(5)[0] as Polyline;
                 var stairDoors = getLayoutStructureService.GetNeedDoors(doors, bufferSRoom);
 

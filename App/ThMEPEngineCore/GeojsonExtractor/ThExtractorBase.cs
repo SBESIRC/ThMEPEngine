@@ -1,12 +1,12 @@
-﻿using ThMEPEngineCore.Model;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
-using ThCADCore.NTS;
-using NFox.Cad;
-using System.Linq;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// <summary>
         /// 分组开关，用于控制是否分组
         /// </summary>
-        public bool GroupSwitch { get; set; }
+        public bool GroupSwitch { get; set; }   
         /// <summary>
         /// 表示在BuildGeometry时只输出孤立的元素
         /// </summary>
@@ -46,6 +46,8 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// </summary>
         protected double LoopBufferLength = 10.0;
 
+        protected double TesslateLength = 10.0;
+        protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         public ThExtractorBase()
         {
             Category = "";
@@ -55,6 +57,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             UseDb3Engine = true;
             ColorIndex = 256;
             FilterMode = FilterMode.Cross;
+            GroupOwner = new Dictionary<Entity, List<string>>();
         }
         public abstract void Extract(Database database, Point3dCollection pts);
         public abstract List<ThGeometry> BuildGeometries();
@@ -69,6 +72,21 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var enlarge = bufferService.Buffer(loop, LoopBufferLength) as Polyline;
             var spatialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
             return spatialIndex.SelectWindowPolygon(enlarge).Cast<Entity>().ToList();
+        }
+        protected string BuildString(Dictionary<Entity, List<string>> owners, Entity curve, string linkChar = ";")
+        {
+            if (owners.ContainsKey(curve))
+            {
+                return string.Join(linkChar, owners[curve]);
+            }
+            return "";
+        }
+        protected List<string> FindCurveGroupIds(Dictionary<Entity, string> groupId, Entity curve)
+        {
+            var ids = new List<string>();
+            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
+            groups.ForEach(g => ids.Add(groupId[g]));
+            return ids;
         }
     }
     public enum SwitchStatus

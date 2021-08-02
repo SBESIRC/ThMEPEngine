@@ -29,9 +29,18 @@ namespace ThMEPEngineCore.Service
                 return null;
             }
         }
+        //TODO: BuffePoly并没有对看上去封闭但实际上没有封闭的作处理。
         private Polyline BufferPoly(Polyline polyline, double length)
         {
-            var objs = polyline.Buffer(length);
+            var objs = new DBObjectCollection();
+            if (polyline.Closed)
+            {
+                objs = polyline.Buffer(length);
+            }
+            else
+            {
+                objs = polyline.BufferPL(length);
+            }
             if (objs.Count > 0)
             {
                 return objs.Cast<Polyline>().OrderByDescending(o=>o.Area).First();
@@ -41,6 +50,7 @@ namespace ThMEPEngineCore.Service
                 return null;
             }
         }
+
         private MPolygon BufferPolygon(MPolygon mPolygon, double length)
         {
             var polygon = mPolygon.ToNTSPolygon();

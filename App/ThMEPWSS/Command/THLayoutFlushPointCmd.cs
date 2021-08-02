@@ -86,6 +86,7 @@ namespace ThMEPWSS.Command
                 // 过滤哪些点位靠近排水设施，哪些远离排水设施
                 var filterService = new ThFilterWashPointsService()
                 {
+                    Rooms = roomExtractor.Rooms.Select(o=>o.Boundary).ToList(),
                     DrainFacilityExtractor = extractors[4] as ThDrainFacilityExtractor,
                 };
                 filterService.Filter(washPoints);

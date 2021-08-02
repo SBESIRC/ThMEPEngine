@@ -50,11 +50,13 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public List<ThAlarmControlWireCircuitModel> WireCircuits { get; set; }
 
+        public List<BlockReference> NotInAlarmControlWireCircuitData { get; set; }
+
         /// <summary>
         /// 初始化楼层（无防火分区）
         /// </summary>
         /// <param name="FireDistrictBlockReference">楼层块</param>
-        public void InitFireDistrict(int floorNumber, BlockReference FireDistrictBlockReference)
+        public void InitFireDistrict(string floorNumber, BlockReference FireDistrictBlockReference)
         {
             this.FireDistrictNo = 1;
             this.FireDistrictBoundary = new Polyline() { Closed = true };
@@ -66,14 +68,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 初始化楼层(防火分区)
         /// </summary>
         /// <param name="FireDistrict"></param>
-        internal void InitFireDistrict(int floorNumber, ThFireCompartment FireDistrict)
+        internal void InitFireDistrict(string floorNumber, ThFireCompartment FireDistrict)
         {
             this.FireDistrictBoundary = FireDistrict.Boundary;
-            //using (Linq2Acad.AcadDatabase acad= Linq2Acad.AcadDatabase.Active())
-            //{
-            //    FireDistrictBoundary.ColorIndex = 2;
-            //    acad.ModelSpace.Add(FireDistrictBoundary);
-            //}
             this.WireCircuits = new List<ThAlarmControlWireCircuitModel>();
             if (string.IsNullOrWhiteSpace(FireDistrict.Number))
             {
@@ -89,16 +86,39 @@ namespace ThMEPElectrical.SystemDiagram.Model
             }
             else
             {
+                this.FireDistrictName = FireDistrict.Number;
                 string[] FireDistrictInfo = FireDistrict.Number.Split('-');
-                if (FireDistrictInfo[0].Replace('B', '-').Contains(floorNumber.ToString()))//防火分区和楼层一致才能说明该防火分区属于本楼层
-                    this.FireDistrictNo = int.Parse(FireDistrictInfo[1]);
+                if (FireDistrictInfo.Length == 2)
+                {
+                    if (FireDistrictInfo[0] == floorNumber || (FireDistrictInfo[0].Contains('F') && floorNumber.Contains('F') && FireDistrictInfo[0].Replace("F", "") == floorNumber.Replace("F", "")))//防火分区和楼层一致才能说明该防火分区属于本楼层
+                    {
+                        if(int.TryParse(FireDistrictInfo[1], out int fireDistrictNo))
+                        {
+                            this.FireDistrictNo = fireDistrictNo;//系统生成的防火分区/按照系统命名规则命名的规则，可以正确识别编号
+                        }
+                        else
+                        {
+                            this.FireDistrictNo = 0;//该防火分区不是本系统命名的，属于工程师手动命名，打个标记
+                        }
+                    }
+                    else
+                    {
+                        if (FireDistrictInfo[0] == "*")
+                            this.FireDistrictNo = -2;//是本系统手动生成的防火分区，需提示用户
+                        else if (FireDistrictInfo[0].Replace("F", "").Replace("B", "").IsInt())
+                        {
+                            this.FireDistrictNo = -1;//该防火分区不属于本楼层，打个标记
+                        }
+                        else
+                        {
+                            this.FireDistrictNo = 0;//该防火分区不是本系统命名的，属于工程师手动命名，打个标记
+                        }
+                    }
+                }
                 else
                 {
-                    this.FireDistrictNo = -1;//该防火分区不属于本楼层，打个标记
-                    if (FireDistrictInfo[0] == "*")
-                        this.FireDistrictNo = -2;//是本系统手动生成的防火分区，需提示用户
+                    this.FireDistrictNo = 0;//该防火分区不是本系统命名的，属于工程师手动命名，打个标记
                 }
-                this.FireDistrictName = FireDistrict.Number;
             }
         }
     }

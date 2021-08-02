@@ -87,6 +87,17 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
             return false;
         }
+        public static bool LineIntersctBySelect(List<Entity> polylines, Polyline line)
+        {
+            foreach(var room in polylines)
+            {
+                if(room.IsIntersects(line))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         /// <summary>
         /// 判断是否和外框线相交
         /// </summary>

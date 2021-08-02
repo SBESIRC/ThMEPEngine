@@ -43,7 +43,7 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {

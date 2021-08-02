@@ -30,12 +30,13 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                ThBConvertDbUtils.UpdateLayerSettings(layer);
                 var block = acadDatabase.Element<Entity>(blkRef, true);
-                block.LayerId = ThBConvertDbUtils.BlockLayer(ThBConvertCommon.LAYER_BLOCK_WEAKCURRENT, 3);
+                block.Layer = layer;
             }
         }
 
@@ -44,91 +45,151 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            var tolerance = 800;
-            if (srcBlockData.EffectiveName.Contains("防火阀"))
+            if (srcBlockData.EffectiveName.Contains("自动扫描射水高空水炮") ||
+                srcBlockData.EffectiveName.Contains("消防炮") ||
+                srcBlockData.EffectiveName.Contains("大空间灭火装置") ||
+                srcBlockData.EffectiveName.Contains("自动扫描射水喷头"))
             {
-                TransformByCenter_FireDamper(blkRef, srcBlockData);
-            }
-            else if (srcBlockData.EffectiveName.Contains("自动扫描射水高空水炮") ||
-                     srcBlockData.EffectiveName.Contains("消防炮") ||
-                     srcBlockData.EffectiveName.Contains("大空间灭火装置") ||
-                     srcBlockData.EffectiveName.Contains("自动扫描射水喷头"))
-            {
-                TransformByCenter(blkRef, srcBlockData, tolerance);
+                TransformByPosition(blkRef, srcBlockData);
             }
             else
             {
-                tolerance = 100;
-                TransformByCenter(blkRef, srcBlockData, tolerance);
+                TransformByCenter(blkRef, srcBlockData);
             }
         }
 
-        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData, int tolerance)
+        /// <summary>
+        /// 按几何中心调整位置
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockData"></param>
+        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 考虑几何中心点与位置点的偏差，如果偏差在允许范围内，则取位置点进行计算
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < tolerance
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                var srcBlockDataPosition = new Point3d().TransformBy(srcBlockData.MCS2WCS);
-                var srcBlockDataPoint = srcBlockData.GetCentroidPoint().DistanceTo(srcBlockDataPosition) < tolerance
-                    ? srcBlockDataPosition : srcBlockData.GetCentroidPoint();
-                var offset = targetPoint.GetVectorTo(srcBlockDataPoint);
+                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
+                var scrCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
-        private void TransformByCenter_FireDamper(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        /// <summary>
+        /// 按位置点调整位置
+        /// </summary>
+        /// <param name="blkRef"></param>
+        /// <param name="srcBlockData"></param>
+        private void TransformByPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            // 考虑防火阀的几何中心
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
-                var dynamicProperties = srcBlockData.CustomProperties;
-                double length = 0, width = 0;
-                if (srcBlockData.CustomProperties.Contains("长度"))
-                {
-                    length = (double)dynamicProperties.GetValue("长度");
-                }
-                if (srcBlockData.CustomProperties.Contains("宽度或直径"))
-                {
-                    width = (double)dynamicProperties.GetValue("宽度或直径");
-                }
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                var srcBlockDataPosition = new Point3d(width / 2, -length / 2, 0).TransformBy(srcBlockData.MCS2WCS);
-                var offset = targetPoint.GetVectorTo(srcBlockDataPosition);
+                var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
+                var targetBlockDataPosition = Point3d.Origin.TransformBy(targetMCS2WCS);
+                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
+                var targetPoint = targetCentriodPoint.DistanceTo(targetBlockDataPosition) < 2000
+                    ? targetBlockDataPosition : targetCentriodPoint;
+                var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
+                var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
+                var srcCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var srcPoint = srcCentriodPoint.DistanceTo(srcBlockDataPosition) < 2000
+                    ? srcBlockDataPosition : srcCentriodPoint;
+                var offset = targetPoint.GetVectorTo(srcPoint);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
-        public override void Adjust(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void Rotate(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
-            AdjustRotation(blkRef, srcBlockReference);
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var position = srcBlockData.Position;
+                double rotation = srcBlockData.Rotation;
+                if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
+                {
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                }
+                else
+                {
+                    if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                    {
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
+                    }
+                    else
+                    {
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                    }
+                }
+            }
         }
 
-        private void AdjustRotation(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void Mirror(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
-                double rotation = srcBlockReference.Rotation;
-                var targetPoint = targetBlockData.GetCentroidPoint().DistanceTo(targetBlockData.Position) < 100
-                    ? targetBlockData.Position : targetBlockData.GetCentroidPoint();
-                if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                var targetScale = targetBlockData.ScaleFactors;
+                var srcScale = srcBlockData.ScaleFactors;
+                var scale = new Scale3d(targetScale.X * srcScale.X, targetScale.Y * srcScale.Y, targetScale.Z * srcScale.Z);
+                var mirror = Matrix3d.Identity;
+                if (scale.X < 0)
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, targetPoint));
+                    if (scale.Y < 0)
+                    {
+                        if (scale.Z < 0)  //x<0,y<0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(Point3d.Origin);
+                        }
+                        else  //x<0,y<0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 0, 1)));
+                        }
+                    }
+                    else
+                    {
+                        if (scale.Z < 0)  //x<0,y>0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(0, 1, 0)));
+                        }
+                        else  //x<0,y>0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(0, 1, 0), new Vector3d(0, 0, 1)));
+                        }
+                    }
                 }
                 else
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, targetPoint));
+                    if (scale.Y < 0)
+                    {
+                        if (scale.Z < 0)  //x>0,y<0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Line3d(Point3d.Origin, new Point3d(1, 0, 0)));
+                        }
+                        else  //x>0,y<0,z>0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(1, 0, 0), new Vector3d(0, 0, 1)));
+                        }
+                    }
+                    else
+                    {
+                        if (scale.Z < 0)  //x>0,y>0,z<0
+                        {
+                            mirror = Matrix3d.Mirroring(new Plane(Point3d.Origin, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0)));
+                        }
+                        else  //x>0,y>0,z>0
+                        {
+                            //
+                        }
+                    }
                 }
+                blockReference.TransformBy(mirror);
             }
         }
     }

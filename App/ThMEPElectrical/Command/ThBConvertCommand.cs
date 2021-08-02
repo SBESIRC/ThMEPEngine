@@ -9,12 +9,14 @@ using ThCADExtension;
 using AcHelper.Commands;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
+using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Command
 {
@@ -117,7 +119,7 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    var prefix = Category == ConvertCategory.WSS ? "W" : "H";
+                    XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
                         ConvertMode mode = Mode & rule.Mode;
@@ -125,9 +127,27 @@ namespace ThMEPElectrical.Command
                         var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
                         srcBlocks.Select(o => o.Data as ThBlockReferenceData)
-                            //.Where(o => o.Database.Filename.StartsWith(prefix))
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
-                            .ForEach(o =>
+                            .Where(o =>
+                            {
+                                string name = "";
+                                ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
+                                Regex r = new Regex(@"([a-zA-Z])");
+                                Match m = r.Match(name);
+                                if (!m.Success)
+                                {
+                                    return false;
+                                }
+                                switch (Category)
+                                {
+                                    case ConvertCategory.WSS:
+                                        return m.Groups[1].Value.ToUpper() == "W";
+                                    case ConvertCategory.HVAC:
+                                        return m.Groups[1].Value.ToUpper() == "H";
+                                    default:
+                                        return true;
+                                }
+                            }).ForEach(o =>
                             {
                                 // 获取转换后的块信息
                                 ThBlockConvertBlock transformedBlock = null;
@@ -168,18 +188,31 @@ namespace ThMEPElectrical.Command
                                 {
                                     // 导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                                    var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                                    var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                                    currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+
+                                    // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
+                                    // 修正插入动态块的图层顺序
+                                    if (targetBlockName == "电动机及负载标注")
+                                    {
+                                        var wipeOut = new ThBConvertWipeOut();
+                                        wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
+                                    }  
 
                                     // 插入新的块引用
                                     var scale = new Scale3d(Scale);
                                     var engine = CreateConvertEngine(mode);
                                     var objId = engine.Insert(targetBlockName, scale, o);
 
-                                    // 将新插入的块引用调整到源块引用所在的位置
-                                    engine.TransformBy(objId, o);
+                                    // 设置新插入的块引用的镜像变化
+                                    engine.Mirror(objId, o);
 
-                                    // 微调
-                                    engine.Adjust(objId, o);
+                                    // 设置新插入的块引用的角度
+                                    engine.Rotate(objId, o);
+
+                                    // 设置新插入的块引用位置
+                                    engine.Displacement(objId, o);
 
                                     // 设置动态块可见性
                                     engine.SetVisibilityState(objId, o);
@@ -192,21 +225,24 @@ namespace ThMEPElectrical.Command
                                     var refIds = new ObjectIdCollection();
                                     if (rule.Explodable())
                                     {
-                                        var blkref = currentDb.Element<BlockReference>(objId, true);
+                                        ExplodeWithErase(objId, refIds);
 
-                                        // 
-                                        void handler(object s, ObjectEventArgs e)
+                                        // 如果是“单台潜水泵”，继续炸一次
+                                        var objIds = new ObjectIdCollection();
+                                        foreach(ObjectId item in refIds)
                                         {
-                                            if (e.DBObject is BlockReference reference)
+                                            if (item.GetBlockName() == "单台潜水泵")
                                             {
-                                                refIds.Add(e.DBObject.ObjectId);
+                                                ExplodeWithErase(item, objIds);
+                                            }
+                                            else
+                                            {
+                                                objIds.Add(item);
                                             }
                                         }
-                                        currentDb.Database.ObjectAppended += handler;
-                                        blkref.ExplodeToOwnerSpace();
-                                        currentDb.Database.ObjectAppended -= handler;
 
-                                        blkref.Erase();
+                                        // 获取最终结果
+                                        refIds = objIds;
                                     }
                                     else
                                     {
@@ -216,12 +252,31 @@ namespace ThMEPElectrical.Command
                                     // 设置块引用的数据库属性
                                     refIds.Cast<ObjectId>().ForEach(b =>
                                     {
-                                        engine.SetDatbaseProperties(b, o);
+                                        engine.SetDatbaseProperties(b, o, targetBlockLayer);
                                     });
                                 }
                             });
                     }
                 }
+            }
+        }
+
+        private void ExplodeWithErase(ObjectId objId, ObjectIdCollection results)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var blkref = currentDb.Element<BlockReference>(objId, true);
+
+                // Explode
+                var objs = new DBObjectCollection();
+                blkref.ExplodeWithVisible(objs);
+                foreach (Entity item in objs)
+                {
+                    results.Add(currentDb.ModelSpace.Add(item));
+                }
+
+                // Erase
+                blkref.Erase();
             }
         }
 

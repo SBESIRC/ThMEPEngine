@@ -30,9 +30,19 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public bool IsMultiFloor { get; set; } = false;
 
         /// <summary>
+        /// 多楼层包含层数
+        /// </summary>
+        public List<string> MulitFloors { get; set; }
+
+        /// <summary>
         /// 多楼层名称
         /// </summary>
-        public List<int> MulitFloorName { get; set; }
+        public string MulitFloorName { get; set; }
+        
+        /// <summary>
+        /// 多楼层名称
+        /// </summary>
+        public string MulitStoreyNumber { get; set; }
 
         /// <summary>
         /// 防火分区信息
@@ -63,7 +73,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 FindFireCompartments.ForEach(o =>
                 {
                     ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
-                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    NewFireDistrict.InitFireDistrict(this.FloorName, o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }
@@ -73,7 +83,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     FireDistrictName = this.FloorName
                 };
-                NewFireDistrict.InitFireDistrict(this.FloorNumber, FloofBlockReference);
+                NewFireDistrict.InitFireDistrict(this.FloorName, FloofBlockReference);
                 this.FireDistricts.Add(NewFireDistrict);
             }
         }
@@ -92,7 +102,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 FindFireCompartments.ForEach(o =>
                 {
                     ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
-                    NewFireDistrict.InitFireDistrict(this.FloorNumber, o);
+                    NewFireDistrict.InitFireDistrict(this.FloorName, o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }

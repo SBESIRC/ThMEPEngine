@@ -9,7 +9,6 @@ using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Model
@@ -131,26 +130,26 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
-        public static void DrawDN_1(Point2d pt,string layer, string text = "DN100")
+        public static void DrawDN_1(Point2d pt, string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(-50, 320).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStyles(layer,t);
+            Dr.SetLabelStyles(layer, t);
         }
         public static void DrawDN_2(Point2d pt, string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(-300, 200).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStyles(layer,t);
+            Dr.SetLabelStyles(layer, t);
         }
         public static void DrawDN_3(Point2d pt, string layer, string text = "DN100")
         {
             var basePt = pt.OffsetXY(450, 200).ToPoint3d();
             var t = DU.DrawTextLazy(text, 350, basePt);
             t.Rotate(basePt, 90.0.AngleFromDegree());
-            Dr.SetLabelStyles(layer,t);
+            Dr.SetLabelStyles(layer, t);
         }
         public static void DrawStarterPipeHeightLabel(Point3d basePt)
         {
@@ -172,9 +171,9 @@ namespace ThMEPWSS.Pipe.Model
             DrawLabel(basePt, text);
         }
 
-        public static void DrawLabel(Point3d basePt, string text)
+        public static void DrawLabel(Point3d basePt, string text,double textHeight=350)
         {
-            var height = 350;
+            var height = textHeight;
             var width = height * .8 * text.Length;
             var yd = new YesDraw();
             yd.OffsetXY(0, -700);
@@ -184,6 +183,25 @@ namespace ThMEPWSS.Pipe.Model
             Dr.SetLabelStylesForRainNote(lines.ToArray());
             var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(50, 50));
             Dr.SetLabelStylesForRainNote(t);
+        }
+        public static void DrawSimpleLabel(Point2d _basePt, string text)
+        {
+            var basePt = _basePt.ToPoint3d();
+            var height = 350;
+            var gap = 50;
+            var factor = .7;
+            var width = height * factor * factor * (text?.Length ?? 0);
+            if (width < 1400) width = 1400;
+            var vecs = new List<Vector2d> { new Vector2d(-400, 400), new Vector2d(-width, 0) };
+            var segs = vecs.ToGLineSegments(basePt).ToList();
+            foreach (var seg in segs)
+            {
+                var line = DU.DrawLineSegmentLazy(seg);
+            }
+            var txtBasePt = segs[1].EndPoint ;
+            txtBasePt = txtBasePt.OffsetY(gap);
+            var t = DU.DrawTextLazy(text, height, txtBasePt);
+            t.WidthFactor = factor;
         }
 
         public static void DrawUnderBoardLabelAtLeftTop(Point3d basePt)
@@ -218,56 +236,15 @@ namespace ThMEPWSS.Pipe.Model
             var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
             Dr.SetLabelStylesForRainNote(t);
         }
-        public static void DrawWrappingPipe(Point3d basePt)
-        {
-            DU.DrawingQueue.Enqueue(adb =>
-            {
-                var fbk = DrawingTransaction.Current.fbk;
-                if (fbk == null)
-                {
-                    DU.DrawBlockReference(blkName: "套管系统", basePt: basePt.OffsetXY(-450, 0), cb: br =>
-                    {
-                        DU.SetLayerAndByLayer("W-BUSH",  br);
-                        if (br.IsDynamicBlock)
-                        {
-                            br.ObjectId.SetDynBlockValue("可见性", "防水套管水平");
-                        }
-                    });
-                }
-                else
-                {
-                    var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
-                    fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
-                    {
-                        DU.SetLayerAndByLayer("W-BUSH",  br);
-
-                    }, after: br =>
-                    {
-                        if (br.IsDynamicBlock)
-                            foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
-                            {
-                                if (!prop.ReadOnly)
-                                {
-                                    if (d.TryGetValue(prop.PropertyName, out object value))
-                                    {
-                                        prop.Value = value;
-                                    }
-                                }
-                            }
-                    });
-                }
-            });
-        }
         public static void DrawFloorDrain(Point3d basePt)
         {
             DU.DrawingQueue.Enqueue(adb =>
             {
-                var fbk = DrawingTransaction.Current.fbk;
-                if (fbk == null)
+             
                 {
                     DU.DrawBlockReference(blkName: "地漏系统", basePt: basePt.OffsetY(-390), scale: 2, cb: br =>
                     {
-                        DU.SetLayerAndByLayer(ThWPipeCommon.W_RAIN_EQPM,  br);
+                        DU.SetLayerAndByLayer(ThWPipeCommon.W_RAIN_EQPM, br);
                         if (br.IsDynamicBlock)
                         {
                             br.ObjectId.SetDynBlockValue("可见性", "普通地漏无存水弯");
@@ -275,26 +252,6 @@ namespace ThMEPWSS.Pipe.Model
                     });
                     return;
                 }
-                var d = new Dictionary<string, object>() { { "可见性", "普通地漏无存水弯" }, };
-                fbk.InsertBlockReference(basePt.OffsetY(-390), "地漏系统", before: br =>
-                {
-                    br.ScaleFactors = new Scale3d(2);
-                    DU.SetLayerAndByLayer(ThWPipeCommon.W_RAIN_EQPM,  br);
-
-                }, after: br =>
-                {
-                    if (br.IsDynamicBlock)
-                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>().ToList())
-                        {
-                            if (!prop.ReadOnly)
-                            {
-                                if (d.TryGetValue(prop.PropertyName, out object value))
-                                {
-                                    prop.Value = value;
-                                }
-                            }
-                        }
-                });
             });
         }
         public static void DrawCondensePipe(Point2d basePt)
@@ -304,44 +261,16 @@ namespace ThMEPWSS.Pipe.Model
         public static void DrawCondensePipe(Point3d basePt)
         {
             var c = DU.DrawCircleLazy(basePt, 30);
-            DU.SetLayerAndByLayer("W-RAIN-EQPM",  c);
+            DU.SetLayerAndByLayer("W-RAIN-EQPM", c);
         }
 
-        public static void InsetDNBlock(Point3d pt, string dn, double angle, double scale = 1)
-        {
-            DU.DrawingQueue.Enqueue(adb =>
-            {
-                var fbk = DrawingTransaction.Current.fbk;
-                if (fbk == null) return;
-                var d = new Dictionary<string, object>() { { "可见性", dn }, { "角度1", angle } };
-                fbk.InsertBlockReference(pt, "雨水管径100", before: br =>
-                {
-                    br.ScaleFactors = new Scale3d(scale);
-                    br.Layer = "W-NOTE";
-                }, after: br =>
-                {
-                    if (br.IsDynamicBlock)
-                    {
-                        foreach (var prop in br.DynamicBlockReferencePropertyCollection.OfType<DynamicBlockReferenceProperty>())
-                        {
-                            if (!prop.ReadOnly)
-                            {
-                                if (d.TryGetValue(prop.PropertyName, out object value))
-                                {
-                                    prop.Value = value;
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-        }
+      
         public static void DrawRainPort(Point3d basePt)
         {
             DU.DrawBlockReference(
                 blkName: "$TwtSys$00000132",
                 basePt: basePt.OffsetXY(-450, 0),
-                cb: br => DU.SetLayerAndByLayer("W-DRAI-NOTE",  br));
+                cb: br => DU.SetLayerAndByLayer("W-DRAI-NOTE", br));
         }
 
         public static void DrawWaterWell(Point3d basePt, string DN)
@@ -397,7 +326,7 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-        public static void SetLabelStyles(string layer,params Entity[] ents)
+        public static void SetLabelStyles(string layer, params Entity[] ents)
         {
             foreach (var e in ents)
             {
@@ -674,19 +603,9 @@ namespace ThMEPWSS.Pipe.Model
         {
             drawLazy(ctx);
         }
-        public static bool showXLabel;
         private void drawLazy(PipeRunDrawingContext ctx)
         {
             if (Storey == null) return;
-            if (showXLabel)
-            {
-                DU.DrawingQueue.Enqueue(adb =>
-                {
-                    var basePt = ctx.BasePoint;
-                    Dbg.ShowXLabel(basePt);
-                });
-            }
-
             DrawTranslatorLazy(ctx);
             DrawCheckPointLazy(ctx);
             DrawCondensePipesLazy(ctx);
@@ -747,7 +666,7 @@ namespace ThMEPWSS.Pipe.Model
                     Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
-                        Dr.DrawWrappingPipe(basePt.OffsetY(-550));
+                     
                     }
                 }
                 if (fds.Count == 2)
@@ -764,7 +683,7 @@ namespace ThMEPWSS.Pipe.Model
                     Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
-                        Dr.DrawWrappingPipe(basePt.OffsetXY(900, -550));
+                      
                     }
                 }
                 if (Dr.GetHasAirConditionerFloorDrain() && ctx.ThWRainPipeRun.MainRainPipe.Label.StartsWith("Y2L") && ctx.ThWRainPipeRun.CondensePipes.Count == 2)
@@ -808,7 +727,7 @@ namespace ThMEPWSS.Pipe.Model
                 ThWRainPipeSystem.SetPipeRunLineStyle(line);
                 if (fd.HasDrivePipe)
                 {
-                    Dr.DrawWrappingPipe(pt);
+                  
                 }
             }
         }

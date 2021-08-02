@@ -26,40 +26,41 @@ namespace ThMEPWSS.Command
         {
             try
             {
-                CreateFireHydrantSystem();
+                using (var docLock = Active.Document.LockDocument())
+                using (AcadDatabase currentDb = AcadDatabase.Active())
+                {
+                    CreateFireHydrantSystem(currentDb);
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public void CreateFireHydrantSystem()
+        public void CreateFireHydrantSystem(AcadDatabase curDb)
         {
-            var opt = new PromptPointOptions("请指定环管标记起点");
+            var opt = new PromptPointOptions("请指定环管标记起点: \n");
             var loopStartPt = Active.Editor.GetPoint(opt).Value;
-
-            var tuplePoint = Common.Utils.SelectPoints();//范围框定
-            var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
-
+            var selectArea = Common.Utils.SelectAreas();//生成候选区域
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
 
-            GetInput.GetFireHydrantSysInput(ref fireHydrantSysIn, selectArea);//提取输入参数
+            GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea);//提取输入参数
             
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
             var extraNodes = new List<Point3dEx>();//主环路连通阀点集
             var visited = new HashSet<Point3dEx>();//访问标志
-            var subPtList = new List<Point3dEx>();//按照主环遍历顺序存放次环节点
+            //var subPtList = new List<Point3dEx>();//按照主环遍历顺序存放次环节点
             foreach (var markLine in fireHydrantSysIn.markLineList)
             {
                 var startPt = new Point3dEx(new Point3d());
                 var targetPt = new Point3dEx(new Point3d());
-                if (PtOnLine.PtIsOnLine(loopStartPt, markLine[0]))
+                if (PtOnLine.PtIsOnLine(loopStartPt, markLine[0], 100))
                 {
                     startPt = PtSet.SetStartEndPt(fireHydrantSysIn, markLine).First();
                     targetPt = PtSet.SetStartEndPt(fireHydrantSysIn, markLine).Last();
                 }
-                if(PtOnLine.PtIsOnLine(loopStartPt, markLine[1]))
+                if(PtOnLine.PtIsOnLine(loopStartPt, markLine[1], 100))
                 {
                     startPt = PtSet.SetStartEndPt(fireHydrantSysIn, markLine).Last();
                     targetPt = PtSet.SetStartEndPt(fireHydrantSysIn, markLine).First();
@@ -74,7 +75,6 @@ namespace ThMEPWSS.Command
 
                 //主环路深度搜索
                 DepthFirstSearch.dfsMainLoop(startPt, tempPath, visited, ref mainPathList, targetPt, fireHydrantSysIn, ref extraNodes);
-                //ThPointCountService.SetPointType(ref fireHydrantSysIn, ref subPtList, mainPathList);
                 ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
             }
             
@@ -84,7 +84,6 @@ namespace ThMEPWSS.Command
             }
 
             var subPathList = new List<List<Point3dEx>>();//次环路最终路径 List
-            
             foreach (var nd in fireHydrantSysIn.nodeList)
             {
                 if (!fireHydrantSysIn.ptDic.ContainsKey(nd[0]))
@@ -107,19 +106,37 @@ namespace ThMEPWSS.Command
             }
 
             ThPointCountService.SetPointType(ref fireHydrantSysIn, subPathList);
+            visited.Clear();
             PtSet.AddVisit(ref visited, mainPathList);
             PtSet.AddVisit(ref visited, subPathList);
-
-            var branchDic = new Dictionary<Point3dEx, List<List<Point3dEx>>>();//支点 + 支点的支路列表
-            PtDic.CreateBranchDic(ref branchDic, mainPathList, fireHydrantSysIn, visited, extraNodes);
-            PtDic.CreateBranchDic(ref branchDic, subPathList, fireHydrantSysIn, visited, extraNodes);
-
+            //using (AcadDatabase currentDb = AcadDatabase.Active())
+            //{
+            //    DrawPipe(currentDb, mainPathList);
+            //    DrawPipe(currentDb, subPathList);
+            //}
             
-            GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList, fireHydrantSysIn);//主环路获取
-            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn);//次环路获取
-            GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, fireHydrantSysIn);//支路获取
+            var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
+            var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
+            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited, extraNodes);
+            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited, extraNodes);
 
-            fireHydrantSysOut.Draw();//绘制系统图   
+            GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList, fireHydrantSysIn, branchDic);//主环路获取
+            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取
+            GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
+            fireHydrantSysOut.Draw();//绘制系统图
+        }
+
+        public static void DrawPipe(AcadDatabase acadDatabase, List<List<Point3dEx>> pathList)
+        {
+            foreach (var path in pathList)
+            {
+                for (int i = 0; i < path.Count - 1; i++)
+                {
+                    var line = new Line(path[i]._pt, path[i + 1]._pt);
+                    line.LayerId = DbHelper.GetLayerId("X-SHET-LOGK");
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+            }
         }
     }
 }

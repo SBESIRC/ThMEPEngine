@@ -17,15 +17,12 @@ namespace ThMEPEngineCore.Temp
         public List<System.Type> Types { get; set; }
         public bool UseDb3Engine { get; set; }
         public bool GroupSwitch { get; set; }
-        public bool Group2Switch { get; set; }
         public bool IsolateSwitch { get; set; }
         public double TesslateLength { get; set; }
 
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
-        protected Dictionary<Entity, List<string>> Group2Owner { get; set; }
         protected string IdPropertyName = "Id";
         protected string GroupIdPropertyName = "GroupId";
-        protected string Group2IdPropertyName = "Group2Id";
         protected string CodePropertyName = "Code";
         protected string NamePropertyName = "Name";
         protected string CategoryPropertyName = "Category";
@@ -42,10 +39,8 @@ namespace ThMEPEngineCore.Temp
             ElementLayer = "";
             TesslateLength = 5;
             GroupSwitch = false;
-            Group2Switch = false;
             IsolateSwitch = true;       
             GroupOwner = new Dictionary<Entity, List<string>>();
-            Group2Owner = new Dictionary<Entity, List<string>>();
             Types = new List<System.Type>() { typeof(Polyline)};
         }
         protected string ToString(Polyline poly)
@@ -96,10 +91,6 @@ namespace ThMEPEngineCore.Temp
                 }
             }
             return false;
-        }
-        public virtual void Group2(Dictionary<Entity, string> groupId)
-        {
-            //
         }
     }
 }

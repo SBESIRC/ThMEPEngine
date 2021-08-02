@@ -8,8 +8,7 @@
     using System.Collections.Generic;
     using System.Windows.Forms;
     using ThMEPWSS.JsonExtensionsNs;
-    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-    using DU = ThMEPWSS.Assistant.DrawUtils;
+    using static ThMEPWSS.Assistant.DrawUtils;
     using Autodesk.AutoCAD.EditorInput;
     using AcHelper;
     using Autodesk.AutoCAD.Geometry;
@@ -48,11 +47,229 @@
     using System.CodeDom.Compiler;
     using System.Linq.Expressions;
     using ThMEPEngineCore.Algorithm;
-    using ThMEPWSS.DebugNs;
+    using ThMEPWSS.ReleaseNs;
     using ThMEPWSS.Pipe.Service.DrainageServiceNs.ExtensionsNs.DoubleExtensionsNs;
-    using ThUtilExtensionsNs;
     using ThMEPWSS.Diagram.ViewModel;
     using static THDrainageService;
+
+    public class RainSystemCadData
+    {
+        public List<Geometry> Storeys;
+        public List<Geometry> LabelLines;
+        public List<Geometry> WLines;
+        public List<Geometry> WLinesAddition;
+        public List<Geometry> Labels;
+        public List<Geometry> VerticalPipes;
+        public List<Geometry> CondensePipes;
+        public List<Geometry> FloorDrains;
+        public List<Geometry> WaterWells;
+        public List<Geometry> WaterPortSymbols;
+        public List<Geometry> WaterPort13s;
+        public List<Geometry> WrappingPipes;
+        public List<Geometry> SideWaterBuckets;
+        public List<Geometry> GravityWaterBuckets;
+        public List<Geometry> _87WaterBuckets;
+        public void Init()
+        {
+            Storeys ??= new List<Geometry>();
+            LabelLines ??= new List<Geometry>();
+            WLines ??= new List<Geometry>();
+            WLinesAddition ??= new List<Geometry>();
+            Labels ??= new List<Geometry>();
+            VerticalPipes ??= new List<Geometry>();
+            CondensePipes ??= new List<Geometry>();
+            FloorDrains ??= new List<Geometry>();
+            WaterWells ??= new List<Geometry>();
+            WaterPortSymbols ??= new List<Geometry>();
+            WaterPort13s ??= new List<Geometry>();
+            WrappingPipes ??= new List<Geometry>();
+            SideWaterBuckets ??= new List<Geometry>();
+            GravityWaterBuckets ??= new List<Geometry>();
+            _87WaterBuckets ??= new List<Geometry>();
+        }
+        public static RainSystemCadData Create(RainSystemGeoData data)
+        {
+            var bfSize = 10;
+            var o = new RainSystemCadData();
+            o.Init();
+            o.Storeys.AddRange(data.Storeys.Select(x => x.ToPolygon()));
+            o.LabelLines.AddRange(data.LabelLines.Select(x => x.Buffer(bfSize)));
+            o.WLines.AddRange(data.WLines.Select(x => x.Buffer(bfSize)));
+            o.WLinesAddition.AddRange(data.WLinesAddition.Select(x => x.Buffer(bfSize)));
+            o.Labels.AddRange(data.Labels.Select(x => x.Boundary.ToPolygon()));
+            o.VerticalPipes.AddRange(data.VerticalPipes.Select(x => x.ToPolygon()));
+            o.CondensePipes.AddRange(data.CondensePipes.Select(x => x.ToPolygon()));
+            o.FloorDrains.AddRange(data.FloorDrains.Select(x => x.ToPolygon()));
+            o.WaterWells.AddRange(data.WaterWells.Select(x => x.ToPolygon()));
+            o.WaterPortSymbols.AddRange(data.WaterPortSymbols.Select(x => x.ToPolygon()));
+            o.WaterPort13s.AddRange(data.WaterPort13s.Select(x => x.ToPolygon()));
+            o.WrappingPipes.AddRange(data.WrappingPipes.Select(x => x.ToPolygon()));
+            o.SideWaterBuckets.AddRange(data.SideWaterBuckets.Select(x => x.ToPolygon()));
+            o.GravityWaterBuckets.AddRange(data.GravityWaterBuckets.Select(x => x.ToPolygon()));
+            o._87WaterBuckets.AddRange(data._87WaterBuckets.Select(x => x.ToPolygon()));
+            return o;
+        }
+        public List<Geometry> GetAllEntities()
+        {
+            var ret = new List<Geometry>(4096);
+            ret.AddRange(Storeys);
+            ret.AddRange(LabelLines);
+            ret.AddRange(WLines);
+            ret.AddRange(WLinesAddition);
+            ret.AddRange(Labels);
+            ret.AddRange(VerticalPipes);
+            ret.AddRange(CondensePipes);
+            ret.AddRange(FloorDrains);
+            ret.AddRange(WaterWells);
+            ret.AddRange(WaterPortSymbols);
+            ret.AddRange(WaterPort13s);
+            ret.AddRange(WrappingPipes);
+            ret.AddRange(SideWaterBuckets);
+            ret.AddRange(GravityWaterBuckets);
+            ret.AddRange(_87WaterBuckets);
+            return ret;
+        }
+        public List<RainSystemCadData> SplitByStorey()
+        {
+            var lst = new List<RainSystemCadData>(this.Storeys.Count);
+            if (this.Storeys.Count == 0) return lst;
+            var f = GeoFac.CreateIntersectsSelector(GetAllEntities());
+            foreach (var storey in this.Storeys)
+            {
+                var objs = f(storey);
+                var o = new RainSystemCadData();
+                o.Init();
+                o.LabelLines.AddRange(objs.Where(x => this.LabelLines.Contains(x)));
+                o.WLines.AddRange(objs.Where(x => this.WLines.Contains(x)));
+                o.WLinesAddition.AddRange(objs.Where(x => this.WLinesAddition.Contains(x)));
+                o.Labels.AddRange(objs.Where(x => this.Labels.Contains(x)));
+                o.VerticalPipes.AddRange(objs.Where(x => this.VerticalPipes.Contains(x)));
+                o.CondensePipes.AddRange(objs.Where(x => this.CondensePipes.Contains(x)));
+                o.FloorDrains.AddRange(objs.Where(x => this.FloorDrains.Contains(x)));
+                o.WaterWells.AddRange(objs.Where(x => this.WaterWells.Contains(x)));
+                o.WaterPortSymbols.AddRange(objs.Where(x => this.WaterPortSymbols.Contains(x)));
+                o.WaterPort13s.AddRange(objs.Where(x => this.WaterPort13s.Contains(x)));
+                o.WrappingPipes.AddRange(objs.Where(x => this.WrappingPipes.Contains(x)));
+                o.SideWaterBuckets.AddRange(objs.Where(x => this.SideWaterBuckets.Contains(x)));
+                o.GravityWaterBuckets.AddRange(objs.Where(x => this.GravityWaterBuckets.Contains(x)));
+                o._87WaterBuckets.AddRange(objs.Where(x => this._87WaterBuckets.Contains(x)));
+                lst.Add(o);
+            }
+            return lst;
+        }
+        public RainSystemCadData Clone()
+        {
+            return (RainSystemCadData)MemberwiseClone();
+        }
+    }
+    public class RainSystemGeoData
+    {
+        public List<GRect> Storeys;
+
+        public List<GLineSegment> LabelLines;
+        public List<GLineSegment> WLines;
+        public List<GLineSegment> WLinesAddition;
+        public List<CText> Labels;
+        public List<GRect> VerticalPipes;
+        public List<GRect> CondensePipes;
+        public List<GRect> FloorDrains;
+        public List<GRect> WaterWells;
+        public List<string> WaterWellLabels;
+        public List<GRect> WaterPortSymbols;
+        public List<GRect> WaterPort13s;
+        public List<GRect> WrappingPipes;
+
+        public List<GRect> SideWaterBuckets;
+        public List<GRect> GravityWaterBuckets;
+        public List<GRect> _87WaterBuckets;
+
+        public void Init()
+        {
+            LabelLines ??= new List<GLineSegment>();
+            WLines ??= new List<GLineSegment>();
+            WLinesAddition ??= new List<GLineSegment>();
+            Labels ??= new List<CText>();
+            VerticalPipes ??= new List<GRect>();
+            Storeys ??= new List<GRect>();
+            CondensePipes ??= new List<GRect>();
+            FloorDrains ??= new List<GRect>();
+            WaterWells ??= new List<GRect>();
+            WaterWellLabels ??= new List<string>();
+            WaterPortSymbols ??= new List<GRect>();
+            WaterPort13s ??= new List<GRect>();
+            WrappingPipes ??= new List<GRect>();
+            SideWaterBuckets ??= new List<GRect>();
+            GravityWaterBuckets ??= new List<GRect>();
+            _87WaterBuckets ??= new List<GRect>();
+        }
+        public void FixData()
+        {
+            LabelLines = LabelLines.Where(x => x.Length > 0).Distinct().ToList();
+            WLines = WLines.Where(x => x.Length > 0).Distinct().ToList();
+            WLinesAddition = WLinesAddition.Where(x => x.Length > 0).Distinct().ToList();
+            Labels = Labels.Where(x => x.Boundary.IsValid).Distinct().ToList();
+            VerticalPipes = VerticalPipes.Where(x => x.IsValid).Distinct().ToList();
+            Storeys = Storeys.Where(x => x.IsValid).Distinct().ToList();
+            CondensePipes = CondensePipes.Where(x => x.IsValid).Distinct().ToList();
+            FloorDrains = FloorDrains.Where(x => x.IsValid).Distinct().ToList();
+            WaterWells = WaterWells.Where(x => x.IsValid).Distinct().ToList();
+            WaterPortSymbols = WaterPortSymbols.Where(x => x.IsValid).Distinct().ToList();
+            WaterPort13s = WaterPort13s.Where(x => x.IsValid).Distinct().ToList();
+            WrappingPipes = WrappingPipes.Where(x => x.IsValid).Distinct().ToList();
+            SideWaterBuckets = SideWaterBuckets.Where(x => x.IsValid).Distinct().ToList();
+            GravityWaterBuckets = GravityWaterBuckets.Where(x => x.IsValid).Distinct().ToList();
+            _87WaterBuckets = _87WaterBuckets.Where(x => x.IsValid).Distinct().ToList();
+        }
+        public RainSystemGeoData Clone()
+        {
+            return (RainSystemGeoData)MemberwiseClone();
+        }
+        public RainSystemGeoData DeepClone()
+        {
+            return this.ToCadJson().FromCadJson<RainSystemGeoData>();
+        }
+    }
+    public class ThStoreysData
+    {
+        public GRect Boundary;
+        public List<int> Storeys;
+        public ThMEPEngineCore.Model.Common.StoreyType StoreyType;
+    }
+    public abstract class DrainageText
+    {
+        public string RawString;
+        public class TLDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"TL(\d+)\-(\d+)");
+        }
+        public class FLDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"FL(\d+)\-(\d+)");
+        }
+        public class PLDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"PL(\d+)\-(\d+)");
+        }
+        public class ToiletDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"(接自)?(\d+)F卫生间单排");
+        }
+        public class KitchenDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"(接自)?(\d+)F厨房单排");
+        }
+        public class FallingBoardAreaFloorDrainText : DrainageText
+        {
+            //仅31F顶层板下设置乙字弯
+            //一层底板设置乙字弯
+            //这个不管
+        }
+        public class UnderboardShortTranslatorSettingsDrainageText : DrainageText
+        {
+            public static readonly Regex re = new Regex(@"降板区地漏DN(\d+)");
+
+        }
+    }
 
     public class DrainageDrawingData
     {
@@ -141,47 +358,39 @@
         public List<DrainageCadData> CadDatas;
         public List<DrainageDrawingData> drawingDatas;
         public List<KeyValuePair<string, Geometry>> roomData;
-        public static void TestDrawingDatasCreation(DrainageGeoData geoData)
-        {
-            ThDrainageService.PreFixGeoData(geoData);
-            ThDrainageService.ConnectLabelToLabelLine(geoData);
-            geoData.FixData();
-            var cadDataMain = DrainageCadData.Create(geoData);
-            var cadDatas = cadDataMain.SplitByStorey();
-            TestDrawingDatasCreation(geoData, cadDataMain, cadDatas);
-        }
         public static DrainageGeoData CollectGeoData()
         {
             if (commandContext != null) return null;
-            Dbg.FocusMainWindow();
-            var range = Dbg.TrySelectRange();
+            FocusMainWindow();
+            var range = TrySelectRange();
             if (range == null) return null;
-            using (Dbg.DocumentLock)
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
             {
-                var storeys = ThRainSystemService.GetStoreys(range, adb);
+                var storeys = GetStoreys(range, adb);
                 var geoData = new DrainageGeoData();
                 geoData.Init();
                 CollectGeoData(range, adb, geoData);
                 return geoData;
             }
         }
-        public static void DrawDrainageSystemDiagram2()
+   
+        public static void DrawDrainageSystemDiagram2(Dictionary<string, object> ctx)
         {
             if (commandContext != null) return;
-            Dbg.FocusMainWindow();
-            var range = Dbg.TrySelectRange();
+            FocusMainWindow();
+            var range = TrySelectRange();
             if (range == null) return;
-            //if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
+            //if (!TrySelectPoint(out Point3d basePt)) return;
             if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (Dbg.DocumentLock)
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
                 try
                 {
-                    DU.Dispose();
-                    var storeys = ThRainSystemService.GetStoreys(range, adb);
+                    Dispose();
+                    var storeys = GetStoreys(range, adb);
                     var geoData = new DrainageGeoData();
                     geoData.Init();
                     CollectGeoData(range, adb, geoData);
@@ -198,23 +407,15 @@
                         CadDataMain = cadDataMain,
                         CadDatas = cadDatas,
                     };
-                    sv.CreateDrawingDatas();
-                    //DU.Draw();
-                    //DU.Dispose();
                     if (sv.DrainageSystemDiagram == null) { }
-
-                    //DU.Dispose();
-                    //sv.RainSystemDiagram.Draw(basePt);
-                    //DU.Draw(adb);
-                    //Dbg.PrintText(sv.DrawingDatas.ToCadJson());
                 }
                 finally
                 {
-                    DU.Dispose();
+                    Dispose();
                 }
             }
         }
-        public static void CollectGeoData(Geometry range, AcadDatabase adb, DrainageGeoData geoData, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
+        public static void CollectGeoData(Geometry range, AcadDatabase adb, DrainageGeoData geoData, CommandContext ctx)
         {
             var cl = CollectGeoData(adb, geoData);
             cl.CollectStoreys(range, ctx);
@@ -241,52 +442,6 @@
             cl.CollectKillers();
             return cl;
         }
-
-        public static void DrawDrainageSystemDiagram3()
-        {
-            Dbg.FocusMainWindow();
-            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
-            DU.Dispose();
-            if (commandContext == null) return;
-            if (commandContext.StoreyContext == null) return;
-            if (commandContext.range == null) return;
-            if (commandContext.StoreyContext.thStoreysDatas == null) return;
-            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                try
-                {
-                    DU.Dispose();
-                    var range = commandContext.range;
-                    var storeys = commandContext.StoreyContext.thStoreysDatas;
-                    var geoData = new DrainageGeoData();
-                    geoData.Init();
-                    CollectGeoData(range, adb, geoData);
-                    ThDrainageService.PreFixGeoData(geoData);
-                    ThDrainageService.ConnectLabelToLabelLine(geoData);
-                    geoData.FixData();
-                    var cadDataMain = DrainageCadData.Create(geoData);
-                    var cadDatas = cadDataMain.SplitByStorey();
-                    var sv = new DrainageService()
-                    {
-                        Storeys = storeys,
-                        GeoData = geoData,
-                        CadDataMain = cadDataMain,
-                        CadDatas = cadDatas,
-                    };
-                    sv.CreateDrawingDatas();
-
-                }
-                finally
-                {
-                    DU.Dispose();
-                }
-
-            }
-
-        }
         static bool AllNotEmpty(params List<Geometry>[] plss)
         {
             foreach (var pls in plss)
@@ -296,10 +451,6 @@
             return true;
         }
         public static ThRainSystemService.CommandContext commandContext => ThRainSystemService.commandContext;
-        public void CreateDrawingDatas()
-        {
-            TestDrawingDatasCreation(GeoData, CadDataMain, CadDatas);
-        }
         static List<GLineSegment> ExplodeGLineSegments(Geometry geo)
         {
             static IEnumerable<GLineSegment> enumerate(Geometry geo)
@@ -331,19 +482,19 @@
 #pragma warning disable
         public static void DrawGeoData(DrainageGeoData geoData)
         {
-            foreach (var s in geoData.Storeys) DU.DrawRectLazy(s).ColorIndex = 1;
-            foreach (var o in geoData.LabelLines) DU.DrawLineSegmentLazy(o).ColorIndex = 1;
+            foreach (var s in geoData.Storeys) DrawRectLazy(s).ColorIndex = 1;
+            foreach (var o in geoData.LabelLines) DrawLineSegmentLazy(o).ColorIndex = 1;
             foreach (var o in geoData.Labels)
             {
-                DU.DrawTextLazy(o.Text, o.Boundary.LeftButtom).ColorIndex = 2;
-                DU.DrawRectLazy(o.Boundary).ColorIndex = 2;
+                DrawTextLazy(o.Text, o.Boundary.LeftButtom).ColorIndex = 2;
+                DrawRectLazy(o.Boundary).ColorIndex = 2;
             }
-            foreach (var o in geoData.VerticalPipes) DU.DrawRectLazy(o).ColorIndex = 3;
-            foreach (var o in geoData.FloorDrains) DU.DrawRectLazy(o).ColorIndex = 6;
-            foreach (var o in geoData.WaterPorts) DU.DrawRectLazy(o).ColorIndex = 7;
+            foreach (var o in geoData.VerticalPipes) DrawRectLazy(o).ColorIndex = 3;
+            foreach (var o in geoData.FloorDrains) DrawRectLazy(o).ColorIndex = 6;
+            foreach (var o in geoData.WaterPorts) DrawRectLazy(o).ColorIndex = 7;
             {
                 var cl = Color.FromRgb(4, 229, 230);
-                foreach (var o in geoData.DLines) DU.DrawLineSegmentLazy(o).Color = cl;
+                foreach (var o in geoData.DLines) DrawLineSegmentLazy(o).Color = cl;
             }
         }
 
@@ -351,7 +502,7 @@
 
         public static void CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out string logString, out List<DrainageDrawingData> drDatas, List<KeyValuePair<string, Geometry>> roomData = null)
         {
-            DrawingTransaction.Current.AbleToDraw = false;
+            _DrawingTransaction.Current.AbleToDraw = false;
             roomData ??= new List<KeyValuePair<string, Geometry>>();
             Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
             Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
@@ -359,7 +510,7 @@
             static List<Geometry> GeosGroupToGeos(List<List<Geometry>> geosGrp) => geosGrp.Select(lst => GeoFac.CreateGeometry(lst)).ToList();
             foreach (var s in geoData.Storeys)
             {
-                var e = DU.DrawRectLazy(s).ColorIndex = 1;
+                var e = DrawRectLazy(s).ColorIndex = 1;
             }
             var sb = new StringBuilder(8192);
             drDatas = new List<DrainageDrawingData>();
@@ -419,7 +570,7 @@
                                     var pl = r.ToPolygon();
                                     cadDataMain.VerticalPipes.Add(pl);
                                     item.VerticalPipes.Add(pl);
-                                    DU.DrawTextLazy("脑补的", pl.GetCenter());
+                                    DrawTextLazy("脑补的", pl.GetCenter());
                                 }
                             }
                         }
@@ -427,55 +578,55 @@
                 }
 
 
-                DU.DrawTextLazy($"===框{storeyI}===", geoData.Storeys[storeyI].LeftTop);
+                DrawTextLazy($"===框{storeyI}===", geoData.Storeys[storeyI].LeftTop);
                 foreach (var o in item.LabelLines)
                 {
-                    DU.DrawLineSegmentLazy(geoData.LabelLines[cadDataMain.LabelLines.IndexOf(o)]).ColorIndex = 1;
+                    DrawLineSegmentLazy(geoData.LabelLines[cadDataMain.LabelLines.IndexOf(o)]).ColorIndex = 1;
                 }
                 foreach (var pl in item.Labels)
                 {
                     var m = geoData.Labels[cadDataMain.Labels.IndexOf(pl)];
-                    var e = DU.DrawTextLazy(m.Text, m.Boundary.LeftButtom.ToPoint3d());
+                    var e = DrawTextLazy(m.Text, m.Boundary.LeftButtom.ToPoint3d());
                     e.ColorIndex = 2;
-                    var _pl = DU.DrawRectLazy(m.Boundary);
+                    var _pl = DrawRectLazy(m.Boundary);
                     _pl.ColorIndex = 2;
                 }
                 foreach (var o in item.PipeKillers)
                 {
-                    DU.DrawRectLazy(geoData.PipeKillers[cadDataMain.PipeKillers.IndexOf(o)]).Color = Color.FromRgb(255, 255, 55);
+                    DrawRectLazy(geoData.PipeKillers[cadDataMain.PipeKillers.IndexOf(o)]).Color = Color.FromRgb(255, 255, 55);
                 }
                 foreach (var o in item.WashingMachines)
                 {
-                    DU.DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)], 10);
+                    DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)], 10);
                 }
                 foreach (var o in item.VerticalPipes)
                 {
-                    DU.DrawRectLazy(geoData.VerticalPipes[cadDataMain.VerticalPipes.IndexOf(o)]).ColorIndex = 3;
+                    DrawRectLazy(geoData.VerticalPipes[cadDataMain.VerticalPipes.IndexOf(o)]).ColorIndex = 3;
                 }
                 foreach (var o in item.FloorDrains)
                 {
-                    DU.DrawRectLazy(geoData.FloorDrains[cadDataMain.FloorDrains.IndexOf(o)]).ColorIndex = 6;
+                    DrawRectLazy(geoData.FloorDrains[cadDataMain.FloorDrains.IndexOf(o)]).ColorIndex = 6;
                 }
                 foreach (var o in item.WaterPorts)
                 {
-                    DU.DrawRectLazy(geoData.WaterPorts[cadDataMain.WaterPorts.IndexOf(o)]).ColorIndex = 7;
-                    DU.DrawTextLazy(geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(o)], o.GetCenter());
+                    DrawRectLazy(geoData.WaterPorts[cadDataMain.WaterPorts.IndexOf(o)]).ColorIndex = 7;
+                    DrawTextLazy(geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(o)], o.GetCenter());
                 }
                 foreach (var o in item.WashingMachines)
                 {
-                    var e = DU.DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)]).ColorIndex = 1;
+                    var e = DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)]).ColorIndex = 1;
                 }
                 foreach (var o in item.CleaningPorts)
                 {
                     var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
-                    if (false) DU.DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
-                    DU.DrawRectLazy(GRect.Create(m, 40));
+                    if (false) DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
+                    DrawRectLazy(GRect.Create(m, 40));
                 }
                 {
                     var cl = Color.FromRgb(0x91, 0xc7, 0xae);
                     foreach (var o in item.WrappingPipes)
                     {
-                        var e = DU.DrawRectLazy(geoData.WrappingPipes[cadDataMain.WrappingPipes.IndexOf(o)]);
+                        var e = DrawRectLazy(geoData.WrappingPipes[cadDataMain.WrappingPipes.IndexOf(o)]);
                         e.Color = cl;
                     }
                 }
@@ -483,14 +634,14 @@
                     var cl = Color.FromRgb(4, 229, 230);
                     foreach (var o in item.DLines)
                     {
-                        var e = DU.DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
+                        var e = DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
                     }
                 }
                 {
                     var cl = Color.FromRgb(211, 213, 111);
                     foreach (var o in item.VLines)
                     {
-                        DU.DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
+                        DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
                     }
                 }
 
@@ -835,7 +986,7 @@
                                     var waterPort = waterPorts[0];
                                     var waterPortLabel = getWaterPortLabel(waterPort);
                                     portd[dlinesGeo] = waterPortLabel;
-                                    //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
+                                    //DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
                                     var pipes = f2(dlinesGeo);
                                     ok_ents.AddRange(pipes);
                                     foreach (var pipe in pipes)
@@ -851,7 +1002,7 @@
                                             foreach (var wp in wrappingpipes)
                                             {
                                                 portd[wp] = waterPortLabel;
-                                                DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
+                                                DrawTextLazy(waterPortLabel, wp.GetCenter());
                                             }
                                         }
                                     }
@@ -889,10 +1040,8 @@
                                 {
                                     if (waterPort.GetCenter().GetDistanceTo(pt) <= 1500)
                                     {
-                                        Dbg.ShowXLabel(pt);
                                         var waterPortLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterPort)];
                                         portd[dlinesGeo] = waterPortLabel;
-                                        //DU.DrawTextLazy(waterPortLabel, dlinesGeo.GetCenter());
                                         foreach (var pipe in f2(dlinesGeo))
                                         {
                                             if (lbDict.TryGetValue(pipe, out string label))
@@ -907,7 +1056,7 @@
                                                 foreach (var wp in wrappingpipes)
                                                 {
                                                     portd[wp] = waterPortLabel;
-                                                    DU.DrawTextLazy(waterPortLabel, wp.GetCenter());
+                                                    DrawTextLazy(waterPortLabel, wp.GetCenter());
                                                 }
                                             }
                                         }
@@ -973,7 +1122,7 @@
                         {
                             var num = kv1.Value;
                             var pipe = kv2.Key;
-                            DU.DrawTextLazy(num, pipe.ToGRect().RightButtom);
+                            DrawTextLazy(num, pipe.ToGRect().RightButtom);
                             return 666;
                         }).Count();
                     }
@@ -990,7 +1139,7 @@
                     lbDict.TryGetValue(pp, out string label);
                     if (label != null)
                     {
-                        DU.DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
+                        DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
                     }
                 }
 
@@ -1222,7 +1371,7 @@
                 drDatas.Add(drData);
             }
             logString = sb.ToString();
-            DrawingTransaction.Current.AbleToDraw = true;
+            _DrawingTransaction.Current.AbleToDraw = true;
         }
 
         public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
@@ -1608,7 +1757,7 @@
         public static List<DrainageGroupedPipeItem> GetDrainageGroupedPipeItems(List<DrainageDrawingData> drDatas, List<StoreysItem> storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys)
         {
             //Draw(drDatas, pt, storeysItems);
-            //👻开始写分组逻辑
+            //开始写分组逻辑
 
             //Console.WriteLine(storeysItems.ToCadJson());
 
@@ -1698,31 +1847,6 @@
                     }
                 }
             }
-            //Console.WriteLine(plstoreylist.ToCadJson());
-            //Console.WriteLine(flstoreylist.ToCadJson());
-
-            if (Dbg._)
-            {
-                var tlMinMaxStoreyScoreDict = new Dictionary<string, KeyValuePair<int, int>>();
-                foreach (var tl in tls)
-                {
-                    int min = int.MaxValue;
-                    int max = int.MinValue;
-                    foreach (var item in pltlList)
-                    {
-                        if (item.tl == tl)
-                        {
-                            var s = GetStoreyScore(item.storey);
-                            if (s < min) min = s;
-                            if (s > max) max = s;
-                            tlMinMaxStoreyScoreDict[tl] = new KeyValuePair<int, int>(min, max);
-                        }
-                    }
-                }
-            }
-
-            //Console.WriteLine(tlMinMaxStoreyScoreDict.ToCadJson());
-            //Console.WriteLine(pltlList.OrderBy(x => GetScore(x.storey)).ThenBy(x => x.pl).ToCadJson());
             var plLongTransList = new List<KeyValuePair<string, string>>();
             {
                 for (int i = 0; i < storeysItems.Count; i++)
@@ -2324,22 +2448,6 @@
                         item.HasWrappingPipe = true;
                     }
                 }
-                //1楼不需要通气立管。通气立管在1楼以上有接入点的最后一层截止。
-                {
-                    if (Dbg._)
-                    {
-                        foreach (var item in pipeInfoDict.Values)
-                        {
-                            if (item.HasTL)
-                            {
-                                if (item.MinTl == 1)
-                                {
-                                    item.MinTl = 2;
-                                }
-                            }
-                        }
-                    }
-                }
                 //小于7层 就不需要TL了
                 {
                     if (allNumStoreys.Max() < 7)
@@ -2396,16 +2504,7 @@
                 return pipeGroupItems;
             }
         }
-        //如果存疑，则投票选举
-        static bool vote(IEnumerable<bool> flags)
-        {
-            var d = new CountDict<bool>();
-            foreach (var flag in flags)
-            {
-                d[flag]++;
-            }
-            return d[true] >= d[false];
-        }
+
         public class DrainageGroupedPipeItem
         {
             public List<string> Labels;
@@ -2545,77 +2644,28 @@
 
         public static void DrawDrainageSystemDiagram()
         {
-            Dbg.FocusMainWindow();
-            var range = Dbg.TrySelectRange();
+            FocusMainWindow();
+            var range = TrySelectRange();
             if (range == null) return;
-            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
+            if (!TrySelectPoint(out Point3d point3D)) return;
             var basePoint = point3D.ToPoint2d();
 
             if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (Dbg.DocumentLock)
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb, true))
+            using (var tr = new _DrawingTransaction(adb, true))
             {
-
-                Dbg.BuildAndSetCurrentLayer(adb.Database);
-
                 List<StoreysItem> storeysItems;
                 List<DrainageDrawingData> drDatas;
                 if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: true)) return;
                 Console.WriteLine(drDatas.ToCadJson());
                 Console.WriteLine(storeysItems.ToCadJson());
                 var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                DU.Dispose();
+                Dispose();
                 DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys);
-                DU.Draw(adb);
+                FlushDQ(adb);
             }
         }
-
-        public static void DrawDrainageSystemDiagramFromCache()
-        {
-
-            static void DrawStoreys(Point2d basePoint)
-            {
-                var OFFSET_X = 2500.0;
-                var SPAN_X = 5500.0;
-                var HEIGHT = 1800.0;
-                //var HEIGHT = 5000.0;
-                var COUNT = 20;
-
-                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
-                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-                for (int i = 0; i < storeys.Count; i++)
-                {
-                    var storey = storeys[i];
-                    var bsPt1 = basePoint.OffsetY(HEIGHT * i);
-                    DrawStoreyLine(storey, bsPt1, lineLen);
-                }
-                var outputStartPointOffsets = new Vector2d[COUNT];
-            }
-
-
-            List<DrainageDrawingData> drDatas;
-            List<StoreysItem> storeysItems;
-            loadTestData(out drDatas, out storeysItems);
-            Dbg.FocusMainWindow();
-            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
-            var basePoint = point3D.ToPoint2d();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                if (false) Draw(drDatas, basePoint, storeysItems);
-                if (false) DrawVer1(null);
-                //Testing = true;
-                DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys);
-
-            }
-        }
-
-
-
-
         public static void DrawStoreyLine(string label, Point2d basePt, double lineLen)
         {
             DrawStoreyLine(label, basePt.ToPoint3d(), lineLen);
@@ -2623,15 +2673,15 @@
         public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
         {
             {
-                var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
-                var dbt = DU.DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                var line = DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                var dbt = DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
                 Dr.SetLabelStylesForWNote(line, dbt);
-                DU.DrawBlockReference(blkName: "标高", basePt: basePt.OffsetX(550), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", "" } });
+                DrawBlockReference(blkName: "标高", basePt: basePt.OffsetX(550), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", "" } });
             }
             if (label == "RF")
             {
-                var line = DU.DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0));
-                var dbt = DU.DrawTextLazy("建筑完成面", ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                var line = DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0));
+                var dbt = DrawTextLazy("建筑完成面", ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
                 Dr.SetLabelStylesForWNote(line, dbt);
             }
         }
@@ -2667,7 +2717,7 @@
         {
             if (leftOrRight)
             {
-                DU.DrawBlockReference("洗涤盆排水", basePt, br =>
+                DrawBlockReference("洗涤盆排水", basePt, br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.ScaleFactors = new Scale3d(2, 2, 2);
@@ -2679,7 +2729,7 @@
             }
             else
             {
-                DU.DrawBlockReference("洗涤盆排水", basePt, br =>
+                DrawBlockReference("洗涤盆排水", basePt, br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.ScaleFactors = new Scale3d(-2, 2, 2);
@@ -2695,7 +2745,7 @@
             basePt = basePt.OffsetY(300);
             if (leftOrRight)
             {
-                DU.DrawBlockReference("双格洗涤盆排水", basePt,
+                DrawBlockReference("双格洗涤盆排水", basePt,
                   br =>
                   {
                       br.Layer = "W-DRAI-EQPM";
@@ -2708,7 +2758,7 @@
             }
             else
             {
-                DU.DrawBlockReference("双格洗涤盆排水", basePt,
+                DrawBlockReference("双格洗涤盆排水", basePt,
                   br =>
                   {
                       br.Layer = "W-DRAI-EQPM";
@@ -2848,11 +2898,11 @@
             foreach (var e in ents)
             {
                 e.Layer = "W-RAIN-NOTE";
-                DU.ByLayer(e);
+                ByLayer(e);
                 if (e is DBText t)
                 {
                     t.WidthFactor = .7;
-                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                    SetTextStyleLazy(t, "TH-STYLE3");
                 }
             }
         }
@@ -2864,9 +2914,9 @@
             var wordPt = isLeftOrRight ? segs[1].EndPoint : segs[1].StartPoint;
             var text = "乙字弯";
             var height = 350;
-            var lines = DU.DrawLineSegmentsLazy(segs);
+            var lines = DrawLineSegmentsLazy(segs);
             SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, wordPt);
+            var t = DrawTextLazy(text, height, wordPt);
             SetLabelStylesForRainNote(t);
         }
         public static void DrawWashingMachineRaisingSymbol(Point2d bsPt, bool isLeftOrRight)
@@ -2874,7 +2924,7 @@
             if (isLeftOrRight)
             {
                 var v = new Vector2d(383875.8169, -250561.9571);
-                DU.DrawBlockReference("P型存水弯", (bsPt - v).ToPoint3d(), br =>
+                DrawBlockReference("P型存水弯", (bsPt - v).ToPoint3d(), br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.ScaleFactors = new Scale3d(2, 2, 2);
@@ -2887,7 +2937,7 @@
             else
             {
                 var v = new Vector2d(-383875.8169, -250561.9571);
-                DU.DrawBlockReference("P型存水弯", (bsPt - v).ToPoint3d(), br =>
+                DrawBlockReference("P型存水弯", (bsPt - v).ToPoint3d(), br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
                     br.ScaleFactors = new Scale3d(-2, 2, 2);
@@ -2923,28 +2973,28 @@
         }
         public static void DrawAiringSymbol(Point2d pt, double offsetY)
         {
-            DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: "W-DRAI-DOME-PIPE", cb: br =>
+            DrawBlockReference(blkName: "通气帽系统", basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: "W-DRAI-DOME-PIPE", cb: br =>
             {
                 br.ObjectId.SetDynBlockValue("距离1", offsetY);
                 br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
             });
         }
-        public static ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext commandContext { get => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext; set => ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = value; }
+        public static CommandContext commandContext { get => ThDrainageService.commandContext; set => ThDrainageService.commandContext = value; }
         public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
         {
-            Dbg.FocusMainWindow();
+            FocusMainWindow();
             if (commandContext == null) return;
             if (commandContext.StoreyContext == null) return;
             if (commandContext.StoreyContext.thStoreysDatas == null) return;
-            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
+            if (!TrySelectPoint(out Point3d basePt)) return;
             if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
 
-            using (Dbg.DocumentLock)
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb, true))
+            using (var tr = new _DrawingTransaction(adb, true))
             {
-                DU.Dispose();
-                LayerThreeAxes();
+                Dispose();
+                LayerThreeAxes(new List<string>() { "W-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-NOTE", "W-DRAI-EQPM", "W-BUSH", "W-RAIN-NOTE", "W-DRAI-VENT-PIPE" });
                 var storeys = commandContext.StoreyContext.thStoreysDatas;
                 List<StoreysItem> storeysItems;
                 List<DrainageDrawingData> drDatas;
@@ -2968,15 +3018,10 @@
                 var COUNT = pipeGroupItems.Count;
                 var dy = HEIGHT - 1800.0;
                 var __dy = 300;
-                DU.Dispose();
+                Dispose();
                 DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
-                DU.Draw(adb);
+                FlushDQ(adb);
             }
-        }
-
-        public static void LayerThreeAxes()
-        {
-            Dbg.LayerThreeAxes(new List<string>() { "W-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-NOTE", "W-DRAI-EQPM", "W-BUSH", "W-RAIN-NOTE", "W-DRAI-VENT-PIPE" });
         }
 
         public static void StartToDrawDrainageSystemDiagram(Point3d basePoint)
@@ -3111,7 +3156,7 @@
                                                 var segs = vecs.ToGLineSegments(startPt);
                                                 segs.RemoveAt(0);
                                                 DrawDraiNoteLines(segs);
-                                                var t = DU.DrawTextLazy("DN100乙字弯", 350, segs.Last().EndPoint);
+                                                var t = DrawTextLazy("DN100乙字弯", 350, segs.Last().EndPoint);
                                                 SetLabelStylesForDraiNote(t);
                                             }
                                         }
@@ -3162,7 +3207,7 @@
 
         public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel)
         {
-            static void DrawSegs(List<GLineSegment> segs) { for (int k = 0; k < segs.Count; k++) DU.DrawTextLazy(k.ToString(), segs[k].StartPoint); }
+            static void DrawSegs(List<GLineSegment> segs) { for (int k = 0; k < segs.Count; k++) DrawTextLazy(k.ToString(), segs[k].StartPoint); }
             var vecs0 = new List<Vector2d> { new Vector2d(0, 1800 + dy), new Vector2d(0, -1800 - dy) };
             var vecs1 = new List<Vector2d> { new Vector2d(0, 1800 + dy), new Vector2d(0, -780), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy) };
             var vecs8 = new List<Vector2d> { new Vector2d(0, 1800 + dy), new Vector2d(0, -780 - __dy), new Vector2d(-121, -121), new Vector2d(-1258, 0), new Vector2d(-121, -120), new Vector2d(0, -779 - dy + __dy) };
@@ -3615,7 +3660,7 @@
                         //        {
                         //            if (!string.IsNullOrEmpty(comment))
                         //            {
-                        //                DU.DrawTextLazy(comment, 350, info.EndPoint.OffsetY(-HEIGHT * ((IList)arr).IndexOf(info)).OffsetY(dy));
+                        //                DrawTextLazy(comment, 350, info.EndPoint.OffsetY(-HEIGHT * ((IList)arr).IndexOf(info)).OffsetY(dy));
                         //            }
                         //            dy -= 350;
                         //        }
@@ -3644,9 +3689,9 @@
                     {
                         var vecs = new List<Vector2d> { new Vector2d(0, height), new Vector2d(leftOrRight ? -3600 : 3600, 0) };
                         var segs = vecs.ToGLineSegments(basePt);
-                        var lines = DU.DrawLineSegmentsLazy(segs);
+                        var lines = DrawLineSegmentsLazy(segs);
                         Dr.SetLabelStylesForDraiNote(lines.ToArray());
-                        var t = DU.DrawTextLazy(text, 350, segs.Last().EndPoint.OffsetY(50));
+                        var t = DrawTextLazy(text, 350, segs.Last().EndPoint.OffsetY(50));
                         Dr.SetLabelStylesForDraiNote(t);
                     }
                     void _DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
@@ -3692,8 +3737,8 @@
                     //    {
                     //        //hasDrawedFloorDrain = true;
                     //        _DrawLabel("接厨房洗衣机地漏DN75，余同" , p1 + new Vector2d(-180, 390), true, 900);
-                    //        //DU.DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390));
-                    //        //DU.DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyNonWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390+300));
+                    //        //DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390));
+                    //        //DrawTextLazy(gpItem.Items.Select(x => x.HasBalconyNonWashingMachineFloorDrain).ToJson(), p1 + new Vector2d(-180, 390+300));
                     //    }
                     //    DrawFloorDrain(basePt, leftOrRight);
                     //}
@@ -3856,7 +3901,7 @@
                             {
                                 if (hanging.IsFL0)
                                 {
-                                    //Dbg.ShowXLabel(info.EndPoint);
+                                    //ShowXLabel(info.EndPoint);
                                     DrawFloorDrain((info.StartPoint + new Vector2d(-1391, -390)).ToPoint3d(), true, "普通地漏无存水弯");
                                     var vecs = new List<Vector2d> { new Vector2d(0, -667), new Vector2d(-121, 121), new Vector2d(-1450, 0) };
                                     var segs = vecs.ToGLineSegments(info.StartPoint).Skip(1).ToList();
@@ -4140,13 +4185,6 @@
                         }
                         if (viewModel?.Params?.ShouldRaiseWashingMachine ?? false)
                         {
-                            if (Dbg._)
-                            {
-                                var vecs = new List<Vector2d> { new Vector2d(-121, 121), new Vector2d(-2059, 0) };
-                                var segs = vecs.ToGLineSegments(info.HangingEndPoint.OffsetY(300));
-                                drawDomePipes(segs);
-                                DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
-                            }
                         }
                     }
 
@@ -4229,22 +4267,22 @@
                     }
                     //foreach (var pt in kitchenWashingMachineFloorDrains.OrderByDescending(x=>x.Y))
                     //{
-                    //    Dbg.ShowXLabel(pt);
+                    //    ShowXLabel(pt);
                     //    _DrawLabel("接厨房洗衣机地漏DN75，余同", pt, true, 900);
                     //}
                     //foreach (var pt in kitchenNonWashingMachineFloorDrains.OrderByDescending(x => x.Y))
                     //{
-                    //    Dbg.ShowXLabel(pt);
+                    //    ShowXLabel(pt);
                     //    _DrawLabel("接厨房地漏DN75，余同", pt, true, 1800);
                     //}
                     //foreach (var pt in balconyWashingMachineFloorDrains.OrderByDescending(x => x.Y))
                     //{
-                    //    Dbg.ShowXLabel(pt);
+                    //    ShowXLabel(pt);
                     //    _DrawLabel("接阳台洗衣机地漏DN75，余同", pt, true, 900);
                     //}
                     //foreach (var pt in balconyNonWashingMachineFloorDrains.OrderByDescending(x => x.Y))
                     //{
-                    //    Dbg.ShowXLabel(pt);
+                    //    ShowXLabel(pt);
                     //    _DrawLabel("接阳台地漏DN75，余同", pt, true, 1800);
                     //}
                 }
@@ -4270,19 +4308,19 @@
                     var segs = vecs.ToGLineSegments(basePt).ToList();
                     foreach (var seg in segs)
                     {
-                        var line = DU.DrawLineSegmentLazy(seg);
+                        var line = DrawLineSegmentLazy(seg);
                         Dr.SetLabelStylesForDraiNote(line);
                     }
                     var txtBasePt = isLeftOrRight ? segs[1].EndPoint : segs[1].StartPoint;
                     txtBasePt = txtBasePt.OffsetY(50);
                     if (text1 != null)
                     {
-                        var t = DU.DrawTextLazy(text1, 350, txtBasePt);
+                        var t = DrawTextLazy(text1, 350, txtBasePt);
                         Dr.SetLabelStylesForDraiNote(t);
                     }
                     if (text2 != null)
                     {
-                        var t = DU.DrawTextLazy(text2, 350, txtBasePt.OffsetY(-350 - 50));
+                        var t = DrawTextLazy(text2, 350, txtBasePt.OffsetY(-350 - 50));
                         Dr.SetLabelStylesForDraiNote(t);
                     }
                 }
@@ -4503,13 +4541,6 @@
                                 var segs = vecs.ToGLineSegments(p + new Vector2d(-180, -160));
                                 drawDomePipes(segs);
                                 DrawOutlets1(info.EndPoint, 3600, output, dy: -HEIGHT * .2778);
-                                if (Dbg._)
-                                {
-                                    output.HasCleaningPort2 = true;
-                                    output.HasWrappingPipe2 = true;
-                                    output.DN2 = "DN100";
-                                    DrawOutlets5(info.EndPoint, output, gpItem);
-                                }
                             }
                             else if (gpItem.HasBasinInKitchenAt1F)
                             {
@@ -4537,30 +4568,30 @@
                 {
                     foreach (var g in GeoFac.GroupParallelLines(dome_lines, 1, .01))
                     {
-                        var line = DU.DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
+                        var line = DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
                         line.Layer = dome_layer;
-                        DU.ByLayer(line);
+                        ByLayer(line);
                     }
                     foreach (var g in GeoFac.GroupParallelLines(vent_lines, 1, .01))
                     {
-                        var line = DU.DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
+                        var line = DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5));
                         line.Layer = vent_layer;
-                        DU.ByLayer(line);
+                        ByLayer(line);
                     }
                 }
                 else
                 {
                     foreach (var dome_line in dome_lines)
                     {
-                        var line = DU.DrawLineSegmentLazy(dome_line);
+                        var line = DrawLineSegmentLazy(dome_line);
                         line.Layer = dome_layer;
-                        DU.ByLayer(line);
+                        ByLayer(line);
                     }
                     foreach (var _line in vent_lines)
                     {
-                        var line = DU.DrawLineSegmentLazy(_line);
+                        var line = DrawLineSegmentLazy(_line);
                         line.Layer = vent_layer;
-                        DU.ByLayer(line);
+                        ByLayer(line);
                     }
 
                 }
@@ -4640,9 +4671,9 @@
         {
             var vecs = new List<Vector2d> { new Vector2d(800, 0), new Vector2d(0, HEIGHT * .4) };
             var segs = vecs.ToGLineSegments(p);
-            var lines = DU.DrawLineSegmentsLazy(segs);
+            var lines = DrawLineSegmentsLazy(segs);
             Dr.SetLabelStylesForDraiNote(lines.ToArray());
-            DU.DrawBlockReference(blkName: "标高", basePt: segs.Last().EndPoint.OffsetX(250).ToPoint3d(),
+            DrawBlockReference(blkName: "标高", basePt: segs.Last().EndPoint.OffsetX(250).ToPoint3d(),
  props: new Dictionary<string, string>() { { "标高", "管底H+X.XX" } },
  cb: br =>
  {
@@ -4728,11 +4759,11 @@
             foreach (var e in ents)
             {
                 e.Layer = "W-DRAI-NOTE";
-                DU.ByLayer(e);
+                ByLayer(e);
                 if (e is DBText t)
                 {
                     t.WidthFactor = .7;
-                    DU.SetTextStyleLazy(t, "TH-STYLE3");
+                    SetTextStyleLazy(t, "TH-STYLE3");
                 }
             }
         }
@@ -4742,37 +4773,36 @@
         }
         public static void DrawDomePipes(IEnumerable<GLineSegment> segs)
         {
-            var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
             lines.ForEach(line => SetDomePipeLineStyle(line));
         }
         public static void DrawBluePipes(IEnumerable<GLineSegment> segs)
         {
-            var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
             lines.ForEach(line =>
             {
                 line.Layer = "W-RAIN-PIPE";
-                DU.ByLayer(line);
+                ByLayer(line);
             });
         }
         public static void DrawDraiNoteLines(IEnumerable<GLineSegment> segs)
         {
-            var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
             lines.ForEach(line =>
             {
                 line.Layer = "W-DRAI-NOTE";
-                DU.ByLayer(line);
+                ByLayer(line);
             });
         }
         public static void qvg1qe()
         {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
+            FocusMainWindow();
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
                 var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var basePt = SelectPoint().ToPoint2d();
                 var vecs = new List<Vector2d> { new Vector2d(0, -479), new Vector2d(-121, -121), new Vector2d(-1879, 0) };
                 var pts = vecs.ToPoint2ds(basePt);
                 var segs = vecs.ToGLineSegments(basePt);
@@ -4785,14 +4815,13 @@
         }
         public static void qvg1vf()
         {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
+            FocusMainWindow();
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
                 var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var basePt = SelectPoint().ToPoint2d();
                 var vecs = new List<Vector2d> { new Vector2d(0, -1479), new Vector2d(-121, -121), new Vector2d(-2379, 0), new Vector2d(0, 600), new Vector2d(1779, 0), new Vector2d(121, 121), new Vector2d(0, 579), new Vector2d(-1600, -700), new Vector2d(0, -600) };
                 var pts = vecs.ToPoint2ds(basePt);
                 var segs = vecs.ToGLineSegments(basePt);
@@ -4817,19 +4846,19 @@
         }
         public static void qvg7cd()
         {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
+            FocusMainWindow();
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
-                DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetX(550 + 3038)), "W-NOTE");
+                var basePt = SelectPoint().ToPoint2d();
+                DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetX(550 + 3038)), "W-NOTE");
                 DrawStoreyHeightSymbol(basePt.OffsetX(550), "-0.35");
                 var p1 = basePt + new Vector2d(2830, -390);
-                DU.DrawBlockReference("地漏系统", p1.ToPoint3d(), br =>
+                DrawBlockReference("地漏系统", p1.ToPoint3d(), br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
-                    DU.ByLayer(br);
+                    ByLayer(br);
                     br.ScaleFactors = new Scale3d(2, 2, 2);
                     if (br.IsDynamicBlock)
                     {
@@ -4847,21 +4876,21 @@
         }
         public static void qvg7cs()
         {
-            Dbg.FocusMainWindow();
-            using (Dbg.DocumentLock)
+            FocusMainWindow();
+            using (DocLock)
             using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
+            using (var tr = new _DrawingTransaction(adb))
             {
-                var basePt = Dbg.SelectPoint().ToPoint2d();
+                var basePt = SelectPoint().ToPoint2d();
                 //DrawStoreyHeightSymbol(basePt, "-0.75");
-                //DU.DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetX(2450 )), "W-NOTE");
-                DU.DrawBlockReference("侧排地漏", basePt.ToPoint3d(), cb: br => br.Layer = "W-DRAI-FLDR");
+                //DrawLineSegmentLazy(new GLineSegment(basePt, basePt.OffsetX(2450 )), "W-NOTE");
+                DrawBlockReference("侧排地漏", basePt.ToPoint3d(), cb: br => br.Layer = "W-DRAI-FLDR");
             }
         }
 
         public static void DrawStoreyHeightSymbol(Point2d basePt, string label = "666")
         {
-            DU.DrawBlockReference(blkName: "标高", basePt: basePt.ToPoint3d(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", label } }, cb: br => { DU.ByLayer(br); });
+            DrawBlockReference(blkName: "标高", basePt: basePt.ToPoint3d(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", label } }, cb: br => { ByLayer(br); });
         }
 
         public static void DrawWrappingPipe(Point2d basePt)
@@ -4870,10 +4899,10 @@
         }
         public static void DrawWrappingPipe(Point3d basePt)
         {
-            DU.DrawBlockReference("套管系统", basePt, br =>
+            DrawBlockReference("套管系统", basePt, br =>
             {
                 br.Layer = "W-BUSH";
-                DU.ByLayer(br);
+                ByLayer(br);
             });
         }
 
@@ -4887,9 +4916,9 @@
             var p1 = basePt.OffsetY(h);
             var p2 = p1.OffsetX(-200);
             var p3 = p1.OffsetX(200);
-            var line = DU.DrawLineLazy(p2, p3);
+            var line = DrawLineLazy(p2, p3);
             line.Layer = "W-DRAI-NOTE";
-            DU.ByLayer(line);
+            ByLayer(line);
         }
 
         public static Point2d NewMethod5(double HEIGHT, ref Vector2d v, Point3d basePt)
@@ -4914,10 +4943,10 @@
             if (Testing) return;
             if (leftOrRight)
             {
-                DU.DrawBlockReference("地漏系统", basePt, br =>
+                DrawBlockReference("地漏系统", basePt, br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
-                    DU.ByLayer(br);
+                    ByLayer(br);
                     br.ScaleFactors = new Scale3d(2, 2, 2);
                     if (br.IsDynamicBlock)
                     {
@@ -4927,11 +4956,11 @@
             }
             else
             {
-                DU.DrawBlockReference("地漏系统", basePt,
+                DrawBlockReference("地漏系统", basePt,
                br =>
                {
                    br.Layer = "W-DRAI-EQPM";
-                   DU.ByLayer(br);
+                   ByLayer(br);
                    br.ScaleFactors = new Scale3d(-2, 2, 2);
                    if (br.IsDynamicBlock)
                    {
@@ -4945,10 +4974,10 @@
         {
             if (leftOrRight)
             {
-                DU.DrawBlockReference("S型存水弯", basePt, br =>
+                DrawBlockReference("S型存水弯", basePt, br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
-                    DU.ByLayer(br);
+                    ByLayer(br);
                     br.ScaleFactors = new Scale3d(2, 2, 2);
                     if (br.IsDynamicBlock)
                     {
@@ -4959,11 +4988,11 @@
             }
             else
             {
-                DU.DrawBlockReference("S型存水弯", basePt,
+                DrawBlockReference("S型存水弯", basePt,
                    br =>
                    {
                        br.Layer = "W-DRAI-EQPM";
-                       DU.ByLayer(br);
+                       ByLayer(br);
                        br.ScaleFactors = new Scale3d(-2, 2, 2);
                        if (br.IsDynamicBlock)
                        {
@@ -4977,33 +5006,33 @@
         {
             if (leftOrRight)
             {
-                DU.DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
+                DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
-                    DU.ByLayer(br);
+                    ByLayer(br);
                     br.Rotation = GeoAlgorithm.AngleFromDegree(90);
                 });
             }
             else
             {
-                DU.DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
+                DrawBlockReference("清扫口系统", basePt, scale: scale, cb: br =>
                 {
                     br.Layer = "W-DRAI-EQPM";
-                    DU.ByLayer(br);
+                    ByLayer(br);
                     br.Rotation = GeoAlgorithm.AngleFromDegree(90 + 180);
                 });
             }
         }
         public static void DrawPipeCheckPoint(Point3d basePt, bool leftOrRight)
         {
-            DU.DrawBlockReference(blkName: "立管检查口", basePt: basePt,
+            DrawBlockReference(blkName: "立管检查口", basePt: basePt,
       cb: br =>
       {
           if (leftOrRight)
           {
               br.ScaleFactors = new Scale3d(-1, 1, 1);
           }
-          DU.ByLayer(br);
+          ByLayer(br);
           br.Layer = "W-DRAI-EQPM";
       });
         }
@@ -5015,20 +5044,20 @@
             var lastPt2 = points2.Last();
             {
                 var segs = points1.ToGLineSegments(basePt.OffsetY(HEIGHT - height1));
-                var lines = DU.DrawLineSegmentsLazy(segs);
+                var lines = DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
 
             {
                 var p1 = basePt.OffsetXY(lastPt1.X, -lastPt2.Y);
                 var p2 = p1.OffsetY(HEIGHT - height1 + lastPt1.Y + lastPt2.Y);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             {
                 var p1 = basePt.OffsetY(HEIGHT - height1);
                 var p2 = basePt.OffsetY(HEIGHT);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             {
@@ -5054,20 +5083,20 @@
             var lastPt2 = points2.Last();
             {
                 var segs = points1.ToGLineSegments(basePt.OffsetY(HEIGHT - height1));
-                var lines = DU.DrawLineSegmentsLazy(segs);
+                var lines = DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
 
             {
                 var p1 = basePt.OffsetXY(lastPt1.X, -lastPt2.Y);
                 var p2 = p1.OffsetY(HEIGHT - height1 + lastPt1.Y + lastPt2.Y);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             {
                 var p1 = basePt.OffsetY(HEIGHT - height1);
                 var p2 = basePt.OffsetY(HEIGHT);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             {
@@ -5078,7 +5107,7 @@
             {
                 var height2 = HEIGHT + lastPt2.Y;
                 var segs = points2.ToGLineSegments(basePt.OffsetY(HEIGHT - height2));
-                var lines = DU.DrawLineSegmentsLazy(segs);
+                var lines = DrawLineSegmentsLazy(segs);
                 lines.ForEach(line => SetDomePipeLineStyle(line));
             }
             {
@@ -5092,12 +5121,12 @@
             var lastPt = points.Last();
             var height = HEIGHT + lastPt.Y;
             var segs = points.ToGLineSegments(basePt.OffsetY(HEIGHT - height));
-            var lines = DU.DrawLineSegmentsLazy(segs);
+            var lines = DrawLineSegmentsLazy(segs);
             lines.ForEach(line => SetDomePipeLineStyle(line));
             {
                 var p1 = basePt.OffsetY(HEIGHT - height);
                 var p2 = basePt.OffsetY(HEIGHT);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
                 v += new Vector2d(lastPt.X, 0);
             }
@@ -5108,19 +5137,19 @@
             var lastPt = points.Last();
             var height = LONG_TRANSLATOR_HEIGHT1;
             var segs = points.ToGLineSegments(basePt.OffsetY(HEIGHT - height));
-            var lines = DU.DrawLineSegmentsLazy(segs);
+            var lines = DrawLineSegmentsLazy(segs);
             lines.ForEach(line => SetDomePipeLineStyle(line));
 
             {
                 var p1 = basePt.OffsetX(points.Last().X);
                 var p2 = p1.OffsetY(HEIGHT - height + lastPt.Y);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             {
                 var p1 = basePt.OffsetY(HEIGHT - height);
                 var p2 = basePt.OffsetY(HEIGHT);
-                var line = DU.DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                var line = DrawLineSegmentLazy(new GLineSegment(p1, p2));
                 SetDomePipeLineStyle(line);
             }
             v += new Vector2d(lastPt.X, 0);
@@ -5131,24 +5160,24 @@
         }
         public static void DrawDirtyWaterWell(Point3d basePt, string value)
         {
-            DU.DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-400),
+            DrawBlockReference(blkName: "污废合流井编号", basePt: basePt.OffsetY(-400),
             props: new Dictionary<string, string>() { { "-", value } },
             cb: br =>
             {
                 br.Layer = "W-DRAI-EQPM";
-                DU.ByLayer(br);
+                ByLayer(br);
             });
         }
         public static void SetVentPipeLineStyle(Line line)
         {
             line.Layer = "W-DRAI-VENT-PIPE";
-            DU.ByLayer(line);
+            ByLayer(line);
         }
 
         public static void SetDomePipeLineStyle(Line line)
         {
             line.Layer = "W-DRAI-DOME-PIPE";
-            DU.ByLayer(line);
+            ByLayer(line);
         }
     }
     public class DrainageGeoData
@@ -5391,9 +5420,43 @@
             return (DrainageCadData)MemberwiseClone();
         }
     }
-    [Feng]
+
     public static class THDrainageService
     {
+        public static List<ThStoreysData> GetStoreys(Geometry range, AcadDatabase adb, CommandContext ctx)
+        {
+            return ctx.StoreyContext.thStoreysDatas;
+        }
+        public static List<ThStoreysData> GetStoreys(Point3dCollection range, AcadDatabase adb)
+        {
+            var storeysRecEngine = new ThStoreysRecognitionEngine();
+            storeysRecEngine.Recognize(adb.Database, range);
+            var storeys = new List<ThStoreysData>();
+            foreach (var s in storeysRecEngine.Elements.OfType<ThMEPEngineCore.Model.Common.ThStoreys>())
+            {
+                var e = adb.Element<Entity>(s.ObjectId);
+                var data = new ThStoreysData()
+                {
+                    Boundary = e.Bounds.ToGRect(),
+                    Storeys = s.Storeys,
+                    StoreyType = s.StoreyType,
+                };
+                storeys.Add(data);
+            }
+            FixStoreys(storeys);
+            return storeys;
+        }
+        public static void FixStoreys(List<ThStoreysData> storeys)
+        {
+            var lst1 = storeys.Where(s => s.Storeys.Count == 1).Select(s => s.Storeys[0]).ToList();
+            foreach (var s in storeys.Where(s => s.Storeys.Count > 1).ToList())
+            {
+                var hs = new HashSet<int>(s.Storeys);
+                foreach (var _s in lst1) hs.Remove(_s);
+                s.Storeys.Clear();
+                s.Storeys.AddRange(hs.OrderBy(i => i));
+            }
+        }
         public static bool IsToilet(string roomName)
         {
             //1)	包含“卫生间” //2)	包含“主卫” //3)	包含“次卫”
@@ -5466,921 +5529,6 @@
         {
             return Regex.IsMatch(label, @"^D\d?L");
         }
-        public static void Register(Action<string, Action> register)
-        {
-            register("拖把池", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var names = new List<string>() { "A-Kitchen-9" };
-                    Dbg.DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (names.Any(x => name.Contains(x)))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            DU.DrawRectLazy(r, 10);
-                            Dbg.ShowWhere(r);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            });
-            register("厨房", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    var kitchens = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (IsKitchen(kv.Key))
-                        {
-                            kitchens.Add(kv.Value);
-                        }
-                    }
-                    foreach (var kc in kitchens)
-                    {
-                        DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
-                    }
-                }
-            });
-            register("阳台", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    var kitchens = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (IsBalcony(kv.Key))
-                        {
-                            kitchens.Add(kv.Value);
-                        }
-                    }
-                    foreach (var kc in kitchens)
-                    {
-                        DU.DrawRectLazy(kc.Envelope.ToGRect(), 100);
-                    }
-                }
-            });
-            register("阳台有洗衣机", () =>
-            {
-                //fl1-2 fl1-3
-                //fl1-2 fl1-4 fl2-2 fl2-4
-                //fl1-4 fl1-3 fl2-3 fl2-4
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    var balcony = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (IsBalcony(kv.Key))
-                        {
-                            balcony.Add(kv.Value);
-                        }
-                    }
-                    var f = GeoFac.CreateIntersectsSelector(balcony);
-                    Dbg.DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (name.Contains("A-Toilet-9"))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            if (f(r.ToPolygon()).Any())
-                            {
-                                DU.DrawRectLazy(r, 10);
-                                Dbg.ShowWhere(r);
-                            }
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            });
-            register("厨房有洗涤盆", () =>
-            {
-                //图1 fl1-1 fl1-4
-                //图2 fl1-1 fl1-3 fl2-1 fl2-3
-                //图3 fl1-1 fl1-2 fl2-2 fl2-1
-
-                //厨房外扩350再判断
-
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    var kitchens = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (IsKitchen(kv.Key))
-                        {
-                            kitchens.Add(kv.Value);
-                        }
-                    }
-                    var f = GeoFac.CreateIntersectsSelector(kitchens);
-                    var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
-                    Dbg.DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (names.Any(x => name.Contains(x)))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            if (f(r.ToPolygon()).Any())
-                            {
-                                DU.DrawRectLazy(r, 10);
-                                Dbg.ShowWhere(r);
-                            }
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            });
-            register("ThDistributionElementExtractor", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-
-
-                    var visitor = new ThModelExtractionVisitor();
-                    var extractor = new ThDistributionElementExtractor();
-                    extractor.Accept(visitor);
-                    extractor.Extract(adb.Database);
-                    Console.WriteLine(visitor.Results.Count);
-                }
-            });
-            register("洗衣机", () =>
-            {
-                var rs = new List<GRect>();
-                var xclips = new List<GRect>();
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var names = new List<string>() { "A-Toilet-9", "$xiyiji" };
-                    Dbg.DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (names.Any(x => name.Contains(x)))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            rs.Add(r);
-                            //DU.DrawRectLazy(r, 10);
-                            //Dbg.ShowWhere(r);
-                            return true;
-                        }
-                        return false;
-                    }, doXClip: (br, m) =>
-                    {
-                        var xclip = br.XClipInfo();
-                        var poly = xclip.Polygon;
-                        if (poly != null)
-                        {
-                            poly.TransformBy(m);
-                            //var r = poly.ToNTSGeometry().Envelope.ToGRect();
-                            //var gf = poly.ToNTSGeometry().ToIPreparedGeometry();
-                            //rs = rs.Distinct().ToList();
-                            //var geos = rs.Select(x => x.ToPolygon()).ToList();
-                            //rs = geos.Where(x => gf.Contains(x)).Select(geos).ToList(rs);
-                            var r = poly.Bounds.ToGRect();
-                            if (r.IsValid)
-                            {
-                                //xclips.Add(r);
-                            }
-                        }
-                    });
-                    rs = rs.Distinct().ToList();
-                    if (xclips.Count > 0)
-                    {
-                        var range = GeoFac.CreateGeometryEx(xclips.Select(x => x.ToPolygon()).ToList());
-                        var geos = rs.Select(x => x.ToPolygon()).ToList();
-                        var rsf = GeoFac.CreateIntersectsSelector(geos);
-                        rs = rsf(range).Select(geos).ToList(rs);
-                    }
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r, 10);
-                        Dbg.ShowWhere(r);
-                    }
-                }
-            });
-            register("XrefStatus", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var br = Dbg.SelectEntity<BlockReference>(adb);
-                    var r = adb.Blocks.Element(br.BlockTableRecord);
-                    Console.WriteLine(r.XrefStatus);
-                }
-            });
-            register("洗脸盆", () =>
-             {
-                 Dbg.FocusMainWindow();
-                 using (Dbg.DocumentLock)
-                 using (var adb = AcadDatabase.Active())
-                 using (var tr = new DrawingTransaction(adb))
-                 {
-                     var db = adb.Database;
-                     Dbg.BuildAndSetCurrentLayer(db);
-                     var names = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
-                     Dbg.DoExtract(adb, (br, m) =>
-                     {
-                         var name = br.GetEffectiveName();
-                         if (names.Any(x => name.Contains(x)))
-                         {
-                             var e = br.GetTransformedCopy(m);
-                             var r = e.Bounds.ToGRect();
-                             if (!r.IsValid) return true;
-                             DU.DrawRectLazy(r, 10);
-                             Dbg.ShowWhere(r);
-                             return true;
-                         }
-                         return false;
-                     });
-                 }
-             });
-            register("洗衣机抬高的触发条件", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    var kitchens = new List<Geometry>();
-                    foreach (var kv in roomData)
-                    {
-                        if (IsKitchen(kv.Key))
-                        {
-                            kitchens.Add(kv.Value);
-                        }
-                    }
-                    var washingMachines = new List<Geometry>();
-
-                    Dbg.DoExtract(adb, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-
-                        if (name.Contains("A-Toilet-9"))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            if (!r.IsValid) return true;
-                            washingMachines.Add(r.ToPolygon());
-                            return true;
-                        }
-                        return false;
-                    });
-
-                    var f = GeoFac.CreateIntersectsSelector(washingMachines);
-                    foreach (var k in kitchens)
-                    {
-                        if (f(k).Any())
-                        {
-                            Console.WriteLine("OK");
-                            return;
-                        }
-                    }
-                }
-            });
-            register("$JB-XiDiPen-", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var rs = new List<GRect>();
-                    Dbg.DoExtract(Dbg.SelectEntity<BlockReference>(adb), Matrix3d.Identity, (br, m) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕") || name.Contains("0$asdfghjgjhkl"))
-                        {
-                            var e = br.GetTransformedCopy(m);
-                            var r = e.Bounds.ToGRect();
-                            rs.Add(r);
-                            return true;
-                        }
-                        return false;
-                    });
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r, 10);
-                    }
-                }
-            });
-            register("$JB-XiDiPen-", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    //var br = Dbg.SelectEntity<BlockReference>(adb);
-                    var ext = new ThDistributionElementExtractor();
-                    var visitor = new BlockReferenceVisitor();
-                    var names = new List<string>();
-                    visitor.IsTargetBlockReferenceCb = br =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (name.Contains("$JB-XiDiPen-") || name.Contains("0$座厕"))
-                        {
-                            names.Add(name);
-                            return true;
-                        }
-                        return false;
-                    };
-                    var rs = new List<GRect>();
-                    visitor.HandleBlockReferenceCb = (br, m) =>
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        rs.Add(r);
-                    };
-                    ext.Accept(visitor);
-                    ext.Extract(adb.Database);
-                    Console.WriteLine(names.ToJson());
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r, 10);
-                    }
-                }
-            });
-            register("A-Kitchen-Toilet", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-
-                    var list = new List<string>();
-                    var visitor = new BlockReferenceVisitor();
-                    visitor.IsTargetBlockReferenceCb = (br) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        list.Add(name);
-                        if (name.Contains("|A-Kitchen-") || name.Contains("|A-Toilet-") || name.EndsWith("|lp") || name.EndsWith("|lp1") || name.EndsWith("|lp2") || name.EndsWith("|A-lavabo"))
-                        {
-                            return true;
-                        }
-                        return false;
-                    };
-
-                    var rs = new List<GRect>();
-                    visitor.HandleBlockReferenceCb = (br, m) =>
-                    {
-
-                        var e = br.GetTransformedCopy(m);
-                        var r = e.Bounds.ToGRect();
-                        rs.Add(r);
-                        //rs.Add(br.GeometryExtentsBestFit(m).ToGRect());
-                        //var name = br.GetEffectiveName();
-                    };
-                    var extractor = new ThDistributionElementExtractor();
-                    extractor.Accept(visitor);
-                    extractor.Extract(db);
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r, 10);
-                        //Dbg.ShowWhere(r);
-                    }
-                    Console.WriteLine(list.ToJson());
-                    Dbg.SetText(list);
-                }
-            });
-            register("A-Kitchen-", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-
-                    var list = new List<string>();
-                    var visitor = new BlockReferenceVisitor();
-                    visitor.IsTargetBlockReferenceCb = (br) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (name.Contains("A-Kitchen-"))
-                        {
-                            list.Add(name);
-                            return true;
-                        }
-                        return false;
-                    };
-
-                    var rs = new List<GRect>();
-                    visitor.HandleBlockReferenceCb = (br, m) =>
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        rs.Add(e.Bounds.ToGRect());
-                    };
-                    var extractor = new ThDistributionElementExtractor();
-                    extractor.Accept(visitor);
-                    extractor.Extract(db);
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r);
-                    }
-                    Console.WriteLine(list.ToJson());
-                    Dbg.SetText(list);
-                }
-            });
-            register("A-Toilet-", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-
-                    var list = new List<string>();
-                    var visitor = new BlockReferenceVisitor();
-                    visitor.IsTargetBlockReferenceCb = (br) =>
-                    {
-                        var name = br.GetEffectiveName();
-                        if (name.Contains("A-Toilet-"))
-                        {
-                            list.Add(name);
-                            return true;
-                        }
-                        return false;
-                    };
-
-                    var rs = new List<GRect>();
-                    visitor.HandleBlockReferenceCb = (br, m) =>
-                    {
-                        var e = br.GetTransformedCopy(m);
-                        rs.Add(e.Bounds.ToGRect());
-                    };
-                    var extractor = new ThDistributionElementExtractor();
-                    extractor.Accept(visitor);
-                    extractor.Extract(db);
-                    foreach (var r in rs)
-                    {
-                        DU.DrawRectLazy(r);
-                    }
-                    Console.WriteLine(list.ToJson());
-                    Dbg.SetText(list);
-                }
-            });
-            register("CollectRoomData", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var list = DrainageService.CollectRoomData(adb);
-                    Console.WriteLine(list.Select(x => x.Key).ToJson());
-                }
-            });
-            register("DrawOutlets2", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var pt = Dbg.SelectPoint().ToPoint2d();
-                    DrainageSystemDiagram.DrawOutlets2(pt);
-                }
-            });
-            register("🔴draw byuivm", () =>
-            {
-                try
-                {
-                    var vm = new ThMEPWSS.Diagram.ViewModel.DrainageSystemDiagramViewModel();
-                    vm.Params.CouldHavePeopleOnRoof = true;
-                    ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = new ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext() { ViewModel = vm, };
-                    ThDrainageService.CollectFloorListDatasEx();
-                    DrainageSystemDiagram.DrawDrainageSystemDiagram(vm);
-                }
-                finally
-                {
-                    ThMEPWSS.Pipe.Service.ThDrainageService.commandContext = null;
-                }
-            });
-            register("🔴draw bycmd", () => { DrainageSystemDiagram.DrawDrainageSystemDiagram(); });
-            register("CollectRoomData", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var roomData = DrainageService.CollectRoomData(adb);
-                    foreach (var kv in roomData)
-                    {
-                        if (kv.Key == "")
-                        {
-                            DU.DrawGeometryLazy(kv.Value, ents => ents.ForEach(e => { e.ColorIndex = 3; if (e is Polyline pl) { pl.ConstantWidth = 10; } }));
-                        }
-                    }
-                }
-            });
-            register("三板斧", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                {
-                    Dbg.LayerThreeAxes(adb.Layers.Select(x => x.Name).ToList());
-                }
-            });
-            register("load drDatas and draw", () =>
-            {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
-                var drDatas = Dbg.LoadFromTempJsonFile<List<DrainageDrawingData>>("drainage_drDatas");
-                Dbg.FocusMainWindow();
-                var basePoint = Dbg.SelectPoint().ToPoint2d();
-
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var pipeGroupItems = DrainageSystemDiagram.GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                    DU.Dispose();
-                    DrainageSystemDiagram.DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys);
-                    DU.Draw(adb);
-                }
-            });
-            register("load geoData save drDatas noDraw", () =>
-            {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
-                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("drainage_geoData");
-
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, true);
-                    Dbg.SaveToTempJsonFile(drDatas, "drainage_drDatas");
-                }
-            });
-            register("load geoData save drDatas", () =>
-            {
-                var storeysItems = Dbg.LoadFromTempJsonFile<List<DrainageSystemDiagram.StoreysItem>>("drainage_storeysItems");
-                var geoData = Dbg.LoadFromTempJsonFile<DrainageGeoData>("drainage_geoData");
-
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var drDatas = DrainageSystemDiagram.CreateDrainageDrawingData(adb, geoData, false);
-                    Dbg.SaveToTempJsonFile(drDatas, "drainage_drDatas");
-                }
-            });
-            register("save geoData", () =>
-            {
-                Dbg.FocusMainWindow();
-                var range = Dbg.TrySelectRange();
-                if (range == null) return;
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<DrainageSystemDiagram.StoreysItem> storeysItems, out DrainageGeoData geoData);
-                    Dbg.SaveToTempJsonFile(storeysItems, "drainage_storeysItems");
-                    Dbg.SaveToTempJsonFile(geoData, "drainage_geoData");
-                }
-            });
-            register("draw14(from cache)", DrainageSystemDiagram.DrawDrainageSystemDiagramFromCache);
-            register("draw13(log only)", DrainageSystemDiagram.DrawDrainageSystemDiagramLogOnly);
-            register("draw12(create cache)", DrainageSystemDiagram.DrawDrainageSystemDiagramCreateCache);
-            register("draw11", DrainageSystemDiagram.DrainageSystemDiagramStartPoint);
-            register("draw8", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw8(drDatas, basePt.ToPoint2d());
-                }
-            });
-            register("draw7", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>(@"D:\DATA\temp\637602152659535447.json");
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw7(drDatas, basePt.ToPoint2d());
-                }
-            });
-            register("UnHighLightAll", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                {
-                    HighlightHelper.UnHighLight(adb.ModelSpace.OfType<Entity>());
-                }
-            });
-            register("draw1", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var basePt = Dbg.SelectPoint();
-                    if (false)
-                    {
-                        var dg = new DrainageSystemDiagram();
-                        dg.Draw(basePt);
-                    }
-                    else
-                    {
-                        DrainageSystemDiagram.BeginToDrawDrainageSystemDiagram(basePt);
-                    }
-                }
-            });
-            register("draw2", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var basePt = Dbg.SelectPoint();
-                    if (false)
-                    {
-                        var dg = new DrainageSystemDiagram();
-                        dg.Draw(basePt);
-                    }
-                    else
-                    {
-                        DrainageSystemDiagram.StartToDrawDrainageSystemDiagram(basePt);
-                    }
-                }
-            });
-            register("draw3", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.PreparedToDrawDrainageSystemDiagram(basePt.ToPoint2d());
-                }
-            });
-            register("draw4", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.ReadyToDrawDrainageSystemDiagram(basePt.ToPoint2d());
-                }
-            });
-            register("draw6", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.AbleToDrawDrainageSystemDiagram(basePt.ToPoint2d());
-                }
-            });
-            register("根据点收集向量数据", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var points = new List<Point3d>();
-                    while (Dbg.TrySelectPoint(out Point3d pt))
-                    {
-                        points.Add(pt);
-                    }
-                    var vecs = points.Select(p => p.ToPoint2d()).ToArray().ToVector2ds();
-                    Dbg.PrintLine($"var vecs=new List<Vector2d>{{{vecs.Select(v => $"new Vector2d({Convert.ToInt64(v.X)},{Convert.ToInt64(v.Y)})").JoinWith(",")}}};");
-                }
-            });
-            register("根据点收集点数据", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var points = new List<Point3d>();
-                    while (Dbg.TrySelectPoint(out Point3d pt))
-                    {
-                        points.Add(pt);
-                    }
-                    var v = points[0].ToVector3d();
-                    for (int i = 0; i < points.Count; i++)
-                    {
-                        points[i] = points[i] - v;
-                    }
-                    Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
-                }
-            });
-            register("根据线收集点数据", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var basePt = Dbg.SelectPoint().ToPoint2d();
-                    var lines = Dbg.SelectEntities(adb).OfType<Line>().ToList();
-                    if (lines.Count > 0)
-                    {
-                        //var points = new List<Point2d>();
-                        //points.Add(lines[0].StartPoint.ToPoint2d());
-                        //points.Add(lines[0].EndPoint.ToPoint2d());
-                        //for (int i = 1; i < lines.Count; i++)
-                        //{
-                        //    points.Add(lines[i].EndPoint.ToPoint2d());
-                        //}
-                        //Dbg.PrintLine(basePt.ToPoint2d().ToCadJson());
-                        //Dbg.PrintLine(points.ToCadJson());
-                        var points = new List<Point2d>() { Point2d.Origin };
-                        var curPt = basePt;
-                        foreach (var line in lines)
-                        {
-                            var p1 = line.StartPoint.ToPoint2d();
-                            var p2 = line.EndPoint.ToPoint2d();
-                            if (p1.GetDistanceTo(curPt) < 1)
-                            {
-                                points.Add((p2 - basePt).ToPoint2d());
-                                curPt = p2;
-                            }
-                            else if (p2.GetDistanceTo(curPt) < 1)
-                            {
-                                points.Add((p1 - basePt).ToPoint2d());
-                                curPt = p1;
-                            }
-                            else
-                            {
-                                Dbg.PrintLine("err");
-                                return;
-                            }
-                        }
-                        //Dbg.PrintLine(points.Select(p=>p.ToLongPoint2d()).ToCadJson());
-                        Dbg.PrintLine($"var points=new Point2d[]{{{points.Select(p => $"new Point2d({Convert.ToInt64(p.X)},{Convert.ToInt64(p.Y)})").JoinWith(",")}}};");
-                    }
-
-                }
-            });
-            register("ImportElementsFromStdDwg", () => ThRainSystemService.ImportElementsFromStdDwg());
-            register("CreateFloorFraming", ThMEPWSS.Common.Utils.CreateFloorFraming);
-            register("🔴一些工具", () => { FengDbgTest.FengDbgTesting.Register(typeof(ThDebugClass.DebugTools)); });
-            register("0", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db, "0");
-                }
-            });
-            register("feng_dbg_test_washing_machine", () =>
-            {
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db, "feng_dbg_test_washing_machine");
-                }
-            });
-            register("DrawWashingMachineRaisingSymbol", () =>
-            {
-                static void SetDomePipeLineStyle(Line line)
-                {
-                    line.Layer = "W-DRAI-DOME-PIPE";
-                    DU.ByLayer(line);
-                }
-                static void DrawDomePipes(IEnumerable<GLineSegment> segs)
-                {
-                    var lines = DU.DrawLineSegmentsLazy(segs.Where(x => x.Length > 0));
-                    lines.ForEach(line => SetDomePipeLineStyle(line));
-                }
-
-                Dbg.FocusMainWindow();
-                using (Dbg.DocumentLock)
-                using (var adb = AcadDatabase.Active())
-                using (var tr = new DrawingTransaction(adb))
-                {
-                    var db = adb.Database;
-                    Dbg.BuildAndSetCurrentLayer(db);
-                    var pt = Dbg.SelectPoint().ToPoint2d();
-                    var vecs = new List<Vector2d> { new Vector2d(-895, 0), new Vector2d(-90, 90), new Vector2d(0, 700), new Vector2d(-285, 0) };
-                    var segs = vecs.ToGLineSegments(pt);
-                    DrainageSystemDiagram.DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, true);
-                    DrawDomePipes(segs);
-                }
-            });
-            register("", () => { });
-            register("", () => { });
-        }
-
         public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
         {
             public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Autodesk.AutoCAD.DatabaseServices.Entity dbObj, Matrix3d matrix)
@@ -6422,7 +5570,6 @@
 
             private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
             {
-                Dbg.ShowWhere(blkref.GetTransformedCopy(matrix));
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
                     Geometry = blkref.GetTransformedCopy(matrix),
@@ -6431,16 +5578,15 @@
         }
 
     }
-
+    public class CommandContext
+    {
+        public Point3dCollection range;
+        public StoreyContext StoreyContext;
+        public Diagram.ViewModel.DrainageSystemDiagramViewModel ViewModel;
+        public System.Windows.Window window;
+    }
     public class ThDrainageService
     {
-        public class CommandContext
-        {
-            public Point3dCollection range;
-            public ThMEPWSS.Pipe.Service.ThRainSystemService.StoreyContext StoreyContext;
-            public Diagram.ViewModel.DrainageSystemDiagramViewModel ViewModel;
-            public System.Windows.Window window;
-        }
         public static CommandContext commandContext;
         public static void ConnectLabelToLabelLine(DrainageGeoData geoData)
         {
@@ -6498,7 +5644,7 @@
             }
             {
                 //处理标注重叠的情况
-                geoData.Labels = geoData.Labels.Distinct(Dbg.CreateEqualityComparer<CText>((x, y) => x.Text == y.Text && x.Boundary.EqualsTo(y.Boundary, 10))).ToList();
+                geoData.Labels = geoData.Labels.Distinct(CreateEqualityComparer<CText>((x, y) => x.Text == y.Text && x.Boundary.EqualsTo(y.Boundary, 10))).ToList();
             }
             {
                 //其他的也顺手处理下好了。。。
@@ -6521,7 +5667,6 @@
                 }
                 geoData.VerticalPipes = pipes.Where(x => x.UserData == null).Select(pipes).ToList(_pipes);
             }
-            //if (Dbg._)
             {
                 foreach (var ct in geoData.Labels)
                 {
@@ -6574,11 +5719,22 @@
                 || label.StartsWith("J1L") || label.StartsWith("J2L")
                 ;
         }
+        public static void FixStoreys(List<ThStoreysData> storeys)
+        {
+            var lst1 = storeys.Where(s => s.Storeys.Count == 1).Select(s => s.Storeys[0]).ToList();
+            foreach (var s in storeys.Where(s => s.Storeys.Count > 1).ToList())
+            {
+                var hs = new HashSet<int>(s.Storeys);
+                foreach (var _s in lst1) hs.Remove(_s);
+                s.Storeys.Clear();
+                s.Storeys.AddRange(hs.OrderBy(i => i));
+            }
+        }
         public static void CollectFloorListDatasEx()
         {
-            static ThRainSystemService.StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<ThMEPWSS.Model.FloorFramed> resFloors)
+            static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<ThMEPWSS.Model.FloorFramed> resFloors)
             {
-                var ctx = new ThRainSystemService.StoreyContext();
+                var ctx = new StoreyContext();
 
                 if (range != null)
                 {
@@ -6604,12 +5760,12 @@
                     };
                     storeys.Add(data);
                 }
-                ThRainSystemService.FixStoreys(storeys);
+                FixStoreys(storeys);
                 ctx.thStoreysDatas = storeys;
                 return ctx;
             }
 
-            Dbg.FocusMainWindow();
+            FocusMainWindow();
             if (ThMEPWSS.Common.FramedReadUtil.SelectFloorFramed(out List<ThMEPWSS.Model.FloorFramed> resFloors))
             {
                 var ctx = commandContext;
@@ -6620,8 +5776,8 @@
         }
         public static void CollectFloorListDatas()
         {
-            Dbg.FocusMainWindow();
-            var range = Dbg.TrySelectRange();
+            FocusMainWindow();
+            var range = TrySelectRange();
             if (range == null) return;
             var ctx = commandContext;
             ctx.range = range;
@@ -6629,9 +5785,9 @@
             ctx.StoreyContext = GetStoreyContext(range, adb);
             InitFloorListDatas(adb);
         }
-        public static ThRainSystemService.StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb)
+        public static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb)
         {
-            var ctx = new ThRainSystemService.StoreyContext();
+            var ctx = new StoreyContext();
             var storeysRecEngine = new ThStoreysRecognitionEngine();
             storeysRecEngine.Recognize(adb.Database, range);
             var storeys = new List<ThStoreysData>();
@@ -6647,7 +5803,7 @@
                 };
                 storeys.Add(data);
             }
-            ThRainSystemService.FixStoreys(storeys);
+            FixStoreys(storeys);
             ctx.thStoreysDatas = storeys;
             return ctx;
         }
@@ -6792,12 +5948,11 @@ namespace ThMEPWSS.Pipe.Service
     using ThCADExtension;
     using ThMEPEngineCore.Engine;
     using System.Text;
-    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-    using DU = ThMEPWSS.Assistant.DrawUtils;
+    using static ThMEPWSS.Assistant.DrawUtils;
     using ThCADCore.NTS;
     using Autodesk.AutoCAD.Colors;
     using NetTopologySuite.Geometries;
-    using ThMEPWSS.DebugNs;
+    using ThMEPWSS.ReleaseNs;
     using ThMEPWSS.Assistant;
     using ThMEPWSS.Pipe.Model;
     using System.IO;
@@ -6827,7 +5982,7 @@ namespace ThMEPWSS.Pipe.Service
         List<GRect> mopPools => geoData.MopPools;
         List<GRect> basins => geoData.Basins;
         List<GRect> pipeKillers => geoData.PipeKillers;
-        public void CollectStoreys(Geometry range, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
+        public void CollectStoreys(Geometry range, CommandContext ctx)
         {
             storeys.AddRange(ctx.StoreyContext.thStoreysDatas.Select(x => x.Boundary));
         }
@@ -6837,7 +5992,7 @@ namespace ThMEPWSS.Pipe.Service
             {
                 washingMachines.Add(c.Bounds.ToGRect());
             }
-            Dbg.DoExtract(adb, (br, m) =>
+            DoExtract(adb, (br, m) =>
             {
                 var ok = false;
                 var basinNames = new List<string>() { "A-Kitchen-3", "A-Kitchen-4", "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4", "-XiDiPen-" };
@@ -6883,35 +6038,6 @@ namespace ThMEPWSS.Pipe.Service
                 }
                 return ok;
             });
-
-            if (Dbg._)
-            {
-                var visitor = new BlockReferenceVisitor();
-                visitor.IsTargetBlockReferenceCb = (br) =>
-                {
-                    var name = br.GetEffectiveName();
-                    if (name.Contains("A-Toilet-") || name.Contains("A-Kitchen-"))
-                    {
-                        return true;
-                    }
-                    return false;
-                };
-                visitor.HandleBlockReferenceCb = (br, m) =>
-                {
-                    var name = br.GetEffectiveName();
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    if (!r.IsValid) return;
-                    pipeKillers.Add(r);
-                    if (name.Contains("A-Toilet-9"))
-                    {
-                        washingMachines.Add(r);
-                    }
-                };
-                var extractor = new ThDistributionElementExtractor();
-                extractor.Accept(visitor);
-                extractor.Extract(adb.Database);
-            }
         }
         public void CollectStoreys(Point3dCollection range)
         {
@@ -7383,112 +6509,6 @@ namespace ThMEPWSS.Pipe.Service
             };
         }
     }
-    public partial class DrainageService
-    {
-        public static void TestDrawingDatasCreation(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas)
-        {
-
-            Dbg.AddLazyAction("画骨架", adb =>
-            {
-                foreach (var s in geoData.Storeys)
-                {
-                    var e = DU.DrawRectLazy(s);
-                    e.ColorIndex = 1;
-                }
-                for (int storeyI = 0; storeyI < cadDatas.Count; storeyI++)
-                {
-                    var item = cadDatas[storeyI];
-                    foreach (var o in item.LabelLines)
-                    {
-                        var j = cadDataMain.LabelLines.IndexOf(o);
-                        var m = geoData.LabelLines[j];
-                        var e = DU.DrawLineSegmentLazy(m);
-                        e.ColorIndex = 1;
-                    }
-                    foreach (var pl in item.Labels)
-                    {
-                        var j = cadDataMain.Labels.IndexOf(pl);
-                        var m = geoData.Labels[j];
-                        var e = DU.DrawTextLazy(m.Text, m.Boundary.LeftButtom);
-                        e.ColorIndex = 2;
-                        var _pl = DU.DrawRectLazy(m.Boundary);
-                        _pl.ColorIndex = 2;
-                    }
-                    foreach (var o in item.VerticalPipes)
-                    {
-                        var j = cadDataMain.VerticalPipes.IndexOf(o);
-                        var m = geoData.VerticalPipes[j];
-                        var e = DU.DrawRectLazy(m);
-                        e.ColorIndex = 3;
-                    }
-                    {
-                        var cl = Color.FromRgb(0x91, 0xc7, 0xae);
-                        foreach (var o in item.WrappingPipes)
-                        {
-                            var j = cadDataMain.WrappingPipes.IndexOf(o);
-                            var m = geoData.WrappingPipes[j];
-                            var e = DU.DrawRectLazy(m);
-                            e.Color = cl;
-                        }
-                    }
-                    foreach (var o in item.FloorDrains)
-                    {
-                        var j = cadDataMain.FloorDrains.IndexOf(o);
-                        var m = geoData.FloorDrains[j];
-                        var e = DU.DrawRectLazy(m);
-                        e.ColorIndex = 6;
-                    }
-                    foreach (var o in item.WaterPorts)
-                    {
-                        var j = cadDataMain.WaterPorts.IndexOf(o);
-                        var m = geoData.WaterPorts[j];
-                        var e = DU.DrawRectLazy(m);
-                        e.ColorIndex = 7;
-                    }
-                    foreach (var o in item.WashingMachines)
-                    {
-                        var j = cadDataMain.WashingMachines.IndexOf(o);
-                        var m = geoData.WashingMachines[j];
-                        var e = DU.DrawRectLazy(m);
-                        e.ColorIndex = 1;
-                    }
-                    foreach (var o in item.CleaningPorts)
-                    {
-                        var j = cadDataMain.CleaningPorts.IndexOf(o);
-                        var m = geoData.CleaningPorts[j];
-                        if (false) DU.DrawGeometryLazy(new GCircle(m, 50).ToCirclePolygon(36), ents => ents.ForEach(e => e.ColorIndex = 7));
-                        DU.DrawRectLazy(GRect.Create(m, 50));
-                    }
-                    {
-                        var cl = Color.FromRgb(4, 229, 230);
-                        foreach (var o in item.DLines)
-                        {
-                            var j = cadDataMain.DLines.IndexOf(o);
-                            var m = geoData.DLines[j];
-                            var e = DU.DrawLineSegmentLazy(m);
-                            e.Color = cl;
-                        }
-                    }
-                }
-            });
-            Dbg.AddLazyAction("开始分析", adb =>
-            {
-                CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string sb, out List<DrainageDrawingData> drDatas);
-
-                Dbg.PrintText(sb.ToString());
-                Dbg.AddButton("Dbg.PrintText(drDatas.ToJson());", () => { Dbg.PrintText(drDatas.ToJson()); });
-                Dbg.AddButton("Dbg.SaveToJsonFile(drDatas);", () => { Dbg.SaveToJsonFile(drDatas); });
-                Dbg.AddLazyAction("draw8", adb =>
-                {
-                    Dbg.FocusMainWindow();
-                    var basePt = Dbg.SelectPoint();
-                    DrainageSystemDiagram.draw8(drDatas, basePt.ToPoint2d());
-                });
-            });
-        }
-
-
-    }
     public partial class DrainageSystemDiagram
     {
         public static void draw7(List<DrainageDrawingData> drDatas, Point2d basePoint)
@@ -7573,8 +6593,6 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
 
-            Dbg.Log(groups);
-
             DrawVer1(new DrawingOption()
             {
                 BasePoint = basePoint,
@@ -7628,42 +6646,12 @@ namespace ThMEPWSS.Pipe.Service
                     }
             }
         }
-        public static void draw10()
-        {
-            //3号图纸比较好
-            Dbg.FocusMainWindow();
-            var range = Dbg.TrySelectRange();
-            if (range == null) return;
-            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
-
-            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-
-            var pt = point3D.ToPoint2d();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                List<StoreysItem> storeysItems;
-                List<DrainageDrawingData> drDatas;
-                CollectDrainageData(range, adb, out storeysItems, out drDatas);
-                if (!NoDraw)
-                {
-                    Draw(drDatas, pt, storeysItems);
-                }
-                else
-                {
-                    Dbg.SaveToTempJsonFile(drDatas);
-                    Dbg.SaveToTempJsonFile(storeysItems);
-                }
-            }
-        }
-
         public static bool CollectDrainageData(Point3dCollection range, AcadDatabase adb, out List<StoreysItem> storeysItems, out List<DrainageDrawingData> drDatas, bool noWL = false)
         {
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData);
             return CreateDrainageDrawingData(adb, out drDatas, noWL, geoData);
         }
-        public static bool CollectDrainageData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out List<DrainageDrawingData> drDatas, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx, bool noWL = false)
+        public static bool CollectDrainageData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = false)
         {
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData, ctx);
             return CreateDrainageDrawingData(adb, out drDatas, noWL, geoData);
@@ -7696,15 +6684,14 @@ namespace ThMEPWSS.Pipe.Service
             var cadDatas = cadDataMain.SplitByStorey();
             var roomData = DrainageService.CollectRoomData(adb);
             DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out drDatas, roomData: roomData);
-            Dbg.PrintText(logString);
-            if (noDraw) DU.Dispose();
+            if (noDraw) Dispose();
             return drDatas;
         }
 
-        public static void CollectDrainageGeoData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out DrainageGeoData geoData, ThMEPWSS.Pipe.Service.ThDrainageService.CommandContext ctx)
+        public static void CollectDrainageGeoData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out DrainageGeoData geoData, CommandContext ctx)
         {
-            var storeys = ThRainSystemService.GetStoreys(range, adb, ctx);
-            ThRainSystemService.FixStoreys(storeys);
+            var storeys = GetStoreys(range, adb, ctx);
+            FixStoreys(storeys);
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
@@ -7712,8 +6699,8 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static void CollectDrainageGeoData(Point3dCollection range, AcadDatabase adb, out List<StoreysItem> storeysItems, out DrainageGeoData geoData)
         {
-            var storeys = ThRainSystemService.GetStoreys(range, adb);
-            ThRainSystemService.FixStoreys(storeys);
+            var storeys = GetStoreys(range, adb);
+            FixStoreys(storeys);
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
@@ -7721,34 +6708,6 @@ namespace ThMEPWSS.Pipe.Service
         }
 
         static bool NoDraw;
-        public static void DrawDrainageSystemDiagramLogOnly()
-        {
-            try
-            {
-                NoDraw = true;
-                DrainageSystemDiagramStartPoint();
-            }
-            finally
-            {
-                NoDraw = false;
-            }
-        }
-
-
-
-        public static void DrawDrainageSystemDiagramCreateCache()
-        {
-            try
-            {
-                NoDraw = true;
-                draw10();
-            }
-            finally
-            {
-                NoDraw = false;
-            }
-        }
-
         static bool IsNumStorey(string storey)
         {
             return GetStoreyScore(storey) < ushort.MaxValue;
@@ -7835,55 +6794,6 @@ namespace ThMEPWSS.Pipe.Service
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
                 return _GetEnumerator();
-            }
-        }
-        public static void DrainageSystemDiagramStartPoint()
-        {
-            List<DrainageDrawingData> drDatas;
-            List<StoreysItem> storeysItems;
-            loadTestData(out drDatas, out storeysItems);
-            Dbg.FocusMainWindow();
-            if (!Dbg.TrySelectPoint(out Point3d point3D)) return;
-            var pt = point3D.ToPoint2d();
-            using (Dbg.DocumentLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new DrawingTransaction(adb))
-            {
-                if (NoDraw)
-                {
-                    GetDrainageGroupedPipeItems(drDatas, storeysItems, out _, out _);
-                }
-                else
-                {
-                    Draw(drDatas, pt, storeysItems);
-                }
-            }
-        }
-
-        public static void loadTestData(out List<DrainageDrawingData> drDatas, out List<StoreysItem> storeysItems)
-        {
-            var lines = File.ReadAllLines(@"Y:\xx.txt");
-            drDatas = Dbg.LoadFromJsonFile<List<DrainageDrawingData>>($@"Y:\{lines[0]}.json");
-            storeysItems = Dbg.LoadFromJsonFile<List<StoreysItem>>($@"Y:\{lines[1]}.json");
-        }
-        public class Dict<K, V> where V : new()
-        {
-            public Dictionary<K, V> d = new Dictionary<K, V>();
-            public V this[K k]
-            {
-                get
-                {
-                    if (!d.TryGetValue(k, out V v))
-                    {
-                        v = new V();
-                        d[k] = v;
-                    }
-                    return v;
-                }
-                set
-                {
-                    d[k] = value;
-                }
             }
         }
         public static void Draw(List<DrainageDrawingData> drDatas, Point2d basePoint, List<StoreysItem> storeysItems)
@@ -8130,208 +7040,6 @@ namespace ThMEPWSS.Pipe.Service
                 });
             }
         }
-        public static void draw8(List<DrainageDrawingData> drDatas, Point2d basePoint)
-        {
-            var q = drDatas.SelectMany(drData => drData.VerticalPipeLabels).Distinct();
-            q = q.Where(lb => IsPL(lb) || IsFL(lb));
-            q = q.Where(lb => ThDrainageService.IsWantedLabelText(lb));
-            var pipeLabels = q.OrderBy(x => x).ToList();
-            var pipesCmpInfos = new List<PipeCmpInfo>();
-            foreach (var label in pipeLabels)
-            {
-                var info = new PipeCmpInfo();
-                pipesCmpInfos.Add(info);
-                info.label = label;
-                info.PipeRuns = new List<PipeCmpInfo.PipeRunCmpInfo>();
-                for (int i = 0; i < drDatas.Count; i++)
-                {
-                    var drData = drDatas[i];
-                    var runInfo = new PipeCmpInfo.PipeRunCmpInfo();
-                    runInfo.HasShortTranslator = drData.ShortTranslatorLabels.Contains(label);
-                    runInfo.HasLongTranslator = drData.LongTranslatorLabels.Contains(label);
-                    runInfo.HasCleaningPort = drData.CleaningPorts.Contains(label);
-                    runInfo.HasWrappingPipe = drData.WrappingPipes.Contains(label);
-                    info.PipeRuns.Add(runInfo);
-                }
-                info.IsWaterPortOutlet = drDatas.Any(x => x.Outlets.ContainsKey(label));
-            }
-            var list = pipesCmpInfos.GroupBy(x => x).ToList();
-
-            var OFFSET_X = 2500.0;
-            var SPAN_X = 5500.0;
-            var HEIGHT = 1800.0;
-            var COUNT = list.Count;
-            var STOREY_COUNT = drDatas.Count;
-            var storeys = Enumerable.Range(1, STOREY_COUNT).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
-
-
-            var pipeLineGroups = new List<ThwPipeLineGroup>();
-
-            foreach (var g in list)
-            {
-                var info = g.Key;
-                var label = g.Key.label;
-                var group = new ThwPipeLineGroup();
-                pipeLineGroups.Add(group);
-                var ppl = group.PL = new ThwPipeLine();
-                ppl.Labels = g.Select(x => x.label).ToList();
-                var runs = ppl.PipeRuns = new List<ThwPipeRun>();
-                for (int i = 0; i < drDatas.Count; i++)
-                {
-                    var storey = storeys[i];
-                    var drData = drDatas[i];
-                    var run = new ThwPipeRun()
-                    {
-                        Storey = storey,
-                        HasShortTranslator = info.PipeRuns[i].HasShortTranslator,
-                        HasLongTranslator = info.PipeRuns[i].HasLongTranslator,
-                        IsShortTranslatorToLeftOrRight = true,
-                        IsLongTranslatorToLeftOrRight = true,
-                        HasCheckPoint = true,
-                        HasCleaningPort = info.PipeRuns[i].HasCleaningPort,
-                    };
-                    runs.Add(run);
-                    {
-                        bool? flag = null;
-                        for (int i1 = ppl.PipeRuns.Count - 1; i1 >= 0; i1--)
-                        {
-                            var r = ppl.PipeRuns[i1];
-                            if (r.HasLongTranslator)
-                            {
-                                if (!flag.HasValue)
-                                {
-                                    flag = IsPL(label) || IsFL(label);
-                                }
-                                else
-                                {
-                                    flag = !flag.Value;
-                                }
-                                r.IsLongTranslatorToLeftOrRight = flag.Value;
-                            }
-                        }
-                    }
-
-                    {
-                        if (drData.FloorDrains.TryGetValue(label, out int count))
-                        {
-                            if (count > 0)
-                            {
-                                var hanging = run.LeftHanging = new Hanging();
-                                hanging.FloorDrainsCount = count;
-                                hanging.HasSCurve = true;
-                            }
-                        }
-                        else if (IsFL(label))
-                        {
-                            var hanging = run.LeftHanging = new Hanging();
-                            hanging.FloorDrainsCount = count;
-                            hanging.HasDoubleSCurve = true;
-                        }
-                    }
-                    {
-                        var b = run.BranchInfo = new BranchInfo();
-                        if (IsPL(label) || IsFL(label))
-                        {
-                            b.MiddleLeftRun = true;
-                        }
-                        else if (IsTL(label))
-                        {
-                            b.BlueToLeftMiddle = true;
-                        }
-                    }
-                    {
-                        if (storey == "1F")
-                        {
-                            var o = ppl.Output = new ThwOutput();
-                            o.DN1 = "DN100";
-                            o.HasWrappingPipe1 = g.Key.PipeRuns.FirstOrDefault().HasWrappingPipe;
-                            var hs = new HashSet<string>();
-                            foreach (var _label in g.Select(x => x.label))
-                            {
-                                if (drData.Outlets.TryGetValue(_label, out string well))
-                                {
-                                    hs.Add(well);
-                                }
-                            }
-                            o.DirtyWaterWellValues = hs.OrderBy(x => { long.TryParse(x, out long v); return v; }).ToList();
-                            ppl.Labels.Add("===");
-                            ppl.Labels.Add("outlets:");
-                            ppl.Labels.AddRange(o.DirtyWaterWellValues);
-                        }
-
-                    }
-
-                }
-            }
-
-            var pipeLineGroups2 = new List<ThwPipeLineGroup>();
-            for (int j = 0; j < pipeLineGroups.Count; j++)
-            {
-                var group = new ThwPipeLineGroup();
-                pipeLineGroups2.Add(group);
-                var ttl = group.TL = new ThwPipeLine();
-                var runs = ttl.PipeRuns = new List<ThwPipeRun>();
-                for (int i = 0; i < drDatas.Count; i++)
-                {
-                    var storey = storeys[i];
-                    var drData = drDatas[i];
-                    var run = new ThwPipeRun();
-                    runs.Add(run);
-                    run.HasLongTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasLongTranslator;
-                    run.IsLongTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsLongTranslatorToLeftOrRight;
-                    run.HasShortTranslator = pipeLineGroups[j].PL.PipeRuns[i].HasShortTranslator;
-                    run.IsShortTranslatorToLeftOrRight = pipeLineGroups[j].PL.PipeRuns[i].IsShortTranslatorToLeftOrRight;
-                }
-                for (int i = 0; i < runs.Count; i++)
-                {
-                    var run = runs[i];
-                    var bi = run.BranchInfo = new BranchInfo();
-                    if (i == runs.Count - 1)
-                    {
-                        bi.BlueToLeftFirst = true;
-                    }
-                    else if (i == 0)
-                    {
-                        bi.BlueToLeftLast = true;
-                    }
-                    else
-                    {
-                        bi.BlueToLeftMiddle = true;
-                    }
-                }
-            }
-
-
-            DrawVer1(new DrawingOption()
-            {
-                BasePoint = basePoint,
-                OFFSET_X = OFFSET_X,
-                SPAN_X = SPAN_X,
-                HEIGHT = HEIGHT,
-                COUNT = COUNT,
-                Storeys = storeys,
-                Groups = pipeLineGroups,
-                Layer = "W-DRAI-DOME-PIPE",
-            });
-
-            if (pipeLineGroups2.Count > 0)
-            {
-                DrawVer1(new DrawingOption()
-                {
-                    BasePoint = basePoint,
-                    OFFSET_X = OFFSET_X,
-                    SPAN_X = SPAN_X,
-                    HEIGHT = HEIGHT,
-                    COUNT = COUNT,
-                    Storeys = storeys,
-                    Groups = pipeLineGroups2,
-                    Layer = "W-DRAI-EQPM",
-                    DrawStoreyLine = false,
-                    IsDebugging = true,
-                });
-            }
-        }
-
         public class PipeCmpInfo : IEquatable<PipeCmpInfo>
         {
             public string label;
@@ -8373,5 +7081,14 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
 
+    }
+    public class StoreyContext
+    {
+        public List<ThStoreysData> thStoreysDatas;
+        public List<ThMEPEngineCore.Model.Common.ThStoreys> thStoreys;
+        public List<ObjectId> GetObjectIds()
+        {
+            return thStoreys.Select(o => o.ObjectId).ToList();
+        }
     }
 }

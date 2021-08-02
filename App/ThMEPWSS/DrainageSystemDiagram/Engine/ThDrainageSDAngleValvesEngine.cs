@@ -10,17 +10,25 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDAngleValvesEngine
     {
-        public static List<KeyValuePair<Point3d, Vector3d>> getAngleValves(List<ThTerminalToilate> terminalList)
+        public static List<ThDrainageSDADBlkOutput> getAngleValves(List<ThTerminalToilet> terminalList)
         {
-            var angleValves = new List<KeyValuePair<Point3d, Vector3d>>();
-
-            terminalList.ForEach(t =>
-               {
-                   t.SupplyCoolOnWall.ForEach(pt => angleValves.Add(new KeyValuePair<Point3d, Vector3d>(pt, t.Dir)));
-               });
-
-
-
+            var angleValves = new List<ThDrainageSDADBlkOutput>();
+            if (terminalList != null && terminalList.Count > 0)
+            {
+                terminalList.ForEach(t =>
+                {
+                    t.SupplyCoolOnWall.ForEach(pt =>
+                    {
+                        var valve = new ThDrainageSDADBlkOutput(pt);
+                        valve.dir = t.Dir;
+                        valve.name = ThDrainageSDCommon.Blk_AngleValves;
+                        valve.visibility.Add(ThDrainageSDCommon.Visibility_AngleValves_key, ThDrainageSDCommon.Visibility_AngleValves_Value);
+                        valve.scale = ThDrainageSDCommon.Blk_scale_AngleValves;
+                        valve.blkSize = ThDrainageSDCommon.Blk_size_AngleValves;
+                        angleValves.Add(valve);
+                    });
+                });
+            }
             return angleValves;
         }
     }

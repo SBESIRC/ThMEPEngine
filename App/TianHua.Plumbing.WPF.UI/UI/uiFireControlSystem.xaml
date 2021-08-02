@@ -1,98 +1,108 @@
 ﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiFireControlSystem"
-             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     WindowStartupLocation="CenterOwner"
                     Title="消火栓系统图"
-                    SizeToContent="Height"
-                    Width="215"
-             mc:Ignorable="d" >
-    <Grid Margin="5">
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d" >
+    <Window.Resources>
+        <Style TargetType="Label">
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,5,0,0"></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="5" x:Name="gridForm">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Vertical">
-          
-            <Label Content="生成对象"></Label>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <RadioButton GroupName="CreationTypeGroup" IsChecked="{Binding IsTower}" Grid.Row="0" Grid.Column="0" Width="Auto" Content="塔楼"/>
-                <RadioButton GroupName="CreationTypeGroup" IsChecked="{Binding IsManagementBuilding}" Grid.Row="0" Grid.Column="1" Width="Auto" Content="管理用房" Margin="0,0,40,0"/>
-            </Grid>
-            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1"  SnapsToDevicePixels="True" Margin="0,5,0,0"/>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="楼层线间距："></Label>
-                <TextBox Width="50" Margin="10,5,0,0" ></TextBox>
-                <Label Content="mm"></Label>
+        <WrapPanel Grid.Row="0" Orientation="Vertical" Grid.Column="0" Grid.ColumnSpan="2">
+            <Label Content="生成对象" Width="Auto" FontWeight="Bold"></Label>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <RadioButton GroupName="CreationTypeGroup" IsChecked="{Binding IsTower}" Margin="5,0,10,0" Content="塔楼"/>
+                <!--管理用房部分暂时没有实现，界面也没有做，暂时不显示给用户-->
+                <RadioButton IsEnabled="False" Visibility="Hidden"  GroupName="CreationTypeGroup" IsChecked="{Binding IsManagementBuilding}"  Content="管理用房" Margin="10,0,10,0"/>
             </StackPanel>
-        </StackPanel>
-        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
-            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1"  SnapsToDevicePixels="True"/>
-            <Grid Margin="0,5,0,5">
-                <Label Content="分区设置(从低到高)"></Label>
-            </Grid>
-            <DataGrid Height="150" BorderThickness="0,1,0,1" Background="Transparent" HeadersVisibility="All" 
-                      ItemsSource="{Binding ZoneConfigs,Mode=TwoWay}" RowHeight="24" CanUserAddRows="False" AutoGenerateColumns="False"
-                     >
+            
+            <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="楼层线间距：" Height="25" VerticalContentAlignment="Center"/>
+                <cus:InputTextBox TextBoxInputType="InputDouble" Height="20" Width="50" VerticalAlignment="Center" NumCanMinus="False" Text="{Binding FaucetFloor,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="mm" Width="Auto" Margin="5,0,0,0"/>
+            </StackPanel>
+
+            <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
+            <Label Content="分区设置(从低到高)" Width="Auto" Margin="0,5,0,5"></Label>
+            <DataGrid BorderThickness="0" ItemsSource="{Binding ZoneConfigs,Mode=TwoWay}" MaxHeight="200" RowHeight="24" AllowDrop="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="区号" Width="66" CanUserSort="False" CanUserResize="False" Binding="{Binding ZoneID ,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="起始层" Width="66" CanUserSort="False" CanUserResize="False" Binding="{Binding StartFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="结束层" Width="66" CanUserSort="False" CanUserResize="False" Binding="{Binding EndFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="区号" Width="50" CanUserSort="False" IsReadOnly="True" CanUserResize="False" Binding="{Binding ZoneID ,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                    <DataGridTemplateColumn Header="起始层" Width="60" CanUserSort="False" CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <cus:InputTextBox Height="20" TextBoxInputType="InputInteger" Text="{Binding StartFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0"></cus:InputTextBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="结束层" Width="60" CanUserSort="False" CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <cus:InputTextBox Height="20" TextBoxInputType="InputInteger" Text="{Binding EndFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0"></cus:InputTextBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                <Label Content="单元编号：" ></Label>
-                <TextBox Width="50"  Margin="25,0,0,0" Text="{Binding Serialnumber,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+            <Grid Margin="0" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="15"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="单元编号："/>
+                <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Grid.Row="0" Grid.Column="1" Height="22" Grid.ColumnSpan="2" Text="{Binding Serialnumber,Mode=TwoWay,ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}"/>
+                
+                <Label Grid.Row="1" Grid.Column="0" Content="普通层消火栓："></Label>
+                <cus:InputTextBox Grid.Row="1" Grid.Column="1"  Height="22" HintText="" NumCanMinus="False" TextBoxInputType="InputInteger"
+                                   Text="{Binding CountsGeneral,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+                <Label Grid.Row="1"  Grid.Column="2" Content="个" Margin="5,0,0,0"></Label>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="消火栓类型"></Label>
+                <ComboBox Grid.Row="2"  Grid.Column="1" Grid.ColumnSpan="2" Height="22"  Width="80"
+                          ItemsSource="{Binding FireTypes,Mode=OneWay,NotifyOnSourceUpdated=True}"
+                          SelectedItem="{Binding ComBoxFireTypeSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="避难层消火栓："></Label>
+                <cus:InputTextBox Grid.Row="3" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Grid.Row="3" Grid.Column="2"  Content="个" Margin="5,0,0,0" Width="Auto"></Label>
+                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="存在手台泵接驳口" VerticalAlignment="Center" 
+                          VerticalContentAlignment="Center" IsChecked="{Binding HaveHandPumpConnection,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+            <Label Content="最高成环楼层:" Width="Auto" FontWeight="Black" Height="25"></Label>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="CreationLayerGroup" Margin="5,0,10,0" IsChecked="{Binding IsRoofRing}" Content="屋顶"/>
+                <RadioButton GroupName="CreationLayerGroup" Margin="10,0,0,0" IsChecked="{Binding IsTopLayerRing}" Content="顶层"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                <Label Content="普通层消火栓："></Label>
-                <TextBox Width="50" Text="{Binding CountsGeneral,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <Label Content="个"></Label>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
-                <Label Content="避难层消火栓："></Label>
-                <TextBox Width="50" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <Label Content="个"></Label>
-                <ItemsControl x:Name="testList" ItemsSource="{Binding DynamicRadios}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"></WrapPanel>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
-                <Label Content="最高成环楼层:"></Label>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <RadioButton GroupName="CreationLayerGroup" IsChecked="{Binding IsRoof}" Grid.Row="0" Grid.Column="0" Width="Auto" Content="屋顶"/>
-                    <RadioButton GroupName="CreationLayerGroup" Margin="0,0,60,0" IsChecked="{Binding IsTopLayer}" Grid.Row="0" Grid.Column="1" Width="Auto" Content="顶层"/>
-                </Grid>
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Left" Margin="0,325,0,0">
-            <CheckBox Content="试验消火栓"></CheckBox>
-        </StackPanel>
-        <StackPanel Orientation="Vertical" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,10">
+            <CheckBox Content="试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
+        </WrapPanel>
+        
+        <StackPanel  Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0">
             <cus:ImageButton ImageTextLocation="TextOnly" Content="生成" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>

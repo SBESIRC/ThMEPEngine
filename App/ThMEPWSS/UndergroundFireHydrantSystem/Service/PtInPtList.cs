@@ -34,5 +34,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             return false;
         }
+
+        public static bool PtIsTermPt(Point3dEx pt, List<Point3dEx> ptLs)
+        {
+            foreach (var tpt in ptLs)
+            {
+                if (pt._pt.DistanceTo(tpt._pt) < 80)
+                {
+                    return true;
+                }
+            }
+            return false;
+
+        }
     }
 }

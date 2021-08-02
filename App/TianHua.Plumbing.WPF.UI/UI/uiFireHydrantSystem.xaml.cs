@@ -31,7 +31,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
 
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (Active.Document.LockDocument())
             using (var cmd = new ThFireHydrantCmd())
             {
                 cmd.Execute();

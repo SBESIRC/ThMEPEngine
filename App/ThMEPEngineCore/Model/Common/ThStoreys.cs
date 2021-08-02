@@ -1,10 +1,12 @@
-﻿using Linq2Acad;
+﻿using System;
+using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using TianHua.Publics.BaseCode;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.Publics.BaseCode;
 
 namespace ThMEPEngineCore.Model.Common
 {
@@ -127,6 +129,58 @@ namespace ThMEPEngineCore.Model.Common
                 }
                 return storeys;
             }
+        }
+    }
+
+    public class FloorCalculator
+    {
+        public List<string> Floors { get; private set; }
+        public FloorCalculator(string ventNum)
+        {
+            Floors = new List<string>();
+            ventNum = ventNum.Replace('，', ',').Replace("F", "").Replace(" ", "");
+            var FloorExpression= ventNum.Split(',');
+            FloorExpression.ForEach(o => Floors.AddRange(Parsestring(o)));
+            Floors = Floors.Distinct().ToList();
+            //Floors.Sort();
+        }
+
+        private List<string> Parsestring(string floorString)
+        { 
+            try
+            {
+                List<string> FloorList = new List<string>();
+                var floorListString = floorString.Split('-');
+                if (floorListString.Length == 1)
+                {
+                    //判断是否是纯数字
+                    if (Regex.IsMatch(floorString, "^[0-9]*$"))
+                        floorString += "F";
+                    FloorList.Add(floorString);
+                }
+                else if (floorListString.Length == 2)
+                {
+                    if (floorString.Contains('M')) return FloorList;
+                    int minFloor = int.Parse(floorListString[0].Replace('B', '-').Replace("F", "").Replace("M", ""));
+                    int maxFloor = int.Parse(floorListString[1].Replace('B', '-').Replace("F", "").Replace("M", ""));
+                    for (int floorNo = minFloor; floorNo <= maxFloor; floorNo++)
+                    {
+                        if (floorNo != 0)
+                            FloorList.Add(floorNo > 0 ? floorNo + "F" : "B" + Math.Abs(floorNo));
+                    }
+                }
+                else
+                {
+                    //do Not 违反既定规则
+                }
+                return FloorList;
+            }
+            catch (Exception)
+            {
+                //do Not 违反既定规则
+                return new List<string>();
+            }
+            
         }
     }
 }

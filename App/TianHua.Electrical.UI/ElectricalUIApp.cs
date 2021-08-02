@@ -8,6 +8,7 @@ using ThMEPElectrical.Command;
 using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Electrical.UI.CapitalConverter;
 
 namespace TianHua.Electrical.UI
 {
@@ -44,76 +45,51 @@ namespace TianHua.Electrical.UI
             }
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
         }
-
         [CommandMethod("TIANHUACAD", "THTZZH", CommandFlags.Modal)]
         public void THTZZH()
         {
-            // TODO：跳出模态对话框，获取转换参数
-            // 暂时用命令行获取转换参数
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                // 专业
-                var options = new PromptKeywordOptions("\n选择专业");
-                options.Keywords.Add("暖通", "H", "暖通(H)");
-                options.Keywords.Add("给排水", "W", "给排水(W)");
-                options.Keywords.Add("所有", "A", "所有(A)");
-                options.Keywords.Default = "所有";
-                var category = Active.Editor.GetKeywords(options);
-                if (category.Status != PromptStatus.OK)
+                var uiCapitalConverter = new CapitalConverterUI();
+                uiCapitalConverter.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                AcadApp.ShowModalWindow(uiCapitalConverter);
+                if (!uiCapitalConverter.GoOn)
                 {
                     return;
                 }
-
-                // 模式
-                options = new PromptKeywordOptions("\n选择模式");
-                options.Keywords.Add("强电", "S", "强电(S)");
-                options.Keywords.Add("弱电", "W", "弱电(W)");
-                options.Keywords.Add("所有", "A", "所有(A)");
-                options.Keywords.Default = "所有";
-                var mode = Active.Editor.GetKeywords(options);
-                if (mode.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                // 图纸比例
-                var scale = Active.Editor.GetDouble(new PromptDoubleOptions("\n图纸比例")
-                {
-                    DefaultValue = 100.0,
-                });
-                if (scale.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
                 // 执行命令
                 var cmd = new ThBConvertCommand()
                 {
-                    Scale = scale.Value,
+                    Scale = uiCapitalConverter.Parameter.BlkScaleValue,
                 };
-                if (category.StringResult == "暖通")
-                {
-                    cmd.Category = ConvertCategory.HVAC;
-                }
-                else if (category.StringResult == "给排水")
-                {
-                    cmd.Category = ConvertCategory.WSS;
-                }
-                else if (category.StringResult == "所有")
+                if(uiCapitalConverter.Parameter.HavcOps &&
+                    uiCapitalConverter.Parameter.WssOps)
                 {
                     cmd.Category = ConvertCategory.ALL;
                 }
-                if (mode.StringResult == "强电")
+                else if (uiCapitalConverter.Parameter.HavcOps)
                 {
-                    cmd.Mode = ConvertMode.STRONGCURRENT;
+                    cmd.Category = ConvertCategory.HVAC;
                 }
-                else if (mode.StringResult == "弱电")
+                else if (uiCapitalConverter.Parameter.WssOps)
                 {
-                    cmd.Mode = ConvertMode.WEAKCURRENT;
+                    cmd.Category = ConvertCategory.WSS;
                 }
-                else if (mode.StringResult == "所有")
+                else
                 {
-                    cmd.Mode = ConvertMode.ALL;
+                    return;
+                }
+                switch (uiCapitalConverter.Parameter.EquipOps)
+                {
+                    case CapitalOP.Strong:
+                        cmd.Mode = ConvertMode.STRONGCURRENT;
+                        break;
+                    case CapitalOP.Weak:
+                        cmd.Mode = ConvertMode.WEAKCURRENT;
+                        break;
+                    case CapitalOP.All:
+                        cmd.Mode = ConvertMode.ALL;
+                        break;
                 }
                 cmd.Execute();
             }
@@ -129,8 +105,8 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModelessDialog(BasementLightingUI);
         }
 
-        [CommandMethod("TIANHUACAD", "THSPS", CommandFlags.Modal)]
-        public void THSPS()
+        [CommandMethod("TIANHUACAD", "THAFPM", CommandFlags.Modal)]
+        public void THAFPM()
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);

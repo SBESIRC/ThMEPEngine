@@ -1,37 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using AcHelper;
-using NFox.Cad;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDRoomService
     {
-        public static List<ThToilateRoom> filtRoomList(List<ThToilateRoom> roomList)
+        public static List<ThToiletRoom> filtRoomList(List<ThToiletRoom> roomList)
         {
 
-            var rooms = roomList.Where(x => x.toilate.Count > 0).ToList();
+            var rooms = roomList.Where(x => x.toilet.Count > 0).ToList();
 
             return rooms;
         }
 
         //public static void shrinkRoom(List<ThExtractorBase> archiExtractor)
         //{
-        //    var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
+        //    var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToiletRoomExtractor)) as ThDrainageToiletRoomExtractor;
 
         //    roomExtractor.Rooms.ForEach(room =>
         //    {
@@ -46,30 +38,30 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             List<ThIfcRoom> roomList = new List<ThIfcRoom>();
 
-            var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToilateRoomExtractor)) as ThDrainageToilateRoomExtractor;
+            var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToiletRoomExtractor)) as ThDrainageToiletRoomExtractor;
 
             roomList.AddRange(roomExtractor.Rooms);
 
             return roomList;
         }
 
-        public static List<ThToilateRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThTerminalToilate> toilateList)
+        public static List<ThToiletRoom> buildRoomModel(List<ThIfcRoom> roomList, List<ThTerminalToilet> toiletList)
         {
-            List<ThToilateRoom> roomModelList = new List<ThToilateRoom>();
+            List<ThToiletRoom> roomModelList = new List<ThToiletRoom>();
             roomList.ForEach(x =>
             {
                 var roomOutline = x.Boundary as Polyline;
-                var roomToilateList = new List<ThTerminalToilate>();
-                foreach (var terminal in toilateList)
+                var roomToiletList = new List<ThTerminalToilet>();
+                foreach (var terminal in toiletList)
                 {
-                    var toilateOutline = terminal.Boundary;
-                    if (roomOutline.Contains(toilateOutline) || roomOutline.Intersects(toilateOutline))
+                    var toiletOutline = terminal.Boundary;
+                    if (roomOutline.Contains(toiletOutline) || roomOutline.Intersects(toiletOutline))
                     {
-                        roomToilateList.Add(terminal);
+                        roomToiletList.Add(terminal);
                     }
                 }
 
-                var room = new ThToilateRoom(roomOutline, string.Join(";",x.Tags.ToArray()), roomToilateList);
+                var room = new ThToiletRoom(roomOutline, string.Join(";",x.Tags.ToArray()), roomToiletList);
                 roomModelList.Add(room);
             });
 

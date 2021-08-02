@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
 
-using ThCADExtension;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {
@@ -28,26 +20,26 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return areaGeom;
         }
 
-        public static List<ThGeometry> buildCoolPtGeometry(List<ThTerminalToilate> toilateList)
+        public static List<ThGeometry> buildCoolPtGeometry(List<ThTerminalToilet> toiletList)
         {
             List<ThGeometry> geom = new List<ThGeometry>();
 
-            toilateList.ForEach(toilate =>
+            toiletList.ForEach(toilet =>
             {
-                for (int i = 0; i < toilate.SupplyCoolOnWall.Count(); i++)
+                for (int i = 0; i < toilet.SupplyCoolOnWall.Count(); i++)
                 {
-                    var pt = toilate.SupplyCoolOnWall[i];
+                    var pt = toilet.SupplyCoolOnWall[i];
 
                     if (pt != Point3d.Origin)
                     {
                         var geometry = new ThGeometry();
-                        var id = i == 0 ? toilate.Uuid : toilate.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
+                        var id = i == 0 ? toilet.Uuid : toilet.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
 
                         geometry.Properties.Add(ThDrainageSDCommon.ProId, id);
                         geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WaterSupplyPoint.ToString());
-                        geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, toilate.AreaId);
-                        geometry.Properties.Add(ThDrainageSDCommon.ProGroupId, toilate.GroupId);
-                        geometry.Properties.Add(ThDrainageSDCommon.ProDirection, new double[] { toilate.Dir.X, toilate.Dir.Y });
+                        geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, toilet.AreaId);
+                        geometry.Properties.Add(ThDrainageSDCommon.ProGroupId, toilet.GroupId);
+                        geometry.Properties.Add(ThDrainageSDCommon.ProDirection, new double[] { toilet.Dir.X, toilet.Dir.Y });
 
                         geometry.Boundary = new DBPoint(pt);
 
@@ -60,7 +52,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return geom;
         }
 
-        public static List<ThGeometry> buildVirtualCoolPtGeomary(List<ThToilateGJson> virtualPtList)
+        public static List<ThGeometry> buildVirtualCoolPtGeomary(List<ThToiletGJson> virtualPtList)
         {
             List<ThGeometry> geom = new List<ThGeometry>();
 
@@ -87,7 +79,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             virtualColumn.ForEach(vcl =>
               {
                   var geometry = new ThGeometry();
-
+                  
                   geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Column.ToString());
                   geometry.Properties.Add(ThDrainageSDCommon.ProAreaId, areaId);
 
@@ -100,39 +92,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return columnGeom;
         }
 
-        //public static string getAreaId(List<ThExtractorBase> archiExtractor)
-        //{
-        //    string areaId = "";
-
-        //    var extractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageSDRegionExtractor)) as ThDrainageSDRegionExtractor;
-
-        //    if (extractor != null && extractor.Region.Count > 0)
-        //    {
-        //        var pl = extractor.Region[0].Geometry as Polyline;
-        //        var areaPolylineToIdDic = extractor.ToiletGroupId;
-        //        areaId = areaPolylineToIdDic[pl];
-        //    }
-
-        //    return areaId;
-        //}
-
-        public static List<Line> updateToilateModel(List<ThToilateGJson> tGJList, List<ThTerminalToilate> toilateList)
+        public static List<Line> updateToiletModel(List<ThToiletGJson> tGJList, List<ThTerminalToilet> toiletList)
         {
             List<Line> subLink = new List<Line>();
 
             foreach (var gj in tGJList)
             {
-                var toilate = toilateList.Where(toilate => gj.Id.Contains(toilate.Uuid)).FirstOrDefault();
-                if (toilate != null)
+                var toilet = toiletList.Where(toi => gj.Id.Contains(toi.Uuid)).FirstOrDefault();
+                if (toilet != null )
                 {
-                    //Point3d subLinkEndPt = gj.Pt + gj.Direction * DrainageSDCommon.SublinkLength;
+                    //轴测图判断最重点位所属厕所也要用到支线方向，所以不要轻易支线计算的方向 toilet.Dir
+                    Point3d subLinkEndPt = gj.Pt + toilet.Dir * ThDrainageSDCommon.LengthSublink;
 
-                    Point3d subLinkEndPt = gj.Pt + toilate.Dir * ThDrainageSDCommon.LengthSublink;
-
-                    toilate.SupplyCoolOnBranch.Add(subLinkEndPt);
-                    //toilate.Dir = gj.Direction;
-                    toilate.AreaId = gj.AreaId;
-                    toilate.GroupId = gj.GroupId;
+                    toilet.SupplyCoolOnBranch.Add(subLinkEndPt);
+                    toilet.AreaId = gj.AreaId;
+                    toilet.GroupId = gj.GroupId;
 
                     subLink.Add(new Line(gj.Pt, subLinkEndPt));
                 }
@@ -141,26 +115,26 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return subLink;
         }
 
-        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThTerminalToilate, List<Point3d>> toilatePtDict)
+        public static List<ThToiletGJson> toVirtualPt(Dictionary<ThTerminalToilet, List<Point3d>> toiletPtDict)
         {
-            List<ThToilateGJson> virtualModelList = new List<ThToilateGJson>();
+            List<ThToiletGJson> virtualModelList = new List<ThToiletGJson>();
 
-            foreach (var toilatePt in toilatePtDict)
+            foreach (var toiletPt in toiletPtDict)
             {
-                var toilate = toilatePt.Key;
+                var toilet = toiletPt.Key;
 
-                for (int i = 0; i < toilatePt.Value.Count; i++)
+                for (int i = 0; i < toiletPt.Value.Count; i++)
                 {
-                    var pt = toilatePt.Value[i];
-                    var id = i == 0 ? toilate.Uuid : toilate.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
+                    var pt = toiletPt.Value[i];
+                    var id = i == 0 ? toilet.Uuid : toilet.Uuid + ThDrainageSDCommon.GJSecPtSuffix;
 
-                    var virtualPt = new ThToilateGJson()
+                    var virtualPt = new ThToiletGJson()
                     {
                         Id = id,
-                        Direction = toilate.Dir,
+                        Direction = toilet.Dir,
                         Pt = pt,
-                        AreaId = toilate.AreaId,
-                        GroupId = toilate.GroupId,
+                        AreaId = toilet.AreaId,
+                        GroupId = toilet.GroupId,
                     };
 
                     virtualModelList.Add(virtualPt);
@@ -170,27 +144,25 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return virtualModelList;
         }
 
-        public static List<ThToilateGJson> toVirtualPt(Dictionary<ThTerminalToilate, Point3d> virtualPtDict)
+        public static List<ThToiletGJson> toVirtualPt(Dictionary<ThTerminalToilet, Point3d> virtualPtDict)
         {
-            List<ThToilateGJson> virtualModelList = new List<ThToilateGJson>();
+            List<ThToiletGJson> virtualModelList = new List<ThToiletGJson>();
 
             foreach (var virtualPt in virtualPtDict)
             {
-                var toilate = virtualPt.Key;
+                var toilet = virtualPt.Key;
                 var pt = virtualPt.Value;
-                var virtualModel = new ThToilateGJson()
+                var virtualModel = new ThToiletGJson()
                 {
-                    Id = toilate.Uuid,
-                    Direction = toilate.Dir,
+                    Id = toilet.Uuid,
+                    Direction = toilet.Dir,
                     Pt = pt,
-                    AreaId = toilate.AreaId,
-                    GroupId = toilate.GroupId,
+                    AreaId = toilet.AreaId,
+                    GroupId = toilet.GroupId,
                 };
 
                 virtualModelList.Add(virtualModel);
-
             }
-
 
             return virtualModelList;
         }

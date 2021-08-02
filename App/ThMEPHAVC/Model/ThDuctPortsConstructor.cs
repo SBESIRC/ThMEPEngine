@@ -34,6 +34,7 @@ namespace ThMEPHVAC.Model
     }
     public class ThDuctPortsConstructor
     {
+        private bool is_recreate { set; get; }
         private bool have_main { set; get; }
         private double ui_air_speed { set; get; }
         public List<Port_Info> ports_position_ptr { set; get; }
@@ -41,6 +42,7 @@ namespace ThMEPHVAC.Model
         public List<Endline_seg_Info> endline_segs { set; get; }
         public ThDuctPortsConstructor(ThDuctPortsAnalysis anay_res, DuctPortsParam in_param)
         {
+            is_recreate = anay_res.is_recreate;
             ui_air_speed = in_param.air_speed;
             have_main = anay_res.main_ducts.Count != 0;
             endline_elbow = new List<Special_graph_Info>();
@@ -83,13 +85,13 @@ namespace ThMEPHVAC.Model
         }
 
         private Endline_seg_Info Break_duct_by_port(Endline_Info cur_info,
-                                                         Endline_Info pre_info,
-                                                         Endline_Info next_info,
-                                                         bool is_first,
-                                                         ref string duct_size_info)
+                                                    Endline_Info pre_info,
+                                                    Endline_Info next_info,
+                                                    bool is_first,
+                                                    ref string duct_size_info)
         {
             var port_seg = new Endline_seg_Info();
-            Line proc_line = Get_real_proc_line(cur_info, pre_info, next_info, is_first, ref duct_size_info);
+            var proc_line = Get_real_proc_line(cur_info, pre_info, next_info, is_first, ref duct_size_info);
             Seperate_line_by_port(cur_info, next_info, proc_line, port_seg.segs, is_first, ref duct_size_info);
             return port_seg;
         }
@@ -110,7 +112,7 @@ namespace ThMEPHVAC.Model
             ports_position_ptr = new List<Port_Info>();
             for (int i = cur_info.ports.Count - 1; i > 0; --i)
             {
-                cur_p += dir_vec * port_step;
+                cur_p = is_recreate ? cur_info.ports[i].position : cur_p + dir_vec * port_step;
                 ports_position_ptr.Add(new Port_Info(cur_info.ports[i].air_volume, cur_p));
                 double cur_width = Get_duct_width(false, cur_info.ports[i - 1].air_volume, ref next_duct_size);
                 if (duct_size_info != next_duct_size)
@@ -180,11 +182,11 @@ namespace ThMEPHVAC.Model
             double last_air_volume = (cur_info.ports.Count == 0) ? 0 : cur_info.ports[0].air_volume;
             Vector3d dir_vec = Get_edge_direction(cur_info.direct_edge);
             double port_step = proc_line.Length / (cur_info.ports.Count + 1);
-            cur_p += dir_vec * port_step;
-            double dis = proc_line.EndPoint.DistanceTo(cur_p);
+            var p = is_recreate ? cur_info.ports[0].position : cur_p + dir_vec * port_step;
+            double dis = proc_line.EndPoint.DistanceTo(p);
             double reducing_len = (dis > 1000) ? 1000 : dis;
             Line l = new Line(flag_p, proc_line.EndPoint - (reducing_len + 1) * dir_vec);
-            ports_position_ptr.Add(new Port_Info(last_air_volume, cur_p));
+            ports_position_ptr.Add(new Port_Info(last_air_volume, p));
             port_seg.Add(new Duct_ports_Info(l, cur_width, ports_position_ptr, cur_duct_size));
             Line reducing = new Line(proc_line.EndPoint - dir_vec, proc_line.EndPoint);
             ports_position_ptr = new List<Port_Info>();
@@ -207,7 +209,10 @@ namespace ThMEPHVAC.Model
             if (port_num == 0)
                 ports_position_ptr = new List<Port_Info>();
             else
-                ports_position_ptr.Add(new Port_Info (last_air_volume, cur_p + dir_vec * port_step));
+            {
+                var p = is_recreate ? cur_info.ports[0].position : cur_p + dir_vec * port_step;
+                ports_position_ptr.Add(new Port_Info(last_air_volume, p));
+            }
             port_seg.Add(new Duct_ports_Info(l, cur_width, ports_position_ptr, cur_duct_size));
         }
         private void Has_reducing_end_with_direct_duct(Point3d cur_p,
@@ -219,7 +224,8 @@ namespace ThMEPHVAC.Model
             double last_air_volume = (cur_info.ports.Count == 0) ? 0 : cur_info.ports[0].air_volume;
             Vector3d dir_vec = Get_edge_direction(cur_info.direct_edge);
             double port_step = proc_line.Length / (cur_info.ports.Count + 1);
-            last_seg.ports_info.Add(new Port_Info(last_air_volume, cur_p + dir_vec * port_step));
+            var p = is_recreate ? cur_info.ports[0].position : (cur_p + dir_vec * port_step);
+            last_seg.ports_info.Add(new Port_Info(last_air_volume, p));
             last_seg.l = new Line(last_seg.l.StartPoint, proc_line.EndPoint);
         }
         private void End_direct_duct_with_reducing( Point3d flag_p,
@@ -234,8 +240,8 @@ namespace ThMEPHVAC.Model
             double last_air_volume = (cur_info.ports.Count == 0) ? 0 : cur_info.ports[0].air_volume;
             Vector3d dir_vec = Get_edge_direction(cur_info.direct_edge);
             double port_step = proc_line.Length / (cur_info.ports.Count + 1);
-            cur_p += dir_vec * port_step;
-            ports_position_ptr.Add(new Port_Info(last_air_volume, cur_p));
+            var p = is_recreate ? cur_info.ports[0].position : (cur_p + dir_vec * port_step);
+            ports_position_ptr.Add(new Port_Info(last_air_volume, p));
             Line reducing = new Line(flag_p, proc_line.EndPoint);
             port_seg.Add(new Duct_ports_Info(reducing, cur_width, ports_position_ptr, cur_duct_size));
         }
@@ -257,10 +263,10 @@ namespace ThMEPHVAC.Model
             double cur_duct_width = Get_duct_width(is_first, cur_air_volumn, ref duct_size_info);
             double src_shrink = (Math.Abs(pre_elbow_open_angle) < 1e-3) ?
                                  cur_info.direct_edge.SourceShrink :
-                                 Get_elbow_shrink(pre_elbow_open_angle, cur_duct_width, 0, 0.7);
+                                 ThDuctPortsShapeService.Get_elbow_shrink(pre_elbow_open_angle, cur_duct_width, 0, 0.7);
             double dst_shrink = (Math.Abs(next_elbow_open_angle) < 1e-3) ?
                                  cur_info.direct_edge.TargetShrink :
-                                 Get_elbow_shrink(next_elbow_open_angle, next_duct_start_width, 0, 0.7);
+                                 ThDuctPortsShapeService.Get_elbow_shrink(next_elbow_open_angle, next_duct_start_width, 0, 0.7);
             return Get_shrink_line(cur_info, src_shrink, dst_shrink);
         }
         private Line Get_shrink_line(Endline_Info cur_info, double src_shrink, double dst_shrink)
@@ -366,7 +372,7 @@ namespace ThMEPHVAC.Model
             {
                 Line outter = info.lines[i];
                 Vector3d out_line_vec = ThDuctPortsService.Get_edge_direction(outter);
-                if (Is_vertical(in_line_vec, out_line_vec))
+                if (ThDuctPortsService.Is_vertical(in_line_vec, out_line_vec))
                 {
                     if (in_line_vec.CrossProduct(out_line_vec).Z > 0)
                         o_outter_idx = i;
@@ -420,7 +426,7 @@ namespace ThMEPHVAC.Model
             Vector3d in_vec = ThDuctPortsService.Get_edge_direction(i_line);
             if (type == Tee_Type.BRANCH_VERTICAL_WITH_OTTER)
             {
-                if (Is_vertical(o1_vec, in_vec))
+                if (ThDuctPortsService.Is_vertical(o1_vec, in_vec))
                 {
                     branch_idx = 1; other_idx = 2;
                 }
@@ -446,7 +452,7 @@ namespace ThMEPHVAC.Model
         {
             Vector3d v1 = ThDuctPortsService.Get_edge_direction(outter1);
             Vector3d v2 = ThDuctPortsService.Get_edge_direction(outter2);
-            if (Is_vertical(v1, v2))
+            if (ThDuctPortsService.Is_vertical(v1, v2))
                 return Tee_Type.BRANCH_VERTICAL_WITH_OTTER;
             else
                 return Tee_Type.BRANCH_COLLINEAR_WITH_OTTER;
@@ -462,7 +468,7 @@ namespace ThMEPHVAC.Model
             double open_angle = Get_elbow_open_angle(info);
             if (Math.Abs(in_width - out_width) < 1e-3)
             {
-                double shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                 Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
                 Duct_src_shrink(anay_res, shrink_len, info, 1);
             }
@@ -470,33 +476,19 @@ namespace ThMEPHVAC.Model
             {
                 if (in_width > out_width)
                 {
-                    double shrink_len = Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
+                    double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
                     Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
-                    shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                    shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                     Duct_src_shrink(anay_res, shrink_len, info, 1);
                 }
                 else
                 {
-                    double shrink_len = Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
+                    double shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, 0, info.K);
                     Duct_tar_shrink(anay_res, shrink_len, info.lines[0]);
-                    shrink_len = Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
+                    shrink_len = ThDuctPortsShapeService.Get_elbow_shrink(open_angle, elbow_width, reducing_len, info.K);
                     Duct_src_shrink(anay_res, shrink_len, info, 1);
                 }
             }
-        }
-        private double Get_elbow_shrink(double open_angle, double width, double reducing_len, double K)
-        {
-            if (open_angle > 0.5 * Math.PI)
-            {
-                Point2d center_point = new Point2d(-0.7 * width, -Math.Abs(0.7 * width * Math.Tan(0.5 * (Math.PI - open_angle))));
-                return Math.Abs(center_point.Y) + reducing_len + 50;
-            }
-            else if (Math.Abs(open_angle - 0.5 * Math.PI) < 1e-3)
-                return K * (width + reducing_len) + 50;
-            else if (open_angle > 0 && open_angle < 0.5 * Math.PI)
-                throw new NotImplementedException();
-            else
-                return 0;
         }
         private double Get_elbow_open_angle(Special_graph_Info info)
         {
@@ -526,10 +518,6 @@ namespace ThMEPHVAC.Model
             var endline_idx = anay_res.Search_endline_idx(current_line);
             if (endline_idx != null)
                 anay_res.merged_endlines[endline_idx.i].segments[endline_idx.j].direct_edge.SourceShrink = width;
-        }
-        private bool Is_vertical(Vector3d v1, Vector3d v2)
-        {
-            return Math.Abs(v1.DotProduct(v2)) < 1e-1 ? true : false;
         }
         private Vector3d Get_edge_direction(ThDuctEdge<ThDuctVertex> direct_edge)
         {

@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -21,14 +22,14 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 List<ThWindWell> windWells = new List<ThWindWell>();
                 foreach (var room in rooms)
                 {
-                    if(room.Tags.Contains("机房"))
-                    {
-                        continue;
-                    }
                     bool isWindWell = false;
                     foreach(var tag in room.Tags)
                     {
-                        if (tag.Contains("风") || tag.Contains("加压")
+                        if (tag.Contains("机房"))
+                        {
+                            break;
+                        }
+                        else if (tag.Contains("风") || tag.Contains("加压")
                             || tag.Contains("烟") || tag.Contains("井"))
                         {
                             isWindWell = true;

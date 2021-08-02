@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -10,12 +11,13 @@ using System.Linq;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
+    class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup, ISetStorey
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
         private const string UsePropertyName = "Use";
         private const string DistanceToFlorPropertyName = "BottomDistanceToFloor";
+        private List<StoreyInfo> StoreyInfos { get; set; }
         public ThFaBeamExtractor()
         {
             Beams = new List<ThIfcBeam>();
@@ -30,14 +32,13 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
+                var parentId = BuildString(GroupOwner, o.Outline);
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Outline));
+                    var storeyInfo = Query(o.Outline);
+                    parentId = storeyInfo.Id;
                 }
-                if (Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Outline));
-                }
+                geometry.Properties.Add(ParentIdPropertyName, parentId);
                 geometry.Properties.Add(DistanceToFlorPropertyName, o.DistanceToFloor);
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
@@ -69,14 +70,6 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-        public override void Group2(Dictionary<Entity, string> groupId)
-        {
-            if (Group2Switch)
-            {
-                Beams.ForEach(o => Group2Owner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
-            }
-        }
-
         public void Print(Database database)
         {
             using (var db = AcadDatabase.Use(database))
@@ -93,6 +86,17 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), beamIds);
                 }
             }
+        }
+
+        public void Set(List<StoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
+
+        public StoreyInfo Query(Entity entity)
+        {
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new StoreyInfo();
         }
     }
 }

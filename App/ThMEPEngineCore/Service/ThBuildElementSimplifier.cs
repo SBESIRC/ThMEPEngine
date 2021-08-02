@@ -4,6 +4,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
@@ -60,23 +61,9 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
-        public virtual DBObjectCollection Filter(DBObjectCollection walls)
+        public virtual DBObjectCollection Filter(DBObjectCollection Polygons)
         {
-            return walls.Cast<Entity>().Where(o =>
-            {
-                if (o is AcPolygon polygon)
-                {
-                    return polygon.Area > AREATOLERANCE;
-                }
-                else if (o is MPolygon mPolygon)
-                {
-                    return mPolygon.Area > AREATOLERANCE;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }).ToCollection();
+            return Polygons.FilterSmallArea(AREATOLERANCE);
         }
         public virtual DBObjectCollection Tessellate(DBObjectCollection curves)
         {

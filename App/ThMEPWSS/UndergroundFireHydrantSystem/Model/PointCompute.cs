@@ -14,7 +14,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
     {
         public static Line PointInLine(Point3d pt, List<Line> lineList)
         {
-            double Tolerance = 10.0;
+            double Tolerance = 1.0;
             var termPointLine = new Line();
             foreach (var line in lineList)
             {
@@ -68,6 +68,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             double Tolerance = 10.0;
             if (pt1.DistanceTo(line.StartPoint) < Tolerance || pt1.DistanceTo(line.EndPoint) < Tolerance)
             {
+
                 return true;
             }
             return false;

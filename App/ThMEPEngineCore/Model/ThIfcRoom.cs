@@ -7,11 +7,6 @@ namespace ThMEPEngineCore.Model
     public class ThIfcRoom : ThIfcSpatialElement
     {
         /// <summary>
-        /// 名称
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
         /// 标签
         /// </summary>
         public List<string> Tags { get; set; }
@@ -25,10 +20,8 @@ namespace ThMEPEngineCore.Model
         {
             return new ThIfcRoom()
             {
-                Name = "",
                 Boundary = entity,                
                 Tags = new List<string>(),
-                Uuid = Guid.NewGuid().ToString()
             };
         }
 
@@ -36,10 +29,8 @@ namespace ThMEPEngineCore.Model
         {
             return new ThIfcRoom()
             {
-                Name = "",
                 Tags = tags,
                 Boundary = entity,
-                Uuid = Guid.NewGuid().ToString()
             };
         }
     }

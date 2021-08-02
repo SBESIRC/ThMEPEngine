@@ -19,14 +19,14 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         public List<LayoutModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
             List<LayoutModel> layoutModels = new List<LayoutModel>();
-            var room = thRoom.Boundary as Polyline;
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
 
             //计算门信息
-            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
 
             //获取构建信息
-            var bufferRoom = room.Buffer(5)[0] as Polyline;
+            var bufferRoom = room.Buffer(15)[0] as Polyline;
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);

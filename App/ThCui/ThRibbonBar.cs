@@ -170,6 +170,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THHZXT_SMALL",
             "IDI_THCAD_THHZXT_LARGE",
             RibbonButtonStyle.LargeWithText);
+
+            // 提资转换
+            row.AddNewButton("提资转换",
+            "天华提资转换",
+            "THTZZH",
+            "天华提资转换",
+            "IDI_THCAD_THTZZH_SMALL",
+            "IDI_THCAD_THTZZH_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
@@ -212,17 +221,17 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            //{
-            //    var subPanel = row.AddNewPanel();
-            //    var subRow = subPanel.AddNewRibbonRow();
-            //    row.AddNewButton("地下消火栓系统图",
-            //        "天华地下消火栓系统图",
-            //        "THDXXHSXTT",
-            //        "天华地下消火栓系统图",
-            //        "IDI_THCAD_THDXXHSXTT_SMALL",
-            //        "IDI_THCAD_THDXXHSXTT_LARGE",
-            //        RibbonButtonStyle.LargeWithText);
-            //}
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("地下消火栓系统图",
+                    "天华地下消火栓系统图",
+                    "THDXXHSXTT",
+                    "天华地下消火栓系统图",
+                    "IDI_THCAD_THDXXHSXTT_SMALL",
+                    "IDI_THCAD_THDXXHSXTT_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
@@ -258,9 +267,13 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSXTT_SMALL",
                     "IDI_THCAD_THJSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
 
                 // 地上排水系统图
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地上排水系统图",
                     "天华地上排水系统图",
                     "THPSXTT",
@@ -268,6 +281,40 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THPSXTT_SMALL",
                     "IDI_THCAD_THPSXTT_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 地上消火栓系统图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地上消火栓系统",
+                    "天华地上消火栓系统图",
+                    "THXHSXTT",
+                    "天华地上消火栓系统图",
+                    "IDI_THCAD_THXHSXTT_SMALL",
+                    "IDI_THCAD_THXHSXTT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("给水大样图",
+                    "天华给水大样图",
+                    "THJSDY",
+                    "天华给水大样图",
+                    "IDI_THCAD_THJSDY_SMALL",
+                    "IDI_THCAD_THJSDY_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+                var subRow = subPanel.AddNewRibbonRow();
+                row.AddNewButton("给水轴测图",
+                    "天华给水轴测图",
+                    "THJSZC",
+                    "天华给水轴测图",
+                    "IDI_THCAD_THJSZC_SMALL",
+                    "IDI_THCAD_THJSZC_LARGE",
+                    RibbonButtonStyle.LargeWithText);
             }
 
             {

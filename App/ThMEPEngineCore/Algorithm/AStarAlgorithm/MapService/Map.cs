@@ -17,12 +17,14 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         double avoidFrameDistance = 200;
         Polyline polyline = null; //外包框
         List<Polyline> holes = null;
+        List<Entity> rooms = null;
         int columns = 0;
         int rows = 0;
         public T endInfo;
         public Point startPt;
         public MapHelper<T> mapHelper;
         public List<Point> cells = new List<Point>();
+        public Dictionary<Point, double> roomCast = new Dictionary<Point, double>();
         public bool[][] obstacles = null; //障碍物位置，维度：Column * Line    
 
         public Map(Polyline _polyline, Vector3d xDir, T _endInfo, double _step, double _avoidFrameDistance, double _avoidHoleDistance)
@@ -65,6 +67,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         {
             holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
         }
+        public void SetRoom(List<Entity> _rooms)
+        {
+            rooms = _rooms;
+        }
 
         /// <summary>
         /// 设置起点和终点信息
@@ -74,7 +80,16 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         public void SetStartAndEndInfo(Point3d _startPt)
         {
             this.startPt = mapHelper.SetStartAndEndInfo(_startPt, endInfo);
-            InitObstacle();
+            if(holes != null)
+            {
+                InitObstacle();
+            }
+            
+            if(rooms != null)
+            {
+                InitRoom();
+            }
+            
         }
 
         /// <summary>
@@ -95,6 +110,22 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
                     if (hole.Contains(cellPt))
                     {
                         this.obstacles[cell.X][cell.Y] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void InitRoom()
+        {
+            foreach (var cell in cells)
+            {
+                Point3d cellPt = mapHelper.TransformMapPoint(cell);
+                foreach (var room in rooms)
+                {
+                    if (room.ToNTSPolygon().Contains(cellPt.ToNTSPoint()))
+                    {
+                        roomCast.Add(cell, 0.01);
                         break;
                     }
                 }

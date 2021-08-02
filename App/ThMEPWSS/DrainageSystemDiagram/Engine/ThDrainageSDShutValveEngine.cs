@@ -10,9 +10,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDShutValveEngine
     {
-        public static List<KeyValuePair<Point3d, Vector3d>> getShutValvePoint(ThDrainageSDDataExchange dataset)
+        public static List<ThDrainageSDADBlkOutput> getShutValvePoint(ThDrainageSDDataExchange dataset)
         {
-            var shutValveList = new List<KeyValuePair<Point3d, Vector3d>>();
+            var shutValveList = new List<ThDrainageSDADBlkOutput>();
 
             if (dataset.PipeTreeRoot != null)
             {
@@ -32,14 +32,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return shutValveList;
         }
 
-        private static KeyValuePair<Point3d, Vector3d> ToShutValve(ThDrainageSDTreeNode node)
+        private static ThDrainageSDADBlkOutput ToShutValve(ThDrainageSDTreeNode node)
         {
             int moveLength = 200;
             Vector3d dir = (node.Parent.Node - node.Node).GetNormal();
-
             Point3d pt = node.Node + moveLength * dir;
 
-            var valve = new KeyValuePair<Point3d, Vector3d>(pt, dir);
+            var valve = new ThDrainageSDADBlkOutput(pt);
+            valve.dir = dir;
+            valve.name = ThDrainageSDCommon.Blk_ShutValves;
+            valve.blkSize = ThDrainageSDCommon.Blk_size_ShutValves;
+            valve.scale = ThDrainageSDCommon.Blk_scale_ShutValves;
 
             return valve;
         }
@@ -82,10 +85,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     currNode = ifChildHasAllHandWashSink(currNode, dataset.TerminalList);
                     currNode = ifNodeLineTooShort(currNode, cutList);
 
-                    cutList.Add(currNode);
-                    currNode.Parent.Child.Remove(currNode);
-                    var allRoot = findRoot(currNode);
-                    currNode = allRoot;
+                    if (currNode.Parent != null)
+                    {
+                        cutList.Add(currNode);
+                        currNode.Parent.Child.Remove(currNode);
+                        var allRoot = findRoot(currNode);
+                        currNode = allRoot;
+                    }
                 }
                 else
                 {
@@ -145,21 +151,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return currNode;
         }
 
-        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList, List<List<ThTerminalToilate>> islandGroupList)
+        private static ThDrainageSDTreeNode ifInIsland(ThDrainageSDTreeNode node, List<ThTerminalToilet> terminalList, List<List<ThTerminalToilet>> islandGroupList)
         {
             ThDrainageSDTreeNode newNode = node;
 
             if (islandGroupList.Count > 0)
             {
                 var leaf = node.getLeaf();
-                var toilateLeaf = leaf.Select(x => matchPipeEndTerminal(x, terminalList)).ToList();
+                var toiletLeaf = leaf.Select(x => matchPipeEndTerminal(x, terminalList)).ToList();
 
-                foreach (var toi in toilateLeaf)
+                foreach (var toi in toiletLeaf)
                 {
                     var group = islandGroupList.Where(x => x.Contains(toi)).FirstOrDefault();
                     if (group != null && group.Count > 0)
                     {
-                        var notInLeaf = group.Where(x => toilateLeaf.Contains(x) == false).ToList();
+                        var notInLeaf = group.Where(x => toiletLeaf.Contains(x) == false).ToList();
                         if (notInLeaf.Count > 0)
                         {
                             newNode = node.Parent;
@@ -172,7 +178,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
+        private static ThDrainageSDTreeNode ifChildHasAllHandWashSink(ThDrainageSDTreeNode node, List<ThTerminalToilet> terminalList)
         {
             ThDrainageSDTreeNode newNode = node;
             List<string> HandWashSinkType = new List<string>() { "A-Toilet-1", "A-Toilet-2", "A-Toilet-3", "A-Toilet-4" };
@@ -180,12 +186,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (node.Parent != null)
             {
                 var siblingLeaf = node.getSibling().SelectMany(x => x.getLeaf());
-                var toilateSibling = siblingLeaf.Select(x => matchPipeEndTerminal(x, terminalList)).ToList();
+                var toiletSibling = siblingLeaf.Select(x => matchPipeEndTerminal(x, terminalList)).ToList();
 
-                if (toilateSibling.Count > 0)
+                if (toiletSibling.Count > 0)
                 {
-                    var toilateNotHandWashSink = toilateSibling.Where(x => HandWashSinkType.Contains(x.Type) == false);
-                    if (toilateNotHandWashSink.Count() == 0)
+                    var toiletNotHandWashSink = toiletSibling.Where(x => HandWashSinkType.Contains(x.Type) == false);
+                    if (toiletNotHandWashSink.Count() == 0)
                     {
                         newNode = node.Parent;
                     }
@@ -195,9 +201,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return newNode;
         }
 
-        private static List<List<ThTerminalToilate>> getIslandGroupList(Dictionary<string, List<ThTerminalToilate>> GroupList, Dictionary<string, (string, string)> IslandPair)
+        private static List<List<ThTerminalToilet>> getIslandGroupList(Dictionary<string, List<ThTerminalToilet>> GroupList, Dictionary<string, (string, string)> IslandPair)
         {
-            var islandGroupList = new List<List<ThTerminalToilate>>();
+            var islandGroupList = new List<List<ThTerminalToilet>>();
 
             List<string> islandTraversal = new List<string>();
 
@@ -206,7 +212,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (islandTraversal.Contains(island.Key) == false)
                 {
 
-                    var group = new List<ThTerminalToilate>();
+                    var group = new List<ThTerminalToilet>();
                     group.AddRange(GroupList[island.Value.Item1]);
                     group.AddRange(GroupList[island.Value.Item2]);
                     islandGroupList.Add(group);
@@ -223,7 +229,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             int i = 0;
             i = node.getLeafCount();
             i = i - DescendantCount(node, cutList);
-
 
             return i;
         }
@@ -246,12 +251,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     }
                 }
             }
-
             return i;
 
         }
 
-        private static ThTerminalToilate matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThTerminalToilate> terminalList)
+        private static ThTerminalToilet matchPipeEndTerminal(ThDrainageSDTreeNode node, List<ThTerminalToilet> terminalList)
         {
             var tol = new Tolerance(10, 10);
 
@@ -259,34 +263,35 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return terminal;
         }
 
-        public static List<Line> cutPipe(List<KeyValuePair<Point3d, Vector3d>> valveList, List<Line> pipes)
+        public static List<Line> cutPipe(List<ThDrainageSDADBlkOutput> valveList, List<Line> pipes)
         {
             var tol = new Tolerance(1, 1);
             var finalLine = new List<Line>();
 
-            double scale = ThDrainageSDCommon.Blk_scale;
-            double blkSize = ThDrainageSDCommon.Blk_Size;
-
-            foreach (var valve in valveList)
+            if (valveList != null && valveList.Count > 0)
             {
-                var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.Key, tol)).ToList();
-                if (line.Count > 0)
+                foreach (var valve in valveList)
                 {
-                    var l = line.First();
-                    var dir = valve.Value;
-                    var blkS = valve.Key - dir * scale * blkSize;
-                    var blkE = valve.Key + dir * scale * blkSize;
-                    var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
-                    var newE2 = blkS == newE ? blkE : blkS;
+                    var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position, tol)).ToList();
+                    if (line.Count > 0)
+                    {
+                        var l = line.First();
+                        var dir = valve.dir;
+                        double scale = valve.scale;
+                        double blkSize = valve.blkSize;
+                        var blkS = valve.position - dir * scale * blkSize / 2;
+                        var blkE = valve.position + dir * scale * blkSize / 2;
+                        var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
+                        var newE2 = blkS == newE ? blkE : blkS;
 
 
-                    var cutpart1 = new Line(l.StartPoint, newE);
-                    var cutpart2 = new Line(newE2, l.EndPoint);
-                    finalLine.Add(cutpart1);
-                    finalLine.Add(cutpart2);
-                    pipes.Remove(l);
+                        var cutpart1 = new Line(l.StartPoint, newE);
+                        var cutpart2 = new Line(newE2, l.EndPoint);
+                        finalLine.Add(cutpart1);
+                        finalLine.Add(cutpart2);
+                        pipes.Remove(l);
+                    }
                 }
-
             }
 
             finalLine.AddRange(pipes);

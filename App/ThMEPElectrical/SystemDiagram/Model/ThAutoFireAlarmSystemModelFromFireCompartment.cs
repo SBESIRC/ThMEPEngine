@@ -1,19 +1,17 @@
 ﻿using System;
-using AcHelper;
 using NFox.Cad;
+using AcHelper;
 using Linq2Acad;
-using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -31,10 +29,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
         private ThCADCoreNTSSpatialIndex GlobalBlockInfoSpatialIndex;
         private List<ThIfcDistributionFlowElement> FloorBlockInfo;
         private ThCADCoreNTSSpatialIndex FloorBlockInfoSpatialIndex;
+        private List<string> FireCompartmentNameList;
 
         public ThAutoFireAlarmSystemModelFromFireCompartment()
         {
             floors = new List<ThFloorModel>();
+            FireCompartmentNameList = new List<string>();
         }
 
         /// <summary>
@@ -132,8 +132,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 {
                                     ThFloorModel NewFloor = new ThFloorModel
                                     {
-                                        FloorName = sobj.StoreyNumber.Contains("B") ? sobj.StoreyNumber : sobj.Storeys[0] + "F",
-                                        FloorNumber = sobj.StoreyNumber.Contains("B") ? -sobj.Storeys[0] : sobj.Storeys[0]
+                                        FloorName = sobj.Storeys[0],
+                                        FloorNumber = sobj.Storeys[0].GetFloorNumber()
                                     };
                                     NewFloor.InitFloors(adb.Database, blk, fireCompartments, spatialIndex);
                                     Floors.Add(NewFloor);
@@ -142,10 +142,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 {
                                     ThFloorModel NewFloor = new ThFloorModel
                                     {
-                                        FloorName = sobj.Storeys[0] + "F",
-                                        FloorNumber = sobj.Storeys[0],
+                                        FloorName = sobj.Storeys[0],
+                                        FloorNumber = sobj.Storeys[0].GetFloorNumber(),
                                         IsMultiFloor = true,
-                                        MulitFloorName = sobj.Storeys
+                                        MulitFloors = sobj.Storeys,
+                                        MulitFloorName = sobj.StoreyTypeString,
+                                        MulitStoreyNumber = sobj.StoreyNumber
                                     };
                                     NewFloor.InitFloors(adb.Database, blk, fireCompartments, spatialIndex);
                                     Floors.Add(NewFloor);
@@ -161,6 +163,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             //统计楼层内防火分区计数
             Floors.ForEach(floor =>
             {
+                FireCompartmentNameList.AddRange(floor.FireDistricts.Where(o => !o.DrawFireDistrictNameText).Select(o => o.FireDistrictName));
                 var FloorBlockInfo = GetFloorBlockInfo(floor.FloorBoundary);
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
@@ -176,37 +179,17 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
                 floor.FireDistricts.Where(f => f.DrawFireDistrict && f.DrawFireDistrictNameText).ToList().ForEach(o =>
                 {
-                    o.FireDistrictNo = ++Max_FireDistrictNo;
-                    o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
-                });
-            });
-            //分解复数楼层
-            Floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
-            {
-                floor.MulitFloorName.ForEach(o =>
-                {
-                    var newfloor = new ThFloorModel();
-                    newfloor.IsMultiFloor = false;
-                    newfloor.FloorName = o + "F";
-                    newfloor.FloorNumber = o;
-                    floor.FireDistricts.ForEach(x =>
+                    Max_FireDistrictNo++;
+                    while (FireCompartmentNameList.Contains(FloorName + "-" + Max_FireDistrictNo))
                     {
-                        var names = x.FireDistrictName.Split('-');
-                        names[0] = newfloor.FloorName;
-                        newfloor.FireDistricts.Add(new ThFireDistrictModel()
-                        {
-                            FireDistrictName = string.Join("-", names),
-                            DrawFireDistrict = x.DrawFireDistrict,
-                            DrawFireDistrictNameText = newfloor.FloorNumber == floor.MulitFloorName[0] ? x.DrawFireDistrictNameText : false,
-                            TextPoint = x.TextPoint,
-                            Data = x.Data,
-                            FireDistrictNo = x.FireDistrictNo
-                        });
-                    });
-                    Floors.Add(newfloor);
+                        Max_FireDistrictNo++;
+                    }
+                    o.FireDistrictNo = Max_FireDistrictNo;
+                    o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
+                    FireCompartmentNameList.Add(o.FireDistrictName);
                 });
             });
-            return Floors.Where(o => !o.IsMultiFloor).ToList();
+            return Floors;
         }
 
         /// <summary>
@@ -230,6 +213,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 var FloorBlockInfo = GetFloorBlockInfo(floor.FloorBoundary);
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
+                    fireDistrict.FireDistrictNo = 0;//该楼层属于虚拟楼层，需手动调整防火分区归属权
                     fireDistrict.Data = new DataSummary()
                     {
                         BlockData = FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary)
@@ -286,8 +270,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         }
                     });
                 });
-                //HostApplicationServices.WorkingDatabase = db;
-
                 foreach (Entity item in DrawEntitys)
                 {
                     acadDatabase.ModelSpace.Add(item);
@@ -300,9 +282,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         protected override void PrepareData()
         {
-            var AllFireDistrictsData = GetFireDistrictsInfo();
-            AllFireDistrictsData = DataProcessing(AllFireDistrictsData);
-            var AllData = DataConversion(AllFireDistrictsData);
+            DataProcessing();
+            var AllData = GetDrawModelInfo();
             this.DrawData = AllData;
         }
 
@@ -399,51 +380,113 @@ namespace ThMEPElectrical.SystemDiagram.Model
         }
 
         /// <summary>
-        /// 获取所有的防火分区信息
-        /// </summary>
-        /// <returns></returns>
-        private List<ThFireDistrictModel> GetFireDistrictsInfo()
-        {
-            return this.floors.OrderBy(x => { x.FireDistricts = x.FireDistricts.OrderBy(y => y.FireDistrictNo).ToList(); return x.FloorNumber; }).SelectMany(o => o.FireDistricts).Where(f => f.DrawFireDistrict).ToList();
-        }
-
-        /// <summary>
         /// 数据处理，按业务需求处理数据
         /// </summary>
         /// <param name="allData"></param>
         /// <returns></returns>
-        private List<ThFireDistrictModel> DataProcessing(List<ThFireDistrictModel> allData)
+        private void DataProcessing()
         {
-            //正常的防火分区
-            var NormalFireDistricts = allData.Where(f => f.FireDistrictNo != -1).ToList();
-            allData.Where(f => f.FireDistrictNo == -1).ForEach(f =>
+            //全部防火分区
+            var AllFireZones = this.floors.SelectMany(o => o.FireDistricts).ToList();
+            //合并同名称楼层
+            var NormalFireDistricts = new List<ThFireDistrictModel>();
+            AllFireZones.ForEach(o =>
             {
-                var FindData = NormalFireDistricts.FirstOrDefault(o => o.FireDistrictName == f.FireDistrictName);
-                if (FindData.IsNull())
+                int index = NormalFireDistricts.FindIndex(x => x.FireDistrictName == o.FireDistrictName);
+                if (index >= 0)
                 {
-                    NormalFireDistricts.Add(f);
+                    NormalFireDistricts[index].Data += o.Data;
                 }
                 else
                 {
-                    FindData.Data += f.Data;
+                    NormalFireDistricts.Add(o);
                 }
             });
-            NormalFireDistricts.ForEach(o =>
+            //计算楼层合并关系
+            for (int i = 0; i < this.floors.Count; i++)
+            {
+                ThFloorModel floor = this.floors[i];
+                List<ThFireDistrictModel> fireCompartments = new List<ThFireDistrictModel>();
+                floor.FireDistricts.ForEach(o =>
+                {
+                    var fireDistrict = NormalFireDistricts.FirstOrDefault(f => f.FireDistrictName == o.FireDistrictName);
+                    if (fireDistrict.IsNull())
+                    {
+                        //已被别的楼层合并完成，本楼层直接忽略
+                        fireCompartments.Add(o);
+                    }
+                    else if(o.FireDistrictNo != -1)
+                    {
+                        //正常防火分区，合并所有重名防火分区数据
+                        o.Data = fireDistrict.Data;
+                        NormalFireDistricts.Remove(fireDistrict);
+                    }
+                    else
+                    {
+                        //不属于本楼层的防火分区，不执行合并操作，忽略掉
+                        fireCompartments.Add(o);
+                    }
+                });
+                floor.FireDistricts.RemoveAll(o => fireCompartments.Contains(o));
+            }
+            this.floors.ForEach(x => x.FireDistricts.ForEach(o =>
             {
                 if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
                     o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
-            });
-            return NormalFireDistricts;
+            }));
+            if (FireCompartmentParameter.DiagramDisplayEffect == 1)
+            {
+                //分解复数楼层
+                this.floors.Where(o => o.IsMultiFloor).ToList().ForEach(floor =>
+                {
+                    floor.MulitFloors.ForEach(o =>
+                    {
+                        var newfloor = new ThFloorModel();
+                        newfloor.IsMultiFloor = false;
+                        newfloor.FloorName = o;
+                        newfloor.FloorNumber = o.GetFloorNumber();
+                        floor.FireDistricts.ForEach(x =>
+                        {
+                            var names = x.FireDistrictName.Split('-');
+                            names[0] = newfloor.FloorName;
+                            newfloor.FireDistricts.Add(new ThFireDistrictModel()
+                            {
+                                FireDistrictName = string.Join("-", names),
+                                DrawFireDistrict = x.DrawFireDistrict,
+                                DrawFireDistrictNameText = newfloor.FloorName == floor.MulitFloors[0] ? x.DrawFireDistrictNameText : false,
+                                TextPoint = x.TextPoint,
+                                Data = x.Data,
+                                FireDistrictNo = x.FireDistrictNo
+                            });
+                        });
+                        this.floors.Add(newfloor);
+                    });
+                    this.floors = this.floors.Where(o => !o.IsMultiFloor).ToList();
+                });
+            }
+            return;
         }
 
         /// <summary>
-        /// 数据转换，转成系统图能够识别的数据类型
+        /// 获取DrawModelList
         /// </summary>
-        /// <param name="allData"></param>
         /// <returns></returns>
-        private List<ThDrawModel> DataConversion(List<ThFireDistrictModel> allData)
+        private List<ThDrawModel> GetDrawModelInfo()
         {
-            return allData.Select(o => new ThDrawModel() { FireDistrictName = o.FireDistrictName, Data = o.Data }).ToList();
+            return this.floors.OrderBy(o => o.FloorNumber).SelectMany(o =>
+            {
+                List<ThDrawModel> drawModels = new List<ThDrawModel>();
+                o.FireDistricts.Where(x => x.DrawFireDistrict).OrderBy(x => x.FireDistrictNo).ForEach(x =>
+                {
+                    drawModels.Add(new ThDrawModel()
+                    {
+                        FireDistrictName = o.IsMultiFloor ? $"{o.MulitFloorName}:{o.MulitStoreyNumber}F-{x.FireDistrictNo}" : x.FireDistrictName,
+                        Data = x.Data,
+                        FloorCount = o.IsMultiFloor ? o.MulitFloors.Count : 1,
+                    });
+                });
+                return drawModels;
+            }).ToList();
         }
     }
 }

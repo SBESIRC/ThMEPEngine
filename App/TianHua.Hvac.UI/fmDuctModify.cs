@@ -15,8 +15,13 @@ namespace TianHua.Hvac.UI
             duct_size = duct_size_;
             air_volume = air_volume_;
             label7.Text = duct_size;
+            string[] s = duct_size.Split('x');
+            if (s.Length == 2)
+            {
+                textBox8.Text = s[0];
+                textBox1.Text = s[1];
+            }
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(textBox8.Text) || String.IsNullOrEmpty(textBox1.Text))
@@ -25,7 +30,6 @@ namespace TianHua.Hvac.UI
             DialogResult = DialogResult.OK;
             this.Close();
         }
-
         private void textBox8_TextChanged(object sender, EventArgs e)
         {
             if (!Is_integer_str(textBox8.Text))

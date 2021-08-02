@@ -24,13 +24,14 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         {
             List<LayoutModel> models = new List<LayoutModel>();
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            var room = thRoom.Boundary as Polyline;
+            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom);
+
             //获取需要的构建信息
             var bufferRoom = room.Buffer(tol)[0] as Polyline;
             var needDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
             var doorPts = needDoors.Select(x => x.GetRectangleCenterPt()).ToList();
             var nLanes = getLayoutStructureService.GetNeedLanes(lanes, room);
-            if (nLanes.Count <= 0)
+            if (nLanes.Count <= 0 || needDoors.Count <= 0)
             {
                 return models;
             }

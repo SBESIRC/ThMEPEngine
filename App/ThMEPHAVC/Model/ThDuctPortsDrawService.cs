@@ -10,60 +10,6 @@ using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
-    public class Elbow_Info
-    {
-        public bool is_flip;
-        public double open_angle;
-        public double duct_width;
-        public double rotate_angle;
-        public Point3d center_point;
-        public Elbow_Info(bool is_flip_, double open_angle_, double duct_width_, double rotate_angle_, Point3d center_point_)
-        {
-            is_flip = is_flip_;
-            open_angle = open_angle_;
-            duct_width = duct_width_;
-            rotate_angle = rotate_angle_;
-            center_point = center_point_;
-        }
-    }
-    public class Tee_Info
-    {
-        public bool is_flip;
-        public double i_width;
-        public double o_width1;
-        public double o_width2;
-        public double rotate_angle;
-        public Point3d center_point;
-        public Tee_Info(bool is_flip_, double i_width_, double o_width1_, double o_width2_, double rotate_angle_, Point3d center_point_)
-        {
-            is_flip = is_flip_;
-            i_width = i_width_;
-            o_width1 = o_width1_;
-            o_width2 = o_width2_;
-            rotate_angle = rotate_angle_;
-            center_point = center_point_;
-        }
-    }
-    public class Cross_Info
-    {
-        public bool is_flip;
-        public double i_width;
-        public double o_width1;
-        public double o_width2;
-        public double o_width3;
-        public double rotate_angle;
-        public Point3d center_point;
-        public Cross_Info(bool is_flip_, double i_width_, double o_width1_, double o_width2_, double o_width3_, double rotate_angle_, Point3d center_point_)
-        {
-            is_flip = is_flip_;
-            i_width = i_width_;
-            o_width1 = o_width1_;
-            o_width2 = o_width2_;
-            o_width3 = o_width3_;
-            rotate_angle = rotate_angle_;
-            center_point = center_point_;
-        }
-    }
     public class ThDuctPortsDrawService
     {
         public string geo_layer;
@@ -76,20 +22,28 @@ namespace ThMEPHVAC.Model
         public string dimension_layer;
         public string port_mark_layer;
         public string valve_name;
-        public string block_name;
+        public string port_name;
         public string start_name;
         public string port_mark_name;
+        private string valve_visibility;
         public ThDuctPortsDrawDim dim_service;
+        public ThDuctPortsDrawValve valve_service;
+        public ThDuctPortsDrawText text_service;
+        public ThDuctPortsDrawPort port_service;
         public ThDuctPortsDrawService(string scenario, string scale)
         {
             valve_name = "风阀";
             start_name = "AI-风管起点";
             port_mark_name = "风口标注";
-            block_name = "风口-AI研究中心";
+            port_name = "风口-AI研究中心";
+            valve_visibility = "多叶调节风阀";
             Set_layer(scenario);
             Import_Layer_Block();
             Pre_proc_layer();
             dim_service = new ThDuctPortsDrawDim(dimension_layer, scale);
+            valve_service = new ThDuctPortsDrawValve(valve_visibility, valve_name, valve_layer);
+            text_service = new ThDuctPortsDrawText(duct_size_layer);
+            port_service = new ThDuctPortsDrawPort(port_layer, port_name);
         }
         private void Set_layer(string scenario)
         {
@@ -153,7 +107,7 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(dimension_layer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(port_mark_layer));
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(port_mark_name), false);
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(block_name), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(port_name), false);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(valve_name), false);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(start_name), false);
                 currentDb.DimStyles.Import(blockDb.DimStyles.ElementOrDefault("TH-DIM150"));
@@ -185,18 +139,35 @@ namespace ThMEPHVAC.Model
                                Matrix3d mat,
                                out ObjectIdList geo_ids,
                                out ObjectIdList flg_ids,
-                               out ObjectIdList center_ids)
+                               out ObjectIdList center_ids,
+                               out ObjectIdList ports_ids,
+                               out ObjectIdList ext_ports_ids)
         {
             Draw_lines(info.geo, mat, geo_layer, out geo_ids);
             Draw_lines(info.flg, mat, flg_layer, out flg_ids);
             Draw_lines(info.center_line, mat, center_layer, out center_ids);
+            Draw_ports(info.ports, info.ports_ext, mat, out ports_ids, out ext_ports_ids);
+        }
+        public static void Draw_ports(List<Point3d> ports, 
+                                      List<Point3d> ports_ext,
+                                      Matrix3d mat,
+                                      out ObjectIdList ports_ids,
+                                      out ObjectIdList ext_ports_ids)
+        {
+            var ports_ids2 = new ObjectIdList();
+            var ext_ports_ids2 = new ObjectIdList();
+            ports.ForEach(p => ports_ids2.Add(Dreambuild.AutoCAD.Draw.Point(p.TransformBy(mat))));
+            ports_ext.ForEach(p => ext_ports_ids2.Add(Dreambuild.AutoCAD.Draw.Point(p.TransformBy(mat))));
+
+            ports_ids = ports_ids2;
+            ext_ports_ids = ext_ports_ids2;
         }
         public static void Draw_lines(DBObjectCollection lines,
                                       Matrix3d trans_mat,
                                       string str_layer,
                                       out ObjectIdList ids)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
                 ids = new ObjectIdList();
                 foreach (Curve obj in lines)
@@ -213,24 +184,9 @@ namespace ThMEPHVAC.Model
         }
         public ObjectId Insert_start_flag(Point3d p)
         {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Active())
             {
                 return acadDb.ModelSpace.ObjectId.InsertBlockReference(start_layer, start_name, p, new Scale3d(), 0);
-            }
-        }
-        public void Attach_start_param(ObjectId id, DuctPortsParam param, List<Entity_param> entity_ids)
-        {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
-            {
-                var value_list = new TypedValueList
-                {
-                    { (int)DxfCode.ExtendedDataAsciiString, id.ToString()},
-                    { (int)DxfCode.ExtendedDataAsciiString, param.scale},
-                    { (int)DxfCode.ExtendedDataAsciiString, param.scenario},
-                };
-                foreach (var info in entity_ids)
-                    value_list.Add((int)DxfCode.ExtendedDataAsciiString, info.ToString());
-                id.AddXData("Start", value_list);
             }
         }
         public static void Remove_ids(ObjectId[] objectIds)
@@ -248,14 +204,55 @@ namespace ThMEPHVAC.Model
         public static void Set_valve_dyn_block_properity(ObjectId obj, double width, double height, double text_angle, string valve_visibility)
         {
             var data = new ThBlockReferenceData(obj);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY, valve_visibility);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA, width);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT, height);
-            if (data.CustomProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE))
-                data.CustomProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE, text_angle);
+            var properity = data.CustomProperties;
+            if (properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY))
+                properity.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY, valve_visibility);
+            if (properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA))
+                properity.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA, width);
+            if (properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT))
+                properity.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT, height);
+            if (properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE))
+                properity.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE, text_angle);
+        }
+        public static void Get_valve_dyn_block_properity(ObjectId obj,
+                                                         out Point3d pos,
+                                                         out double width, 
+                                                         out double height,
+                                                         out double text_angle,
+                                                         out double rotate_angle,
+                                                         out string valve_visibility)
+        {
+            var data = new ThBlockReferenceData(obj);
+            var properity = data.CustomProperties;
+            valve_visibility = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY) ?
+                              (string)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY) :
+                              String.Empty;
+            width = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA) ?
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA) : 0;
+            height = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT) ? 
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT) : 0;
+            text_angle = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE) ? 
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE) : 0;
+            rotate_angle = data.Rotation;
+            pos = data.Position;
+        }
+        public static void Get_port_dyn_block_properity(ObjectId obj,
+                                                        out Point3d pos,
+                                                        out string port_range,
+                                                        out double port_height,
+                                                        out double port_width,
+                                                        out double rotate_angle)
+        {
+            var data = new ThBlockReferenceData(obj);
+            var properity = data.CustomProperties;
+            port_width = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER) ?
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER) : 0;
+            port_height = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT) ?
+                    (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_HEIGHT) : 0;
+            port_range = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE) ?
+                    (string)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PORT_RANGE) : String.Empty;
+            rotate_angle = data.Rotation;
+            pos = data.Position;
         }
         public static void Set_port_dyn_block_properity(ObjectId obj, double port_width, double port_height, string port_range)
         {
@@ -272,6 +269,37 @@ namespace ThMEPHVAC.Model
             var dis_mat = Matrix3d.Displacement(-align_p.GetAsVector());
             foreach (Curve l in line_set)
                 l.TransformBy(dis_mat);
+        }
+        public static void Remove_group_by_comp(ObjectId id)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var ids = id.GetGroups();
+                foreach (var g_id in ids)
+                {
+                    g_id.RemoveXData(ThHvacCommon.RegAppName_Info);
+                    Remove_group(g_id);
+                }
+            }
+        }
+        public static void Clear_graph(Handle handle)
+        {
+            if (handle.Value != 0)
+            {
+                using (var db = AcadDatabase.Active())
+                {
+                    var g_id = db.Database.GetObjectId(false, handle, 0);
+                    //g_id.RemoveXData(ThHvacCommon.RegAppName_Info);
+                    Remove_group(g_id);
+                }
+            }
+        }
+        private static void Remove_group(ObjectId g_id)
+        {
+            var component_ids = Dreambuild.AutoCAD.DbHelper.GetEntityIdsInGroup(g_id);
+            foreach (ObjectId i in component_ids)
+                i.Erase();
+            g_id.Erase();
         }
     }
 }

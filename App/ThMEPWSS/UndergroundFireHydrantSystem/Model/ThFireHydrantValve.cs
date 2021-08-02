@@ -33,6 +33,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return Size;
         }
 
+        public Point3dCollection GetRect()
+        {
+            double gap = 300;
+            var pt1 = (Valve as Entity).GeometricExtents.MaxPoint;
+            var pt2 = (Valve as Entity).GeometricExtents.MinPoint;
+            var pts = new Point3d[5];
+            pts[0] = new Point3d(pt2.X - gap, pt1.Y + gap, 0);
+            pts[1] = new Point3d(pt1.X + gap, pt1.Y + gap, 0);
+            pts[2] = new Point3d(pt1.X + gap, pt2.Y - gap, 0);
+            pts[3] = new Point3d(pt2.X - gap, pt2.Y - gap, 0);
+            pts[4] = pts[0];
+            return new Point3dCollection(pts);
+        }
 
         public Line GetLine(bool isBkRe)
         {

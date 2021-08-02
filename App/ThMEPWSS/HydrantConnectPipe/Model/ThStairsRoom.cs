@@ -10,18 +10,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
 {
     public class ThStairsRoom : ThIfcBuildingElement
     {
-        public Polyline ElementObb { get; set; }
         public static ThStairsRoom Create(Entity data)
         {
             var stairsRoom = new ThStairsRoom();
             stairsRoom.Uuid = Guid.NewGuid().ToString();
             stairsRoom.Outline = data;
-            if (data is Polyline)
-            {
-                var polyline = data as Polyline;
-                stairsRoom.ElementObb = polyline;
-            }
-
             return stairsRoom;
         }
     }

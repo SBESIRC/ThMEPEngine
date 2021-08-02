@@ -1,15 +1,16 @@
-﻿using Linq2Acad;
-using System.Collections.Generic;
+﻿using System;
+using Linq2Acad;
+using DotNetARX;
+using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
-using DotNetARX;
-using System.Linq;
-using Dreambuild.AutoCAD;
-using System;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -232,7 +233,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
 
                 //加入组
-                Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                if (FireCompartmentParameter.DiagramCreateGroup == 1)
+                {
+                    Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                }
             }
         }
 

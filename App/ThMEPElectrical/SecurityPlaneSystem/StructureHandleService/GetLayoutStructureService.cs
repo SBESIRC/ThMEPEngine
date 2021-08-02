@@ -74,7 +74,7 @@ namespace ThMEPElectrical.StructureHandleService
             var ep = roomPt.DistanceTo(pt1) < roomPt.DistanceTo(pt2) ? pt1 : pt2;
             var sp = roomPt.DistanceTo(pt2) > roomPt.DistanceTo(pt1) ? pt2 : pt1;
             var dir = (ep - sp).GetNormal();
-
+            
             return Tuple.Create(roomPt, dir, doorLength, doorWidth);
         }
 
@@ -162,7 +162,10 @@ namespace ThMEPElectrical.StructureHandleService
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
-
+            if (needWalls.Count <= 0)
+            {
+                return new List<Polyline>();
+            }
             needWalls = room.Intersection(needWalls);
             return range.Intersection(needWalls).Cast<Polyline>().ToList();
         }
@@ -268,6 +271,53 @@ namespace ThMEPElectrical.StructureHandleService
 
             structs.AddRange(circle.Intersection(walls.ToCollection()).Cast<Polyline>().ToList());
             return structs;
+        }
+
+        /// <summary>
+        /// 找到合适的房间框线
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="door"></param>
+        /// <returns></returns>
+        public Polyline GetUseRoomBoundary(ThIfcRoom room, Polyline door)
+        {
+            Polyline polyRoom = null;
+            if (room.Boundary is Polyline polyline)
+            {
+                polyRoom = polyline;
+            }
+            else if (room.Boundary is MPolygon mPolygon)
+            {
+                var bufferDoor = door.Buffer(10)[0] as Polyline;
+                foreach (Polyline loop in mPolygon.Loops())
+                {
+                    if (loop.Intersects(bufferDoor))
+                    {
+                        return loop;
+                    }
+                }
+            }
+            return polyRoom;
+        }
+
+        /// <summary>
+        /// 找到合适的房间框线
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="door"></param>
+        /// <returns></returns>
+        public Polyline GetUseRoomBoundary(ThIfcRoom room)
+        {
+            Polyline polyRoom = null;
+            if (room.Boundary is Polyline polyline)
+            {
+                polyRoom = polyline;
+            }
+            else if (room.Boundary is MPolygon mPolygon)
+            {
+                return mPolygon.Loops()[0];
+            }
+            return polyRoom;
         }
     }
 }

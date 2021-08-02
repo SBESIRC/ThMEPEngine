@@ -90,11 +90,11 @@ namespace ThMEPEngineCore.Model.Electrical
             }
         }
 
-        public List<int> Storeys
+        public List<string> Storeys
         {
             get
             {
-                var storeys = new List<int>();
+                var storeys = new List<string>();
                 switch (StoreyType)
                 {
                     case EStoreyType.StandardStorey:
@@ -102,22 +102,22 @@ namespace ThMEPEngineCore.Model.Electrical
                     case EStoreyType.RefugeStorey:
                     case EStoreyType.PodiumRoof:
                         {
-                            var parser = new VentSNCalculator(StoreyNumber);
-                            storeys.AddRange(parser.SerialNumbers);
+                            var parser = new FloorCalculator(StoreyNumber);
+                            storeys.AddRange(parser.Floors);
                             break;
                         }
                     case EStoreyType.EvenStorey:
                         {
-                            var parser = new VentSNCalculator(StoreyNumber);
-                            storeys.AddRange(parser.SerialNumbers);
-                            storeys.RemoveAll(o => (o & 1) == 1);
+                            var parser = new FloorCalculator(StoreyNumber);
+                            storeys.AddRange(parser.Floors);
+                            storeys.RemoveAll(o => (int.Parse(Regex.Replace(o, @"[^0-9]+", "")) & 1) == 1);
                             break;
                         }
                     case EStoreyType.OddStorey:
                         {
-                            var parser = new VentSNCalculator(StoreyNumber);
-                            storeys.AddRange(parser.SerialNumbers);
-                            storeys.RemoveAll(o => (o & 1) == 0);
+                            var parser = new FloorCalculator(StoreyNumber);
+                            storeys.AddRange(parser.Floors);
+                            storeys.RemoveAll(o => (int.Parse(Regex.Replace(o, @"[^0-9]+", "")) & 1) == 0);
                             break;
                         }
                     default:

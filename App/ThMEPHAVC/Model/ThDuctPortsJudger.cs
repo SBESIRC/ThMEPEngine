@@ -22,9 +22,30 @@ namespace ThMEPHVAC.Model
         private List<Line> crossing_h_grid_set;
         private ThCADCoreNTSSpatialIndex grid_spatial_index;
         public ThDuctPortsJudger(Point3d start_pos_,
+                                 bool is_recreate,
                                  List<Merged_endline_Info> endline, 
                                  List<Endline_seg_Info> endline_segs)
         {
+            Init(start_pos_);
+            if (!is_recreate)
+            {
+                Inner_shrink(endline_segs);
+                var grids = Get_grid_lines();
+                Move_to_org(grids);
+                var grid_lines = Filter_h_v_grid_line(grids);
+                grids.Clear();
+                if (grid_lines.Count > 0)
+                {
+                    grid_spatial_index = new ThCADCoreNTSSpatialIndex(grid_lines);
+                    Seperate_v_and_h_grid(grid_lines, v_grid_set, h_grid_set);
+                    Get_crossing_grid(endline);
+                    Adjust_port_by_wall(endline_segs);
+                    Adjust_end_endline_width(endline_segs);
+                }
+            }
+        }
+        private void Init(Point3d start_pos_)
+        {   
             align_limit = 500;
             start_pos = start_pos_;
             dir_align_points = new List<Point2d>();
@@ -33,17 +54,17 @@ namespace ThMEPHVAC.Model
             h_grid_set = new List<Line>();
             crossing_v_grid_set = new List<Line>();
             crossing_h_grid_set = new List<Line>();
-            Inner_shrink(endline_segs);
-            var grid_lines = Get_grid_lines();
-            Move_to_org(grid_lines);
-            if (grid_lines.Count > 0)
+        }
+        private DBObjectCollection Filter_h_v_grid_line(DBObjectCollection grid_lines)
+        {
+            var lins = new DBObjectCollection();
+            for (int i = 0; i < grid_lines.Count; ++i)
             {
-                grid_spatial_index = new ThCADCoreNTSSpatialIndex(grid_lines);
-                Seperate_v_and_h_grid(grid_lines, v_grid_set, h_grid_set);
-                Get_crossing_grid(endline);
-                Adjust_port_by_wall(endline_segs);
-                Adjust_end_endline_width(endline_segs);
+                var l = grid_lines[i] as Line;
+                if (ThDuctPortsService.Is_vertical(l) || ThDuctPortsService.Is_horizontal(l))
+                    lins.Add(l);
             }
+            return lins;
         }
         private void Move_to_org(DBObjectCollection grid_lines)
         {
@@ -62,7 +83,6 @@ namespace ThMEPHVAC.Model
                 Set_sizes(4000, sizes, merged_endline.segs);
             }
         }
-
         private void Set_sizes(double threshold, List<string> sizes, List<Duct_ports_Info> merged_endline)
         {
             int count = 0;
@@ -79,7 +99,6 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-
         private void Modify_sizes(List<string> sizes)
         {
             for (int i = 0; i < sizes.Count - 1; ++i)
@@ -94,10 +113,9 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-
         private List<string> Less_duct_size(double threshold, List<Duct_ports_Info> merged_endline)
         {
-            List<string> sizes = new List<string>();
+            var sizes = new List<string>();
             foreach (var duct_info in merged_endline)
             {
                 foreach (var port_info in duct_info.ports_info)
@@ -123,22 +141,20 @@ namespace ThMEPHVAC.Model
                 ver_align_points.Add(ver_wall_point);
             }
         }
-
         private void Update_port_pos(Point2d align_point, List<Duct_ports_Info> merged_endline)
         {
-            Vector3d vec = Get_edge_direction(merged_endline[0].l);
-            if (!Is_vertical(vec) && !Is_horizontal(vec))
+            if (align_point.IsEqualTo(Point2d.Origin, new Tolerance(1e-3, 1e-3)))
                 return;
-            Point3d align_base_point = new Point3d(align_point.X, align_point.Y, 0);
+            var align_base_point = new Point3d(align_point.X, align_point.Y, 0);
             foreach (var port_seg in merged_endline)
             {
                 for (int i = 0; i < port_seg.ports_info.Count; ++i)
                 {
-                    Point3d pos = port_seg.ports_info[i].position;
+                    var pos = port_seg.ports_info[i].position;
                     double dis = align_base_point.DistanceTo(pos);
-                    Vector3d dir_vec = (pos - align_base_point).GetNormal();
+                    var dir_vec = (pos - align_base_point).GetNormal();
                     
-                    double align_dis = (dis < 100) ? 0 : Align_distance(dis, 100);
+                    double align_dis = (dis < 100) ? 0 : ThDuctPortsService.Align_distance(dis, 100);
                     port_seg.ports_info[i].position = align_base_point + dir_vec * align_dis;
                 }
             }
@@ -149,18 +165,21 @@ namespace ThMEPHVAC.Model
                                           List<Line> grid_set2)
         {
             double min_dis = Double.MaxValue;
-            Point2d align_point = new Point2d();
+            var align_point = new Point2d();
             wall_point = Point2d.Origin;
             foreach (var port_seg in merged_endline)
             {
-                Vector3d dir_vec = Get_edge_direction(port_seg.l);
-                if (Is_vertical(dir_vec))
+                if (ThDuctPortsService.Is_vertical(port_seg.l))
                 {
+                    if (grid_set1.Count == 0)
+                        return Point2d.Origin;
                     double cur_min_dis = Do_search_align_port(port_seg.ports_info, grid_set1, out Point2d position, out Point2d wall_p);
                     Update_align_wall_info(cur_min_dis, ref min_dis, position, ref align_point, wall_p, ref wall_point);
                 }
-                else
+                else if (ThDuctPortsService.Is_horizontal(port_seg.l))
                 {
+                    if (grid_set2.Count == 0)
+                        return Point2d.Origin;
                     double cur_min_dis = Do_search_align_port(port_seg.ports_info, grid_set2, out Point2d position, out Point2d wall_p);
                     Update_align_wall_info(cur_min_dis, ref min_dis, position, ref align_point, wall_p, ref wall_point);
                 }
@@ -187,13 +206,13 @@ namespace ThMEPHVAC.Model
                                              out Point2d wall_point)
         {
             double min_dis = Double.MaxValue;
-            Point2d min_p = new Point2d ();
-            Line align_wall = new Line();
+            var min_p = new Point2d();
+            var align_wall = new Line();
             foreach (Line l in crossing_grid_set)
             {
                 foreach (var info in ports_info)
                 {
-                    double cur_dis = Align_distance(Point_to_line(info.position.ToPoint2D(), l), 100);
+                    double cur_dis = ThDuctPortsService.Align_distance(ThDuctPortsService.Point_to_line(info.position.ToPoint2D(), l), 100);
                     if (cur_dis >= align_limit &&  cur_dis <= min_dis)
                     {
                         min_p = info.position.ToPoint2D();
@@ -202,9 +221,9 @@ namespace ThMEPHVAC.Model
                     }
                 }
             }
-            Point2d mirror_p = Get_mirror_point(min_p, align_wall);
-            Point3d mid_point = Get_mid_point(new Line(new Point3d (min_p.X, min_p.Y, 0) , new Point3d(mirror_p.X, mirror_p.Y, 0)));
-            Vector2d dir_vec = (min_p - mirror_p).GetNormal();
+            var mirror_p = ThDuctPortsService.Get_mirror_point(min_p, align_wall);
+            var mid_point = ThDuctPortsService.Get_mid_point(new Line(new Point3d (min_p.X, min_p.Y, 0) , new Point3d(mirror_p.X, mirror_p.Y, 0)));
+            var dir_vec = (min_p - mirror_p).GetNormal();
             position = mid_point.ToPoint2D() + dir_vec * min_dis;
             wall_point = mid_point.ToPoint2D();
             return min_dis;
@@ -230,12 +249,12 @@ namespace ThMEPHVAC.Model
         }
         private void Add_top_fence(Point2d p, List<Line> grid_set, DBObjectCollection crossing_lines)
         {
-            Line top_line = new Line();
+            var top_line = new Line();
             double min_dis = Double.MaxValue;
             foreach (Line l in grid_set)
             {
-                double dis = Point_to_line(p, l);
-                if (l.StartPoint.Y > p.Y && dis < min_dis && Is_in_mirror_range(p, l))
+                double dis = ThDuctPortsService.Point_to_line(p, l);
+                if (l.StartPoint.Y > p.Y && dis < min_dis && ThDuctPortsService.Is_in_mirror_range(p, l))
                 {
                     min_dis = dis;
                     top_line = l;
@@ -246,12 +265,12 @@ namespace ThMEPHVAC.Model
         }
         private void Add_right_fence(Point2d p, List<Line> grid_set, DBObjectCollection crossing_lines)
         {
-            Line right_line = new Line();
+            var right_line = new Line();
             double min_dis = Double.MaxValue;
             foreach (Line l in grid_set)
             {
-                double dis = Point_to_line(p, l);
-                if (l.StartPoint.X > p.X && dis < min_dis && Is_in_mirror_range(p, l))
+                double dis = ThDuctPortsService.Point_to_line(p, l);
+                if (l.StartPoint.X > p.X && dis < min_dis && ThDuctPortsService.Is_in_mirror_range(p, l))
                 {
                     min_dis = dis;
                     right_line = l;
@@ -262,12 +281,12 @@ namespace ThMEPHVAC.Model
         }
         private void Add_left_fence(Point2d p, List<Line> grid_set, DBObjectCollection crossing_lines)
         {
-            Line left_line = new Line();
+            var left_line = new Line();
             double min_dis = Double.MaxValue;
             foreach (Line l in grid_set)
             {
-                double dis = Point_to_line(p, l);
-                if (l.StartPoint.X < p.X && Point_to_line(p, l) < min_dis && Is_in_mirror_range(p, l))
+                double dis = ThDuctPortsService.Point_to_line(p, l);
+                if (l.StartPoint.X < p.X && dis < min_dis && ThDuctPortsService.Is_in_mirror_range(p, l))
                 {
                     min_dis = dis;
                     left_line = l;
@@ -278,12 +297,12 @@ namespace ThMEPHVAC.Model
         }
         private void Add_bottom_fence(Point2d p, List<Line> grid_set, DBObjectCollection crossing_lines)
         {
-            Line bottom_line = new Line();
+            var bottom_line = new Line();
             double min_dis = Double.MaxValue;
             foreach (Line l in grid_set)
             {
-                double dis = Point_to_line(p, l);
-                if (l.StartPoint.Y < p.Y && Point_to_line(p, l) < min_dis && Is_in_mirror_range(p, l))
+                double dis = ThDuctPortsService.Point_to_line(p, l);
+                if (l.StartPoint.Y < p.Y && dis < min_dis && ThDuctPortsService.Is_in_mirror_range(p, l))
                 {
                     min_dis = dis;
                     bottom_line = l;
@@ -292,26 +311,7 @@ namespace ThMEPHVAC.Model
             if (bottom_line.StartPoint.DistanceTo(bottom_line.EndPoint) > 1e-3)
                 crossing_lines.Add(bottom_line);
         }
-        private bool Is_in_mirror_range(Point2d p, Line l)
-        {
-            var vertical_p = Get_vertical_point(p, l);
-            return Mid_point_is_in_line(vertical_p, l);
-        }
-        private bool Mid_point_is_in_line(Point2d p, Line l)
-        {
-            double maxX = l.StartPoint.X > l.EndPoint.X ? l.StartPoint.X : l.EndPoint.X;
-            double maxY = l.StartPoint.Y > l.EndPoint.Y ? l.StartPoint.Y : l.EndPoint.Y;
-            double minX = l.StartPoint.X < l.EndPoint.X ? l.StartPoint.X : l.EndPoint.X;
-            double minY = l.StartPoint.Y < l.EndPoint.Y ? l.StartPoint.Y : l.EndPoint.Y;
-            if (minX <= p.X && p.X <= maxX && minY <= p.Y && p.Y <= maxY)
-                return true;
-            return false;
-        }
-        private double Point_to_line(Point2d p, Line l)
-        {
-            Point2d vertical_p = Get_vertical_point(p, l);
-            return vertical_p.GetDistanceTo(p);
-        }
+        
         private void Search_poly_border(Merged_endline_Info endlines, out Point2d top, out Point2d left, out Point2d right, out Point2d bottom)
         {
             top = new Point2d(0, Double.MinValue);
@@ -339,14 +339,12 @@ namespace ThMEPHVAC.Model
         {
             foreach (Line l in crossing_lines)
             {
-                Vector3d dir_vec = Get_edge_direction(l);
-                if (Is_vertical(dir_vec))
+                if (ThDuctPortsService.Is_vertical(l))
                     v_set.Add(l);
-                else
+                else if (ThDuctPortsService.Is_horizontal(l))
                     h_set.Add(l);
             }
         }
-
         private Point3dCollection Create_poly_line(Merged_endline_Info merged_line)
         {
             Point3dCollection polygon = new Point3dCollection();
@@ -369,7 +367,7 @@ namespace ThMEPHVAC.Model
             {
                 foreach (var seg in endline.segs)
                 {
-                    Vector3d dir_vec = Get_edge_direction(seg.l);
+                    Vector3d dir_vec = ThDuctPortsService.Get_edge_direction(seg.l);
                     int port_num = seg.ports_info.Count;
                     if (port_num > 1)
                     {
@@ -382,38 +380,9 @@ namespace ThMEPHVAC.Model
                         }
                     }
                     else if (port_num == 1)
-                        seg.ports_info[0].position = Get_mid_point(seg.l);
+                        seg.ports_info[0].position = ThDuctPortsService.Get_mid_point(seg.l);
                 }
             }
-        }
-        private Point2d Get_vertical_point(Point2d p, Line l)
-        {
-            var mirror = Get_mirror_point(p, l);
-            return Get_mid_point(mirror, p);
-        }
-        private double Align_distance(double dis, double multiple)
-        {
-            return (Math.Ceiling(dis / multiple)) * multiple;
-        }
-        private Point2d Get_mirror_point(Point2d p, Line l)
-        {
-            return p.Mirror(new Line2d(l.StartPoint.ToPoint2D(), l.EndPoint.ToPoint2D()));
-        }
-        private static Vector3d Get_edge_direction(Line l)
-        {
-            Point3d srt_p = l.StartPoint;
-            Point3d end_p = l.EndPoint;
-            return (end_p - srt_p).GetNormal();
-        }
-        private static Point3d Get_mid_point(Line l)
-        {
-            Point3d sp = l.StartPoint;
-            Point3d ep = l.EndPoint;
-            return new Point3d((sp.X + ep.X) * 0.5, (sp.Y + ep.Y) * 0.5, 0);
-        }
-        private Point2d Get_mid_point(Point2d p1, Point2d p2)
-        {
-            return new Point2d((p1.X + p2.X) * 0.5, (p1.Y + p2.Y) * 0.5);
         }
         private DBObjectCollection Get_grid_lines()
         {
@@ -423,14 +392,6 @@ namespace ThMEPHVAC.Model
                 engine.Recognize(acadDatabase.Database, new Point3dCollection());
                 return engine.Elements.Select(o => o.Outline).ToCollection();
             }
-        }
-        private bool Is_vertical(Vector3d vec)
-        {
-            return Math.Abs(vec.DotProduct(Vector3d.XAxis)) < 1e-3;
-        }
-        private bool Is_horizontal(Vector3d vec)
-        {
-            return Math.Abs(vec.DotProduct(Vector3d.YAxis)) < 1e-3;
         }
     }
 }

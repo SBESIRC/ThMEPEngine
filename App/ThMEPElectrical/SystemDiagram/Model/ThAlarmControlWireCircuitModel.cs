@@ -23,6 +23,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public int WireCircuitNo { get; set; } = 0;
 
         /// <summary>
+        /// 合并线路名称
+        /// </summary>
+        public string MulitWireCircuitName { get; set; }
+
+        /// <summary>
         /// 块权重计数
         /// </summary>
         public int BlockCount { get; set; }
@@ -52,10 +57,17 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     case StatisticType.BlockName:
                         {
-                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
-                            if(o.HasAlias)
+                            if (ThAutoFireAlarmSystemCommon.NotInAlarmControlWireCircuitBlockNames.Contains(o.BlockName))
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = 0;//寻路算法不统计不属于自动报警控制总线的块
+                            }
+                            else
+                            {
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                                if (o.HasAlias)
+                                {
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                }
                             }
                             break;
                         }
@@ -138,6 +150,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             ThAlarmControlWireCircuitModel newWireCircuitModel = new ThAlarmControlWireCircuitModel()
             {
                 WireCircuitName = x.WireCircuitName,
+                WireCircuitNo=x.WireCircuitNo,
                 TextPoint = x.TextPoint.Equals(Point3d.Origin) ? y.TextPoint : x.TextPoint,
                 Data = x.Data + y.Data,
                 BlockCount = x.BlockCount + y.BlockCount,

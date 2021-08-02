@@ -50,9 +50,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 var shearWalls = ThHydrantDataManager.GetShearWalls(range);//获取剪力墙
                 var stairsRooms = ThHydrantDataManager.GetStairsRooms(range);//获取楼梯间
                 var structureCols = ThHydrantDataManager.GetStructuralCols(range);//获取结构柱
-//              var structureWalls = ThHydrantDataManager.GetStructureWalls(range);//获取结构墙
                 var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
-                var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓 
                 var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
                 var buildRooms = ThHydrantDataManager.GetBuildRoom(range);//获取建筑房间
 
@@ -62,27 +60,27 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 var pathService = new ThCreateHydrantPathService();
                 foreach (var shearWall in shearWalls)
                 {
-                    pathService.SetObstacle(shearWall.ElementObb);
+                    pathService.SetObstacle(shearWall.Outline);
                 }
                 foreach (var structureCol in structureCols)
                 {
-                    pathService.SetObstacle(structureCol.ElementObb);
+                    pathService.SetObstacle(structureCol.Outline);
                 }
                 foreach (var electricWell in electricWells)
                 {
-                    pathService.SetObstacle(electricWell.ElementObb);
+                    pathService.SetObstacle(electricWell.Outline);
                 }
                 foreach (var windWell in windWells)
                 {
-                    pathService.SetObstacle(windWell.ElementObb);
+                    pathService.SetObstacle(windWell.Outline);
                 }
                 foreach (var stairsRoom in stairsRooms)
                 {
-                    pathService.SetRoom(stairsRoom.ElementObb);
+                    pathService.SetObstacle(stairsRoom.Outline);
                 }
                 foreach (var buildRoom in buildRooms)
                 {
-                    pathService.SetRoom(buildRoom.ElementObb);
+                    pathService.SetRoom(buildRoom.Outline);
                 }
 
                 //添加约束终止线
@@ -130,7 +128,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         }
                         var objcets = path.BufferPL(200)[0];
                         var obb = objcets as Polyline;
-                        pathService.SetObstacle(obb);
+                        pathService.AddObstacle(obb);
                     }
                 }
                 Active.Editor.WriteMessage(System.DateTime.Now.ToString("yyyy-MM-dd HH：mm：ss：ffff"));

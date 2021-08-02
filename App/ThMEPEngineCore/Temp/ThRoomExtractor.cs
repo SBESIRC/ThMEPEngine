@@ -14,7 +14,8 @@ namespace ThMEPEngineCore.Temp
         public List<ThIfcRoom> Rooms { get; set; }
         public ThRoomExtractor()
         {
-            Rooms = new List<ThIfcRoom>();           
+            Rooms = new List<ThIfcRoom>();
+            Category = BuiltInCategory.Room.ToString();
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -23,13 +24,14 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
+                if(!string.IsNullOrEmpty(o.Name) && !o.Tags.Contains(o.Name))
+                {
+                    o.Tags.Add(o.Name);
+                }
+                geometry.Properties.Add(NamePropertyName,string.Join(",",o.Tags.ToArray()));
                 if (GroupSwitch)
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o.Boundary));
-                }
-                if(Group2Switch)
-                {
-                    geometry.Properties.Add(Group2IdPropertyName, BuildString(Group2Owner, o.Boundary));
                 }
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
@@ -56,14 +58,6 @@ namespace ThMEPEngineCore.Temp
             if (GroupSwitch)
             {
                 Rooms.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
-            }
-        }
-
-        public override void Group2(Dictionary<Entity, string> groupId)
-        {
-            if (Group2Switch)
-            {
-                Rooms.ForEach(o => Group2Owner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
             }
         }
 

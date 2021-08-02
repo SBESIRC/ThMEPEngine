@@ -17,16 +17,15 @@ namespace ThMEPHVAC.Model
         }
         public void Draw_dimension(List<Duct_ports_Info> infos, Point2d dir_wall_point, Point2d ver_wall_point, Point3d start_pos)
         {
-            Vector3d vec = ThDuctPortsService.Get_edge_direction(infos[0].l);
-            if (!ThDuctPortsService.Is_vertical(vec, Vector3d.XAxis) &&
-                !ThDuctPortsService.Is_vertical(vec, Vector3d.YAxis))
+            var l = infos[0].l;
+            if (!ThDuctPortsService.Is_vertical(l) && !ThDuctPortsService.Is_horizontal(l))
                 return;
             Insert_ver_dimension(infos, ver_wall_point, start_pos);
             Insert_dir_dimension(infos, dir_wall_point, start_pos);
         }
         private void Insert_ver_dimension(List<Duct_ports_Info> infos, Point2d ver_wall_point, Point3d start_pos)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
                 if (infos.Count > 0 && ver_wall_point.GetDistanceTo(Point2d.Origin) > 1e-3)
                 {
@@ -85,8 +84,7 @@ namespace ThMEPHVAC.Model
                     Vector3d vertical_vec = Get_dimension_vertical_vec(dir_vec);
                     for (int j = 0; j < info.ports_info.Count - 1; ++j)
                     {
-                        if (info.ports_info[j].air_volume > 0 &&
-                            info.ports_info[j + 1].air_volume > 0)
+                        if (info.ports_info[j].air_volume > 0 && info.ports_info[j + 1].air_volume > 0)
                         {
                             var dim = Create_align_dim(info.ports_info[j].position + dis_vec, 
                                                        info.ports_info[j + 1].position + dis_vec, 
@@ -102,7 +100,7 @@ namespace ThMEPHVAC.Model
         }
         private void Insert_wall_point(List<Duct_ports_Info> infos, Point2d wall_point)
         {
-            if (wall_point.GetDistanceTo(Point2d.Origin) < 1e-3)
+            if (wall_point.IsEqualTo(Point2d.Origin, new Tolerance (1e-3, 1e-3)))
                 return;
             Point3d wall_p = new Point3d(wall_point.X, wall_point.Y, 0);
             if (Insert_wall_point_not_in_line(infos, wall_p))

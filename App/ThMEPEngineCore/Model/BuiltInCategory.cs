@@ -20,6 +20,10 @@
         /// </summary>
         BigRoof,
         /// <summary>
+        /// 建筑楼层
+        /// </summary>
+        BuildingStorey,
+        /// <summary>
         /// 中心线
         /// </summary>
         CenterLine,
@@ -36,6 +40,10 @@
         /// </summary>
         ConnectPort,
         /// <summary>
+        /// 引下线
+        /// </summary>
+        Conductor,
+        /// <summary>
         /// 门
         /// </summary>
         Door,
@@ -48,6 +56,10 @@
         /// </summary>
         DrainageFacility,
         /// <summary>
+        /// 
+        /// </summary>
+        Distribution,
+        /// <summary>
         /// 设备
         /// </summary>
         Equipment,
@@ -59,6 +71,10 @@
         /// 车道线
         /// </summary>
         FireproofShutter,
+        /// <summary>
+        /// 防火分区
+        /// </summary>
+        FireApart,
         /// <summary>
         /// 防火卷帘
         /// </summary>
@@ -75,6 +91,10 @@
         /// 外墙形成的边界
         /// </summary>
         OuterBoundary,
+        /// <summary>
+        /// 在墙上开的洞
+        /// </summary>
+        Opening,
         /// <summary>
         /// 停车位
         /// </summary>
@@ -115,6 +135,14 @@
         /// 楼层框线
         /// </summary>
         StoreyBorder,
+        /// <summary>
+        /// 场地
+        /// </summary>
+        Site,
+        /// <summary>
+        /// 楼梯
+        /// </summary>
+        Stair,
         /// <summary>
         /// 窗户
         /// </summary>

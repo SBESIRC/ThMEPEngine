@@ -421,60 +421,71 @@ namespace ThMEPEngineCore
                 }
                 // ArchitectureWall、Shearwall、Column、Window、Room
                 // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
+
+                //先提取楼层框线
                 var storeyExtractor = new ThEStoreyExtractor()
                 {
                     ElementLayer = "AI-楼层框定E",
                     ColorIndex = 12,
                     GroupSwitch = false,
-                    Group2Switch = false,
                     UseDb3Engine = true,
                     IsolateSwitch = false,
                 };
                 storeyExtractor.Extract(acadDatabase.Database,pts);
 
+                //再提取防火分区，接着用楼层框线对防火分区分组
+                var storeyInfos = storeyExtractor.Storeys.Cast<StoreyInfo>().ToList();
+                var fireApartExtractor = new ThFireApartExtractor()
+                {
+                    ElementLayer = "AI-防火分区,AD-AREA-DIVD",
+                    ColorIndex = 11,
+                    GroupSwitch = true,
+                    UseDb3Engine = false,
+                    IsolateSwitch = false,
+                    StoreyInfos = storeyInfos, //用于创建防火分区
+                };
+                fireApartExtractor.Extract(acadDatabase.Database, pts);
+                fireApartExtractor.Group(storeyExtractor.StoreyIds); //判断防火分区属于哪个楼层框线
+                fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
+                
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThArchitectureWallExtractor()
+                    new ThFaArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
                         ColorIndex=1,
                         GroupSwitch=true,
-                        Group2Switch=false,
                         UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
-                    new ThShearWallExtractor()
+                    new ThFaShearWallExtractor()
                     {
                         ElementLayer = "AI-剪力墙",
                         ColorIndex=2,
                         GroupSwitch=true,
-                        Group2Switch=false,
                         UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
-                    new ThColumnExtractor()
+                    new ThFaColumnExtractor()
                     {
                         ElementLayer = "AI-柱",
                         ColorIndex=3,
-                        GroupSwitch=false,
-                        Group2Switch=false,
+                        GroupSwitch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
-                    new ThWindowExtractor()
+                    new ThFaWindowExtractor()
                     {
                         ElementLayer="AI-窗",
                         ColorIndex=4,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
-                    new ThRoomExtractor()   
+                    new ThFaRoomExtractor()   
                     {
                         ColorIndex=5,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
@@ -483,7 +494,6 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-梁",
                         ColorIndex=6,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
@@ -492,16 +502,14 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-门",
                         ColorIndex=7,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
-                    new ThRailingExtractor()
+                    new ThFaRailingExtractor()
                     {
                         ElementLayer = "AI-栏杆",
                         ColorIndex=8,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
@@ -510,7 +518,6 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-防火卷帘",
                         ColorIndex=9,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
@@ -519,35 +526,33 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-洞",
                         ColorIndex=10,
                         GroupSwitch=true,
-                        Group2Switch=true,
                         UseDb3Engine=false,
                         IsolateSwitch=false,
                     },
-                    new ThFiredistrictExtractor()
-                    {
-                        ElementLayer="AI-防火分区,AD-AREA-DIVD",
-                        ColorIndex=11,
-                        GroupSwitch=true,
-                        Group2Switch=false,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },                    
-                };
-                extractEngine.Accept(extractors);
-                var fireApartExtractor = extractors.Where(o => o is ThFiredistrictExtractor).First() as ThFiredistrictExtractor;
-                fireApartExtractor.StoreyInfos = storeyExtractor.Storeys.Cast<StoreyInfo>().ToList();
+                };                
+                extractEngine.Accept(extractors);             
                 extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.Accept(storeyExtractor);
-                extractEngine.Group(storeyExtractor.StoreyIds);
-                extractEngine.Group2(fireApartExtractor.GetFireAPartIds());
-
+                //用防火分区对墙、柱...分组
+                extractEngine.Group(fireApartExtractor.FireApartIds);
+                //找到防火门、防火卷帘邻接的防火分区
                 var faDoorExtractor = extractors.Where(o => o is ThFaDoorOpeningExtractor).First() as ThFaDoorOpeningExtractor;
-                faDoorExtractor.SetTags(fireApartExtractor.GetFireAPartIds());
+                faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
                 var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
-                fireProofShutter.SetTags(fireApartExtractor.GetFireAPartIds());
-                //string geoContent = extractEngine.OutputGeo(); 
-                extractEngine.Remove(storeyExtractor);
+                fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
+
+                //最后将楼层框线和防火分区提取器加入，生成Geometries
+                extractEngine.Accept(storeyExtractor);
+                extractEngine.Accept(fireApartExtractor);
+                //把楼层框线传给列表中的提取器
+                extractors.ForEach(o =>
+                {
+                    if (o is ISetStorey iSetStory)
+                    {
+                        iSetStory.Set(storeyExtractor.Storeys.Cast<StoreyInfo>().ToList());
+                    }
+                });
                 var geos = extractEngine.BuildGeometries();
+
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
                 string fileName = fileInfo.Name;
