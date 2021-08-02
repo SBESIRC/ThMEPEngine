@@ -4,7 +4,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using Autodesk.AutoCAD.ApplicationServices;
     using Autodesk.AutoCAD.Colors;
     using Autodesk.AutoCAD.DatabaseServices;
+    using Autodesk.AutoCAD.EditorInput;
     using Autodesk.AutoCAD.Geometry;
+    using Autodesk.AutoCAD.Runtime;
     using DotNetARX;
     using Dreambuild.AutoCAD;
     using Linq2Acad;
@@ -1395,10 +1397,22 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     }
                 }
                 {
-                    var _storeys = new string[] { allNumStoreyLabels.GetAt(THESAURUSACCIDENT), allNumStoreyLabels.GetLastOrDefault(THESAURUSACCUSTOMED) }.SelectNotNull().Distinct().ToList();
+                    var _allSmoothStoreys = new List<string>();
+                    for (int i = QUOTATIONSHAKES; i < allNumStoreyLabels.Count; i++)
+                    {
+                        var run=runs.TryGet(i);
+                        if (run != null)
+                        {
+                            if (!run.HasLongTranslator && !run.HasShortTranslator)
+                            {
+                                _allSmoothStoreys.Add(allNumStoreyLabels[i]);
+                            }
+                        }
+                    }
+                    var _storeys = new string[] { _allSmoothStoreys.GetAt(THESAURUSACCIDENT), _allSmoothStoreys.GetLastOrDefault(THESAURUSACCUSTOMED) }.SelectNotNull().Distinct().ToList();
                     if (_storeys.Count == QUOTATIONSHAKES)
                     {
-                        _storeys = new string[] { allNumStoreyLabels.FirstOrDefault(), allNumStoreyLabels.LastOrDefault() }.SelectNotNull().Distinct().ToList();
+                        _storeys = new string[] { _allSmoothStoreys.FirstOrDefault(), _allSmoothStoreys.LastOrDefault() }.SelectNotNull().Distinct().ToList();
                     }
                     _storeys = _storeys.Where(storey =>
                     {
@@ -1719,9 +1733,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (output.HasCleaningPort2) DrawCleaningPort(segs[THESAURUSACCIDENT].StartPoint.ToPoint3d(), THESAURUSABDOMEN, THESAURUSACCESSION);
             DrawCleaningPort(segs[THESAURUSACCUSE].EndPoint.ToPoint3d(), THESAURUSABDOMINAL, THESAURUSACCIDENT);
         }
-        public static void CollectFloorListDatasEx()
+        public static void CollectFloorListDatasEx(bool focus)
         {
-            static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<ThMEPWSS.Model.FloorFramed> resFloors)
+            static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<BlockReference> brs)
             {
                 var ctx = new StoreyContext();
                 if (range != null)
@@ -1732,7 +1746,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 else
                 {
-                    ctx.thStoreys = resFloors.Select(x => new ThMEPEngineCore.Model.Common.ThStoreys(x.blockId)).ToList();
+                    ctx.thStoreys = brs.Select(x => new ThMEPEngineCore.Model.Common.ThStoreys(x.ObjectId)).ToList();
                 }
                 var storeys = new List<ThStoreysData>();
                 foreach (var s in ctx.thStoreys)
@@ -1750,13 +1764,27 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 ctx.thStoreysDatas = storeys;
                 return ctx;
             }
-            FocusMainWindow();
-            if (ThMEPWSS.Common.FramedReadUtil.SelectFloorFramed(out List<ThMEPWSS.Model.FloorFramed> resFloors))
             {
-                var ctx = commandContext;
-                using var adb = AcadDatabase.Active();
-                ctx.StoreyContext = GetStoreyContext(null, adb, resFloors);
-                InitFloorListDatas(adb);
+                var options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = THESAURUSABDOMEN,
+                    MessageForAdding = THESAURUSALTERNATE,
+                };
+                var dxfNames = new string[]
+                {
+                        RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                if (focus) FocusMainWindow();
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var ctx = commandContext;
+                    using var adb = AcadDatabase.Active();
+                    var selectedIds = result.Value.GetObjectIds();
+                    ctx.StoreyContext = GetStoreyContext(null, adb, selectedIds.Select(x => adb.Element<BlockReference>(x)).Where(x => x.GetEffectiveName() == ALTERNATIVENESS).ToList());
+                    InitFloorListDatas(adb);
+                }
             }
         }
         public static void InitFloorListDatas(AcadDatabase adb)
@@ -1910,9 +1938,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             geoData.Init();
             DrainageService.CollectGeoData(range, adb, geoData);
         }
-        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
+        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel, bool focus)
         {
-            FocusMainWindow();
+            if (focus) FocusMainWindow();
             if (commandContext == null) return;
             if (commandContext.StoreyContext == null) return;
             if (commandContext.StoreyContext.thStoreysDatas == null) return;
@@ -5114,7 +5142,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
     }
     public static class THDrainageService
-    {        
+    {
         public const int QUOTATIONSHAKES = 0;
         public const int INTENSIFICATION = 40;
         public const int INTERDIGITATING = 36;
@@ -5420,6 +5448,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSALLERGY = "HasBalconyWashingMachine：";
         public const string THESAURUSALLEVIATE = "HasMopPool：";
         public const int THESAURUSALLIANCE = 12;
+        public const string THESAURUSALTERNATE = "请选择楼层框线";
+        public const string ALTERNATIVENESS = "楼层框定";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>

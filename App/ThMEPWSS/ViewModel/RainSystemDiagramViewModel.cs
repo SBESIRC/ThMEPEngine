@@ -63,7 +63,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        public void InitFloorListDatas()
+        public void InitFloorListDatas(bool focus)
         {
             // 绑定控件
             if (DateTime.Now == DateTime.MinValue) FloorListDatas = SystemDiagramUtils.GetFloorListDatas();
@@ -71,7 +71,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 try
                 {
-                    ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.CollectFloorListDatasEx();
+                    ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.CollectFloorListDatasEx(focus);
                 }
                 catch (System.Exception ex)
                 {
@@ -111,7 +111,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        public void CollectFloorListDatas()
+        public void CollectFloorListDatas(bool focus)
         {
             try
             {
@@ -123,7 +123,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 else
                 {
                     //点选
-                    ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectFloorListDatasEx();
+                    ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectFloorListDatasEx(focus);
                 }
             }
             catch (System.Exception ex)

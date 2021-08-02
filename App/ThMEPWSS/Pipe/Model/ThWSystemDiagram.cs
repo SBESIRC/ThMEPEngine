@@ -11,7 +11,6 @@ using Linq2Acad;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ThMEPWSS.Assistant;
-using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using DU = ThMEPWSS.Assistant.DrawUtils;
 using ThMEPEngineCore.Model.Common;
