@@ -15,10 +15,7 @@ namespace ThMEPElectrical.GroundingGrid.Data
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.FloorTypePropertyName, o.StoreyType);
-                if (o.StoreyNumber == "")
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);
-                else
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, StoreyNumberMap[o.StoreyNumber]);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.FloorNumberPropertyName, o.StoreyNumber);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.IdPropertyName, o.Id);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.BasePointPropertyName, o.BasePoint);
                 geometry.Boundary = null;

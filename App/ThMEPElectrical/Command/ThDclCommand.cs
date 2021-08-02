@@ -59,7 +59,7 @@ namespace ThMEPElectrical.Command
                 }
                 short colorIndex = 1;
 
-                var storeyExtractor = new ThEStoreyExtractor()
+                var storeyExtractor = new ThDclEStoreyExtractor()
                 {
                     ColorIndex = colorIndex++,
                     GroupSwitch = false,
