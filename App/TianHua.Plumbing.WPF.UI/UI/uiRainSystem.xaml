@@ -31,7 +31,9 @@
             </ListBox>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Vertical">
-            <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
+            <Border BorderThickness="0.5" Margin="0,5,0,5">
+                <TextBlock x:Name="hint" FontSize="10" Visibility="Collapsed"></TextBlock>
+            </Border>
             <ItemsControl x:Name="testList" ItemsSource="{Binding DynamicRadioButtons}" MaxHeight="100">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

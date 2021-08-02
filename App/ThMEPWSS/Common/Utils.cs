@@ -15,9 +15,9 @@ namespace ThMEPWSS.Common
 {
     public static class Utils
     {
-        public static void CreateFloorFraming()
+        public static void CreateFloorFraming(bool focus = true)
         {
-            ThMEPWSS.Common.Utils.FocusMainWindow();
+            if (focus) ThMEPWSS.Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -41,7 +41,7 @@ namespace ThMEPWSS.Common
                 using (var acadDatabase = AcadDatabase.Active())
                 {
                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.FloorFraming,
-                    propmptResult.Value, new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { {"楼层编号" , "1" } });
+                    propmptResult.Value, new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "楼层编号", "1" } });
                 }
             }
         }

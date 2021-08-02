@@ -23,7 +23,6 @@
     using Autodesk.AutoCAD.Internal;
     using ThMEPWSS.CADExtensionsNs;
     using ThMEPWSS.Uitl;
-    using ThMEPWSS.Uitl.DebugNs;
     using ThMEPWSS.Uitl.ExtensionsNs;
     using ThMEPWSS.Assistant;
     using ThMEPWSS.Pipe.Service;

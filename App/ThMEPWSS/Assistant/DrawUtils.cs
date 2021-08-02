@@ -2020,10 +2020,6 @@ namespace ThMEPWSS.Assistant
                 id.InsertBlockReference(layerName, blkName, basePt, new Scale3d(1), 0);
             });
         }
-        public static Polyline DrawBoundaryLazy(params Entity[] ents)
-        {
-            return DrawBoundaryLazy(ents, 2);
-        }
         public static Polyline DrawBoundaryLazy(Entity[] ents, double thickness)
         {
             if (ents.Length == 0) return null;
@@ -2035,28 +2031,6 @@ namespace ThMEPWSS.Assistant
             var pl = DrawRectLazy(new GRect(minx, miny, maxx, maxy));
             pl.ConstantWidth = thickness;
             return pl;
-        }
-        public static void DrawBoundaryLazy(Entity e, double thickness = 2)
-        {
-            DrawingQueue.Enqueue(adb => { _DrawBoundary(adb.Database, e, thickness); });
-        }
-        public static void _DrawBoundary(Database db, Entity e, double thickness)
-        {
-            //if (e is BlockReference br)
-            //{
-            //    var colle = br.ExplodeToDBObjectCollection();
-            //    ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, colle.OfType<Entity>().ToArray());
-            //    foreach (Entity ent in colle)
-            //    {
-            //        ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, ent);
-            //    }
-            //}
-            //else
-            //{
-            //    ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, e);
-            //}
-
-            ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, e);
         }
         public static Polyline DrawRectLazyFromLeftButtom(Point3d leftButtom, double width, double height)
         {
@@ -2161,7 +2135,33 @@ namespace ThMEPWSS.Assistant
         }
         public static Polyline DrawRectLazy(Point3d pt1, Point3d pt2)
         {
-            var polyline = ThMEPWSS.Uitl.DebugNs.DebugTool.CreateRectangle(pt1.ToPoint2D(), pt2.ToPoint2D());
+            static Polyline CreatePolyline(Point2dCollection pts)
+            {
+                var pline = new Polyline();
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    pline.AddVertexAt(i, pts[i], 0, 0, 0);
+                }
+                return pline;
+            }
+            static Polyline CreateRectangle(Point2d pt1, Point2d pt2)
+            {
+                var minX = Math.Min(pt1.X, pt2.X);
+                var maxX = Math.Max(pt1.X, pt2.X);
+                var minY = Math.Min(pt1.Y, pt2.Y);
+                var maxY = Math.Max(pt1.Y, pt2.Y);
+                var pts = new Point2dCollection
+                {
+                    new Point2d(minX, minY),
+                    new Point2d(minX, maxY),
+                    new Point2d(maxX, maxY),
+                    new Point2d(maxX, minY)
+                };
+                var pline = CreatePolyline(pts);
+                pline.Closed = true;
+                return pline;
+            }
+            var polyline = CreateRectangle(pt1.ToPoint2D(), pt2.ToPoint2D());
             DrawingQueue.Enqueue(adb =>
             {
                 adb.ModelSpace.Add(polyline);
