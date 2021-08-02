@@ -63,6 +63,7 @@
     <Compile Include="FireProtectionSystemDiagram\Models\FloorDataModel.cs" />
     <Compile Include="FireProtectionSystemDiagram\Models\LineElementCreate.cs" />
     <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
+    <Compile Include="FlushPoint\Data\ThFpArchitectureWallExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThFpColumnExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThCanArrangedElement.cs" />
     <Compile Include="FlushPoint\Data\ThFpShearwallExtractor.cs" />

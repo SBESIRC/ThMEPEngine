@@ -45,9 +45,10 @@ namespace ThMEPWSS.Command
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
                 //收集数据
+                short colorIndex = 1;
                 var roomExtractor = new ThRoomExtractor()
                 {
-                    ColorIndex = 6,
+                    ColorIndex = colorIndex++,
                 };
                 roomExtractor.Extract(acadDb.Database, pts);
                 var parkingStallExtractor = new ThParkingStallExtractor();
@@ -56,13 +57,17 @@ namespace ThMEPWSS.Command
                     parkingStallExtractor.ParkingStalls.ToCollection());
                 resetService.Reset();
 
+                //可布置元素
+                var canArrangeElements = new List<ThCanArrangedElement>()
+                { ThCanArrangedElement.IsolatedColumn};
+
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
-                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
-                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
-                    new ThObstacleExtractor(){ ColorIndex=4,},
-                    new ThDrainFacilityExtractor(){ ColorIndex=5,},
+                    new ThFpColumnExtractor(canArrangeElements){ ColorIndex=colorIndex++,},
+                    new ThFpShearwallExtractor(canArrangeElements){ ColorIndex=colorIndex++,},
+                    new ThFpArchitectureWallExtractor(canArrangeElements){ ColorIndex=colorIndex++,},
+                    new ThObstacleExtractor(){ ColorIndex=colorIndex++,},
+                    new ThDrainFacilityExtractor(){ ColorIndex=colorIndex++,},
                 };
                 extractors.ForEach(o => o.SetRooms(roomExtractor.Rooms));
                 extractors.ForEach(o => o.Extract(acadDb.Database, pts));
