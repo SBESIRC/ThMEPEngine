@@ -71,8 +71,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var labelLine = labelEngine.CreateLabelLineList();
                 
             double textWidth = 1300;
+            double textHeight = 525;
             var textEngine = new ThExtractLabelText();//提取文字
-            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth);
+            var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textHeight);
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
 
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
@@ -98,7 +99,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
                 
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
-            fireHydrantSysIn.textWidth = textWidth/525*350;
+            fireHydrantSysIn.textWidth = textWidth * 350 / 525;
             fireHydrantSysIn.pipeWidth = textWidth + 200;
         }
     }

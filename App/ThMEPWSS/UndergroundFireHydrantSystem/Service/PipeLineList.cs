@@ -66,7 +66,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
 
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, null, 1000, 1);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList,  1000, 1);//打断部分 自动连接
 
             foreach (var l in GLineConnectList)
             {

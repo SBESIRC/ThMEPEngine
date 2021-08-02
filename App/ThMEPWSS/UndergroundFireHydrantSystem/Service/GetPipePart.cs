@@ -30,9 +30,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                 }
                 pt2 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
+                if (i != rstPath.Count -1)
+                {
+                    if(fireHydrantSysIn.ptTypeDic[rstPath[i + 1]].Equals("Valve"))
+                    {
+                        pt2 = new Point3d(stPt.X + pipeLength - 240 - 400, stPt.Y, 0);
+                    }
+                }
+                
                 fireHydrantSysOut.LoopLine.Add(new Line(pt1, pt2));
                 stPt = pt2;
 
+    
                 AddDN(ref fireHydrantSysOut, i, pt1, fireHydrantSysIn, rstPath);
                 return stPt;
             }
