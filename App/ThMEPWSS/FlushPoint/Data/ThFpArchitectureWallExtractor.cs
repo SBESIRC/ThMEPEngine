@@ -31,24 +31,28 @@ namespace ThMEPWSS.FlushPoint.Data
 
         private List<Entity> GetOutPutArchitectureWalls()
         {
+            if (!CanArrangedElements.Contains(ThCanArrangedElement.IsolatedArchitectureWall) &&
+                !CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedArchitectureWall))
+            {
+                return new List<Entity>();
+            }
+
             if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedArchitectureWall) &&
                 CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedArchitectureWall))
             {
                 return Walls;
             }
-
-            var isolateArchwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
-            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedArchitectureWall))
-            {
-                return isolateArchwalls;
-            }
-            else if (CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedArchitectureWall))
-            {
-                return Walls.Where(o => !isolateArchwalls.Contains(o)).ToList();
-            }
             else
             {
-                return new List<Entity>();
+                var isolateArchwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
+                if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedArchitectureWall))
+                {
+                    return isolateArchwalls;
+                }
+                else
+                {
+                    return Walls.Where(o => !isolateArchwalls.Contains(o)).ToList();
+                }
             }
         }
     }

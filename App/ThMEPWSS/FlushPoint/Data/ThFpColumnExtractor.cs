@@ -32,24 +32,27 @@ namespace ThMEPWSS.FlushPoint.Data
 
         private List<Polyline> GetOutPutColumns()
         {
+            if (!CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn) &&
+                !CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedColumn))
+            {
+                return new List<Polyline>(); 
+            }
             if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn) &&
                 CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedColumn))
             {
                 return Columns;
             }
-
-            var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
-            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn))
-            {
-                return isolateColumns.Cast<Polyline>().ToList();
-            }
-            else if(CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedColumn))
-            {
-                return Columns.Where(o=>!isolateColumns.Contains(o)).ToList();
-            }
             else
             {
-                return new List<Polyline>();
+                var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
+                if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn))
+                {
+                    return isolateColumns.Cast<Polyline>().ToList();
+                }
+                else
+                {
+                    return Columns.Where(o => !isolateColumns.Contains(o)).ToList();
+                }
             }
         }
     }

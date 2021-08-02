@@ -18,7 +18,6 @@ namespace ThMEPWSS.FlushPoint.Data
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            var isolateShearwalls = new List<Entity>();
             var outputWalls = GetOutPutShearwalls();
             outputWalls.ForEach(o =>
             {
@@ -31,23 +30,27 @@ namespace ThMEPWSS.FlushPoint.Data
         }
         private List<Entity> GetOutPutShearwalls()
         {
+            if(!CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall) &&
+                !CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedShearwall))
+            {
+                return new List<Entity>();
+            }
             if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall) &&
                 CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedShearwall))
             {
                 return Walls;
             }
-            var isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);            
-            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall))
-            {
-                return isolateShearwalls;
-            }
-            else if (CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedShearwall))
-            {
-                return Walls.Where(o => !isolateShearwalls.Contains(o)).ToList();
-            }
             else
             {
-                return new List<Entity>();
+                var isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
+                if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall))
+                {
+                    return isolateShearwalls;
+                }
+                else 
+                {
+                    return Walls.Where(o => !isolateShearwalls.Contains(o)).ToList();
+                }
             }
         }
     }
