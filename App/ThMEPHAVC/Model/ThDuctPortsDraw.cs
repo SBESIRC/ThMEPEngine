@@ -313,11 +313,6 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsDrawService.Draw_lines(mainlines.geo, mat, service.geo_layer, out ObjectIdList geo_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.flg_layer, out ObjectIdList flg_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.center_line, org_dis_mat, service.center_layer, out ObjectIdList center_ids);
-<<<<<<< HEAD
-                var param = ThDuctPortsService.Create_duct_modify_param(mainlines, duct_size, info.AirVolume, start_id);
-                ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, param);
-                Draw_mainline_text_info(angle, center_point, info, ref pre_duct_size_text);
-=======
                 // port根据中心线变化
                 ThDuctPortsDrawService.Draw_ports(mainlines.ports, mainlines.ports_ext, org_dis_mat,
                                                   out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
@@ -325,7 +320,6 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
                 var dir_vec = (info.Target.Position - info.Source.Position).GetNormal();
                 service.text_service.Draw_mainline_text_info(angle, main_height,center_point, dir_vec, org_dis_mat, in_param,ref pre_duct_size_text);
->>>>>>> release/v1.5.5.0
             }
         }
         private Line_Info Get_main_duct(ThDuctEdge<ThDuctVertex> info, out double duct_width)
