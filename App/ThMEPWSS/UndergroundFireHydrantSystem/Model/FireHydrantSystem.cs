@@ -52,6 +52,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             using ( var acadDatabase = AcadDatabase.Active())
             {
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
+                //ThMEPWSS.Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
                 foreach (var line in LoopLine)
                 {
                     line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
@@ -71,7 +72,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
                 foreach(var pipeInt in PipeInterrupted.Keys)
                 {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", "水管中断",
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水管中断",
                     pipeInt, new Scale3d(-0.8, 0.8, 0.8), PipeInterrupted[pipeInt]);
                 }
 
@@ -94,7 +95,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
                 foreach (var fh in FireHydrant)
                 {
-                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-PIPE", "室内消火栓系统", 
+                    var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-PIPE", "室内消火栓系统1", 
                         fh, new Scale3d(1, 1, 1), 0);
                     objID.SetDynBlockValue("可见性", "单栓");
                 }

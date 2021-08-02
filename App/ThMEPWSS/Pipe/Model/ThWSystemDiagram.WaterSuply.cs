@@ -37,7 +37,7 @@ namespace ThMEPWSS.Pipe.Model
         public const string GateValve = "闸阀";
         public const string LoopMark = "消火栓环管标记";
         public const string LoopNodeMark = "消火栓环管节点标记";
-        public const string FireHydrant = "室内消火栓系统";
+        public const string FireHydrant = "室内消火栓系统1";
     }
 
 
@@ -71,7 +71,7 @@ namespace ThMEPWSS.Pipe.Model
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.GateValve));//闸阀
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopMark));//
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopNodeMark));//
-                //acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FireHydrant));//
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FireHydrant));//
             }
         }
     }
