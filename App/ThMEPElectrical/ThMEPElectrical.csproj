@@ -121,6 +121,8 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
+    <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
@@ -133,12 +135,25 @@
     <Compile Include="DCL\Service\ThStruOuterVerticalComponentRecognizer.cs" />
     <Compile Include="DCL\Service\ThArchOuterVerticalComponentRecognizer.cs" />
     <Compile Include="DCL\Service\ThOuterVerticalComponentRecognizer.cs" />
-    <Compile Include="FireAlarm\Data\ThEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaEStoreyExtractor.cs" />
     <Compile Include="FireAlarm\Data\ThFaArchitectureWallExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaBeamExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaColumnExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaDoorOpeningExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaFireproofshutterExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaRailingExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaRoomExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaShearWallExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFaWindowExtractor.cs" />
     <Compile Include="FireAlarm\Data\ThFireApartExtractor.cs" />
-    <Compile Include="FireAlarm\Model\EStoreyInfo.cs" />
-    <Compile Include="FireAlarm\Model\StoreyInfo.cs" />
+    <Compile Include="FireAlarm\Data\ThHoleExtractor.cs" />
+    <Compile Include="FireAlarm\Interface\ISetStorey.cs" />
+    <Compile Include="FireAlarm\Service\ThCleanEntityService.cs" />
+    <Compile Include="FireAlarm\Service\ThHandleContainsService.cs" />
+    <Compile Include="FireAlarm\Service\ThHandleNonClosedPolylineService.cs" />
     <Compile Include="FireAlarm\Service\ThFireAlarmUtils.cs" />
+    <Compile Include="FireAlarm\Service\ThHandleConflictService.cs" />
+    <Compile Include="FireAlarm\Service\ThHandleRoomBufferService.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
@@ -269,6 +284,7 @@
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThFireAlarmCmds.cs" />
     <Compile Include="ThGroundGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
@@ -312,6 +328,7 @@
   <ItemGroup>
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
+    <Folder Include="FireAlarm\Model\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

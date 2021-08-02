@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThShearwallExtractor : ThExtractorBase, IPrint
     {
-        public List<Entity> Walls { get; private set; }
+        public List<Entity> Walls { get; protected set; }
         private List<ThIfcRoom> Rooms { get; set; }
         public ThShearwallExtractor()
         {
@@ -94,6 +94,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public void Print(Database database)
         {
             Walls.CreateGroup(database, ColorIndex);
+        }
+
+        public override List<Entity> GetEntities()
+        {
+            return Walls;
         }
     }
 }

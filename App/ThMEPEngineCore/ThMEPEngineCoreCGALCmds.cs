@@ -471,7 +471,7 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-柱",
                         ColorIndex=3,
                         GroupSwitch=true,
-                        UseDb3Engine=false,
+                        UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
                     new ThFaWindowExtractor()
@@ -510,7 +510,7 @@ namespace ThMEPEngineCore
                         ElementLayer = "AI-栏杆",
                         ColorIndex=8,
                         GroupSwitch=true,
-                        UseDb3Engine=false,
+                        UseDb3Engine=true,
                         IsolateSwitch=false,
                     },
                     new ThFaFireproofshutterExtractor()

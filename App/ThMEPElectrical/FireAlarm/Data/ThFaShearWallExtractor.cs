@@ -1,33 +1,32 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPElectrical.FireAlarm.Service;
-using NFox.Cad;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.IO;
 using ThMEPElectrical.FireAlarm.Interfacce;
 
 namespace FireAlarm.Data
 {
-    public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IGroup, ISetStorey
+    public class ThFaShearWallExtractor : ThShearwallExtractor, IGroup, ISetStorey
     {
-        private List<ThStoreyInfo> StoreyInfos { get; set; }
-        public ThFaArchitectureWallExtractor()
+        public ThFaShearWallExtractor()
         {
-            StoreyInfos = new List<ThStoreyInfo>();
         }
+        private List<ThStoreyInfo> StoreyInfos { get; set; }
         public override void Extract(Database database, Point3dCollection pts)
         {
             //From DB3
             var db3Walls = new List<Entity>();
-            using (var wallEngine = new ThDB3ArchWallRecognitionEngine())
+            using (var wallEngine = new ThShearWallRecognitionEngine())
             {
                 wallEngine.Recognize(database, pts);
                 db3Walls = wallEngine.Elements.Select(o => o.Outline as Polyline).Cast<Entity>().ToList();
@@ -41,7 +40,7 @@ namespace FireAlarm.Data
             instance.Extract(database, pts);
             ThCleanEntityService clean = new ThCleanEntityService();
             localWalls = instance.Polys
-                .Where(o=>o.Area>=SmallAreaTolerance)
+                .Where(o => o.Area >= SmallAreaTolerance)
                 .Select(o => clean.Clean(o))
                 .Cast<Entity>()
                 .ToList();
@@ -51,7 +50,11 @@ namespace FireAlarm.Data
             //处理重叠
             var conflictService = new ThHandleConflictService(localWalls, db3Walls);
             conflictService.Handle();
-            Walls = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance).Cast<Entity>().ToList();
+            Walls = conflictService.Results.Cast<Entity>().ToList();
+            ThHandleContainsService handlecontain = new ThHandleContainsService();
+            Walls = handlecontain.Handle(Walls);
+
+            Walls = Walls.ToCollection().FilterSmallArea(SmallAreaTolerance).Cast<Entity>().ToList();
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -73,9 +76,13 @@ namespace FireAlarm.Data
             return geos;
         }
 
+        public void Group(Dictionary<Entity, string> groupId)
+        {
+            Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+        }
+
         public ThStoreyInfo Query(Entity entity)
         {
-            //ToDo
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
@@ -84,9 +91,5 @@ namespace FireAlarm.Data
         {
             StoreyInfos = storeyInfos;
         }
-        public void Group(Dictionary<Entity, string> groupId)
-        {
-            Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
-        }     
     }
 }

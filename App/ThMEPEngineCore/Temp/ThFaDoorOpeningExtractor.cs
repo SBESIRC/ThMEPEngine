@@ -7,10 +7,12 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThFaDoorOpeningExtractor : ThDoorOpeningExtractor, IBuildGeometry, ISetStorey
+    public class ThFaDoorOpeningExtractor : ThDoorOpeningExtractor, IBuildGeometry, ISetStorey,IExtract
     {
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
         private List<StoreyInfo> StoreyInfos { get; set; }
@@ -19,6 +21,28 @@ namespace ThMEPEngineCore.Temp
         public ThFaDoorOpeningExtractor()
         {
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
+        }
+        public new void Extract(Database database, Point3dCollection pts)
+        {
+            if (UseDb3Engine)
+            {
+                var doorEngine = new ThDB3DoorRecognitionEngine();
+                doorEngine.Recognize(database, pts);
+                Doors = doorEngine.Elements.Cast<ThIfcDoor>().ToList();
+            }
+            else
+            {
+                var instance = new ThExtractDoorOpeningService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Doors = instance.Openings.Select(o => new ThIfcDoor() { Outline = o }).ToList();
+            }
+
+            // Buffer 10
+            var bufferService = new ThNTSBufferService();
+            Doors.ForEach(o => o.Outline = bufferService.Buffer(o.Outline, 10));
         }
         public new List<ThGeometry> BuildGeometries()
         {
@@ -63,7 +87,7 @@ namespace ThMEPEngineCore.Temp
                 {
                     FireDoorNeibourIds.Add(o.Outline,neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
                 }
-                else
+                else if (neibours.Count > 2)
                 {
                     throw new NotSupportedException();
                 }

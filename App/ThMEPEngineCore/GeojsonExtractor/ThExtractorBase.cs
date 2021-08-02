@@ -47,6 +47,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         protected double LoopBufferLength = 10.0;
 
         protected double TesslateLength = 10.0;
+        protected double SmallAreaTolerance = 1.0;
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         public ThExtractorBase()
         {
@@ -87,6 +88,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
             groups.ForEach(g => ids.Add(groupId[g]));
             return ids;
+        }
+        public virtual List<Entity> GetEntities()
+        {
+            return new List<Entity>();
         }
     }
     public enum SwitchStatus

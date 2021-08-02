@@ -100,6 +100,10 @@
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractBlockReferenceService.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThExtractTextService.cs" />
+    <Compile Include="GeojsonExtractor\ThFireproofShutterExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThRailingExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThWindowExtractor.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcBuildingStoreyFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcCurtainWallFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcParkingStallFeature.cs" />

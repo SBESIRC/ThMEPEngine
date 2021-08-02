@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Temp
                     parentId = storeyInfo.Id;
                 }
                 geometry.Properties.Add(ParentIdPropertyName, parentId);
-                geometry.Properties.Add(DistanceToFlorPropertyName, o.DistanceToFloor);
+                geometry.Properties.Add(DistanceToFlorPropertyName, GetDistancd(o.DistanceToFloor));
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });
@@ -97,6 +97,13 @@ namespace ThMEPEngineCore.Temp
         {
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new StoreyInfo();
+        }
+        private double GetDistancd(double distance)
+        {
+            if (distance > 0)
+                return 0;
+            else
+                return -distance;
         }
     }
 }

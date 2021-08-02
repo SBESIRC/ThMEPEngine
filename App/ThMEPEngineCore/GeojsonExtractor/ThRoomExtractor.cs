@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThRoomExtractor : ThExtractorBase, IPrint
     {
-        public List<ThIfcRoom> Rooms { get; private set; }
+        public List<ThIfcRoom> Rooms { get; protected set; }
         public IRoomPrivacy iRoomPrivacy { get; set; }
         public double TESSELLATE_ARC_LENGTH { get; set; }
         public ThRoomExtractor()
@@ -68,7 +68,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 Rooms = Rooms.Where(o => rooms.Contains(o.Boundary)).ToList();
             }
         }
-        private void Clean()
+        protected void Clean()
         {
             using (var instance = new ThCADCoreNTSArcTessellationLength(TESSELLATE_ARC_LENGTH))
             {
