@@ -8,19 +8,19 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPWSS.FlushPoint.Data
 {
-    public class ThFpColumnExtractor :ThColumnExtractor
+    public class ThFpShearwallExtractor : ThShearwallExtractor
     {
         private List<ThCanArrangedElement> CanArrangedElements { get; set; }
-        public ThFpColumnExtractor(List<ThCanArrangedElement> canArrangedElements)
+        public ThFpShearwallExtractor(List<ThCanArrangedElement> canArrangedElements)
         {
             CanArrangedElements = canArrangedElements;
         }
-
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            var outputColumns = GetOutPutColumns();
-            outputColumns.ForEach(o =>
+            var isolateShearwalls = new List<Entity>();
+            var outputWalls = GetOutPutShearwalls();
+            outputWalls.ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
@@ -29,27 +29,25 @@ namespace ThMEPWSS.FlushPoint.Data
             });
             return geos;
         }
-
-        private List<Polyline> GetOutPutColumns()
+        private List<Entity> GetOutPutShearwalls()
         {
-            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn) &&
-                CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedColumn))
+            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall) &&
+                CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedShearwall))
             {
-                return Columns;
+                return Walls;
             }
-
-            var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
-            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedColumn))
+            var isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);            
+            if (CanArrangedElements.Contains(ThCanArrangedElement.IsolatedShearwall))
             {
-                return isolateColumns.Cast<Polyline>().ToList();
+                return isolateShearwalls;
             }
-            else if(CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedColumn))
+            else if (CanArrangedElements.Contains(ThCanArrangedElement.NonIsolatedShearwall))
             {
-                return Columns.Where(o=>!isolateColumns.Contains(o)).ToList();
+                return Walls.Where(o => !isolateShearwalls.Contains(o)).ToList();
             }
             else
             {
-                return new List<Polyline>();
+                return new List<Entity>();
             }
         }
     }
