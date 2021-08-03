@@ -24,7 +24,7 @@ namespace FireAlarm.Data
 
         public ThHoleExtractor()
         {
-            Category = "Hole";
+            Category = BuiltInCategory.Hole.ToString();
             StoreyInfos = new List<ThStoreyInfo>();
             HoleDic = new Dictionary<Polyline, List<string>>();
         }
