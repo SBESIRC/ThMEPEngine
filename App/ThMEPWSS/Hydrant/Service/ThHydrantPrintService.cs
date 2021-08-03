@@ -1,14 +1,16 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -83,18 +85,24 @@ namespace ThMEPWSS.Hydrant.Service
                 }                
             }
         }
-        public void Erase()
+        public void Erase(Point3dCollection pts)
         {
-            using (var databse=AcadDatabase.Use(Db))
+            using (var databse = AcadDatabase.Use(Db))
             {
                 var layerId = databse.Database.CreateAILayer(LayerName, 30);
                 Db.UnOffLayer(LayerName);
                 Db.UnLockLayer(LayerName);
                 Db.UnFrozenLayer(LayerName);
-                databse.ModelSpace
+                var ents = databse.ModelSpace
                     .OfType<Entity>()
-                    .Where(e => IsElementLayer(e.Layer))
-                    .ForEach(e =>
+                    .Where(e => IsElementLayer(e.Layer)).ToList();
+                if (pts.Count >= 3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
+                    var objs = spatialIndex.SelectCrossingPolygon(pts);
+                    ents = objs.Cast<Entity>().ToList();
+                }
+                ents.ForEach(e =>
                     {
                         e.UpgradeOpen();
                         e.Erase();

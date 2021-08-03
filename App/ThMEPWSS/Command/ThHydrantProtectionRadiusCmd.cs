@@ -43,7 +43,7 @@ namespace ThMEPWSS.Command
                 var printService = new ThHydrantPrintService(
                     acadDb.Database,
                     ThCheckExpressionControlService.CheckExpressionLayer);
-                printService.Erase();
+                printService.Erase(pts);
 
                 ICheck checkService = null;
                 if (FireHydrantVM.Parameter.CheckObjectOption== CheckObjectOps.FireHydrant)
