@@ -59,9 +59,9 @@ namespace ThMEPEngineCore.Service
 
         public static DBObjectCollection BuildArea(DBObjectCollection walls)
         {
-            walls = walls.BufferPolygons(-DISTANCE_TOLERANCE);
+            walls = Buffer(walls, -DISTANCE_TOLERANCE);
             walls = walls.BuildArea();
-            walls = walls.BufferPolygons(DISTANCE_TOLERANCE);
+            walls = Buffer(walls, DISTANCE_TOLERANCE);
             return walls;
         }
 
@@ -82,6 +82,20 @@ namespace ThMEPEngineCore.Service
                     throw new NotSupportedException();
                 }
             }).ToCollection();
+        }
+        private static DBObjectCollection Buffer(DBObjectCollection objs, double disttance)
+        {
+            DBObjectCollection result = new DBObjectCollection();
+            var bufferService = new ThNTSBufferService();
+            foreach (Entity obj in objs)
+            {
+                var entity = bufferService.Buffer(obj, disttance);
+                if (entity != null)
+                {
+                    result.Add(entity);
+                }
+            }
+            return result;
         }
     }
 }
