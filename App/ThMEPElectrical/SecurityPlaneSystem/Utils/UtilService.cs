@@ -17,10 +17,15 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public static List<Line> GetAllLinesInPolyline(this Polyline polyline)
+        public static List<Line> GetAllLinesInPolyline(this Polyline polyline, bool isClosed = true)
         {
             List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            var count = polyline.NumberOfVertices;
+            if (!isClosed)
+            {
+                count = count - 1;
+            }
+            for (int i = 0; i < count; i++)
             {
                 var line = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices));
                 if (line.Length > 5)
@@ -238,6 +243,61 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
             polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
             return polyline;
+        }
+
+        /// <summary>
+        /// 获取boundingbox
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline GetBoungdingBox(List<Point3d> points, Vector3d xDir)
+        {
+            Vector3d zDir = Vector3d.ZAxis;
+            Vector3d yDir = zDir.CrossProduct(xDir);
+            Matrix3d matrix = new Matrix3d(new double[] {
+                xDir.X, xDir.Y, xDir.Z, 0,
+                yDir.X, yDir.Y, yDir.Z, 0,
+                zDir.X, zDir.Y, zDir.Z, 0,
+                0.0, 0.0, 0.0, 1.0
+            });
+            points = points.Select(x => x.TransformBy(matrix.Inverse())).ToList();
+
+            points = points.OrderBy(x => x.X).ToList();
+            double minX = points.First().X;
+            double maxX = points.Last().X;
+            points = points.OrderBy(x => x.Y).ToList();
+            double minY = points.First().Y;
+            double maxY = points.Last().Y;
+
+            Point2d pt1 = new Point2d(minX, minY);
+            Point2d pt2 = new Point2d(minX, maxY);
+            Point2d pt3 = new Point2d(maxX, maxY);
+            Point2d pt4 = new Point2d(maxX, minY);
+            Polyline polyline = new Polyline() { Closed = true };
+            polyline.AddVertexAt(0, pt1, 0, 0, 0);
+            polyline.AddVertexAt(1, pt2, 0, 0, 0);
+            polyline.AddVertexAt(2, pt3, 0, 0, 0);
+            polyline.AddVertexAt(3, pt4, 0, 0, 0);
+            polyline.TransformBy(matrix);
+
+            return polyline;
+        }
+
+        /// <summary>
+        /// 获取boundingbox
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline GetBoungdingBox(Point3d pt, Vector3d xDir, double distance)
+        {
+            var otherDir = Vector3d.ZAxis.CrossProduct(xDir);
+            var pt1 = pt - xDir * (distance / 2);
+            var pt2 = pt + xDir * (distance / 2);
+            var pt3 = pt - otherDir * (distance / 2);
+            var pt4 = pt + otherDir * (distance / 2);
+            var points = new List<Point3d>() { pt1, pt2, pt3, pt4 };
+
+            return GetBoungdingBox(points, xDir);
         }
     }
 }

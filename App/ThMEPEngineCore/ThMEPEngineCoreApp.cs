@@ -1069,8 +1069,8 @@ namespace ThMEPEngineCore
 
                 AStarOptimizeRoutePlanner aStarOptimizeRoute = new AStarOptimizeRoutePlanner(frame, (line.EndPoint - line.StartPoint).GetNormal());
                 aStarOptimizeRoute.SetObstacle(holes);
-                var res = aStarOptimizeRoute.Plan(pt, line);
-                acdb.ModelSpace.Add(res);
+                //var res = aStarOptimizeRoute.Plan(pt, line);
+                //acdb.ModelSpace.Add(res);
             }
         }
     }

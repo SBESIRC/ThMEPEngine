@@ -36,16 +36,16 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New
         }
 
         #region Plan
-        public Polyline Plan(Point3d start, Line endLine)
+        public Polyline Plan(Point3d start, Point3d endPt)
         {
             //判断起点和终点是否在框线内
-            if (!map.ContainsPt(start) || !map.ContainsLine(endLine))
+            if (!map.ContainsPt(start) || !map.ContainsPt(endPt))
             {
                 return null;
             }
 
             //初始化起点终点信息
-            map.SetStartAndEndInfo(start, endLine);
+            map.SetStartAndEndInfo(start, endPt);
 
             RoutePlanData routePlanData = new RoutePlanData(map);
 
@@ -94,7 +94,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New
                     AStarNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
                     //var index = GetCoefficient(currenNode, nextCell);
                     double costG = costGetter.GetGCost(currenNode, nextCell);   //计算G值
-                    double costH = costGetter.GetHCost(nextCell, routePlanData.CellMap.endLine);    //计算H值
+                    double costH = costGetter.GetHCost(nextCell, routePlanData.CellMap.endPt);    //计算H值
                     if (nextNode != null)
                     {
                         if (nextNode.CostG > costG)

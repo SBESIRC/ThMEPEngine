@@ -185,6 +185,20 @@ namespace ThMEPElectrical.StructureHandleService
         }
 
         /// <summary>
+        /// 找到房间内相交的洞口
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<Polyline> GetNeedHoles(List<Polyline> holes, Polyline room)
+        {
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(holes.ToCollection());
+            var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
+
+            return needWalls.Cast<Polyline>().ToList();
+        }
+
+        /// <summary>
         /// 获取空间内的车道线或者中心线
         /// </summary>
         /// <param name="lanes"></param>

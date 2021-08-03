@@ -13,6 +13,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.CostGetterService
     {
         double GetGCost(AStarNode currentNode, Point3d nextPt);
 
-        double GetHCost(Point3d cell, Line endInfo);
+        double GetHCost(Point3d cell, Point3d endInfo);
     }
 }
