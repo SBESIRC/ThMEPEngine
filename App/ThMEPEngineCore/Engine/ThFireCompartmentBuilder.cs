@@ -67,7 +67,7 @@ namespace ThMEPEngineCore.Engine
             List<Polyline> FireCompartmentData = rooms.Select(o => o.Boundary as Polyline).ToList();
             var Holes = CalHoles(FireCompartmentData);
             var ThFireCompartments = FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o => o.Key == x)) : x }).ToList();
-            ThFireCompartments.RemoveAll(o => o.Boundary is Polyline poly && poly.Area == 0);
+            ThFireCompartments.RemoveAll(o => o.Boundary is Polyline poly && poly.Area < 1);
             foreach (var FireCompartment in ThFireCompartments)
             {
                 var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
