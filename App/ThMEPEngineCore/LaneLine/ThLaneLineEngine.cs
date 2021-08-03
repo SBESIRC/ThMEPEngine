@@ -45,6 +45,13 @@ namespace ThMEPEngineCore.LaneLine
                         objs.Add(line.WashClone() as Line);
                     }
                 }
+                else if (curve is Arc arc)
+                {
+                    if (arc.Length > ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH)
+                    {
+                        objs.Add(arc.WashClone() as Arc);
+                    }
+                }
                 else if (curve is Polyline polyline)
                 {
                     var entitySet = new DBObjectCollection();

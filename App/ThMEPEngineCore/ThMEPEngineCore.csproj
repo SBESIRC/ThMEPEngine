@@ -99,6 +99,7 @@
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="FireCompartment\ThFireCompartmentExtendEngine.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractBlockReferenceService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractTextService.cs" />
     <Compile Include="GeojsonExtractor\ThFireproofShutterExtractor.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
