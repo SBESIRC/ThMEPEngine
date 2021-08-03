@@ -40,8 +40,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                             isBuildRoom = false;
                             break;
                         }
-                        if (tag.Contains("风") || tag.Contains("加压")
-                            || tag.Contains("烟") || tag.Contains("井"))
+                        if ((tag.Contains("风") || tag.Contains("加压")|| tag.Contains("烟") || tag.Contains("井")) && !tag.Contains("机房"))
                         {
                             isBuildRoom = false;
                             break;

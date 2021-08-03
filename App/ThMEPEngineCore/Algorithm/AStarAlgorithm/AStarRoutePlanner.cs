@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //设置障碍物
             map.SetObstacle(holes);
         }
-        public void SetRoom(List<Entity> holes)
+        public void SetRoom(List<Line> holes)
         {
             map.SetRoom(holes);
         }
@@ -78,7 +78,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 
             //调整路径
             AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
-            resPt = adjustAStarPath.AdjustPath(resPt, routePlanData.CellMap.obstacles);
+            resPt = adjustAStarPath.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);
             return path;
@@ -102,15 +102,13 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 foreach (CompassDirections direction in allCompassDirections)
                 {
                     Point nextCell = GeometryHelper.GetAdjacentPoint(currenNode.Location, direction);
-                    if (!routePlanData.CellMap.ContainsPt(nextCell)) //相邻点已经在地图之外
+                    if (!routePlanData.CellMap.IsInBounds(nextCell)) //相邻点已经在地图之外
                     {
                         continue;
                     }
 
-                    if (routePlanData.CellMap.obstacles[nextCell.X][nextCell.Y]) //下一个Cell为障碍物
-                    {
+                    if (routePlanData.CellMap.IsObstacle(nextCell))
                         continue;
-                    }
 
                     AStarNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
                     int costG = costGetter.GetGCost(currenNode, direction);   //计算G值

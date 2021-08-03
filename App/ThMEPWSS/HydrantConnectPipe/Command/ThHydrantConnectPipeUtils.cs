@@ -87,11 +87,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
             return false;
         }
-        public static bool LineIntersctBySelect(List<Entity> polylines, Polyline line)
+        public static bool LineIntersctBySelect(List<Line> lines, Polyline pl)
         {
-            foreach(var room in polylines)
+            foreach(var l in lines)
             {
-                if(room.IsIntersects(line))
+                if(l.IsIntersects(pl))
                 {
                     return true;
                 }
@@ -110,19 +110,24 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         }
         public static Polyline CreateMapFrame(List<Point3d> pts, double expandLength)
         {
-            Polyline polyLine = new Polyline() { Closed = true };
-            var allPts = pts.OrderBy(x => x.X).ToList();
-            double minX = allPts.First().X;
-            double maxX = allPts.Last().X;
-            allPts = allPts.OrderBy(x => x.Y).ToList();
-            double minY = allPts.First().Y;
-            double maxY = allPts.Last().Y;
-            polyLine.AddVertexAt(0, new Point2d(minX, minY), 0, 0, 0);
-            polyLine.AddVertexAt(1, new Point2d(maxX, minY), 0, 0, 0);
-            polyLine.AddVertexAt(2, new Point2d(maxX, maxY), 0, 0, 0);
-            polyLine.AddVertexAt(3, new Point2d(minX, maxY), 0, 0, 0);
-            var mapFrame = polyLine.Buffer(expandLength);
-            return mapFrame[0] as Polyline;
+            //Polyline polyLine = new Polyline() { Closed = true };
+            //var allPts = pts.OrderBy(x => x.X).ToList();
+            //double minX = allPts.First().X;
+            //double maxX = allPts.Last().X;
+            //allPts = allPts.OrderBy(x => x.Y).ToList();
+            //double minY = allPts.First().Y;
+            //double maxY = allPts.Last().Y;
+            //polyLine.AddVertexAt(0, new Point2d(minX, minY), 0, 0, 0);
+            //polyLine.AddVertexAt(1, new Point2d(maxX, minY), 0, 0, 0);
+            //polyLine.AddVertexAt(2, new Point2d(maxX, maxY), 0, 0, 0);
+            //polyLine.AddVertexAt(3, new Point2d(minX, maxY), 0, 0, 0);
+            //var mapFrame = polyLine.Buffer(expandLength);
+            //return mapFrame[0] as Polyline;
+            Polyline polyLine = new Polyline();
+            polyLine.AddVertexAt(0, pts[0].ToPoint2D(), 0, 0, 0);
+            polyLine.AddVertexAt(0, pts[1].ToPoint2D(), 0, 0, 0);
+            var objcet = polyLine.BufferPL(expandLength)[0];
+            return objcet as Polyline;
         }
         public static Polyline CreateMapFrame(Point3d pt,double radius)
         {
@@ -133,7 +138,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public static List<Line> GetNearbyLine4(Point3d pt,List<Line> lines)
         {
             List<Line> returnLines = new List<Line>();
-            if (lines.Count <=2)
+            if (lines.Count <=3)
             {
                 return lines;
             }
@@ -141,10 +146,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             lines = lines.OrderBy(o => o.DistanceToPoint(pt)).ToList();
             returnLines.Add(lines[0]);
             returnLines.Add(lines[1]);
+            returnLines.Add(lines[2]);
             return returnLines;
         }
 
-        public static bool IsIntersect(Line firstLine, Line secLine)
+        public static bool IsIntersect(Entity firstLine, Entity secLine)
         {
             var ptLst = new Point3dCollection();
             firstLine.IntersectWith(secLine, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);

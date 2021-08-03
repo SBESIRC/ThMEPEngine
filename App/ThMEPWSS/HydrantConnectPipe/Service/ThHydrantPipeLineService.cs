@@ -127,19 +127,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             return tmpPipeLines;
         }
-        private List<Point3dEx> GetPipePoints(List<Line> pipeLines)
-        {
-            List<Point3dEx> pipePoints = new List<Point3dEx>();
-            foreach(var line in pipeLines)
-            {
-                Point3dEx point1 = new Point3dEx(line.StartPoint);
-                Point3dEx point2 = new Point3dEx(line.EndPoint);
-                pipePoints.Add(point1);
-                pipePoints.Add(point2);
-            }
-            return pipePoints.Distinct().ToList();
-        }
-
         private List<Line> GetPipeLines(ref FireHydrantSystemIn fireHydrantSysIn,Point3dCollection selectArea) 
         {
             using (var acadDatabase = AcadDatabase.Active())
@@ -176,8 +163,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
         }
 
-  
-
-       
+        public List<Line> GetHydrantMainLine(Point3dCollection selectArea)
+        {
+            var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
+            List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn, selectArea);
+            pipeLines = PipeLineList.CleanLaneLines3(pipeLines);
+            return pipeLines;
+        }
     }
 }
