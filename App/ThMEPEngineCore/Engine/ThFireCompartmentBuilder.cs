@@ -67,6 +67,7 @@ namespace ThMEPEngineCore.Engine
             List<Polyline> FireCompartmentData = rooms.Select(o => o.Boundary as Polyline).ToList();
             var Holes = CalHoles(FireCompartmentData);
             var ThFireCompartments = FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o => o.Key == x)) : x }).ToList();
+            ThFireCompartments.RemoveAll(o => o.Boundary is Polyline poly && poly.Area == 0);
             foreach (var FireCompartment in ThFireCompartments)
             {
                 var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
@@ -83,7 +84,7 @@ namespace ThMEPEngineCore.Engine
                     {
                         //找到防火分区名称，为防火分区命名
                         FireCompartment.Number = mark.First().Text;
-                        choisemark.AddRange(mark.Select(o=>o.Geometry)); 
+                        choisemark.AddRange(mark.Select(o => o.Geometry));
                     }
                     else
                     {
@@ -119,6 +120,8 @@ namespace ThMEPEngineCore.Engine
         }
         private Entity GetMpolygon(List<Polyline> polylines)
         {
+            if (polylines.Count == 0)
+                return new Polyline();
             if (polylines.Count == 1)
                 return polylines[0];
             var rGeometry = polylines[0].ToNTSPolygon().Difference(polylines.Skip(1).ToCollection().UnionGeometries());

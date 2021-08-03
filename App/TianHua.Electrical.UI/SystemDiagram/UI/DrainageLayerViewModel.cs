@@ -18,13 +18,14 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
             DynamicCheckBoxs = new ObservableCollection<DynamicCheckBox>();
             DynamicOpenFiles = new ObservableCollection<DynamicCheckBox>();
             DynamicCheckBoxs.Add(new DynamicCheckBox { Content = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, IsChecked = true, ShowText = ThAutoFireAlarmSystemCommon.FireDistrictByLayer });
+            DynamicCheckBoxs.Add(new DynamicCheckBox { Content = "防火分区", IsChecked = true, ShowText = "防火分区" });
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 foreach (var layer in acadDatabase.Layers)
                 {
                     string LayerName = layer.Name;
-                    if (LayerName != ThAutoFireAlarmSystemCommon.FireDistrictByLayer && (LayerName.Contains(ThAutoFireAlarmSystemCommon.FireDistrictByLayer) || LayerName.Contains("防火分区")))
-                        DynamicCheckBoxs.Add(new DynamicCheckBox { Content = LayerName, IsChecked = false , ShowText = AbbreviationString(LayerName) });
+                    if (LayerName != ThAutoFireAlarmSystemCommon.FireDistrictByLayer && LayerName != "防火分区" && (LayerName.Contains(ThAutoFireAlarmSystemCommon.FireDistrictByLayer) || LayerName.Contains("防火分区")))
+                        DynamicCheckBoxs.Add(new DynamicCheckBox { Content = LayerName, IsChecked = false, ShowText = AbbreviationString(LayerName) });
                 }
             }
             RefreshOpenFileList();
