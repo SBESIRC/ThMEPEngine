@@ -67,6 +67,7 @@
     <Compile Include="FlushPoint\Data\ThFpColumnExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThCanArrangedElement.cs" />
     <Compile Include="FlushPoint\Data\ThFpShearwallExtractor.cs" />
+    <Compile Include="FlushPoint\Service\ThAdjustWashPointPositionService.cs" />
     <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />

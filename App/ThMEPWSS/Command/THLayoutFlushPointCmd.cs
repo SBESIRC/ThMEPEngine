@@ -103,10 +103,13 @@ namespace ThMEPWSS.Command
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
                 }
+                //调整冲洗点位位置
+                var columns = (extractors[0] as ThColumnExtractor).Columns;
+                ThAdjustWashPointPositionService.Adjust(layOutPts, columns);
 
                 // 打印块
                 ThFlushPointUtils.SortWashPoints(layOutPts);
-                var columns = (extractors[0] as ThColumnExtractor).Columns;
+               
                 var walls = new List<Entity>();
                 walls.AddRange((extractors[1] as ThShearwallExtractor).Walls);
                 walls.AddRange((extractors[2] as ThArchitectureExtractor).Walls);
