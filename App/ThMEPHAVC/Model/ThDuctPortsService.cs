@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
-using DotNetARX;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsService
     {
-        public static double Calc_duct_width(bool is_first,
+        public static double Calc_duct_width(bool is_first, 
                                              double ui_air_speed, 
                                              double air_vloume, 
                                              ref string duct_size)
@@ -184,7 +184,7 @@ namespace ThMEPHVAC.Model
         {
             return new Vector2d(dir_vec.Y, -dir_vec.X);
         }
-        public static Vector2d Get_dir_vec(double angle)
+        public static Vector2d Get_dir_vec_by_angle(double angle)
         {
             return new Vector2d(Math.Cos(angle), Math.Sin(angle));
         }
@@ -201,16 +201,16 @@ namespace ThMEPHVAC.Model
         }
         public static bool Is_vertical(Line l)
         {
-            return Is_equal(l.StartPoint.X, l.EndPoint.X);
+            return Math.Abs(l.StartPoint.X - l.EndPoint.X) <= 1e-1;
         }
         public static bool Is_horizontal(Line l)
         {
-            return Is_equal(l.StartPoint.Y, l.EndPoint.Y);
+            return Math.Abs(l.StartPoint.Y - l.EndPoint.Y) <= 1e-1;
         }
         public static bool Is_outter(Vector2d v2_1, Vector2d v2_2)
         {
             var v1 = new Vector3d(v2_1.X, v2_1.Y, 0);
-            var v2 = new Vector3d(v2_1.X, v2_1.Y, 0);
+            var v2 = new Vector3d(v2_2.X, v2_2.Y, 0);
             return Is_outter(v1, v2);
         }
         public static bool Is_outter(Vector3d v1, Vector3d v2)
@@ -534,6 +534,14 @@ namespace ThMEPHVAC.Model
             var r_vec = Get_right_vertical_vec(dir_vec);
             pl.CreateRectangle((l.StartPoint + l_vec * ext_len).ToPoint2D(), (l.EndPoint + r_vec * ext_len).ToPoint2D());
             return pl;
+        }
+        public static Point3d Round_point(Point3d p, int tail_num)
+        {
+            return new Point3d(Math.Round(p.X, tail_num), Math.Round(p.Y, tail_num), 0);
+        }
+        public static Point2d Round_point(Point2d p, int tail_num)
+        {
+            return new Point2d(Math.Round(p.X, tail_num), Math.Round(p.Y, tail_num));
         }
     }
 }

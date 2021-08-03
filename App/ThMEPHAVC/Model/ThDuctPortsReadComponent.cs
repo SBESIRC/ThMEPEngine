@@ -19,7 +19,7 @@ namespace ThMEPHVAC.Model
                 var groups = db.Groups;
                 foreach (var g in groups)
                 {
-                    var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_Info);
+                    var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)
                     {
                         var poly = new Polyline();
@@ -65,7 +65,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var list = id.GetXData(ThHvacCommon.RegAppName_Info);
+                    var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -86,7 +86,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var list = id.GetXData(ThHvacCommon.RegAppName_Info);
+                    var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -181,7 +181,7 @@ namespace ThMEPHVAC.Model
                     var entity = db.Element<Entity>(id);
                     if (!(entity is DBPoint))
                         continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Info);
+                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (ptXdata != null)
                     {
                         var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -215,7 +215,7 @@ namespace ThMEPHVAC.Model
                     var entity = db.Element<Entity>(id);
                     if (!(entity is DBPoint))
                         continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Info);
+                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (ptXdata != null)
                     {
                         var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -239,7 +239,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
-                    var info = id.GetXData(ThHvacCommon.RegAppName_Info);
+                    var info = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (info != null)
                         dic.Add(id, g);
                 }

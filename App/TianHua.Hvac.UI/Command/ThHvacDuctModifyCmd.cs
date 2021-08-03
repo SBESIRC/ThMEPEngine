@@ -47,6 +47,16 @@ namespace TianHua.Hvac.UI.Command
                 }
                 var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
                 param = ThDuctPortsInterpreter.Get_duct_param(list, groupId.Handle);
+                if (param.type == "")
+                {
+                    ThDuctPortsService.Prompt_msg("该管段未包含XData");
+                    return null;
+                }
+                if (param.type != "Duct")
+                {
+                    ThDuctPortsService.Prompt_msg("请选择管段");
+                    return null;
+                }
                 return objIds;
             }
             else

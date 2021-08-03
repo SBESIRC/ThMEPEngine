@@ -63,11 +63,6 @@ namespace TianHua.Hvac.UI.Command
             using (var db = AcadDatabase.Active())
             {
                 start_point = Get_point_from_prompt("选择起点");
-                if (start_point.DistanceTo(Point3d.Origin) < 1e-3)
-                {
-                    center_lines = new DBObjectCollection();
-                    return;
-                }
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Line)).DxfName,
@@ -83,6 +78,7 @@ namespace TianHua.Hvac.UI.Command
         }
         private bool Get_duct_port_info()
         {
+            in_param.is_redraw = false;
             var dlg = new fmDuctPorts(in_param);
             if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
             {

@@ -26,7 +26,8 @@ namespace ThMEPHVAC.Model
         {
             duct_size_info = new List<DBText>();
             ThDuctPortsService.Get_line_pos_info(info.l, out double angle, out Point3d center_point);
-            ThDuctPortsFactory.Get_duct_geo_flg_center_line(info.l, info.width, angle, center_point, out DBObjectCollection geo, out DBObjectCollection flg, out DBObjectCollection center_line);
+            ThDuctPortsFactory.Get_duct_geo_flg_center_line(info.l, info.width, angle, center_point, 
+                out DBObjectCollection geo, out DBObjectCollection flg, out DBObjectCollection center_line);
             var text = Create_duct_info(!have_main && is_first, in_param.elevation, main_height, in_param.scale, info.duct_size);
             is_first = false;
             var mat = Get_side_text_info_trans_mat(angle, info.width, center_point, text, info.l, in_param);
@@ -70,12 +71,15 @@ namespace ThMEPHVAC.Model
             var vertical_vec = -ThDuctPortsService.Get_vertical_vec(dir_vec);
             mat = org_dis_mat * Matrix3d.Displacement(vertical_vec * text.Height * 0.5) * mat;
             Seperate_duct_size_elevation(in_param.scale, text, mat, dir_vec, out DBText duct_size_text, out DBText elevation_size);
-            if (pre_duct_size_text != duct_size_text.TextString)
-            {
-                Draw_text(duct_size_text);
-                Draw_text(elevation_size);
-                pre_duct_size_text = duct_size_text.TextString;
-            }
+            //if (pre_duct_size_text != duct_size_text.TextString)//过滤掉一些标注
+            //{
+            //    Draw_text(duct_size_text);
+            //    Draw_text(elevation_size);
+            //    pre_duct_size_text = duct_size_text.TextString;
+            //}
+            Draw_text(duct_size_text);
+            Draw_text(elevation_size);
+            pre_duct_size_text = duct_size_text.TextString;
         }
         private Matrix3d Get_main_text_info_trans_mat(double rotate_angle,
                                                       Point3d center_point,

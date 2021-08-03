@@ -74,6 +74,7 @@ namespace TianHua.Hvac.UI
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -113,7 +114,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer1.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.Size = new System.Drawing.Size(172, 289);
-            this.splitContainer1.SplitterDistance = 85;
+            this.splitContainer1.SplitterDistance = 88;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -200,8 +201,8 @@ namespace TianHua.Hvac.UI
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new System.Drawing.Size(172, 203);
-            this.splitContainer2.SplitterDistance = 134;
+            this.splitContainer2.Size = new System.Drawing.Size(172, 200);
+            this.splitContainer2.SplitterDistance = 132;
             this.splitContainer2.SplitterWidth = 1;
             this.splitContainer2.TabIndex = 5;
             // 
@@ -352,7 +353,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer3.Panel2.Controls.Add(this.label13);
             this.splitContainer3.Panel2.Controls.Add(this.textBox6);
             this.splitContainer3.Panel2Collapsed = true;
-            this.splitContainer3.Size = new System.Drawing.Size(170, 66);
+            this.splitContainer3.Size = new System.Drawing.Size(170, 65);
             this.splitContainer3.SplitterDistance = 31;
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 0;
@@ -364,7 +365,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(170, 66);
+            this.listBox1.Size = new System.Drawing.Size(170, 65);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -424,7 +425,7 @@ namespace TianHua.Hvac.UI
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(23, 527);
+            this.button1.Location = new System.Drawing.Point(18, 563);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(128, 23);
             this.button1.TabIndex = 1;
@@ -617,11 +618,22 @@ namespace TianHua.Hvac.UI
             this.label20.TabIndex = 18;
             this.label20.Text = "风口总数：";
             // 
+            // checkBox1
+            // 
+            this.checkBox1.Location = new System.Drawing.Point(18, 531);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(128, 24);
+            this.checkBox1.TabIndex = 19;
+            this.checkBox1.Text = "沿用图中已绘风口";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // fmDuctPorts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(172, 551);
+            this.ClientSize = new System.Drawing.Size(172, 589);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.splitContainer4);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.splitContainer1);
@@ -701,5 +713,6 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

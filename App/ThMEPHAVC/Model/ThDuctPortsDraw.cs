@@ -248,24 +248,27 @@ namespace ThMEPHVAC.Model
             for (int i = 0; i < infos.Count; ++i)
             {
                 var info = infos[i];
-                var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
+                var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, 
+                    info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
+                
                 service.port_service.Draw_ports(info, in_param, org_dis_vec, port_width, port_height);
                 service.text_service.Draw_duct_size_info(duct_size_info);
                 Collect_duct_geo(geo_set, cur_seg);
                 Record_pre_seg_info(cur_seg, duct_text_info, info, ref pre_seg, ref pre_duct_size, ref pre_air_volume);
-                Record_duct(cur_seg, pre_seg, pre_duct_size, pre_air_volume);
+                var is_last_duct = (i == infos.Count - 1);
+                Record_duct(is_last_duct, cur_seg, pre_seg, pre_duct_size, pre_air_volume);
                 if (i == 0)
-                    continue;//第一段duct不画reducing，之后的都是reducing+duct
+                    continue;//第一段duct不画reducing，之后的都是reducing + duct
                 Record_reducing(geo_set);
                 Remove_pre_duct_geo(geo_set);
             }
         }
-        private void Record_duct(Line_Info cur_seg, Line_Info pre_seg, string pre_duct_size, double pre_air_volume)
+        private void Record_duct(bool is_last_duct, Line_Info cur_seg, Line_Info pre_seg, string pre_duct_size, double pre_air_volume)
         {
             var duct_param = ThDuctPortsService.Create_duct_modify_param(cur_seg, pre_duct_size, pre_air_volume, start_id.Handle);
             if (duct_param.sp.GetDistanceTo(duct_param.ep) > 1)
             {
-                service.Draw_shape(pre_seg, org_dis_mat, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, 
+                service.Draw_shape(is_last_duct, pre_seg, org_dis_mat, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, 
                                     out ObjectIdList seg_center_ids, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
                 ThDuctPortsRecoder.Create_duct_group(seg_geo_ids, seg_flg_ids, seg_center_ids, ports_ids, ext_ports_ids, duct_param);
             }

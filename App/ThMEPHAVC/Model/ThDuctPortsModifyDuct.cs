@@ -227,12 +227,14 @@ namespace ThMEPHVAC.Model
             if (!is_direct_duct)
             {
                 var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(red, port_idx, modify_size);
-                var flg1 = reducing_geo.flg[0] as Line;
-                var flg2 = reducing_geo.flg[1] as Line;
-                if (ThDuctPortsService.Is_equal(flg1.Length, flg2.Length))
-                    Update_detect_p(ref detect_p, reducing_geo);
-                else
-                    Update_reducing(reducing_geo);
+                Update_reducing(reducing_geo);
+                //特殊处理duct宽相同高度不同
+                //var flg1 = reducing_geo.flg[0] as Line;
+                //var flg2 = reducing_geo.flg[1] as Line;
+                //if (ThDuctPortsService.Is_equal(flg1.Length, flg2.Length))
+                //    Update_detect_p(ref detect_p, reducing_geo);
+                //else
+                //    Update_reducing(reducing_geo);
             }
             ThDuctPortsDrawService.Clear_graph(red.handle);
         }
@@ -246,36 +248,125 @@ namespace ThMEPHVAC.Model
         private void Do_proc_elbow(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
         {
             var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
-            var dir_vec = (cur_line.ep - cur_line.sp).GetNormal();
-            var dis1 = cur_line.sp.GetDistanceTo(detect_p);
-            var dis2 = cur_line.ep.GetDistanceTo(detect_p);
             if (elbow.port_widths[0] > modify_width)
+                Proc_elbow_shrink(port_idx, modify_duct_width, elbow, ref detect_p);
+            else
             {
-                // 需要改变elbow的宽度
-                var open_angle = ThDuctPortsShapeService.Get_elbow_open_angle(elbow);
-                var elbow_geo = ThDuctPortsFactory.Create_elbow(open_angle, modify_width);
-                var shrink_change_len = Get_elbow_shrink_change(elbow.port_widths[0], modify_width, open_angle);
-                var p = elbow.pos[(port_idx + 1) % 2];
-                Search_2_port_neig_duct(p, out int connect_duct_idx);
-                var mat = ThDuctPortsShapeService.Create_elbow_trans_mat(elbow);
-                var new_elbow = ThDuctPortsService.Create_special_modify_param(elbow_geo, start_handle, "Elbow", mat);
-                Update_new_shape(elbow_geo, mat, new_elbow);
-                if (connect_duct_idx >= 0)
-                    Draw_elbow_connect_duct(shrink_change_len, connect_duct_idx, modify_duct_width, p);
-                Modify_reducing_with_elbow(p, modify_width, open_angle, elbow);
-                var dis_vec = dir_vec * shrink_change_len;
-                detect_p = dis1 < dis2 ? cur_line.sp - dis_vec : cur_line.ep + dis_vec;
-                ThDuctPortsDrawService.Clear_graph(elbow.handle);
+                var e = Search_elbow_conn_reducing(port_idx, elbow);
+                if (e.type != "Reducing")
+                    Proc_elbow_conn_duct(modify_duct_width, elbow, ref detect_p);
+                else
+                    Proc_elbow_extend(elbow, e, modify_duct_width, ref detect_p);
+            }
+        }
+        private void Proc_elbow_extend(Entity_modify_param elbow,
+                                       Entity_modify_param reducing, 
+                                       string modify_duct_width, 
+                                       ref Point2d detect_p)
+        {
+            var idx = reducing.port_widths[0] > reducing.port_widths[1] ? 0 : 1;
+            Search_2_port_neig_duct(reducing.pos[idx], out int connect_duct_idx);
+            var duct = ducts[connect_duct_idx];
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            if (modify_duct_width == duct.duct_size)
+            {
+                Create_elbow_by_elbow(false, modify_duct_width, elbow, ref detect_p,  out double _, out double _, out Point2d elbow_other_port);
+                var dis1 = duct.sp.GetDistanceTo(elbow_other_port);
+                var dis2 = duct.ep.GetDistanceTo(elbow_other_port);
+                var new_duct = dis1 > dis2 ? ThDuctPortsFactory.Create_duct(duct.sp, elbow_other_port, modify_width) :
+                                             ThDuctPortsFactory.Create_duct(elbow_other_port, duct.ep, modify_width);
+                service.Draw_shape(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                                              out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, duct.duct_size, duct.air_volume, start_handle);
+                ThDuctPortsDrawService.Clear_graph(duct.handle);
+                ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
+                ThDuctPortsDrawService.Clear_graph(reducing.handle);
             }
             else
             {
-                // 添加变径
-                var dis_vec = dir_vec * 1000;
-                var p = dis1 < dis2 ? cur_line.sp + dis_vec : cur_line.ep - dis_vec;
-                var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(p, detect_p, modify_width, elbow.port_widths[0]);
-                Update_reducing(reducing_geo);
-                detect_p = p;
+                Create_elbow_by_elbow(false, modify_duct_width, elbow, ref detect_p, out _, out double _, out Point2d elbow_other_port);
+                Create_reducing_by_reducing(reducing, elbow_other_port, duct.duct_size, modify_width);
             }
+        }
+        private void Proc_elbow_shrink(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            Create_elbow_by_elbow(true, modify_duct_width, elbow, ref detect_p, 
+                                  out double shrink_change_len, out double open_angle, out Point2d _);
+            var p = elbow.pos[(port_idx + 1) % 2];
+            Search_2_port_neig_duct(p, out int connect_duct_idx);            
+            if (connect_duct_idx >= 0)
+                Draw_elbow_connect_duct(shrink_change_len, connect_duct_idx, modify_duct_width, p);
+            Modify_reducing_with_elbow(p, modify_width, open_angle, elbow);
+        }
+        private void Create_elbow_by_elbow(bool is_shrink,
+                                           string modify_duct_width, 
+                                           Entity_modify_param elbow, 
+                                           ref Point2d detect_p, 
+                                           out double shrink_change_len, 
+                                           out double open_angle,
+                                           out Point2d elbow_other_port)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            var dir_vec = (cur_line.ep - cur_line.sp).GetNormal();
+            var dis1 = cur_line.sp.GetDistanceTo(detect_p);
+            var dis2 = cur_line.ep.GetDistanceTo(detect_p);
+            // 需要改变elbow的宽度
+            open_angle = ThDuctPortsShapeService.Get_elbow_open_angle(elbow);
+            var elbow_geo = ThDuctPortsFactory.Create_elbow(open_angle, modify_width);
+            shrink_change_len = Get_elbow_shrink_change(elbow.port_widths[0], modify_width, open_angle);
+            var mat = ThDuctPortsShapeService.Create_elbow_trans_mat(elbow);
+            var new_elbow = ThDuctPortsService.Create_special_modify_param(elbow_geo, start_handle, "Elbow", mat);
+            Update_new_shape(elbow_geo, mat, new_elbow);
+            var dis_vec = dir_vec * shrink_change_len;
+            if (is_shrink)
+                detect_p = dis1 < dis2 ? cur_line.sp - dis_vec : cur_line.ep + dis_vec;
+            else
+                detect_p = dis1 < dis2 ? cur_line.sp + dis_vec : cur_line.ep - dis_vec;
+            elbow_other_port = detect_p.IsEqualTo(new_elbow.pos[0]) ? new_elbow.pos[1] : new_elbow.pos[0]; ;
+            ThDuctPortsDrawService.Clear_graph(elbow.handle);
+        }
+        private void Create_reducing_by_reducing(Entity_modify_param reducing, 
+                                                 Point2d elbow_other_port,
+                                                 string conn_duct_size,
+                                                 double modify_width)
+        {
+            var dis1 = reducing.pos[0].GetDistanceTo(elbow_other_port);
+            var dis2 = reducing.pos[1].GetDistanceTo(elbow_other_port);
+            var p = dis1 > dis2 ? reducing.pos[0] : reducing.pos[1];
+            var conn_width = ThDuctPortsService.Get_width(conn_duct_size);
+            var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(p, elbow_other_port, conn_width, modify_width);
+            Update_reducing(reducing_geo);
+            ThDuctPortsDrawService.Clear_graph(reducing.handle);
+        }
+        private void Proc_elbow_conn_duct(string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        {
+            var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
+            var dir_vec = (cur_line.ep - cur_line.sp).GetNormal();
+            var dis1 = cur_line.sp.GetDistanceTo(detect_p);
+            var dis2 = cur_line.ep.GetDistanceTo(detect_p);
+            var dis_vec = dir_vec * 1000;
+            var p = dis1 < dis2 ? cur_line.sp + dis_vec : cur_line.ep - dis_vec;
+            // 添加变径
+            var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(p, detect_p, modify_width, elbow.port_widths[0]);
+            Update_reducing(reducing_geo);
+            detect_p = p;
+        }
+        private Entity_modify_param Search_elbow_conn_reducing(int port_idx, Entity_modify_param elbow)
+        {
+            var p = elbow.pos[(port_idx + 1) % 2];
+            foreach (var e in shapes)
+            {
+                if (e.type == "Reducing")
+                {
+                    foreach (var pos in e.pos)
+                    {
+                        if (pos.IsEqualTo(p))
+                            return e;
+                    }
+                }
+            }
+            return new Entity_modify_param();
         }
         private void Do_proc_tee(int port_idx, string modify_duct_size, Entity_modify_param tee, ref Point2d detect_p)
         {
@@ -358,11 +449,11 @@ namespace ThMEPHVAC.Model
         private void Search_2_port_neig_duct(Point2d p, out int connect_duct_idx)
         {
             connect_duct_idx = -1;
-            for (int j = 0; j < ducts.Count; ++j)
+            for (int i = 0; i < ducts.Count; ++i)
             {
-                var duct = ducts[j];
+                var duct = ducts[i];
                 if (p.IsEqualTo(duct.sp, tor) || p.IsEqualTo(duct.ep, tor))
-                    connect_duct_idx = j;
+                    connect_duct_idx = i;
             }
         }
         private void Search_tee_neig_duct(int cur_port_idx, List<Point2d> shape_pos, out List<int> connect_duct_idx)
@@ -422,7 +513,6 @@ namespace ThMEPHVAC.Model
             var duct_param = ThDuctPortsService.Create_duct_modify_param(new_duct, connect_line.duct_size, connect_line.air_volume, start_handle);
             ThDuctPortsDrawService.Clear_graph(connect_line.handle);
             ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
-
             Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
         }
         private void Insert_reducing(double connect_width, 
@@ -479,19 +569,29 @@ namespace ThMEPHVAC.Model
             var f_p = new Point3d(f_detect.X, f_detect.Y, 0);
             var l_p = new Point3d(l_detect.X, l_detect.Y, 0);
             var l = new Line(f_p, l_p);
+            bool is_down_port = Get_port_range();
             for (int i = 0; i < texts.Count; ++i)
             {
                 var cur_t = texts[i];
                 var p = new Point3d(cur_t.center_point.X, cur_t.center_point.Y, 0);
                 double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 double width = ThDuctPortsService.Get_width(cur_line.duct_size);
-                if (dis < (width + 501))
+                //down port字高500 side port距线的距离应该为0
+                if ((is_down_port && dis < (width + 501)) ||  (!is_down_port && dis < 50))
                 {
                     ThDuctPortsDrawService.Clear_graph(cur_t.handle);
                     if (!direct_flag)
                         service.text_service.Re_draw_text(cur_t, modify_size, in_param);
                 }
             }
+        }
+        private bool Get_port_range()
+        {
+            if (ports.Count > 0)
+            {
+                return (ports[0].port_range.Contains("下"));
+            }
+            throw new NotImplementedException();
         }
         private void Update_cur_duct_valve(Point2d org_f_detect, 
                                            Point2d f_detect, 
@@ -509,7 +609,7 @@ namespace ThMEPHVAC.Model
             {
                 if (valve.judge_p.IsEqualTo(detect_p, tor))
                 {
-                    var dir_vec = ThDuctPortsService.Get_dir_vec(valve.rotate_angle - Math.PI * 0.5);
+                    var dir_vec = ThDuctPortsService.Get_dir_vec_by_angle(valve.rotate_angle - Math.PI * 0.5);
                     var vertical_r = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
                     var valve_service = new ThDuctPortsDrawValve(valve.valve_visibility, valve.valve_name, valve.valve_layer);
                     var insert_p = new_p + vertical_r * new_width * 0.5 + start_point.GetAsVector();

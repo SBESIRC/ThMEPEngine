@@ -8,6 +8,7 @@ namespace TianHua.Hvac.UI
 {
     public partial class fmDuctPorts : Form
     {
+        public bool is_redraw;
         public int port_num;
         public double air_volume;
         public double elevation;
@@ -39,6 +40,7 @@ namespace TianHua.Hvac.UI
             Port_init();
             Set_port_speed();
             Set_port_range();
+            is_redraw = checkBox1.Enabled && checkBox1.Checked;
         }
 
         private void Component_init(DuctPortsParam param)
@@ -51,7 +53,18 @@ namespace TianHua.Hvac.UI
             textBox8.Text = s[0];
             textBox1.Text = s[1];
             textBox9.Text = param.port_name;
+            if (param.port_range.Contains("下"))
+            {
+                radioButton3.Checked = true;
+                radioButton4.Checked = false;
+            }
+            else
+            {
+                radioButton3.Checked = false;
+                radioButton4.Checked = true;
+            }
             comboBox1.Text = param.scale;
+            checkBox1.Enabled = param.is_redraw;
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
@@ -375,6 +388,19 @@ namespace TianHua.Hvac.UI
         {
             string reg = "^[0-9]*$";
             return Regex.Match(text, reg).Success;
+        }
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                splitContainer1.Enabled = false;
+                splitContainer4.Enabled = false;
+            }
+            else
+            {
+                splitContainer1.Enabled = true;
+                splitContainer4.Enabled = true;
+            }
         }
     }
 }
