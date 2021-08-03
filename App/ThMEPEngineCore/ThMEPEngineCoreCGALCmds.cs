@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using AcHelper;
 using Linq2Acad;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
@@ -15,10 +16,12 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
-using ThMEPEngineCore.Algorithm;
+using NetTopologySuite.Geometries;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Temp;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using CLI;
 
 namespace ThMEPEngineCore
@@ -563,6 +566,49 @@ namespace ThMEPEngineCore
                 });
                 ThGeoOutput.Output(geos, path, newFileName);
                 extractEngine.Print(acadDatabase.Database);
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPCENTERLINE", CommandFlags.Modal)]
+        public void THPCENTERLINE()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                var engine = new ThPolygonCenterLineMgd();
+                var serializer = GeoJsonSerializer.Create();
+                objs.Cast<Polyline>().ForEach(o =>
+                {
+                    var geos = new List<ThGeometry>();
+                    geos.Add(new ThGeometry()
+                    {
+                        Boundary = o,
+                    });
+                    var results = engine.Generate(ThGeoOutput.Output(geos));
+                    using (var stringReader = new StringReader(results))
+                    using (var jsonReader = new JsonTextReader(stringReader))
+                    {
+                        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                        foreach (var f in features)
+                        {
+                            if (f.Geometry is LineString line)
+                            {
+                                acadDatabase.ModelSpace.Add(line.ToDbPolyline());
+                            }
+                        }
+                    }
+                });
             }
         }
     }
