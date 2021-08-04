@@ -111,8 +111,13 @@ namespace ThMEPElectrical.DCL.Data
             //
             if (OuterArchOutlineIdDic.Count == 0)
                 return;
-            var firstStorey = storeyInfos.Where(o => o.StoreyNumber.Contains("1F")).First();
-            var secondStorey = storeyInfos.Where(o => o.StoreyNumber.Contains("2F")).First();
+            if(!(storeyInfos.Where(o => IsContains(o.StoreyNumber, "1F")).Any() &&
+                storeyInfos.Where(o => IsContains(o.StoreyNumber, "2F")).Any()))
+            {
+                return; 
+            }
+            var firstStorey = storeyInfos.Where(o => IsContains(o.StoreyNumber, "1F")).First();
+            var secondStorey = storeyInfos.Where(o => IsContains(o.StoreyNumber, "2F")).First();
             var firtbasepoint = firstStorey.BasePoint.Split(',');
             var secondbasepoint = secondStorey.BasePoint.Split(',');
             if (firtbasepoint.Length != 2 || secondbasepoint.Length != 2)
@@ -151,6 +156,11 @@ namespace ThMEPElectrical.DCL.Data
                 res.Add(o.Boundary, outerArchlineInBoundary);
             });
             return res;
+        }
+        private bool IsContains(string storeyNumber, string floorNo)
+        {
+            var splitChars = storeyNumber.Split(',');
+            return splitChars.Where(o => o.ToUpper().Equals(floorNo.ToUpper())).Any();
         }
     }
 }
