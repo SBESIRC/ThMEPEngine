@@ -36,84 +36,28 @@ namespace ThMEPWSS.Diagram.ViewModel
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
-                PromptSelectionOptions options = new PromptSelectionOptions()
+                SelectedArea = Common.Utils.SelectAreas();
+                var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
+                var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎R
+                storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
+                if (storeysRecEngine.Elements.Count == 0)
                 {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择楼层框线",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filter = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status == PromptStatus.OK)//框选择成功
-                {
-                    var selectedIds = result.Value.GetObjectIds();
-                    double topLeftX = 0;
-                    double topLeftY = 0;
-                    double lowRightX = 0;
-                    double lowRightY = 0;
-                    var firstFlag = true;
-                    foreach (var sID in selectedIds)
-                    {
-                        var br = acadDatabase.Element<BlockReference>(sID);
-                        if (br.GetEffectiveName() == "楼层框定")
-                        {
-                            if (firstFlag)
-                            {
-                                topLeftX = GeoAlgorithm.GetBoundaryRect(sID.GetEntity()).LeftTop.X;//最左边的X
-                                topLeftY = GeoAlgorithm.GetBoundaryRect(sID.GetEntity()).LeftTop.Y;//最左边的Y
-                                lowRightX = GeoAlgorithm.GetBoundaryRect(sID.GetEntity()).RightButtom.X;//最右边的X
-                                lowRightY = GeoAlgorithm.GetBoundaryRect(sID.GetEntity()).RightButtom.Y;//最右边的Y
-                                firstFlag = false;
-                            }
-                            else
-                            {
-                                var bdRect = GeoAlgorithm.GetBoundaryRect(sID.GetEntity());
-                                if (bdRect.LeftTop.X < topLeftX)
-                                {
-                                    topLeftX = bdRect.LeftTop.X;
-                                }
-                                if (bdRect.LeftTop.Y > topLeftY)
-                                {
-                                    topLeftY = bdRect.LeftTop.Y;
-                                }
-                                if (bdRect.RightButtom.X > lowRightX)
-                                {
-                                    lowRightX = bdRect.RightButtom.X;
-                                }
-                                if (bdRect.RightButtom.Y < lowRightY)
-                                {
-                                    lowRightY = bdRect.RightButtom.Y;
-                                }
-                            }
-                        }
-                    }
-                    SelectedArea = ThWCompute.CreatePolyLine(new Point3d(topLeftX - 100, topLeftY + 100, 0), new Point3d(lowRightX + 100, lowRightY - 100, 0));
-                    var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
-                    var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎R
-                    storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
-                    if (storeysRecEngine.Elements.Count == 0)
-                    {
-                        MessageBox.Show("框选区域没有有效楼层");
-                        return;
-                    }
-                    UndpdsFloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase, storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray());
-                    var FloorNum = storeysRecEngine.Elements
-                        .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
-                        .Select(floor => (floor as ThStoreys).StoreyNumber).ToList();
-                    if (FloorNum.Count == 0)
-                    {
-                        MessageBox.Show("框选区域没有标准楼层");
-                        return;
-                    }
-                    FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
-                    FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
-                    undpdsfloorListDatas.Reverse();
+                    MessageBox.Show("框选区域没有有效楼层");
+                    return;
                 }
+                UndpdsFloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase, storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray());
+                var FloorNum = storeysRecEngine.Elements
+                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
+                    .Select(floor => (floor as ThStoreys).StoreyNumber).ToList();
+                if (FloorNum.Count == 0)
+                {
+                    MessageBox.Show("框选区域没有标准楼层");
+                    return;
+                }
+                FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
+                FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
+                undpdsfloorListDatas.Reverse();
+                return;
             }
         }
         private List<string> undpdsfloorListDatas { get; set; }//楼层表

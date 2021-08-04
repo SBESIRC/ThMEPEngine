@@ -63,6 +63,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public int Diameter = 0;//立管管径
         public double totalQ = 0;//总流量
         public int AppendusedpumpCount = 0;
+        public bool IsInitialDrainWell = false;
     }
     public class HorizontalLabelClass
     {

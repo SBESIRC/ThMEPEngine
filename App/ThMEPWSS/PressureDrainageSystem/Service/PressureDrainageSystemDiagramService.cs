@@ -10,6 +10,7 @@ using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.PressureDrainageSystem.Model;
+using static DotNetARX.UCSTools;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
@@ -55,7 +56,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         public Point3d ptloctotalQ;//系统图中标注总流量的定位点
         public double totalQ = 0;//当前排水系统图的总流量
         const double pumpUnitSpacing = 9000;//排水系统图中并列潜水泵间距
-      
+        
         /// <summary>
         /// 绘制系统图主函数
         /// </summary>
@@ -84,7 +85,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         public List<Line> DrawFloorLine()
         {
-            List<Line> floorLines = new ();
+            InsertPt = UCSTools.TranslateCoordinates(InsertPt, CoordSystem.UCS, CoordSystem.WCS);
+            List<Line> floorLines = new();
             double FloorLineLength = spacing * PipeLineSystemUnits.Count;//楼板线长度&参考值
             floorLines.Add(new Line(InsertPt, new Point3d(InsertPt.X + FloorLineLength, InsertPt.Y, 0)));
             int floorNumber = Modeldatas.FloorListDatas.Count;
@@ -100,7 +102,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             return floorLines;
         }
-       
+        
         /// <summary>
         /// 给排水单元内的每一根立管赋予标识Id，便于在递归中检测立管是否进入递归
         /// </summary>
@@ -160,6 +162,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         someLayerPipeIndexes.Add(j, new List<int>());
                     }
+                    if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
+                    {
+                        for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
+                        {
+                            foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
+                            {
+                                Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
+                                line.ColorIndex = (int)ColorIndex.Cyan;
+                                line.AddToCurrentSpace();
+                            }
+                        }
+                    }
                     PipeLineSystemUnits[i].verticalPipeId.ForEach(o => ids.Add(o));
                     ids.Remove(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Id);
                     parLayers.Add(-1);
@@ -194,7 +208,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 return;
             }
         }
-       
+        
         /// <summary>
         /// 合并相同的排水系统单元图
         /// </summary>
@@ -211,119 +225,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 lines.Add(new Line(PipeLineSystemUnits[i].SameUnitsStartPt[0], pt));
                 guidelines.Add(lines);
             }
-            for (int i = 1; i < comparedEntitys.Count; i++)
-            {
-                foreach (var br in drainwellbrs[i])
-                {
-                    br.Visible = false;
-                }
-                for (int j = 0; j < i; j++)
-                {
-                    if (IsSameSystemUnits(comparedEntitys[i], comparedEntitys[j]))
-                    {
-                        guidelines[j].Add(new Line(PipeLineSystemUnits[i].SameUnitsStartPt[0], pt));
-                        guidelines.RemoveAt(i);
-                        lineIdspump.RemoveAt(i);
-                        if (drainwellbrs[i].Count > 0)
-                        {
-                            int cond_QuitCycle = 0;
-                            foreach (var br in drainwellbrs[j])
-                            {
-                                if (br.Id.GetAttributeInBlockReference("-") == drainwellbrs[i][0].Id.GetAttributeInBlockReference("-"))
-                                {
-                                    cond_QuitCycle = 1;
-                                    break;
-                                }
-                            }
-                            if (cond_QuitCycle == 0)
-                            {
-                                drainwellbrs[j].Add(drainwellbrs[i][0]);
-                            }
-                        }
-                        drainwellbrs.RemoveAt(i);
-                        foreach (var curId in identifiers[i])
-                        {
-                            int cond_QuitCycle = 0;
-                            foreach (var curText in curId)
-                            {
-                                foreach (var testId in identifiers[j])
-                                {
-                                    foreach (var testText in testId)
-                                    {
-                                        if (identiferDict[i].ContainsKey(curText.TextString) && identiferDict[j].ContainsKey(testText.TextString))
-                                        {
-                                            if (identiferDict[i][curText.TextString] == identiferDict[j][testText.TextString] && curText.HorizontalMode == testText.HorizontalMode)
-                                            {
-                                                curText.Position = testText.Position;
-                                                curText.AlignmentPoint = testText.AlignmentPoint;
-                                                testId.Add(curText);
-                                                cond_QuitCycle = 1;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (cond_QuitCycle == 1)
-                                    {
-                                        break;
-                                    }
-                                }
-                                if (cond_QuitCycle == 1)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        identifiers.RemoveAt(i);
-                        identiferDict.RemoveAt(i);
-                        allEntities.RemoveAt(i);
-                        allBlocks[i].ForEach(o => o.Visible = false);
-                        allBlocks.RemoveAt(i);
-                        PipeLineSystemUnits.RemoveAt(i);
-                        comparedEntitys.RemoveAt(i);
-                        i--;
-                        break;
-                    }
-                }
-            }
-            comparedEntitys.Clear();
-            foreach (var curId in identifiers)
-            {
-                foreach (var curText in curId)
-                {
-                    List<DBText> dBTexts = new();
-                    if (curText.Count > 0)
-                    {
-                        dBTexts.Add(curText[0]);
-                        if (curText.Count > 1)
-                        {
-                            for (int p = 1; p < curText.Count; p++)
-                            {
-                                int cond_QuitCycle = 0;
-                                foreach (var testText in dBTexts)
-                                {
-                                    if (curText[p].TextString == testText.TextString)
-                                    {
-                                        cond_QuitCycle = 1;
-                                        break;
-                                    }
-                                }
-                                if (cond_QuitCycle == 0)
-                                {
-                                    dBTexts.Add(curText[p]);
-                                }
-                            }
-                        }
-                    }
-                    curText.Clear();
-                    dBTexts.ForEach(o => curText.Add(o));
-                    double disXform = 0;
-                    foreach (var text in curText)
-                    {
-                        text.TransformBy(Matrix3d.Displacement(new Vector3d(0, disXform, 0)));
-                        disXform += textHeight + 50;
-                    }
-                }
-            }
+            CompareEachSystemUnit(guidelines, pt);
+            ProcessIdentifersInSameSystemUnits();
             for (int i = 0; i < identifiers.Count; i++)
             {
                 foreach (var text in identifiers[i])
@@ -366,7 +269,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
-       
+        
         /// <summary>
         /// 排水系统图排版
         /// </summary>
@@ -423,7 +326,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     indexCurPoint = j;
                 }
-                else if (pipe.AppendedDrainWell != null)
+                else if (pipe.IsInitialDrainWell)
                 {
                     indexCurPoint = j;
                 }
@@ -563,7 +466,136 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 tmpBlocksLayerBUSH.ForEach(o => blocks.Add(o));
             }
         }
-       
+
+        /// <summary>
+        /// 通过比较两排水系统的可比较部分来处理相同的排水系统
+        /// </summary>
+        /// <param name="guidelines"></param>
+        /// <param name="pt"></param>
+        public void CompareEachSystemUnit(List<List<Line>> guidelines, Point3d pt)
+        {
+            for (int i = 1; i < comparedEntitys.Count; i++)
+            {
+                foreach (var br in drainwellbrs[i])
+                {
+                    br.Visible = false;
+                }
+                for (int j = 0; j < i; j++)
+                {
+                    if (IsSameSystemUnits(comparedEntitys[i], comparedEntitys[j]))
+                    {
+                        guidelines[j].Add(new Line(PipeLineSystemUnits[i].SameUnitsStartPt[0], pt));
+                        guidelines.RemoveAt(i);
+                        lineIdspump.RemoveAt(i);
+                        if (drainwellbrs[i].Count > 0)
+                        {
+                            int cond_QuitCycle = 0;
+                            foreach (var br in drainwellbrs[j])
+                            {
+                                if (br.Id.GetAttributeInBlockReference("-") == drainwellbrs[i][0].Id.GetAttributeInBlockReference("-"))
+                                {
+                                    cond_QuitCycle = 1;
+                                    break;
+                                }
+                            }
+                            if (cond_QuitCycle == 0)
+                            {
+                                drainwellbrs[j].Add(drainwellbrs[i][0]);
+                            }
+                        }
+                        drainwellbrs.RemoveAt(i);
+                        foreach (var curId in identifiers[i])
+                        {
+                            int cond_QuitCycle = 0;
+                            foreach (var curText in curId)
+                            {
+                                foreach (var testId in identifiers[j])
+                                {
+                                    foreach (var testText in testId)
+                                    {
+                                        if (identiferDict[i].ContainsKey(curText.TextString) && identiferDict[j].ContainsKey(testText.TextString))
+                                        {
+                                            if (identiferDict[i][curText.TextString] == identiferDict[j][testText.TextString] && curText.HorizontalMode == testText.HorizontalMode)
+                                            {
+                                                curText.Position = testText.Position;
+                                                curText.AlignmentPoint = testText.AlignmentPoint;
+                                                testId.Add(curText);
+                                                cond_QuitCycle = 1;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (cond_QuitCycle == 1)
+                                    {
+                                        break;
+                                    }
+                                }
+                                if (cond_QuitCycle == 1)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        identifiers.RemoveAt(i);
+                        identiferDict.RemoveAt(i);
+                        allEntities.RemoveAt(i);
+                        allBlocks[i].ForEach(o => o.Visible = false);
+                        allBlocks.RemoveAt(i);
+                        PipeLineSystemUnits.RemoveAt(i);
+                        comparedEntitys.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            comparedEntitys.Clear();
+        }
+
+        /// <summary>
+        /// 将相同排水系统中对应立管的编号汇总
+        /// </summary>
+        public void ProcessIdentifersInSameSystemUnits()
+        {
+            foreach (var curId in identifiers)
+            {
+                foreach (var curText in curId)
+                {
+                    List<DBText> dBTexts = new();
+                    if (curText.Count > 0)
+                    {
+                        dBTexts.Add(curText[0]);
+                        if (curText.Count > 1)
+                        {
+                            for (int p = 1; p < curText.Count; p++)
+                            {
+                                int cond_QuitCycle = 0;
+                                foreach (var testText in dBTexts)
+                                {
+                                    if (curText[p].TextString == testText.TextString)
+                                    {
+                                        cond_QuitCycle = 1;
+                                        break;
+                                    }
+                                }
+                                if (cond_QuitCycle == 0)
+                                {
+                                    dBTexts.Add(curText[p]);
+                                }
+                            }
+                        }
+                    }
+                    curText.Clear();
+                    dBTexts.ForEach(o => curText.Add(o));
+                    double disXform = 0;
+                    foreach (var text in curText)
+                    {
+                        text.TransformBy(Matrix3d.Displacement(new Vector3d(0, disXform, 0)));
+                        disXform += textHeight + 50;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// 判断两个排水系统图是否相同
         /// </summary>
@@ -761,7 +793,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
-      
+        
         /// <summary>
         /// 判断该立管下一层是否有对应立管
         /// </summary>
@@ -788,7 +820,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             return cond_HasSonPipe;
         }
-       
+        
         /// <summary>
         /// 判断该立管下一层是否有对应立管并处理
         /// </summary>

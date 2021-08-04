@@ -399,13 +399,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[0].Count; i++)
                 {
                     double mindisinunit = double.PositiveInfinity;
-                    foreach (var j in _totalPipeLineUnitsByLayerByUnit[0][i].HorizontalPipes)
+                    foreach (var horLine in _totalPipeLineUnitsByLayerByUnit[0][i].HorizontalPipes)
                     {
-                        double dis = j.GetClosestPointTo(well.Extents.CenterPoint(), false).DistanceTo(well.Extents.CenterPoint());
+                        double dis = horLine.GetClosestPointTo(well.Extents.CenterPoint(), false).DistanceTo(well.Extents.CenterPoint());
                         if (dis < mindisinunit)
                         {
                             mindisinunit = dis;
-                            hor = j;
+                            hor = horLine;
                         }
                     }
                     if (mindisinunit < mindis && !indexes.Contains(i))
@@ -439,6 +439,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 if (indexVertical != -1)
                 {
                     _totalPipeLineUnitsByLayerByUnit[0][index].VerticalPipes[indexVertical].AppendedDrainWell = well;
+                    _totalPipeLineUnitsByLayerByUnit[0][index].VerticalPipes[indexVertical].IsInitialDrainWell = true;
                     _totalPipeLineUnitsByLayerByUnit[0][index].VerticalPipes[indexVertical].IsNexttoDainWell = true;
                     _totalPipeLineUnitsByLayerByUnit[0][index].DrainWellPipeIndex = indexVertical;
                 }
@@ -658,6 +659,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="pipeLineSystemUnits"></param>
         private void PostProcessPressureDrainageSystemUnits(List<PipeLineSystemUnitClass> pipeLineSystemUnits)
         {
+            AppendDrainWellsToSystemUnits(pipeLineSystemUnits);
             RemoveUnitWhileNoVerticalPipe(pipeLineSystemUnits);
             RemoveUnitWhileNoSubmergePump(pipeLineSystemUnits);
             CalculateSubmergedPipeDiameter(pipeLineSystemUnits);
@@ -869,6 +871,28 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
         }
        
+        /// <summary>
+        /// 将排水井信息补充到排水系统单元
+        /// </summary>
+        /// <param name="pipeLineSystemUnits"></param>
+        private void AppendDrainWellsToSystemUnits(List<PipeLineSystemUnitClass> pipeLineSystemUnits)
+        {
+            foreach (var systemUnit in pipeLineSystemUnits)
+            {
+                foreach (var pipe in systemUnit.PipeLineUnits[0].VerticalPipes)
+                {
+                    if (pipe.AppendedDrainWell != null)
+                    {
+                        foreach (var p in systemUnit.PipeLineUnits[0].VerticalPipes)
+                        {
+                            p.AppendedDrainWell = pipe.AppendedDrainWell;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// 移除没有立管的排水系统单元
         /// </summary>

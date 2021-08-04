@@ -116,7 +116,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
 
-        [CommandMethod("TIANHUACAD", "THPDSD", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THDXPLXTT", CommandFlags.Modal)]
         public void ThCreateUNDPDrainageSystemDiagram()
         {
             var ui = new uiUNDPressureDrainageSystem();
