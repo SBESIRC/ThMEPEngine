@@ -84,6 +84,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\WaterColumnAngleBooleanConverter.cs" />
+    <Compile Include="Converter\ReductionFactorBooleanConverter.cs" />
     <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
     <Compile Include="Converter\ProtectStrengthOpsBooleanConverter.cs" />
     <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />

@@ -7,8 +7,8 @@
              xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
-                    Title="消火栓校核" SizeToContent="Manual" Height="320" 
-                    Width="150" MaxWidth="150" MaxHeight="320"
+                    Title="消火栓校核" SizeToContent="Manual" Height="350" 
+                    Width="140" MaxWidth="140" MaxHeight="350"
              mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -16,9 +16,11 @@
             <converters:MaxProtectDisOpsBooleanConverter x:Key="maxProtectDisOpsConverter"/>
             <converters:ProtectStrengthOpsBooleanConverter x:Key="protectStrengthOpsConverter"/>
             <converters:WaterColumnLengthOpsBooleanConverter x:Key="waterColumnLengthOpsConverter"/>
+            <converters:ReductionFactorBooleanConverter x:Key="reductionFactorOpsConverter"/>
+            <converters:WaterColumnAngleBooleanConverter x:Key="waterColumnAngleOpsConverter"/>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="5">
+    <Grid Margin="3">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -36,16 +38,21 @@
                                  IsChecked="{Binding Parameter.CheckObjectOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource checkObjectOpsConverter},ConverterParameter=0}" Checked="rbFireHydrant_Checked">
                     </RadioButton>
-                    <RadioButton x:Name="rbFireExtinguisher" Content="灭火器" GroupName="CheckObject" Margin="15,0" IsThreeState="False"
+                    <RadioButton x:Name="rbFireExtinguisher" Content="灭火器" GroupName="CheckObject" Margin="10,0" IsThreeState="False"
                                  IsChecked="{Binding Parameter.CheckObjectOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource checkObjectOpsConverter},ConverterParameter=1}" Checked="rbFireExtinguisher_Checked">
                     </RadioButton>
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Name="spFireHydrantPanel" Visibility="Visible">
+        <StackPanel Grid.Row="1" Name="spFireHydrantPanel" Visibility="Hidden">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -60,14 +67,14 @@
                                  IsChecked="{Binding Parameter.ProtectStrengthOption,Converter={StaticResource protectStrengthOpsConverter}, 
                                  ConverterParameter=0,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>
-                    <RadioButton x:Name="rbSingleStrands" Content="单股" GroupName="StrandGroup" Margin="27,0" IsThreeState="False"
+                    <RadioButton x:Name="rbSingleStrands" Content="单股" GroupName="StrandGroup" Margin="22,0" IsThreeState="False"
                                  IsChecked="{Binding Parameter.ProtectStrengthOption,Converter={StaticResource protectStrengthOpsConverter},
                                  ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,5">
                     <TextBlock Text="水龙带长："></TextBlock>
-                    <TextBox x:Name="tbFireHose" Width="50" Margin="10,0"
+                    <TextBox x:Name="tbFireHose" Width="50" Margin="5,0"
                              InputMethod.IsInputMethodEnabled="False" PreviewTextInput="TextBox_PreviewTextInput"
                              PreviewKeyDown="TextBox_PreviewKeyDown" TextChanged="TextBox_TextChanged">
                         <Binding Path="Parameter.HoseLength" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
@@ -76,24 +83,53 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <TextBlock Text="米" Margin="-8,0"></TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5">
-                    <TextBlock Text="水柱长度："></TextBlock>
+                    <TextBlock Text="米" Margin="-4,0"></TextBlock>
+                </StackPanel>                
+                <StackPanel Grid.Row="3" Orientation="Horizontal">
+                    <TextBlock Text="折减系数："></TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,5">
-                    <RadioButton x:Name="rbTenMetres" Content="10米" GroupName="WaterColunmLength" IsThreeState="False"
+                    <RadioButton x:Name="rbZeroDotEight" Content="0.8" GroupName="ReductionFactor" IsThreeState="False"
+                                 IsChecked="{Binding Parameter.ReductionFactorOption,Converter={StaticResource reductionFactorOpsConverter}, 
+                                 ConverterParameter=0,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    </RadioButton>
+                    <RadioButton x:Name="rbZeroDotNine" Content="0.9" GroupName="ReductionFactor" Margin="30,0" IsThreeState="False"
+                                 IsChecked="{Binding Parameter.ReductionFactorOption,Converter={StaticResource reductionFactorOpsConverter},
+                                 ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    </RadioButton>
+                </StackPanel>
+                <Line Grid.Row="5" Margin="0,2,0,4" X1="0" Y1="0" X2="200" Y2="0" StrokeDashArray="6" Stroke="Gray" 
+                      StrokeThickness="2" VerticalAlignment="Center"/>               
+                <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,5">
+                    <TextBlock Text="水柱长度："></TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Row="7" Orientation="Horizontal" Margin="0,5">
+                    <RadioButton x:Name="rbTenMetres" Content="10米" GroupName="WaterColumnLength" IsThreeState="False"
                                  IsChecked="{Binding Parameter.WaterColumnLengthOption, Converter={StaticResource waterColumnLengthOpsConverter}, 
                                  ConverterParameter=0,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>
-                    <RadioButton x:Name="rbThirteenMetres" Content="13米" Margin="27,0" GroupName="WaterColunmLength" IsThreeState="False"
+                    <RadioButton x:Name="rbThirteenMetres" Content="13米" Margin="20,0" GroupName="WaterColumnLength" IsThreeState="False"
                                  IsChecked="{Binding Parameter.WaterColumnLengthOption,Converter={StaticResource waterColumnLengthOpsConverter},
                                  ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>
                 </StackPanel>
+                <StackPanel Grid.Row="8" Orientation="Horizontal" Margin="0,5">
+                    <TextBlock Text="水柱角度(相对水平)："></TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Row="9" Orientation="Horizontal" Margin="0,5">
+                    <RadioButton x:Name="rb45Deree" Content="45°" GroupName="WaterColumnAngle" IsThreeState="False"
+                                 IsChecked="{Binding Parameter.WaterColumnAngleOption, Converter={StaticResource waterColumnAngleOpsConverter}, 
+                                 ConverterParameter=0,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    </RadioButton>
+                    <RadioButton x:Name="rb90Deree" Content="90°" Margin="28,0" GroupName="WaterColumnAngle" IsThreeState="False"
+                                 IsChecked="{Binding Parameter.WaterColumnAngleOption,Converter={StaticResource waterColumnAngleOpsConverter},
+                                 ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    </RadioButton>
+                </StackPanel>
+                
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Name="spFireExtinguisherPanel" Visibility="Hidden">
+        <StackPanel Grid.Row="1" Name="spFireExtinguisherPanel" Visibility="Visible">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -109,11 +145,11 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Margin="0,3,0,4" Text="危险等级：" HorizontalAlignment="Left" />
-                <ComboBox Grid.Row="1" Margin="0,2,0,4" x:Name="cbDangerLevel" Width="140" HorizontalAlignment="Left"
+                <ComboBox Grid.Row="1" Margin="0,2,0,4" x:Name="cbDangerLevel" Width="120" HorizontalAlignment="Left"
                           ItemsSource="{Binding DangerLevels,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Text="{Binding Parameter.DangerLevel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 <TextBlock Grid.Row="2" Margin="0,2,0,4" Text="火灾种类：" HorizontalAlignment="Left" />
-                <ComboBox Grid.Row="3" Margin="0,2,0,4" x:Name="cbFireType" Width="140" HorizontalAlignment="Left"
+                <ComboBox Grid.Row="3" Margin="0,2,0,4" x:Name="cbFireType" Width="120" HorizontalAlignment="Left"
                           ItemsSource="{Binding FireTypes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Text="{Binding Parameter.FireType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 <Line Grid.Row="4" Margin="0,2,0,4" X1="0" Y1="0" X2="200" Y2="0" StrokeDashArray="6" Stroke="Gray" 
@@ -135,7 +171,7 @@
                                  ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                  Checked="rbSelf_Checked" Unchecked="rbSelf_Unchecked">
                     </RadioButton>
-                    <TextBox x:Name="tbSelfValue" Width="45" Margin="10,0"
+                    <TextBox x:Name="tbSelfValue" Width="45" Margin="8,0"
                              InputMethod.IsInputMethodEnabled="False" PreviewTextInput ="TextBox_PreviewTextInput" 
                              PreviewKeyDown="TextBox_PreviewKeyDown"  TextChanged="TextBox_TextChanged">
                         <Binding Path="Parameter.SelfLength" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
@@ -148,7 +184,7 @@
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="2" >
+        <StackPanel Grid.Row="7" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"></RowDefinition>
@@ -163,7 +199,7 @@
                           IsChecked="{Binding Parameter.IsShowCheckResult,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Checked="chkShowResult_Checked" Unchecked="chkShowResult_Unchecked"></CheckBox>
-                <Button Grid.Row="2" Margin="0,0,6,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
+                <Button Grid.Row="2" Margin="0,0,8,3" HorizontalAlignment="Right" x:Name="btnRegionCheck" 
                         Width="65" Height="20" Content="区域校核" Command="{Binding RegionCheckCmd}"></Button>
             </Grid>
         </StackPanel>
