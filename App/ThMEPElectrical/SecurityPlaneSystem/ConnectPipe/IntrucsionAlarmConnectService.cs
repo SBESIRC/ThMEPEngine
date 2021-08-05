@@ -76,6 +76,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             {
                 return resPolys;
             }
+            var useModels = roomModelInfos[thRoom];
             switch (layoutType)
             {
                 case LayoutType.Nothing:
@@ -85,20 +86,17 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 case LayoutType.EmergencyAlarm:
                     break;
                 case LayoutType.InfraredWallMounting:
-                    var useModels = roomModelInfos[thRoom];
                     var controllers = useModels.Where(x => x is IAControllerModel).ToList();
                     var detectors = useModels.Where(x => x is IAInfraredWallDetectorModel).ToList();
                     resPolys.AddRange(ConnectIWMPipe(controllers, detectors, thRoom, holes));
                     break;
                 case LayoutType.InfraredHoisting:
-                    useModels = roomModelInfos[thRoom];
                     controllers = useModels.Where(x => x is IAControllerModel).ToList();
                     detectors = useModels.Where(x => x is IAInfraredHositingDetectorModel).ToList();
                     resPolys.AddRange(ConnectIWMPipe(controllers, detectors, thRoom, holes));
                     break;
                 case LayoutType.DoubleWallMounting:
                 case LayoutType.DoubleHositing:
-                    useModels = roomModelInfos[thRoom];
                     controllers = useModels.Where(x => x is IAControllerModel).ToList();
                     detectors = useModels.Where(x => x is IADoubleDetectorModel).ToList();
                     resPolys.AddRange(ConnectIWMPipe(controllers, detectors, thRoom, holes));

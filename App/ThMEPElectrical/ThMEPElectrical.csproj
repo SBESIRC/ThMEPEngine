@@ -219,8 +219,10 @@
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\AccessControlConnectService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\ConnectPipeService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\IntrucsionAlarmConnectService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ACModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\IAModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\ConnectBlockService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\PipePathService.cs" />

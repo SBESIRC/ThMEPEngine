@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 foreach (var item in structs)
                 {
-                    db.ModelSpace.Add(item);
+                    //db.ModelSpace.Add(item);
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();

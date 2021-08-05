@@ -16,6 +16,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         {
             IntrucsionAlarmConnectService connectService = new IntrucsionAlarmConnectService();
             var pipes = connectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
+
+            AccessControlConnectService accessControlConnectService = new AccessControlConnectService(); 
+            pipes.AddRange(accessControlConnectService.ConnectPipe(connectBlock, rooms, columns, doors, floor));
             using (AcadDatabase db = AcadDatabase.Active())
             {
                 foreach (var item in pipes)

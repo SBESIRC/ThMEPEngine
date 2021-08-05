@@ -200,7 +200,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                         }
                     }
                     var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                    if (!dir.IsParallelWithTolerance(lineDir, angle) && line.Length > blockWidth)
+                    if (line.Length > blockWidth)
                     {
                         var sPt = line.StartPoint.DistanceTo(doorPt) < line.EndPoint.DistanceTo(doorPt) ? line.StartPoint : line.EndPoint;
                         var ePt = line.StartPoint.DistanceTo(doorPt) > line.EndPoint.DistanceTo(doorPt) ? line.StartPoint : line.EndPoint;

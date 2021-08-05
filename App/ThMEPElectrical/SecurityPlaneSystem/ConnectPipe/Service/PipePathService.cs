@@ -21,8 +21,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
         double distance = 250;
         public Polyline CreatePipePath(Polyline polyline, Point3d sPt, Point3d blockPt, Vector3d dir, List<Polyline> holes)
         {
-            Polyline resLine = new Polyline();
-
+            Polyline resLine = null;
             //寻找起点
             //var startPt = CreateDistancePoint(polyline, sPt);
             //var endPt = CreateDistancePoint(polyline, blockPt);
