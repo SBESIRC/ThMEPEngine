@@ -201,8 +201,7 @@ namespace ThMEPHVAC.Model
                 for (int j = 0; j < info.segments.Count; ++j)
                 {
                     var seg = info.segments[j];
-                    if (ThDuctPortsService.Is_same_line(l, seg.direct_edge.Source.Position, 
-                                                           seg.direct_edge.Target.Position, point_tor))
+                    if (ThDuctPortsService.Is_same_line(l, seg.direct_edge.Source.Position, seg.direct_edge.Target.Position, point_tor))
                         return new Pair_coor (i, j);
                 }
             }

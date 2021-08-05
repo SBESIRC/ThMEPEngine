@@ -54,7 +54,7 @@ namespace ThMEPHVAC.Model
             Draw_special_shape(anay_res.special_shapes_info);
             Draw_port_mark(endlines);
             service.valve_service.Insert_valve(anay_res.merged_endlines.Count, start_point, endlines);
-            ThDuctPortsRecoder.Attach_start_param(start_id, start_point.ToPoint2D(), in_param);
+            ThDuctPortsRecoder.Attach_start_param(start_id, in_param);
         }
         private void Draw_port_mark(ThDuctPortsConstructor endlines)
         {
@@ -64,16 +64,22 @@ namespace ThMEPHVAC.Model
             if (last_seg.segs.Count == 0)
                 return;
             var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
+            if (ports.Count == 0)
+                return;
             Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0) + org_dis_vec;
             ThDuctPortsDrawPortMark.Insert_mark(in_param, port_width, port_height, service.port_mark_name, service.port_mark_layer, p);
             ThDuctPortsDrawPortMark.Insert_leader(Get_mark_base_point(ports) + org_dis_vec, p, service.port_mark_layer);
         }
         private Point3d Get_mark_base_point(List<Port_Info> ports)
         {
-            if (ports[ports.Count - 1].air_volume > 1)
-                return ports[ports.Count - 1].position;
-            else
-                return ports[ports.Count - 2].position;
+            if (ports.Count > 0)
+            {
+                if (ports[ports.Count - 1].air_volume > 1)
+                    return ports[ports.Count - 1].position;
+                else
+                    return ports[ports.Count - 2].position;
+            }
+            return Point3d.Origin;
         }
         private void Draw_special_shape(List<Special_graph_Info> special_shapes_info)
         {
@@ -233,13 +239,14 @@ namespace ThMEPHVAC.Model
             {
                 string pre_duct_text_info = String.Empty;
                 var infos = endlines.endline_segs[i];
-                var ver_wall_point = (duct_ver_align_points.Count > i) ? duct_ver_align_points[i] : Point2d.Origin;
+                var is_last_duct = (i == (endlines.endline_segs.Count - 1));
+                var ver_wall_point = (duct_dir_align_points.Count > i && is_last_duct) ? duct_ver_align_points[i] : Point2d.Origin;
                 var dir_wall_point = (duct_dir_align_points.Count > i) ? duct_dir_align_points[i] : Point2d.Origin;
-                Draw_port_duct(infos.segs, ref pre_duct_text_info);
+                Draw_port_duct(is_last_duct, infos.segs, ref pre_duct_text_info);
                 service.dim_service.Draw_dimension(infos.segs, dir_wall_point, ver_wall_point, start_point);
             }
         }
-        private void Draw_port_duct(List<Duct_ports_Info> infos, ref string duct_text_info)
+        private void Draw_port_duct(bool is_last_duct, List<Duct_ports_Info> infos, ref string duct_text_info)
         {
             double pre_air_volume = 0;
             string pre_duct_size = string.Empty;
@@ -255,7 +262,6 @@ namespace ThMEPHVAC.Model
                 service.text_service.Draw_duct_size_info(duct_size_info);
                 Collect_duct_geo(geo_set, cur_seg);
                 Record_pre_seg_info(cur_seg, duct_text_info, info, ref pre_seg, ref pre_duct_size, ref pre_air_volume);
-                var is_last_duct = (i == infos.Count - 1);
                 Record_duct(is_last_duct, cur_seg, pre_seg, pre_duct_size, pre_air_volume);
                 if (i == 0)
                     continue;//第一段duct不画reducing，之后的都是reducing + duct

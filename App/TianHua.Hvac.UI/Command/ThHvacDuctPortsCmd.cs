@@ -68,6 +68,11 @@ namespace TianHua.Hvac.UI.Command
                     RXClass.GetClass(typeof(Line)).DxfName,
                     RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
+                if (start_point == null)
+                {
+                    center_lines = new DBObjectCollection();
+                    return;
+                }
                 var sf = ThSelectionFilterTool.Build(dxfNames);
                 center_lines = Get_center_line("请选择中心线", out string layer, sf);
                 if (center_lines.Count == 0)
@@ -137,6 +142,11 @@ namespace TianHua.Hvac.UI.Command
                 var coll = objIds.ToObjectIdCollection();
                 layer = ThDuctPortsDrawService.Get_cur_layer(coll);
                 var lines = Pre_proc(coll);
+                if (lines.Polygonize().Count != 0)
+                {
+                    ThDuctPortsService.Prompt_msg("中心线包含环");
+                    return new DBObjectCollection();
+                }
                 ThDuctPortsDrawService.Remove_ids(objIds);
                 return lines;
             }
@@ -153,6 +163,14 @@ namespace TianHua.Hvac.UI.Command
         private DBObjectCollection Pre_proc(ObjectIdCollection objs)
         {
             var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
+            foreach (var l in lines)
+            {
+                if (l is Polyline)
+                {
+                    var pl = l as Polyline;
+                    
+                }
+            }
             ThDuctPortsDrawService.Move_to_origin(start_point, lines);
             var service = new ThLaneLineCleanService();
             var res = ThLaneLineEngine.Explode(service.Clean(lines));

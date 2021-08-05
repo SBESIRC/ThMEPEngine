@@ -30,6 +30,7 @@ namespace ThMEPHVAC.Model
     {
         OK,
         NO_PORT,
+        NO_CROSS_PORT,
         MULTI_PORT_RANGE,
         PORT_CROSS_MULTI_ENTITY
     }
@@ -48,8 +49,11 @@ namespace ThMEPHVAC.Model
         private double port_width;
         private string port_range;
         private double port_height;
+        private ObjectId[] start_id;
         private DuctPortsParam in_param;
         private HashSet<Handle> handles;
+        private List<Handle> conn_group_handles;
+        private List<Handle> cross_port_handles;
         private DBObjectCollection mp_objs;
         private HashSet<Polyline> poly_set;
         private ThCADCoreNTSSpatialIndex port_index;
@@ -57,41 +61,30 @@ namespace ThMEPHVAC.Model
         private ThCADCoreNTSSpatialIndex mp_group_index;
         private Dictionary<Polyline, ObjectId> bounds_2_id_dic;
         private Dictionary<Point3d, List<Handle>> port_2_handle_dic;
-        public ThDuctPortsModifyPort(ObjectId[] start_id, DuctPortsParam in_param)
+        public ThDuctPortsModifyPort(ObjectId[] start_id, ref DuctPortsParam ui_param)
         {
             using (var db = AcadDatabase.Active())
             {
-                ThDuctPortsInterpreter.Get_basic_param(start_id, out _, out Point2d p);
-                Init(p, in_param);
+                ThDuctPortsInterpreter.Get_basic_param(start_id, out DuctPortsParam basic_param, out Point2d p);
+                Init(p, basic_param, start_id);
                 bounds_2_id_dic = ThDuctPortsReadComponent.Read_all_component();
                 var group_bounds = bounds_2_id_dic.Keys.ToCollection();
                 Move_bounds_to_org(group_bounds, start_p);
-                var conn_handles = Get_conn_comp_index(group_bounds);
+                conn_group_handles = Get_conn_comp_index(group_bounds);
                 var all_port_blk = ThDuctPortsReadComponent.Read_all_port_by_name("风口-AI研究中心");
-                status = Get_port_info(all_port_blk);
+                Get_port_info(all_port_blk);
                 if (status != ModifyerStatus.OK)
                     return;
-                Get_conn_port(all_port_blk, out List<Handle> cross_port_handle);
-                Adjust_port();
-                if (cross_port_handle.Count == 0)
-                {
-                    status = ModifyerStatus.PORT_CROSS_MULTI_ENTITY;
+                Get_conn_port(all_port_blk, out cross_port_handles);
+                if (status != ModifyerStatus.OK)
                     return;
-                }
-                int port_num = cross_port_handle.Count;
-                if (port_num == 0)
-                {
-                    status = ModifyerStatus.NO_PORT;
-                    return;
-                }
+                int port_num = cross_port_handles.Count;
                 in_param.port_num = port_num;
                 avg_air_volume = in_param.air_volume / port_num;
-                Prepare_for_search(out Polyline detect_poly, out Point3d detect_p);
-                Count_duct_air_volume(detect_poly, detect_p, out _);
-                Delete_org_graph(conn_handles, cross_port_handle, start_id);
+                ui_param = in_param;
             }
         }
-        private void Init(Point2d p, DuctPortsParam in_param)
+        private void Init(Point2d p, DuctPortsParam basic_param, ObjectId[] start_id)
         {
             start_p = new Point3d(p.X, p.Y, 0);
             dis_mat = Matrix3d.Displacement(-start_p.GetAsVector());
@@ -102,11 +95,22 @@ namespace ThMEPHVAC.Model
             mp_objs = new DBObjectCollection();
             ducts = new List<Duct_Info>();
             handles = new HashSet<Handle>();
-            this.in_param = in_param;
+            in_param = basic_param;
+            this.start_id = start_id;
+        }
+        public void Construct()
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                Adjust_port();
+                Prepare_for_search(out Polyline detect_poly, out Point3d detect_p);
+                Set_duct_air_volume(detect_poly, detect_p, out _);
+                Delete_org_graph();
+            }
         }
         private void Prepare_for_search(out Polyline detect_poly, out Point3d detect_p)
         {
-            detect_poly = Create_detect_poly(Point3d.Origin);
+            detect_poly = ThDuctPortsService.Create_detect_poly(Point3d.Origin);
             detect_p = Point3d.Origin;
             poly_set.Clear();
         }
@@ -133,10 +137,13 @@ namespace ThMEPHVAC.Model
             port_handles = new List<Handle>();
             port_2_handle_dic = Create_port_bounds(all_port_blk);
             if (port_2_handle_dic.Count == 0)
+            {
+                status = ModifyerStatus.NO_PORT;
                 return;
+            }
             foreach (var p in port_2_handle_dic.Keys)
             {
-                var port_bound = Create_detect_poly(p);
+                var port_bound = ThDuctPortsService.Create_detect_poly(p);
                 var res = mp_group_index.SelectCrossingPolygon(port_bound);
                 if (res.Count > 0)
                 {
@@ -144,7 +151,26 @@ namespace ThMEPHVAC.Model
                     cross_port.Add(port_bound);
                 }
             }
+            status = Checkout_port(port_handles);
             port_index = new ThCADCoreNTSSpatialIndex(cross_port.ToCollection());
+        }
+        private ModifyerStatus Checkout_port(List<Handle> port_handles)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var handle in port_handles)
+                {
+                    var id = db.Database.HandleToObjectId(handle.ToString());
+                    var param = ThDuctPortsInterpreter.Get_port_param(id);
+                    if (!ThDuctPortsService.Is_equal(port_width, param.port_width) ||
+                        port_range != param.port_range ||
+                        !ThDuctPortsService.Is_equal(port_height, param.port_height))
+                    {
+                        return ModifyerStatus.MULTI_PORT_RANGE;
+                    }
+                }
+                return ModifyerStatus.OK;
+            }
         }
         private void Adjust_port()
         {
@@ -158,6 +184,8 @@ namespace ThMEPHVAC.Model
                     if (res.Count > 0)
                     {
                         var center_line = Get_duct_center_line(duct.Bounds.Value);
+                        if (center_line.StartPoint.IsEqualTo(center_line.EndPoint, tor))
+                            continue;
                         center_line.TransformBy(dis_mat);
                         foreach (Polyline pl in res)
                         {
@@ -165,7 +193,7 @@ namespace ThMEPHVAC.Model
                             var p = ThDuctPortsService.Round_point(center_line.GetClosestPointTo(pl_cp, false), 6);
                             var handles = port_2_handle_dic[pl_cp];
                             dic.Add(p, handles);
-                            port_bounds.Add(Create_detect_poly(p));
+                            port_bounds.Add(ThDuctPortsService.Create_detect_poly(p));
                         }
                     }
                 }
@@ -190,7 +218,7 @@ namespace ThMEPHVAC.Model
                     }
                 }
             }
-            throw new NotImplementedException();
+            return new Line();
         }
         private Dictionary<Point3d, List<Handle>> Create_port_bounds(List<BlockReference> all_port_blk)
         {
@@ -211,13 +239,9 @@ namespace ThMEPHVAC.Model
             var list = new List<Handle>();
             foreach (var port in all_port_blk)
             {
-                var dir_vec = ThDuctPortsService.Get_dir_vec_by_angle(port.Rotation);
-                var r_vec = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
-                var dis_vec = 0.5 * port_height * r_vec + 0.5 * port_width * dir_vec;
-                var p = port.Position.TransformBy(dis_mat).ToPoint2D() + dis_vec;
-                p = ThDuctPortsService.Round_point(p, 6);
+                var p = Get_down_port_judge_pos(port);
                 list.Add(port.Handle);
-                pb.Add(new Point3d(p.X, p.Y, 0), list);
+                pb.Add(p, list);
                 list = new List<Handle>();
             }
             return pb;
@@ -282,40 +306,44 @@ namespace ThMEPHVAC.Model
             var p = position.ToPoint2D() + dis_vec;
             return new Point3d (Math.Round(p.X, 6), Math.Round(p.Y, 6), 0);
         }
-        private ModifyerStatus Get_port_info(List<BlockReference> port_blks)
+        private Point3d Get_down_port_judge_pos(BlockReference port)
+        {
+            var dir_vec = ThDuctPortsService.Get_dir_vec_by_angle(port.Rotation);
+            var r_vec = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var dis_vec = 0.5 * port_height * r_vec + 0.5 * port_width * dir_vec;
+            var p = port.Position.TransformBy(dis_mat).ToPoint2D() + dis_vec;
+            p = ThDuctPortsService.Round_point(p, 6);
+            return new Point3d(p.X, p.Y, 0);
+        }
+        private void Get_port_info(List<BlockReference> port_blks)
         {
             using (var db = AcadDatabase.Active())
             {
                 foreach (var blk in port_blks)
                 {
-                    var id = db.Database.HandleToObjectId(blk.Handle.ToString());
-                    var param = ThDuctPortsInterpreter.Get_port_param(id);
-                    port_width = param.port_width;
-                    port_range = param.port_range;
-                    port_height = param.port_height;
-                    break;
-                }
-                foreach (var blk in port_blks)
-                {
-                    var id = db.Database.HandleToObjectId(blk.Handle.ToString());
-                    var param = ThDuctPortsInterpreter.Get_port_param(id);
-                    if (!ThDuctPortsService.Is_equal(port_width, param.port_width) ||
-                        port_range != param.port_range ||
-                        !ThDuctPortsService.Is_equal(port_height, param.port_height))
+                    var pl = new Polyline();
+                    pl.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                    pl.TransformBy(dis_mat);
+                    var res = mp_group_index.SelectCrossingPolygon(pl);
+                    if (res.Count > 0)
                     {
-                        return ModifyerStatus.MULTI_PORT_RANGE;
+                        var id = db.Database.HandleToObjectId(blk.Handle.ToString());
+                        var param = ThDuctPortsInterpreter.Get_port_param(id);
+                        port_width = param.port_width;
+                        port_range = param.port_range;
+                        port_height = param.port_height;
+                        break;
                     }
                 }
-                return ModifyerStatus.OK;
+                if (port_range == null)
+                    status = ModifyerStatus.NO_CROSS_PORT;
             }
         }
-        private void Delete_org_graph(List<Handle> conn_group_handle,
-                                      List<Handle> cross_port_handle,
-                                      ObjectId[] start_id)
+        public void Delete_org_graph()
         {
-            foreach (var handle in conn_group_handle)
+            foreach (var handle in conn_group_handles)
                 ThDuctPortsDrawService.Clear_graph(handle);
-            foreach (var port_handle in cross_port_handle)
+            foreach (var port_handle in cross_port_handles)
                 ThDuctPortsDrawService.Clear_graph(port_handle);
             foreach (var id in start_id)
                 ThDuctPortsDrawService.Clear_graph(id.Handle);
@@ -408,7 +436,7 @@ namespace ThMEPHVAC.Model
                 pts.Add(p.TransformBy(dis_mat));
             return pts;
         }
-        private double Count_duct_air_volume(Polyline cur_poly, Point3d detect_p, out Polyline pre_poly)
+        private double Set_duct_air_volume(Polyline cur_poly, Point3d detect_p, out Polyline pre_poly)
         {
             double sub_air_volume = 0;
             var res = Detect_cross_group(detect_p);
@@ -427,7 +455,7 @@ namespace ThMEPHVAC.Model
                 var port_pts = Get_step_point(pl, detect_p);
                 foreach (var p in port_pts)
                 {
-                    sub_air_volume += Count_duct_air_volume(pl, p, out pre_poly);
+                    sub_air_volume += Set_duct_air_volume(pl, p, out pre_poly);
                     double cur_air_volume = Get_cur_port_air_volume(cur_poly);
                     Record_comp(cur_poly, sub_air_volume);
                     air_volume = sub_air_volume + cur_air_volume;
@@ -546,15 +574,9 @@ namespace ThMEPHVAC.Model
         }
         private DBObjectCollection Detect_cross_group(Point3d p)
         {
-            var poly = Create_detect_poly(p);
+            var poly = ThDuctPortsService.Create_detect_poly(p);
             var res = group_index.SelectCrossingPolygon(poly);
             return res;
-        }
-        private Polyline Create_detect_poly(Point3d p)
-        {
-            var poly = new Polyline();
-            poly.CreatePolygon(p.ToPoint2D(), 4, 10);
-            return poly;
         }
     }
 }

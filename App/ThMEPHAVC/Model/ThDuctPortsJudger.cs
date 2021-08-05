@@ -29,7 +29,6 @@ namespace ThMEPHVAC.Model
             Init(start_pos_);
             if (!is_recreate)
             {
-                Inner_shrink(endline_segs);
                 var grids = Get_grid_lines();
                 Move_to_org(grids);
                 var grid_lines = Filter_h_v_grid_line(grids);
@@ -360,29 +359,6 @@ namespace ThMEPHVAC.Model
                 polygon.Add(polygon[1] + vertical_vec);
             }
             return polygon;
-        }
-        public static void Inner_shrink(List<Endline_seg_Info> endline_segs)
-        {
-            foreach (var endline in endline_segs)
-            {
-                foreach (var seg in endline.segs)
-                {
-                    Vector3d dir_vec = ThDuctPortsService.Get_edge_direction(seg.l);
-                    int port_num = seg.ports_info.Count;
-                    if (port_num > 1)
-                    {
-                        double real_step = Math.Ceiling(seg.l.Length / 100) * 100.0 / port_num;
-                        Point3d cur_p = seg.start_point + dir_vec * (0.5 * real_step);
-                        for (int i = 0; i < port_num; ++i)
-                        {
-                            seg.ports_info[i].position = cur_p;
-                            cur_p += real_step * dir_vec;
-                        }
-                    }
-                    else if (port_num == 1)
-                        seg.ports_info[0].position = ThDuctPortsService.Get_mid_point(seg.l);
-                }
-            }
         }
         private DBObjectCollection Get_grid_lines()
         {

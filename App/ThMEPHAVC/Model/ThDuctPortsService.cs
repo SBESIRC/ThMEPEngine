@@ -543,5 +543,11 @@ namespace ThMEPHVAC.Model
         {
             return new Point2d(Math.Round(p.X, tail_num), Math.Round(p.Y, tail_num));
         }
+        public static Polyline Create_detect_poly(Point3d p)
+        {
+            var poly = new Polyline();
+            poly.CreatePolygon(p.ToPoint2D(), 4, 10);
+            return poly;
+        }
     }
 }

@@ -13,16 +13,17 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacPortModifyCmd : IAcadCommand, IDisposable
     {
-        private static readonly DuctPortsParam in_param = new DuctPortsParam();
+        private static DuctPortsParam in_param = new DuctPortsParam();
         public void Dispose() { }
         public void Execute()
         {
             var id = Get_start_node("选择起始节点");
             if (id == null)
                 return;
+            var modifyer = new ThDuctPortsModifyPort(id, ref in_param);
             if (!Get_duct_port_info())
                 return;
-            var modifyer = new ThDuctPortsModifyPort(id, in_param);
+            modifyer.Construct();
             if (modifyer.status != ModifyerStatus.OK)
             {
                 Prompt_error(modifyer.status);

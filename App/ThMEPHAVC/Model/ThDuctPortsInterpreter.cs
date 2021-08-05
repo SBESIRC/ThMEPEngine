@@ -22,13 +22,21 @@ namespace ThMEPHVAC.Model
                 start_point = Point2d.Origin;
                 return;
             }
+            int inc = 0;
             param = new DuctPortsParam
             {
-                scale = (string)values.ElementAt(0).Value,
-                scenario = (string)values.ElementAt(1).Value,
-                elevation = Double.Parse((string)values.ElementAt(2).Value),
-                main_height = Double.Parse((string)values.ElementAt(3).Value),
-                port_range = (string)values.ElementAt(4).Value,
+                is_redraw = (string)values.ElementAt(inc++).Value == "True",
+                port_num = Int32.Parse((string)values.ElementAt(inc++).Value),
+                air_speed = Double.Parse((string)values.ElementAt(inc++).Value),
+                air_volume = Double.Parse((string)values.ElementAt(inc++).Value),
+                elevation = Double.Parse((string)values.ElementAt(inc++).Value),
+                main_height = Double.Parse((string)values.ElementAt(inc++).Value),
+                scale = (string)values.ElementAt(inc++).Value,
+                scenario = (string)values.ElementAt(inc++).Value,
+                port_size = (string)values.ElementAt(inc++).Value,
+                port_name = (string)values.ElementAt(inc++).Value,
+                port_range = (string)values.ElementAt(inc++).Value,
+                in_duct_size = (string)values.ElementAt(inc++).Value,
             };
             var blk = obj_list[0].GetEntity() as BlockReference;
             start_point = blk.Position.ToPoint2D();
@@ -138,7 +146,8 @@ namespace ThMEPHVAC.Model
             {
                 var id = db.Database.GetObjectId(false, group_handle, 0);
                 var portIndex2PositionDic = ThDuctPortsReadComponent.GetPortsOfGroup(id);
-                var portExtIndex2PositionDic = ThDuctPortsReadComponent.GetPortExtsOfGroup(id);
+                if (portIndex2PositionDic.Count == 0)
+                    return param;
                 param.sp = portIndex2PositionDic["0"].Item1.ToPoint2D();
                 param.ep = portIndex2PositionDic["1"].Item1.ToPoint2D();
             }                
@@ -176,6 +185,7 @@ namespace ThMEPHVAC.Model
             var list = new TypedValueList();
             foreach (var g_id in g_ids)
             {
+
                 list = g_id.GetXData(reg_app_name);
                 if (list == null)
                     continue;

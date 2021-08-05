@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
 
@@ -10,20 +9,24 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsRecoder
     {
-        public static void Attach_start_param( ObjectId id, 
-                                               Point2d start_point,
-                                               DuctPortsParam param)
+        public static void Attach_start_param(ObjectId id, DuctPortsParam param)
         {
             using (var acadDb = AcadDatabase.Active())
             {
                 var value_list = new TypedValueList
                 {
-                    { (int)DxfCode.ExtendedDataAsciiString, param.scale},
-                    { (int)DxfCode.ExtendedDataAsciiString, param.scenario},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.is_redraw},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.port_num},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.air_speed},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.air_volume},
                     { (int)DxfCode.ExtendedDataAsciiString, param.elevation},
                     { (int)DxfCode.ExtendedDataAsciiString, param.main_height},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.scale},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.scenario},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.port_size},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.port_name},
                     { (int)DxfCode.ExtendedDataAsciiString, param.port_range},
-                    { (int)DxfCode.ExtendedDataAsciiString, start_point.ToString()}
+                    { (int)DxfCode.ExtendedDataAsciiString, param.in_duct_size}
                 };
                 id.AddXData(ThHvacCommon.RegAppName_Duct_Param, value_list);
             }

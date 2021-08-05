@@ -20,7 +20,7 @@ namespace ThMEPHVAC.Model
                 foreach (var g in groups)
                 {
                     var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_Duct_Info);
-                    if (list != null)
+                    if (g.NumEntities != 0 && list != null)
                     {
                         var poly = new Polyline();
                         Get_group_bound(g, out Point3d low_left_p, out Point3d high_right_p);
@@ -196,7 +196,6 @@ namespace ThMEPHVAC.Model
             }
             return rst;
         }
-
         public static Dictionary<string, Point3d> GetPortExtsOfGroup(ObjectId groupId)
         {
             var rst = new Dictionary<string, Point3d>();

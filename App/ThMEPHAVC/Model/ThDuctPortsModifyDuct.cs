@@ -264,8 +264,11 @@ namespace ThMEPHVAC.Model
                                        string modify_duct_width, 
                                        ref Point2d detect_p)
         {
-            var idx = reducing.port_widths[0] > reducing.port_widths[1] ? 0 : 1;
-            Search_2_port_neig_duct(reducing.pos[idx], out int connect_duct_idx);
+            var p = reducing.pos[0].GetDistanceTo(detect_p) > reducing.pos[1].GetDistanceTo(detect_p) ?
+                    reducing.pos[0] : reducing.pos[1];
+            Search_2_port_neig_duct(p, out int connect_duct_idx);
+            if (connect_duct_idx < 0)
+                return;
             var duct = ducts[connect_duct_idx];
             var modify_width = ThDuctPortsService.Get_width(modify_duct_width);
             if (modify_duct_width == duct.duct_size)
@@ -285,7 +288,7 @@ namespace ThMEPHVAC.Model
             else
             {
                 Create_elbow_by_elbow(false, modify_duct_width, elbow, ref detect_p, out _, out double _, out Point2d elbow_other_port);
-                Create_reducing_by_reducing(reducing, elbow_other_port, duct.duct_size, modify_width);
+                Create_reducing_by_reducing(reducing, elbow_other_port, p, duct.duct_size, modify_width);
             }
         }
         private void Proc_elbow_shrink(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
@@ -328,14 +331,15 @@ namespace ThMEPHVAC.Model
         }
         private void Create_reducing_by_reducing(Entity_modify_param reducing, 
                                                  Point2d elbow_other_port,
+                                                 Point2d reducing_other_port,
                                                  string conn_duct_size,
                                                  double modify_width)
         {
-            var dis1 = reducing.pos[0].GetDistanceTo(elbow_other_port);
-            var dis2 = reducing.pos[1].GetDistanceTo(elbow_other_port);
-            var p = dis1 > dis2 ? reducing.pos[0] : reducing.pos[1];
+            //var dis1 = reducing.pos[0].GetDistanceTo(elbow_other_port);
+            //var dis2 = reducing.pos[1].GetDistanceTo(elbow_other_port);
+            //var p = dis1 > dis2 ? reducing.pos[0] : reducing.pos[1];
             var conn_width = ThDuctPortsService.Get_width(conn_duct_size);
-            var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(p, elbow_other_port, conn_width, modify_width);
+            var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(reducing_other_port, elbow_other_port, conn_width, modify_width);
             Update_reducing(reducing_geo);
             ThDuctPortsDrawService.Clear_graph(reducing.handle);
         }
