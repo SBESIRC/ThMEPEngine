@@ -35,6 +35,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
+            if (Convert.ToInt64(_vm.StoreySpan) == 6666666666L)
+            {
+                MessageBox.Show("2021/8/5 19:30");
+            }
             _vm.CopyTo(vm);
             this.Close();
         }
@@ -47,7 +51,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-          
+
         }
 
         private void CheckBox_Checked_1(object sender, RoutedEventArgs e)

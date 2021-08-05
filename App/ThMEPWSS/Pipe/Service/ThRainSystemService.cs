@@ -730,6 +730,12 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         reg(fs, bd, pipes);
                         return;
                     }
+                    if(name is AMBIDEXTROUSNESS || name.Contains(AMBIDEXTROUSNESS))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
                 }
             }
             var btr = adb.Element<BlockTableRecord>(br.BlockTableRecord);
@@ -5788,6 +5794,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string THESAURUSALWAYS = "X1";
         public const string THESAURUSAMALGAMATE = "X2";
         public const string THESAURUSAMATEUR = "ZP";
+        public const string AMBIDEXTROUSNESS = "A$C6BDE4816";
         public static bool IsRainLabel(string label)
         {
             if (label == null) return THESAURUSABDOMEN;
