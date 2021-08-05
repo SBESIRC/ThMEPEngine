@@ -21,6 +21,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Linq2Acad;
 using ThCADExtension;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using ThMEPWSS.JsonExtensionsNs;
 
 namespace ThMEPWSS.Uitl
 {
@@ -510,6 +511,22 @@ namespace ThMEPWSS.Uitl
             if (ok) return new GRect(minX, minY, maxX, maxY);
             return default;
         }
+        public GRect TransformBy(Matrix3d matrix)
+        {
+            if (this.IsNull) return this;
+            if (matrix == Matrix3d.Identity) return this;
+            var pl = this.ToCadPolyline();
+            pl.TransformBy(matrix);
+            return pl.Bounds.ToGRect();
+        }
+        public GRect TransformBy(ref Matrix3d matrix)
+        {
+            if (this.IsNull) return this;
+            if (matrix == Matrix3d.Identity) return this;
+            var pl = this.ToCadPolyline();
+            pl.TransformBy(matrix);
+            return pl.Bounds.ToGRect();
+        }
     }
     public struct GLineSegment
     {
@@ -565,7 +582,7 @@ namespace ThMEPWSS.Uitl
         }
         public GLineSegment(Point3d point1, Point3d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
         public GLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
-        public bool IsValid => !(X1 == X2 && Y1 == Y2);
+        public bool IsValid => !(X1 == X2 && Y1 == Y2) && !double.IsNaN(X1) && !double.IsNaN(X2) && !double.IsNaN(Y1) && !double.IsNaN(Y2);
         public double X1 { get; }
         public double Y1 { get; }
         public double X2 { get; }

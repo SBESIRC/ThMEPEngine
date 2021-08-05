@@ -1259,6 +1259,26 @@ namespace ThMEPWSS.Assistant
                 DrawUtils.Dispose();
             }
         }
+
+        HashSet<string> visibleLayers = new HashSet<string>();
+        HashSet<string> invisibleLayers = new HashSet<string>();
+        public bool IsLayerVisible(string layer)
+        {
+            if (visibleLayers.Contains(layer)) return true;
+            if (invisibleLayers.Contains(layer)) return false;
+            var ly = adb.Layers.ElementOrDefault(layer);
+            if (ly != null && !ly.IsFrozen && !ly.IsOff && !ly.IsHidden)
+            {
+                visibleLayers.Add(layer);
+                return true;
+            }
+            else
+            {
+                invisibleLayers.Add(layer);
+                return false;
+            }
+        }
+
     }
 
     public class BlockReferenceVisitor : ThDistributionElementExtractionVisitor
@@ -1464,7 +1484,14 @@ namespace ThMEPWSS.Assistant
                 SetTextStyle(t, textStyleName);
             });
         }
-
+        public static bool IsLayerVisible(Entity e)
+        {
+            return IsLayerVisible(e.Layer);
+        }
+        public static bool IsLayerVisible(string layer)
+        {
+            return _DrawingTransaction.Current.IsLayerVisible(layer);
+        }
         public static void LayerThreeAxes(List<string> layers)
         {
             static void EnsureLayerOn(string layerName)
