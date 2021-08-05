@@ -106,16 +106,27 @@ namespace ThMEPElectrical.DCL.Data
         /// 将第二层轮廓线复制进第一层。暂时不处理洞口
         /// </summary>
         /// <param name="storeyInfos"></param>
-        public void MoveSecondToFirst(List<ThEStoreyInfo> storeyInfos)
+        public void MoveSecondToFirst(List<ThEStoreyInfo> storeyInfos, Dictionary<string, string> map)
         {
-            //
+            //假定包含真实的1楼和2楼对应的值必定为1F和2F
             if (OuterArchOutlineIdDic.Count == 0)
                 return;
-            if(!(storeyInfos.Where(o => IsContains(o.StoreyNumber, "1F")).Any() &&
-                storeyInfos.Where(o => IsContains(o.StoreyNumber, "2F")).Any()))
+            bool flag1, flag2;
+            flag1 = flag2 = false;
+            foreach(var item in map)
             {
-                return; 
+                if (item.Value == "1F" && item.Key.Contains("1F"))
+                    flag1 = true;
+                if (item.Value == "2F" && item.Key.Contains("2F"))
+                    flag2 = true;
             }
+            if (!(flag1 && flag2))
+                return;
+            //if(!(storeyInfos.Where(o => IsContains(o.StoreyNumber, "1F")).Any() &&
+            //    storeyInfos.Where(o => IsContains(o.StoreyNumber, "2F")).Any()))
+            //{
+            //    return; 
+            //}
             var firstStorey = storeyInfos.Where(o => IsContains(o.StoreyNumber, "1F")).First();
             var secondStorey = storeyInfos.Where(o => IsContains(o.StoreyNumber, "2F")).First();
             var firtbasepoint = firstStorey.BasePoint.Split(',');

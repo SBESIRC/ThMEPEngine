@@ -66,7 +66,22 @@ namespace ThMEPEngineCore.Service
         {
             var results = new DBObjectCollection();
             var lines = new List<Line>();
-            _polygons.Cast<Polyline>().ForEach(o => lines.AddRange(o.ToLines()));
+            _polygons.Cast<Entity>().ForEach(e =>
+            {
+                if (e is Polyline polyline)
+                {
+                    lines.AddRange(polyline.ToLines());
+                }
+                else if (e is MPolygon mPolygon)
+                {
+                    var polys = mPolygon.Loops();
+                    polys.ForEach(p => lines.AddRange(p.ToLines()));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            });
             lines = lines.Select(o => o.ExtendLine(ExtendLineLength)).ToList();
             return lines.ToCollection().Polygons();
         }
@@ -159,7 +174,9 @@ namespace ThMEPEngineCore.Service
         public readonly DBObjectCollection _windows;
         public readonly DBObjectCollection _cornices;
         public readonly DBObjectCollection _slab;
-        public Model1Data(Database database, Point3dCollection polygon) : base(database,polygon)
+        public readonly DBObjectCollection _beam;
+        public ThBeamConnectRecogitionEngine BeamEngine { get; private set; }
+        public Model1Data(Database database, Point3dCollection polygon)
         {
             _archWall = new DBObjectCollection();
             var archWallEngine = new ThDB3ArchWallRecognitionEngine();
@@ -181,6 +198,11 @@ namespace ThMEPEngineCore.Service
             var slabEngine = new ThDB3SlabRecognitionEngine();
             slabEngine.Recognize(database, polygon);
             _slab = slabEngine.Geometries;
+            _beam = new DBObjectCollection();
+            BeamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
+            _beam = BeamEngine.BeamEngine.Geometries;
+            _shearWalls = BeamEngine.ShearWallEngine.Geometries;
+            _columns = BeamEngine.ColumnEngine.Geometries;
         }
 
         public override DBObjectCollection MergeData()
@@ -193,6 +215,7 @@ namespace ThMEPEngineCore.Service
             _windows.Cast<Entity>().ForEach(o => results.Add(o));
             _cornices.Cast<Entity>().ForEach(o => results.Add(o));
             _slab.Cast<Entity>().ForEach(o => results.Add(o));
+            _beam.Cast<Entity>().ForEach(o => results.Add(o));
             return results;
         }
     }

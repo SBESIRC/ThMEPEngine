@@ -43,8 +43,8 @@ namespace ThMEPElectrical.DCL.Data
         private void Sort()
         {
             //ToDO
-            Storeys = Storeys.Where(o => !(o.StoreyNumber.Contains('B'))).ToList();
-            Storeys.OrderBy(o => double.Parse(o.StoreyNumber));
+            Storeys = Storeys.Where(o => !(o.StoreyNumber.Contains('-') || o.StoreyNumber=="")).ToList();
+            Storeys = Storeys.OrderBy(o => double.Parse(o.StoreyNumber.Split(',')[0])).ToList();
             for (int i = 1; i <= Storeys.Count; i++)
             {
                 if (Storeys[i - 1].StoreyNumber != "")
