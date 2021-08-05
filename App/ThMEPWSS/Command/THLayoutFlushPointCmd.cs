@@ -143,7 +143,8 @@ namespace ThMEPWSS.Command
             // 停车区域的点位可以保护其他空间
             washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
 
-            //             
+            // 设置点位布置的位置
+            washPara.locate_mode = ThWashLocateMode.Interal;
             return washPara;
         }
 #else
