@@ -129,6 +129,27 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             polyline.Dispose();
             return isObstacle;
         }
+        public bool IsRoomWell(Point cell)
+        {
+            Point3d cellPt = mapHelper.TransformMapPoint(cell);
+            foreach (var room in rooms)
+            {
+                if (room is Line)
+                {
+                    var l = room as Line;
+                    if (l.Length < 10.0)
+                    {
+                        continue;
+                    }
+                    var frame = l.Buffer(300);
+                    if(frame.Contains(cellPt))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         /// <summary>
         /// 计算障碍点位信息

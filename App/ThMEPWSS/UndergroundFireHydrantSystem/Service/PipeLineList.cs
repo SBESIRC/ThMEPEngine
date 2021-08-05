@@ -60,6 +60,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
          public static void PipeLineAutoConnect(ref List<Line> lineList)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
+            lineList = CleanLaneLines3(lineList);
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -333,7 +334,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 if (alreadyContains) continue;
                 
-                var colinerSegs = lineSegs.Where(l =>l.IsParallelTo(tmpLineSeg,new Tolerance(0.01,0.01)) && l.IsColinearTo(tmpLineSeg, new Tolerance(0.1, 0))).ToHashSet();
+                var colinerSegs = lineSegs.Where(l =>l.IsParallelTo(tmpLineSeg,new Tolerance(0.001,0.001))).ToHashSet();
                 lineSegGroups.Add(colinerSegs);
                 lineSegs = lineSegs.Except(colinerSegs).ToList();
             }
@@ -404,7 +405,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         private static bool IsOverlapLine(LineSegment2d firLine, LineSegment2d secLine)
         {
-            var overlapedSeg = firLine.Overlap(secLine,new Tolerance(0.1,0.1));
+            var overlapedSeg = firLine.Overlap(secLine,new Tolerance(0.01,0.01));
             if (overlapedSeg != null)
             {
                 return true;
@@ -412,10 +413,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             else
             {
                 var ptSet = new HashSet<Point3dEx>();
-                ptSet.Add(new Point3dEx(firLine.StartPoint.X, firLine.StartPoint.Y, 0.0, 1E-2));
-                ptSet.Add(new Point3dEx(firLine.EndPoint.X, firLine.EndPoint.Y, 0.0, 1E-2));
-                ptSet.Add(new Point3dEx(secLine.StartPoint.X, secLine.StartPoint.Y, 0.0, 1E-2));
-                ptSet.Add(new Point3dEx(secLine.EndPoint.X, secLine.EndPoint.Y, 0.0, 1E-2));
+                var tol = 1E-2;
+                ptSet.Add(new Point3dEx(firLine.StartPoint.X, firLine.StartPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(firLine.EndPoint.X, firLine.EndPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(secLine.StartPoint.X, secLine.StartPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(secLine.EndPoint.X, secLine.EndPoint.Y, 0.0, tol));
                 if(ptSet.Count() == 3)
                 {
                     return true;

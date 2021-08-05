@@ -29,7 +29,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public void Dispose()
         {
         }
-        public void Execute_test()
+        public void Execute1()
         {
             ThMEPWSS.Common.Utils.FocusMainWindow();
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -58,7 +58,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
                 foreach (var l in loopLines)
                 {
-                    l.ColorIndex = 4;
+                    l.ColorIndex = 4; 
                     Draw.AddToCurrentSpace(l);
                 }
 

@@ -142,14 +142,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
                 PipeLineList.PipeLineAutoConnect(ref lineList);
-
+                
+                pointList.Clear();
+                var starPts = lineList.Select(l=> new Point3dEx(l.StartPoint)).ToList();
+                var endPts = lineList.Select(l => new Point3dEx(l.EndPoint)).ToList();
+                pointList.AddRange(starPts);
+                pointList.AddRange(endPts);
                 //var valveEngine = new ThExtractValveService();//提取蝶阀
                 //var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
                 //fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
                 //var valveList = new List<Line>();
                 //PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);
 
-                PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断
+                PipeLine.PipeLineSplit(ref lineList, pointList,1.0,2.0);//管线打断
 
                 fireHydrantSysIn.ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
                 foreach (var L in lineList)

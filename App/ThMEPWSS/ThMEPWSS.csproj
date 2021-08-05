@@ -35,8 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
-
-
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />
@@ -67,6 +65,7 @@
     <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
     <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
+    <Compile Include="HydrantConnectPipe\Command\ThHydrantConnectPipeAdjustPath.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThNonBlockElementExtractor.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThBuildRoom.cs" />

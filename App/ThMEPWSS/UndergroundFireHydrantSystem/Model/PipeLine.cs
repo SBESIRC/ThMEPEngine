@@ -198,14 +198,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return new Point3dCollection(pts);
         }
 
-        public static void PipeLineSplit(ref List<Line> pipeLineList, List<Point3dEx> pointList)
+        public static void PipeLineSplit(ref List<Line> pipeLineList, List<Point3dEx> pointList, double toleranceForPointIsLineTerm = 10, double toleranceForPointOnLine = 1.0)
         {
             foreach (var pt in pointList)//管线打断
             {
-                var line = PointCompute.PointInLine(pt._pt, pipeLineList);
+                var line = PointCompute.PointInLine(pt._pt, pipeLineList, toleranceForPointIsLineTerm, toleranceForPointOnLine);
                 if (!PointCompute.IsNullLine(line))
                 {
-                    if (!PointCompute.PointIsLineTerm(pt._pt, line))
+                    if (!PointCompute.PointIsLineTerm(pt._pt, line, toleranceForPointIsLineTerm))
                     {
                         pipeLineList.Remove(line);
                         var lList = PointCompute.CreateNewLine(pt._pt, line);

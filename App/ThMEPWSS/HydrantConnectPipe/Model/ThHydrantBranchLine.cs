@@ -53,6 +53,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             var lines = BranchPolyline.ToLines();
             foreach (var line in lines)
             {
+                line.ColorIndex = 5;
                 line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
                 acadDatabase.CurrentSpace.Add(line);
             }

@@ -18,10 +18,12 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
     {
         Map<T> map;
         public ICostGetter costGetter { set; get; }
+        public AdjustAStarPath PathAdjuster { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
         public AStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800)
         {
+
             map = new Map<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
 
             if (typeof(T) == typeof(Line))
@@ -32,6 +34,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             {
                 costGetter = new ToPointCostGetter();
             }
+            PathAdjuster = new AdjustAStarPath();
         }
 
         /// <summary>
@@ -77,8 +80,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             var resPt = GetPath(lastNode);
 
             //调整路径
-            AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
-            resPt = adjustAStarPath.AdjustPath<T>(resPt, routePlanData.CellMap);
+//            AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
+            resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);
             return path;

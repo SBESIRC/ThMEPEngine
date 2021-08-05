@@ -71,11 +71,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             //    room.ColorIndex = 6;
             //    Draw.AddToCurrentSpace(room);
             //}
-            //foreach (var line in DicTermLines)
-            //{
-            //    line.Key.ColorIndex = 4;
-            //    Draw.AddToCurrentSpace(line.Key);
-            //}
+            foreach (var line in DicTermLines)
+            {
+                line.Key.ColorIndex = 4;
+                Draw.AddToCurrentSpace(line.Key);
+            }
             //foreach (var hole in ObstacleHoles)
             //{
             //    hole.ColorIndex = 3;
@@ -534,7 +534,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
             AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 500, 300, 50);
             var costGetter = new ToLineCostGetterEx();
+            var pathAdjuster = new ThHydrantConnectPipeAdjustPath();
+            pathAdjuster.Rooms = rooms;
             aStarRoute.costGetter = costGetter;
+            aStarRoute.PathAdjuster = pathAdjuster;
             //----设置障碍物
             aStarRoute.SetObstacle(holes);
             //----设置房间

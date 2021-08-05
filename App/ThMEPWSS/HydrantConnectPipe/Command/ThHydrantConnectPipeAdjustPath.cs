@@ -4,14 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
 
-namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
+namespace ThMEPWSS.HydrantConnectPipe.Command
 {
-    public class AdjustAStarPath
+    public class ThHydrantConnectPipeAdjustPath : AdjustAStarPath
     {
-        virtual public List<Point> AdjustPath<T>(List<Point> path, Map<T> map)
+        public List<Line> Rooms { set; private get; }
+        override public List<Point> AdjustPath<T>(List<Point> path, Map<T> map)
         {
             if (path == null || path.Count <= 1)
             {
@@ -28,7 +30,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="inflectionPoints"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        virtual protected List<Point> ReduceInflectionPoint<T>(List<Point> inflectionPoints, Map<T> map)
+        override protected List<Point> ReduceInflectionPoint<T>(List<Point> inflectionPoints, Map<T> map)
         {
             List<Point> path = new List<Point>();
             Point lastPt = inflectionPoints.Last();
@@ -73,9 +75,38 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="firPt"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        virtual protected bool AdjustInflectionPoint<T>(List<Point> inflectionPoints, Point firPt, Map<T> map, List<Point> midPts, out Point useNextPt)
+        override protected bool AdjustInflectionPoint<T>(List<Point> inflectionPoints, Point firPt, Map<T> map, List<Point> midPts, out Point useNextPt)
         {
             useNextPt = inflectionPoints.First();
+            //判断是否穿墙
+            var midPt = midPts.First();
+            if(firPt.X == midPt.X)
+            {
+                int xValue = firPt.X;
+                int yDir = firPt.Y - midPt.Y < 0 ? 1 : -1;
+                int yLength = Math.Abs(firPt.Y - midPt.Y);
+                for (int i = 1; i <= yLength; i++)
+                {
+                    var pt = new Point(xValue, firPt.Y + yDir * i);
+
+                    if (map.IsRoomWell(pt))
+                        return false;
+                }
+            }
+            else if(firPt.Y == midPt.Y)
+            {
+                int yValue = firPt.Y;
+                int xDir = firPt.X - midPt.X < 0 ? 1 : -1;
+                int xLength = Math.Abs(firPt.X - midPt.X);
+                for (int i = 1; i <= xLength; i++)
+                {
+                    var pt = new Point(firPt.X + xDir * i, yValue);
+
+                    if (map.IsRoomWell(pt))
+                        return false;
+                }
+            }
+
             foreach (var nextPt in inflectionPoints)
             {
                 if (CheckAdjustPoint<T>(firPt, midPts, nextPt, map))
@@ -96,7 +127,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="nextPt"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        virtual protected bool CheckAdjustPoint<T>(Point firPt, List<Point> midPts, Point nextPt, Map<T> map)
+        override protected bool CheckAdjustPoint<T>(Point firPt, List<Point> midPts, Point nextPt, Map<T> map)
         {
             int yValue = midPts.Where(x => x.Y == firPt.Y).Count() == 0 ? firPt.Y : nextPt.Y;
             int xDir = firPt.X - nextPt.X < 0 ? 1 : -1;
@@ -118,7 +149,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 if (map.IsObstacle(pt))
                     return false;
             }
-
             return true;
         }
     }
