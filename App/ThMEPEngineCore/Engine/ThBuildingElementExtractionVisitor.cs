@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
         }
         public virtual bool IsBuildElementBlockReference(BlockReference blockReference)
         {
-            return blockReference.BlockTableRecord.IsValid;
+            return false;
         }
     }
 }
