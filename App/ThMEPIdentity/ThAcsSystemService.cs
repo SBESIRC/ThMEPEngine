@@ -2,7 +2,7 @@
 using AcsCommon;
 using AcsConnector;
 
-namespace ThAnalytics
+namespace ThMEPIdentity
 {
     public class ThAcsSystemService
     {
@@ -61,6 +61,16 @@ namespace ThAnalytics
         /// 项目编号
         /// </summary>
         public string ProjectNumber => Response.ContainsName("PrjNo") ? Response["PrjNo"] : string.Empty;
+
+        /// <summary>
+        /// 专业编号
+        /// </summary>
+        public string MajorCode => Response.ContainsName("MajorCode") ? Response["MajorCode"] : string.Empty;
+
+        /// <summary>
+        /// 登录状态
+        /// </summary>
+        public bool IsLogged => !string.IsNullOrEmpty(UserId);
 
         private NameValueString ACSQM_GETUSER()
         {

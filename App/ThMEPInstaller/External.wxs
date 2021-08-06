@@ -5,6 +5,9 @@
         <?if $(var.Configuration) = Debug ?>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
             <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" Guid="{219401F8-980F-4268-B8F8-7C9758B879AD}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Debug" Guid="{96A0549E-DEB1-43AA-B852-44475ADC8E74}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.dll" />
             </Component>
@@ -53,6 +56,9 @@
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" Guid="{96E812A6-8965-4A38-AC5C-43F43163EDEA}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" Guid="{032A4C04-801A-4BE4-B320-1F69B54CF725}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.dll" />
             </Component>
@@ -101,6 +107,9 @@
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" Guid="{F87274EE-C61F-4A74-BF31-6E30C9397133}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Debug" Guid="{7512B50D-5B5E-410D-A455-878DAC901823}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NetTopologySuite.dll" />
             </Component>
@@ -150,6 +159,9 @@
         <?elseif $(var.Configuration) = Release ?>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
             <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" Guid="{B232B18A-A021-4987-A8DA-45481E2116FF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" Guid="{EC1C4E50-FB56-41DD-8B1D-3272B0901BAD}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.dll" />
             </Component>
@@ -198,6 +210,9 @@
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" Guid="{4EBDB786-B7C7-4619-BC68-EA67A1D4DF9F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" Guid="{96FB0AAE-8BE9-4336-B3BD-6C77A15DF5DA}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.dll" />
             </Component>
@@ -246,6 +261,9 @@
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" Guid="{A152E4EC-8C71-475E-B1D1-1B359E743813}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\YamlDotNet.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Release" Guid="{E8F86512-91E7-4586-945A-F28D513F50F9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NetTopologySuite.dll" />
             </Component>
@@ -343,6 +361,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -390,6 +411,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_SharpZipLib_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_SharpZipLib_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_SharpZipLib_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

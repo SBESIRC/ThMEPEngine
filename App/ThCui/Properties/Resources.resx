@@ -121,9 +121,6 @@
   <data name="profile_ribbon_architecture" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\profile_ribbon_architecture.yml;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="profile_ribbon_construction" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\profile_ribbon_construction.yml;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="profile_ribbon_electrical" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\profile_ribbon_electrical.yml;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

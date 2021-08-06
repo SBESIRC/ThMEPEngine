@@ -1,8 +1,12 @@
 ﻿using System;
+using AcHelper;
 using System.IO;
 using ThCADExtension;
-using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.ApplicationServices;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPIdentity;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -32,8 +36,8 @@ namespace TianHua.AutoCAD.ThCui
             ////复写打印机配置文件到Roaming目录
             //OverwritePlotConfigurations();
 
-            //// CUI界面更新
-            //AcadApp.Idle += Application_OnIdle_Ribbon;
+            // CUI界面更新
+            AcadApp.Idle += Application_OnIdle_Ribbon;
             //AcadApp.Idle += Application_OnIdle_Menubar;
             //AcadApp.Idle += Application_OnIdle_Toolbar;
 
@@ -49,8 +53,8 @@ namespace TianHua.AutoCAD.ThCui
             //    RibbonServices.RibbonPaletteSet.StateChanged += RibbonPaletteSet_StateChanged;
             //}
 
-            ////注册DocumentCollection事件
-            ////AcadApp.DocumentManager.DocumentLockModeChanged += DocCollEvent_DocumentLockModeChanged_Handler;
+            //注册DocumentCollection事件
+            //AcadApp.DocumentManager.DocumentLockModeChanged += DocCollEvent_DocumentLockModeChanged_Handler;
             ////注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged += SystemVariableChangedHandler;
         }
@@ -90,12 +94,6 @@ namespace TianHua.AutoCAD.ThCui
             //AcadApp.SystemVariableChanged -= SystemVariableChangedHandler;
         }
 
-        [CommandMethod("TIANHUACAD", "THHLP", CommandFlags.Modal)]
-        public void ThHelp()
-        {
-            Process.Start(ThCADCommon.OnlineHelpUrl);
-        }
-
 #if DEBUG
         [CommandMethod("TIANHUACAD", "THDUMPCUI", CommandFlags.Modal)]
         public void ThDumpCui()
@@ -103,6 +101,53 @@ namespace TianHua.AutoCAD.ThCui
             CreatePartialCui();
         }
 #endif
+
+        [CommandMethod("TIANHUACAD", "THMEPPROFILE", CommandFlags.Modal)]
+        public void ThMEPProfile()
+        {
+            // 指定专业
+            PromptKeywordOptions keywordOptions = new PromptKeywordOptions("\n请指定专业：")
+            {
+                AllowNone = true
+            };
+            keywordOptions.Keywords.Add("ARCHITECTURE", "ARCHITECTURE", "建筑(A)");
+            keywordOptions.Keywords.Add("STRUCTURE", "STRUCTURE", "结构(S)");
+            keywordOptions.Keywords.Add("HAVC", "HAVC", "暖通(H)");
+            keywordOptions.Keywords.Add("ELECTRICAL", "ELECTRICAL", "电气(E)");
+            keywordOptions.Keywords.Add("WSS", "WSS", "给排水(W)");
+            keywordOptions.Keywords.Default = "ARCHITECTURE";
+            PromptResult result = Active.Editor.GetKeywords(keywordOptions);
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
+
+            switch (result.StringResult)
+            {
+                case "ARCHITECTURE":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("A");
+                    }
+                    break;
+                case "HAVC":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("H");
+                    }
+                    break;
+                case "ELECTRICAL":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("E");
+                    }
+                    break;
+                case "WSS":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                    }
+                    break;
+                default:
+                    return;
+            }
+        }
 
         private void LoadPartialCui(bool bLoad = true)
         {
@@ -121,30 +166,27 @@ namespace TianHua.AutoCAD.ThCui
             partialCui.Create(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ThCADCommon.CuixFile), ThCADCommon.CuixMenuGroup);
         }
 
-        //private void Application_OnIdle_Cmd_Veto(object sender, EventArgs e)
-        //{
-        //    AcadApp.Idle -= Application_OnIdle_Cmd_Veto;
+        private void Application_OnIdle_Cmd_Veto(object sender, EventArgs e)
+        {
+            AcadApp.Idle -= Application_OnIdle_Cmd_Veto;
 
-        //    // 显示登陆提示
-        //    Active.Editor.WriteLine("请先登陆后再使用天华CAD效率工具！");
+            // 显示登陆提示
+            Active.Editor.WriteLine("请先登陆协同后再使用天华MEP工具集！");
+        }
 
-        //    // 运行登陆命令
-        //    ThCuiCmdHandler.ExecuteFromCommandLine(ThCuiCommon.CMD_THLOGIN_GLOBAL_NAME);
-        //}
+        private void Application_OnIdle_Ribbon(object sender, EventArgs e)
+        {
+            // 使用AutoCAD Windows runtime API来配置自定义Tab中的Panels
+            // 需要保证Ribbon自定义Tab是存在的，并且自定义Tab中的Panels也是存在的。
+            if (ThRibbonUtils.Tab != null && ThRibbonUtils.Tab.Panels.Count != 0)
+            {
+                // 配置完成后就不需要Idle事件
+                AcadApp.Idle -= Application_OnIdle_Ribbon;
 
-        //private void Application_OnIdle_Ribbon(object sender, EventArgs e)
-        //{
-        //    // 使用AutoCAD Windows runtime API来配置自定义Tab中的Panels
-        //    // 需要保证Ribbon自定义Tab是存在的，并且自定义Tab中的Panels也是存在的。
-        //    if (ThRibbonUtils.Tab != null && ThRibbonUtils.Tab.Panels.Count != 0)
-        //    {
-        //        // 配置完成后就不需要Idle事件
-        //        AcadApp.Idle -= Application_OnIdle_Ribbon;
-
-        //        // 更新Ribbon
-        //        UpdateRibbonUserInterface();
-        //    }
-        //}
+                // 更新Ribbon
+                UpdateRibbonUserInterface();
+            }
+        }
 
         //private void Application_OnIdle_Menubar(object sender, EventArgs e)
         //{
@@ -170,17 +212,18 @@ namespace TianHua.AutoCAD.ThCui
         //    }
         //}
 
-        ///// <summary>
-        ///// 更新当前的Ribbon界面
-        ///// </summary>
-        //private void UpdateRibbonUserInterface()
-        //{
-        //    // 根据当前的Profile配置Panels
-        //    ThRibbonUtils.ConfigPanelsWithCurrentProfile();
+        /// <summary>
+        /// 更新当前的Ribbon界面
+        /// </summary>
+        private void UpdateRibbonUserInterface()
+        {
+            // 根据当前的登录信息配置Panels
+            //ThRibbonUtils.ConfigPanelsWithCurrentUser();
 
-        //    // 根据当前的登录信息配置Panels
-        //    ThRibbonUtils.ConfigPanelsWithCurrentUser();
-        //}
+            // 根据当前的Profile配置Panels
+            ThRibbonUtils.ConfigPanelsWithProfile("W");
+            //ThRibbonUtils.ConfigPanelsWithCurrentProfile();
+        }
 
         //private void UpdateToolbarUserInterface()
         //{
@@ -227,49 +270,50 @@ namespace TianHua.AutoCAD.ThCui
         //    }
         //}
 
-        //private void DocCollEvent_DocumentLockModeChanged_Handler(object sender, DocumentLockModeChangedEventArgs e)
-        //{
-        //    if (!e.GlobalCommandName.StartsWith("#"))
-        //    {
-        //        // Lock状态，可以看做命令开始状态
-        //        var cmdName = e.GlobalCommandName;
+        private void DocCollEvent_DocumentLockModeChanged_Handler(object sender, DocumentLockModeChangedEventArgs e)
+        {
+            if (!e.GlobalCommandName.StartsWith("#"))
+            {
+                // Lock状态，可以看做命令开始状态
+                var cmdName = e.GlobalCommandName;
 
-        //        // 过滤""命令
-        //        // 通常发生在需要“显式”锁文档的场景中
-        //        if (cmdName == "")
-        //        {
-        //            return;
-        //        }
+                // 过滤""命令
+                // 通常发生在需要“显式”锁文档的场景中
+                if (cmdName == "")
+                {
+                    return;
+                }
 
-        //        // 天华Lisp命令都是以“TH”开头
-        //        // 特殊情况（C:THZ0）
-        //        bool bVeto = false;
-        //        if (Regex.Match(cmdName, @"^\([cC]:THZ0\)$").Success)
-        //        {
-        //            bVeto = !ThIdentityService.IsLogged();
-        //        }
+                //// 天华Lisp命令都是以“TH”开头
+                //// 特殊情况（C:THZ0）
+                //bool bVeto = false;
+                //if (Regex.Match(cmdName, @"^\([cC]:THZ0\)$").Success)
+                //{
+                //    bVeto = !ThAcsSystemService.Instance.IsLogged;
+                //}
 
-        //        // 正常情况（C:THXXX）
-        //        if (Regex.Match(cmdName, @"^\([cC]:TH[A-Z]{3,}\)$").Success)
-        //        {
-        //            bVeto = !ThIdentityService.IsLogged();
-        //        }
+                //// 正常情况（C:THXXX）
+                //if (Regex.Match(cmdName, @"^\([cC]:TH[A-Z]{3,}\)$").Success)
+                //{
+                //    bVeto = !ThAcsSystemService.Instance.IsLogged;
+                //}
 
-        //        // 天华ARX命令
-        //        if (thcommanfunctiondict.ContainsKey(cmdName))
-        //        {
-        //            // 在未登陆的情况下，不能运行
-        //            bVeto = !ThIdentityService.IsLogged();
-        //        }
+                // 天华ARX命令
+                bool bVeto = false;
+                if (ThMEPCmdService.Instance.IsTHCommand(cmdName))
+                {
+                   // 在未登陆的情况下，不能运行
+                   bVeto = !ThAcsSystemService.Instance.IsLogged;
+                }
 
-        //        // 
-        //        if (bVeto)
-        //        {
-        //            e.Veto();
-        //            AcadApp.Idle += Application_OnIdle_Cmd_Veto;
-        //        }
-        //    }
-        //}
+                // Veto
+                if (bVeto)
+                {
+                    e.Veto();
+                    AcadApp.Idle += Application_OnIdle_Cmd_Veto;
+                }
+            }
+        }
 
         //private void SystemVariableChangedHandler(object sender, SystemVariableChangedEventArgs e)
         //{

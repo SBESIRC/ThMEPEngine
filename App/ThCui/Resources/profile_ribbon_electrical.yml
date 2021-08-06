@@ -1,6 +1,6 @@
 ---
-name: "ThRibbonBar"
-title: "天华效率工具"
+name: "ThMEPRibbonBar"
+title: "天华机电工具集"
 panels:
   - UID: "pnlHelp"
     name: "Help"
@@ -10,185 +10,145 @@ panels:
         items:
           - text: "专业切换"
             attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "帮助文档"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "检查更新"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "反馈意见"
-            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlSettings"
-    name: "Settings"
-    title: "设置"
+  - UID: "pnlWGROUNDPLAN"
+    name: "WGROUNDPLAN"
+    title: "地上平面图"
     items:
-        - text: "快捷键"
+        - text: "住宅排水雨水"
+          attributes: { "IsVisible": false, "IsEnabled": false }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWGROUNDSYSTEM"
+    name: "WGROUNDSYSTEM"
+    title: "地上系统图"
+    items:
+        - text: "给水"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlCheckTool"
-    name: "CheckTool"
-    title: "校核审查"
+        - text: "雨水"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "排水"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "消火栓"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWUNDERGROUNDPLAN"
+    name: "WUNDERGROUNDPLAN"
+    title: "地下平面图"
     items:
-      - text: "柱校核\r\n（公测）"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlSitePlanTool"
-    name: "SitePlanTool"
-    title: "一键彩总"
+        - text: "消防喷头"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "冲洗点位"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "潜水泵"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "消火栓"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWUNDERGROUNDSYSTEM"
+    name: "WUNDERGROUNDSYSTEM"
+    title: "地下系统图"
     items:
-      - text: "一键生成"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "局部刷新"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "映射管理"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "常用设置"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "生成查看"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlStatistic"
-    name: "Statistic"
-    title: "计算工具"
+        - text: "消火栓"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWDETAILAXONOMETRY"
+    name: "WDETAILAXONOMETRY"
+    title: "大样轴侧图"
     items:
-      - text: "天华单体\r\n规整"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "天华总平\r\n规整"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "单体面积\r\n汇总"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "综合经济\r\n技术指标表"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "防火分区\r\n疏散表"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "房间面积\r\n框线"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlDrawTool"
-    name: "DrawTool"
-    title: "绘制修改"
-    rowPanels:
-      - text: ""
-        items:
-          - text: "车位编号"
-            attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "快选命令集"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "对齐命令集"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "天华复制"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "批量缩放"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "尺寸避让"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "天华格式刷"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "版次信息修改"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "管线断线"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlPlotTool"
-    name: "PlotTool"
-    title: "布图打印"
-    rowPanels:
-      - text: ""
-        items:
-          - text: "批量打印PDF"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "批量打印DWF"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "批量打印PPT"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlPurgeTool"
-    name: "PurgeTool"
-    title: "图纸清理"
-    rowPanels:
-      - text: ""
-        items:
-          - text: "Z值归零"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "DGN清理"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlBlockTool"
-    name: "BlockTool"
-    title: "图层图块"
+        - text: "给水\r\n大样"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "给水\r\n轴测"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWVALIDATION"
+    name: "WVALIDATION"
+    title: "校核"
     items:
-      - text: "建立建筑\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "建立总图\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "建立单体\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "建立结构\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "建立暖通\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "建立电气\r\n图层"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "建立给排水\r\n图层"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "处理底图\r\n（暖通用）"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "处理底图\r\n（电气用）"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "处理底图\r\n（给排水用）"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "暖通图层管理"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "暖通图层模式"
-        attributes: { "IsVisible": false, "IsEnabled": true }
-      - text: "提电气块\r\n转换"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "图块集"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "图块断线"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: "文字块镜像"
-        attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlOutlineTool"
-    name: "OutlineTool"
-    title: "房间框线"
-    items:  
-       - text: "建筑已绘"
-         attributes: { "IsVisible": true, "IsEnabled": true }
-       - text: "自动识别"
-         attributes: { "IsVisible": true, "IsEnabled": true }
-       - text: "手动绘制"
-         attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlFireControlTool"
-    name: "FireControlTool"
-    title: "消防喷淋"
-    items:
-       - text: "喷头布置"
-         attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlEquipmentTool"
-    name: "EquipmentTool"
+        - text: "消火栓\r\n灭火器"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlHVACINSTALLATION"
+    name: "HVACINSTALLATION"
     title: "设备选型"
     items:
-       - text: "风机选型"
-         attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": true }
-  - UID: "pnlMiscellaneous"
-    name: "Miscellaneous"
-    title: "第三方支持"
+        - text: "风机选型"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlHVACPLAN"
+    name: "HVACPLAN"
+    title: "平面图"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "机房平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "地库风平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "风管修改"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "整体修改"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlEPRECONDITION"
+    name: "EPRECONDITION"
+    title: "前置输入"
     items:
-      - text: "天正看图插件"
-        attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "楼层定义"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "提车道中心线"
+          attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
-    
+  - UID: "pnlEAFAS"
+    name: "EAFAS"
+    title: "火灾报警系统"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "烟感温感布置"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "火灾报警系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "地库消防广播"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "消防广播连线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "广播盲区显示"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlELIGHTING"
+    name: "ELIGHTING"
+    title: "照明系统"
+    items:
+        - text: "地库车道照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "车道应急照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "地库疏散指示"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "地库应急\r\n照明连线"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlEEXCHANGE"
+    name: "EEXCHANGE"
+    title: "提资接收"
+    items:
+        - text: "提资转换"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlAEXCHANGE"
+    name: "AEXCHANGE"
+    title: "机电提资"
+    items:
+        - text: "风机基础"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }

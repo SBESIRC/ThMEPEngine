@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPIdentity;
 
 namespace ThAnalytics
 {
