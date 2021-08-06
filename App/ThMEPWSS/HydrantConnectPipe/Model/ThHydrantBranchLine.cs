@@ -34,17 +34,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 var obb = objcets[0] as Polyline;
                 branchLine.BranchPolylineObb = obb;
 
-                //using (var acadDatabase = AcadDatabase.Active())
-                //{
-                //    var lines = branchLine.BranchPolyline.ToLines();
-                //    foreach (var line in lines)
-                //    {
-                //        line.ColorIndex = 5;
-                //        line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
-                //        acadDatabase.CurrentSpace.Add(line);
-                //    }
-                //}
-
             }
             return branchLine;
         }
@@ -53,8 +42,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             var lines = BranchPolyline.ToLines();
             foreach (var line in lines)
             {
-                line.ColorIndex = 5;
-                line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
+                line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE-AI");
                 acadDatabase.CurrentSpace.Add(line);
             }
         }
@@ -111,6 +99,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                     foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
                     {
                         if (property.PropertyName == "可见性")
+                        {
+                            property.Value = "DN65";
+                            break;
+                        }
+                        if (property.PropertyName == "可见性1")
                         {
                             property.Value = "DN65";
                             break;

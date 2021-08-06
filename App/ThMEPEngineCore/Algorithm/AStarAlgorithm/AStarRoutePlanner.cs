@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 {
@@ -80,7 +81,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             var resPt = GetPath(lastNode);
 
             //调整路径
-//            AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
+            //AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
             resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);

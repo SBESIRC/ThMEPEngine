@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 {
@@ -129,9 +130,11 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             polyline.Dispose();
             return isObstacle;
         }
-        public bool IsRoomWell(Point cell)
+        public bool IsRoomWell(Point cell1,Point cell2)
         {
-            Point3d cellPt = mapHelper.TransformMapPoint(cell);
+            Point3d cellPt1 = mapHelper.TransformMapPoint(cell1);
+            Point3d cellPt2 = mapHelper.TransformMapPoint(cell2);
+            var line = new Line(cellPt1, cellPt2);
             foreach (var room in rooms)
             {
                 if (room is Line)
@@ -141,14 +144,13 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
                     {
                         continue;
                     }
-                    var frame = l.Buffer(300);
-                    if(frame.Contains(cellPt))
+                    if(l.IsIntersects(line))
                     {
-                        return false;
+                        return true;
                     }
                 }
             }
-            return true;
+            return false;
         }
 
         /// <summary>

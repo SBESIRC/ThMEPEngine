@@ -32,6 +32,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             branchLines = pipeLines.Except(loopLines).ToList();
             loopLines = PipeLineList.CleanLaneLines3(loopLines);
             branchLines = PipeLineList.CleanLaneLines3(branchLines);
+            loopLines.RemoveAll(l => IsMarkLine(l, pipeMarks));
+        }
+        private bool IsMarkLine(Line l, List<ThHydrantPipeMark> marks)
+        {
+            foreach (var mark in marks)
+            {
+                if ((l.PointOnLine(mark.StartPoint, false, 100) && l.PointOnLine(mark.StartPoint, true, 10))
+                  || (l.PointOnLine(mark.EndPoint, false, 100) && l.PointOnLine(mark.EndPoint, true, 10)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         private void RemovePipeLines(ref List<Line> pipeLines,ref FireHydrantSystemIn fireHydrantSysIn,List<ThHydrantPipeMark> marks)
         {

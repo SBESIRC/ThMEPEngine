@@ -135,18 +135,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             return circle.ToRectangle();
         }
 
-        public static List<Line> GetNearbyLine4(Point3d pt,List<Line> lines)
+        public static List<Line> GetNearbyLine(Point3d pt,List<Line> lines,int N = 3)
         {
             List<Line> returnLines = new List<Line>();
-            if (lines.Count <=3)
+            if (lines.Count <= N)
             {
                 return lines;
             }
 
             lines = lines.OrderBy(o => o.DistanceToPoint(pt)).ToList();
-            returnLines.Add(lines[0]);
-            returnLines.Add(lines[1]);
-            returnLines.Add(lines[2]);
+            for(int i = 0; i < N;i++)
+            {
+                returnLines.Add(lines[i]);
+            }
             return returnLines;
         }
 
