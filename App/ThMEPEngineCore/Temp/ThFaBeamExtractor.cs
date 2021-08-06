@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup, ISetStorey
+    public class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup, ISetStorey
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
@@ -58,7 +58,12 @@ namespace ThMEPEngineCore.Temp
             else
             {
                 //
-                throw new NotSupportedException();
+                var extractService = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                extractService.Extract(database, pts);
+                extractService.Polys.ForEach(o => Beams.Add(ThIfcLineBeam.Create(o)));
             }
         }
 

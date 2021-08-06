@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Engine;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -17,7 +19,7 @@ namespace ThMEPEngineCore.Temp
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
         private List<StoreyInfo> StoreyInfos { get; set; }
         private const string NeibourFireApartIdsPropertyName = "NeibourFireApartIds";
-        private const string UsePropertyName = "Use";
+        private const string UsePropertyName = "Useage";
         public ThFaDoorOpeningExtractor()
         {
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
@@ -32,17 +34,41 @@ namespace ThMEPEngineCore.Temp
             }
             else
             {
-                var instance = new ThExtractDoorOpeningService()
-                {
-                    ElementLayer = this.ElementLayer,
-                };
-                instance.Extract(database, pts);
-                Doors = instance.Openings.Select(o => new ThIfcDoor() { Outline = o }).ToList();
+                Doors = ExtractMsDoors(database, pts);
             }
 
             // Buffer 10
             var bufferService = new ThNTSBufferService();
             Doors.ForEach(o => o.Outline = bufferService.Buffer(o.Outline, 10));
+        }
+        private List<ThIfcDoor> ExtractMsDoors(Database database, Point3dCollection pts)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var results = new List<ThIfcDoor>();
+                acadDatabase.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(o => o.Layer == this.ElementLayer)
+                    .ForEach(o =>
+                    {
+                        if (o.ColorIndex == 90)
+                        {
+                            results.Add(new ThIfcDoor() { Outline = o.Clone() as Polyline, Spec = "FM" });
+                        }
+                        else
+                        {
+                            results.Add(new ThIfcDoor() { Outline = o.Clone() as Polyline, Spec = "" });
+                        }
+                    });
+                if (pts.Count >= 3)
+                {
+                    var objs = results.Select(o => o.Outline).ToCollection();
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    objs = spatialIndex.SelectCrossingPolygon(pts);
+                    results = results.Where(o => objs.Contains(o.Outline)).ToList();
+                }
+                return results;
+            }
         }
         public new List<ThGeometry> BuildGeometries()
         {

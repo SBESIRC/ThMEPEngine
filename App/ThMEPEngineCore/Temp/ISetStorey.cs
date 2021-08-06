@@ -3,7 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    interface ISetStorey
+    public interface ISetStorey
     {
         void Set(List<StoreyInfo> storeyInfos);
         StoreyInfo Query(Entity entity);

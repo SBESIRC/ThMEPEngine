@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThHoleExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup, ISetStorey
+    public class ThHoleExtractor : ThExtractorBase, IExtract, IBuildGeometry, IPrint, IGroup, ISetStorey
     {
         public List<Polyline> Hole { get; private set; }
         private List<StoreyInfo> StoreyInfos { get; set; }
