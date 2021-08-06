@@ -1443,7 +1443,6 @@
             this.Name = "fmFanSelection";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "风机选型";
-            this.Load += new System.EventHandler(this.fmFanSelection_Load);
             ((System.ComponentModel.ISupportInitialize)(this.BarManager)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);

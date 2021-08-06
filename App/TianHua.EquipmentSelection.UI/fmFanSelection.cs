@@ -67,7 +67,6 @@ namespace TianHua.FanSelection.UI
                 return OnModelDeleted;
             }
         }
-
         public Action<ThModelBeginSaveMessage> OnModelBeginSaveHandler
         {
             get
@@ -75,7 +74,6 @@ namespace TianHua.FanSelection.UI
                 return OnModelBeginSave;
             }
         }
-
         public Action<ThModelUndoMessage> OnModelUndoHandler
         {
             get
@@ -96,31 +94,24 @@ namespace TianHua.FanSelection.UI
         /// 风机箱参数
         /// </summary>
         public List<FanParameters> m_ListFanParameters = new List<FanParameters>();
-
-
         /// <summary>
         /// 风机箱参数-单速
         /// </summary>
         public List<FanParameters> m_ListFanParametersSingle = new List<FanParameters>();
-
-
         /// <summary>
         /// 风机箱参数 双速
         /// </summary>
         public List<FanParameters> m_ListFanParametersDouble = new List<FanParameters>();
-
-
         /// <summary>
         /// 轴流风机参数
         /// </summary>
         public List<AxialFanParameters> m_ListAxialFanParameters = new List<AxialFanParameters>();
-
         /// <summary>
         /// 轴流风机参数 双速
         /// </summary>
         public List<AxialFanParameters> m_ListAxialFanParametersDouble = new List<AxialFanParameters>();
 
-        public void RessetPresenter()
+        public void ResetPresenter()
         {
             if (m_Presenter != null)
             {
@@ -151,22 +142,22 @@ namespace TianHua.FanSelection.UI
             e.Cancel = true;
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            InitForm();
+        }
+
         public fmFanSelection()
         {
             InitializeComponent();
             UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Office2013);
-
-        }
-
-
-        private void fmFanSelection_Load(object sender, EventArgs e)
-        {
-            InitForm();
         }
 
         public void InitForm()
         {
-            RessetPresenter();
+            ResetPresenter();
             ComBoxScene.Properties.Items.Clear();
             ComBoxScene.Properties.Items.AddRange(m_ListScenario);
             ComBoxScene.EditValue = "厨房排油烟";
@@ -254,7 +245,6 @@ namespace TianHua.FanSelection.UI
             this.Text = "风机选型 - " + Path.GetFileNameWithoutExtension(_Filename);
         }
 
-
         private void TreeList_CustomColumnDisplayText(object sender, DevExpress.XtraTreeList.CustomColumnDisplayTextEventArgs e)
         {
             if (e.Column.FieldName == "AirVolume")
@@ -331,18 +321,6 @@ namespace TianHua.FanSelection.UI
                 //FanSelectionInfoError(_Fan);
                 m_fmOverView.DataSourceChanged(m_ListFan);
             }
-        }
-
-        private void FanSelectionInfoError(FanDataModel _Fan)
-        {
-            if (_Fan.FanSelectionStateInfo != null && _Fan.FanSelectionStateInfo.fanSelectionState == FanSelectionState.LowNotFound &&
-                 _Fan.FanSelectionStateInfo.RecommendPointInLow != null && _Fan.FanSelectionStateInfo.RecommendPointInLow.Count == 2)
-            {
-                XtraMessageBox.Show(string.Format(" 低速挡的工况点与高速挡差异过大,低速档风量的推荐值在{0}m³/h左右,总阻力的推荐值小于{1}Pa. ",
-                    _Fan.FanSelectionStateInfo.RecommendPointInLow[0], _Fan.FanSelectionStateInfo.RecommendPointInLow[1]
-                    ), "警告", MessageBoxButtons.OK);
-            }
-            TreeList.Refresh();
         }
 
         private void TxtAirVolume_Click(object sender, EventArgs e)
@@ -834,7 +812,6 @@ namespace TianHua.FanSelection.UI
             }
         }
 
-
         public void SetFanModel()
         {
             if (TreeList == null)
@@ -1207,7 +1184,6 @@ namespace TianHua.FanSelection.UI
 
 
         }
-
 
         public string ReadTxt(string _Path)
         {
