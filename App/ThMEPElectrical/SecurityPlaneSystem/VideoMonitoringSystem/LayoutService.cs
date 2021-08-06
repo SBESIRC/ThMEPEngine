@@ -12,6 +12,7 @@ using System.Linq;
 using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
 using ThMEPEngineCore.Config;
+using ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.VMExitLayoutService;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
@@ -29,6 +30,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             layoutVideo.layoutRange = ThElectricalUIService.Instance.Parameter.videaMaxArea;
             layoutVideoByLine.distance = ThElectricalUIService.Instance.Parameter.videoDistance;
             List<LayoutModel> models = new List<LayoutModel>();
+            Dictionary<ThIfcRoom, List<LayoutModel>> vmInfos = new Dictionary<ThIfcRoom, List<LayoutModel>>();
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
 
             //沿线均布布置模式
@@ -51,24 +53,50 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 else if (connectRooms.Count == 1)
                 {
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
-                    models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls, doors));
+                    SetVideaoInRoom(vmInfos, connectRooms[0], DoLayout(layoutType, connectRooms[0], door, columns, walls, doors));
                 }
                 else if (connectRooms.Count >= 2)
                 {
                     if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls, doors));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls, doors));
+                        SetVideaoInRoom(vmInfos, connectRooms[0], DoLayout(layoutAType, connectRooms[0], door, columns, walls, doors));
+                        SetVideaoInRoom(vmInfos, connectRooms[1], DoLayout(layoutBType, connectRooms[1], door, columns, walls, doors));
                     }
                     if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[1], door, columns, walls, doors));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[0], door, columns, walls, doors));
+                        SetVideaoInRoom(vmInfos, connectRooms[1], DoLayout(layoutAType, connectRooms[1], door, columns, walls, doors));
+                        SetVideaoInRoom(vmInfos, connectRooms[0], DoLayout(layoutBType, connectRooms[0], door, columns, walls, doors));
                     }
                 }
             }
 
+            //调整房间内的摄像头
+            LayoutVideaoAdjust videaoAdjust = new LayoutVideaoAdjust();
+            models.AddRange(videaoAdjust.ClearClostVideao(vmInfos));
+
             return models.Where(x => !x.layoutPt.IsEqualTo(Point3d.Origin)).ToList();
+        }
+
+        /// <summary>
+        /// 将布置的摄像头根据房间分类
+        /// </summary>
+        /// <param name="vmInfos"></param>
+        /// <param name="room"></param>
+        /// <param name="models"></param>
+        private void SetVideaoInRoom(Dictionary<ThIfcRoom, List<LayoutModel>> vmInfos, ThIfcRoom room, List<LayoutModel> models)
+        {
+            if (models.Count <= 0)
+            {
+                return;
+            }
+            if (vmInfos.Keys.Contains(room))
+            {
+                vmInfos[room].AddRange(models);
+            }
+            else
+            {
+                vmInfos.Add(room, models);
+            }
         }
 
         /// <summary>

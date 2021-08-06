@@ -41,6 +41,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -55,11 +56,13 @@
             <TextBox Name="videaMaxArea" Grid.Row="2" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>
             <Label Grid.Row="3" Grid.Column="0" Content="电子巡更排布间距：" VerticalContentAlignment="Center"></Label>
             <TextBox x:Name="gtDistance" Grid.Row="3" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>
-            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,10" VerticalAlignment="Bottom">
+            <!--<Label Grid.Row="4" Grid.Column="0" Content="图块大小：" VerticalContentAlignment="Center"></Label>
+            <TextBox x:Name="scale" Grid.Row="4" Grid.Column="1" Width="130" Height="22" VerticalAlignment="Center" TabIndex="3"/>-->
+            <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,5,10,10" VerticalAlignment="Bottom">
                 <cus:ImageButton IsTabStop="True" TabIndex="2" Content="导出配置表" x:Name="btnExportTable" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnExportTable_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="3" Content="导入配置表" x:Name="btnImportTabl1e" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnImportTabl1e_Click"></cus:ImageButton>
                 <cus:ImageButton IsTabStop="True" TabIndex="4" Content="一键布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnLayout_Click"></cus:ImageButton>
-                <cus:ImageButton IsTabStop="True" TabIndex="5" Content="自动连线" x:Name="btnAutoConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"></cus:ImageButton>
+                <cus:ImageButton IsTabStop="True" TabIndex="5" Content="自动连线" x:Name="btnAutoConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnConnect_Click"></cus:ImageButton>
             </StackPanel>
         </Grid>
     </Grid>

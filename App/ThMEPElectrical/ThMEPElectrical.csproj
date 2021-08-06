@@ -247,6 +247,7 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\HandleVideoMonitoringRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
