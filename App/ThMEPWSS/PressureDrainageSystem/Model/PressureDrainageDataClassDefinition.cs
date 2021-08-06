@@ -36,6 +36,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<DrainWellClass> DrainWells;
         public List<Extents3d> WrappingPipes;//套管
         public List<SubmergedPumpClass> SubmergedPumps;
+        public List<Point3d> StoryFrameBasePt;
     }
     public class DrainWellClass
     {

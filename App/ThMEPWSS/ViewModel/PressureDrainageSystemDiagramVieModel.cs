@@ -37,7 +37,10 @@ namespace ThMEPWSS.Diagram.ViewModel
             using (var acadDatabase = AcadDatabase.Active())
             {
                 SelectedArea = Common.Utils.SelectAreas();
-                var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
+                if (SelectedArea.Count >= 4)
+                {
+                    var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
+                }
                 var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎R
                 storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
                 if (storeysRecEngine.Elements.Count == 0)

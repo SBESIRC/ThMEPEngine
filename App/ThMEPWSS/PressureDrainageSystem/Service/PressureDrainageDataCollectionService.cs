@@ -19,6 +19,7 @@ using ThMEPWSS.PressureDrainageSystem.Model;
 using ThMEPWSS.PressureDrainageSystem.Utils;
 using ThMEPWSS.Uitl;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
+using ThMEPWSS.Common;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class PressureDrainageDataCollectionService
@@ -39,6 +40,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             this.CollectWrappingPipes();
             this.CollectSubmergedPumps();
             this.CollectHorizontalPipes();
+            this.CollectStoryFrame();
             GenerateNecessaryVerticalPipe();
             if (viewmodel.HasInfoTablesRoRead)
             {
@@ -468,6 +470,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                     }
                 }
+            }
+        }
+        public void CollectStoryFrame()
+        {
+            var frames= FramedReadUtil.ReadAllFloorFramed();
+            this.CollectedData.StoryFrameBasePt = new();
+            foreach (var frame in frames)
+            {
+                this.CollectedData.StoryFrameBasePt.Add(frame.datumPoint);
             }
         }
     }

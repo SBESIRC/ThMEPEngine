@@ -45,7 +45,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
         private void PDSReadStoreys_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.InitListDatas();
+            try
+            {
+                viewModel.InitListDatas();
+            }
+            catch { }
         }
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {

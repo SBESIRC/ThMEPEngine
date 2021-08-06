@@ -33,7 +33,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
             AppendDrainWellsToModeldates();
         }
-       
+        
         /// <summary>
         /// 将立管数据添加进modeldatas
         /// </summary>
@@ -117,7 +117,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             Modeldatas.FloorLocPoints = new List<Point3d>();
             for (int i = 0; i < extendList.Count; i++)
             {
-                Modeldatas.FloorLocPoints.Add(extendList[i].CenterPoint());
+                foreach (var pt in CollectDataService.CollectedData.StoryFrameBasePt)
+                {
+                    if (extendList[i].IsPointIn(pt))
+                    {
+                        Modeldatas.FloorLocPoints.Add(pt);
+                    }
+                }
             }
             int floorNumber = extendList.Count;
             for (int i = 0; i < floorNumber; i++)

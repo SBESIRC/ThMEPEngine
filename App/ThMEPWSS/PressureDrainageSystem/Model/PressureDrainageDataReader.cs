@@ -14,6 +14,11 @@ namespace ThMEPWSS.PressureDrainage.Model
         /// <returns></returns>
         public PressureDrainageModelData GetPressureDrainageModelData(PressureDrainageSystemDiagramVieModel viewmodel)
         {
+            if (viewmodel.FloorAreaList == null || viewmodel.FloorNumList == null || viewmodel.SelectedArea == null || viewmodel.UndpdsFloorListDatas == null)
+            {
+                MessageBox.Show("未读取到有效楼层数据");
+                return null;
+            }
             var modeldatas = new PressureDrainageModelData();
             modeldatas.FloorListDatas = viewmodel.UndpdsFloorListDatas;
             modeldatas.FloorLineSpace = viewmodel.UndpdsFloorLineSpace;
