@@ -56,6 +56,8 @@ namespace ThMEPHVAC.Model
                 double width = ThDuctPortsService.Get_width(param.duct_size);
                 var widths = new List<double>() { width, width };
                 SetPortInfoXdata(ports_ids, ext_ports_ids, widths);
+                param.type = "Duct";
+                param.handle = id.Handle;
                 return id.Handle;
             }
         }

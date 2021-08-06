@@ -31,9 +31,7 @@ namespace TianHua.Hvac.UI.Command
                 return;
             }
             var graph_res = new ThDuctPortsAnalysis(modifyer.center_line, modifyer.exclude_line, Point3d.Origin, in_param);
-            graph_res.Get_start_line(modifyer.center_line, Point3d.Origin, out Point3d search_point, out Line start_l);
-            graph_res.Set_duct_info(search_point, start_l, modifyer);
-            graph_res.Set_special_shape_info(search_point);
+            graph_res.Do_anay(in_param.port_num, modifyer, modifyer.center_line);
             if (graph_res.merged_endlines.Count == 0)
             {
                 ThDuctPortsService.Prompt_msg("选择错误起始点");

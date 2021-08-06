@@ -157,14 +157,12 @@ namespace ThMEPHVAC.Model
                 double rotate_angle = in_vec.GetAngleTo(judger_vec);
                 return (in_vec.CrossProduct(judger_vec).Z < 0) ? -rotate_angle : rotate_angle;
             }
-            else if (open_angle < Math.PI * 0.5)
+            else
             {
                 double rotate_angle = in_vec.GetAngleTo(-Vector3d.YAxis);
                 is_flip = !is_flip;
                 return (in_vec.CrossProduct(-Vector3d.YAxis).Z < 0) ? -rotate_angle : rotate_angle;
             }
-            else
-                throw new NotImplementedException();
         }
         public static double Get_elbow_open_angle(Entity_modify_param param)
         {

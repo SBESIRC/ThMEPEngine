@@ -39,9 +39,7 @@ namespace TianHua.Hvac.UI.Command
                 return;
             ThDuctPortsDrawService.Move_to_origin(start_point, exclude_line);
             var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, Point3d.Origin, in_param);
-            graph_res.Get_start_line(center_lines, Point3d.Origin, out Point3d search_point);
-            graph_res.Set_duct_air_volume(in_param.port_num, search_point, center_lines);
-            graph_res.Set_special_shape_info(search_point);
+            graph_res.Do_anay(in_param.port_num, new ThDuctPortsModifyPort(), center_lines);
             if (graph_res.merged_endlines.Count == 0)
             {
                 ThDuctPortsService.Prompt_msg("选择错误起始点");
@@ -163,22 +161,12 @@ namespace TianHua.Hvac.UI.Command
         private DBObjectCollection Pre_proc(ObjectIdCollection objs)
         {
             var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
-            foreach (var l in lines)
-            {
-                if (l is Polyline)
-                {
-                    var pl = l as Polyline;
-                    
-                }
-            }
             ThDuctPortsDrawService.Move_to_origin(start_point, lines);
             var service = new ThLaneLineCleanService();
             var res = ThLaneLineEngine.Explode(service.Clean(lines));
             var extendLines = new DBObjectCollection();
             foreach (Line line in res)
-            {
                 extendLines.Add(line.ExtendLine(1.0));
-            }
             lines = ThLaneLineEngine.Noding(extendLines);
             lines = ThLaneLineEngine.CleanZeroCurves(lines);
             lines = lines.LineMerge();

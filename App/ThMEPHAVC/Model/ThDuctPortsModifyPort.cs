@@ -61,6 +61,7 @@ namespace ThMEPHVAC.Model
         private ThCADCoreNTSSpatialIndex mp_group_index;
         private Dictionary<Polyline, ObjectId> bounds_2_id_dic;
         private Dictionary<Point3d, List<Handle>> port_2_handle_dic;
+        public ThDuctPortsModifyPort() { }
         public ThDuctPortsModifyPort(ObjectId[] start_id, ref DuctPortsParam ui_param)
         {
             using (var db = AcadDatabase.Active())

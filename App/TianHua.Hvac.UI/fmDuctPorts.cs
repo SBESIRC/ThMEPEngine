@@ -24,6 +24,7 @@ namespace TianHua.Hvac.UI
         public fmDuctPorts(DuctPortsParam param)
         {
             InitializeComponent();
+            checkBox1.Enabled = param.is_redraw;
             if (Math.Abs(param.air_volume) > 1e-3)
             {
                 comboBox2.Text = param.scenario;
@@ -40,7 +41,7 @@ namespace TianHua.Hvac.UI
             Port_init();
             Set_port_speed();
             Set_port_range();
-            is_redraw = checkBox1.Enabled && checkBox1.Checked;
+            is_redraw = checkBox1.Checked;
         }
 
         private void Component_init(DuctPortsParam param)
@@ -394,13 +395,16 @@ namespace TianHua.Hvac.UI
             if (checkBox1.Checked)
             {
                 splitContainer1.Enabled = false;
-                splitContainer4.Enabled = false;
+                radioButton3.Enabled = false;
+                radioButton4.Enabled = false;
+                textBox7.Enabled = false;
+                label22.Enabled = false;
             }
             else
             {
                 splitContainer1.Enabled = true;
-                splitContainer4.Enabled = true;
             }
+            is_redraw = checkBox1.Checked;
         }
     }
 }

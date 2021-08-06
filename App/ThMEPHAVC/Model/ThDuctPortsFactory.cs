@@ -550,6 +550,8 @@ namespace ThMEPHVAC.Model
             geo = new DBObjectCollection();
             flg = new DBObjectCollection();
             center_line = new DBObjectCollection();
+            if (l.Length < 1e-3)
+                return;
             var lines = Create_duct(l.Length, width);
             Matrix3d mat = Matrix3d.Displacement(center_point.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
             var l1 = lines[0] as Line;

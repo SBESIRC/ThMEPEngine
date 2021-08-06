@@ -135,20 +135,16 @@ namespace ThMEPHVAC.Model
             db.Database.UnLockLayer(layer_name);
             db.Database.UnOffLayer(layer_name);
         }
-        public void Draw_shape(bool is_last_duct,
-                               Line_Info info,
-                               Matrix3d mat,
-                               out ObjectIdList geo_ids,
-                               out ObjectIdList flg_ids,
-                               out ObjectIdList center_ids,
-                               out ObjectIdList ports_ids,
-                               out ObjectIdList ext_ports_ids)
+        public void Draw_duct(Line_Info info,
+                              Matrix3d mat,
+                              out ObjectIdList geo_ids,
+                              out ObjectIdList flg_ids,
+                              out ObjectIdList center_ids,
+                              out ObjectIdList ports_ids,
+                              out ObjectIdList ext_ports_ids)
         {
             Draw_lines(info.geo, mat, geo_layer, out geo_ids);
-            if (is_last_duct)
-                Draw_lines(info.flg, mat, geo_layer, out flg_ids);
-            else
-                Draw_lines(info.flg, mat, flg_layer, out flg_ids);
+            Draw_lines(info.flg, mat, geo_layer, out flg_ids);
             Draw_lines(info.center_line, mat, center_layer, out center_ids);
             Draw_ports(info.ports, info.ports_ext, mat, out ports_ids, out ext_ports_ids);
         }
