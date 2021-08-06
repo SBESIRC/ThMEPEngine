@@ -26,6 +26,16 @@ namespace ThMEPHVAC.Model
             this.air_volume = air_volume;
         }
     }
+    public class Side_Port_Info
+    {
+        public bool is_left;
+        public List<Handle> port_handles;
+        public Side_Port_Info(bool is_left, List<Handle> port_handles)
+        {
+            this.is_left = is_left;
+            this.port_handles = port_handles;
+        }
+    }
     public enum ModifyerStatus
     {
         OK,
@@ -60,7 +70,7 @@ namespace ThMEPHVAC.Model
         private ThCADCoreNTSSpatialIndex group_index;
         private ThCADCoreNTSSpatialIndex mp_group_index;
         private Dictionary<Polyline, ObjectId> bounds_2_id_dic;
-        private Dictionary<Point3d, List<Handle>> port_2_handle_dic;
+        public Dictionary<Point3d, Side_Port_Info> port_2_handle_dic;
         public ThDuctPortsModifyPort() { }
         public ThDuctPortsModifyPort(ObjectId[] start_id, ref DuctPortsParam ui_param)
         {
@@ -148,7 +158,7 @@ namespace ThMEPHVAC.Model
                 var res = mp_group_index.SelectCrossingPolygon(port_bound);
                 if (res.Count > 0)
                 {
-                    port_handles.AddRange(port_2_handle_dic[p]);
+                    port_handles.AddRange(port_2_handle_dic[p].port_handles);
                     cross_port.Add(port_bound);
                 }
             }
@@ -178,7 +188,7 @@ namespace ThMEPHVAC.Model
             if (port_range.Contains("下"))
             {
                 var port_bounds = new DBObjectCollection();
-                var dic = new Dictionary<Point3d, List<Handle>>();
+                var dic = new Dictionary<Point3d, Side_Port_Info>();
                 foreach (MPolygon duct in mp_objs)
                 {
                     var res = port_index.SelectCrossingPolygon(duct);
@@ -192,8 +202,8 @@ namespace ThMEPHVAC.Model
                         {
                             var pl_cp = ThDuctPortsService.Round_point(pl.GetCentroidPoint(), 6);
                             var p = ThDuctPortsService.Round_point(center_line.GetClosestPointTo(pl_cp, false), 6);
-                            var handles = port_2_handle_dic[pl_cp];
-                            dic.Add(p, handles);
+                            var handles = port_2_handle_dic[pl_cp].port_handles;
+                            dic.Add(p, new Side_Port_Info(true, handles));
                             port_bounds.Add(ThDuctPortsService.Create_detect_poly(p));
                         }
                     }
@@ -221,35 +231,31 @@ namespace ThMEPHVAC.Model
             }
             return new Line();
         }
-        private Dictionary<Point3d, List<Handle>> Create_port_bounds(List<BlockReference> all_port_blk)
+        private Dictionary<Point3d, Side_Port_Info> Create_port_bounds(List<BlockReference> all_port_blk)
         {
             if (port_range.Contains("下"))
-            {
                 return Create_down_port_bounds(all_port_blk);
-            }
             else if (port_range.Contains("侧"))
-            {
                 return Create_side_port_bounds(all_port_blk);
-            }
             else
                 throw new NotImplementedException();
         }
-        private Dictionary<Point3d, List<Handle>> Create_down_port_bounds(List<BlockReference> all_port_blk)
+        private Dictionary<Point3d, Side_Port_Info> Create_down_port_bounds(List<BlockReference> all_port_blk)
         {
-            var pb = new Dictionary<Point3d, List<Handle>>();
+            var pb = new Dictionary<Point3d, Side_Port_Info>();
             var list = new List<Handle>();
             foreach (var port in all_port_blk)
             {
                 var p = Get_down_port_judge_pos(port);
                 list.Add(port.Handle);
-                pb.Add(p, list);
+                pb.Add(p, new Side_Port_Info (true, list));
                 list = new List<Handle>();
             }
             return pb;
         }
-        private Dictionary<Point3d, List<Handle>> Create_side_port_bounds(List<BlockReference> all_port_blk)
+        private Dictionary<Point3d, Side_Port_Info> Create_side_port_bounds(List<BlockReference> all_port_blk)
         {
-            var pb = new Dictionary<Point3d, List<Handle>>();
+            var pb = new Dictionary<Point3d, Side_Port_Info>();
             foreach (var blk in all_port_blk)
             {
                 var duct = Get_side_port_cross_duct(blk.Bounds.Value);
@@ -261,17 +267,16 @@ namespace ThMEPHVAC.Model
                     return pb;
                 }
                 var insert_p = blk.Position.TransformBy(dis_mat);
-                var width = Get_duct_width(duct[0] as Polyline, insert_p);
+                var width = Get_duct_width(duct[0] as Polyline, insert_p, out Line center_line);
                 var p = Get_side_port_judge_pos(width, blk.Rotation, insert_p);
                 if (!pb.ContainsKey(p))
                 {
                     var list = new List<Handle>() { blk.Handle };
-                    pb.Add(p, list);
+                    var is_left = ThDuctPortsService.Is_point_in_left_side(center_line, insert_p);
+                    pb.Add(p, new Side_Port_Info (is_left, list));
                 }
                 else
-                {
-                    pb[p].Add(blk.Handle);
-                }
+                    pb[p].port_handles.Add(blk.Handle);//两个handle代表双边都存在
             }
             return pb;
         }
@@ -282,7 +287,7 @@ namespace ThMEPHVAC.Model
             blk_pl.TransformBy(dis_mat);
             return group_index.SelectCrossingPolygon(blk_pl);
         }
-        private double Get_duct_width(Polyline pl, Point3d insert_p)
+        private double Get_duct_width(Polyline pl, Point3d insert_p, out Line center_line)
         {
             var border = new DBObjectCollection();
             pl.Explode(border);
@@ -292,6 +297,13 @@ namespace ThMEPHVAC.Model
                 if (l.GetClosestPointTo(insert_p, false).IsEqualTo(insert_p))
                     duct_len = l.Length;
             }
+            var points = new List<Point3d>();
+            foreach (Line l in border)
+            {
+                if (!ThDuctPortsService.Is_equal(l.Length, duct_len))
+                    points.Add(ThDuctPortsService.Get_mid_point(l));
+            }
+            center_line = new Line(points[0], points[1]);
             foreach (Line l in border)
             {
                 if (!ThDuctPortsService.Is_equal(l.Length, duct_len))
@@ -473,7 +485,7 @@ namespace ThMEPHVAC.Model
                 var cp = pl.GetCentroidPoint();
                 cp = ThDuctPortsService.Round_point(cp, 6);
                 if (port_2_handle_dic.ContainsKey(cp))
-                    air_volume += port_2_handle_dic[cp].Count * avg_air_volume;
+                    air_volume += port_2_handle_dic[cp].port_handles.Count * avg_air_volume;
                 else
                     throw new NotImplementedException();
             }

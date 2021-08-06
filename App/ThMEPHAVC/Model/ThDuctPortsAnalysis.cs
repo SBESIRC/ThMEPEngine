@@ -15,13 +15,17 @@ namespace ThMEPHVAC.Model
     };
     public class Port_Info
     {
-        public double air_volume;
+        public bool have_r;
+        public bool have_l;
         public Point3d position;
+        public double air_volume;        
         public Port_Info() { }
         public Port_Info(double air_volume_, Point3d position_)
         {
             air_volume = air_volume_;
             position = position_;
+            have_r = true;
+            have_l = true;
         }
     };
     public class Endline_Info
@@ -355,7 +359,8 @@ namespace ThMEPHVAC.Model
                 string size_info = ui_duct_size;
                 var in_air_volume = endline.segments[endline.segments.Count - 1].direct_edge.AirVolume;
                 ThDuctPortsService.Calc_duct_width(false, 0, in_air_volume, ref size_info);
-                endline.in_size_info = size_info;
+                if (merged_endlines.Count > 1)
+                    endline.in_size_info = size_info;
                 for (int i = endline.segments.Count - 1; i >= 0; --i)
                 {
                     var seg = endline.segments[i];

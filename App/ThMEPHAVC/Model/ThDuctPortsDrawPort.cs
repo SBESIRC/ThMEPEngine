@@ -37,8 +37,10 @@ namespace ThMEPHVAC.Model
                         ThDuctPortsService.Get_side_port_insert_pos(dir_vec, pos.position, info.width, port_width, out Point3d pL, out Point3d pR);
                         pL += org_dis_vec;
                         pR += org_dis_vec;
-                        Insert_port(pL, angle + Math.PI * 0.5, port_width, port_height, in_param.port_range);
-                        Insert_port(pR, angle - Math.PI * 0.5, port_width, port_height, in_param.port_range);
+                        if (pos.have_r)
+                            Insert_port(pR, angle - Math.PI * 0.5, port_width, port_height, in_param.port_range);
+                        if (pos.have_l)
+                            Insert_port(pL, angle + Math.PI * 0.5, port_width, port_height, in_param.port_range);
                     }
                 }
             }

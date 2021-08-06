@@ -34,21 +34,47 @@ namespace ThMEPHVAC.Model
     }
     public class ThDuctPortsConstructor
     {
-        private bool is_recreate { set; get; }
-        private bool have_main { set; get; }
-        private double ui_air_speed { set; get; }
+        private bool have_main;
+        private bool is_recreate;
+        private double ui_air_speed;
         public List<Port_Info> ports_position_ptr { set; get; }
         public List<Special_graph_Info> endline_elbow { set; get; }
         public List<Endline_seg_Info> endline_segs { set; get; }
         public ThDuctPortsConstructor(ThDuctPortsAnalysis anay_res, DuctPortsParam in_param)
         {
-            is_recreate = anay_res.is_recreate;
             ui_air_speed = in_param.air_speed;
+            is_recreate = anay_res.is_recreate;
             have_main = anay_res.main_ducts.Count != 0;
             endline_elbow = new List<Special_graph_Info>();
             endline_segs = new List<Endline_seg_Info>();
             Shrink_ducts(anay_res);
             Rearrange_endlines(anay_res.merged_endlines);
+        }
+        public void Update_side_port(string port_range,
+                                     Dictionary<Point3d, Side_Port_Info> side_port_info)
+        {
+            if (port_range.Contains("侧"))
+            {
+                foreach (var endline in endline_segs)
+                {
+                    foreach (var seg in endline.segs)
+                    {
+                        foreach (var port in seg.ports_info)
+                        {
+                            var p = ThDuctPortsService.Round_point(port.position, 6);
+                            if (side_port_info.ContainsKey(p))
+                            {
+                                var side_port = side_port_info[p];
+                                if (side_port.port_handles.Count == 1)
+                                {
+                                    port.have_l = side_port.is_left;
+                                    port.have_r = !side_port.is_left;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         private void Rearrange_endlines(List<Merged_endline_Info> merged_endlines)
         {
@@ -149,7 +175,10 @@ namespace ThMEPHVAC.Model
                 {
                     if (pre_width > cur_width)
                     {
-                        cur_p += dis_vec;
+                        if (is_recreate)
+                            cur_p = Create_port_fix_step(i, cur_info.ports);
+                        else
+                            cur_p += dis_vec;
                         Record_duct(flag_p, cur_p, pre_width, duct_size_info, port_seg);
                         Update_status(reducing_len, dir_vec, cur_p, cur_width, next_duct_size, ref flag_p, ref pre_width, ref duct_size_info);
                     }
@@ -163,7 +192,7 @@ namespace ThMEPHVAC.Model
             {
                 cur_p = is_recreate ? cur_info.ports[0].position : positions.Dequeue();
                 double next_duct_start_width = (next_info == null) ? 0 : Get_duct_width(false, Get_endline_air_volume(next_info), ref next_duct_size);
-                if (next_info != null && next_duct_start_width < pre_width)
+                if (next_info != null && duct_size_info != next_duct_size)
                     Endline_elbow_reducing(flag_p, cur_p, cur_info, pre_width, next_duct_start_width, duct_size_info, next_duct_size, proc_line, port_seg);
                 else if (port_seg.Count == 0)
                     Total_direct_duct(flag_p, cur_p, cur_info, pre_width, duct_size_info, proc_line, port_seg);
@@ -177,6 +206,18 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
+
+        private Point3d Create_port_fix_step(int idx, List<Port_Info> ports)
+        {
+            var cur_p = ports[idx].position;
+            var next_p = ports[idx - 1].position;
+            var dir_vec = (next_p - cur_p).GetNormal();
+            var mid_p = ThDuctPortsService.Get_mid_point(cur_p, next_p);
+            var dis = cur_p.DistanceTo(next_p);
+            dis = dis > 1000 ? 1000 : dis;
+            return mid_p - dir_vec * dis * 0.5;
+        }
+
         private double Get_start_duct_width(bool is_first, 
                                             Endline_Info cur_info,
                                             ref string cur_duct_size)

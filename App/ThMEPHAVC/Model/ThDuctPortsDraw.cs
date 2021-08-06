@@ -239,8 +239,7 @@ namespace ThMEPHVAC.Model
             {
                 string pre_duct_text_info = String.Empty;
                 var infos = endlines.endline_segs[i];
-                var is_last_duct = (i == (endlines.endline_segs.Count - 1));
-                var ver_wall_point = (duct_dir_align_points.Count > i && is_last_duct) ? duct_ver_align_points[i] : Point2d.Origin;
+                var ver_wall_point = (duct_dir_align_points.Count > i) ? duct_ver_align_points[i] : Point2d.Origin;
                 var dir_wall_point = (duct_dir_align_points.Count > i) ? duct_dir_align_points[i] : Point2d.Origin;
                 Draw_port_duct(infos.segs, ref pre_duct_text_info);
                 service.dim_service.Draw_dimension(infos.segs, dir_wall_point, ver_wall_point, start_point);
@@ -257,7 +256,6 @@ namespace ThMEPHVAC.Model
                 var info = infos[i];
                 var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, 
                     info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
-                
                 service.port_service.Draw_ports(info, in_param, org_dis_vec, port_width, port_height);
                 service.text_service.Draw_duct_size_info(duct_size_info);
                 Collect_duct_geo(geo_set, cur_seg);
@@ -320,7 +318,7 @@ namespace ThMEPHVAC.Model
                 var mat = Matrix3d.Displacement(center_point.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
                 mat = org_dis_mat * mat;
                 ThDuctPortsDrawService.Draw_lines(mainlines.geo, mat, service.geo_layer, out ObjectIdList geo_ids);
-                ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.flg_layer, out ObjectIdList flg_ids);
+                ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.geo_layer, out ObjectIdList flg_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.center_line, org_dis_mat, service.center_layer, out ObjectIdList center_ids);
                 // port根据中心线变化
                 ThDuctPortsDrawService.Draw_ports(mainlines.ports, mainlines.ports_ext, org_dis_mat,

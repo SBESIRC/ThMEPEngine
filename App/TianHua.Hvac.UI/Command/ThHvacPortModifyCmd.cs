@@ -38,6 +38,7 @@ namespace TianHua.Hvac.UI.Command
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
+            adjust_graph.Update_side_port(in_param.port_range, modifyer.port_2_handle_dic);
             var judger = new ThDuctPortsJudger(modifyer.start_p, graph_res.is_recreate, graph_res.merged_endlines, adjust_graph.endline_segs);
             var painter = new ThDuctPortsDraw(modifyer.start_p, in_param, judger.dir_align_points, judger.ver_align_points);
             painter.Draw(graph_res, adjust_graph);

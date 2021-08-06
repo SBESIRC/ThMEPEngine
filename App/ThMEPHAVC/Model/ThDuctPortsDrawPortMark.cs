@@ -18,13 +18,16 @@ namespace ThMEPHVAC.Model
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
             double h = ThDuctPortsService.Get_text_height(param.scale);
             double scale_h = h * 2 / 3;
-            double single_port_volume = param.air_volume / param.port_num;
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            int port_num = param.port_num;
+            if (param.port_range.Contains("侧"))
+                port_num *= 2;
+            double single_port_volume = ((int)((param.air_volume / port_num) / 50)) * 50;
+            using (var acadDb = AcadDatabase.Active())
             {
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(scale_h, scale_h, 1), 0,
                           new Dictionary<string, string> { { "风口名称", param.port_name },
                                                            { "尺寸", port_size },
-                                                           { "数量", param.port_num.ToString() },
+                                                           { "数量", port_num.ToString() },
                                                            { "风量", single_port_volume.ToString("0.")} });
             }
         }

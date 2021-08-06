@@ -114,7 +114,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer1.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.Size = new System.Drawing.Size(172, 289);
-            this.splitContainer1.SplitterDistance = 88;
+            this.splitContainer1.SplitterDistance = 91;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -201,8 +201,8 @@ namespace TianHua.Hvac.UI
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new System.Drawing.Size(172, 200);
-            this.splitContainer2.SplitterDistance = 132;
+            this.splitContainer2.Size = new System.Drawing.Size(172, 197);
+            this.splitContainer2.SplitterDistance = 130;
             this.splitContainer2.SplitterWidth = 1;
             this.splitContainer2.TabIndex = 5;
             // 
@@ -353,7 +353,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer3.Panel2.Controls.Add(this.label13);
             this.splitContainer3.Panel2.Controls.Add(this.textBox6);
             this.splitContainer3.Panel2Collapsed = true;
-            this.splitContainer3.Size = new System.Drawing.Size(170, 65);
+            this.splitContainer3.Size = new System.Drawing.Size(170, 64);
             this.splitContainer3.SplitterDistance = 31;
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 0;
@@ -365,7 +365,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(170, 65);
+            this.listBox1.Size = new System.Drawing.Size(170, 64);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 

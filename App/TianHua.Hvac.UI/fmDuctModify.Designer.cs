@@ -88,6 +88,7 @@ namespace TianHua.Hvac.UI
             this.textBox1.TabIndex = 29;
             this.textBox1.Text = "200";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label21
             // 

@@ -537,7 +537,9 @@ namespace ThMEPHVAC.Model
         }
         public static Point3d Round_point(Point3d p, int tail_num)
         {
-            return new Point3d(Math.Round(p.X, tail_num), Math.Round(p.Y, tail_num), 0);
+            var X = Math.Abs(p.X) < 1e-3 ? 0 : p.X;
+            var Y = Math.Abs(p.Y) < 1e-3 ? 0 : p.Y;
+            return new Point3d(Math.Round(X, tail_num), Math.Round(Y, tail_num), 0);
         }
         public static Point2d Round_point(Point2d p, int tail_num)
         {
@@ -548,6 +550,12 @@ namespace ThMEPHVAC.Model
             var poly = new Polyline();
             poly.CreatePolygon(p.ToPoint2D(), 4, 10);
             return poly;
+        }
+        public static bool Is_point_in_left_side(Line l, Point3d p)
+        {
+            var dir_vec = Get_edge_direction(l);
+            var vec = (p - l.StartPoint).GetNormal();
+            return dir_vec.CrossProduct(vec).Z > 0;
         }
     }
 }
