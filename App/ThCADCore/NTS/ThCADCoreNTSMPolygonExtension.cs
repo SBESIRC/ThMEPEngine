@@ -157,5 +157,10 @@ namespace ThCADCore.NTS
                 JoinStyle = NTSJoinStyle.Mitre,
             }).ToDbCollection();
         }
+
+        public static DBObjectCollection Difference(this MPolygon mPolygon, DBObjectCollection objs)
+        {
+            return mPolygon.ToNTSPolygon().Difference(objs.UnionGeometries()).ToDbCollection();
+        }
     }
 }
