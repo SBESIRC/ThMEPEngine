@@ -27,10 +27,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.Topmost = true;
             Loaded += (s, e) => { ThRainService.commandContext = new CommandContext() { ViewModel = viewModel, window = this }; };
             Closed += (s, e) => { ThRainService.commandContext = null; };
-            //this.Title += " 最后更新：2021/7/26 15:43";
-
-            hint.Visibility = Visibility.Visible;
-            hint.Text = "2021/8/5 10:08";
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
