@@ -349,7 +349,13 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THSJSB_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 消火栓
+            row.AddNewButton("消火栓",
+                "天华消火栓联管",
+                "THDXXHS",
+                "天华消火栓联管",
+                "IDI_THCAD_THDXXHS_SMALL",
+                "IDI_THCAD_THDXXHS_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateWUndergroundSystemPanel(RibbonTabSource tab)
