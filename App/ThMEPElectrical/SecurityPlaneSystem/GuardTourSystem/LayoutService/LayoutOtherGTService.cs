@@ -27,7 +27,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                 {
                     var doorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(thSRoom, sDoor);
                     var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(sDoor);
-                    var otherDoorPt = doorCenterPt - doorInfo.Item2 * (doorInfo.Item4 / 2);
+                    var otherDoorPt = doorCenterPt - doorInfo.Item3 * (doorInfo.Item5 / 2);
                     var structs = getLayoutStructureService.CalLayoutStruc(sDoor, columns, walls);
                     //using (Linq2Acad.AcadDatabase db= Linq2Acad.AcadDatabase.Active())
                     //{
@@ -36,7 +36,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                     //        db.ModelSpace.Add(item);
                     //    }
                     //}
-                    var layoutPt = CalControllerLayoutPt(structs, -doorInfo.Item2, otherDoorPt);
+                    var layoutPt = CalControllerLayoutPt(structs, -doorInfo.Item3, otherDoorPt);
                     var pt = layoutPt.Item1 + layoutPt.Item2 * (blockWidth / 2);
                     layoutPts.Add(new KeyValuePair<Polyline, (Point3d, Vector3d)>(sDoor, (pt, layoutPt.Item2)));
                 }

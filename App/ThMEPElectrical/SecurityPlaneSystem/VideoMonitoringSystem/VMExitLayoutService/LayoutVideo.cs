@@ -27,7 +27,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 
             //找到可布置构建
             var roomPtInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
-            var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item2, angle, layoutRange, blindArea);
+            var poly = getLayoutStructureService.GetLayoutRange(roomPtInfo.Item1, roomPtInfo.Item3, angle, layoutRange, blindArea);
             if (poly == null)
             {
                 return null;
@@ -52,7 +52,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var checkRoom = room.Buffer(-10)[0] as Polyline;
             pts = pts.Where(x => poly.Contains(x) && checkRoom.Contains(x)).ToList();
 
-            var layoutPt = CalLayoutPt(pts, roomPtInfo.Item2, roomPtInfo.Item1);
+            var layoutPt = CalLayoutPt(pts, roomPtInfo.Item3, roomPtInfo.Item1);
             var layoutDir = (roomPtInfo.Item1 - layoutPt).GetNormal();
 
             LayoutModel layoutModel = new LayoutModel();

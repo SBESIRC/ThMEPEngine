@@ -104,6 +104,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 default:
                     break;
             }
+            roomModelInfos.Remove(thRoom);
 
             return resPolys;
         }
@@ -137,7 +138,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 var path = pipePath.CreatePipePath(roomPoly, detec.position, control.position, control.layoutDir, useHoles);
                 if (path != null)
                 {
-                    path = connectBlockService.ConnectByPoint(control.ConnectPts, path);
+                    path = connectBlockService.ConnectByPoint(control.ConnectPts, path, true);
                     path.ReverseCurve();
                     path = connectBlockService.ConnectByCircle(new List<Point3d>() { detec.position }, path, 150);
                     resPaths.Add(path);

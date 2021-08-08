@@ -223,6 +223,68 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
         }
 
         /// <summary>
+        /// 计算控制器布置点位
+        /// </summary>
+        /// <param name="structs"></param>
+        /// <param name="doorPt"></param>
+        /// <param name="room"></param>
+        /// <param name="blockWidth"></param>
+        /// <param name="isInside"></param>
+        /// <returns></returns>
+        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Point3d doorPt, Polyline room, double blockWidth, bool isInside = true)
+        {
+            Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
+            foreach (var str in structs)
+            {
+                var allLines = str.GetAllLinesInPolyline().ToList();
+                foreach (var line in allLines)
+                {
+                    var closetPt = line.GetClosestPointTo(doorPt, false);
+                    if (line.StartPoint.DistanceTo(closetPt) > blockWidth)
+                    {
+                        var layoutPt = closetPt + (line.StartPoint - closetPt).GetNormal() * (blockWidth / 2);
+                        if (isInside && IsInsideRoom(room, layoutPt))
+                        {
+                            resLayoutInfo.Add(line, layoutPt);
+                        }
+                        else if (!isInside && !IsInsideRoom(room, layoutPt))
+                        {
+                            resLayoutInfo.Add(line, layoutPt);
+                        }
+                    }
+                    else if (line.EndPoint.DistanceTo(closetPt) > blockWidth)
+                    {
+                        if (!resLayoutInfo.Keys.Contains(line))
+                        {
+                            var layoutPt = closetPt + (line.EndPoint - closetPt).GetNormal() * (blockWidth / 2);
+                            if (isInside && IsInsideRoom(room, layoutPt))
+                            {
+                                resLayoutInfo.Add(line, layoutPt);
+                            }
+                            else if (!isInside && !IsInsideRoom(room, layoutPt))
+                            {
+                                resLayoutInfo.Add(line, layoutPt);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resLayoutInfo.OrderBy(x => x.Value.DistanceTo(doorPt)).ToDictionary(x => x.Key, y => y.Value);
+        }
+
+        /// <summary>
+        /// 判断点是否在房间内
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="doorPt"></param>
+        /// <returns></returns>
+        public static bool IsInsideRoom(Polyline room, Point3d doorPt)
+        {
+            return room.Contains(doorPt) || room.Distance(doorPt) < 10;
+        }
+
+        /// <summary>
         /// 扩张line成polyline
         /// </summary>
         /// <param name="line"></param>

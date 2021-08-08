@@ -20,12 +20,16 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
         /// <param name="connectPts"></param>
         /// <param name="connectLine"></param>
         /// <returns></returns>
-        public Polyline ConnectByPoint(List<Point3d> connectPts, Polyline connectLine)
+        public Polyline ConnectByPoint(List<Point3d> connectPts, Polyline connectLine, bool getClosetPt = false)
         {
             //var closetPt = connectPts.OrderBy(x => connectLine.StartPoint.DistanceTo(x)).First();
             //var closetPt = connectPts.OrderBy(x => connectLine.GetClosestPointTo(x, false).DistanceTo(x)).First();
             var allLines = connectLine.GetAllLinesInPolyline(false);
             var closetPt = connectPts.OrderBy(x => allLines.Select(y => y.GetClosestPointTo(x, false).DistanceTo(x)).Sum()).First();
+            if (getClosetPt)
+            {
+                closetPt = connectPts.OrderBy(x => connectLine.StartPoint.DistanceTo(x)).First();
+            }
             var lastPt = connectLine.GetPoint3dAt(connectLine.NumberOfVertices - 1);
             var polyPts = allLines.Select(x => x.GetClosestPointTo(closetPt, false));
             if (polyPts.Where(x => !x.IsEqualTo(lastPt, new Tolerance(1, 1))).Count() <= 0)

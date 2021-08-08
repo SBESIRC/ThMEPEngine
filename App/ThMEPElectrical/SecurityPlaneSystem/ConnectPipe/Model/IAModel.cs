@@ -8,7 +8,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     {
         public IAModel(BlockReference block)
         {
-            position = block.Position;
+            position = new Point3d(block.Position.X, block.Position.Y, 0);
             layoutDir = -block.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
             blockModel = block;
         }

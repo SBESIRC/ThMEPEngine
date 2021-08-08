@@ -35,8 +35,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var roomStructs = new List<Polyline>(nColumns);
             roomStructs.AddRange(nWalls);
 
-            layoutModels.Add(LayoutSoundLightAlarm(structs, door, roomDoorInfo.Item2, doorCenterPt));
-            layoutModels.Add(LayoutDisabledAlarmButtun(roomStructs, roomDoorInfo.Item2, roomDoorInfo.Item1));
+            layoutModels.Add(LayoutSoundLightAlarm(structs, door, roomDoorInfo.Item3, doorCenterPt));
+            layoutModels.Add(LayoutDisabledAlarmButtun(roomStructs, roomDoorInfo.Item3, roomDoorInfo.Item1));
 
             return layoutModels;
         }

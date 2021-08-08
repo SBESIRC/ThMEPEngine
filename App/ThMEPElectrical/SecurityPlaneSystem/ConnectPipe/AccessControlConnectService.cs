@@ -97,7 +97,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     {
                         return resPolys;
                     }
-                    var electricLock = useBModels.Where(x => x is ACElectricLock).First();
+                    var electricLock = useDoorModels.Where(x => x is ACElectricLock).First();
                     resPolys.AddRange(ConnectACPipe(button, cardReader, electricLock, thRoomA, thRoomB, holes));
                     break;
                 case LayoutType.TwoWayAuthentication:
@@ -107,7 +107,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     {
                         return resPolys;
                     }
-                    electricLock = useBModels.Where(x => x is ACElectricLock).First();
+                    electricLock = useDoorModels.Where(x => x is ACElectricLock).First();
                     resPolys.AddRange(ConnectACPipe(cardReaderA, cardReaderB, electricLock, thRoomA, thRoomB, holes));
                     break;
                 case LayoutType.OneWayVisitorTalk:
@@ -117,7 +117,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     {
                         return resPolys;
                     }
-                    electricLock = useBModels.Where(x => x is ACElectricLock).First();
+                    electricLock = useDoorModels.Where(x => x is ACElectricLock).First();
                     resPolys.AddRange(ConnectACPipe(button, intercom, electricLock, thRoomA, thRoomB, holes));
                     break;
                 default:
@@ -166,7 +166,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             {
                 ePath = connectBlockService.ConnectByPoint(bModel.ConnectPts, ePath);
                 ePath.ReverseCurve();
-                ePath = connectBlockService.ConnectByCircle(new List<Point3d>() { electricLock.position }, ePath, 200);
+                ePath = connectBlockService.ConnectByPoint(electricLock.ConnectPts, ePath);
                 resPaths.Add(ePath);
             }
             if (aPath != null)

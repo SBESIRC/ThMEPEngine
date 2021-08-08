@@ -134,7 +134,8 @@ namespace ThMEPElectrical.Command
 
                 if (model.layoutDir.Y < 0)
                 {
-                    model.layoutDir = new Vector3d(model.layoutDir.X, -model.layoutDir.Y, 0);
+                    //model.layoutDir = new Vector3d(model.layoutDir.X, -model.layoutDir.Y, 0);
+                    model.layoutDir = -model.layoutDir;
                 }
                 double rotateAngle = Vector3d.XAxis.GetAngleTo(model.layoutDir, Vector3d.ZAxis);
                 if (model is Buttun)

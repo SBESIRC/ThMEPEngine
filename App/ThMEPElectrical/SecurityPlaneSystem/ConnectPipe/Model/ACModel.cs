@@ -14,7 +14,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
         {
             double width = 400;
             double height = 500;
-            position = block.Position;
+            position = new Point3d(block.Position.X, block.Position.Y, 0);
             layoutDir = -block.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
             blockModel = block;
             ConnectPts = new List<Point3d>();
@@ -72,7 +72,15 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     /// </summary>
     public class ACElectricLock : ACModel
     {
-        public ACElectricLock(BlockReference block) : base(block) { }
+        public ACElectricLock(BlockReference block) : base(block) {
+            double width = 212;
+            ConnectPts = new List<Point3d>();
+            var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
+            ConnectPts.Add(position + layoutDir * width);
+            ConnectPts.Add(position - layoutDir * width);
+            ConnectPts.Add(position + otherDir * width);
+            ConnectPts.Add(position - otherDir * width);
+        }
     }
 
     /// <summary>
@@ -80,6 +88,15 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     /// </summary>
     public class ACIntercom : ACModel
     {
-        public ACIntercom(BlockReference block) : base(block) { }
+        public ACIntercom(BlockReference block) : base(block) {
+            double width = 400;
+            double height = 800;
+            ConnectPts = new List<Point3d>();
+            var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
+            ConnectPts.Add(position + layoutDir * (height / 2));
+            ConnectPts.Add(position - layoutDir * (height / 2));
+            ConnectPts.Add(position + otherDir * (width / 2));
+            ConnectPts.Add(position - otherDir * (width / 2));
+        }
     }
 }

@@ -44,6 +44,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.VMExitLayout
                             }
                         }
                     }
+
+                    if (tempVideaos.Count > 0)
+                    {
+                        firV = tempVideaos.First();
+                    }
                 }
 
                 resModels.AddRange(tempVideaos);
