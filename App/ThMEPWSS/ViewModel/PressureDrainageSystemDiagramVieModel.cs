@@ -11,25 +11,64 @@ using System.Windows.Forms;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
+using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
+
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
     public class PressureDrainageSystemDiagramVieModel : NotifyPropertyChangedBase
     {
-        public Point3dCollection SelectedArea;//框定区域
-        public List<List<Point3dCollection>> FloorAreaList;//楼层区域
-        public List<List<int>> FloorNumList;//楼层列表
         public PressureDrainageSystemDiagramVieModel()
         {
             UndpdsFloorLineSpace = 5000;//楼层线间距
             HasInfoTablesRoRead = false;
         }
+        public Point3dCollection SelectedArea;//框定区域
+        public List<List<Point3dCollection>> FloorAreaList;//楼层区域
+        public List<List<int>> FloorNumList;//楼层列表
+        private List<string> undpdsfloorListDatas { get; set; }//楼层表
+        public List<string> UndpdsFloorListDatas
+        {
+            get { return undpdsfloorListDatas; }
+            set
+            {
+                undpdsfloorListDatas = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private double undpdsfloorLineSpace { get; set; }//楼层线间距
+        public double UndpdsFloorLineSpace
+        {
+            get { return undpdsfloorLineSpace; }
+            set
+            {
+                undpdsfloorLineSpace = value;
+                this.RaisePropertyChanged("UndpdsFloorLineSpace");
+            }
+        }
+        private bool hasInfoTablesRoRead { get; set; }//读取到提资表
+        public bool HasInfoTablesRoRead
+        {
+            get { return hasInfoTablesRoRead; }
+            set
+            {
+                hasInfoTablesRoRead = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 楼层框定
+        /// </summary>
         public void CreateFloorFraming()
         {
             ThMEPWSS.Common.Utils.CreateFloorFraming();
         }
+        /// <summary>
+        /// 读取楼层信息
+        /// </summary>
         public void InitListDatas()
         {
             UndpdsFloorListDatas = new List<string>();
@@ -37,10 +76,11 @@ namespace ThMEPWSS.Diagram.ViewModel
             using (var acadDatabase = AcadDatabase.Active())
             {
                 SelectedArea = Common.Utils.SelectAreas();
-                if (SelectedArea.Count >= 4)
+                if (SelectedArea.Count == 0)
                 {
-                    var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
+                    return;
                 }
+                var rect = new Rectangle3d(SelectedArea[0], SelectedArea[1], SelectedArea[2], SelectedArea[3]);
                 var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎R
                 storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
                 if (storeysRecEngine.Elements.Count == 0)
@@ -63,35 +103,12 @@ namespace ThMEPWSS.Diagram.ViewModel
                 return;
             }
         }
-        private List<string> undpdsfloorListDatas { get; set; }//楼层表
-        public List<string> UndpdsFloorListDatas
+        /// <summary>
+        /// 生成系统图前处理
+        /// </summary>
+        public void PreGenerateDiagram(ThUNDPDrainageSystemDiagramCmd cmd)
         {
-            get { return undpdsfloorListDatas; }
-            set
-            {
-                undpdsfloorListDatas = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        private double undpdsfloorLineSpace { get; set; }
-        public double UndpdsFloorLineSpace
-        {
-            get { return undpdsfloorLineSpace; }
-            set
-            {
-                undpdsfloorLineSpace = value;
-                this.RaisePropertyChanged("UndpdsFloorLineSpace");
-            }
-        }
-        private bool hasInfoTablesRoRead { get; set; }
-        public bool HasInfoTablesRoRead
-        {
-            get { return hasInfoTablesRoRead; }
-            set
-            {
-                hasInfoTablesRoRead = value;
-                this.RaisePropertyChanged();
-            }
+            cmd.Execute();
         }
     }
 }

@@ -115,7 +115,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiFireHydrant);
         }
 
-
+        /// <summary>
+        /// 地下压力排水系统图
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THDXPLXTT", CommandFlags.Modal)]
         public void ThCreateUNDPDrainageSystemDiagram()
         {

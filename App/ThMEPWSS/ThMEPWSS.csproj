@@ -377,7 +377,7 @@
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageSystemDiagram.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataReader.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageSystemDiagramService.cs" />
-    <Compile Include="PressureDrainageSystem\Service\ImportBlockReferenceService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\ImportService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PipeLineSystemUnitConstructionService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataClassifyByStoriesService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataCollectionService.cs" />
