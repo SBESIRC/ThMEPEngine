@@ -245,6 +245,7 @@ namespace ThMEPEngineCore
                 extractEngine.Extract(acadDatabase.Database, pts);
                 extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
                 string geoContent = extractEngine.OutputGeo();
+                
                 extractEngine.OutputGeo(Active.Document.Name);
                 var dclLayoutEngine = new ThDCLayoutEngineMgd();
                 var data = new ThDCDataMgd();
