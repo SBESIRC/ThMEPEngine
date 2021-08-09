@@ -111,7 +111,7 @@ namespace TianHua.AutoCAD.ThCui
                 AllowNone = true
             };
             keywordOptions.Keywords.Add("ARCHITECTURE", "ARCHITECTURE", "建筑(A)");
-            keywordOptions.Keywords.Add("STRUCTURE", "STRUCTURE", "结构(S)");
+            //keywordOptions.Keywords.Add("STRUCTURE", "STRUCTURE", "结构(S)");
             keywordOptions.Keywords.Add("HAVC", "HAVC", "暖通(H)");
             keywordOptions.Keywords.Add("ELECTRICAL", "ELECTRICAL", "电气(E)");
             keywordOptions.Keywords.Add("WSS", "WSS", "给排水(W)");
