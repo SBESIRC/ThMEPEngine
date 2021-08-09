@@ -367,45 +367,10 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return ret;
         }
-        public static Polyline ClonePolyline(this Polyline pl)
-        {
-            var r = new Polyline();
-            for (int i = 0; i < pl.NumberOfVertices; i++) r.AddVertexAt(i, pl.GetPoint2dAt(i), 0, 0, 0);
-            r.Closed = pl.Closed;
-            return r;
-        }
-        public static Point3dCollection ToPoint3dCollection(this Polyline pl)
-        {
-            var r = new Point3dCollection();
-            for (int i = 0; i < pl.NumberOfVertices; i++) r.Add(pl.GetPoint3dAt(i));
-            return r;
-        }
         public static DBObjectCollection ExplodeToDBObjectCollection(this Entity ent)
         {
             var entitySet = new DBObjectCollection();
             ent.Explode(entitySet);
-            return entitySet;
-        }
-        public static DBObjectCollection ExplodeBlockRef(this BlockReference blk)
-        {
-            var entitySet = new DBObjectCollection();
-            void explode(Entity ent)
-            {
-                var obl = new DBObjectCollection();
-                ent.Explode(obl);
-                foreach (Entity e in obl)
-                {
-                    if (e is BlockReference br)
-                    {
-                        explode(br);
-                    }
-                    else
-                    {
-                        entitySet.Add(e);
-                    }
-                }
-            }
-            explode(blk);
             return entitySet;
         }
         public static List<DBObject> ToDBObjectList(this DBObjectCollection colle)
@@ -426,46 +391,6 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return ret;
         }
-
-        public static double DistanceToOtherLineSegment(this Line thisLine, Line otherLine)
-        {
-            double distance = 0.0;
-            Point3d this_point1 = thisLine.StartPoint;
-            Point3d this_point2 = thisLine.EndPoint;
-            Vector3d this_vector = thisLine.Delta;
-
-            Point3d other_point1 = otherLine.StartPoint;
-            Point3d other_point2 = otherLine.EndPoint;
-            Vector3d other_vector = otherLine.Delta;
-
-            Vector3d vector00 = this_point1.GetVectorTo(other_point1);
-            Vector3d vector01 = this_point1.GetVectorTo(other_point2);
-
-            Vector3d vector10 = this_point2.GetVectorTo(other_point1);
-            Vector3d vector11 = this_point2.GetVectorTo(other_point2);
-
-            double angle00 = other_vector.GetAngleTo(vector00);
-            double angle01 = other_vector.GetAngleTo(vector01);
-
-            double angle10 = other_vector.GetAngleTo(vector10);
-            double angle11 = other_vector.GetAngleTo(vector11);
-
-            if ((angle00 < Math.PI / 2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
-            {
-                distance = this_point2.DistanceTo(other_point1);
-            }
-            else if ((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
-            {
-                distance = this_point1.DistanceTo(other_point2);
-            }
-            else
-            {
-                distance = thisLine.Distance(otherLine);
-            }
-
-            return distance;
-        }
-
         public static double DistanceToPoint(this Line thisLine, Point3d otherPoint)
         {
             double distance = 0.0;
