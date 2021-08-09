@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
     public class ThShearwallExtractor : ThExtractorBase, IPrint
     {
         public List<Entity> Walls { get; protected set; }
-        private List<ThIfcRoom> Rooms { get; set; }
+        protected List<ThIfcRoom> Rooms { get; set; }
         public ThShearwallExtractor()
         {
             Category = BuiltInCategory.ShearWall.ToString();

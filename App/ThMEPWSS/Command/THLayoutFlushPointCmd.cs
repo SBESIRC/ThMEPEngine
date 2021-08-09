@@ -58,21 +58,32 @@ namespace ThMEPWSS.Command
 
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
-                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
-                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
+                    new ThFpColumnExtractor(){ ColorIndex=1},
+                    new ThFpShearwallExtractor(){ ColorIndex=2},
+                    new ThFpArchitectureExtractor(){ ColorIndex=3},
                     new ThObstacleExtractor(){ ColorIndex=4,},
                     new ThDrainFacilityExtractor(){ ColorIndex=5,},
                 };
                 extractors.ForEach(o => o.SetRooms(roomExtractor.Rooms));
-                extractors.ForEach(o => o.Extract(acadDb.Database, pts));
+                extractors.ForEach(o =>
+                {
+                    if(FlushPointVM.Parameter.OnlyLayoutOnColumn)
+                    {
+                        //仅布置在柱子上，不需要提取剪力墙和建筑墙
+                        if(!(o is ThFpShearwallExtractor || o is ThFpArchitectureExtractor))
+                        {
+                            o.Extract(acadDb.Database, pts);
+                        }
+                    }
+                    else
+                    {
+                        o.Extract(acadDb.Database, pts);
+                    }
+                });
 
                 var geos = new List<ThGeometry>();
                 extractors.Add(roomExtractor);
                 extractors.ForEach(o => geos.AddRange(o.BuildGeometries()));
-
-                //extractors.ForEach(o => (o as IPrint).Print(acadDb.Database));
-                //ThFlushPointUtils.OutputGeo(Active.Document.Name, geos);
 
                 var washPara = BuildWashParam(); //UI参数
                 var geoContent = ThGeoOutput.Output(geos); //数据
@@ -144,7 +155,14 @@ namespace ThMEPWSS.Command
             washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
 
             // 设置点位布置的位置
-            washPara.locate_mode = ThWashLocateMode.Interal;
+            if(FlushPointVM.Parameter.OnlyLayoutOnColumn)
+            {
+                washPara.locate_mode = ThWashLocateMode.Interal;
+            }
+            else
+            {
+                washPara.locate_mode = ThWashLocateMode.All;
+            }
             return washPara;
         }
 #else
