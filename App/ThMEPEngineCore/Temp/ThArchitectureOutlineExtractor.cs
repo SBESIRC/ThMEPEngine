@@ -30,12 +30,15 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             ArchOutlineInfos = service.Polys.Select(o => new ThArchitectureOutlineInfo(o)).ToList();
+            var acPolygonService = new ThAcPolygonSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH=TesslateLength,
+            };
             ArchOutlineInfos.ForEach(o =>
             {
-                o.Outline = ThTesslateService.Tesslate(o.Outline, TesslateLength) as Polyline;
+                o.Outline = acPolygonService.Clean(o.Outline);
             });
         }
-        
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();

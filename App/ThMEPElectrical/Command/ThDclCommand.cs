@@ -3,14 +3,12 @@ using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
 using ThMEPElectrical.DCL.Data;
 using ThMEPElectrical.DCL.Service;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -20,6 +18,7 @@ using CLI;
 
 using System;
 using AcHelper.Commands;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.Command
 {
@@ -35,20 +34,13 @@ namespace ThMEPElectrical.Command
             //Lightning Protection Down Conductors Test Data(防雷保护引下线)
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                else
+                var frame = ThWindowInteraction.GetPolyline(
+                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                var pts = frame.Vertices();
+                if(pts.Count<3)
                 {
                     return;
                 }
-
-                //
                 bool outerComponentPattern = true; //true1-> 用模式1,false->用模式2 
 
                 var levelIndex = 3;
@@ -76,14 +68,7 @@ namespace ThMEPElectrical.Command
                 };
                 architectureOutlineExtractor.Extract(acadDatabase.Database, pts);
                 architectureOutlineExtractor.MoveSecondToFirst(storeyExtractor.Storeys,storeyExtractor.StoreyNumberMap);//拿到所有的建筑轮廓线
-                //List<Entity> outlinelist = new List<Entity>();
-                //foreach(var item in architectureOutlineExtractor.OuterArchOutlineIdDic.Keys)
-                //{
-                //    outlinelist.Add(item);
-                //}
-                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlinelist, AcHelper.Active.Database, 1);
-
-
+                
                 //构建外圈构件
 
                 ThOuterVertialComponentData componentData;
@@ -161,8 +146,17 @@ namespace ThMEPElectrical.Command
                         iGroup.Group((extractors[4] as ThEStoreyExtractor).StoreyIds);
                     }
                 });
-                extractors.ForEach(o => (o as IPrint).Print(acadDatabase.Database));
+                //打印查看建筑轮廓线和外圈墙、柱和其它墙、柱（test）
+                extractors.ForEach(o =>
+                {
+                    if (o is ThArchitectureOutlineExtractor ||
+                    o is ThOuterOtherColumnExtractor ||
+                    o is ThOuterOtherShearWallExtractor)
+                    {
+                        (o as IPrint).Print(acadDatabase.Database);
+                    }
 
+                });
 #if DEBUG
                 var geos = new List<ThGeometry>();
                 //extractors.ForEach(e => geos.AddRange(e.BuildGeometries()));

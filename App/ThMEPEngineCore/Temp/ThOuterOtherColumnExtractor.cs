@@ -35,12 +35,16 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IColumnData columnData = service;
+            var acPolygonService = new ThAcPolygonSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH = TesslateLength,
+            };
             columnData.OuterColumns.ForEach(o =>
             {
-                var tesslate = ThTesslateService.Tesslate(o, TesslateLength);
-                OuterColumns.Add(tesslate);
+                var newColumn = acPolygonService.Clean(o as Polyline);
+                OuterColumns.Add(newColumn);
                 var archOutlineIds = ThParseArchitectureOutlineIdService.ParseBelongedArchitectureIds(o);
-                BelongArchitectureIdDic.Add(tesslate, archOutlineIds);
+                BelongArchitectureIdDic.Add(newColumn, archOutlineIds);
             });
             OtherColumns = columnData.OtherColumns.Select(o => ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }

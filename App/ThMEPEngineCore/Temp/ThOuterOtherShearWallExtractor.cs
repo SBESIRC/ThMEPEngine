@@ -35,12 +35,16 @@ namespace ThMEPEngineCore.Temp
             };
             service.Extract(database, pts);
             IShearWallData shearWallData = service;
+            var acPolygonService = new ThAcPolygonSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH = TesslateLength,
+            };
             shearWallData.OuterShearWalls.ForEach(o =>
             {
-                var tesslate = ThTesslateService.Tesslate(o, TesslateLength);
-                OuterShearWalls.Add(tesslate);
+                var newShearWall = acPolygonService.Clean(o as Polyline);
+                OuterShearWalls.Add(newShearWall);
                 var archOutlineIds = ThParseArchitectureOutlineIdService.ParseBelongedArchitectureIds(o);
-                BelongArchitectureIdDic.Add(tesslate, archOutlineIds);
+                BelongArchitectureIdDic.Add(newShearWall, archOutlineIds);
             });
             OtherShearWalls = shearWallData.OtherShearWalls.Select(o =>ThTesslateService.Tesslate(o, TesslateLength)).ToList();
         }
