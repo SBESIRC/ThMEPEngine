@@ -163,7 +163,7 @@ namespace ThMEPWSS.JsonExtensionsNs
         }
         public static GRect ToGRect(this Extents3d? extents3D)
         {
-            if (extents3D is Extents3d _ext) return new GRect(_ext.MinPoint, _ext.MaxPoint);
+            if (extents3D.HasValue) return new GRect(extents3D.Value.MinPoint, extents3D.Value.MaxPoint);
             return default;
         }
     }
@@ -245,6 +245,10 @@ namespace ThMEPWSS.CADExtensionsNs
             return pt + basePt.ToPoint2d().ToVector2d();
         }
         public static GRect ToGRect(this Point2d pt, double ext)
+        {
+            return GRect.Create(pt, ext);
+        }
+        public static GRect ToGRect(this Point3d pt, double ext)
         {
             return GRect.Create(pt, ext);
         }
@@ -471,7 +475,7 @@ namespace ThMEPWSS.CADExtensionsNs
 
             return distance;
         }
-        public static double PolyLineLength(this Polyline thisLine, double flag = 1000.0)
+        public static double PolyLineLength(this Polyline thisLine, double flag = 2000.0)
         {
             double length = 0.0;
             length = thisLine.Length + (thisLine.NumberOfVertices - 2) * flag;

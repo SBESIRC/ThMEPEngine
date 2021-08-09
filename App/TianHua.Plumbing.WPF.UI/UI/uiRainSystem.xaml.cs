@@ -1,9 +1,16 @@
-﻿using System.Windows;
+﻿using AcHelper;
+using Autodesk.AutoCAD.ApplicationServices;
+using System.Threading;
+using System.Windows;
+using System.Windows.Forms;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.ReleaseNs.RainSystemNs;
+using static ThMEPWSS.Assistant.DrawUtils;
+using Application = System.Windows.Forms.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -12,44 +19,73 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiRainSystem : ThCustomWindow
     {
-        private RainSystemDiagramViewModel ViewModel = new RainSystemDiagramViewModel();
+        private RainSystemDiagramViewModel viewModel = new RainSystemDiagramViewModel();
         public uiRainSystem()
         {
             InitializeComponent();
-            this.DataContext = ViewModel;
-            Loaded += (s, e) => { ThRainService.commandContext = new ThRainService.CommandContext() { ViewModel = ViewModel, window = this }; };
+            this.DataContext = viewModel;
+            this.Topmost = true;
+            Loaded += (s, e) => { ThRainService.commandContext = new CommandContext() { ViewModel = viewModel, window = this }; };
             Closed += (s, e) => { ThRainService.commandContext = null; };
-            //this.Title += " 最后更新：2021/7/26 15:43";
         }
-     
+
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var uiParams = new uiRainSystemParams(ViewModel.Params);
+            var uiParams = new uiRainSystemParams(viewModel.Params);
+            uiParams.Topmost = true;
             uiParams.ShowDialog();
-
         }
 
         //run command
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            RainDiagram.DrawRainDiagram(ViewModel);
+            try
+            {
+                Hide(); FocusMainWindow();
+                RainDiagram.DrawRainDiagram(viewModel, false);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Show();
+            }
         }
 
-        //Init storeys
+        //选择楼层
         private void ImageButton_Click_1(object sender, RoutedEventArgs e)
         {
-            ViewModel.InitFloorListDatas();
+            try
+            {
+                Hide(); FocusMainWindow();
+                viewModel.InitFloorListDatas(false);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Show();
+            }
         }
         //这明明是“新建楼层图框”
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                ThMEPWSS.Common.Utils.CreateFloorFraming();
+                Hide(); FocusMainWindow();
+                ThMEPWSS.Common.Utils.CreateFloorFraming(false);
             }
             catch (System.Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Show();
             }
         }
     }

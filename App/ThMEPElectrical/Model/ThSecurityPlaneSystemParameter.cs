@@ -37,6 +37,11 @@ namespace ThMEPElectrical.Model
         public double gtDistance = 15000;
 
         /// <summary>
+        /// 图块大小
+        /// </summary>
+        public double scale = 100;
+
+        /// <summary>
         /// 出入口控制系统配置表
         /// </summary>
         public DataTable accessControlSystemTable { get; set; }

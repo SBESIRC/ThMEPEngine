@@ -41,7 +41,7 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         private IPreparedGeometry preparedPolygon;
-        private IPreparedGeometry PreparedPolygon
+        public IPreparedGeometry PreparedPolygon
         {
             get
             {

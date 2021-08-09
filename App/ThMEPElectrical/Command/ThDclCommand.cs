@@ -75,7 +75,7 @@ namespace ThMEPElectrical.Command
                     IsolateSwitch = false,
                 };
                 architectureOutlineExtractor.Extract(acadDatabase.Database, pts);
-                architectureOutlineExtractor.MoveSecondToFirst(storeyExtractor.Storeys);//拿到所有的建筑轮廓线
+                architectureOutlineExtractor.MoveSecondToFirst(storeyExtractor.Storeys,storeyExtractor.StoreyNumberMap);//拿到所有的建筑轮廓线
                 //List<Entity> outlinelist = new List<Entity>();
                 //foreach(var item in architectureOutlineExtractor.OuterArchOutlineIdDic.Keys)
                 //{
@@ -165,7 +165,18 @@ namespace ThMEPElectrical.Command
 
 #if DEBUG
                 var geos = new List<ThGeometry>();
-                extractors.ForEach(e => geos.AddRange(e.BuildGeometries()));
+                //extractors.ForEach(e => geos.AddRange(e.BuildGeometries()));
+                extractors.ForEach(o =>
+                {
+                    string groupid = ThExtractorPropertyNameManager.GroupIdPropertyName;
+                    var temp = o.BuildGeometries();
+                    temp = temp.Where(e =>
+                    {
+                        return (!e.Properties.ContainsKey(groupid)) ||
+                        (e.Properties.ContainsKey(groupid) && (string)e.Properties[groupid] != "");
+                    }).ToList();
+                    geos.AddRange(temp);
+                });
 
                 // 对接浙大算法
                 string geoContent = ThGeoOutput.Output(geos);

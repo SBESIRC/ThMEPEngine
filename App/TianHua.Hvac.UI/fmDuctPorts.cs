@@ -8,6 +8,7 @@ namespace TianHua.Hvac.UI
 {
     public partial class fmDuctPorts : Form
     {
+        public bool is_redraw;
         public int port_num;
         public double air_volume;
         public double elevation;
@@ -20,9 +21,12 @@ namespace TianHua.Hvac.UI
         public string port_range;
         private double air_speed_max;
         private double air_speed_min;
+        private DuctPortsParam param;
         public fmDuctPorts(DuctPortsParam param)
         {
             InitializeComponent();
+            this.param = param;
+            checkBox1.Enabled = param.is_redraw;
             if (Math.Abs(param.air_volume) > 1e-3)
             {
                 comboBox2.Text = param.scenario;
@@ -39,6 +43,7 @@ namespace TianHua.Hvac.UI
             Port_init();
             Set_port_speed();
             Set_port_range();
+            is_redraw = checkBox1.Checked;
         }
 
         private void Component_init(DuctPortsParam param)
@@ -51,7 +56,18 @@ namespace TianHua.Hvac.UI
             textBox8.Text = s[0];
             textBox1.Text = s[1];
             textBox9.Text = param.port_name;
+            if (param.port_range.Contains("下"))
+            {
+                radioButton3.Checked = true;
+                radioButton4.Checked = false;
+            }
+            else
+            {
+                radioButton3.Checked = false;
+                radioButton4.Checked = true;
+            }
             comboBox1.Text = param.scale;
+            checkBox1.Enabled = param.is_redraw;
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
@@ -72,7 +88,7 @@ namespace TianHua.Hvac.UI
         private void Combobox_init()
         {
             comboBox1.Text = "1:150";
-            comboBox2.Text = "消防补风兼平时送风";
+            comboBox2.Text = "消防排烟兼平时排风";
         }
 
         private void Set_port_range()
@@ -361,6 +377,8 @@ namespace TianHua.Hvac.UI
             Scenario_init();
             Port_init();
             scenario = comboBox2.Text;
+            Set_port_range();
+
         }
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -375,6 +393,39 @@ namespace TianHua.Hvac.UI
         {
             string reg = "^[0-9]*$";
             return Regex.Match(text, reg).Success;
+        }
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                splitContainer1.Panel1.Enabled = false;
+                if (param.port_range.Contains("下"))
+                {
+                    radioButton3.Checked = true;
+                    radioButton4.Checked = false;
+                }
+                else
+                {
+                    radioButton3.Checked = false;
+                    radioButton4.Checked = true;
+                }
+                radioButton3.Enabled = false;
+                radioButton4.Enabled = false;
+                textBox7.Text = param.port_num.ToString();
+                
+                textBox7.Enabled = false;
+                label22.Enabled = false;
+                
+            }
+            else
+            {
+                splitContainer1.Panel1.Enabled = true;
+                radioButton3.Enabled = true;
+                radioButton4.Enabled = true;
+                textBox7.Enabled = true;
+                label22.Enabled = true;
+            }
+            is_redraw = checkBox1.Checked;
         }
     }
 }

@@ -11,28 +11,25 @@ namespace TianHua.AutoCAD.ThCui
     {
         private YamlStream Yaml { get; set; }
 
-        public ThCuiProfileYamlParser(Profile profile)
+        public ThCuiProfileYamlParser(string profile)
         {
             Yaml = new YamlStream();
             string config = null;
             switch (profile)
             {
-                case Profile.ARCHITECTURE:
+                case "A":
                     config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_architecture.yml");
                     break;
-                case Profile.CONSTRUCTION:
-                    config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_construction.yml");
-                    break;
-                case Profile.STRUCTURE:
+                case "S":
                     config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_structure.yml");
                     break;
-                case Profile.HAVC:
+                case "H":
                     config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_havc.yml");
                     break;
-                case Profile.ELECTRICAL:
+                case "E":
                     config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_electrical.yml");
                     break;
-                case Profile.WSS:
+                case "W":
                     config = GetResourceFileText("TianHua.AutoCAD.ThCui.Resources.profile_ribbon_wss.yml");
                     break;
                 default:

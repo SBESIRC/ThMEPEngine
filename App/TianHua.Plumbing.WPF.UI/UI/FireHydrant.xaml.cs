@@ -20,7 +20,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             if(rbFireHydrant.IsChecked ==true)
             {
-                this.Height = 260;
+                this.Height = 350;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Visible;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Hidden;
             }
@@ -42,7 +42,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             else
             {
-                this.Height = 260;
+                this.Height = 350;
                 this.spFireExtinguisherPanel.Visibility = System.Windows.Visibility.Hidden;
                 this.spFireHydrantPanel.Visibility = System.Windows.Visibility.Visible;
             }

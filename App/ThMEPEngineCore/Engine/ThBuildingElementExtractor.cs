@@ -75,7 +75,7 @@ namespace ThMEPEngineCore.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
                 var results = new List<ThRawIfcBuildingElementData>();
-                if (visitor.IsBuildElementBlockReference(blockReference))
+                if (blockReference.BlockTableRecord.IsValid)
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
@@ -86,15 +86,17 @@ namespace ThMEPEngineCore.Engine
                             var dbObj = acadDatabase.Element<Entity>(objId);
                             if (dbObj is BlockReference blockObj)
                             {
-                                if (blockObj ==null || blockObj.BlockTableRecord.IsNull)
+                                if (blockObj.BlockTableRecord.IsNull)
                                 {
                                     continue;
                                 }
                                 if (visitor.IsBuildElementBlockReference(blockObj))
                                 {
-                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                    results.AddRange(DoExtract(blockObj, mcs2wcs, visitor));
+                                    visitor.DoExtract(results, blockObj, matrix);
+                                    continue;
                                 }
+                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                results.AddRange(DoExtract(blockObj, mcs2wcs, visitor));
                             }
                             else
                             {

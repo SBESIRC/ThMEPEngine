@@ -34,11 +34,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
 
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            var inCardReader = CalLayoutCardReader(structs, door, roomDoorInfo.Item2, doorCenterPt);
-            var outCardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, doorCenterPt);
+            var inCardReader = CalLayoutCardReader(structs, door, roomDoorInfo.Item3, doorCenterPt);
+            var outCardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item3, doorCenterPt);
             if (inCardReader != null) accessControlModels.Add(inCardReader);
             if (outCardReader != null) accessControlModels.Add(outCardReader);
-            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1, roomDoorInfo.Item2));
+            accessControlModels.Add(CalLayoutElectricLock(roomDoorInfo.Item1, roomDoorInfo.Item3));
 
             return accessControlModels;
         }

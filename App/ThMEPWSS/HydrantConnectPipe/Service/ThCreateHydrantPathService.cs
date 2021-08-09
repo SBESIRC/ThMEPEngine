@@ -20,41 +20,57 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 {
     public class ThCreateHydrantPathService
     {
-        private double HydrantAngle;
-        private Point3d StartPoint;
-        private List<Line> Terminationlines;
-        private List<Entity> ObstacleRooms;//可穿越区域，但是代价大
+        private Point3d StartPoint;//起始点
+        private Dictionary<Line,bool> DicTermLines;//终点线
+        private List<Line> ObstacleRooms;//可穿越区域，但是代价大
         private List<Polyline> ObstacleHoles;//不可穿越区域
+        private List<Polyline> StairsRooms;//楼梯间
+        private List<Polyline> HydrantPipes;//立管
         private ThCADCoreNTSSpatialIndex HoleIndex;
         private ThCADCoreNTSSpatialIndex LineIndex;
         private ThCADCoreNTSSpatialIndex RoomIndex;
+        public int AStarCount { set; get; }
         public ThCreateHydrantPathService()
         {
-            HydrantAngle = 0.0;
+            
             StartPoint = new Point3d(0,0,0);
-            Terminationlines = new List<Line>();
-            ObstacleRooms = new List<Entity>();
+            DicTermLines = new Dictionary<Line, bool>();
+            ObstacleRooms = new List<Line>();
             ObstacleHoles = new List<Polyline>();
+            StairsRooms = new List<Polyline>();
+            HydrantPipes = new List<Polyline>();
+        }
+        public void Clear()
+        {
+            foreach(var item in ObstacleRooms)
+            {
+                item.Dispose();
+            }
+            foreach (var item in ObstacleHoles)
+            {
+                item.Dispose();
+            }
+            foreach (var item in StairsRooms)
+            {
+                item.Dispose();
+            }
+            foreach (var item in HydrantPipes)
+            {
+                item.Dispose();
+            }
         }
         public void InitData()
         {
-            HoleIndex = new ThCADCoreNTSSpatialIndex(ObstacleHoles.ToCollection());
-            LineIndex = new ThCADCoreNTSSpatialIndex(Terminationlines.ToCollection());
+            AStarCount = 0;
+            //            HoleIndex = new ThCADCoreNTSSpatialIndex(ObstacleHoles.ToCollection());
+            LineIndex = new ThCADCoreNTSSpatialIndex(DicTermLines.Keys.ToList().ToCollection());
             RoomIndex = new ThCADCoreNTSSpatialIndex(ObstacleRooms.ToCollection());
-            //foreach (var room in ObstacleRooms)
-            //{
-            //    room.ColorIndex = 6;
-            //    Draw.AddToCurrentSpace(room);
-            //}
-            foreach (var line in Terminationlines)
+        }
+        public void ClearData()
+        {
+            foreach(var k in DicTermLines.Keys.ToList())
             {
-                line.ColorIndex = 4;
-                Draw.AddToCurrentSpace(line);
-            }
-            foreach (var hole in ObstacleHoles)
-            {
-                hole.ColorIndex = 3;
-                Draw.AddToCurrentSpace(hole);
+                DicTermLines[k] = false;
             }
         }
         public void AddObstacle(Entity hole)
@@ -69,13 +85,46 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                     HoleIndex.Update(adds, new DBObjectCollection());
                 }
             }
-            
         }
-        public void SetRoom(Entity room)
+        public void SetBuildRoom(Entity room)
         {
             if(room != null)
             {
-                ObstacleRooms.Add(room);
+                if(room is MPolygon)
+                {
+                    var pg = room as MPolygon;
+                    var loops = pg.Loops();
+                    foreach(var loop in loops)
+                    {
+                        var lines = loop.ToLines();
+                        ObstacleRooms.AddRange(lines);
+                    }
+                }
+                else if(room is Polyline)
+                {
+                    var lines = (room as Polyline).ToLines();
+                    ObstacleRooms.AddRange(lines);
+                }
+            }
+        }
+        public void SetStairsRoom(Entity room)
+        {
+            if (room != null)
+            {
+                if (room is Polyline)
+                {
+                    StairsRooms.Add(room as Polyline);
+                }
+            }
+        }
+        public void SetHydrantPipe(Entity pipe)
+        {
+            if (pipe != null)
+            {
+                if (pipe is Polyline)
+                {
+                    HydrantPipes.Add(pipe as Polyline);
+                }
             }
         }
         public void SetObstacle(Entity hole)
@@ -88,79 +137,70 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 }
             }
         }
-        public void SetTermination(Line line)
+        public int GetHoleCount()
         {
-            if(line != null)
-            {
-                Terminationlines.Add(line);
-            }
+            return ObstacleHoles.Count;
         }
         public void SetTermination(List<Line> lines)
         {
-            Terminationlines.AddRange(lines);
-        }
-        public void SetHydrantAngle(double angle)
-        {
-            HydrantAngle = angle;
+            foreach(var line in lines)
+            {
+                DicTermLines.Add(line, false);
+            }
         }
         public void SetStartPoint(Point3d pt)
         {
             StartPoint = pt;
         }
-        public Polyline CreateHydrantPath(bool flag)
+        public Polyline CreateHydrantPath()
         {
-            Polyline hydrantPath = new Polyline();
-            foreach(var hole in ObstacleHoles)
+            foreach (var hole in ObstacleHoles)
             {
-                if(hole.Contains(StartPoint))
+                if (hole.Contains(StartPoint))
                 {
                     return null;
                 }
             }
-            if(flag)//有消火栓
+
+            var holes = new List<Polyline>(ObstacleHoles);
+
+            foreach (var pipe in HydrantPipes)
             {
-                var hydrantpaths = new List<Polyline>();
-                for (int i = 0; i < 4; i++)
+                if(!pipe.Contains(StartPoint))
                 {
-                    Vector3d vec = new Vector3d(Math.Sin(HydrantAngle + Math.PI / 2.0 * i), Math.Cos(HydrantAngle + Math.PI / 2.0 * i), 0);
-                    vec *= 500;
-                    var tmpPoint = StartPoint + vec;
-                    bool isInObstacle = false;
-                    foreach (var obstacle in ObstacleHoles)
-                    {
-                        if (obstacle.Contains(tmpPoint))
-                        {
-                            isInObstacle = true;
-                            break;
-                        }
-                    }
-                    if (isInObstacle)
-                    {
-                        continue;
-                    }
-                    var path = HydrantPath(tmpPoint);
-                    hydrantpaths.Add(path);
-                }
-                hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
-                hydrantPath = hydrantpaths.First();
-                hydrantPath.AddVertexAt(0, StartPoint.ToPoint2d(), 0, 0, 0);
-            }
-            else
-            {
-                hydrantPath = HydrantPath(StartPoint);
-                if(hydrantPath != null)
-                {
-                    if(PathCost(hydrantPath) > (hydrantPath.PolyLineLength()+5000))
-                    {
-                        var tmpPath = CreateHydrantPath(StartPoint, 30000);
-                        if(tmpPath == null)
-                        {
-                            return hydrantPath;
-                        }
-                        return (PathCost(hydrantPath) > PathCost(tmpPath))? tmpPath : hydrantPath;
-                    }
+                    holes.Add(pipe);
                 }
             }
+            foreach(var room in StairsRooms)
+            {
+                if(!room.Contains(StartPoint))
+                {
+                    holes.Add(room);
+                }
+            }
+            
+            HoleIndex = new ThCADCoreNTSSpatialIndex(holes.ToCollection());
+            ClearData();
+
+            var hydrantPath = HydrantPath(StartPoint);
+            if (hydrantPath != null)
+            {
+                var directPath = DirectHydrantPath(StartPoint);//取直连的路径
+                if (PathCost(hydrantPath) > (hydrantPath.PolyLineLength() + 5000))
+                {
+                    var tmpPath = HydrantPath(StartPoint, 30000);
+                    if (tmpPath != null)
+                    {
+                        hydrantPath = (PathCost(hydrantPath) > PathCost(tmpPath)) ? tmpPath : hydrantPath;
+                    }
+                }
+
+                if (directPath != null)
+                {
+                    hydrantPath = (PathCost(directPath) > PathCost(hydrantPath)) ? hydrantPath : directPath;
+                }
+            }
+
             return hydrantPath;
         }
         private List<Point3d> StartOneStep(Point3d pt,List<Polyline> holes, List<Entity> rooms, Line line)
@@ -267,7 +307,93 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
             return returnPts;
         }
-        private Polyline CreateHydrantPath(Point3d pt, double radius)
+        private Polyline DirectHydrantPath(Point3d pt)
+        {
+            var tmpLines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(), 10);
+            int lineCount = tmpLines.Count;
+            if(lineCount > 10)
+            {
+                lineCount = 10;
+            }
+            for (int i = 0; i < lineCount; i++)
+            {
+                var line = DirectHydrantPath(pt, tmpLines[i]);
+                if(line != null)
+                {
+                    return line;
+                }
+            }
+            
+            return null;
+
+        }
+        private Polyline DirectHydrantPath(Point3d pt, Line line)
+        {
+            if (line.Length < 1000.0)
+            {
+                return null;
+            }
+
+            List<Point3d> pts = new List<Point3d>();
+            pts.Add(pt);
+            pts.Add(line.GetClosestPointTo(pt, false));
+
+            //构造frame
+            var frame = ThHydrantConnectPipeUtils.CreateMapFrame(pts, 10000);
+            if (frame == null)
+            {
+                return null;
+            }
+            var dbHoles = HoleIndex.SelectCrossingPolygon(frame);
+            var holes = new List<Polyline>();
+            foreach (var dbHole in dbHoles)
+            {
+                if (dbHole is Polyline)
+                {
+                    holes.Add(dbHole as Polyline);
+                }
+            }
+            var dbRooms = RoomIndex.SelectCrossingPolygon(frame);
+            var rooms = new List<Line>();
+            foreach (var room in dbRooms)
+            {
+                if (room is Line)
+                {
+                    rooms.Add(room as Line);
+                }
+            }
+            //----简单的一条延伸线且不穿洞
+            var resLine = CreateSymbolLine(frame, line, pt, holes, rooms);
+            return resLine;
+        }
+        private Polyline HydrantPath(Point3d pt)
+        {
+            Polyline hydrantPath = new Polyline();
+            var hydrantpaths = new List<Polyline>();
+            var lines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(),3);
+            foreach (var line in lines)
+            {
+                var tmpPath = HydrantPath(pt, line);
+                if (tmpPath != null)
+                {
+                    hydrantpaths.Add(tmpPath);
+                }
+                DicTermLines[line] = true;
+            }
+
+            if (hydrantpaths.Count == 0)
+            {
+                return null;
+            }
+            hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
+            hydrantPath = hydrantpaths.First();
+            for (int i = 1; i < hydrantpaths.Count; i++)
+            {
+                hydrantpaths[i].Dispose();
+            }
+            return hydrantPath;
+        }
+        private Polyline HydrantPath(Point3d pt, double radius)
         {
             Polyline hydrantPath = new Polyline();
             //构造frame
@@ -281,143 +407,130 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                     lines.Add(line as Line);
                 }
             }
-            var holeObjs = HoleIndex.SelectCrossingPolygon(frame);
-            var holes = new List<Polyline>();
-            foreach (var hole in holeObjs)
-            {
-                if (hole is Polyline)
-                {
-                    holes.Add(hole as Polyline);
-                }
-            }
-            var dbRooms = RoomIndex.SelectCrossingPolygon(frame);
-            var rooms = new List<Entity>();
-            foreach (var room in dbRooms)
-            {
-                if (room is Entity)
-                {
-                    rooms.Add(room as Entity);
-                }
-            }
+            lines = lines.OrderBy(o => o.DistanceToPoint(pt)).ToList();
+            int lineCount = lines.Count;
+            //if(lines.Count > 10)
+            //{
+            //    lineCount = 10;
+            //}
+
             var hydrantpaths = new List<Polyline>();
-            foreach (Line line in lines)
+            for(int i = 0;i < lineCount; i++)
             {
-                var polyLine = CreateSymbolLine(frame, line, pt, holes, rooms);
-                if (polyLine != null)
+                if (DicTermLines[lines[i]])
                 {
-                    hydrantpaths.Add(polyLine);
+                    continue;
                 }
-                else
+
+                var tmpPath = HydrantPath(pt, lines[i]);
+                if (tmpPath != null)
                 {
-                    var tmpPts = StartOneStep(pt, holes, rooms, line);
-                    foreach (var tmpPt in tmpPts)
-                    {
-                        var tmpPath = GetPathByAStar(frame, line, tmpPt, holes, rooms);
-                        if (null == tmpPath)
-                        {
-                            continue;
-                        }
-                        if (tmpPt.DistanceTo(pt) > 1)
-                        {
-                            tmpPath.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
-                        }
-                        hydrantpaths.Add(tmpPath);
-                    }
+                    hydrantpaths.Add(tmpPath);
                 }
+                DicTermLines[lines[i]] = true;
             }
+
+            //foreach (var line in lines)
+            //{
+            //    if (DicTermLines[line])
+            //    {
+            //        continue;
+            //    }
+            //    var tmpPath = HydrantPath(pt, line);
+            //    if(tmpPath != null)
+            //    {
+            //        hydrantpaths.Add(tmpPath);
+            //    }
+            //    DicTermLines[line] = true;
+            //}
+
             if (hydrantpaths.Count == 0)
             {
                 return null;
             }
             hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
             hydrantPath = hydrantpaths.First();
+            for (int i = 1; i < hydrantpaths.Count; i++)
+            {
+                hydrantpaths[i].Dispose();
+            }
             return hydrantPath;
         }
-        private Polyline HydrantPath(Point3d pt)
+        private Polyline HydrantPath(Point3d pt,Line line)
         {
-            Polyline hydrantPath = new Polyline();
-            var lines = ThHydrantConnectPipeUtils.GetNearbyLine4(StartPoint, Terminationlines);
+            if(line.Length < 1000.0)
+            {
+                return null;
+            }
+
             List<Point3d> pts = new List<Point3d>();
             pts.Add(pt);
-            foreach (var line in lines)
-            {
-                pts.Add(line.GetClosestPointTo(pt, false));
-//                pts.Add(line.StartPoint);
-//                pts.Add(line.EndPoint);
-            }
+            pts.Add(line.GetClosestPointTo(pt, false));
+
             //构造frame
-            var frame = ThHydrantConnectPipeUtils.CreateMapFrame(pts, 5000);
-            var dbObjects = HoleIndex.SelectCrossingPolygon(frame);
-            var rst = new List<Polyline>();
-            foreach (var dbobject in dbObjects)
-            {
-                if (dbobject is Polyline)
-                {
-                    rst.Add(dbobject as Polyline);
-                }
-            }
-
-            var dbRooms = RoomIndex.SelectCrossingPolygon(frame);
-            var rooms = new List<Entity>();
-            foreach (var room in dbRooms)
-            {
-                if (room is Entity)
-                {
-                    rooms.Add(room as Entity);
-                }
-            }
-
-
-            var hydrantpaths = new List<Polyline>();
-            foreach (Line line in lines)
-            {
-                //----简单的一条延伸线且不穿洞
-                var polyLine = CreateSymbolLine(frame, line, pt, rst, rooms);
-                if(polyLine != null)
-                {
-                    hydrantpaths.Add(polyLine);
-                }
-                else
-                {
-                    var tmpPts = StartOneStep(pt, rst, rooms, line);
-                    foreach (var tmpPt in tmpPts)
-                    {
-                        var tmpPath = GetPathByAStar(frame, line, tmpPt, rst, rooms);
-                        if (null == tmpPath)
-                        {
-                            continue;
-                        }
-                        if (tmpPt.DistanceTo(pt) > 1)
-                        {
-                            tmpPath.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
-                        }
-                        hydrantpaths.Add(tmpPath);
-                    }
-                }
-            }
-            if (hydrantpaths.Count == 0)
+            var frame = ThHydrantConnectPipeUtils.CreateMapFrame(pts, 10000);
+            if (frame == null)
             {
                 return null;
             }
-            hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
-            hydrantPath = hydrantpaths.First();
-            return hydrantPath;
-        }
-
-        private Polyline CreateStartLines(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Entity> rooms)
-        {
-            //创建延伸线
-            //----简单的一条延伸线且不穿洞
-            var polyLine = CreateSymbolLine(frame, closetLane, startPt, holes, rooms);
-            if (polyLine != null)
+            var dbHoles = HoleIndex.SelectCrossingPolygon(frame);
+            var holes = new List<Polyline>();
+            foreach (var dbHole in dbHoles)
             {
-                return polyLine;
+                if (dbHole is Polyline)
+                {
+                    holes.Add(dbHole as Polyline);
+                }
+            }
+            var dbRooms = RoomIndex.SelectCrossingPolygon(frame);
+            var rooms = new List<Line>();
+            foreach (var room in dbRooms)
+            {
+                if (room is Line)
+                {
+                    rooms.Add(room as Line);
+                }
+            }
+            //----简单的一条延伸线且不穿洞
+            var resLine = CreateSymbolLine(frame, line, pt, holes, rooms);
+            if (resLine != null) 
+            {
+                return resLine;
             }
             else
             {
-                //----用a*算法计算路径躲洞
-                return GetPathByAStar(frame, closetLane, startPt, holes, rooms);
+                //var tmpPts = StartOneStep(pt, holes, rooms, line);
+
+                //var hydrantpaths = new List<Polyline>();
+                //foreach (var tmpPt in tmpPts)
+                //{
+                //    var tmpPath = GetPathByAStar(frame, line, tmpPt, holes, rooms);
+                //    if (null == tmpPath)
+                //    {
+                //        continue;
+                //    }
+                //    if (!ThHydrantConnectPipeUtils.IsIntersect(tmpPath, line))
+                //    {
+                //        continue;
+                //    }
+                //    if (tmpPt.DistanceTo(pt) > 1)
+                //    {
+                //        tmpPath.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
+                //    }
+                //    hydrantpaths.Add(tmpPath);
+                //}
+
+                //if (hydrantpaths.Count == 0)
+                //{
+                //    return null;
+                //}
+                //hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
+                //resLine = hydrantpaths.First();
+                resLine = GetPathByAStar(frame, line, pt, holes, rooms);
+                AStarCount++;
             }
+
+            return resLine;
         }
         /// <summary>
         /// 计算简单的延伸线
@@ -425,7 +538,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         /// <param name="closetLane"></param>
         /// <param name="startPt"></param>
         /// <returns></returns>
-        private Polyline CreateSymbolLine(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Entity> rooms)
+        private Polyline CreateSymbolLine(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Line> rooms)
         {
             var closetPt = closetLane.GetClosestPointTo(startPt, false);
             Vector3d dir = Vector3d.ZAxis.CrossProduct((closetPt - startPt).GetNormal());
@@ -435,7 +548,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
                 line.AddVertexAt(1, closetPt.ToPoint2D(), 0, 0, 0);
                 if (!ThHydrantConnectPipeUtils.LineIntersctBySelect(holes, line,50)
-                    && !ThHydrantConnectPipeUtils.LineIntersctBySelect(rooms, line)
+                    && !ThHydrantConnectPipeUtils.LineIntersctBySelect(rooms, line) 
                     && !ThHydrantConnectPipeUtils.CheckIntersectWithFrame(line, frame))
                 {
                     return line;
@@ -444,18 +557,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             return null;
         }
-        private Polyline GetPathByAStar(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Entity> rooms)
+        private Polyline GetPathByAStar(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Line> rooms)
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
             AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
-
-            //var costGetter = new ToLineCostGetterEx();
-            //aStarRoute.costGetter = costGetter;
+            var costGetter = new ToLineCostGetterEx();
+            var pathAdjuster = new ThHydrantConnectPipeAdjustPath();
+            aStarRoute.costGetter = costGetter;
+            aStarRoute.PathAdjuster = pathAdjuster;
             //----设置障碍物
             aStarRoute.SetObstacle(holes);
             //----设置房间
-            //aStarRoute.SetRoom(rooms);
+            aStarRoute.SetRoom(rooms);
             //----计算路径
             var path = aStarRoute.Plan(startPt);
 
@@ -470,7 +584,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 {
                     Point3dCollection pts = new Point3dCollection();
                     polyLine.IntersectWith(room, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    cost += pts.Count * 5000;
+                    cost += pts.Count * 10000;
                 }
             }
             return cost;

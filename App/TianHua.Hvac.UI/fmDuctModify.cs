@@ -30,6 +30,13 @@ namespace TianHua.Hvac.UI
             DialogResult = DialogResult.OK;
             this.Close();
         }
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (!Is_integer_str(textBox1.Text))
+                textBox1.Text = "";
+            else
+                Set_port_speed();
+        }
         private void textBox8_TextChanged(object sender, EventArgs e)
         {
             if (!Is_integer_str(textBox8.Text))

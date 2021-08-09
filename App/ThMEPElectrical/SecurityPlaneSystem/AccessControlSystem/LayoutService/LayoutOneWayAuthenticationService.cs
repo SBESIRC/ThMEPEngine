@@ -44,11 +44,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
-            var button = CalLayoutButton(structs, door, roomDoorInfo.Item2, doorCenterPt);
-            var cardReader = CalLayoutCardReader(structs, door, -roomDoorInfo.Item2, doorCenterPt);
+            var button = CalLayoutButton(structs, roomDoorInfo.Item1, room);
+            var cardReader = CalLayoutCardReader(structs, roomDoorInfo.Item2, room);
             if (button != null) accessControlModels.Add(button);
             if (cardReader != null) accessControlModels.Add(cardReader);
-            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item2));
+            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item3));
 
             return accessControlModels;
         }
@@ -60,33 +60,24 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="doorDir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private Buttun CalLayoutButton(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
+        private Buttun CalLayoutButton(List<Polyline> structs, Point3d doorUsePt, Polyline room)
         {
-            var checkDir = doorDir;
-            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, buttunWidth, true).FirstOrDefault();
-            if (layoutInfo.Key == null)
-            {
-                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                if (layoutInfo.Key == null)
-                {
-                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                }
-                checkDir = (doorPt - layoutInfo.Value).GetNormal();
-            }
+            var layoutInfo = UtilService.CalLayoutInfo(structs,doorUsePt, room, buttunWidth).FirstOrDefault();
             if (layoutInfo.Key == null)
             {
                 return null;
             }
             var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (checkDir.DotProduct(dir) < 0)
+
+            var layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
+            if (!room.Contains(layoutPt))
             {
+                layoutPt = layoutInfo.Value - dir * (buttunWidth / 2);
                 dir = -dir;
             }
-
             Buttun buttun = new Buttun();
             buttun.layoutDir = dir;
-            buttun.layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
+            buttun.layoutPt = layoutPt;
 
             return buttun;
         }
@@ -112,33 +103,25 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="doorDir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private CardReader CalLayoutCardReader(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
+        private CardReader CalLayoutCardReader(List<Polyline> structs, Point3d doorUsePt, Polyline room)
         {
-            var checkDir = doorDir;
-            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, cardReaderWidth, true).FirstOrDefault();
-            if (layoutInfo.Key == null)
-            {
-                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                if (layoutInfo.Key == null)
-                {
-                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                }
-                checkDir = (doorPt - layoutInfo.Value).GetNormal();
-            }
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorUsePt, room, buttunWidth).FirstOrDefault();
             if (layoutInfo.Key == null)
             {
                 return null;
             }
             var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (checkDir.DotProduct(dir) < 0)
+
+            var layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
+            if (!room.Contains(layoutPt))
             {
+                layoutPt = layoutInfo.Value - dir * (buttunWidth / 2);
                 dir = -dir;
             }
 
             CardReader cardReader = new CardReader();
             cardReader.layoutDir = dir;
-            cardReader.layoutPt = layoutInfo.Value + dir * (cardReaderLength / 2);
+            cardReader.layoutPt = layoutPt;
 
             return cardReader;
         }

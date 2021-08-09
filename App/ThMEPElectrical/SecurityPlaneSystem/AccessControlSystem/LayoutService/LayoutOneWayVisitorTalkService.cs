@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 foreach (var item in structs)
                 {
-                    db.ModelSpace.Add(item);
+                    //db.ModelSpace.Add(item);
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
@@ -45,11 +45,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 return accessControlModels;
             }
-            var intercom = CalLayoutIntercom(structs, door, -roomDoorInfo.Item2, doorCenterPt);
-            var button = CalLayoutButton(structs, door, roomDoorInfo.Item2, doorCenterPt);
+            var intercom = CalLayoutIntercom(structs, door, -roomDoorInfo.Item3, doorCenterPt);
+            var button = CalLayoutButton(structs, door, roomDoorInfo.Item3, doorCenterPt);
             if (intercom != null) accessControlModels.Add(intercom);
             if (button != null) accessControlModels.Add(button);
-            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item2));
+            accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item3));
 
             return accessControlModels;
         }

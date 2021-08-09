@@ -61,7 +61,7 @@ namespace ThMEPElectrical.StructureHandleService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        public Tuple<Point3d, Vector3d, double, double> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
+        public Tuple<Point3d, Point3d, Vector3d, double, double> GetDoorCenterPointOnRoom(Polyline room, Polyline door)
         {
             door = door.DPSimplify(1);
             var lines = door.GetAllLinesInPolyline().OrderByDescending(x => x.Length).ToList();
@@ -69,13 +69,13 @@ namespace ThMEPElectrical.StructureHandleService
             double doorWidth = lines.Last().Length;
             Point3d pt1 = new Point3d((lines[0].StartPoint.X + lines[0].EndPoint.X) / 2, (lines[0].StartPoint.Y + lines[0].EndPoint.Y) / 2, 0);
             Point3d pt2 = new Point3d((lines[1].StartPoint.X + lines[1].EndPoint.X) / 2, (lines[1].StartPoint.Y + lines[1].EndPoint.Y) / 2, 0);
-            var roomPt = room.GetClosestPointTo(pt1, false);
+            var roomPt1 = room.GetClosestPointTo(pt1, false);
+            var roomPt2 = room.GetClosestPointTo(pt2, false);
 
-            var ep = roomPt.DistanceTo(pt1) < roomPt.DistanceTo(pt2) ? pt1 : pt2;
-            var sp = roomPt.DistanceTo(pt2) > roomPt.DistanceTo(pt1) ? pt2 : pt1;
+            var ep = roomPt1.DistanceTo(pt1) < roomPt1.DistanceTo(pt2) ? pt1 : pt2;
+            var sp = roomPt1.DistanceTo(pt2) > roomPt1.DistanceTo(pt1) ? pt2 : pt1;
             var dir = (ep - sp).GetNormal();
-            
-            return Tuple.Create(roomPt, dir, doorLength, doorWidth);
+            return Tuple.Create(roomPt1, roomPt2, dir, doorLength, doorWidth);
         }
 
         /// <summary>
@@ -179,6 +179,20 @@ namespace ThMEPElectrical.StructureHandleService
         public List<Polyline> GetNeedWalls(List<Polyline> walls, Polyline room)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
+            var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
+
+            return needWalls.Cast<Polyline>().ToList();
+        }
+
+        /// <summary>
+        /// 找到房间内相交的洞口
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public List<Polyline> GetNeedHoles(List<Polyline> holes, Polyline room)
+        {
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(holes.ToCollection());
             var needWalls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room);
 
             return needWalls.Cast<Polyline>().ToList();

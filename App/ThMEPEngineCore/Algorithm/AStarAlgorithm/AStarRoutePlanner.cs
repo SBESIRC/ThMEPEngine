@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 {
@@ -18,10 +19,12 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
     {
         Map<T> map;
         public ICostGetter costGetter { set; get; }
+        public AdjustAStarPath PathAdjuster { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
         public AStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800)
         {
+
             map = new Map<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
 
             if (typeof(T) == typeof(Line))
@@ -32,6 +35,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             {
                 costGetter = new ToPointCostGetter();
             }
+            PathAdjuster = new AdjustAStarPath();
         }
 
         /// <summary>
@@ -42,7 +46,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //设置障碍物
             map.SetObstacle(holes);
         }
-        public void SetRoom(List<Entity> holes)
+        public void SetRoom(List<Line> holes)
         {
             map.SetRoom(holes);
         }
@@ -77,8 +81,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             var resPt = GetPath(lastNode);
 
             //调整路径
-            AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
-            resPt = adjustAStarPath.AdjustPath(resPt, routePlanData.CellMap.obstacles);
+            //AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
+            resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);
             return path;
@@ -102,15 +106,13 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 foreach (CompassDirections direction in allCompassDirections)
                 {
                     Point nextCell = GeometryHelper.GetAdjacentPoint(currenNode.Location, direction);
-                    if (!routePlanData.CellMap.ContainsPt(nextCell)) //相邻点已经在地图之外
+                    if (!routePlanData.CellMap.IsInBounds(nextCell)) //相邻点已经在地图之外
                     {
                         continue;
                     }
 
-                    if (routePlanData.CellMap.obstacles[nextCell.X][nextCell.Y]) //下一个Cell为障碍物
-                    {
+                    if (routePlanData.CellMap.IsObstacle(nextCell))
                         continue;
-                    }
 
                     AStarNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
                     int costG = costGetter.GetGCost(currenNode, direction);   //计算G值

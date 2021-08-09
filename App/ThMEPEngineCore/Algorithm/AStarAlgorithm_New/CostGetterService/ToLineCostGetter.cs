@@ -17,9 +17,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.CostGetterService
             return parentG + currentNode.Location.DistanceTo(nextPt);
         }
 
-        public double GetHCost(Point3d cell, Line endInfo)
+        public double GetHCost(Point3d cell, Point3d endPt)
         {
-            return endInfo.GetClosestPointTo(cell, false).DistanceTo(cell);
+            return endPt.DistanceTo(cell);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
                     {
                         models.AddRange(DoLayout(layoutAType, connectRooms[1], door, columns, walls));
                         models.AddRange(DoLayout(layoutBType, connectRooms[0], door, columns, walls));
-                    }
+                    } 
                 }
             }
 
@@ -103,7 +103,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// </summary>
         /// <param name="connectRoom"></param>
         /// <returns></returns>
-        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
+        public LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
             var roomAInfos = HandleIntrusionAlarmRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
@@ -145,7 +145,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
         /// <param name="roomAType"></param>
         /// <param name="roomBType"></param>
         /// <returns></returns>
-        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
+        public bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
         {
             roomAType = LayoutType.Nothing;
             roomBType = LayoutType.Nothing;

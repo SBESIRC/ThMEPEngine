@@ -98,10 +98,13 @@ namespace ThMEPWSS.Command
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
                 }
+                //调整点位位置
+                var columns = (extractors[0] as ThColumnExtractor).Columns;
+                ThAdjustWashPointPositionService.Adjust(layOutPts, columns);
 
                 // 打印块
                 ThFlushPointUtils.SortWashPoints(layOutPts);
-                var columns = (extractors[0] as ThColumnExtractor).Columns;
+                
                 var walls = new List<Entity>();
                 walls.AddRange((extractors[1] as ThShearwallExtractor).Walls);
                 walls.AddRange((extractors[2] as ThArchitectureExtractor).Walls);
@@ -139,6 +142,9 @@ namespace ThMEPWSS.Command
             washPara.extend_arch = FlushPointVM.Parameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
             // 停车区域的点位可以保护其他空间
             washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
+
+            // 设置点位布置的位置
+            washPara.locate_mode = ThWashLocateMode.Interal;
             return washPara;
         }
 #else

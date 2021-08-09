@@ -39,9 +39,7 @@ namespace TianHua.Hvac.UI.Command
                 return;
             ThDuctPortsDrawService.Move_to_origin(start_point, exclude_line);
             var graph_res = new ThDuctPortsAnalysis(center_lines, exclude_line, Point3d.Origin, in_param);
-            graph_res.Get_start_line(center_lines, Point3d.Origin, out Point3d search_point);
-            graph_res.Set_duct_air_volume(in_param.port_num, search_point, center_lines);
-            graph_res.Set_special_shape_info(search_point);
+            graph_res.Do_anay(in_param.port_num, new ThDuctPortsModifyPort(), center_lines);
             if (graph_res.merged_endlines.Count == 0)
             {
                 ThDuctPortsService.Prompt_msg("选择错误起始点");
@@ -63,16 +61,16 @@ namespace TianHua.Hvac.UI.Command
             using (var db = AcadDatabase.Active())
             {
                 start_point = Get_point_from_prompt("选择起点");
-                if (start_point.DistanceTo(Point3d.Origin) < 1e-3)
-                {
-                    center_lines = new DBObjectCollection();
-                    return;
-                }
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Line)).DxfName,
                     RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
+                if (start_point == null)
+                {
+                    center_lines = new DBObjectCollection();
+                    return;
+                }
                 var sf = ThSelectionFilterTool.Build(dxfNames);
                 center_lines = Get_center_line("请选择中心线", out string layer, sf);
                 if (center_lines.Count == 0)
@@ -83,6 +81,7 @@ namespace TianHua.Hvac.UI.Command
         }
         private bool Get_duct_port_info()
         {
+            in_param.is_redraw = false;
             var dlg = new fmDuctPorts(in_param);
             if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
             {
@@ -141,6 +140,11 @@ namespace TianHua.Hvac.UI.Command
                 var coll = objIds.ToObjectIdCollection();
                 layer = ThDuctPortsDrawService.Get_cur_layer(coll);
                 var lines = Pre_proc(coll);
+                if (lines.Polygonize().Count != 0)
+                {
+                    ThDuctPortsService.Prompt_msg("中心线包含环");
+                    return new DBObjectCollection();
+                }
                 ThDuctPortsDrawService.Remove_ids(objIds);
                 return lines;
             }
@@ -162,9 +166,7 @@ namespace TianHua.Hvac.UI.Command
             var res = ThLaneLineEngine.Explode(service.Clean(lines));
             var extendLines = new DBObjectCollection();
             foreach (Line line in res)
-            {
                 extendLines.Add(line.ExtendLine(1.0));
-            }
             lines = ThLaneLineEngine.Noding(extendLines);
             lines = ThLaneLineEngine.CleanZeroCurves(lines);
             lines = lines.LineMerge();

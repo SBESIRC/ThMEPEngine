@@ -45,5 +45,14 @@ namespace ThMEPElectrical
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THSPPIPE", CommandFlags.Modal)]
+        public void ThSPConnectPipe()
+        {
+            using (var cmd = new ThSecurityPlaneSystemPipeCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

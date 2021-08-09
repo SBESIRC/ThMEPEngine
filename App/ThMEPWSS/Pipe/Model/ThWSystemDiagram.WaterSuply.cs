@@ -1352,7 +1352,7 @@ namespace ThMEPWSS.Pipe.Model
                     }
                     else
                     {
-                        fiNum.Add(Convert.ToInt32(f[i]));
+                        fiNum.Add(Convert.ToInt32(f[i].Trim('B')));
                     }
                 }
                 FloorNumList.Add(fiNum);

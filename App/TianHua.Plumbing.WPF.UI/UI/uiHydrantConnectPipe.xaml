@@ -27,7 +27,7 @@
         <StackPanel Orientation="Vertical" Grid.Row="0">
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" >
                 <Label Content="出图比例:" Margin="0,0,5,0"></Label>
-                <ComboBox Width="70" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="0" SelectedValue="{Binding MapScale}"/>
+                <ComboBox Width="70" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="1" SelectedValue="{Binding MapScale}"/>
             </StackPanel>
             <Rectangle Margin="0,5,0,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
         </StackPanel>

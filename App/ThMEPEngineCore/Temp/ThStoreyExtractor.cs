@@ -17,6 +17,7 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThStoreyExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry,IGroup
     {
+        public Dictionary<string, string> StoreyNumberMap { get; set; }
         public List<StoreyInfo> Storeys { get; private set; }
         private const string FloorNumberPropertyName = "FloorNumber";
         private const string FloorTypePropertyName = "FloorType";
@@ -27,6 +28,7 @@ namespace ThMEPEngineCore.Temp
             Storeys = new List<StoreyInfo>();
             Category = BuiltInCategory.StoreyBorder.ToString();
             TesslateLength = 200.0;
+            StoreyNumberMap = new Dictionary<string, string>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -46,7 +48,28 @@ namespace ThMEPEngineCore.Temp
                 var curve = ThTesslateService.Tesslate(o.Boundary, TesslateLength);
                 o.Boundary = curve as Polyline;
             });
+
+            //空的，地下层过滤
+            Storeys = Storeys.Where(o => o.StoreyNumber.Trim() != "" && !o.StoreyNumber.Contains('B')).ToList();
+            Storeys = Storeys.OrderBy(o => double.Parse(ParseNumbers(o.StoreyNumber)[0])).ToList();
+            for (int i = 1; i <= Storeys.Count; i++)
+            {
+                StoreyNumberMap.Add(Storeys[i - 1].StoreyNumber, i + "F");
+            }
         }
+
+        private List<string> ParseNumbers(string content)
+        {
+            var results = new List<string>();
+            var pattern = @"\d+([.]{1}\d+)?";
+            var rg = new Regex(pattern);
+            foreach(Match match in rg.Matches(content))
+            {
+                results.Add(match.Value.ToString());
+            }
+            return results;
+        }
+
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -55,7 +78,10 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(FloorTypePropertyName, o.StoreyType);
-                geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);                
+                if (o.StoreyNumber == "")
+                    geometry.Properties.Add(FloorNumberPropertyName, o.StoreyNumber);
+                else
+                    geometry.Properties.Add(FloorNumberPropertyName, StoreyNumberMap[o.StoreyNumber]);            
                 geometry.Properties.Add(IdPropertyName, o.Id);
                 geometry.Properties.Add(BasePointPropertyName, o.BasePoint);
                 geometry.Boundary = o.Boundary;

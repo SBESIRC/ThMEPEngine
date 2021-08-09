@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThColumnExtractor : ThExtractorBase, IPrint
     {
-        public List<Polyline> Columns { get; private set; }
+        public List<Polyline> Columns { get; protected set; }
         private List<ThIfcRoom> Rooms { get; set; }
         public ThColumnExtractor()
         {
@@ -84,6 +84,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public void Print(Database database)
         {
             Columns.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+        }
+
+        public override List<Entity> GetEntities()
+        {
+            return Columns.Cast<Entity>().ToList();
         }
     }
 }

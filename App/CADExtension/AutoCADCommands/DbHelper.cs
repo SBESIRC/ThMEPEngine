@@ -284,7 +284,7 @@ namespace Dreambuild.AutoCAD
             {
                 return group.GetAllEntityIds();
             }
-
+            
             return new ObjectId[0];
         }
 

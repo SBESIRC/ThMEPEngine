@@ -63,8 +63,10 @@
     <Compile Include="FireProtectionSystemDiagram\Models\FloorDataModel.cs" />
     <Compile Include="FireProtectionSystemDiagram\Models\LineElementCreate.cs" />
     <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
+    <Compile Include="FlushPoint\Service\ThAdjustWashPointPositionService.cs" />
     <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
+    <Compile Include="HydrantConnectPipe\Command\ThHydrantConnectPipeAdjustPath.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThNonBlockElementExtractor.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThBuildRoom.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
+    <Compile Include="Command\ThUNDPDrainageSystemDiagramCmd.cs" />
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Common\FramedReadUtil.cs" />
     <Compile Include="Common\Model\SystemDiagramModels.cs" />
@@ -370,6 +373,15 @@
     <Compile Include="Pipe\ThWPipeEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletPipeEngine.cs" />
     <Compile Include="Pipe\Tools\ThWPipeOutputFunction.cs" />
+    <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataClassDefinition.cs" />
+    <Compile Include="PressureDrainageSystem\Model\PressureDrainageSystemDiagram.cs" />
+    <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataReader.cs" />
+    <Compile Include="PressureDrainageSystem\Service\PressureDrainageSystemDiagramService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\ImportBlockReferenceService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\PipeLineSystemUnitConstructionService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataClassifyByStoriesService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataCollectionService.cs" />
+    <Compile Include="PressureDrainageSystem\Utils\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CalHolesService.cs" />
     <Compile Include="Service\CheckService.cs" />
@@ -426,6 +438,7 @@
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\ThFlushPointVM.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />

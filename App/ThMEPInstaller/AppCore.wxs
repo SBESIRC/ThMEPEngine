@@ -26,6 +26,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" Guid="{4B788EAB-B95F-44CA-B5CC-522C4472423C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPAnalytics.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" Guid="{5E66590A-F205-44AE-95C8-BB6B9044C888}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPIdentity.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -50,6 +53,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Debug" Guid="{57FF156A-14C7-440F-8EEA-CA2047CAA341}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPAnalytics.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" Guid="{AD69BB3C-DC52-4DD7-B1B1-AC011ECD48DB}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPIdentity.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -73,6 +79,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" Guid="{FF3B9DFA-0E2B-49A3-AF0C-3DFA41BBBA2B}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPAnalytics.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" Guid="{9466B697-F749-4281-841F-A4A6BAEBBEFA}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPIdentity.dll" />
         </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
@@ -99,6 +108,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" Guid="{204C6325-3BAE-4A52-9147-6B9EB2D61BD9}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPAnalytics.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" Guid="{86DE8D9F-01D2-4E74-966F-06EF4113C3FC}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPIdentity.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -123,6 +135,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Release" Guid="{A446F35F-C2F2-4131-A4AC-53C728298ABD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPAnalytics.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" Guid="{4F150AF3-433A-478F-AD8D-7A334D4F3F6F}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPIdentity.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -146,6 +161,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" Guid="{4A170B47-F478-488D-AE33-1E096959281B}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPAnalytics.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" Guid="{1EE334D5-429E-4090-A4DC-17103AA44C12}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPIdentity.dll" />
         </Component>
     </DirectoryRef>
     <?endif?>
@@ -174,6 +192,9 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" />
         <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" />
@@ -196,6 +217,9 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" />
         <?endif?>
     </ComponentGroup>
   </Fragment>

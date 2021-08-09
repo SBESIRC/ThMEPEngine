@@ -1,5 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 {
@@ -15,9 +18,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         double step = 800;
         double avoidHoleDistance = 800;
         double avoidFrameDistance = 200;
-        Polyline polyline = null; //外包框
+        public Polyline polyline = null; //外包框
         List<Polyline> holes = null;
-        List<Entity> rooms = null;
+        List<Line> rooms = null;
         int columns = 0;
         int rows = 0;
         public T endInfo;
@@ -26,7 +29,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         public List<Point> cells = new List<Point>();
         public Dictionary<Point, double> roomCast = new Dictionary<Point, double>();
         public bool[][] obstacles = null; //障碍物位置，维度：Column * Line    
-
+        public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex;
         public Map(Polyline _polyline, Vector3d xDir, T _endInfo, double _step, double _avoidFrameDistance, double _avoidHoleDistance)
         {
             step = _step;
@@ -66,8 +69,17 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         public void SetObstacle(List<Polyline> _holes)
         {
             holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
+
+            DBObjectCollection dbObjColl = new DBObjectCollection();
+            foreach(var h in holes)
+            {
+                var MPolygon = h.ToNTSPolygon().ToDbMPolygon();
+                dbObjColl.Add(MPolygon);
+            }
+
+            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjColl);
         }
-        public void SetRoom(List<Entity> _rooms)
+        public void SetRoom(List<Line> _rooms)
         {
             rooms = _rooms;
         }
@@ -82,14 +94,63 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             this.startPt = mapHelper.SetStartAndEndInfo(_startPt, endInfo);
             if(holes != null)
             {
-                InitObstacle();
+                //InitObstacle();
             }
             
             if(rooms != null)
             {
                 InitRoom();
             }
-            
+        }
+
+        private Polyline CreatePolyline(Point3d pt, int tolerance = 10)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+            pts.Add(new Point2d(pt.X - tolerance, pt.Y - tolerance)); // low left
+            pts.Add(new Point2d(pt.X - tolerance, pt.Y + tolerance)); // high left
+            pts.Add(new Point2d(pt.X + tolerance, pt.Y + tolerance)); // high right
+            pts.Add(new Point2d(pt.X + tolerance, pt.Y - tolerance)); // low right
+            pts.Add(new Point2d(pt.X - tolerance, pt.Y - tolerance)); // low left
+            pl.CreatePolyline(pts);
+            return pl;
+        }
+
+        public bool IsInBounds(Point cell)
+        {
+            Point3d cellPt = mapHelper.TransformMapPoint(cell);
+            return polyline.Contains(cellPt);
+        }
+
+        public bool IsObstacle(Point cell)
+        {
+            Point3d cellPt = mapHelper.TransformMapPoint(cell);
+            var polyline = CreatePolyline(cellPt);
+            var isObstacle = ObstacleSpatialIndex.Intersects(polyline, true);
+            polyline.Dispose();
+            return isObstacle;
+        }
+        public bool IsRoomWell(Point cell1,Point cell2)
+        {
+            Point3d cellPt1 = mapHelper.TransformMapPoint(cell1);
+            Point3d cellPt2 = mapHelper.TransformMapPoint(cell2);
+            var line = new Line(cellPt1, cellPt2);
+            foreach (var room in rooms)
+            {
+                if (room is Line)
+                {
+                    var l = room as Line;
+                    if (l.Length < 10.0)
+                    {
+                        continue;
+                    }
+                    if(l.IsIntersects(line))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -118,17 +179,39 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 
         private void InitRoom()
         {
+            Dictionary<DBPoint, Point> pointCellDic = new Dictionary<DBPoint, Point>();
             foreach (var cell in cells)
             {
                 Point3d cellPt = mapHelper.TransformMapPoint(cell);
-                foreach (var room in rooms)
+                var dbpt = new DBPoint(cellPt);
+                pointCellDic.Add(dbpt, cell);
+            }
+            var cellIndex = new ThCADCoreNTSSpatialIndex(pointCellDic.Keys.ToCollection());
+
+            foreach(var room in rooms)
+            {
+                if(room is Line)
                 {
-                    if (room.ToNTSPolygon().Contains(cellPt.ToNTSPoint()))
+                    var l = room as Line;
+                    if(l.Length < 10.0)
                     {
-                        roomCast.Add(cell, 0.01);
-                        break;
+                        continue;
+                    }
+                    var frame = l.Buffer(300);
+                    var objs = cellIndex.SelectCrossingPolygon(frame);
+                    foreach(var obj in objs)
+                    {
+                        if(!roomCast.ContainsKey(pointCellDic[obj as DBPoint]))
+                        {
+                            roomCast.Add(pointCellDic[obj as DBPoint], 10);
+                        }
                     }
                 }
+            }
+
+            foreach(var item in pointCellDic)
+            {
+                item.Key.Dispose();
             }
         }
 

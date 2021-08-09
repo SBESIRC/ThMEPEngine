@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 {
     public class AdjustAStarPath
     {
-        public List<Point> AdjustPath(List<Point> path, bool[][] obstacles)
+        virtual public List<Point> AdjustPath<T>(List<Point> path, Map<T> map)
         {
             if (path == null || path.Count <= 1)
             {
@@ -18,7 +19,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             }
             var inflectionPoints = path.Where(x => x.IsInflectionPoint).ToList();
 
-            return ReduceInflectionPoint(inflectionPoints, obstacles);
+            return ReduceInflectionPoint<T>(inflectionPoints, map);
         }
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="inflectionPoints"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        private List<Point> ReduceInflectionPoint(List<Point> inflectionPoints, bool[][] obstacles)
+        virtual protected List<Point> ReduceInflectionPoint<T>(List<Point> inflectionPoints, Map<T> map)
         {
             List<Point> path = new List<Point>();
             Point lastPt = inflectionPoints.Last();
@@ -40,7 +41,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 inflectionPoints.Remove(midPt);
 
                 List<Point> midPts = new List<Point>() { midPt };
-                if (AdjustInflectionPoint(inflectionPoints, firPt, obstacles, midPts, out Point nextPt))
+                if (AdjustInflectionPoint<T>(inflectionPoints, firPt, map, midPts, out Point nextPt))
                 {
                     int xValue = midPts.Where(x => x.X == firPt.X).Count() == 0 ? firPt.X : nextPt.X;
                     int yValue = midPts.Where(x => x.Y == firPt.Y).Count() == 0 ? firPt.Y : nextPt.Y;
@@ -72,12 +73,12 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="firPt"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        private bool AdjustInflectionPoint(List<Point> inflectionPoints, Point firPt, bool[][] obstacles, List<Point> midPts, out Point useNextPt)
+        virtual protected bool AdjustInflectionPoint<T>(List<Point> inflectionPoints, Point firPt, Map<T> map, List<Point> midPts, out Point useNextPt)
         {
             useNextPt = inflectionPoints.First();
             foreach (var nextPt in inflectionPoints)
             {
-                if (CheckAdjustPoint(firPt, midPts, nextPt, obstacles))
+                if (CheckAdjustPoint<T>(firPt, midPts, nextPt, map))
                 {
                     useNextPt = nextPt;
                     return true;
@@ -95,17 +96,16 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         /// <param name="nextPt"></param>
         /// <param name="routePlanData"></param>
         /// <returns></returns>
-        private bool CheckAdjustPoint(Point firPt, List<Point> midPts, Point nextPt, bool[][] obstacles)
+        virtual protected bool CheckAdjustPoint<T>(Point firPt, List<Point> midPts, Point nextPt, Map<T> map)
         {
             int yValue = midPts.Where(x => x.Y == firPt.Y).Count() == 0 ? firPt.Y : nextPt.Y;
             int xDir = firPt.X - nextPt.X < 0 ? 1 : -1;
             int xLength = Math.Abs(firPt.X - nextPt.X);
             for (int i = 1; i <= xLength; i++)
             {
-                if (obstacles[firPt.X + xDir * i][yValue])
-                {
+                var pt = new Point(firPt.X + xDir * i, yValue);
+                if (map.IsObstacle(pt))
                     return false;
-                }
             }
 
             int xValue = midPts.Where(x => x.X == firPt.X).Count() == 0 ? firPt.X : nextPt.X;
@@ -113,10 +113,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             int yLength = Math.Abs(firPt.Y - nextPt.Y);
             for (int i = 1; i <= yLength; i++)
             {
-                if (obstacles[xValue][firPt.Y + yDir * i])
-                {
+                var pt = new Point(xValue, firPt.Y + yDir * i);
+
+                if (map.IsObstacle(pt))
                     return false;
-                }
             }
 
             return true;

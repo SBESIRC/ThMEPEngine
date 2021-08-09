@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace ThMEPWSS.Hydrant.Model
 {
@@ -14,7 +15,9 @@ namespace ThMEPWSS.Hydrant.Model
             checkObjectOption = CheckObjectOps.FireHydrant;
             protectStrengthOption = ProtectStrengthOps.DoubleStrand;            
             waterColumnLengthOption = WaterColumnLengthOps.TenMeters;
-            maxProtectDisOption = MaxProtectDisOps.Calculation; 
+            maxProtectDisOption = MaxProtectDisOps.Calculation;
+            reductionFactorOption = ReductionFactorOps.ZeroDotEight;
+            waterColumnAngleOption = WaterColumnAngleOps.FortyFiveDegree;
         }
         private CheckObjectOps checkObjectOption;
         /// <summary>
@@ -205,7 +208,41 @@ namespace ThMEPWSS.Hydrant.Model
             }
         }
 
-        private double k3 = 0.8;
+        private ReductionFactorOps reductionFactorOption;
+        /// <summary>
+        /// 折减系数
+        /// </summary>
+        public ReductionFactorOps ReductionFactorOption
+        {
+            get
+            {
+                return reductionFactorOption;
+            }
+            set
+            {
+                reductionFactorOption = value;
+                RaisePropertyChanged("ReductionFactorOption");
+            }
+
+        }
+
+        private WaterColumnAngleOps waterColumnAngleOption;
+        /// <summary>
+        /// 水柱角度(相对水平)
+        /// </summary>
+        public WaterColumnAngleOps WaterColumnAngleOption
+        {
+            get
+            {
+                return waterColumnAngleOption;
+            }
+            set
+            {
+                waterColumnAngleOption = value;
+                RaisePropertyChanged("WaterColumnAngleOption");
+            }
+
+        }
         /// <summary>
         /// 水龙带能够走到的范围
         /// </summary>
@@ -213,6 +250,8 @@ namespace ThMEPWSS.Hydrant.Model
         {
             get
             {
+                //折减系数
+                double k3 = reductionFactorOption == ReductionFactorOps.ZeroDotEight ? 0.8 : 0.9;
                 return k3 * HoseLength;
             }
         }
@@ -224,7 +263,9 @@ namespace ThMEPWSS.Hydrant.Model
         {
             get
             {
-                return 0.71 * WaterColumnLength;
+                var ang = waterColumnAngleOption == WaterColumnAngleOps.FortyFiveDegree ? 45.0 : 90.0;
+                var rad = ThMEPEngineCore.CAD.ThAuxiliaryUtils.AngToRad(ang);
+                return Math.Sin(rad) * WaterColumnLength;
             }
         }
         /// <summary>
@@ -277,5 +318,34 @@ namespace ThMEPWSS.Hydrant.Model
     {
         TenMeters = 0,
         ThirteenMeters =1,
+    }
+    /// <summary>
+    /// 折减系数
+    /// </summary>
+    public enum ReductionFactorOps
+    {
+        /// <summary>
+        /// 0.8
+        /// </summary>
+        ZeroDotEight,
+        /// <summary>
+        /// 0.9
+        /// </summary>
+        ZeroDotNine
+    }
+
+    /// <summary>
+    /// 水柱角度(相对水平)
+    /// </summary>
+    public enum WaterColumnAngleOps
+    {
+        /// <summary>
+        /// 45°
+        /// </summary>
+        FortyFiveDegree,
+        /// <summary>
+        /// 90°
+        /// </summary>
+        NinetyDegree
     }
 }

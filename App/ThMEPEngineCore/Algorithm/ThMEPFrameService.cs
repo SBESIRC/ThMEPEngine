@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.Algorithm
             return results.Cast<Polyline>().FindByMax(o => o.Area);
         }
 
-        public static bool IsClosed(Polyline frame, double tolerance)
+        public static bool IsClosed(Polyline frame, double tolerance = ThMEPEngineCoreCommon.LOOSE_CLOSED_POLYLINE)
         {
             // 支持真实闭合或视觉闭合
             return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= tolerance);

@@ -21,8 +21,8 @@
         // XDATA
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";
         public const string RegAppName_Model_Foundation = "THCAD_FAN_FOUNDATION";
-        public const string RegAppName_DuctBasic = "THCAD_BASIC";
-        public const string RegAppName_Info = "THCAD_INFO";
+        public const string RegAppName_Duct_Info = "THCAD_HVAC_DUCT_INFO";
+        public const string RegAppName_Duct_Param = "THCAD_HVAC_DUCT_PARAM";
 
         // 图层
         public const string WALLHOLE_LAYER = "H-HOLE";

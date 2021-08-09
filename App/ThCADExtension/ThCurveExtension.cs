@@ -30,16 +30,17 @@ namespace ThCADExtension
         }
 
         //  http://otb.manusoft.com/2013/01/quirkypolyline-exposing-foolish-programmers.htm
+        [Obsolete("Curve的Extend暂时达不到理想的效果，不要调用")]
         public static void Extend(this Curve curve, bool extendStart, double length)
         {
             var delta = length / curve.GetLength();
             if (extendStart)
-            {
-                curve.Extend(extendStart, curve.GetParameterAtDistance(curve.GetDistanceAtParameter(curve.StartParam) * (1 - delta)));
+            { 
+                curve.Extend(curve.GetParameterAtDistance(curve.GetDistanceAtParameter(curve.StartParam) * (1 - delta)));
             }
             else
             {
-                curve.Extend(extendStart, curve.GetParameterAtDistance(curve.GetDistanceAtParameter(curve.EndParam) * (1 + delta)));
+                curve.Extend(curve.GetParameterAtDistance(curve.GetDistanceAtParameter(curve.EndParam) * (1 + delta)));
             }
         }
 
@@ -85,6 +86,11 @@ namespace ThCADExtension
         public static Curve WashClone(this Curve curve)
         {
             return curve.ToCurve3d().ToCurve();
+        }
+
+        public static Vector3d CurveDirection(this Curve curve)
+        {
+            return curve.StartPoint.GetVectorTo(curve.EndPoint).GetNormal();
         }
     }
 }

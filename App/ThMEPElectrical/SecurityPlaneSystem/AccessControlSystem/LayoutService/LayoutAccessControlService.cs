@@ -88,7 +88,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// </summary>
         /// <param name="connectRoom"></param>
         /// <returns></returns>
-        private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
+        public LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
             var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
@@ -130,7 +130,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="roomAType"></param>
         /// <param name="roomBType"></param>
         /// <returns></returns>
-        private bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
+        public bool CalTwoConnectRoom(ThIfcRoom roomA, ThIfcRoom roomB, string floor, out LayoutType roomAType, out LayoutType roomBType)
         {
             roomAType = LayoutType.Nothing;
             roomBType = LayoutType.Nothing;

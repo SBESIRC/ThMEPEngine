@@ -3,6 +3,7 @@ using Autodesk.Windows;
 using System.Collections.Generic;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPIdentity;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -43,8 +44,6 @@ namespace TianHua.AutoCAD.ThCui
                 foreach(RibbonRowPanel rowPanel in panel.Source.Items)
                 {
                     rowPanel.Items.Where(o => o.Text == "专业切换").ForEach(o => o.IsVisible = true);
-                    //rowPanel.Items.Where(o => o.Id == "ID_THLOGIN").ForEach(o => o.IsVisible = false);
-                    //rowPanel.Items.Where(o => o.Id == "ID_THLOGOUT").ForEach(o => o.IsVisible = true);
                 }
             }
         }
@@ -70,33 +69,37 @@ namespace TianHua.AutoCAD.ThCui
                 foreach (RibbonRowPanel rowPanel in panel.Source.Items)
                 {
                     rowPanel.Items.Where(o => o.Text == "专业切换").ForEach(o => o.IsVisible = false);
-                    //rowPanel.Items.Where(o => o.Id == "ID_THLOGIN").ForEach(o => o.IsVisible = true);
-                    //rowPanel.Items.Where(o => o.Id == "ID_THLOGOUT").ForEach(o => o.IsVisible = false);
                 }
             }
         }
 
         public static void ConfigPanelsWithCurrentUser()
         {
-            OpenAllPanels();
-            //if (ThIdentityService.IsLogged())
-            //{
-            //    OpenAllPanels();
-            //}
-            //else
-            //{
-            //    CloseAllPanels();
-            //}
+            if (ThAcsSystemService.Instance.IsLogged)
+            {
+                OpenAllPanels();
+            }
+            else
+            {
+                CloseAllPanels();
+            }
         }
 
         public static void ConfigPanelsWithCurrentProfile()
         {
-            if(Tab==null)
+            if (ThAcsSystemService.Instance.IsLogged)
+            {
+                ConfigPanelsWithProfile(ThAcsSystemService.Instance.MajorCode);
+            }
+        }
+
+        public static void ConfigPanelsWithProfile(string profile)
+        {
+            if (Tab == null)
             {
                 return;
             }
             var panels = Tab.Panels;
-            Profile profile = ThCuiProfileManager.Instance.CurrentProfile;
             foreach (var panel in panels.Where(o => o.UID == "pnl" + "Help"))
             {
                 foreach (RibbonRowPanel rowPanel in panel.Source.Items)
@@ -108,23 +111,20 @@ namespace TianHua.AutoCAD.ThCui
                             IEnumerable<RibbonItem> items = null;
                             switch (profile)
                             {
-                                case Profile.ARCHITECTURE:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _P");
+                                case "A":
+                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THMEPPROFILE _A");
                                     break;
-                                case Profile.CONSTRUCTION:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _A");
+                                case "S":
+                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THMEPPROFILE _S");
                                     break;
-                                case Profile.STRUCTURE:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _S");
+                                case "H":
+                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THMEPPROFILE _H");
                                     break;
-                                case Profile.HAVC:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _H");
+                                case "E":
+                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THMEPPROFILE _E");
                                     break;
-                                case Profile.ELECTRICAL:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _E");
-                                    break;
-                                case Profile.WSS:
-                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THPROFILE _W");
+                                case "W":
+                                    items = splitButton.Items.Where(bt => bt.Id == "ID_THMEPPROFILE _W");
                                     break;
                                 default:
                                     break;

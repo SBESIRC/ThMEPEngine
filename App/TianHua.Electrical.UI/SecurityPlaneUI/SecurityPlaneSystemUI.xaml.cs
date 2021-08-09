@@ -151,6 +151,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             videoBlindArea.Text = ThElectricalUIService.Instance.Parameter.videoBlindArea.ToString();
             videaMaxArea.Text = ThElectricalUIService.Instance.Parameter.videaMaxArea.ToString();
             gtDistance.Text = ThElectricalUIService.Instance.Parameter.gtDistance.ToString();
+            //scale.Text = ThElectricalUIService.Instance.Parameter.scale.ToString();
         }
 
         /// <summary>
@@ -203,6 +204,11 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         }
 
         #region check输入
+        //private bool CheckBlockSize()
+        //{
+
+        //}
+
         /// <summary>
         /// 检查视频监控系统输入
         /// </summary>
@@ -301,6 +307,14 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THGTSYSTEM");
             }
 
+            this.Hide();
+        }
+
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        {
+            //聚焦到CAD
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THSPPIPE");
             this.Hide();
         }
 

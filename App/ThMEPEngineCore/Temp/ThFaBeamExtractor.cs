@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup, ISetStorey
+    public class ThFaBeamExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup, ISetStorey
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Temp
                     parentId = storeyInfo.Id;
                 }
                 geometry.Properties.Add(ParentIdPropertyName, parentId);
-                geometry.Properties.Add(DistanceToFlorPropertyName, o.DistanceToFloor);
+                geometry.Properties.Add(DistanceToFlorPropertyName, GetDistancd(o.DistanceToFloor));
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });
@@ -58,7 +58,12 @@ namespace ThMEPEngineCore.Temp
             else
             {
                 //
-                throw new NotSupportedException();
+                var extractService = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                extractService.Extract(database, pts);
+                extractService.Polys.ForEach(o => Beams.Add(ThIfcLineBeam.Create(o)));
             }
         }
 
@@ -97,6 +102,13 @@ namespace ThMEPEngineCore.Temp
         {
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new StoreyInfo();
+        }
+        private double GetDistancd(double distance)
+        {
+            if (distance > 0)
+                return 0;
+            else
+                return -distance;
         }
     }
 }

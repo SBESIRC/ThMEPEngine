@@ -22,5 +22,7 @@
         public readonly static string ThicknessPropertyName = "Thickness";
         public readonly static string BelongedArchOutlineIdPropertyName = "BelongedArchOutlineId";
         public readonly static string ClassPropertyName = "Class";
+        public readonly static string NeibourFireApartIdsPropertyName = "NeibourFireApartIds";
+        public readonly static string TagPropertyName = "Tag";
     }
 }

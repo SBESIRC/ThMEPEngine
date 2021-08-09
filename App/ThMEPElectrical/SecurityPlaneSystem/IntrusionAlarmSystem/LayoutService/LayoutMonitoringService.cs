@@ -39,11 +39,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, door, doorCenterPt, doorInfo.Item2);
+            var controller = layoutControllerService.LayoutController(structs, door, doorCenterPt, doorInfo.Item3);
 
             //布置探测器
             LayoutHositingDetectorService layoutHositingDetectorService = new LayoutHositingDetectorService();
-            var detector = layoutHositingDetectorService.LayoutDetector(doorInfo.Item1, doorInfo.Item2, door);
+            var detector = layoutHositingDetectorService.LayoutDetector(doorInfo.Item1, doorInfo.Item3, door);
             if (isInfrared)
             {
                 layoutModels.Add(new InfraredHositingDetectorModel() { LayoutPoint = detector.LayoutPoint, LayoutDir = detector.LayoutDir, Room = thRoom });
@@ -86,12 +86,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item2);
+            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item3);
             controller.Room = thRoom;
 
             //布置探测器
             LayoutWallMountingDetectorService wallMountingDetectorService = new LayoutWallMountingDetectorService();
-            var detector = wallMountingDetectorService.LayoutDetector(doorInfo.Item1, doorInfo.Item2, door, doorInfo.Item3, columns, walls, controller);
+            var detector = wallMountingDetectorService.LayoutDetector(doorInfo.Item1, doorInfo.Item3, door, doorInfo.Item4, columns, walls, controller);
 
             layoutModels.Add(controller);
             if (isInfrared)

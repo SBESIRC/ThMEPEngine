@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -83,6 +84,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\WaterColumnAngleBooleanConverter.cs" />
+    <Compile Include="Converter\ReductionFactorBooleanConverter.cs" />
     <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
     <Compile Include="Converter\ProtectStrengthOpsBooleanConverter.cs" />
     <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />
@@ -107,6 +110,12 @@
     </Compile>
     <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
+      <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDPDrainageSystemSet.xaml.cs">
+      <DependentUpon>uiUNDPDrainageSystemSet.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
       <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
@@ -134,6 +143,9 @@
     <Compile Include="UI\uiRainSystemParams.xaml.cs">
       <DependentUpon>uiRainSystemParams.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\uiUNDPressureDrainageSystem.xaml.cs">
+      <DependentUpon>uiUNDPressureDrainageSystem.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiWaterWellPump.xaml.cs">
       <DependentUpon>uiWaterWellPump.xaml</DependentUpon>
@@ -194,6 +206,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\uiUNDPDrainageSystemInfoCheck.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiUNDPDrainageSystemSet.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiDrainageSystemSet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -225,6 +245,10 @@
     <Page Include="UI\uiRainSystemParams.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="UI\uiUNDPressureDrainageSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiWaterWellPump.xaml">
       <SubType>Designer</SubType>

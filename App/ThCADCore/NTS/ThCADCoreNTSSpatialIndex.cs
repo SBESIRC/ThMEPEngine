@@ -52,6 +52,19 @@ namespace ThCADCore.NTS
             return preparedGeometry.Contains(ToNTSGeometry(entity));
         }
 
+        public bool Intersects(Entity entity, bool precisely = false)
+        {
+            var geometry = ToNTSPolygon(entity);
+            var queriedObjs = Query(geometry.EnvelopeInternal);
+
+            if(precisely == false)
+                return queriedObjs.Count > 0;
+
+            var preparedGeometry = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry);
+            var hasIntersection = queriedObjs.Cast<Entity>().Any(o => Intersects(preparedGeometry, o));
+            return hasIntersection;
+        }
+
         private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
         {
             return preparedGeometry.Intersects(ToNTSGeometry(entity));
@@ -234,7 +247,7 @@ namespace ThCADCore.NTS
             return Geometries.Where(o => o.Value == obj).First().Key.UserData;
         }
 
-        private DBObjectCollection Query(Envelope envelope)
+        public DBObjectCollection Query(Envelope envelope)
         {
             var objs = new DBObjectCollection();
             foreach (var geometry in Engine.Query(envelope))

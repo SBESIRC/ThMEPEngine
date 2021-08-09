@@ -82,5 +82,9 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             Walls.CreateGroup(database, ColorIndex);
         }
+        public override List<Entity> GetEntities()
+        {
+            return Walls;
+        }
     }
 }

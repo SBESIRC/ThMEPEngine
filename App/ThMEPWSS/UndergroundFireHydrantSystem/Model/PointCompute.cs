@@ -12,16 +12,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 { 
     class PointCompute
     {
-        public static Line PointInLine(Point3d pt, List<Line> lineList)
+        public static Line PointInLine(Point3d pt, List<Line> lineList, double toleranceForPointIsLineTerm = 10, double toleranceForPointOnLine = 1.0)
         {
-            double Tolerance = 1.0;
             var termPointLine = new Line();
             foreach (var line in lineList)
             {
-                var isOnLine = line.PointOnLine(pt, false, Tolerance);//判断点是否在线上
+                var isOnLine = line.PointOnLine(pt, false, toleranceForPointOnLine);//判断点是否在线上
                 if(isOnLine)//点在线上
                 {
-                    if(!PointIsLineTerm(pt, line))//点不是线的端点
+                    if(!PointIsLineTerm(pt, line, toleranceForPointIsLineTerm))//点不是线的端点
                     {
                         return line;//直接返回
                     }
@@ -63,10 +62,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         }
 
 
-        public static bool PointIsLineTerm(Point3d pt1, Line line)
+        public static bool PointIsLineTerm(Point3d pt1, Line line, double tolerance = 10.0)
         {
-            double Tolerance = 10.0;
-            if (pt1.DistanceTo(line.StartPoint) < Tolerance || pt1.DistanceTo(line.EndPoint) < Tolerance)
+            if (pt1.DistanceTo(line.StartPoint) < tolerance || pt1.DistanceTo(line.EndPoint) < tolerance)
             {
 
                 return true;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;

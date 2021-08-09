@@ -33,7 +33,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var roomStructs = new List<Polyline>(nColumns);
             roomStructs.AddRange(nWalls);
 
-            layoutModels.Add(LayoutEmergencyAlarmButton(roomStructs, roomDoorInfo.Item2, roomDoorInfo.Item1));
+            layoutModels.Add(LayoutEmergencyAlarmButton(roomStructs, roomDoorInfo.Item3, roomDoorInfo.Item1));
 
             return layoutModels;
         }

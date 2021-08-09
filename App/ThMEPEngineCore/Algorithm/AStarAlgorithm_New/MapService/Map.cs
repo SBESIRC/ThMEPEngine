@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         Matrix3d ucsMatrix = Matrix3d.Identity;
         public Polyline polyline = null; //外包框
         public Point3d startPt;
-        public Line endLine;
+        public Point3d endPt;
         public List<Polyline> holes = null;
         public List<Line> cellLines = new List<Line>();
 
@@ -60,11 +60,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         /// </summary> 
         /// <param name="_startPt"></param>
         /// <param name="_endPt"></param>
-        public void SetStartAndEndInfo(Point3d _startPt, Line _endLine)
+        public void SetStartAndEndInfo(Point3d _startPt, Point3d _endPt)
         {
             startPt = _startPt.TransformBy(ucsMatrix);
-            endLine = _endLine.Clone() as Line;
-            endLine.TransformBy(ucsMatrix);
+            endPt = _endPt.TransformBy(ucsMatrix);
             CreateMap();
         }
 
@@ -122,13 +121,13 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
         /// <param name="xDir"></param>
         private void CreateMap()
         {
+            cellLines.Clear();
             var bbox = GetBoungdingBox(polyline);
             var pts = holes.SelectMany(x => x.Vertices().Cast<Point3d>()).ToList();
             pts.AddRange(bbox);
             pts.AddRange(polyline.Vertices().Cast<Point3d>());
             pts.Add(startPt);
-            pts.Add(endLine.StartPoint);
-            pts.Add(endLine.EndPoint);
+            pts.Add(endPt);
             pts.Distinct();
 
             double minX = bbox[0].X;
@@ -144,21 +143,11 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
             });
             var mapLines = FilterRepeatLines(mapXLines);
             mapLines.AddRange(FilterRepeatLines(mapYLines));
-            var handleLines = ThMEPLineExtension.LineSimplifier(mapLines.ToCollection(), 500, 100.0, 1, Math.PI / 180.0);
-            handleLines.AddRange(AddUsefulLines(handleLines, startPt, minX, minY, maxX, maxY));
-            handleLines.AddRange(AddUsefulLines(handleLines, endLine.StartPoint, minX, minY, maxX, maxY));
-            handleLines.AddRange(AddUsefulLines(handleLines, endLine.EndPoint, minX, minY, maxX, maxY));
-            var nodedLines = GetNodedMapLines(handleLines);
+            //var handleLines = ThMEPLineExtension.LineSimplifier(mapLines.ToCollection(), 500, 100.0, 1, Math.PI / 180.0);
+            mapLines.AddRange(AddUsefulLines(mapLines, startPt, minX, minY, maxX, maxY));
+            mapLines.AddRange(AddUsefulLines(mapLines, endPt, minX, minY, maxX, maxY));
+            var nodedLines = GetNodedMapLines(mapLines);
             cellLines = FilterHoleLines(nodedLines);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in cellLines)
-                {
-                    //var S = item;
-                    //S.TransformBy(ucsMatrix.Inverse());
-                    //db.ModelSpace.Add(S);
-                }
-            }
         }
 
         /// <summary>

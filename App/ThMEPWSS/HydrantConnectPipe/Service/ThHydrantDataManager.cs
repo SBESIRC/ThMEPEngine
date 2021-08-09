@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using ThMEPWSS.HydrantConnectPipe.Command;
 using ThMEPWSS.HydrantConnectPipe.Engine;
 using ThMEPWSS.HydrantConnectPipe.Model;
+using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -73,6 +75,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             var buildRoomService = new ThBuildRoomService();
             return buildRoomService.GetBuildRoom(selectArea);
+        }
+
+        public static List<Line> ConnectLine(Point3dCollection selectArea)
+        {
+            var hydrantMainLineService = new ThHydrantPipeLineService();
+            var lines = hydrantMainLineService.GetHydrantMainLine(selectArea);
+            return lines;
         }
     }
 }

@@ -4,7 +4,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using Autodesk.AutoCAD.ApplicationServices;
     using Autodesk.AutoCAD.Colors;
     using Autodesk.AutoCAD.DatabaseServices;
+    using Autodesk.AutoCAD.EditorInput;
     using Autodesk.AutoCAD.Geometry;
+    using Autodesk.AutoCAD.Runtime;
     using DotNetARX;
     using Dreambuild.AutoCAD;
     using Linq2Acad;
@@ -18,6 +20,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using System.Windows.Forms;
     using ThCADCore.NTS;
     using ThCADExtension;
+    using ThMEPEngineCore.Algorithm;
     using ThMEPEngineCore.Engine;
     using ThMEPWSS.Assistant;
     using ThMEPWSS.CADExtensionsNs;
@@ -1274,9 +1277,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         {
                             DrawShortTranslatorLabel(info.Segs.Last().Center, run.IsShortTranslatorToLeftOrRight);
                         }
-                        if (viewModel?.Params?.ShouldRaiseWashingMachine ?? THESAURUSABDOMEN)
-                        {
-                        }
                     }
                     var showAllFloorDrainLabel = THESAURUSABDOMEN;
                     var HasBalconyWashingMachineFloorDrain = THESAURUSABDOMEN;
@@ -1352,8 +1352,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         }
                     }
                 }
-                {
-                }
                 var arr = getPipeRunLocationInfos(basePoint.OffsetX(dx), thwPipeLine, j);
                 handlePipeLine(thwPipeLine, arr);
                 static void drawLabel(Point2d basePt, string text1, string text2, bool isLeftOrRight)
@@ -1395,10 +1393,22 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     }
                 }
                 {
-                    var _storeys = new string[] { allNumStoreyLabels.GetAt(THESAURUSACCIDENT), allNumStoreyLabels.GetLastOrDefault(THESAURUSACCUSTOMED) }.SelectNotNull().Distinct().ToList();
+                    var _allSmoothStoreys = new List<string>();
+                    for (int i = QUOTATIONSHAKES; i < allNumStoreyLabels.Count; i++)
+                    {
+                        var run = runs.TryGet(i);
+                        if (run != null)
+                        {
+                            if (!run.HasLongTranslator && !run.HasShortTranslator)
+                            {
+                                _allSmoothStoreys.Add(allNumStoreyLabels[i]);
+                            }
+                        }
+                    }
+                    var _storeys = new string[] { _allSmoothStoreys.GetAt(THESAURUSACCIDENT), _allSmoothStoreys.GetLastOrDefault(THESAURUSACCUSTOMED) }.SelectNotNull().Distinct().ToList();
                     if (_storeys.Count == QUOTATIONSHAKES)
                     {
-                        _storeys = new string[] { allNumStoreyLabels.FirstOrDefault(), allNumStoreyLabels.LastOrDefault() }.SelectNotNull().Distinct().ToList();
+                        _storeys = new string[] { _allSmoothStoreys.FirstOrDefault(), _allSmoothStoreys.LastOrDefault() }.SelectNotNull().Distinct().ToList();
                     }
                     _storeys = _storeys.Where(storey =>
                     {
@@ -1719,9 +1729,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (output.HasCleaningPort2) DrawCleaningPort(segs[THESAURUSACCIDENT].StartPoint.ToPoint3d(), THESAURUSABDOMEN, THESAURUSACCESSION);
             DrawCleaningPort(segs[THESAURUSACCUSE].EndPoint.ToPoint3d(), THESAURUSABDOMINAL, THESAURUSACCIDENT);
         }
-        public static void CollectFloorListDatasEx()
+        public static void CollectFloorListDatasEx(bool focus)
         {
-            static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<ThMEPWSS.Model.FloorFramed> resFloors)
+            static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb, List<BlockReference> brs)
             {
                 var ctx = new StoreyContext();
                 if (range != null)
@@ -1732,7 +1742,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 else
                 {
-                    ctx.thStoreys = resFloors.Select(x => new ThMEPEngineCore.Model.Common.ThStoreys(x.blockId)).ToList();
+                    ctx.thStoreys = brs.Select(x => new ThMEPEngineCore.Model.Common.ThStoreys(x.ObjectId)).ToList();
                 }
                 var storeys = new List<ThStoreysData>();
                 foreach (var s in ctx.thStoreys)
@@ -1750,13 +1760,27 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 ctx.thStoreysDatas = storeys;
                 return ctx;
             }
-            FocusMainWindow();
-            if (ThMEPWSS.Common.FramedReadUtil.SelectFloorFramed(out List<ThMEPWSS.Model.FloorFramed> resFloors))
             {
-                var ctx = commandContext;
-                using var adb = AcadDatabase.Active();
-                ctx.StoreyContext = GetStoreyContext(null, adb, resFloors);
-                InitFloorListDatas(adb);
+                var options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = THESAURUSABDOMEN,
+                    MessageForAdding = THESAURUSALTERNATE,
+                };
+                var dxfNames = new string[]
+                {
+                        RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                if (focus) FocusMainWindow();
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var ctx = commandContext;
+                    using var adb = AcadDatabase.Active();
+                    var selectedIds = result.Value.GetObjectIds();
+                    ctx.StoreyContext = GetStoreyContext(null, adb, selectedIds.Select(x => adb.Element<BlockReference>(x)).Where(x => x.GetEffectiveName() == ALTERNATIVENESS).ToList());
+                    InitFloorListDatas(adb);
+                }
             }
         }
         public static void InitFloorListDatas(AcadDatabase adb)
@@ -1822,9 +1846,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData);
             return CreateDrainageDrawingData(adb, out drDatas, noWL, geoData);
         }
-        public static bool CollectDrainageData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = THESAURUSABDOMEN)
+        public static bool CollectDrainageData(AcadDatabase adb, out List<StoreysItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = THESAURUSABDOMEN)
         {
-            CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData, ctx);
+            CollectDrainageGeoData(adb, out storeysItems, out DrainageGeoData geoData, ctx);
             return CreateDrainageDrawingData(adb, out drDatas, noWL, geoData);
         }
         public static List<StoreysItem> GetStoreysItem(List<ThStoreysData> storeys)
@@ -1858,18 +1882,18 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             return storeysItems;
         }
-        public static List<ThStoreysData> GetStoreys(Geometry range, AcadDatabase adb, CommandContext ctx)
+        public static List<ThStoreysData> GetStoreys(AcadDatabase adb, CommandContext ctx)
         {
             return ctx.StoreyContext.thStoreysDatas;
         }
-        public static void CollectDrainageGeoData(Geometry range, AcadDatabase adb, out List<StoreysItem> storeysItems, out DrainageGeoData geoData, CommandContext ctx)
+        public static void CollectDrainageGeoData(AcadDatabase adb, out List<StoreysItem> storeysItems, out DrainageGeoData geoData, CommandContext ctx)
         {
-            var storeys = GetStoreys(range, adb, ctx);
+            var storeys = GetStoreys(adb, ctx);
             FixStoreys(storeys);
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
-            DrainageService.CollectGeoData(range, adb, geoData, ctx);
+            DrainageService.CollectGeoData(adb, geoData, ctx);
         }
         public static List<ThStoreysData> GetStoreys(Point3dCollection range, AcadDatabase adb)
         {
@@ -1910,9 +1934,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             geoData.Init();
             DrainageService.CollectGeoData(range, adb, geoData);
         }
-        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
+        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel, bool focus)
         {
-            FocusMainWindow();
+            if (focus) FocusMainWindow();
             if (commandContext == null) return;
             if (commandContext.StoreyContext == null) return;
             if (commandContext.StoreyContext.thStoreysDatas == null) return;
@@ -1934,7 +1958,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 else
                 {
-                    if (!CollectDrainageData(GeoFac.CreateGeometryEx(storeys.Select(x => x.Boundary.ToPolygon()).Cast<Geometry>().ToList()), adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSABDOMINAL)) return;
+                    if (!CollectDrainageData(adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSABDOMINAL)) return;
                 }
                 var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys);
                 var allNumStoreyLabels = allNumStoreys.Select(i => i + UNINTENTIONALLY).ToList();
@@ -2529,7 +2553,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         var _hasLong = hasLong(fl, storey, PipeType.FL);
                         item.Items.Add(new DrainageGroupingPipeItem.ValueItem()
                         {
-                            Exist = testExist(fl, storey),
+                            Exist = IsFL0(fl) ? THESAURUSABDOMINAL : testExist(fl, storey),
                             HasLong = _hasLong,
                             HasShort = hasShort(fl, storey, PipeType.FL),
                             HasKitchenWashingMachine = HasKitchenWashingMachine(fl, storey),
@@ -3156,6 +3180,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     {
         public static void PreFixGeoData(DrainageGeoData geoData)
         {
+            foreach (var ct in geoData.Labels)
+            {
+                ct.Text = FixVerticalPipeLabel(ct.Text);
+            }
+            geoData.FixData();
             for (int i = QUOTATIONSHAKES; i < geoData.LabelLines.Count; i++)
             {
                 var seg = geoData.LabelLines[i];
@@ -3181,6 +3210,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             {
                 geoData.WashingMachines = GeoFac.GroupGeometries(geoData.WashingMachines.Select(x => x.ToPolygon()).Cast<Geometry>().ToList()).Select(x => GeoFac.CreateGeometryEx(x).Envelope.ToGRect()).ToList();
+                geoData.FloorDrains = GeoFac.GroupGeometries(geoData.FloorDrains.Select(x => x.ToPolygon()).Cast<Geometry>().ToList()).Select(x => GeoFac.CreateGeometryEx(x).Envelope.ToGRect()).ToList();
+                geoData.FloorDrains = geoData.FloorDrains.Where(x => x.Width < THESAURUSADDICTION && x.Height < THESAURUSADDICTION).ToList();
             }
             {
                 geoData.Labels = geoData.Labels.Distinct(CreateEqualityComparer<CText>((x, y) => x.Text == y.Text && x.Boundary.EqualsTo(y.Boundary, THESAURUSACCLAIM))).ToList();
@@ -3205,24 +3236,17 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 geoData.VerticalPipes = pipes.Where(x => x.UserData == null).Select(pipes).ToList(_pipes);
             }
-            {
-                foreach (var ct in geoData.Labels)
-                {
-                    if (ct.Text.StartsWith(THESAURUSADMINISTRATION))
-                    {
-                        ct.Text = ct.Text.Substring(THESAURUSACCUSTOMED);
-                    }
-                    else if (ct.Text.StartsWith(ADMINISTRATIVUS))
-                    {
-                        ct.Text = ct.Text.Substring(THESAURUSACCIDENT);
-                    }
-                }
-            }
         }
         public static void ConnectLabelToLabelLine(DrainageGeoData geoData)
         {
+            static bool f(string s)
+            {
+                if (s == null) return THESAURUSABDOMEN;
+                if (IsMaybeLabelText(s)) return THESAURUSABDOMINAL;
+                return THESAURUSABDOMEN;
+            }
             var lines = geoData.LabelLines.Distinct().ToList();
-            var bds = geoData.Labels.Select(x => x.Boundary).ToList();
+            var bds = geoData.Labels.Where(x => f(x.Text)).Select(x => x.Boundary).ToList();
             var lineHs = lines.Where(x => x.IsHorizontal(THESAURUSACCLAIM)).ToList();
             var lineHGs = lineHs.Select(x => x.ToLineString()).ToList();
             var f1 = GeoFac.CreateContainsSelector(lineHGs);
@@ -3242,31 +3266,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
-        public static bool IsNotedLabel(string label)
-        {
-            return label.Contains(ADMINISTRATIVELY) || label.Contains(THESAURUSAIRING);
-        }
-        public static bool IsWantedLabelText(string label)
-        {
-            if (label == null) return THESAURUSABDOMEN;
-            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label);
-        }
-        public static bool IsMaybeLabelText(string label)
-        {
-            if (label == null) return THESAURUSABDOMEN;
-            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label)
-                || label.StartsWith(THESAURUSABILITY) || label.StartsWith(ABITURIENTENEXAMEN) || label.StartsWith(THESAURUSABJECT) || label.StartsWith(THESAURUSABJURE)
-                || label.Contains(ADMINISTRATIVELY)
-                || label.StartsWith(ADMINISTRATORSHIP) || label.StartsWith(ADMINISTRATRESS)
-                || label.StartsWith(THESAURUSADMINISTRATOR) || label.StartsWith(ADMINISTRATRICE)
-                ;
-        }
     }
-    public class ThDrainageSystemServiceGeoCollector
+    public class ThDrainageSystemServiceGeoCollector3
     {
         public AcadDatabase adb;
         public DrainageGeoData geoData;
-        public List<Entity> entities;
         List<GLineSegment> labelLines => geoData.LabelLines;
         List<CText> cts => geoData.Labels;
         List<GLineSegment> dlines => geoData.DLines;
@@ -3278,67 +3282,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         List<GRect> waterPorts => geoData.WaterPorts;
         List<string> waterPortLabels => geoData.WaterPortLabels;
         List<GRect> storeys => geoData.Storeys;
-        List<Point2d> cleaningPorts => geoData.CleaningPorts;
         List<GRect> washingMachines => geoData.WashingMachines;
         List<GRect> mopPools => geoData.MopPools;
         List<GRect> basins => geoData.Basins;
         List<GRect> pipeKillers => geoData.PipeKillers;
-        public void CollectStoreys(Geometry range, CommandContext ctx)
+        public void CollectStoreys(CommandContext ctx)
         {
             storeys.AddRange(ctx.StoreyContext.thStoreysDatas.Select(x => x.Boundary));
-        }
-        public void CollectKillers()
-        {
-            foreach (var c in entities.Where(x => x.Layer is DISSATISFACTION))
-            {
-                washingMachines.Add(c.Bounds.ToGRect());
-            }
-            DoExtract(adb, (br, m) =>
-            {
-                var ok = THESAURUSABDOMEN;
-                var basinNames = new List<string>() { THESAURUSALACRITY, AUTOBIOGRAPHICAL, QUOTATIONPERFIDIOUS, CRYSTALLIZATION, THESAURUSALCOHOL, THESAURUSALCOHOLIC, THESAURUSALCOVE };
-                var washingMachinesNames = new List<string>() { QUOTATION1BBLACK, REPRESENTATIVES };
-                var mopPoolNames = new List<string>() { PHYSIOTHERAPIST, };
-                var killerNames = new List<string>() { THESAURUSALCOVE, ADMINISTRATIONS, QUOTATIONALFVÉN, MAGNETOHYDRODYNAMIC, MAGNETOHYDRODYNAMICS, EXTRATERRESTRIAL, THESAURUSALIENATE, THESAURUSALIENATION };
-                var name = br.GetEffectiveName();
-                if (killerNames.Any(x => name.Contains(x)))
-                {
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    if (!r.IsValid) return THESAURUSABDOMINAL;
-                    pipeKillers.Add(r);
-                    if (name.Contains(QUOTATION1BBLACK))
-                    {
-                        washingMachines.Add(r);
-                    }
-                    ok = THESAURUSABDOMINAL;
-                }
-                if (basinNames.Any(x => name.Contains(x)))
-                {
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    if (!r.IsValid) return THESAURUSABDOMINAL;
-                    basins.Add(r);
-                    ok = THESAURUSABDOMINAL;
-                }
-                if (washingMachinesNames.Any(x => name.Contains(x)))
-                {
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    if (!r.IsValid) return THESAURUSABDOMINAL;
-                    washingMachines.Add(r);
-                    ok = THESAURUSABDOMINAL;
-                }
-                if (mopPoolNames.Any(x => name.Contains(x)))
-                {
-                    var e = br.GetTransformedCopy(m);
-                    var r = e.Bounds.ToGRect();
-                    if (!r.IsValid) return THESAURUSABDOMINAL;
-                    mopPools.Add(r);
-                    ok = THESAURUSABDOMINAL;
-                }
-                return ok;
-            });
         }
         public void CollectStoreys(Point3dCollection range)
         {
@@ -3350,313 +3300,442 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 storeys.Add(bd);
             }
         }
+        const int distinguishDiameter = THESAURUSACCUSATION;
+        private void handleEntity(Entity entity, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
+        {
+            if (!IsLayerVisible(entity)) return;
+            if (isInXref)
+            {
+                return;
+            }
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            {
+                static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABORTIVE or THESAURUSABSORBENT or THESAURUSABRASIVE or QUOTATIONABSORBENT or ELECTROMAGNETIC or CHARACTERISTICALLY or THESAURUSABSORPTION;
+                if (f(entity.Layer) && entity is Line line && line.Length > QUOTATIONSHAKES)
+                {
+                    var seg = line.ToGLineSegment().TransformBy(matrix);
+                    reg(fs, seg, labelLines);
+                    return;
+                }
+            }
+            {
+                static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABSENCE or THESAURUSABUNDANT or THESAURUSALIGHT or THESAURUSABRASIVE or THESAURUSABYSMAL or THESAURUSAMAZEMENT;
+                if (entity is Circle c && distinguishDiameter <= c.Radius && c.Radius <= INATTENTIVENESS && f(entity.Layer))
+                {
+                    var bd = c.Bounds.ToGRect().TransformBy(matrix);
+                    reg(fs, bd, pipes);
+                    return;
+                }
+            }
+            {
+                static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABORTIVE or THESAURUSABSORBENT or THESAURUSABRASIVE or QUOTATIONABSORBENT or THESAURUSABSENCE or ELECTROMAGNETIC or CHARACTERISTICALLY or THESAURUSABSORPTION or THESAURUSABUNDANT or THESAURUSABYSMAL;
+                if (entity is Circle c)
+                {
+                    if (distinguishDiameter <= c.Radius && c.Radius <= INATTENTIVENESS)
+                    {
+                        if (f(c.Layer))
+                        {
+                            var r = c.Bounds.ToGRect().TransformBy(matrix);
+                            reg(fs, r, pipes);
+                            return;
+                        }
+                    }
+                }
+            }
+            if (entity.Layer is THESAURUSABSTAIN or THESAURUSABSTEMIOUS)
+            {
+                if (entity is Line line && line.Length > QUOTATIONSHAKES)
+                {
+                    var seg = line.ToGLineSegment().TransformBy(matrix);
+                    reg(fs, seg, dlines);
+                    return;
+                }
+                else if (entity is Polyline pl)
+                {
+                    foreach (var ln in pl.ExplodeToDBObjectCollection().OfType<Line>())
+                    {
+                        var seg = ln.ToGLineSegment().TransformBy(matrix);
+                        reg(fs, seg, dlines);
+                    }
+                    return;
+                }
+                if (dxfName is CONVENTIONALIZED)
+                {
+                    dynamic o = entity;
+                    var seg = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(matrix);
+                    reg(fs, seg, dlines);
+                    return;
+                }
+            }
+            if (dxfName is CONVENTIONALIZED)
+            {
+                if (entity.Layer is THESAURUSABSTRUSE or THESAURUSABSENCE or THESAURUSABSENT)
+                {
+                    foreach (var c in entity.ExplodeToDBObjectCollection().OfType<Circle>().Where(IsLayerVisible))
+                    {
+                        if (c.Radius > distinguishDiameter)
+                        {
+                            var bd = c.Bounds.ToGRect().TransformBy(matrix);
+                            reg(fs, bd, pipes);
+                        }
+                    }
+                }
+            }
+            if (dxfName == THESAURUSACCELERATE)
+            {
+                dynamic o = entity.AcadObject;
+                var text = (string)o.DimStyleText + THESAURUSACCEPT + (string)o.VPipeNum;
+                var colle = entity.ExplodeToDBObjectCollection();
+                var ts = new List<DBText>();
+                foreach (var e in colle.OfType<Entity>().Where(IsLayerVisible))
+                {
+                    if (e is Line line)
+                    {
+                        if (line.Length > QUOTATIONSHAKES)
+                        {
+                            var seg = line.ToGLineSegment().TransformBy(matrix);
+                            reg(fs, seg, labelLines);
+                            continue;
+                        }
+                    }
+                    else if (e.GetRXClass().DxfName.ToUpper() == THESAURUSACCELERATION)
+                    {
+                        ts.AddRange(e.ExplodeToDBObjectCollection().OfType<DBText>().Where(IsLayerVisible));
+                        continue;
+                    }
+                }
+                if (ts.Count > QUOTATIONSHAKES)
+                {
+                    GRect bd;
+                    if (ts.Count == THESAURUSACCESSION) bd = ts[QUOTATIONSHAKES].Bounds.ToGRect();
+                    else
+                    {
+                        bd = GeoFac.CreateGeometry(ts.Select(x => x.Bounds.ToGRect()).Where(x => x.IsValid).Select(x => x.ToPolygon())).EnvelopeInternal.ToGRect();
+                    }
+                    bd = bd.TransformBy(matrix);
+                    var ct = new CText() { Text = text, Boundary = bd };
+                    if (IsMaybeLabelText(ct.Text)) reg(fs, ct, cts);
+                }
+                return;
+            }
+            {
+                static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABORTIVE or THESAURUSABRASIVE or QUOTATIONABSORBENT or ELECTROMAGNETIC or CHARACTERISTICALLY or THESAURUSABSORPTION;
+                static bool g(string t) => !t.StartsWith(THESAURUSACCENT) && !t.ToLower().Contains(PLENIPOTENTIARY) && !t.ToUpper().Contains(THESAURUSAMBASSADOR);
+                if (entity is DBText dbt && f(entity.Layer) && g(dbt.TextString))
+                {
+                    var bd = dbt.Bounds.ToGRect().TransformBy(matrix);
+                    var ct = new CText() { Text = dbt.TextString, Boundary = bd };
+                    if (IsMaybeLabelText(ct.Text)) reg(fs, ct, cts);
+                    return;
+                }
+            }
+            if (dxfName == THESAURUSACCELERATION)
+            {
+                dynamic o = entity.AcadObject;
+                string text = o.Text;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    var ct = new CText() { Text = text, Boundary = entity.Bounds.ToGRect().TransformBy(matrix) };
+                    if (IsMaybeLabelText(ct.Text)) reg(fs, ct, cts);
+                }
+                return;
+            }
+            if (dxfName == THESAURUSADULTERATE)
+            {
+                var colle = entity.ExplodeToDBObjectCollection();
+                {
+                    foreach (var e in colle.OfType<Entity>().Where(e => e.GetRXClass().DxfName.ToUpper() is THESAURUSACCELERATION or QUOTATIONALMAIN).Where(IsLayerVisible))
+                    {
+                        foreach (var dbt in e.ExplodeToDBObjectCollection().OfType<DBText>().Where(x => !string.IsNullOrWhiteSpace(x.TextString)).Where(IsLayerVisible))
+                        {
+                            var bd = dbt.Bounds.ToGRect().TransformBy(matrix);
+                            var ct = new CText() { Text = dbt.TextString, Boundary = bd };
+                            if (IsMaybeLabelText(ct.Text)) reg(fs, ct, cts);
+                        }
+                    }
+                    foreach (var seg in colle.OfType<Line>().Where(x => x.Length > QUOTATIONSHAKES).Where(IsLayerVisible).Select(x => x.ToGLineSegment().TransformBy(matrix)))
+                    {
+                        reg(fs, seg, labelLines);
+                    }
+                }
+                return;
+            }
+        }
+        private void handleBlockReference(BlockReference br, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
+        {
+            if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
+            if (!br.Visible) return;
+            if (IsLayerVisible(br))
+            {
+                var name = br.GetEffectiveName();
+                if (name is THESAURUSACCEPTANCE)
+                {
+                    var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                    var lb = br.GetAttributesStrValue(THESAURUSACCEPT) ?? THESAURUSACCEPTABLE;
+                    reg(fs, bd, () =>
+                    {
+                        waterPorts.Add(bd);
+                        waterPortLabels.Add(lb);
+                    });
+                    return;
+                }
+                if (name.Contains(ACKNOWLEDGEMENT) || name is ADSIGNIFICATION)
+                {
+                    var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                    reg(fs, bd, floorDrains);
+                    return;
+                }
+                {
+                    static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABSENCE or THESAURUSABUNDANT or THESAURUSALIGHT or THESAURUSABRASIVE;
+                    if (name is THESAURUSABSTRACTION or THESAURUSABUSIVE)
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(INCOMPREHENSIBLE);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name.Contains(THESAURUSABSURD))
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(INCOMPREHENSIBILITY);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name is AMBIDEXTROUSNESS)
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(THESAURUSABSOLUTE);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name is THESAURUSACADEMIC && br.Layer is QUOTATIONABYSSINIAN or THESAURUSABSENT or THESAURUSABSTAIN)
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(THESAURUSABSOLUTE);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name is ACANTHOPTERYGII && br.Layer is HYPOCHONDRIACAL)
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(THESAURUSABSOLUTE);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name is THESAURUSABSTRACTION or THESAURUSABUSIVE)
+                    {
+                        var bd = GRect.Create(br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix), INCOMPREHENSIBLE);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                    if (name.Contains(THESAURUSABSURD))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
+                }
+                if (name.Contains(THESAURUSABSTRACT))
+                {
+                    var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                    if (bd.IsValid)
+                    {
+                        if (bd.Width < THESAURUSABSTRACTED && bd.Height < THESAURUSABSTRACTED)
+                        {
+                            reg(fs, bd, wrappingPipes);
+                        }
+                    }
+                    return;
+                }
+                {
+                    var ok = THESAURUSABDOMEN;
+                    if (killerNames.Any(x => name.Contains(x)))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, pipeKillers);
+                        ok = THESAURUSABDOMINAL;
+                        var x = adb.Layers.Element(br.Layer);
+                    }
+                    if (basinNames.Any(x => name.Contains(x)))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, basins);
+                        ok = THESAURUSABDOMINAL;
+                    }
+                    if (washingMachinesNames.Any(x => name.Contains(x)))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, washingMachines);
+                        ok = THESAURUSABDOMINAL;
+                    }
+                    if (mopPoolNames.Any(x => name.Contains(x)))
+                    {
+                        var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                        reg(fs, bd, mopPools);
+                        ok = THESAURUSABDOMINAL;
+                    }
+                    if (ok) return;
+                }
+            }
+            var btr = adb.Element<BlockTableRecord>(br.BlockTableRecord);
+            if (!IsWantedBlock(btr)) return;
+            var _fs = new List<KeyValuePair<Geometry, Action>>();
+            foreach (var objId in btr)
+            {
+                var dbObj = adb.Element<Entity>(objId);
+                if (dbObj is BlockReference b)
+                {
+                    handleBlockReference(b, br.BlockTransform.PreMultiplyBy(matrix), _fs);
+                }
+                else
+                {
+                    handleEntity(dbObj, br.BlockTransform.PreMultiplyBy(matrix), _fs);
+                }
+            }
+            {
+                var lst = new List<KeyValuePair<Geometry, Action>>();
+                var info = br.XClipInfo();
+                if (info.IsValid)
+                {
+                    info.TransformBy(br.BlockTransform.PreMultiplyBy(matrix));
+                    var gf = info.PreparedPolygon;
+                    foreach (var kv in _fs)
+                    {
+                        if (gf.Intersects(kv.Key))
+                        {
+                            lst.Add(kv);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var kv in _fs)
+                    {
+                        lst.Add(kv);
+                    }
+                }
+                fs.AddRange(lst);
+            }
+        }
+        readonly List<string> basinNames = new List<string>() { THESAURUSALACRITY, AUTOBIOGRAPHICAL, QUOTATIONPERFIDIOUS, CRYSTALLIZATION, THESAURUSALCOHOL, THESAURUSALCOHOLIC, THESAURUSALCOVE };
+        readonly List<string> mopPoolNames = new List<string>() { PHYSIOTHERAPIST, };
+        readonly List<string> killerNames = new List<string>() { THESAURUSALCOVE, ADMINISTRATIONS, QUOTATIONALFVÉN, MAGNETOHYDRODYNAMIC, MAGNETOHYDRODYNAMICS, EXTRATERRESTRIAL, THESAURUSALIENATE, THESAURUSALIENATION };
+        readonly List<string> washingMachinesNames = new List<string>() { QUOTATION1BBLACK, REPRESENTATIVES };
+        bool isInXref;
         public void CollectEntities()
         {
-            IEnumerable<Entity> GetEntities()
+            foreach (var entity in adb.ModelSpace.OfType<Entity>())
             {
-                foreach (var ent in adb.ModelSpace.OfType<Entity>())
                 {
-                    if (ent is BlockReference br && br.ObjectId.IsValid)
+                    if (entity.Layer is DISSATISFACTION)
                     {
-                        if (br.Layer == THESAURUSABOLITION)
+                        var bd = entity.Bounds.ToGRect();
+                        if (bd.IsValid)
                         {
-                            var r = br.Bounds.ToGRect();
-                            if (r.Width > THESAURUSABOMINABLE && r.Width < THESAURUSABOMINATE && r.Height > THESAURUSABOMINATION)
-                            {
-                                foreach (var e in br.ExplodeToDBObjectCollection().OfType<Entity>())
-                                {
-                                    yield return e;
-                                }
-                            }
+                            washingMachines.Add(bd);
                         }
-                        else if (
-                             (br.Layer == THESAURUSABORIGINAL && br.ObjectId.IsValid && br.GetEffectiveName() == THESAURUSABORTION)
-                             || (br.Layer == THESAURUSABORTIVE && br.ObjectId.IsValid && br.GetEffectiveName() == THESAURUSABOUND)
-                              || (br.Layer == THESAURUSABOLITION && br.ObjectId.IsValid && br.GetEffectiveName() == THESAURUSABRASION
-                              || (br.Layer is THESAURUSABRASIVE or THESAURUSABREAST && br.ObjectId.IsValid && br.GetEffectiveName() is THESAURUSABRIDGE))
-                             )
+                        return;
+                    }
+                }
+                if (entity is BlockReference br)
+                {
+                    if (!br.BlockTableRecord.IsValid) continue;
+                    var btr = adb.Blocks.Element(br.BlockTableRecord);
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    Action f = null;
+                    try
+                    {
+                        isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
+                        handleBlockReference(br, Matrix3d.Identity, _fs);
+                    }
+                    finally
+                    {
+                        isInXref = THESAURUSABDOMEN;
+                    }
+                    {
+                        var info = br.XClipInfo();
+                        if (info.IsValid)
                         {
-                            foreach (var e in br.ExplodeToDBObjectCollection().OfType<Entity>())
+                            info.TransformBy(br.BlockTransform);
+                            var gf = info.PreparedPolygon;
+                            foreach (var kv in _fs)
                             {
-                                yield return e;
-                            }
-                        }
-                        else if (br.Layer == THESAURUSABORIGINAL)
-                        {
-                            var r = br.Bounds.ToGRect();
-                            if (r.Width > THESAURUSABRIDGEMENT && r.Height > THESAURUSABROAD)
-                            {
-                                foreach (var e in br.ExplodeToDBObjectCollection().OfType<Entity>())
+                                if (gf.Intersects(kv.Key))
                                 {
-                                    yield return e;
-                                }
-                            }
-                        }
-                        else if (br.Layer == AUTHORITATIVELY && br.ObjectId.IsValid && br.GetEffectiveName() == THESAURUSABROGATION)
-                        {
-                            var r = br.Bounds.ToGRect();
-                            if (r.Width > THESAURUSABRIDGEMENT && r.Height > THESAURUSABRUPT)
-                            {
-                                foreach (var e in br.ExplodeToDBObjectCollection().OfType<BlockReference>())
-                                {
-                                    if (e.Layer == THESAURUSABORIGINAL)
-                                    {
-                                        r = br.Bounds.ToGRect();
-                                        if (r.Width > THESAURUSABRIDGEMENT && r.Height > THESAURUSABRUPT)
-                                        {
-                                            foreach (var ee in e.ExplodeToDBObjectCollection().OfType<Entity>())
-                                            {
-                                                yield return ee;
-                                            }
-                                        }
-                                    }
+                                    f += kv.Value;
                                 }
                             }
                         }
                         else
                         {
-                            yield return ent;
-                        }
-                    }
-                    else
-                    {
-                        yield return ent;
-                    }
-                }
-            }
-            {
-                foreach (var br in adb.ModelSpace.OfType<BlockReference>().Where(e => e.Layer == THESAURUSABOLITION && e.ObjectId.IsValid && e.GetEffectiveName() == THESAURUSABSCESS))
-                {
-                    foreach (var e in br.ExplodeToDBObjectCollection().OfType<BlockReference>())
-                    {
-                        if (e.Layer is THESAURUSABSCOND or THESAURUSABSENCE or THESAURUSABSENT)
-                        {
-                            pipes.Add(e.Bounds.ToGRect().Center.ToGRect(THESAURUSABSOLUTE));
-                        }
-                    }
-                }
-            }
-            var entities = GetEntities().ToList();
-            this.entities = entities;
-        }
-        public void CollectCleaningPorts()
-        {
-            {
-                static bool f(string layer) => layer == THESAURUSABSENT;
-                Point3d? pt = null;
-                foreach (var e in entities.OfType<BlockReference>().Where(x => f(x.Layer) && x.ObjectId.IsValid && x.GetEffectiveName() == THESAURUSABSOLUTION))
-                {
-                    if (!pt.HasValue)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(e.BlockTableRecord);
-                        var r = blockTableRecord.GeometricExtents().ToGRect();
-                        pt = GeoAlgorithm.MidPoint(r.LeftButtom, r.RightButtom).ToPoint3d();
-                    }
-                    cleaningPorts.Add(pt.Value.TransformBy(e.BlockTransform).ToPoint2d());
-                }
-            }
-            foreach (var e in entities.OfType<BlockReference>().Where(e => e.Layer == THESAURUSABSENT && e.ObjectId.IsValid && e.GetEffectiveName() == THESAURUSABSOLVE))
-            {
-                cleaningPorts.Add(e.Bounds.ToGRect().Center);
-            }
-        }
-        public void CollectLabelLines()
-        {
-            static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABORTIVE or THESAURUSABSORBENT or THESAURUSABRASIVE or QUOTATIONABSORBENT or ELECTROMAGNETIC or CHARACTERISTICALLY or THESAURUSABSORPTION;
-            foreach (var e in entities.OfType<Line>().Where(e => f(e.Layer) && e.Length > QUOTATIONSHAKES))
-            {
-                labelLines.Add(e.ToGLineSegment());
-            }
-        }
-        public void CollectDLines()
-        {
-            dlines.AddRange(GetLines(entities, layer => layer is THESAURUSABSTAIN or THESAURUSABSTEMIOUS));
-        }
-        public void CollectVLines()
-        {
-            vlines.AddRange(GetLines(entities, layer => layer is THESAURUSABSTENTION));
-        }
-        public static IEnumerable<GLineSegment> GetLines(IEnumerable<Entity> entities, Func<string, bool> f)
-        {
-            foreach (var e in entities.OfType<Entity>().Where(e => f(e.Layer)).ToList())
-            {
-                if (e is Line line && line.Length > QUOTATIONSHAKES)
-                {
-                    yield return line.ToGLineSegment();
-                }
-                else if (e is Polyline pl)
-                {
-                    foreach (var ln in pl.ExplodeToDBObjectCollection().OfType<Line>())
-                    {
-                        if (ln.Length > QUOTATIONSHAKES)
-                        {
-                            yield return ln.ToGLineSegment();
-                        }
-                    }
-                }
-                else if (ThRainSystemService.IsTianZhengElement(e))
-                {
-                    if (GeoAlgorithm.TryConvertToLineSegment(e, out GLineSegment seg))
-                    {
-                        if (seg.IsValid) yield return seg;
-                    }
-                    else foreach (var ln in e.ExplodeToDBObjectCollection().OfType<Line>())
-                        {
-                            if (ln.Length > QUOTATIONSHAKES)
+                            foreach (var kv in _fs)
                             {
-                                yield return ln.ToGLineSegment();
+                                f += kv.Value;
                             }
                         }
-                }
-            }
-        }
-        int distinguishDiameter = THESAURUSACCEDE;
-        public void CollectWrappingPipes()
-        {
-            var ents = new List<Entity>();
-            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid ? x.Layer == REPRESENTATIONAL && x.GetEffectiveName().Contains(THESAURUSABSTRACT) : x.Layer == REPRESENTATIONAL));
-            wrappingPipes.AddRange(ents.Select(e => e.Bounds.ToGRect()).Where(r => r.Width < THESAURUSABSTRACTED && r.Height < THESAURUSABSTRACTED));
-        }
-        public void CollectVerticalPipes()
-        {
-            static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABSENCE or THESAURUSABUNDANT or THESAURUSALIGHT or THESAURUSABRASIVE;
-            {
-                var pps = new List<Entity>();
-                pps.AddRange(entities.OfType<BlockReference>()
-                .Where(e => f(e.Layer))
-                .Where(e => e.ObjectId.IsValid && e.GetEffectiveName() is THESAURUSABUSIVE or THESAURUSABSTRACTION));
-                static GRect getRealBoundaryForPipe(Entity ent)
-                {
-                    var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
-                    var et = ents.FirstOrDefault(e => Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(e).Width) == INATTENTIVENESS);
-                    if (et != null) return GeoAlgorithm.GetBoundaryRect(et);
-                    return GeoAlgorithm.GetBoundaryRect(ent);
-                }
-                foreach (var pp in pps)
-                {
-                    pipes.Add(getRealBoundaryForPipe(pp));
-                }
-            }
-            {
-                var pps = new List<Circle>();
-                pps.AddRange(entities.OfType<Circle>()
-                .Where(x => f(x.Layer) || x.Layer is THESAURUSABYSMAL)
-                .Where(c => distinguishDiameter <= c.Radius && c.Radius <= INATTENTIVENESS));
-                static GRect getRealBoundaryForPipe(Circle c)
-                {
-                    return c.Bounds.ToGRect();
-                }
-                foreach (var pp in pps.Distinct())
-                {
-                    pipes.Add(getRealBoundaryForPipe(pp));
-                }
-            }
-            {
-                var pps = new List<Entity>();
-                pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer is QUOTATIONABYSSINIAN or THESAURUSABSENT or THESAURUSABSTAIN && e.ObjectId.IsValid && e.GetEffectiveName() == THESAURUSACADEMIC));
-                pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer == HYPOCHONDRIACAL && e.ObjectId.IsValid && e.GetEffectiveName() == ACANTHOPTERYGII));
-                pps.AddRange(entities.OfType<Entity>().Where(e => e.Layer is THESAURUSABSENT or THESAURUSABSENCE or THESAURUSABSTRUSE && e.GetRXClass().DxfName.ToUpper() == CONVENTIONALIZED));
-                pps.AddRange(entities.OfType<BlockReference>().Where(e => e.Layer is THESAURUSABSENT or THESAURUSABSENCE or THESAURUSABSCOND && e.ObjectId.IsValid && e.GetEffectiveName().Contains(THESAURUSABSURD)));
-                static GRect getRealBoundaryForPipe(Entity c)
-                {
-                    var r = c.Bounds.ToGRect();
-                    if (!r.IsValid) r = GRect.Create(r.Center, THESAURUSABSOLUTE);
-                    return r;
-                }
-                foreach (var pp in pps.Distinct())
-                {
-                    if (pp is BlockReference e && e.ObjectId.IsValid && e.GetEffectiveName().Contains(THESAURUSABSURD))
-                    {
-                        pipes.Add(pp.Bounds.ToGRect().Center.ToGRect(INCOMPREHENSIBILITY));
+                        f?.Invoke();
                     }
-                    else
+                }
+                else
+                {
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    handleEntity(entity, Matrix3d.Identity, _fs);
+                    foreach (var kv in _fs)
                     {
-                        pipes.Add(getRealBoundaryForPipe(pp));
+                        kv.Value();
                     }
                 }
             }
         }
-        public void CollectCTexts()
+        private static bool IsWantedBlock(BlockTableRecord blockTableRecord)
         {
+            if (blockTableRecord.IsDynamicBlock)
             {
-                foreach (var e in entities.OfType<Entity>().Where(e => e.Layer is THESAURUSABRASIVE or ELECTROMAGNETIC && e.GetRXClass().DxfName.ToUpper() == THESAURUSACCELERATE))
-                {
-                    var colle = e.ExplodeToDBObjectCollection();
-                    {
-                        var ee = colle.OfType<Entity>().FirstOrDefault(e => e.GetRXClass().DxfName.ToUpper() == THESAURUSACCELERATION);
-                        var dbText = ((DBText)ee.ExplodeToDBObjectCollection()[QUOTATIONSHAKES]);
-                        cts.Add(new CText() { Text = dbText.TextString, Boundary = dbText.Bounds.ToGRect() });
-                        labelLines.AddRange(colle.OfType<Line>().Where(x => x.Length > QUOTATIONSHAKES).Select(x => x.ToGLineSegment()));
-                    }
-                }
+                return THESAURUSABDOMEN;
             }
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
             {
-                static bool f(string layer) => layer is THESAURUSABSENT or THESAURUSABORTIVE or THESAURUSABRASIVE or QUOTATIONABSORBENT or ELECTROMAGNETIC or CHARACTERISTICALLY or THESAURUSABSORPTION;
-                foreach (var e in entities.OfType<DBText>().Where(e => f(e.Layer)).Where(x => !x.TextString.StartsWith(THESAURUSACCENT)))
-                {
-                    cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
-                }
-                foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => f(e.Layer) && ThRainSystemService.IsTianZhengElement(e)))
-                {
-                    foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
-                    {
-                        var ct = new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() };
-                        if (!ct.Boundary.IsValid)
-                        {
-                            var p = e.Position.ToPoint2d();
-                            var h = e.Height;
-                            var w = h * e.WidthFactor * e.WidthFactor * e.TextString.Length;
-                            var r = new GRect(p, p.OffsetXY(w, h));
-                            ct.Boundary = r;
-                        }
-                        cts.Add(ct);
-                    }
-                }
+                return THESAURUSABDOMEN;
             }
+            if (!blockTableRecord.Explodable)
+            {
+                return THESAURUSABDOMEN;
+            }
+            return THESAURUSABDOMINAL;
         }
-        public void CollectWaterPorts()
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, Action f)
         {
-            var ents = new List<BlockReference>();
-            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && x.GetEffectiveName() == THESAURUSACCEPTANCE));
-            waterPorts.AddRange(ents.Select(e => e.Bounds.ToGRect()));
-            waterPortLabels.AddRange(ents.Select(e => e.GetAttributesStrValue(THESAURUSACCEPT) ?? THESAURUSACCEPTABLE));
+            if (seg.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(seg.ToLineString(), f));
         }
-        public void CollectFloorDrains()
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, List<GLineSegment> lst)
         {
-            var ents = new List<Entity>();
-            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.ObjectId.IsValid && (x.GetEffectiveName()?.Contains(ACKNOWLEDGEMENT) ?? THESAURUSABDOMEN)));
-            ents.AddRange(entities.OfType<BlockReference>().Where(x => x.Layer == THESAURUSALIGNMENT));
-            floorDrains.AddRange(ents.Distinct().Select(e => e.Bounds.ToGRect()));
-            sideFloorDrains.AddRange(ents.Distinct().OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName() == INDISTINGUISHABLE).Select(e => e.Bounds.ToGRect().Center));
+            reg(fs, seg, () => { lst.Add(seg); });
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, Action f)
+        {
+            if (r.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(r.ToPolygon(), f));
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, List<GRect> lst)
+        {
+            reg(fs, r, () => { lst.Add(r); });
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, CText ct, Action f)
+        {
+            reg(fs, ct.Boundary, f);
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, CText ct, List<CText> lst)
+        {
+            reg(fs, ct, () => { lst.Add(ct); });
         }
     }
     public class DrainageService
     {
-        public static void CollectGeoData(Geometry range, AcadDatabase adb, DrainageGeoData geoData, CommandContext ctx)
+        public static void CollectGeoData(AcadDatabase adb, DrainageGeoData geoData, CommandContext ctx)
         {
-            var cl = CollectGeoData(adb, geoData);
-            cl.CollectStoreys(range, ctx);
+            var cl = new ThDrainageSystemServiceGeoCollector3() { adb = adb, geoData = geoData };
+            cl.CollectStoreys(ctx);
+            cl.CollectEntities();
         }
         public static void CollectGeoData(Point3dCollection range, AcadDatabase adb, DrainageGeoData geoData)
         {
-            var cl = CollectGeoData(adb, geoData);
+            var cl = new ThDrainageSystemServiceGeoCollector3() { adb = adb, geoData = geoData };
             cl.CollectStoreys(range);
-        }
-        private static ThDrainageSystemServiceGeoCollector CollectGeoData(AcadDatabase adb, DrainageGeoData geoData)
-        {
-            var cl = new ThDrainageSystemServiceGeoCollector() { adb = adb, geoData = geoData };
             cl.CollectEntities();
-            cl.CollectDLines();
-            cl.CollectVLines();
-            cl.CollectLabelLines();
-            cl.CollectCTexts();
-            cl.CollectVerticalPipes();
-            cl.CollectWrappingPipes();
-            cl.CollectWaterPorts();
-            cl.CollectFloorDrains();
-            cl.CollectCleaningPorts();
-            cl.CollectKillers();
-            return cl;
         }
         static bool AllNotEmpty(params List<Geometry>[] plss)
         {
@@ -3744,7 +3823,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     var pipesf = F(item.VerticalPipes);
                     foreach (var label in item.Labels)
                     {
-                        if (!ThDrainageService.IsMaybeLabelText(geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text)) continue;
+                        if (!IsMaybeLabelText(geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text)) continue;
                         var lst = labellinesf(label);
                         if (lst.Count == THESAURUSACCESSION)
                         {
@@ -3761,7 +3840,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     var pl = r.ToPolygon();
                                     cadDataMain.VerticalPipes.Add(pl);
                                     item.VerticalPipes.Add(pl);
-                                    DrawTextLazy(INTERCHANGEABLE, pl.GetCenter());
+                                    DrawTextLazy(THESAURUSADDICTED, pl.GetCenter());
                                 }
                             }
                         }
@@ -3848,14 +3927,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     var lb = labels[QUOTATIONSHAKES];
                                     var pp = pipes[QUOTATIONSHAKES];
                                     var label = geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? THESAURUSACCEPTABLE;
-                                    if (ThDrainageService.IsMaybeLabelText(label))
+                                    if (IsMaybeLabelText(label))
                                     {
                                         lbDict[pp] = label;
                                         ok_ents.Add(pp);
                                         ok_ents.Add(lb);
                                         ok = THESAURUSABDOMINAL;
                                     }
-                                    else if (ThDrainageService.IsNotedLabel(label))
+                                    else if (IsNotedLabel(label))
                                     {
                                         notedPipesDict[pp] = label;
                                         ok_ents.Add(lb);
@@ -3877,7 +3956,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 if (labels.Count == pipes.Count && labels.Count > QUOTATIONSHAKES)
                                 {
                                     var labelsTxts = labels.Select(lb => geoData.Labels[cadDataMain.Labels.IndexOf(lb)].Text ?? THESAURUSACCEPTABLE).ToList();
-                                    if (labelsTxts.All(txt => ThDrainageService.IsMaybeLabelText(txt)))
+                                    if (labelsTxts.All(txt => IsMaybeLabelText(txt)))
                                     {
                                         pipes = ThRainSystemService.SortGeometrysBy2DSpacePosition(pipes).ToList();
                                         labels = ThRainSystemService.SortGeometrysBy2DSpacePosition(labels).ToList();
@@ -3902,7 +3981,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             foreach (var label in item.Labels.Except(ok_ents).ToList())
                             {
                                 var lb = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text ?? THESAURUSACCEPTABLE;
-                                if (!ThDrainageService.IsMaybeLabelText(lb)) continue;
+                                if (!IsMaybeLabelText(lb)) continue;
                                 var lst = labellinesf(label);
                                 if (lst.Count == THESAURUSACCESSION)
                                 {
@@ -4934,7 +5013,25 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             VerticalPipes = VerticalPipes.Where(x => x.IsValid).Distinct().ToList();
             WrappingPipes = WrappingPipes.Where(x => x.IsValid).Distinct().ToList();
             FloorDrains = FloorDrains.Where(x => x.IsValid).Distinct().ToList();
-            WaterPorts = WaterPorts.Where(x => x.IsValid).Distinct().ToList();
+            {
+                var d = new Dictionary<GRect, string>();
+                for (int i = QUOTATIONSHAKES; i < WaterPorts.Count; i++)
+                {
+                    var well = WaterPorts[i];
+                    var label = WaterPortLabels[i];
+                    if (!string.IsNullOrWhiteSpace(label) || !d.ContainsKey(well))
+                    {
+                        d[well] = label;
+                    }
+                }
+                WaterPorts.Clear();
+                WaterPortLabels.Clear();
+                foreach (var kv in d)
+                {
+                    WaterPorts.Add(kv.Key);
+                    WaterPortLabels.Add(kv.Value);
+                }
+            }
             WashingMachines = WashingMachines.Where(x => x.IsValid).Distinct().ToList();
             Basins = Basins.Where(x => x.IsValid).Distinct().ToList();
             MopPools = MopPools.Where(x => x.IsValid).Distinct().ToList();
@@ -5114,7 +5211,66 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
     }
     public static class THDrainageService
-    {        
+    {
+        public static string FixVerticalPipeLabel(string label)
+        {
+            if (label == null) return null;
+            if (label.StartsWith(THESAURUSADMINISTRATION))
+            {
+                return label.Substring(THESAURUSACCUSTOMED);
+            }
+            if (label.StartsWith(ADMINISTRATIVUS))
+            {
+                return label.Substring(THESAURUSACCIDENT);
+            }
+            return label;
+        }
+        public static bool IsNotedLabel(string label)
+        {
+            return label.Contains(ADMINISTRATIVELY) || label.Contains(THESAURUSAIRING);
+        }
+        public static bool IsWantedLabelText(string label)
+        {
+            if (label == null) return THESAURUSABDOMEN;
+            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label);
+        }
+        public static bool IsY1L(string label)
+        {
+            return label.StartsWith(THESAURUSABILITY);
+        }
+        public static bool IsY2L(string label)
+        {
+            return label.StartsWith(ABITURIENTENEXAMEN);
+        }
+        public static bool IsNL(string label)
+        {
+            return label.StartsWith(THESAURUSABJECT);
+        }
+        public static bool IsYL(string label)
+        {
+            return label.StartsWith(THESAURUSABJURE);
+        }
+        public static bool IsRainLabel(string label)
+        {
+            if (label == null) return THESAURUSABDOMEN;
+            return IsY1L(label) || IsY2L(label) || IsNL(label) || IsYL(label);
+        }
+        public static bool IsMaybeLabelText(string label)
+        {
+            if (label == null) return THESAURUSABDOMEN;
+            static bool f(string label)
+            {
+                return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label)
+                    || IsRainLabel(label) || label.StartsWith(THESAURUSABJURE)
+                    || label.Contains(ADMINISTRATIVELY) || label.Contains(THESAURUSADMINISTRATIVE)
+                    || label.StartsWith(ADMINISTRATORSHIP) || label.StartsWith(ADMINISTRATRESS)
+                    || label.StartsWith(THESAURUSADMINISTRATOR) || label.StartsWith(ADMINISTRATRICE) || label.StartsWith(THESAURUSAMBIGUITY) || label.StartsWith(THESAURUSALTOGETHER) || label.StartsWith(QUOTATIONALVEOLAR)
+                    || label.StartsWith(QUOTATIONALUMINIUM) || label.StartsWith(THESAURUSALWAYS) || label.StartsWith(THESAURUSAMALGAMATE)
+                    || label.StartsWith(THESAURUSAMATEUR)
+                    ;
+            }
+            return f(FixVerticalPipeLabel(label));
+        }
         public const int QUOTATIONSHAKES = 0;
         public const int INTENSIFICATION = 40;
         public const int INTERDIGITATING = 36;
@@ -5147,30 +5303,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSABNORMAL = @"^P\d?L";
         public const string PROGNOSTICATION = @"^T\d?L";
         public const string THESAURUSABOLISH = @"^D\d?L";
-        public const string THESAURUSABOLITION = "0";
-        public const int THESAURUSABOMINABLE = 20000;
-        public const int THESAURUSABOMINATE = 80000;
-        public const int THESAURUSABOMINATION = 5000;
-        public const string THESAURUSABORIGINAL = "块";
-        public const string THESAURUSABORTION = "A$C028429B2";
         public const string THESAURUSABORTIVE = "W-DRAI-NOTE";
-        public const string THESAURUSABOUND = "wwwe";
-        public const string THESAURUSABRASION = "dsa";
         public const string THESAURUSABRASIVE = "W-DRAI-DIMS";
-        public const string THESAURUSABREAST = "A-排水立管图块";
-        public const string THESAURUSABRIDGE = "sadf32f43tsag";
-        public const int THESAURUSABRIDGEMENT = 30000;
-        public const int THESAURUSABROAD = 15000;
-        public const string AUTHORITATIVELY = "C-SHET-SHET";
-        public const string THESAURUSABROGATION = "A$C066D2D80";
         public const int THESAURUSABRUPT = 8000;
-        public const string THESAURUSABSCESS = "A$C17E546D9";
-        public const string THESAURUSABSCOND = "P-SEWR-SILO";
         public const string THESAURUSABSENCE = "W-RAIN-EQPM";
         public const string THESAURUSABSENT = "W-DRAI-EQPM";
         public const int THESAURUSABSOLUTE = 55;
         public const string THESAURUSABSOLUTION = "清扫口系统";
-        public const string THESAURUSABSOLVE = "$TwtSys$00000136";
         public const string THESAURUSABSORB = "W-RAIN-PIPE";
         public const string THESAURUSABSORBENT = "W-FRPT-NOTE";
         public const string QUOTATIONABSORBENT = "W-RAIN-NOTE";
@@ -5197,7 +5336,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string ACANTHOPTERYGII = "A$C5E4A3C21";
         public const string CONVENTIONALIZED = "TCH_PIPE";
         public const int INCOMPREHENSIBILITY = 60;
-        public const int THESAURUSACCEDE = 20;
         public const string THESAURUSACCELERATE = "TCH_VPIPEDIM";
         public const string THESAURUSACCELERATION = "TCH_TEXT";
         public const string THESAURUSACCENT = "De";
@@ -5277,6 +5415,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int FAMILIARIZATION = 229;
         public const int THESAURUSADDENDUM = 230;
         public const int THESAURUSADDICT = 8192;
+        public const string THESAURUSADDICTED = "FromImagination";
         public const int THESAURUSADDICTION = 700;
         public const string CORTICOSTEROIDS = "清扫口：";
         public const string THESAURUSADDITION = "排出：";
@@ -5298,11 +5437,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSADMINISTRATION = "73-";
         public const string ADMINISTRATIVUS = "1-";
         public const string ADMINISTRATIVELY = "单排";
+        public const string THESAURUSADMINISTRATIVE = "雨水斗";
         public const string ADMINISTRATORSHIP = "RML";
         public const string ADMINISTRATRESS = "RMHL";
         public const string THESAURUSADMINISTRATOR = "J1L";
         public const string ADMINISTRATRICE = "J2L";
         public const int AUTHORITARIANISM = 15;
+        public const string ADSIGNIFICATION = "DL";
+        public const string THESAURUSADULTERATE = "TCH_MULTILEADER";
         public const int THESAURUSADVANTAGE = 180;
         public const string THESAURUSADVICE = @"^(F\d?L|T\d?L|P\d?L|D\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
         public const double RECOMMENDATIONS = 383875.8169;
@@ -5400,9 +5542,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSALIENATE = "|lp1";
         public const string THESAURUSALIENATION = "|lp2";
         public const string THESAURUSALIGHT = "VPIPE-废水";
-        public const string THESAURUSALIGNMENT = "W-DRAI-FLDR";
-        public const string INDISTINGUISHABLE = "侧排地漏";
-        public const string INTERCHANGEABLE = "脑补的";
         public const string QUOTATIONGOLDSMITH = "套管：";
         public const string ALIMENTATIVENESS = "水";
         public const string THESAURUSALIMONY = "水井";
@@ -5420,6 +5559,20 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSALLERGY = "HasBalconyWashingMachine：";
         public const string THESAURUSALLEVIATE = "HasMopPool：";
         public const int THESAURUSALLIANCE = 12;
+        public const string QUOTATIONALMAIN = "TCH_MTEXT";
+        public const string THESAURUSALTERNATE = "请选择楼层框线";
+        public const string ALTERNATIVENESS = "楼层框定";
+        public const string THESAURUSALTOGETHER = "JL";
+        public const string QUOTATIONALUMINIUM = "XL";
+        public const string QUOTATIONALVEOLAR = "JG";
+        public const string THESAURUSALWAYS = "X1";
+        public const string THESAURUSAMALGAMATE = "X2";
+        public const string THESAURUSAMATEUR = "ZP";
+        public const string THESAURUSAMAZEMENT = "W-WSUP-EQPM";
+        public const string PLENIPOTENTIARY = "wb";
+        public const string THESAURUSAMBASSADOR = "kd";
+        public const string AMBIDEXTROUSNESS = "A$C6BDE4816";
+        public const string THESAURUSAMBIGUITY = "J3L";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>

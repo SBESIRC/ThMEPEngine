@@ -4,6 +4,7 @@ namespace ThMEPHVAC.Model
 {
     public class DuctPortsParam
     {
+        public bool is_redraw;
         public int port_num;
         public double air_speed;
         public double air_volume;

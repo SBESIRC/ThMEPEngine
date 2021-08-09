@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\ModifyParam.cs" />
+    <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
     <Compile Include="Model\ThDuctPortsConstructor.cs" />
     <Compile Include="Model\ThDuctPortsDistribute.cs" />

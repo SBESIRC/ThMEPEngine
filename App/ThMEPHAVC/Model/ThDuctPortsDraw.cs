@@ -54,7 +54,7 @@ namespace ThMEPHVAC.Model
             Draw_special_shape(anay_res.special_shapes_info);
             Draw_port_mark(endlines);
             service.valve_service.Insert_valve(anay_res.merged_endlines.Count, start_point, endlines);
-            ThDuctPortsRecoder.Attach_start_param(start_id, start_point.ToPoint2D(), in_param);
+            ThDuctPortsRecoder.Attach_start_param(start_id, in_param);
         }
         private void Draw_port_mark(ThDuctPortsConstructor endlines)
         {
@@ -64,16 +64,22 @@ namespace ThMEPHVAC.Model
             if (last_seg.segs.Count == 0)
                 return;
             var ports = last_seg.segs[last_seg.segs.Count - 1].ports_info;
+            if (ports.Count == 0)
+                return;
             Point3d p = Get_mark_base_point(ports) + new Vector3d(1500, 2000, 0) + org_dis_vec;
             ThDuctPortsDrawPortMark.Insert_mark(in_param, port_width, port_height, service.port_mark_name, service.port_mark_layer, p);
             ThDuctPortsDrawPortMark.Insert_leader(Get_mark_base_point(ports) + org_dis_vec, p, service.port_mark_layer);
         }
         private Point3d Get_mark_base_point(List<Port_Info> ports)
         {
-            if (ports[ports.Count - 1].air_volume > 1)
-                return ports[ports.Count - 1].position;
-            else
-                return ports[ports.Count - 2].position;
+            if (ports.Count > 0)
+            {
+                if (ports[ports.Count - 1].air_volume > 1)
+                    return ports[ports.Count - 1].position;
+                else
+                    return ports[ports.Count - 2].position;
+            }
+            return Point3d.Origin;
         }
         private void Draw_special_shape(List<Special_graph_Info> special_shapes_info)
         {
@@ -233,7 +239,7 @@ namespace ThMEPHVAC.Model
             {
                 string pre_duct_text_info = String.Empty;
                 var infos = endlines.endline_segs[i];
-                var ver_wall_point = (duct_ver_align_points.Count > i) ? duct_ver_align_points[i] : Point2d.Origin;
+                var ver_wall_point = (duct_dir_align_points.Count > i) ? duct_ver_align_points[i] : Point2d.Origin;
                 var dir_wall_point = (duct_dir_align_points.Count > i) ? duct_dir_align_points[i] : Point2d.Origin;
                 Draw_port_duct(infos.segs, ref pre_duct_text_info);
                 service.dim_service.Draw_dimension(infos.segs, dir_wall_point, ver_wall_point, start_point);
@@ -248,14 +254,15 @@ namespace ThMEPHVAC.Model
             for (int i = 0; i < infos.Count; ++i)
             {
                 var info = infos[i];
-                var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
+                var cur_seg = service.text_service.Get_endline_duct_info(have_main, main_height, in_param, 
+                    info, org_dis_mat, ref is_first, ref duct_text_info, out List<DBText> duct_size_info);
                 service.port_service.Draw_ports(info, in_param, org_dis_vec, port_width, port_height);
                 service.text_service.Draw_duct_size_info(duct_size_info);
                 Collect_duct_geo(geo_set, cur_seg);
                 Record_pre_seg_info(cur_seg, duct_text_info, info, ref pre_seg, ref pre_duct_size, ref pre_air_volume);
                 Record_duct(cur_seg, pre_seg, pre_duct_size, pre_air_volume);
                 if (i == 0)
-                    continue;//第一段duct不画reducing，之后的都是reducing+duct
+                    continue;//第一段duct不画reducing，之后的都是reducing + duct
                 Record_reducing(geo_set);
                 Remove_pre_duct_geo(geo_set);
             }
@@ -265,7 +272,7 @@ namespace ThMEPHVAC.Model
             var duct_param = ThDuctPortsService.Create_duct_modify_param(cur_seg, pre_duct_size, pre_air_volume, start_id.Handle);
             if (duct_param.sp.GetDistanceTo(duct_param.ep) > 1)
             {
-                service.Draw_shape(pre_seg, org_dis_mat, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, 
+                service.Draw_duct(pre_seg, org_dis_mat, out ObjectIdList seg_geo_ids, out ObjectIdList seg_flg_ids, 
                                     out ObjectIdList seg_center_ids, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
                 ThDuctPortsRecoder.Create_duct_group(seg_geo_ids, seg_flg_ids, seg_center_ids, ports_ids, ext_ports_ids, duct_param);
             }
@@ -311,7 +318,7 @@ namespace ThMEPHVAC.Model
                 var mat = Matrix3d.Displacement(center_point.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
                 mat = org_dis_mat * mat;
                 ThDuctPortsDrawService.Draw_lines(mainlines.geo, mat, service.geo_layer, out ObjectIdList geo_ids);
-                ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.flg_layer, out ObjectIdList flg_ids);
+                ThDuctPortsDrawService.Draw_lines(mainlines.flg, mat, service.geo_layer, out ObjectIdList flg_ids);
                 ThDuctPortsDrawService.Draw_lines(mainlines.center_line, org_dis_mat, service.center_layer, out ObjectIdList center_ids);
                 // port根据中心线变化
                 ThDuctPortsDrawService.Draw_ports(mainlines.ports, mainlines.ports_ext, org_dis_mat,

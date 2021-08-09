@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThDoorOpeningExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
-        public List<ThIfcDoor> Doors { get; private set; }
+        public List<ThIfcDoor> Doors { get; protected set; }
 
         private const string SwitchPropertyName = "Switch";
         private const string UsePropertyName = "Use";

@@ -32,6 +32,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             branchLines = pipeLines.Except(loopLines).ToList();
             loopLines = PipeLineList.CleanLaneLines3(loopLines);
             branchLines = PipeLineList.CleanLaneLines3(branchLines);
+            loopLines.RemoveAll(l => IsMarkLine(l, pipeMarks));
+        }
+        private bool IsMarkLine(Line l, List<ThHydrantPipeMark> marks)
+        {
+            foreach (var mark in marks)
+            {
+                if ((l.PointOnLine(mark.StartPoint, false, 100) && l.PointOnLine(mark.StartPoint, true, 10))
+                  || (l.PointOnLine(mark.EndPoint, false, 100) && l.PointOnLine(mark.EndPoint, true, 10)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         private void RemovePipeLines(ref List<Line> pipeLines,ref FireHydrantSystemIn fireHydrantSysIn,List<ThHydrantPipeMark> marks)
         {
@@ -127,19 +140,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             return tmpPipeLines;
         }
-        private List<Point3dEx> GetPipePoints(List<Line> pipeLines)
-        {
-            List<Point3dEx> pipePoints = new List<Point3dEx>();
-            foreach(var line in pipeLines)
-            {
-                Point3dEx point1 = new Point3dEx(line.StartPoint);
-                Point3dEx point2 = new Point3dEx(line.EndPoint);
-                pipePoints.Add(point1);
-                pipePoints.Add(point2);
-            }
-            return pipePoints.Distinct().ToList();
-        }
-
         private List<Line> GetPipeLines(ref FireHydrantSystemIn fireHydrantSysIn,Point3dCollection selectArea) 
         {
             using (var acadDatabase = AcadDatabase.Active())
@@ -155,14 +155,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
                 PipeLineList.PipeLineAutoConnect(ref lineList);
-
+                
+                pointList.Clear();
+                var starPts = lineList.Select(l=> new Point3dEx(l.StartPoint)).ToList();
+                var endPts = lineList.Select(l => new Point3dEx(l.EndPoint)).ToList();
+                pointList.AddRange(starPts);
+                pointList.AddRange(endPts);
                 //var valveEngine = new ThExtractValveService();//提取蝶阀
                 //var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
                 //fireHydrantSysIn.ValveIsBkReference = valveEngine.IsBkReference;
                 //var valveList = new List<Line>();
                 //PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList);
 
-                PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断
+                PipeLine.PipeLineSplit(ref lineList, pointList,1.0,2.0);//管线打断
 
                 fireHydrantSysIn.ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
                 foreach (var L in lineList)
@@ -176,8 +181,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
         }
 
-  
-
-       
+        public List<Line> GetHydrantMainLine(Point3dCollection selectArea)
+        {
+            var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
+            List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn, selectArea);
+            pipeLines = PipeLineList.CleanLaneLines3(pipeLines);
+            return pipeLines;
+        }
     }
 }

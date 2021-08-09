@@ -68,6 +68,7 @@
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
+    <Compile Include="Algorithm\ThMEPRegionService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
@@ -99,7 +100,12 @@
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="FireCompartment\ThFireCompartmentExtendEngine.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractBlockReferenceService.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThExtractTextService.cs" />
+    <Compile Include="GeojsonExtractor\ThFireproofShutterExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThRailingExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThWindowExtractor.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcBuildingStoreyFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcCurtainWallFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcParkingStallFeature.cs" />
@@ -153,6 +159,7 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />

@@ -10,7 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    class ThFireApartExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
+    public class ThFireApartExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
     {
         public List<Polyline> FireAparts { get; private set; }
 

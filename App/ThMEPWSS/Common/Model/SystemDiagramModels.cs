@@ -21,6 +21,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Linq2Acad;
 using ThCADExtension;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using ThMEPWSS.JsonExtensionsNs;
 
 namespace ThMEPWSS.Uitl
 {
@@ -313,173 +314,6 @@ namespace ThMEPWSS.Uitl
             }
         }
     }
-    namespace DebugNs
-    {
-        using Autodesk.AutoCAD.ApplicationServices;
-        using Dreambuild.AutoCAD;
-        using Linq2Acad;
-
-        public static class DebugTool
-        {
-            public static Editor Editor => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-            public static Document MdiActiveDocument => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            public static Database WorkingDatabase => HostApplicationServices.WorkingDatabase;
-            public static AcadDatabase AcadDatabase => AcadDatabase.Active();
-            public static Transaction Transaction => WorkingDatabase.TransactionManager.StartTransaction();
-            static Database db => WorkingDatabase;
-            public static void DrawBoundary(double thickness, params Entity[] ents)
-            {
-                DrawBoundary(db, thickness, ents);
-            }
-            public static void DrawBoundary(Database db, double thickness, params Entity[] ents)
-            {
-                var r = GeoAlgorithm.GetBoundaryRect(ents);
-                var pt1 = new Point2d(r.LeftTop.X, r.LeftTop.Y);
-                var pt2 = new Point2d(r.RightButtom.X, r.RightButtom.Y);
-                var rect = new GRect(pt1, pt2);
-                DrawRect(db, rect, thickness);
-            }
-            public static void DrawCircle(Point3d center, double radius)
-            {
-                DrawCircle(db, center, radius);
-            }
-            public static void DrawLine(Point3d startPoint, Point3d endPoint)
-            {
-                var line = new Line() { StartPoint = startPoint, EndPoint = endPoint };
-                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
-                {
-                    var btr = GetBlockTableRecord(db, trans);
-                    line.Thickness = 5;
-                    btr.AppendEntity(line);
-                    trans.AddNewlyCreatedDBObject(line, true);
-                    line.ColorIndex = 1;
-                    trans.Commit();
-                }
-            }
-            public static void DrawCircle(Database db, Point3d center, double radius)
-            {
-                var circle = new Circle() { Center = center, Radius = radius };
-                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
-                {
-                    var btr = GetBlockTableRecord(db, trans);
-                    circle.Thickness = 5;
-                    btr.AppendEntity(circle);
-                    trans.AddNewlyCreatedDBObject(circle, true);
-                    circle.ColorIndex = 32;
-                    trans.Commit();
-                }
-            }
-            public static void DrawCircle(Database db, Point3d pt1, Point3d pt2, Point3d pt3)
-            {
-                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
-                {
-                    var btr = GetBlockTableRecord(db, trans);
-                    var circle = CreateCircle(pt1, pt2, pt3);
-                    circle.Thickness = 5;
-                    btr.AppendEntity(circle);
-                    trans.AddNewlyCreatedDBObject(circle, true);
-                    circle.ColorIndex = 32;
-                    trans.Commit();
-                }
-            }
-            public static Circle CreateCircle(Point3d pt1, Point3d pt2, Point3d pt3)
-            {
-                var va = pt1.GetVectorTo(pt2);
-                var vb = pt1.GetVectorTo(pt3);
-                var angle = va.GetAngleTo(vb);
-                if (angle == 0 || angle == Math.PI)
-                {
-                    return null;
-                }
-                else
-                {
-                    var circle = new Circle();
-                    var geArc = new CircularArc3d(pt1, pt2, pt3);
-                    circle.Center = geArc.Center;
-                    circle.Radius = geArc.Radius;
-                    return circle;
-                }
-            }
-            public static void DrawRect(Database db, GRect rect, double thickness)
-            {
-                DrawRect(db, rect.LeftTop, rect.RightButtom, thickness);
-            }
-            public static void DrawRect(GRect rect, double thickness)
-            {
-                DrawRect(db, rect.LeftTop, rect.RightButtom, thickness);
-            }
-            public static void DrawRect(Database db, Point2d leftTop, Point2d rightButtom, double thickness = 2)
-            {
-                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
-                {
-                    var btr = GetBlockTableRecord(db, trans);
-                    var pline = CreateRectangle(leftTop, rightButtom);
-                    btr.AppendEntity(pline);
-                    trans.AddNewlyCreatedDBObject(pline, true);
-                    pline.ConstantWidth = thickness;
-                    pline.ColorIndex = 32;
-                    trans.Commit();
-                }
-            }
-            public static void DrawText(Database db, Point2d pt, string text)
-            {
-                using (var trans = HostApplicationServices.WorkingDatabase.TransactionManager.StartTransaction())
-                {
-                    var btr = GetBlockTableRecord(db, trans);
-                    var t = new DBText() { Position = pt.ToPoint3d(), TextString = text, Height = 350, Thickness = 10, };
-                    btr.AppendEntity(t);
-                    trans.AddNewlyCreatedDBObject(t, true);
-                    trans.Commit();
-                }
-            }
-            private static BlockTableRecord GetBlockTableRecord(Database db, Transaction trans)
-            {
-                var bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
-                var btr = (BlockTableRecord)trans.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-                return btr;
-            }
-            public static Polyline CreateRectangle(Point2d pt1, Point2d pt2)
-            {
-                var minX = Math.Min(pt1.X, pt2.X);
-                var maxX = Math.Max(pt1.X, pt2.X);
-                var minY = Math.Min(pt1.Y, pt2.Y);
-                var maxY = Math.Max(pt1.Y, pt2.Y);
-                var pts = new Point2dCollection
-                {
-                    new Point2d(minX, minY),
-                    new Point2d(minX, maxY),
-                    new Point2d(maxX, maxY),
-                    new Point2d(maxX, minY)
-                };
-                var pline = CreatePolyline(pts);
-                pline.Closed = true;
-                return pline;
-            }
-            public static Polyline CreatePolygon(Point2d centerPoint, int num, double radius)
-            {
-                var pts = new Point2dCollection(num);
-                double angle = 2 * Math.PI / num;
-                for (int i = 0; i < num; i++)
-                {
-                    var pt = new Point2d(centerPoint.X + radius * Math.Cos(i * angle),
-                        centerPoint.Y + radius * Math.Sin(i * angle));
-                    pts.Add(pt);
-                }
-                var pline = CreatePolyline(pts);
-                pline.Closed = true;
-                return pline;
-            }
-            public static Polyline CreatePolyline(Point2dCollection pts)
-            {
-                var pline = new Polyline();
-                for (int i = 0; i < pts.Count; i++)
-                {
-                    pline.AddVertexAt(i, pts[i], 0, 0, 0);
-                }
-                return pline;
-            }
-        }
-    }
     public class ComparableCollection<T> : List<T>, IEquatable<ComparableCollection<T>>
     {
         public bool Equals(ComparableCollection<T> other)
@@ -677,6 +511,22 @@ namespace ThMEPWSS.Uitl
             if (ok) return new GRect(minX, minY, maxX, maxY);
             return default;
         }
+        public GRect TransformBy(Matrix3d matrix)
+        {
+            if (this.IsNull) return this;
+            if (matrix == Matrix3d.Identity) return this;
+            var pl = this.ToCadPolyline();
+            pl.TransformBy(matrix);
+            return pl.Bounds.ToGRect();
+        }
+        public GRect TransformBy(ref Matrix3d matrix)
+        {
+            if (this.IsNull) return this;
+            if (matrix == Matrix3d.Identity) return this;
+            var pl = this.ToCadPolyline();
+            pl.TransformBy(matrix);
+            return pl.Bounds.ToGRect();
+        }
     }
     public struct GLineSegment
     {
@@ -732,7 +582,7 @@ namespace ThMEPWSS.Uitl
         }
         public GLineSegment(Point3d point1, Point3d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
         public GLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
-        public bool IsValid => !(X1 == X2 && Y1 == Y2);
+        public bool IsValid => !(X1 == X2 && Y1 == Y2) && !double.IsNaN(X1) && !double.IsNaN(X2) && !double.IsNaN(Y1) && !double.IsNaN(Y2);
         public double X1 { get; }
         public double Y1 { get; }
         public double X2 { get; }
@@ -1238,6 +1088,10 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static double Round(this double num, double prec)
+        {
+            return prec == 0.0 ? num : Math.Floor(num / prec + 0.5) * prec;
+        }
         public static GRect ToGRect(this Point3dCollection pts)
         {
             if (pts.Count == 0)

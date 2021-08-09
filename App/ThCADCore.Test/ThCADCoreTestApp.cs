@@ -1,5 +1,7 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -10,14 +12,10 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.Overlay.Snap;
 using Autodesk.AutoCAD.Colors;
-using DotNetARX;
-using System;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Electrical;
+using ThMEPEngineCore.Service;
 
 namespace ThCADCore.Test
 {
@@ -901,6 +899,57 @@ namespace ThCADCore.Test
                 var center = objs.GetMaximumInscribedCircleCenter();
                 Circle circle = new Circle(center, new Vector3d(0, 0, 1), 100);
                 acadDatabase.ModelSpace.Add(circle);
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThTestFireCompartmentPolygons", CommandFlags.Modal)]
+        public void ThTestPolygons()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                Active.Editor.WriteLine("\n请选择");
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs1 = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    Polyline polyline = acadDatabase.Element<Polyline>(obj);
+                    objs1.Add(polyline);
+                }
+                ThFireCompartmentCleanService cleanService = new ThFireCompartmentCleanService();
+                var cleanobjs= cleanService.Clean(objs1);
+                bool test = false ;
+                if (test)
+                {
+                    foreach (Entity item in cleanobjs)
+                    {
+                        acadDatabase.ModelSpace.Add(item);
+                    }
+                }
+                else
+                { 
+                    var objs = new List<DBObject>();
+                    foreach (Polygon polygon in cleanobjs.Polygonize())
+                    {
+                        objs.Add(polygon.ToDbEntity());
+                    }
+
+                    foreach (var obj in objs)
+                    {
+                        var entity = obj as Entity;
+                        entity.ColorIndex = 2;
+                        if (entity is Polyline poly && poly.Area < 5E+6)
+                            continue;
+                        if (entity is MPolygon mpoly && mpoly.Area < 5E+6)
+                            continue;
+                        acadDatabase.ModelSpace.Add(entity);
+                    }
+                }
             }
         }
     }

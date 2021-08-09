@@ -76,6 +76,10 @@
         /// </summary>
         FireApart,
         /// <summary>
+        /// 洞
+        /// </summary>
+        Hole,
+        /// <summary>
         /// 防火卷帘
         /// </summary>
         LaneLine,

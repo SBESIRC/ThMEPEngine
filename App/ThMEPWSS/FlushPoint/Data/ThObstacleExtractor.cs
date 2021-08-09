@@ -51,6 +51,11 @@ namespace ThMEPWSS.FlushPoint.Data
             var doorService = new ThDoorOpeningExtractor();
             doorService.Extract(database, pts);
             ObstacleDic.Add("DoorOpening", doorService.Doors.Cast<Curve>().ToList());
+
+            // 1.3 窗户
+            var windowService = new ThWindowExtractor();
+            windowService.Extract(database, pts);
+            ObstacleDic.Add("Window", windowService.Windows.Cast<Curve>().ToList());
         }
 
         public void Print(Database database)
