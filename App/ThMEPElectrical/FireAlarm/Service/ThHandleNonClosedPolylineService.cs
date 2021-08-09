@@ -18,7 +18,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
             else
             {
-                return new Polyline();
+                return origin;
             }
         }
         private static bool IsValid(Polyline polyline)

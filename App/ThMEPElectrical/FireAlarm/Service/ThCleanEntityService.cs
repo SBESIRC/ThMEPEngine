@@ -31,10 +31,10 @@ namespace ThMEPElectrical.FireAlarm.Service
             objs = objs.Buffer(length);
             return objs.Count>0 ? objs.Cast<Polyline>().OrderByDescending(p => p.Area).First():new Polyline();
         }
-        public static Polyline MakeValid(Polyline polyline)
+        public static Polyline MakeValid(Polyline polygon)
         {
             //处理自交
-            var objs = polyline.MakeValid();
+            var objs = polygon.MakeValid();
             return objs.Count>0 ? objs.Cast<Polyline>().OrderByDescending(p => p.Area).First() : new Polyline();
         }
         public static Polyline Tesslate(Polyline polyline,double length=10.0)

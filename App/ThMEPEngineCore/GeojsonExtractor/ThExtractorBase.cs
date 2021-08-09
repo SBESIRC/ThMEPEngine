@@ -7,6 +7,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -49,6 +50,8 @@ namespace ThMEPEngineCore.GeojsonExtractor
         protected double TesslateLength = 10.0;
         protected double SmallAreaTolerance = 1.0;
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
+
+        protected ThMEPOriginTransformer transformer;
         public ThExtractorBase()
         {
             Category = "";
@@ -59,6 +62,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             ColorIndex = 256;
             FilterMode = FilterMode.Cross;
             GroupOwner = new Dictionary<Entity, List<string>>();
+            transformer = new ThMEPOriginTransformer(Point3d.Origin);
         }
         public abstract void Extract(Database database, Point3dCollection pts);
         public abstract List<ThGeometry> BuildGeometries();

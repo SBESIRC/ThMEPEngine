@@ -6,6 +6,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
@@ -28,9 +30,20 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
                     .ToList();
                 if(pts.Count>=3)
                 {
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Polys.ToCollection());
-                    var objs = spatialIndex.SelectCrossingPolygon(pts);
-                    Polys = objs.Cast<Polyline>().ToList();
+                    var objs = Polys.ToCollection();
+                    var transformer = new ThMEPOriginTransformer(objs);
+                    var newPts = new Point3dCollection();
+                    pts.Cast<Point3d>().ForEach(o =>
+                    {
+                        var pt = new Point3d(o.X,o.Y,o.Z);
+                        transformer.Transform(ref pt);
+                        newPts.Add(pt);
+                    });                                 
+                    transformer.Transform(objs);
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    var querys = spatialIndex.SelectCrossingPolygon(newPts);
+                    transformer.Reset(querys);
+                    Polys = querys.Cast<Polyline>().ToList();
                 }
             }
         }        

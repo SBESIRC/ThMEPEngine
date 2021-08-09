@@ -14,10 +14,11 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.GeojsonExtractor.Model;
+using NFox.Cad;
 
 namespace ThMEPElectrical.Command
 {
@@ -56,6 +57,10 @@ namespace ThMEPElectrical.Command
                     ColorIndex = colorIndex++,
                 };
                 storeyExtractor.Extract(acadDatabase.Database, pts);
+ 
+                var transformer = new ThMEPOriginTransformer(storeyExtractor.Storeys.Select(o=>o.Boundary).ToCollection());
+                storeyExtractor.Transformer = transformer;
+                storeyExtractor.Transform(); //移到原点
 
                 //再提取防火分区，接着用楼层框线对防火分区分组
                 var storeyInfos = storeyExtractor.Storeys.Cast<ThStoreyInfo>().ToList();
@@ -64,6 +69,7 @@ namespace ThMEPElectrical.Command
                     ElementLayer = "AI-防火分区,AD-AREA-DIVD",
                     ColorIndex = colorIndex++,
                     StoreyInfos = storeyInfos, //用于创建防火分区
+                    Transformer = transformer, //把变换器传给防火分区
                 };
                 fireApartExtractor.Extract(acadDatabase.Database, pts);
                 fireApartExtractor.Group(storeyExtractor.StoreyIds); //判断防火分区属于哪个楼层框线
@@ -75,54 +81,65 @@ namespace ThMEPElectrical.Command
                     {
                         ElementLayer = "AI-墙",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaShearWallExtractor()
                     {
                         ElementLayer = "AI-剪力墙",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaColumnExtractor()
                     {
                         ElementLayer = "AI-柱",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaWindowExtractor()
                     {
                         ElementLayer="AI-窗",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaRoomExtractor()
                     {
                         ColorIndex=colorIndex++,
                         UseDb3Engine=true,
+                        Transformer = transformer,
                     },
                     new ThFaBeamExtractor()
                     {
                         ElementLayer = "AI-梁",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaDoorOpeningExtractor()
                     {
                         ElementLayer = "AI-门",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaRailingExtractor()
                     {
                         ElementLayer = "AI-栏杆",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThFaFireproofshutterExtractor()
                     {
                         ElementLayer = "AI-防火卷帘",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,
                     },
                     new ThHoleExtractor()
                     {
                         ElementLayer = "AI-洞",
                         ColorIndex=colorIndex++,
+                        Transformer = transformer,                        
                     },
                 };
                 extractors.ForEach(o => o.Extract(acadDatabase.Database, pts));
+
                 //把楼层信息传入到提取器中，对于不在防火分区内的图形要判断在哪个楼层
                 extractors.ForEach(o =>
                 {
@@ -152,26 +169,27 @@ namespace ThMEPElectrical.Command
                 var faDoorExtractor = extractors.Where(o => o is ThFaDoorOpeningExtractor).First() as ThFaDoorOpeningExtractor;
                 faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
                 var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
-                fireProofShutter.SetTags(fireApartExtractor.FireApartIds);  
-
-                //最后将楼层框线和防火分区提取器加入，生成Geometries
-                extractors.Add(storeyExtractor);
-                extractors.Add(fireApartExtractor);
-                //把楼层框线传给列表中的提取器
-                extractors.ForEach(o =>
-                {
-                    if (o is ISetStorey iSetStory)
-                    {
-                        iSetStory.Set(storeyExtractor.Storeys.Cast<ThStoreyInfo>().ToList());
-                    }
-                });
-
+                fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
                 // 把房间传给门提取器
                 var roomExtractor = extractors.Where(o => o is ThFaRoomExtractor).First() as ThFaRoomExtractor;
                 faDoorExtractor.SetRooms(roomExtractor.Rooms);
 
+                //最后将楼层框线和防火分区提取器加入，生成Geometries
+                extractors.Add(storeyExtractor);
+                extractors.Add(fireApartExtractor);                
                 var geos = new List<ThGeometry>();
                 extractors.ForEach(o => geos.AddRange(o.BuildGeometries()));
+
+                // 移回原位
+                storeyExtractor.Reset();
+                fireApartExtractor.Reset();
+                extractors.ForEach(o =>
+                {
+                    if (o is ITransformer iTransformer)
+                    {
+                        iTransformer.Reset();
+                    }
+                });
 
                 //输出
                 var fileInfo = new FileInfo(Active.Document.Name);

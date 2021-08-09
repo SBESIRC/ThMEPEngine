@@ -15,17 +15,23 @@ using ThMEPElectrical.FireAlarm.Service;
 using NFox.Cad;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
 
 namespace FireAlarm.Data
 {
-    class ThFaBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey
+    class ThFaBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey,ITransformer
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
         private const string UsePropertyName = "Use";
         private const string DistanceToFlorPropertyName = "BottomDistanceToFloor";
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+
         public ThFaBeamExtractor()
         {
             Beams = new List<ThIfcBeam>();
@@ -60,25 +66,15 @@ namespace FireAlarm.Data
         {
             //优先保留DB的
             //保留用户绘制的没有产生冲突的
-            var db3Beams = new List<ThIfcBeam>();
-            var beamEngine = new ThBeamRecognitionEngine();
-            beamEngine.Recognize(database, pts);
-            Beams = beamEngine.Elements.Cast<ThIfcBeam>().ToList();
+            //如果梁识别引擎增加了MakeValid,Normalize的动作，对于很远的梁识别有问题
+            var db3Beams = ExtractDb3Beam(database, pts);
+            var localBeams = ExtractMsBeam(database, pts);
 
-            //From Local
-            var localBeams = new List<ThIfcBeam>();
-            var instance = new ThExtractPolylineService()
-            {
-                ElementLayer = this.ElementLayer,
-            };
-            instance.Extract(database, pts);
-            localBeams = instance.Polys
-                .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => ThIfcLineBeam.Create(o))
-                .Cast<ThIfcBeam>()
-                .ToList();
             //对Clean的结果进一步过虑
-            localBeams.ForEach(o => o.Outline = ThCleanEntityService.Buffer(o.Outline as Polyline, 25));
+            for (int i = 0; i < localBeams.Count; i++)
+            {
+                localBeams[i].Outline = ThCleanEntityService.Buffer(localBeams[i].Outline as Polyline, 25);
+            }
 
             //处理重叠
             var conflictService = new ThHandleConflictService(
@@ -94,8 +90,51 @@ namespace FireAlarm.Data
                 .ToList());
             var objs = Beams.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Beams = Beams.Where(o => objs.Contains(o.Outline)).ToList();
-        } 
+        }
+        private List<ThIfcBeam> ExtractDb3Beam(Database database, Point3dCollection pts)
+        {
+            var beams = new List<ThIfcBeam>();
+            var engine = new ThBeamExtractionEngine();
+            engine.Extract(database);
+            engine.Results.ForEach(o => beams.Add(ThIfcLineBeam.Create(o.Data as ThIfcBeamAnnotation)));
+            beams.ForEach(o => transformer.Transform(o.Outline));
+            if (pts.Count > 0)
+            {
+                var newPts = new Point3dCollection();
+                pts.Cast<Point3d>().ForEach(o =>
+                {
+                    var pt = new Point3d(o.X, o.Y, o.Z);
+                    transformer.Transform(ref pt);
+                    newPts.Add(pt);
+                });
+                var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(beams.Select(o=>o.Outline).ToCollection());
+                var pline = new Polyline()
+                {
+                    Closed = true,
+                };
+                pline.CreatePolyline(newPts);
+                var queryObjs = beamSpatialIndex.SelectCrossingPolygon(pline);
+                beams = beams.Where(o => queryObjs.Contains(o.Outline)).ToList();
+            }
+            return beams;
+        }
+        private List<ThIfcBeam> ExtractMsBeam(Database database, Point3dCollection pts)
+        {
+            var localBeams = new List<ThIfcBeam>();
+            var instance = new ThExtractPolylineService()
+            {
+                ElementLayer = this.ElementLayer,
+            };
+            instance.Extract(database, pts);
+            instance.Polys.ForEach(o => Transformer.Transform(o));
+            localBeams = instance.Polys
+                .Where(o => o.Area >= SmallAreaTolerance)
+                .Select(o => ThIfcLineBeam.Create(o))
+                .Cast<ThIfcBeam>()
+                .ToList();
 
+            return localBeams;
+        }
         public void Group(Dictionary<Entity, string> groupId)
         {
             Beams.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
@@ -140,6 +179,16 @@ namespace FireAlarm.Data
                 return 0;
             else
                 return -distance;
+        }
+
+        public void Transform()
+        {
+            Beams.ForEach(o => Transformer.Transform(o.Outline));
+        }
+
+        public void Reset()
+        {
+            Beams.ForEach(o => Transformer.Reset(o.Outline));
         }
     }
 }

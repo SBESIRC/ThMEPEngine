@@ -1,11 +1,14 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
@@ -16,16 +19,50 @@ namespace ThMEPEngineCore.Service
         internal ThSpatialIndexCacheService() 
         {
             Factories = new List<SpatialIndexFactory>();
+            Transformer = new ThMEPOriginTransformer(Point3d.Origin);
         }
+        public ThMEPOriginTransformer Transformer { get; set; }
         public static ThSpatialIndexCacheService Instance { get { return instance; } }
         public List<SpatialIndexFactory> Factories { get; set; }
         public void Build(Database database, Point3dCollection polygon)
         {
             foreach(var factory in Factories)
             {
+                factory.Transformer = Transformer;
                 factory.Create(database, polygon);
             }
         }
+        public void Build(Dictionary<BuiltInCategory,DBObjectCollection> dict)
+        {
+            foreach(var item in dict)
+            {
+                SpatialIndexFactory spatialIndex = null;
+                switch(item.Key)
+                {
+                    case BuiltInCategory.ArchitectureOutline:
+                        spatialIndex = new ArchitectureWallSpatialIndexFactory();
+                        break;
+                    case BuiltInCategory.ShearWall:
+                        spatialIndex = new ShearWallSpatialIndexFactory();
+                        break;
+                    case BuiltInCategory.Column:
+                        spatialIndex = new ColumnSpatialIndexFactory();
+                        break;
+                    case BuiltInCategory.Window:
+                        spatialIndex = new WindowSpatialIndexFactory();
+                        break;
+                    case BuiltInCategory.CurtainWall:
+                        spatialIndex = new CurtainWallSpatialIndexFactory();
+                        break;
+                }
+                if(spatialIndex!=null)
+                {
+                    spatialIndex.Create(item.Value);
+                    Factories.Add(spatialIndex);
+                }
+            }
+        }
+
         public void Add(List<BuiltInCategory> builtInCategories)
         {
             builtInCategories.ForEach(o => Add(o));
@@ -82,7 +119,9 @@ namespace ThMEPEngineCore.Service
     {
         public BuiltInCategory BuiltCategory { get; protected set; } = BuiltInCategory.UnNone;
         protected ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+        public ThMEPOriginTransformer Transformer { get; set; }
         public abstract void Create(Database database, Point3dCollection polygon);
+        public abstract void Create(DBObjectCollection elements);
         public virtual List<Entity> Query(Polyline envelope)
         {
             if (SpatialIndex != null)
@@ -96,6 +135,17 @@ namespace ThMEPEngineCore.Service
                 return new List<Entity>();
             }
         }
+        protected Point3dCollection Transform(Point3dCollection pts)
+        {
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(p =>
+            {
+                var pt = new Point3d(p.X, p.Y, p.Z);
+                Transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            return newPts;
+        }
     }
     public class ColumnSpatialIndexFactory : SpatialIndexFactory
     {
@@ -105,17 +155,18 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThColumnRecognitionEngine())
-            using (var db3Engine = new ThDB3ColumnRecognitionEngine())
-            {
-                // 识别结构柱
-                engine.Recognize(database, polygon);
-                db3Engine.Recognize(database, polygon);
-                var dbObjs = new DBObjectCollection();
-                engine.Elements.ForEach(o=>dbObjs.Add(o.Outline));
-                db3Engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-            }
+            var columnBuilder = new ThColumnBuilderEngine();
+            var columns = columnBuilder.Build(database, polygon);
+            columns.ForEach(o => Transformer.Transform(o.Outline));
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(
+                columns.Select(o=>o.Outline)
+                .ToCollection()
+                .FilterSmallArea(1.0));
+        }
+        public override void Create(DBObjectCollection elements)
+        {
+            Transformer.Transform(elements);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(elements);
         }
     }
     public class ArchitectureWallSpatialIndexFactory : SpatialIndexFactory
@@ -126,14 +177,19 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThDB3ArchWallRecognitionEngine())
-            {
-                // 识别结构柱
-                engine.Recognize(database, polygon);
-                var dbObjs = new DBObjectCollection();
-                engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-            }
+            //提取了DB3中的墙，并移动到原点
+            var engine = new ThDB3ArchWallExtractionEngine();
+            engine.Extract(database); //提取跟NTS算法没有关系
+            engine.Results.ForEach(o => Transformer.Transform(o.Geometry));      
+            var wallEngine = new ThDB3ArchWallRecognitionEngine();
+            wallEngine.Recognize(engine.Results, Transform(polygon));
+            var db3Walls = wallEngine.Elements.Select(o => o.Outline).ToCollection();
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(db3Walls.FilterSmallArea(1.0));
+        }
+        public override void Create(DBObjectCollection elements)
+        {
+            Transformer.Transform(elements);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(elements);
         }
     }
     public class ShearWallSpatialIndexFactory : SpatialIndexFactory
@@ -144,17 +200,27 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThShearWallRecognitionEngine())
-            using (var db3Engine = new ThDB3ShearWallRecognitionEngine())
-            {
-                // 识别结构柱
-                engine.Recognize(database, polygon);
-                db3Engine.Recognize(database, polygon);
-                var dbObjs = new DBObjectCollection();
-                engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
-                db3Engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-            }
+            var newPts = Transform(polygon);
+            var walls = new DBObjectCollection();            
+            var db3ShearWallExtractionEngine = new ThDB3ShearWallExtractionEngine();
+            db3ShearWallExtractionEngine.Extract(database); //提取跟NTS算法没有关系
+            db3ShearWallExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            var db3ShearWallEngine = new ThDB3ShearWallRecognitionEngine();
+            db3ShearWallEngine.Recognize(db3ShearWallExtractionEngine.Results, newPts);
+            db3ShearWallEngine.Elements.ForEach(o => walls.Add(o.Outline));
+
+            var shearWallExtractionEngine = new ThShearWallExtractionEngine();
+            shearWallExtractionEngine.Extract(database); //提取跟NTS算法没有关系
+            shearWallExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            var shearWallEngine = new ThShearWallRecognitionEngine();
+            shearWallEngine.Recognize(shearWallExtractionEngine.Results, newPts);
+            shearWallEngine.Elements.ForEach(o => walls.Add(o.Outline));
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(walls.FilterSmallArea(1.0));
+        }
+        public override void Create(DBObjectCollection elements)
+        {
+            Transformer.Transform(elements);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(elements);
         }
     }
     public class CurtainWallSpatialIndexFactory : SpatialIndexFactory
@@ -165,20 +231,21 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThCurtainWallRecognitionEngine())
-            {
-                // 识别结构柱
-                engine.Recognize(database, polygon);
-                if(engine.Elements.Count>0)
-                {
-                    SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    engine.Elements.Select(o => o.Outline).ToCollection());
-                }
-                else
-                {
-                    SpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
-                }
-            }
+            var newPts = Transform(polygon);
+            var extractionEngine = new ThCurtainWallExtractionEngine();
+            extractionEngine.Extract(database);
+            extractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            var recognizeEngine = new ThCurtainWallRecognitionEngine();
+            recognizeEngine.Recognize(extractionEngine.Results, newPts);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(
+                recognizeEngine.Elements
+                .Select(o=>o.Outline)
+                .ToCollection().FilterSmallArea(1.0));
+        }
+        public override void Create(DBObjectCollection elements)
+        {
+            Transformer.Transform(elements);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(elements);
         }
     }
     public class WindowSpatialIndexFactory : SpatialIndexFactory
@@ -189,27 +256,22 @@ namespace ThMEPEngineCore.Service
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
-            using (var engine = new ThDB3WindowRecognitionEngine())
-            {
-                engine.Recognize(database, polygon);
-                if(engine.Elements.Count>0)
-                {
-                    var objs = new DBObjectCollection();
-                    engine.Elements.ForEach(o =>
-                    {
-                        var outline = o.Outline as Polyline;
-                        if (outline.Area > 1e-4)
-                        {
-                            objs.Add(outline);
-                        }
-                    });
-                    SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                }
-                else
-                {
-                    SpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
-                }
-            }
+            var newPts = Transform(polygon);
+            var extractionEngine = new ThDB3WindowExtractionEngine();
+            extractionEngine.Extract(database);
+            extractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+
+            var recognizeEngine = new ThDB3WindowRecognitionEngine();
+            recognizeEngine.Recognize(extractionEngine.Results, newPts);     
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(
+                recognizeEngine.Elements
+                .Select(o => o.Outline)
+                .ToCollection().FilterSmallArea(1.0));
+        }
+        public override void Create(DBObjectCollection elements)
+        {
+            Transformer.Transform(elements);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(elements);
         }
     }
     #endregion

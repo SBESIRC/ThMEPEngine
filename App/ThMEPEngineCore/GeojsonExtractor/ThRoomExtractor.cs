@@ -115,5 +115,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
             }
             return Privacy.Unknown;
         }
+
+        public override List<Entity> GetEntities()
+        {
+            return Rooms.Select(o=>o.Boundary).ToList();
+        }
     }
 }

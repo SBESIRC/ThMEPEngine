@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 
-namespace ThMEPElectrical.FireAlarm.Interfacce
+namespace ThMEPElectrical.FireAlarm.Interface
 {
     interface ISetStorey
     {
