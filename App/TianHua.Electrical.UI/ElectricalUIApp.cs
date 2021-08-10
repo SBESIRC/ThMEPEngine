@@ -1,14 +1,17 @@
 ﻿using AcHelper;
 using Linq2Acad;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Command;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical.BlockConvert;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Electrical.UI.SecurityPlaneUI;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using TianHua.Electrical.UI.CapitalConverter;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using Autodesk.AutoCAD.Geometry;
 
 namespace TianHua.Electrical.UI
 {
@@ -45,6 +48,7 @@ namespace TianHua.Electrical.UI
             }
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
         }
+
         [CommandMethod("TIANHUACAD", "THTZZH", CommandFlags.Modal)]
         public void THTZZH()
         {
@@ -62,7 +66,7 @@ namespace TianHua.Electrical.UI
                 {
                     Scale = uiCapitalConverter.Parameter.BlkScaleValue,
                 };
-                if(uiCapitalConverter.Parameter.HavcOps &&
+                if (uiCapitalConverter.Parameter.HavcOps &&
                     uiCapitalConverter.Parameter.WssOps)
                 {
                     cmd.Category = ConvertCategory.ALL;

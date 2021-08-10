@@ -74,6 +74,8 @@
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
+    <Compile Include="CAD\NameValueString.cs" />
+    <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
@@ -89,6 +91,8 @@
     <Compile Include="Engine\ThDB3RoomMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3StairExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3StairRecognitionEngine.cs" />
     <Compile Include="Engine\ThEStoreysRecognitionEngine.cs" />
     <Compile Include="Engine\ThFireCompartmentBuilder.cs" />
     <Compile Include="Engine\ThFireCompartmentMarkRecognitionEngine.cs" />

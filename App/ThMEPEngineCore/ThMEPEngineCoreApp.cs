@@ -1003,6 +1003,48 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractStair", CommandFlags.Modal)]
+        public void THExtractStair()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var engine = new ThDB3StairRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Elements.Cast<ThIfcStair>().ForEach(o =>
+                {
+                    var pline = new Polyline();
+                    if (o.PlatForLayout.Count != 0)
+                    {
+                        pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
+                        pline.Closed = true;
+                        acadDatabase.ModelSpace.Add(pline);
+                    }
+
+                    if (o.HalfPlatForLayout.Count != 0)
+                    {
+                        var halfPline = new Polyline();
+                        halfPline.CreatePolyline(new Point3dCollection(o.HalfPlatForLayout.ToArray()));
+                        halfPline.Closed = true;
+                        acadDatabase.ModelSpace.Add(halfPline);
+                    }
+                });
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THASTAR", CommandFlags.Modal)]
         public void THASTAR()
         {
