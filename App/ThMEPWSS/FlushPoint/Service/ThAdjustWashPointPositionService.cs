@@ -61,7 +61,7 @@ namespace ThMEPWSS.FlushPoint.Service
                     return position;
                 }
             }
-            return collector.Count > 0 ? collector[0] : null;
+            return collector.Count > 0 ? (Point3d?)collector[0] : null;
         }
         private bool CanLayout(Point3d position, Vector3d dir)
         {
