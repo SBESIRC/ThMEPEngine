@@ -27,10 +27,6 @@ namespace TianHua.FanSelection.UI
 
         public List<FanDataModel> m_ListMainFan { get; set; }
 
-
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
-        public static extern int GetWindowThreadProcessId(IntPtr hwnd, out int ID);
-
         /// <summary>
         /// 风机箱参数
         /// </summary>

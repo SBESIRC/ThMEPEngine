@@ -121,9 +121,6 @@ namespace TianHua.FanSelection.UI
             m_Presenter = new PresentersFanSelection(this);
         }
 
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
-        public static extern int GetWindowThreadProcessId(IntPtr hwnd, out int ID);
-
         public void ShowFormByID(string _ID)
         {
             var _FocusFan = m_ListFan.Find(p => p.ID == _ID);
