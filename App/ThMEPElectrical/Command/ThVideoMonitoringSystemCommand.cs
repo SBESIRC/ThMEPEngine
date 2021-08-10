@@ -15,6 +15,7 @@ using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.Model;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPElectrical.VideoMonitoringSystem;
 using ThMEPEngineCore.Algorithm;
@@ -124,6 +125,7 @@ namespace ThMEPElectrical.Command
         /// <param name="originTransformer"></param>
         private void InsertBlock(List<LayoutModel> layoutModels, ThMEPOriginTransformer originTransformer)
         {
+            double scale = ThElectricalUIService.Instance.Parameter.scale;
             foreach (var model in layoutModels)
             {
                 var pt = model.layoutPt;
@@ -132,26 +134,26 @@ namespace ThMEPElectrical.Command
                 double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.layoutDir, Vector3d.ZAxis);
                 if (model is GunCameraModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is PanTiltCameraModel)
                 {
-                    var block = InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.PANTILTCAMERA_BLOCK_NAME, pt, rotateAngle, 100);
+                    var block = InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.PANTILTCAMERA_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is DomeCameraModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, 100);
-                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.DOMECAMERA_SHILED_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, scale);
+                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.DOMECAMERA_SHILED_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is GunCameraWithShieldModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, 100);
-                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_SHIELD_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_BLOCK_NAME, pt, rotateAngle, scale);
+                    InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.GUNCAMERA_SHIELD_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is FaceRecognitionCameraModel)
                 {
                     var attribute = new Dictionary<string, string>() { { "人脸", "人脸" } };
-                    var faceBlockId = InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.FACERECOGNITIONCAMERA_BLOCK_NAME, pt, rotateAngle, 100, attribute);
+                    var faceBlockId = InsertBlockService.InsertBlock(ThMEPCommon.VM_LAYER_NAME, ThMEPCommon.FACERECOGNITIONCAMERA_BLOCK_NAME, pt, rotateAngle, scale, attribute);
                     TransFaceBlockText(faceBlockId, rotateAngle);
                 }
             }

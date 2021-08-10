@@ -69,13 +69,13 @@ namespace ThMEPElectrical.StructureHandleService
             double doorWidth = lines.Last().Length;
             Point3d pt1 = new Point3d((lines[0].StartPoint.X + lines[0].EndPoint.X) / 2, (lines[0].StartPoint.Y + lines[0].EndPoint.Y) / 2, 0);
             Point3d pt2 = new Point3d((lines[1].StartPoint.X + lines[1].EndPoint.X) / 2, (lines[1].StartPoint.Y + lines[1].EndPoint.Y) / 2, 0);
-            var roomPt1 = room.GetClosestPointTo(pt1, false);
-            var roomPt2 = room.GetClosestPointTo(pt2, false);
+            var roomPt = room.GetClosestPointTo(pt1, false);
 
-            var ep = roomPt1.DistanceTo(pt1) < roomPt1.DistanceTo(pt2) ? pt1 : pt2;
-            var sp = roomPt1.DistanceTo(pt2) > roomPt1.DistanceTo(pt1) ? pt2 : pt1;
+            var ep = roomPt.DistanceTo(pt1) < roomPt.DistanceTo(pt2) ? pt1 : pt2;
+            var sp = roomPt.DistanceTo(pt2) > roomPt.DistanceTo(pt1) ? pt2 : pt1;
             var dir = (ep - sp).GetNormal();
-            return Tuple.Create(roomPt1, roomPt2, dir, doorLength, doorWidth);
+
+            return Tuple.Create(ep, sp, dir, doorLength, doorWidth);
         }
 
         /// <summary>

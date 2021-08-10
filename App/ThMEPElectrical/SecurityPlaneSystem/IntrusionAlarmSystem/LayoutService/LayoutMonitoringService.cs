@@ -39,7 +39,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, door, doorCenterPt, doorInfo.Item3);
+            var controller = layoutControllerService.LayoutController(structs, room, door, doorCenterPt, doorInfo.Item3);
 
             //布置探测器
             LayoutHositingDetectorService layoutHositingDetectorService = new LayoutHositingDetectorService();
@@ -86,7 +86,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 
             //布置控制器
             LayoutControllerService layoutControllerService = new LayoutControllerService();
-            var controller = layoutControllerService.LayoutController(structs, door, doorInfo.Item1, doorInfo.Item3);
+            var controller = layoutControllerService.LayoutController(structs, room, door, doorInfo.Item1, doorInfo.Item3);
             controller.Room = thRoom;
 
             //布置探测器

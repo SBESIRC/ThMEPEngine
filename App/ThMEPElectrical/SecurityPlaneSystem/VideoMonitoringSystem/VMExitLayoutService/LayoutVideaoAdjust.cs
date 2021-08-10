@@ -31,6 +31,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.VMExitLayout
                 while (tempVideaos.Count > 0)
                 {
                     tempVideaos.Remove(firV);
+                    resModels.Add(firV);
                     var otherVideaos = tempVideaos.Where(x => x.layoutPt.DistanceTo(firV.layoutPt) < distance).ToList();
                     foreach (var videao in otherVideaos)
                     {

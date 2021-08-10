@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
 {
@@ -12,8 +13,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     {
         public ACModel(BlockReference block)
         {
-            double width = 400;
-            double height = 500;
+            double width = 4 * ThElectricalUIService.Instance.Parameter.scale;
+            double height = 5 * ThElectricalUIService.Instance.Parameter.scale;
             position = new Point3d(block.Position.X, block.Position.Y, 0);
             layoutDir = -block.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
             blockModel = block;
@@ -72,8 +73,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     /// </summary>
     public class ACElectricLock : ACModel
     {
-        public ACElectricLock(BlockReference block) : base(block) {
-            double width = 212;
+        public ACElectricLock(BlockReference block) : base(block)
+        {
+            double width = Math.Sqrt(2 * Math.Pow(1.5 * ThElectricalUIService.Instance.Parameter.scale, 2));
             ConnectPts = new List<Point3d>();
             var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
             ConnectPts.Add(position + layoutDir * width);
@@ -88,9 +90,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     /// </summary>
     public class ACIntercom : ACModel
     {
-        public ACIntercom(BlockReference block) : base(block) {
-            double width = 400;
-            double height = 800;
+        public ACIntercom(BlockReference block) : base(block)
+        {
+            double width = 4 * ThElectricalUIService.Instance.Parameter.scale;
+            double height = 8 * ThElectricalUIService.Instance.Parameter.scale;
             ConnectPts = new List<Point3d>();
             var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
             ConnectPts.Add(position + layoutDir * (height / 2));

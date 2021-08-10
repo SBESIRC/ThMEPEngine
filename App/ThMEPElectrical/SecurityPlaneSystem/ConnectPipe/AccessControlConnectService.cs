@@ -24,7 +24,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
     public class AccessControlConnectService
     {
         readonly double tol = 10;
-        readonly double avoidStep = 400;
+        readonly double avoidStep = 300;
         readonly double tolLength = 5000;
         readonly double pathDis = 150;
         public List<Polyline> ConnectPipe(List<BlockReference> IABlock, List<ThIfcRoom> rooms, List<Polyline> columns, List<Polyline> doors, ThEStoreys floor)
@@ -171,9 +171,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             if (aPath != null)
             {
+                double range = 2 * ThElectricalUIService.Instance.Parameter.scale;
                 aPath = connectBlockService.ConnectByPoint(bModel.ConnectPts, aPath);
                 aPath.ReverseCurve();
-                aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, 200);
+                aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, range);
                 resPaths.Add(aPath);
             }
 

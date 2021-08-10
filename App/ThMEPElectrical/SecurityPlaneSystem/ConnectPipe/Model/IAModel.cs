@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
 {
@@ -44,8 +45,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
     /// </summary>
     public class IAControllerModel : IAModel
     {
-        double width = 300;
-        double height = 500;
+        double width = 3 * ThElectricalUIService.Instance.Parameter.scale;
+        double height = 5 * ThElectricalUIService.Instance.Parameter.scale;
         public IAControllerModel(BlockReference block) : base(block) {
             ConnectPts = new List<Point3d>();
             var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
 {
@@ -15,7 +16,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
     {
         public double layoutSpace = 15000;
         double layoutStairDis = 8000;
-        double modelWidth = 300;
+        double modelWidth = 3 * ThElectricalUIService.Instance.Parameter.scale;
 
         public LayoutGTAlongLaneService(double space = 15000, double stairDis = 8000)
         {

@@ -231,7 +231,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
         /// <param name="blockWidth"></param>
         /// <param name="isInside"></param>
         /// <returns></returns>
-        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Point3d doorPt, Polyline room, double blockWidth, bool isInside = true)
+        public static Dictionary<Line, Point3d> CalLayoutInfo(List<Polyline> structs, Point3d doorPt, Polyline room, double blockWidth, double blockTol, bool isInside = true)
         {
             Dictionary<Line, Point3d> resLayoutInfo = new Dictionary<Line, Point3d>();
             foreach (var str in structs)
@@ -240,7 +240,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                 foreach (var line in allLines)
                 {
                     var closetPt = line.GetClosestPointTo(doorPt, false);
-                    if (line.StartPoint.DistanceTo(closetPt) > blockWidth)
+                    if (line.StartPoint.DistanceTo(closetPt) > blockTol)
                     {
                         var layoutPt = closetPt + (line.StartPoint - closetPt).GetNormal() * (blockWidth / 2);
                         if (isInside && IsInsideRoom(room, layoutPt))
@@ -252,7 +252,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                             resLayoutInfo.Add(line, layoutPt);
                         }
                     }
-                    else if (line.EndPoint.DistanceTo(closetPt) > blockWidth)
+                    if (line.EndPoint.DistanceTo(closetPt) > blockTol)
                     {
                         if (!resLayoutInfo.Keys.Contains(line))
                         {

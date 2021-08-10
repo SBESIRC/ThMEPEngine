@@ -15,17 +15,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         public void ConnectPipe(List<BlockReference> connectBlock, List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls, ThEStoreys floor)
         {
             IntrucsionAlarmConnectService connectService = new IntrucsionAlarmConnectService();
-            var pipes = connectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
+            var iaPipes = connectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
+            InsertConnectPipeService.InsertConnectPipe(iaPipes, ThMEPCommon.IA_PIPE_LAYER_NAME, ThMEPCommon.IA_PIPE_LINETYPE);
 
             AccessControlConnectService accessControlConnectService = new AccessControlConnectService(); 
-            pipes.AddRange(accessControlConnectService.ConnectPipe(connectBlock, rooms, columns, doors, floor));
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in pipes)
-                {
-                    db.ModelSpace.Add(item);
-                }
-            }
+            var acPipe = accessControlConnectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
+            InsertConnectPipeService.InsertConnectPipe(acPipe, ThMEPCommon.AC_PIPE_LAYER_NAME, ThMEPCommon.AC_PIPE_LINETYPE);
         }
     }
 }
