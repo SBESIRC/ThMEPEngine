@@ -45,13 +45,23 @@ namespace ThMEPWSS.Command
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
                 //收集数据
+                var parkingStalls = new List<Polyline>(); //停车位
+                var walls = new List<Entity>(); //墙：剪力墙 + 建筑墙
+                var columns = new List<Polyline>(); // 柱
+                var rooms = new List<ThIfcRoom>(); // 房间
+
+                //提取房间
                 var roomExtractor = new ThRoomExtractor()
                 {
                     ColorIndex = 6,
                 };
                 roomExtractor.Extract(acadDb.Database, pts);
+                rooms = roomExtractor.Rooms;
+
+                //提取停车位
                 var parkingStallExtractor = new ThParkingStallExtractor();
                 parkingStallExtractor.Extract(acadDb.Database, pts);
+                parkingStalls = parkingStallExtractor.ParkingStalls.Cast<Polyline>().ToList();
                 var resetService = new ThRoomNameResetService(roomExtractor.Rooms,
                     parkingStallExtractor.ParkingStalls.ToCollection());
                 resetService.Reset();
@@ -64,26 +74,31 @@ namespace ThMEPWSS.Command
                     new ThObstacleExtractor(){ ColorIndex=4,},
                     new ThDrainFacilityExtractor(){ ColorIndex=5,},
                 };
-                extractors.ForEach(o => o.SetRooms(roomExtractor.Rooms));
+                extractors.ForEach(o => o.SetRooms(rooms));
+                extractors.ForEach(o => o.Extract(acadDb.Database, pts));
+
+                //收集数据
+                columns = (extractors[0] as ThColumnExtractor).Columns;
+                walls.AddRange((extractors[1] as ThShearwallExtractor).Walls);
+                walls.AddRange((extractors[2] as ThArchitectureExtractor).Walls);
+
+                var geos = new List<ThGeometry>();
+                extractors.Add(roomExtractor);
                 extractors.ForEach(o =>
                 {
-                    if(FlushPointVM.Parameter.OnlyLayoutOnColumn)
+                    if (FlushPointVM.Parameter.OnlyLayoutOnColumn)
                     {
-                        //仅布置在柱子上，不需要提取剪力墙和建筑墙
-                        if(!(o is ThFpShearwallExtractor || o is ThFpArchitectureExtractor))
+                        //仅布置在柱子上，不需要剪力墙和建筑墙的数据
+                        if (!(o is ThFpShearwallExtractor || o is ThFpArchitectureExtractor))
                         {
-                            o.Extract(acadDb.Database, pts);
+                            geos.AddRange(o.BuildGeometries());
                         }
                     }
                     else
                     {
-                        o.Extract(acadDb.Database, pts);
+                        geos.AddRange(o.BuildGeometries());
                     }
                 });
-
-                var geos = new List<ThGeometry>();
-                extractors.Add(roomExtractor);
-                extractors.ForEach(o => geos.AddRange(o.BuildGeometries()));
 
                 var washPara = BuildWashParam(); //UI参数
                 var geoContent = ThGeoOutput.Output(geos); //数据
@@ -109,21 +124,18 @@ namespace ThMEPWSS.Command
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
                 }
-                //调整点位位置
-                var columns = (extractors[0] as ThColumnExtractor).Columns;
-                ThAdjustWashPointPositionService.Adjust(layOutPts, columns);
+                //调整点位位置               
+                var adjustService = new ThAdjustWashPointPositionService(columns, parkingStalls, walls);
+                adjustService.Adjust(layOutPts);
 
                 // 打印块
                 ThFlushPointUtils.SortWashPoints(layOutPts);
                 
-                var walls = new List<Entity>();
-                walls.AddRange((extractors[1] as ThShearwallExtractor).Walls);
-                walls.AddRange((extractors[2] as ThArchitectureExtractor).Walls);
                 var layoutData = new WashPointLayoutData()
                 {
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
-                    Rooms = roomExtractor.Rooms.Select(o => o.Boundary).ToList(),
+                    Rooms = rooms.Select(o => o.Boundary).ToList(),
                     WashPoints = layOutPts,
                     Db = acadDb.Database,
                     PtRange = 10.0,

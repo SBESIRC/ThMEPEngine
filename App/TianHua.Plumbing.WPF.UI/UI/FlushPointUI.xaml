@@ -9,7 +9,7 @@
              xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d" 
-             Width="180" Height="570" MinWidth="180" MinHeight="570" Title="冲洗点位" ResizeMode="NoResize">
+             Width="180" Height="540" MinWidth="180" MinHeight="550" Title="冲洗点位" ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <converters:ArrangePositionBooleanConverter x:Key="apConverter"/>
