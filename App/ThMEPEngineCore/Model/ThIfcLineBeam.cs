@@ -55,7 +55,16 @@ namespace ThMEPEngineCore.Model
         {
             var outline = ThLineBeamOutliner.CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
             outline.TransformBy(annotation.Matrix);
-            return Create(outline, annotation.Size.Y, double.Parse(annotation.Attributes[ThMEPEngineCoreCommon.BEAM_GEOMETRY_DISTANCETOFLOOR]));
+            return new ThIfcLineBeam()
+            {
+                Outline = outline,
+                Width = annotation.Size.X,
+                Height = annotation.Size.Y,               
+                StartPoint = annotation.StartPoint.TransformBy(annotation.Matrix),
+                EndPoint = annotation.EndPoint.TransformBy(annotation.Matrix),                              
+                Uuid = Guid.NewGuid().ToString(),
+                DistanceToFloor = double.Parse(annotation.Attributes[ThMEPEngineCoreCommon.BEAM_GEOMETRY_DISTANCETOFLOOR])
+            };
         }
         public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
         {
