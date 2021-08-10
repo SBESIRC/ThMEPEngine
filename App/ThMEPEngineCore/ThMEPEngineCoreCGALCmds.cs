@@ -446,6 +446,41 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]
+        public void TH2DVisiblityTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                while(true)
+                {
+                    var per = Active.Editor.GetSelection();
+                    if (per.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+
+                    var ptRes = Active.Editor.GetPoint("\nselect a point3d");
+                    if (ptRes.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+
+                    var objs = new DBObjectCollection();
+                    per.Value.GetObjectIds().ForEach(o => objs.Add(acadDatabase.Element<Polyline>(o)));
+                    var results = objs.BuildArea();
+                    if (results.Count == 1)
+                    {
+                        var geos = new List<ThGeometry>();
+                        geos.Add(new ThGeometry { Boundary = results [0] as Entity});
+                        geos.Add(new ThGeometry { Boundary = new DBPoint(ptRes.Value)});
+                        var fileInfo = new FileInfo(Active.Document.Name);
+                        var path = fileInfo.Directory.FullName;
+                        string fileName = fileInfo.Name;
+                        ThGeoOutput.Output(geos, path, fileInfo.Name+DateTime.Now.ToString("hh-mm-ss"));
+                    }
+                }
+            }
+        }
     }
 }
 #endif
