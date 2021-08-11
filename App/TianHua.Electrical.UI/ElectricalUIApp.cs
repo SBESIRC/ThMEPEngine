@@ -116,6 +116,13 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
         }
 
+        [CommandMethod("TIANHUACAD", "THLTSBBZ", CommandFlags.Modal)]
+        public void THLTSBBZ()
+        {
+            var cmd = new ThStairCommand();
+            cmd.Execute();
+        }
+
         private string LayoutType
         {
             get

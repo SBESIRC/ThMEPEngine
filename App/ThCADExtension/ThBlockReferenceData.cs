@@ -1,5 +1,4 @@
-﻿using System;
-using DotNetARX;
+﻿using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;

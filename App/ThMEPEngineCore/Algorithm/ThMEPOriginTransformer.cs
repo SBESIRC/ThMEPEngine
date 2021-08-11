@@ -40,6 +40,11 @@ namespace ThMEPEngineCore.Algorithm
             TransformBy(objs, matrix);
         }
 
+        public Point3d Transform(Point3d point)
+        {
+            return point.TransformBy(Displacement);
+        }
+
         public void Transform(ref Point3d point)
         {
             var matrix = Displacement;

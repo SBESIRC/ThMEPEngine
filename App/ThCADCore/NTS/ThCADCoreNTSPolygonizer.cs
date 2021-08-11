@@ -31,12 +31,28 @@ namespace ThCADCore.NTS
             return polygonizer.GetPolygons();
         }
 
+        [Obsolete("该方法已被弃用，请使用PolygonsEx代替")]
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
             var objs = new List<DBObject>();
             foreach (Polygon polygon in lines.Polygonize())
             {
                 objs.AddRange(polygon.ToDbPolylines());
+            }
+            return objs.ToCollection();
+        }
+        
+        /// <summary>
+        /// 获取多边形面（支持洞）
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static DBObjectCollection PolygonsEx(this DBObjectCollection lines)
+        {
+            var objs = new List<DBObject>();
+            foreach (Polygon polygon in lines.Polygonize())
+            {
+                objs.Add(polygon.ToDbEntity());
             }
             return objs.ToCollection();
         }
