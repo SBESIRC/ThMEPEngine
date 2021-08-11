@@ -1026,9 +1026,9 @@ namespace ThMEPEngineCore
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
                 engine.Elements.Cast<ThIfcStair>().ForEach(o =>
                 {
-                    var pline = new Polyline();
                     if (o.PlatForLayout.Count != 0)
                     {
+                        var pline = new Polyline();
                         pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
                         pline.Closed = true;
                         acadDatabase.ModelSpace.Add(pline);

@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
 {
-    public class ThBConvertManager :IDisposable
+    public class ThBConvertManager : IDisposable
     {
         /// <summary>
         /// 块转换的映射规则
