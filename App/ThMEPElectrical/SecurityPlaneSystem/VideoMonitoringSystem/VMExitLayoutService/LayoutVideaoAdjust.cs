@@ -39,10 +39,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.VMExitLayout
                         if (Math.PI < angle)
                         {
                             angle = 2 * Math.PI - angle;
-                            if (angleTol > angle)
-                            {
-                                tempVideaos.Remove(videao);
-                            }
+                        }
+                        if (angleTol < angle)
+                        {
+                            tempVideaos.Remove(videao);
                         }
                     }
 

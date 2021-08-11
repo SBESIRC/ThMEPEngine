@@ -240,7 +240,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                 foreach (var line in allLines)
                 {
                     var closetPt = line.GetClosestPointTo(doorPt, false);
-                    if (line.StartPoint.DistanceTo(closetPt) > blockTol)
+                    if (line.StartPoint.DistanceTo(closetPt) >= blockTol)
                     {
                         var layoutPt = closetPt + (line.StartPoint - closetPt).GetNormal() * (blockWidth / 2);
                         if (isInside && IsInsideRoom(room, layoutPt))
@@ -252,7 +252,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.Utls
                             resLayoutInfo.Add(line, layoutPt);
                         }
                     }
-                    if (line.EndPoint.DistanceTo(closetPt) > blockTol)
+                    if (line.EndPoint.DistanceTo(closetPt) >= blockTol)
                     {
                         if (!resLayoutInfo.Keys.Contains(line))
                         {

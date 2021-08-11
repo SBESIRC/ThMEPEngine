@@ -93,7 +93,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 case LayoutType.OneWayAuthentication:
                     var button = useAModels.Where(x => x is ACButtun).ToList();
                     var cardReader = useBModels.Where(x => x is ACCardReader).ToList();
-                    if (button.Count <= 0 || cardReader.Count <= 0)
+                    if (cardReader.Count <= 0)
                     {
                         return resPolys;
                     }
@@ -103,7 +103,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 case LayoutType.TwoWayAuthentication:
                     var cardReaderA = useAModels.Where(x => x is ACCardReader).ToList();
                     var cardReaderB = useBModels.Where(x => x is ACCardReader).ToList();
-                    if (cardReaderA.Count <= 0 || cardReaderB.Count <= 0)
+                    if (cardReaderB.Count <= 0)
                     {
                         return resPolys;
                     }
@@ -113,7 +113,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 case LayoutType.OneWayVisitorTalk:
                     button = useAModels.Where(x => x is ACButtun).ToList();
                     var intercom = useBModels.Where(x => x is ACIntercom).ToList();
-                    if (button.Count <= 0 || intercom.Count <= 0)
+                    if (intercom.Count <= 0)
                     {
                         return resPolys;
                     }
@@ -138,28 +138,45 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         private List<Polyline> ConnectACPipe(List<ACModel> roomAModel, List<ACModel> roomBModel, ACModel electricLock, ThIfcRoom roomA, ThIfcRoom roomB, List<Polyline> holes)
         {
             List<Polyline> resPaths = new List<Polyline>();
-
-            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            var aModel = roomAModel.OrderBy(x => x.position.DistanceTo(electricLock.position)).First();
-            var bModel = roomBModel.OrderBy(x => x.position.DistanceTo(electricLock.position)).First();
-            ConnectBlockService connectBlockService = new ConnectBlockService();
-            var otherAModels = roomAModel.Where(x => x != aModel).ToList();
-            var otherBModels = roomBModel.Where(x => x != bModel).ToList();
             var useHoles = new List<Polyline>(holes);
-            useHoles.AddRange(otherAModels.Select(x => UtilService.GetBoungdingBox(x.position, bModel.layoutDir, avoidStep)));
-            useHoles.AddRange(otherBModels.Select(x => UtilService.GetBoungdingBox(x.position, bModel.layoutDir, avoidStep)));
-
+            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
             PipePathService pipePath = new PipePathService();
+            ConnectBlockService connectBlockService = new ConnectBlockService();
+
+            Polyline aPath = null;
+            Polyline ePath = null;
+            var bModel = roomBModel.OrderBy(x => x.position.DistanceTo(electricLock.position)).First();
             var roomPoly = CreateMap(roomA, roomB, bModel.layoutDir).Buffer(avoidStep * 2)[0] as Polyline;
+            var otherBModels = roomBModel.Where(x => x != bModel).ToList();
+            useHoles.AddRange(otherBModels.Select(x => UtilService.GetBoungdingBox(x.position, bModel.layoutDir, avoidStep)));
+            //连接房间a和房间b的块
+            ACModel aModel = null;
+            if (roomAModel.Count > 0)
+            {
+                aModel = roomAModel.OrderBy(x => x.position.DistanceTo(electricLock.position)).First();
+                var otherAModels = roomAModel.Where(x => x != aModel).ToList();
+                useHoles.AddRange(otherAModels.Select(x => UtilService.GetBoungdingBox(x.position, bModel.layoutDir, avoidStep)));
+                var useAHoles = new List<Polyline>(useHoles);
+                useAHoles.Add(UtilService.GetBoungdingBox(electricLock.position, bModel.layoutDir, avoidStep));
+                aPath = pipePath.CreatePipePath(roomPoly, aModel.position, bModel.position, bModel.layoutDir, useAHoles);
+                //修正连接线
+                if (aPath != null)
+                {
+                    double range = 2 * ThElectricalUIService.Instance.Parameter.scale;
+                    aPath = connectBlockService.ConnectByPoint(bModel.ConnectPts, aPath);
+                    aPath.ReverseCurve();
+                    aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, range);
+                    resPaths.Add(aPath);
+                }
+            }
+
             //连接电锁和房间b的块
             var useEHoles = new List<Polyline>(useHoles);
-            useEHoles.Add(UtilService.GetBoungdingBox(aModel.position, bModel.layoutDir, avoidStep));
-            var ePath = pipePath.CreatePipePath(roomPoly, electricLock.position, bModel.position, bModel.layoutDir, useEHoles);
-            //连接房间a和房间b的块
-            var useAHoles = new List<Polyline>(useHoles);
-            useAHoles.Add(UtilService.GetBoungdingBox(electricLock.position, bModel.layoutDir, avoidStep));
-            var aPath = pipePath.CreatePipePath(roomPoly, aModel.position, bModel.position, bModel.layoutDir, useAHoles);
-
+            if (aModel != null)
+            {
+                useEHoles.Add(UtilService.GetBoungdingBox(aModel.position, bModel.layoutDir, avoidStep));
+            }
+            ePath = pipePath.CreatePipePath(roomPoly, electricLock.position, bModel.position, bModel.layoutDir, useEHoles);
             //修正连接线
             ePath = connectBlockService.AjustPathIntersection(ePath, aPath, electricLock.position, bModel.position, pathDis);
             if (ePath != null)
@@ -169,15 +186,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 ePath = connectBlockService.ConnectByPoint(electricLock.ConnectPts, ePath);
                 resPaths.Add(ePath);
             }
-            if (aPath != null)
-            {
-                double range = 2 * ThElectricalUIService.Instance.Parameter.scale;
-                aPath = connectBlockService.ConnectByPoint(bModel.ConnectPts, aPath);
-                aPath.ReverseCurve();
-                aPath = connectBlockService.ConnectByCircle(new List<Point3d>() { aModel.position }, aPath, range);
-                resPaths.Add(aPath);
-            }
-
+            
             return resPaths.Where(x => x.Length < tolLength).ToList();
         }
 
