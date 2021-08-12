@@ -84,12 +84,6 @@ namespace ThMEPEngineCore.Temp
             ThGeoOutput.Output(geos, path, fileInfo.Name);
         }
 
-        public string OutputGeo()
-        {
-            var geos = BuildGeometries();
-            return ThGeoOutput.Output(geos);
-        }
-
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
