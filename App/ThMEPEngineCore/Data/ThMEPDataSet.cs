@@ -1,9 +1,10 @@
-﻿using NetTopologySuite.Features;
+﻿using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Data
 {
     public class ThMEPDataSet
     {
-        public FeatureCollection Container { get; set; }
+        public List<ThGeometry> Container { get; set; }
     }
 }
