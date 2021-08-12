@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project baseDir=".\build\bin\Release-NET45\" outputDir=".\build\bin\Release-NET45\" xmlns="http://confuser.codeplex.com">
+<project baseDir=".\build\bin\Release-NET45\" outputDir=".\" xmlns="http://confuser.codeplex.com">
     <rule preset="none" pattern="true">
         <protection id="anti debug" />
         <protection id="anti dump" />
