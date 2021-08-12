@@ -19,6 +19,7 @@ using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.Command
 {
@@ -112,6 +113,7 @@ namespace ThMEPElectrical.Command
         /// <param name="originTransformer"></param>
         private void InsertBlock(List<LayoutModel> layoutModels, ThMEPOriginTransformer originTransformer)
         {
+            double scale = ThElectricalUIService.Instance.Parameter.scale;
             foreach (var model in layoutModels)
             {
                 var pt = model.LayoutPoint;
@@ -120,35 +122,35 @@ namespace ThMEPElectrical.Command
                 double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.LayoutDir, Vector3d.ZAxis);
                 if (model is ControllerModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.CONTROLLER_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.CONTROLLER_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is InfraredWallDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR" } });
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME, pt, rotateAngle, scale, new Dictionary<string, string>() { { "F", "IR" } });
                 }
                 else if (model is DoubleWallDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR/M" } });
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, scale, new Dictionary<string, string>() { { "F", "IR/M" } });
                 }
                 else if (model is InfraredHositingDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR" } });
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME, pt, rotateAngle, scale, new Dictionary<string, string>() { { "F", "IR" } });
                 }
                 else if (model is DoubleHositingDetectorModel)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, 100, new Dictionary<string, string>() { { "F", "IR/M" } });
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME, pt, rotateAngle, scale, new Dictionary<string, string>() { { "F", "IR/M" } });
                 }
                 else if (model is SoundLightAlarm)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.SOUNDLIGHTALARM_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.SOUNDLIGHTALARM_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is DisabledAlarmButtun)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DISABLEDALARM_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.DISABLEDALARM_BLOCK_NAME, pt, rotateAngle, scale);
                 }
                 else if (model is EmergencyAlarmButton)
                 {
-                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.EMERGENCYALARM_BLOCK_NAME, pt, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPCommon.IA_LAYER_NAME, ThMEPCommon.EMERGENCYALARM_BLOCK_NAME, pt, rotateAngle, scale);
                 }
             }
         }

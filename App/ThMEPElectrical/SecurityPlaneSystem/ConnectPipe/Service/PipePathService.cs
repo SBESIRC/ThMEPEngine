@@ -80,7 +80,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
             Polyline resLines = null;
             //计算逃生路径(用A*算法)
             //----构建寻路地图框线
-            var mapFrame = polyline;
+            var mapFrame = CreateMapFrame(dir, startPt, blockPt, holes, 5000);
+            mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderBy(x => x.Area).First();
 
             //----初始化寻路类
             AStarOptimizeRoutePlanner aStarRoute = new AStarOptimizeRoutePlanner(mapFrame, dir, 50, 50);
@@ -136,20 +137,21 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
         /// <param name="holes"></param>
         /// <param name="expandLength"></param>
         /// <returns></returns>
-        private Polyline CreateMapFrame(Line lane, Point3d startPt, List<Polyline> holes, double expandLength)
+        private Polyline CreateMapFrame(Vector3d xDir, Point3d startPt, Point3d endPt, List<Polyline> holes, double expandLength)
         {
-            Vector3d xDir = (lane.EndPoint - lane.StartPoint).GetNormal();
-            List<Point3d> pts = new List<Point3d>() { startPt, lane.StartPoint, lane.EndPoint };
+            var addPt1 = startPt + xDir * 100;
+            var addPt2 = endPt + xDir * 100;
+            List<Point3d> pts = new List<Point3d>() { startPt, endPt, addPt1, addPt2 };
             var polyline = UtilService.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
-            GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            var intersectHoles = getLayoutStructureService.GetNeedHoles(holes, polyline);
-            foreach (var iHoles in intersectHoles)
-            {
-                pts.AddRange(iHoles.Vertices().Cast<Point3d>());
-            }
-            var resPolyline = UtilService.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
+            //GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
+            //var intersectHoles = getLayoutStructureService.GetNeedHoles(holes, polyline);
+            //foreach (var iHoles in intersectHoles)
+            //{
+            //    pts.AddRange(iHoles.Vertices().Cast<Point3d>());
+            //}
+            //var resPolyline = UtilService.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
 
-            return resPolyline;
+            return polyline;
         }
     }
 }

@@ -40,7 +40,25 @@ namespace ThMEPElectrical.CAD
         public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false)) 
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
+
+        public static void ImportLinetype(this Database database, string url, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(url, DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
+
+        public static void ImportLayer(this Database database, string url, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(url, DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
             }

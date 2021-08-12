@@ -33,19 +33,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 else if (connectRooms.Count == 1)
                 {
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
-                    models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls));
+                    models.AddRange(DoLayout(layoutType, connectRooms[0], null, door, columns, walls));
                 }
                 else if (connectRooms.Count >= 2)
                 {
                     if (CalTwoConnectRoom(connectRooms[0], connectRooms[1], floor.StoreyTypeString, out LayoutType layoutAType, out LayoutType layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[0], door, columns, walls));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[1], door, columns, walls));
+                        models.AddRange(DoLayout(layoutAType, connectRooms[0], connectRooms[1], door, columns, walls));
+                        models.AddRange(DoLayout(layoutBType, connectRooms[1], connectRooms[0], door, columns, walls));
                     }
                     else if (CalTwoConnectRoom(connectRooms[1], connectRooms[0], floor.StoreyTypeString, out layoutAType, out layoutBType))
                     {
-                        models.AddRange(DoLayout(layoutAType, connectRooms[1], door, columns, walls));
-                        models.AddRange(DoLayout(layoutBType, connectRooms[0], door, columns, walls));
+                        models.AddRange(DoLayout(layoutAType, connectRooms[1], connectRooms[0], door, columns, walls));
+                        models.AddRange(DoLayout(layoutBType, connectRooms[0], connectRooms[1], door, columns, walls));
                     }
                 }
             }
@@ -57,7 +57,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// 执行布置
         /// </summary>
         /// <param name="layoutType"></param>
-        private List<AccessControlModel> DoLayout(LayoutType layoutType, ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
+        private List<AccessControlModel> DoLayout(LayoutType layoutType, ThIfcRoom thRoomA, ThIfcRoom thRoomB, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
             List<AccessControlModel> models = new List<AccessControlModel>(); 
             switch (layoutType)
@@ -66,15 +66,15 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                     break;
                 case LayoutType.OneWayAuthentication:
                     LayoutOneWayAuthenticationService layoutOneWayAuthenticationService = new LayoutOneWayAuthenticationService();
-                    models = layoutOneWayAuthenticationService.Layout(thRoom, door, columns, walls);
+                    models = layoutOneWayAuthenticationService.Layout(thRoomA, thRoomB, door, columns, walls);
                     break;
                 case LayoutType.TwoWayAuthentication:
                     LayoutTwoWayAuthenticationService layoutTwoWayAuthenticationService = new LayoutTwoWayAuthenticationService();
-                    models = layoutTwoWayAuthenticationService.Layout(thRoom, door, columns, walls);
+                    models = layoutTwoWayAuthenticationService.Layout(thRoomA, thRoomB, door, columns, walls);
                     break;
                 case LayoutType.OneWayVisitorTalk:
                     LayoutOneWayVisitorTalkService layoutOneWayVisitorTalkService = new LayoutOneWayVisitorTalkService();
-                    models = layoutOneWayVisitorTalkService.Layout(thRoom, door, columns, walls);
+                    models = layoutOneWayVisitorTalkService.Layout(thRoomA, thRoomB, door, columns, walls);
                     break;
                 default:
                     break;

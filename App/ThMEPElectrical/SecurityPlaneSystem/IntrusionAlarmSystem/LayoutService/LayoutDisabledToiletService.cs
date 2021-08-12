@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
 
@@ -15,7 +16,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
     public class LayoutDisabledToiletService
     {
-        double alarmWidth = 300;
+        double alarmWidth = 3 * ThElectricalUIService.Instance.Parameter.scale;
         double angle = 45;
         public List<LayoutModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {

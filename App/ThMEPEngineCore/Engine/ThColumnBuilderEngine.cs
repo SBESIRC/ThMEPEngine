@@ -3,6 +3,7 @@ using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
@@ -16,6 +17,9 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThColumnBuilderEngine : IDisposable
     {
+        private const double AREATOLERANCE = 1.0;
+        private const double BUFFERTOLERANCE = 1.0;
+
         public ThColumnBuilderEngine()
         {
         }
@@ -25,7 +29,7 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThIfcColumn> Build(Database db, Point3dCollection pts)
         {
-            //从原始数据提取
+            // 获取数据
             var columns = new DBObjectCollection();
             var columnExtractor = new ThColumnExtractionEngine();
             columnExtractor.Extract(db);
@@ -33,51 +37,41 @@ namespace ThMEPEngineCore.Engine
             db3ColumnExtractor.Extract(db);         
             columnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
             db3ColumnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
-            columns = Buffer(columns, -1.0);
 
-            //移动到原点
-            var center = GetCenter(columns);
+            // 处理极远情况（>1E+10）
+            var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
             transformer.Transform(columns);
-            var newPts = new Point3dCollection();
-            foreach(Point3d pt in pts)
-            {
-                var tempPt = new Point3d(pt.X,pt.Y,pt.Z);
-                transformer.Transform(ref tempPt);
-                newPts.Add(tempPt);
-            }
+            var newPts = pts.OfType<Point3d>()
+                .Select(o => transformer.Transform(o))
+                .ToCollection();
+
+            // 后处理
             columns = FilterInRange(columns, newPts);
+            columns = Buffer(columns, -BUFFERTOLERANCE);
             columns = Preprocess(columns);
-            columns = Buffer(columns, 1.0);
+            columns = Buffer(columns, BUFFERTOLERANCE);
+
+            // 回复到原位置
             transformer.Reset(columns);
 
+            // 返回
             return columns.Cast<Polyline>().Select(e => ThIfcColumn.Create(e)).ToList();
         }        
         private DBObjectCollection Preprocess(DBObjectCollection columns)
         {
             var simplifier = new ThElementSimplifier();
-            var results = columns.FilterSmallArea(1.0);
+            var results = columns.FilterSmallArea(AREATOLERANCE);
             results = simplifier.Tessellate(columns);
             results = results.UnionPolygons();
-            results = results.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(AREATOLERANCE);
             results = simplifier.MakeValid(results);
-            results = results.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(AREATOLERANCE);
             results = simplifier.Normalize(results);
-            results = results.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(AREATOLERANCE);
             results = simplifier.Simplify(results);
-            results = results.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(AREATOLERANCE);
             return results;
-        }
-        private Point3d GetCenter(DBObjectCollection columns)
-        {
-            var pts = new List<Point3d>();
-            columns.Cast<Polyline>()
-                .ForEach(o => pts.AddRange(o.EntityVertices().Cast<Point3d>().ToList()));
-            var minX = pts.Select(o => o.X).OrderBy(o => o).FirstOrDefault();
-            var minY = pts.Select(o => o.Y).OrderBy(o => o).FirstOrDefault();
-            var maxX = pts.Select(o => o.X).OrderByDescending(o => o).FirstOrDefault();
-            var maxY = pts.Select(o => o.Y).OrderByDescending(o => o).FirstOrDefault();
-            return new Point3d((minX + maxX) / 2.0, (minY + maxY) / 2.0, 0.0);
         }
         private DBObjectCollection FilterInRange(DBObjectCollection objs, Point3dCollection pts)
         {
@@ -108,7 +102,7 @@ namespace ThMEPEngineCore.Engine
             objs.Cast<Entity>().ForEach(e =>
             {
                 var entity = bufferService.Buffer(e,length);
-                if(entity!=null && GetArea(entity)>=1.0)
+                if(entity!=null && GetArea(entity)>= AREATOLERANCE)
                 {
                     results.Add(entity);
                 }

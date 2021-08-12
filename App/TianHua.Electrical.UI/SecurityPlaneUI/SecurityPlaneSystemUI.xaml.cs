@@ -137,6 +137,8 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// </summary>
         private void SetDefaultValue()
         {
+            scale.ItemsSource = new List<string>() { "100", "150" };
+
             string[] files = Directory.GetFiles(configFolderUrl + @"\", "*.xls");
             List<string> fileLst = new List<string>();
             foreach (string file in files)
@@ -151,7 +153,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             videoBlindArea.Text = ThElectricalUIService.Instance.Parameter.videoBlindArea.ToString();
             videaMaxArea.Text = ThElectricalUIService.Instance.Parameter.videaMaxArea.ToString();
             gtDistance.Text = ThElectricalUIService.Instance.Parameter.gtDistance.ToString();
-            //scale.Text = ThElectricalUIService.Instance.Parameter.scale.ToString();
+            scale.SelectedValue = ThElectricalUIService.Instance.Parameter.scale.ToString();
         }
 
         /// <summary>
@@ -204,11 +206,6 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         }
 
         #region check输入
-        //private bool CheckBlockSize()
-        //{
-
-        //}
-
         /// <summary>
         /// 检查视频监控系统输入
         /// </summary>
@@ -287,6 +284,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             //聚焦到CAD
             SetFocusToDwgView();
 
+            ThElectricalUIService.Instance.Parameter.scale = double.Parse(scale.SelectedItem.ToString()); 
             //发送命令
             if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
             {
@@ -310,10 +308,16 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             this.Hide();
         }
 
+        /// <summary>
+        /// 自动连线
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             //聚焦到CAD
             SetFocusToDwgView();
+            ThElectricalUIService.Instance.Parameter.scale = double.Parse(scale.SelectedItem.ToString());
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSPPIPE");
             this.Hide();
         }

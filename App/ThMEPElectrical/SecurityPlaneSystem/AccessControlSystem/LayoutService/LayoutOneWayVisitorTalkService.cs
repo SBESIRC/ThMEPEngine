@@ -8,28 +8,31 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
 {
     public class LayoutOneWayVisitorTalkService
     {
-        double buttunWidth = 400;
-        double cardReaderWidth = 400;
-        double cardReaderLength = 800;
-        double angle = 45;
-        public List<AccessControlModel> Layout(ThIfcRoom thRoom, Polyline door, List<Polyline> columns, List<Polyline> walls)
+        double blockTol = 300;
+        double buttunWidth = 4 * ThElectricalUIService.Instance.Parameter.scale;
+        double cardReaderWidth = 4 * ThElectricalUIService.Instance.Parameter.scale;
+        double cardReaderLength = 8 * ThElectricalUIService.Instance.Parameter.scale;
+        public List<AccessControlModel> Layout(ThIfcRoom thRoomA, ThIfcRoom thRoomB, Polyline door, List<Polyline> columns, List<Polyline> walls)
         {
             GetLayoutStructureService getLayoutStructureService = new GetLayoutStructureService();
-            var room = getLayoutStructureService.GetUseRoomBoundary(thRoom, door);
+            var roomA = getLayoutStructureService.GetUseRoomBoundary(thRoomA, door);
+            var roomB = thRoomB == null ? null : getLayoutStructureService.GetUseRoomBoundary(thRoomB, door);
 
             //计算门信息
-            var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(room, door);
+            var roomDoorInfo = getLayoutStructureService.GetDoorCenterPointOnRoom(roomA, door);
             var doorCenterPt = getLayoutStructureService.GetDoorCenterPt(door);
 
             //获取构建信息
-            var bufferRoom = room.Buffer(15)[0] as Polyline;
+            var bufferRoom = roomA.Buffer(15)[0] as Polyline;
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
@@ -45,8 +48,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             {
                 return accessControlModels;
             }
-            var intercom = CalLayoutIntercom(structs, door, -roomDoorInfo.Item3, doorCenterPt);
-            var button = CalLayoutButton(structs, door, roomDoorInfo.Item3, doorCenterPt);
+            var intercom = CalLayoutIntercom(structs, roomDoorInfo.Item2, roomA, roomB, door);
+            var button = CalLayoutButton(structs, roomDoorInfo.Item1, roomA, door);
             if (intercom != null) accessControlModels.Add(intercom);
             if (button != null) accessControlModels.Add(button);
             accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item3));
@@ -61,33 +64,36 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="doorDir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private Buttun CalLayoutButton(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
+        private Buttun CalLayoutButton(List<Polyline> structs, Point3d doorUsePt, Polyline room, Polyline door)
         {
-            var checkDir = doorDir;
-            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, buttunWidth, true).FirstOrDefault();
-            if (layoutInfo.Key == null)
+            var resInfos = new List<KeyValuePair<Point3d, Vector3d>>();
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorUsePt, room, buttunWidth, blockTol);
+            var bufferDoor = door.Buffer(10)[0] as Polyline;
+            var firLayoutInfos = layoutInfo.Where(x => x.Key.IsIntersects(bufferDoor)).ToDictionary(x => x.Key, y => y.Value);
+            if (firLayoutInfos.Count > 0)
             {
-                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                if (layoutInfo.Key == null)
-                {
-                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                }
-                checkDir = (doorPt - layoutInfo.Value).GetNormal();
+                layoutInfo = firLayoutInfos;
             }
-            if (layoutInfo.Key == null)
+            foreach (var lInfo in layoutInfo)
+            {
+                var dir = Vector3d.ZAxis.CrossProduct(lInfo.Key.EndPoint - lInfo.Key.StartPoint).GetNormal();
+                var layoutPt = lInfo.Value + dir * (buttunWidth / 2);
+                if (!room.Contains(layoutPt))
+                {
+                    layoutPt = lInfo.Value - dir * (buttunWidth / 2);
+                    dir = -dir;
+                }
+                resInfos.Add(new KeyValuePair<Point3d, Vector3d>(layoutPt, dir));
+            }
+            resInfos = resInfos.OrderBy(x => x.Key.DistanceTo(doorUsePt)).ToList();
+            if (resInfos.Count <= 0)
             {
                 return null;
             }
-            var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (checkDir.DotProduct(dir) < 0)
-            {
-                dir = -dir;
-            }
 
             Buttun buttun = new Buttun();
-            buttun.layoutDir = dir;
-            buttun.layoutPt = layoutInfo.Value + dir * (buttunWidth / 2);
+            buttun.layoutDir = resInfos.First().Value;
+            buttun.layoutPt = resInfos.First().Key;
 
             return buttun;
         }
@@ -113,33 +119,40 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <param name="doorDir"></param>
         /// <param name="doorPt"></param>
         /// <returns></returns>
-        private Intercom CalLayoutIntercom(List<Polyline> structs, Polyline door, Vector3d doorDir, Point3d doorPt)
+        private Intercom CalLayoutIntercom(List<Polyline> structs, Point3d doorUsePt, Polyline roomA, Polyline roomB, Polyline door)
         {
-            var checkDir = doorDir;
-            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, cardReaderWidth, true).FirstOrDefault();
-            if (layoutInfo.Key == null)
+            var resInfos = new List<KeyValuePair<Point3d, Vector3d>>();
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorUsePt, roomA, cardReaderWidth, blockTol, false);
+            var bufferDoor = door.Buffer(10)[0] as Polyline;
+            var firLayoutInfos = layoutInfo.Where(x => x.Key.IsIntersects(bufferDoor)).ToDictionary(x => x.Key, y => y.Value);
+            if (firLayoutInfos.Count > 0)
             {
-                var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                if (layoutInfo.Key == null)
-                {
-                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, cardReaderWidth * 2).FirstOrDefault();
-                }
-                checkDir = (doorPt - layoutInfo.Value).GetNormal();
+                layoutInfo = firLayoutInfos;
             }
-            if (layoutInfo.Key == null)
+            foreach (var lInfo in layoutInfo)
+            {
+                var dir = Vector3d.ZAxis.CrossProduct(lInfo.Key.EndPoint - lInfo.Key.StartPoint).GetNormal();
+                var layoutPt = lInfo.Value + dir * (cardReaderLength / 2);
+                if (roomA.Contains(layoutPt))
+                {
+                    layoutPt = lInfo.Value - dir * (cardReaderLength / 2);
+                    dir = -dir;
+                }
+                resInfos.Add(new KeyValuePair<Point3d, Vector3d>(layoutPt, dir));
+            }
+            resInfos = resInfos.OrderBy(x => x.Key.DistanceTo(doorUsePt)).ToList();
+            if (roomB != null)
+            {
+                resInfos = resInfos.Where(x => roomB.Contains(x.Key)).ToList();
+            }
+            if (resInfos.Count <= 0)
             {
                 return null;
             }
-            var dir = Vector3d.ZAxis.CrossProduct(layoutInfo.Key.EndPoint - layoutInfo.Key.StartPoint).GetNormal();
-            if (checkDir.DotProduct(dir) < 0)
-            {
-                dir = -dir;
-            }
 
             Intercom intercom = new Intercom();
-            intercom.layoutDir = dir;
-            intercom.layoutPt = layoutInfo.Value + dir * (cardReaderLength / 2);
+            intercom.layoutDir = resInfos.First().Value;
+            intercom.layoutPt = resInfos.First().Key;
             return intercom;
         }
     }

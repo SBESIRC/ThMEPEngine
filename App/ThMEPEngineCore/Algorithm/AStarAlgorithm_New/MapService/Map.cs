@@ -267,23 +267,21 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New.MapService
                 bufferDistance = -5;
             }
 
-            var resLines = new List<Line>(lines);
+            var resLines = new List<Line>();
             foreach (var hole in holes)
             {
                 var bufferHole = hole.Buffer(bufferDistance)[0] as Polyline;
-                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-                {
-                    var s = bufferHole.Clone() as Polyline;
-                    s.TransformBy(ucsMatrix.Inverse());
-                    //db.ModelSpace.Add(s);
-                }
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(resLines.ToCollection());
+                //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+                //{
+                //    var s = bufferHole.Clone() as Polyline;
+                //    s.TransformBy(ucsMatrix.Inverse());
+                //    //db.ModelSpace.Add(s);
+                //}
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
                 var intersectLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferHole).Cast<Curve>().ToList();
-                foreach (Line line in intersectLines)
-                {
-                    resLines.Remove(line);
-                }
+                resLines.AddRange(intersectLines.Cast<Line>());
             }
+            resLines = lines.Except(resLines).ToList();
 
             var filLines = new List<Line>();
             foreach (var line in resLines)

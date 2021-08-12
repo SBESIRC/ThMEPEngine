@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
     public class LayoutWallMountingDetectorService
     {
-        double blockWidth = 400;
-        double blockLength = 400;
+        double blockWidth = 4 * ThElectricalUIService.Instance.Parameter.scale;
+        double blockLength = 4 * ThElectricalUIService.Instance.Parameter.scale;
         double angle = 10;
         public DetectorModel LayoutDetector(Point3d doorPt, Vector3d doorDir, Polyline door, double doorLength, List<Polyline> columns, List<Polyline> walls, ControllerModel controller)
         {
