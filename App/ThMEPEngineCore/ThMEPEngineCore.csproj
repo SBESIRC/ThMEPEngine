@@ -85,6 +85,7 @@
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThColumnBuilderEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomMarkExtractionVisitor.cs" />

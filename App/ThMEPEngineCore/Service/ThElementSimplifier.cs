@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.Service
         public override DBObjectCollection Tessellate(DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
-            foreach (Curve c in curves)
+            foreach (Entity c in curves)
             {
                 if (c is AcPolygon polygon)
                 {
@@ -66,6 +66,15 @@ namespace ThMEPEngineCore.Service
                 else if (c is Arc arc)
                 {
                     objs.Add(arc.TessellateArcWithArc(TESSELLATE_ARC_LENGTH));
+                }
+                else if (c is MPolygon mPolygon)
+                {
+                    //不支持多个MuiltPolygon
+                    var shell = mPolygon.Shell();
+                    var holes = mPolygon.Holes();
+                    shell = shell.Tessellate(TESSELLATE_ARC_LENGTH);
+                    holes.ForEach(h => h = h.Tessellate(TESSELLATE_ARC_LENGTH));
+                    objs.Add(ThMPolygonTool.CreateMPolygon(shell, holes.Cast<Curve>().ToList()));
                 }
                 else
                 {
