@@ -163,5 +163,9 @@
         /// 给水起点
         /// </summary>
         WaterStartPoint,
+        /// <summary>
+        /// 区域
+        /// </summary>
+        Zone,
     }
 }
