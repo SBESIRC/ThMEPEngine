@@ -91,11 +91,11 @@ namespace ThMEPEngineCore.Service
             while (i < j)
             {
                 //从右到左，寻找第一个小于基准pivot的元素
-                while (GetArea(ents[j]) >= GetArea(pivot) && i < j) j--; //指针向前移
+                while (ents[j].GetArea() >= pivot.GetArea() && i < j) j--; //指针向前移
                 ents[i] = ents[j];  //执行到此，j已指向从右端起第一个小于基准pivot的元素，执行替换
 
                 //从左到右，寻找首个大于基准pivot的元素
-                while (GetArea(ents[i]) <= GetArea(pivot) && i < j) i++; //指针向后移
+                while (ents[i].GetArea() <= pivot.GetArea() && i < j) i++; //指针向后移
                 ents[j] = ents[i];  //执行到此,i已指向从左端起首个大于基准pivot的元素，执行替换
             }
 
@@ -125,29 +125,6 @@ namespace ThMEPEngineCore.Service
                     first.Add(e);
                 }
             });
-        }
-        private double GetArea(Entity polygon)
-        {
-            if(polygon is Polyline polyline)
-            {
-                return polyline.Area;
-            }
-            else if(polygon is MPolygon mPolygon)
-            {
-                return mPolygon.Area;
-            }
-            else if(polygon is Circle circle)
-            {
-                return circle.Area;
-            }
-            else if(polygon is Ellipse ellipse)
-            {
-                return ellipse.Area;
-            }
-            else
-            {
-                throw new System.NotSupportedException();
-            }
         }
     }
 }
