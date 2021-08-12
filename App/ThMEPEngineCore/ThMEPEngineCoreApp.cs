@@ -186,30 +186,6 @@ namespace ThMEPEngineCore
                 }
             }
         }
-        [CommandMethod("TIANHUACAD", "THRecognizeColumn", CommandFlags.Modal)]
-        public void THRecognizeColumn()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-
-                var columnBuilder = new ThColumnBuilderEngine();
-                var columns = columnBuilder.Build(acadDatabase.Database, frame.Vertices());
-                CAD.ThAuxiliaryUtils.CreateGroup(columns.Select(o => o.Outline).ToList(), acadDatabase.Database, 1);
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THExtractShearWall", CommandFlags.Modal)]
         public void THExtractShearWall()
