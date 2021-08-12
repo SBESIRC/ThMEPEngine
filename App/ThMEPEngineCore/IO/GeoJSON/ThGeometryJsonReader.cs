@@ -10,6 +10,7 @@ using NetTopologySuite.Features;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.IO.GeoJSON
 {
@@ -18,6 +19,10 @@ namespace ThMEPEngineCore.IO.GeoJSON
         public static List<ThGeometry> ReadFromContent(string content)
         {
             var results = new List<ThGeometry>();
+            if(!IsValid(content))
+            {
+                return results;
+            }
             var serializer = GeoJsonSerializer.Create();
             using (var stringReader = new StringReader(content))
             using (var jsonReader = new JsonTextReader(stringReader))
@@ -71,6 +76,12 @@ namespace ThMEPEngineCore.IO.GeoJSON
             }
             var content = File.ReadAllText(fileName, Encoding.UTF8);
             return ReadFromContent(content);
+        }
+        private static bool IsValid(string content)
+        {
+            string pattern = "(\"" + "features" + "\")" + @"\s{0,}[:]{1}\s{0,}(null)";
+            var rg = new Regex(pattern);
+            return !rg.IsMatch(content);
         }
     }
 }
