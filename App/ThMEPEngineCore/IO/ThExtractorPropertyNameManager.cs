@@ -7,6 +7,13 @@
         public readonly static string IsolatePropertyName = "Isolated";
         public readonly static string CategoryPropertyName = "Category";
         public readonly static string SwitchPropertyName = "Switch";
+        /// <summary>
+        /// 布置属性：可布/不可布/必布
+        /// </summary>
+        public readonly static string PlacementPropertyName = "Placement";
+        /// <summary>
+        /// 公有属性：公有/私有
+        /// </summary>
         public readonly static string PrivacyPropertyName = "Privacy";
         public readonly static string GroupIdPropertyName = "GroupId";
         public readonly static string FloorNumberPropertyName = "FloorNumber";
