@@ -11,34 +11,14 @@ namespace ThMEPEngineCore.IO
     {
         public static void Output(List<ThGeometry> geos,string path,string fileName)
         {
-            var stream =  File.Create(Path.Combine(path, string.Format("{0}.Info.geojson", fileName)));
-            using (StreamWriter geoJson = new StreamWriter(stream, new UTF8Encoding(false)))
-            using (JsonTextWriter writer = new JsonTextWriter(geoJson)
-            {
-                Indentation = 4,
-                IndentChar = ' ',
-                Formatting = Formatting.Indented,
-            })
-            {
-                var geoJsonWriter = new ThGeometryJsonWriter();
-                geoJsonWriter.Write(geos, writer);
-            }
+            var geoJsonWriter = new ThGeometryJsonWriter();
+            geoJsonWriter.Write(geos, Path.Combine(path, string.Format("{0}.Info.geojson", fileName)));
         }
 
         public static string Output(List<ThGeometry> geos)
         {
-            using (var geoJson = new ExtentedStringWriter(new UTF8Encoding(false)))
-            using (var writer = new JsonTextWriter(geoJson)
-            {
-                Indentation = 4,
-                IndentChar = ' ',
-                Formatting = Formatting.Indented,
-            })
-            {
-                var geoJsonWriter = new ThGeometryJsonWriter();
-                geoJsonWriter.Write(geos, writer);
-                return geoJson.ToString();
-            }
+            var geoJsonWriter = new ThGeometryJsonWriter();
+            return geoJsonWriter.Write(geos);
         }
     }
     public sealed class ExtentedStringWriter : StringWriter
