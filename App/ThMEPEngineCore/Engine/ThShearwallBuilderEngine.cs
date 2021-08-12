@@ -10,6 +10,7 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -46,13 +47,27 @@ namespace ThMEPEngineCore.Engine
 
             // 后处理
             walls = FilterInRange(walls, newPts);
-            
+            walls = Preprocess(walls);
+
             // 回复到原位置
             transformer.Reset(walls);
 
             // 返回
             return walls.Cast<Polyline>().Select(e => ThIfcWall.Create(e)).ToList();
-        }        
+        }
+        private DBObjectCollection Preprocess(DBObjectCollection walls)
+        {
+            var simplifier = new ThShearWallSimplifier();
+            var results = walls.FilterSmallArea(AREATOLERANCE);
+            results = simplifier.Tessellate(walls);
+            results = simplifier.MakeValid(results);
+            results = results.FilterSmallArea(AREATOLERANCE);
+            results = simplifier.Normalize(results);
+            results = results.FilterSmallArea(AREATOLERANCE);
+            results = simplifier.Simplify(results);
+            results = results.FilterSmallArea(AREATOLERANCE);
+            return results;
+        }
 
         private DBObjectCollection FilterInRange(DBObjectCollection objs, Point3dCollection pts)
         {
