@@ -1,20 +1,14 @@
 ﻿using AcHelper;
-using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Model;
 
 namespace ThMEPWSS.Common
@@ -50,34 +44,27 @@ namespace ThMEPWSS.Common
             using (Active.Document.LockDocument())
             {
                 Utils.FocusToCAD();
-                //Active.Document.SendStringToExecute("\x03\x03", true, false, true);
                 using (AcadDatabase acdb = AcadDatabase.Active())
                 {
-                    PromptSelectionOptions options = new PromptSelectionOptions()
+                    var selectedArea = Utils.SelectAreas();
+                    if (selectedArea.Count == 0)
+                        return false;
+                    var rect = new Rectangle3d(selectedArea[0], selectedArea[1], selectedArea[2], selectedArea[3]);
+                    var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎R
+                    storeysRecEngine.Recognize(acdb.Database, selectedArea);
+                    if (storeysRecEngine.Elements.Count < 1)
+                        return true;
+                    var selectIds = storeysRecEngine.Elements.Where(c => c is ThStoreys).Cast<ThStoreys>().Select(c => c.ObjectId).ToList();
+                    if (selectIds == null || selectIds.Count < 1)
+                        return true;
+                    foreach (var sId in selectIds)
                     {
-                        AllowDuplicates = false,
-                        MessageForAdding = "请选择楼层框线",
-                        //RejectObjectsOnLockedLayers = true,
-                    };
-                    var dxfNames = new string[]
-                    {
-                        RXClass.GetClass(typeof(BlockReference)).DxfName,
-                    };
-                    var filter = ThSelectionFilterTool.Build(dxfNames);
-                    var result = Active.Editor.GetSelection(options, filter);
-
-                    if (result.Status == PromptStatus.OK)//框选择成功
-                    {
-                        var selectedIds = result.Value.GetObjectIds();
-                        foreach (var sId in selectedIds)
-                        {
-                            var br = acdb.Element<BlockReference>(sId);
-                            if (null == br || !br.GetEffectiveName().Equals(floorBlockName))
-                                continue;
-                            resFloors.Add(new FloorFramed(br, sId));
-                        }
-                        selectSucceed = true;
+                        var br = acdb.Element<BlockReference>(sId);
+                        if (null == br || !br.GetEffectiveName().Equals(floorBlockName))
+                            continue;
+                        resFloors.Add(new FloorFramed(br, sId));
                     }
+                    selectSucceed = true;
                 }
             }
             return selectSucceed;
@@ -91,22 +78,6 @@ namespace ThMEPWSS.Common
                 tempFramed = orderFloors.OrderByDescending(c => c.endFloorOrder).ToList();
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("小屋面")).ToList());
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("大屋面")).ToList());
-            //foreach (var item in tempFramed)
-            //{
-            //    if (item.floorType.Contains("屋面"))
-            //        continue;
-            //    if (item.floorType.Contains("非标"))
-            //        continue;
-            //    resFloors.Add(item);
-            //}
-            //foreach (var item in tempFramed)
-            //{
-            //    if (item.floorType.Contains("屋面"))
-            //        continue;
-            //    if (!item.floorType.Contains("非标"))
-            //        continue;
-            //    resFloors.Add(item);
-            //}
             foreach (var item in tempFramed) 
             {
                 if (item.floorType.Contains("屋面"))
