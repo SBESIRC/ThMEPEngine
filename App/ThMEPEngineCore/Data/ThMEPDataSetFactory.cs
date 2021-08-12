@@ -1,10 +1,17 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Data
 {
     public abstract class ThMEPDataSetFactory
     {
+        protected ThMEPOriginTransformer Transformer { get; set; }
+        public ThMEPDataSetFactory()
+        {
+            Transformer = new ThMEPOriginTransformer(Point3d.Origin);
+        }
         /// <summary>
         /// 创建数据集
         /// </summary>
@@ -27,5 +34,11 @@ namespace ThMEPEngineCore.Data
         /// 创建数据集
         /// </summary>
         protected abstract ThMEPDataSet BuildDataSet();
+
+        protected void UpdateTransformer(Point3dCollection pts)
+        {
+            var center = pts.Envelope().CenterPoint();
+            Transformer = new ThMEPOriginTransformer(center);
+        }
     }
 }
