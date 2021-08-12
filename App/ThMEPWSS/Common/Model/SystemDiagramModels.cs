@@ -844,7 +844,14 @@ namespace ThMEPWSS.Uitl
 
     public static class LinqAlgorithm
     {
-
+        public static IEnumerable<V> SelectNotNull<T,V>(this IEnumerable<T> source,Func<T,V> f) where V : class
+        {
+            foreach (var item in source)
+            {
+                var v = f(item);
+                if (v != null) yield return v;
+            }
+        }
         public static IEnumerable<T> SelectNotNull<T>(this IEnumerable<T> source) where T : class
         {
             return source.Where(x => x != null);
