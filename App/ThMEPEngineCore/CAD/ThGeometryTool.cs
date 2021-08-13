@@ -121,12 +121,21 @@ namespace ThMEPEngineCore.CAD
         }
         public static Polyline TextOBB(this DBText dBText)
         {
-            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, dBText.Normal, dBText.Position);
-            DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
-            Polyline obb = newText.GeometricExtents.ToRectangle();
-            Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
-            obb.TransformBy(counterClockwiseMat);
-            return obb;
+            try
+            {
+                Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, dBText.Normal, dBText.Position);
+                DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
+
+                Polyline obb = newText.GeometricExtents.ToRectangle();
+                Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
+                obb.TransformBy(counterClockwiseMat);
+                return obb;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return new Polyline();
         }
         public static Polyline TextOBB(this MText mText)
         {
