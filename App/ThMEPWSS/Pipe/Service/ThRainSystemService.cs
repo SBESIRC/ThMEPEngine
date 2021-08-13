@@ -3460,7 +3460,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                 var info = arr[i];
                                 {
                                     string label1, label2;
-                                    var labels = RainLabelItem.ConvertLabelStrings(thwPipeLine.Labels.Where(x => !IsTL(x))).ToList();
+                                    var labels = RainLabelItem.ConvertLabelStrings(thwPipeLine.Labels.Where(x => !IsTL(x))).OrderBy(x => x).ToList();
                                     if (labels.Count == THESAURUSACCIDENT)
                                     {
                                         label1 = labels[QUOTATIONSHAKES];
@@ -4085,37 +4085,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             foreach (var o in geoData.WLines) DrawLineSegmentLazy(o).ColorIndex = QUOTATIONSPENSER;
         }
         const double MAX_SHORTTRANSLATOR_DISTANCE = ACHONDROPLASTIC;
-        public static IEnumerable<Geometry> GroupLinesByConnPoints<T>(List<T> geos, double radius) where T : Geometry
-        {
-            var lines = geos.SelectMany(o => GeoFac.GetLines(o)).Distinct().ToList();
-            var _lines = lines.Select(x => x.ToLineString()).ToList();
-            var _linesf = GeoFac.CreateIntersectsSelector(_lines);
-            var _geos = lines.Select(line => GeoFac.CreateGeometryEx(new Geometry[] { GeoFac.CreateCirclePolygon(line.StartPoint, radius, QUOTATIONSPENSER), GeoFac.CreateCirclePolygon(line.EndPoint, radius, QUOTATIONSPENSER) })).ToList();
-            for (int i1 = QUOTATIONSHAKES; i1 < _geos.Count; i1++)
-            {
-                var _geo = _geos[i1];
-                foreach (var i in _linesf(_geo).Select(_lines))
-                {
-                    if (i == i1) continue;
-                    var line = lines[i];
-                    var _line = _lines[i];
-                    var r1 = GeoFac.CreateCirclePolygon(line.StartPoint, radius, QUOTATIONSPENSER);
-                    if (r1.Intersects(_line))
-                    {
-                        _geos[i1] = _geos[i1].Union(r1);
-                    }
-                    var r2 = GeoFac.CreateCirclePolygon(line.EndPoint, radius, QUOTATIONSPENSER);
-                    if (r2.Intersects(_line))
-                    {
-                        _geos[i1] = _geos[i1].Union(r2);
-                    }
-                }
-            }
-            foreach (var list in GeoFac.GroupGeometries(_geos))
-            {
-                yield return GeoFac.CreateGeometry(list.Select(_geos).ToList(lines).Select(x => x.ToLineString()));
-            }
-        }
         public static void CreateDrawingDatas(RainGeoData geoData, RainCadData cadDataMain, List<RainCadData> cadDatas, out string logString, out List<RainDrawingData> drDatas, List<KeyValuePair<string, Geometry>> roomData = null)
         {
             _DrawingTransaction.Current.AbleToDraw = THESAURUSABDOMEN;
@@ -4157,7 +4126,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 var labellinesf = F(labelLinesGeos);
                 var shortTranslatorLabels = new HashSet<string>();
                 var longTranslatorLabels = new HashSet<string>();
-                var wlinesGeos = GroupLinesByConnPoints(item.WLines, AUTHORITARIANISM).ToList();
+                var wlinesGeos = GeoFac.GroupLinesByConnPoints(item.WLines, AUTHORITARIANISM).ToList();
                 var wrappingPipesf = F(item.WrappingPipes);
                 {
                     var pipesf = F(item.VerticalPipes);
@@ -4410,7 +4379,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                         var pts = GeoFac.ToNodedLineSegments(wlines.SelectMany(x => GeoFac.GetLines(x)).ToList()).SelectMany(x => new Point2d[] { x.StartPoint, x.EndPoint }).ToList();
                                         var wlinesGeo = GeoFac.CreateGeometry(wlines);
                                         var fds = fdsf(GeoFac.CreateGeometry(pts.Select(x => x.ToNTSPoint())));
-                                        ok_fds.AddRange(ok_fds);
+                                        ok_fds.AddRange(fds);
                                         floorDrainD[label] = fds.Count;
                                         if (fds.Count > QUOTATIONSHAKES)
                                         {

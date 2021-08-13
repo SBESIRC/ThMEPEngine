@@ -681,6 +681,37 @@ namespace ThMEPWSS.Assistant
                 }
             }
         }
+        public static IEnumerable<Geometry> GroupLinesByConnPoints<T>(List<T> geos, double radius) where T : Geometry
+        {
+            var lines = geos.SelectMany(o => GetLines(o)).Distinct().ToList();
+            var _lines = lines.Select(x => x.ToLineString()).ToList();
+            var _linesf = CreateIntersectsSelector(_lines);
+            var _geos = lines.Select(line => CreateGeometryEx(new Geometry[] { CreateCirclePolygon(line.StartPoint, radius, 6), CreateCirclePolygon(line.EndPoint, radius, 6) })).ToList();
+            for (int i1 = 0; i1 < _geos.Count; i1++)
+            {
+                var _geo = _geos[i1];
+                foreach (var i in _linesf(_geo).Select(_lines))
+                {
+                    if (i == i1) continue;
+                    var line = lines[i];
+                    var _line = _lines[i];
+                    var r1 = CreateCirclePolygon(line.StartPoint, radius, 6);
+                    if (r1.Intersects(_line))
+                    {
+                        _geos[i1] = _geos[i1].Union(r1);
+                    }
+                    var r2 = CreateCirclePolygon(line.EndPoint, radius, 6);
+                    if (r2.Intersects(_line))
+                    {
+                        _geos[i1] = _geos[i1].Union(r2);
+                    }
+                }
+            }
+            foreach (var list in GroupGeometries(_geos))
+            {
+                yield return CreateGeometry(list.Select(_geos).ToList(lines).Select(x => x.ToLineString()));
+            }
+        }
         public static Geometry CreateGeometry(IEnumerable<Geometry> geomList)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geomList);
