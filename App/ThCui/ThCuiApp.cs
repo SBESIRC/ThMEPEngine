@@ -88,8 +88,8 @@ namespace TianHua.AutoCAD.ThCui
             //    RibbonServices.RibbonPaletteSet.StateChanged -= RibbonPaletteSet_StateChanged;
             //}
 
-            ////反注册DocumentCollection事件
-            ////AcadApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
+            //反注册DocumentCollection事件
+            //AcadApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
             ////反注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged -= SystemVariableChangedHandler;
         }
@@ -171,7 +171,7 @@ namespace TianHua.AutoCAD.ThCui
             AcadApp.Idle -= Application_OnIdle_Cmd_Veto;
 
             // 显示登陆提示
-            Active.Editor.WriteLine("请先登陆协同后再使用天华MEP工具集！");
+            Active.Editor.WriteLine("请先登陆天华三维协同后再使用天华MEP工具集！");
         }
 
         private void Application_OnIdle_Ribbon(object sender, EventArgs e)
