@@ -66,6 +66,7 @@
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\AStarNode.cs" />
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\RoutePlanData.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
+    <Compile Include="Algorithm\ThConcaveBuilder.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPRegionService.cs" />

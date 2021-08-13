@@ -6,11 +6,18 @@ namespace ThMEPEngineCore.Service
 {
     public class ThTesslateService
     {
-        public static Entity Tesslate(Entity ent, double length)
+        public static Entity Tesslate(Entity ent, double length,bool isTesslateLine=false)
         {
             if (ent is Line line)
             {
-                return line;
+                if(isTesslateLine)
+                {
+                    return line.Tesslate(length);
+                }
+                else
+                {
+                    return line;
+                }
             }
             else if (ent is Arc arc)
             {
@@ -23,12 +30,7 @@ namespace ThMEPEngineCore.Service
             else if (ent is Circle circle)
             {
                 return Tesslate(circle, length);
-            }
-            else if (ent is MPolygon mPolygon)
-            {
-                // 暂不支持对洞的打散
-                return mPolygon;
-            }
+            }            
             else
             {
                 throw new NotSupportedException();
