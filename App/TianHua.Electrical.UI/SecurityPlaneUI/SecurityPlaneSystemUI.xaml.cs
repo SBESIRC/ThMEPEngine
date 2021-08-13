@@ -24,6 +24,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     {
         static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "SecurityPlaneConfig");
         static string defaultFile = "上海地区住宅-安防配置表.xlsx";
+        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
         static string installUrl = urlFolder + "\\" + defaultFile;
         static string configFolderUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\SecurityPlaneConfig";
         static string configFileUrl = configFolderUrl + "\\" + defaultFile;
@@ -32,6 +33,9 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         public SecurityPlaneSystemUI()
         {
             InitializeComponent();
+
+            //读取房间配置表
+            ReadRoomConfigTable();
 
             //设置填充listview
             var dataSet = GetExcelContent(installUrl);
@@ -75,11 +79,28 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                     GuardTourGrid.ItemsSource = table.DefaultView;
                     List<string> configLst = new List<string>() { "是", "否" };
                     SetGridValue(GuardTourGrid, table, configLst);
-                }   
-                else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.RoomNameControl))
-                {
-                    ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable = table;
                 }
+            }
+            //else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.RoomNameControl))
+            //{
+            //    ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable = table;
+            //}
+            if (ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable != null)
+            {
+                ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree = RoomConfigTreeService.CreateRoomTree(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable);
+            }
+        }
+
+        /// <summary>
+        /// 读取房间配置表
+        /// </summary>
+        private void ReadRoomConfigTable()
+        {
+            var dataSet = GetExcelContent(roomConfigUrl);
+            var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
+            if (table != null)
+            {
+                ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable = table;
             }
             if (ThElectricalUIService.Instance.Parameter.RoomInfoMappingTable != null)
             {
@@ -198,7 +219,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             dataSet.Merge(((DataView)AccessControlGrid.ItemsSource).Table);
             dataSet.Merge(((DataView)GuardTourGrid.ItemsSource).Table);
             dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.Configs]);
-            dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
+            //dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
 
             //存储成excel
             ReadExcelService excelService = new ReadExcelService();

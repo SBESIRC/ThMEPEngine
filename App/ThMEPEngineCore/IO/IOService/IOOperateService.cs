@@ -56,5 +56,24 @@ namespace ThMEPEngineCore.IO.IOService
             }
             return true;
         }
+
+        /// <summary> 
+        /// 输出成txt
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="content"></param>
+        public static void OutputTxt(string filePath, List<string> content)
+        {
+            using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate))
+            {
+                StreamWriter sw = new StreamWriter(fs);
+                foreach (var con in content)
+                {
+                    sw.Write(con);
+                }
+                
+                sw.Close();
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace ThMEPEngineCore.Config
 {
     public static class RoomConfigTreeService
     {
+        readonly static string publicRoom = "公共区域";
         /// <summary>
         /// 将房间映射表建成树
         /// </summary>
@@ -21,11 +22,16 @@ namespace ThMEPEngineCore.Config
 
             List<string> levelColumns = new List<string>();
             string synonym = "同义词";
+            string tags = "标签";
             foreach (DataColumn column in RoomInfoMappingTable.Columns)
             {
                 if (column.ColumnName.Contains(synonym))
                 {
                     synonym = column.ColumnName;
+                }
+                else if (column.ColumnName.Contains(tags))
+                {
+                    tags = column.ColumnName;
                 }
                 else
                 {
@@ -46,6 +52,10 @@ namespace ThMEPEngineCore.Config
                         if (!string.IsNullOrEmpty(row[synonym].ToString()))
                         {
                             roomTableTree.synonym.AddRange(row[synonym].ToString().Split('，'));
+                        }
+                        if (!string.IsNullOrEmpty(row[tags].ToString()))
+                        {
+                            roomTableTree.tags.AddRange(row[tags].ToString().Split('；'));
                         }
 
                         if (j == 0)
@@ -102,6 +112,37 @@ namespace ThMEPEngineCore.Config
             }
 
             return roomInfo;
+        }
+
+        /// <summary>
+        /// 判断是否是公共区域
+        /// </summary>
+        /// <param name="roomTree"></param>
+        /// <param name="roomName"></param>
+        /// <returns></returns>
+        public static bool IsPublicRoom(this List<RoomTableTree> roomTree, string roomName)
+        {
+            foreach (var treeNode in roomTree)
+            {
+                var thisNode = treeNode;
+                if(thisNode.nodeName == roomName)
+                {
+                    if (thisNode.tags.Contains(publicRoom))
+                    {
+                        return true;
+                    }
+                }
+
+                if (thisNode.child.Count > 0)
+                {
+                    if (IsPublicRoom(thisNode.child, roomName))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -196,6 +237,11 @@ namespace ThMEPEngineCore.Config
         /// 同义词
         /// </summary>
         public List<string> synonym = new List<string>();
+
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public List<string> tags = new List<string>();
 
         /// <summary>
         /// 下一层数据

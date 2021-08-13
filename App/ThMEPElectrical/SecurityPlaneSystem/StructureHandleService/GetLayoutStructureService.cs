@@ -46,7 +46,7 @@ namespace ThMEPElectrical.StructureHandleService
             var objCollection = criclePoly.GetAllLinesInPolyline();
             objCollection.Add(new Line(pt, pt1));
             objCollection.Add(new Line(pt, pt2));
-            List<Polyline> polygons = objCollection.ToCollection().Polygons().Cast<Polyline>().ToList();
+            List<Polyline> polygons = objCollection.ToCollection().PolygonsEx().Cast<Polyline>().ToList();
             var resPoly = polygons.OrderBy(x => x.Area).FirstOrDefault();
 
             Circle blindCircle = new Circle(pt, Vector3d.ZAxis, blindArea);
