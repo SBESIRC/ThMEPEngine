@@ -10,11 +10,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThCurtainWallExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3CurtainWallExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThCurtainWallExtractionVisitor()
+            var visitor = new ThDB3CurtainWallExtractionVisitor()
             {
                 LayerFilter = ThCurtainWallLayerManager.CurveXrefLayers(database),
             };
@@ -24,11 +24,11 @@ namespace ThMEPEngineCore.Engine
             Results = visitor.Results;
         }
     }
-    public class ThCurtainWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3CurtainWallRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThCurtainWallExtractionEngine();
+            var engine = new ThDB3CurtainWallExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

@@ -398,7 +398,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 var nFrame = ThMEPFrameService.Normalize(frame);
-                var engine = new ThCurtainWallExtractionEngine();
+                var engine = new ThDB3CurtainWallExtractionEngine();
                 engine.Extract(acadDatabase.Database);
                 var results = new DBObjectCollection();
                 var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());

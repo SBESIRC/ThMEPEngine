@@ -232,10 +232,10 @@ namespace ThMEPEngineCore.Service
         public override void Create(Database database, Point3dCollection polygon)
         {
             var newPts = Transform(polygon);
-            var extractionEngine = new ThCurtainWallExtractionEngine();
+            var extractionEngine = new ThDB3CurtainWallExtractionEngine();
             extractionEngine.Extract(database);
             extractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
-            var recognizeEngine = new ThCurtainWallRecognitionEngine();
+            var recognizeEngine = new ThDB3CurtainWallRecognitionEngine();
             recognizeEngine.Recognize(extractionEngine.Results, newPts);
             SpatialIndex = new ThCADCoreNTSSpatialIndex(
                 recognizeEngine.Elements
