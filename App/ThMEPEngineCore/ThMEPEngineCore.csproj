@@ -230,8 +230,8 @@
     <Compile Include="Engine\ThDrainageWellRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3CorniceExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3CorniceRecognitionEngine.cs" />
-    <Compile Include="Engine\ThRailingExtractionVisitor.cs" />
-    <Compile Include="Engine\ThRailingRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3RailingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3RailingRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoomBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomMarkRecognitionEngine.cs" />

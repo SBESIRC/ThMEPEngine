@@ -694,7 +694,7 @@ namespace ThMEPEngineCore
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
-                var railingRecognitionEngine = new ThRailingRecognitionEngine();
+                var railingRecognitionEngine = new ThDB3RailingRecognitionEngine();
                 railingRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 railingRecognitionEngine.Elements.ForEach(o =>
                 {

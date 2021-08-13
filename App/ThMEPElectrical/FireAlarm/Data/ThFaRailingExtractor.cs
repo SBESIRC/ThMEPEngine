@@ -47,11 +47,11 @@ namespace FireAlarm.Data
         private DBObjectCollection ExtractDb3Railing(Database database, Point3dCollection pts)
         {
             var db3Railings = new DBObjectCollection();
-            var db3RailingExtractionEngine = new ThRailingExtractionEngine();
+            var db3RailingExtractionEngine = new ThDB3RailingExtractionEngine();
             db3RailingExtractionEngine.Extract(database);
             db3RailingExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
 
-            var railingEngine = new ThRailingRecognitionEngine();
+            var railingEngine = new ThDB3RailingRecognitionEngine();
             var newPts = new Point3dCollection();
             pts.Cast<Point3d>().ForEach(p =>
             {

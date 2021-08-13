@@ -10,11 +10,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRailingExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3RailingExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThRailingExtractionVisitor()
+            var visitor = new ThDB3RailingExtractionVisitor()
             {
                 LayerFilter = ThRailingLayerManager.CurveXrefLayers(database),
             };
@@ -25,11 +25,11 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThRailingRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3RailingRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRailingExtractionEngine();
+            var engine = new ThDB3RailingExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

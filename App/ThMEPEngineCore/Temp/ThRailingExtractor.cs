@@ -38,7 +38,7 @@ namespace ThMEPEngineCore.Temp
         {
             if (UseDb3Engine)
             {
-                var railingEngine = new ThRailingRecognitionEngine();
+                var railingEngine = new ThDB3RailingRecognitionEngine();
                 railingEngine.Recognize(database, pts);
                 Railing = railingEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             }
