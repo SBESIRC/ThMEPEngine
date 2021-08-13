@@ -11,12 +11,12 @@ namespace ThMEPEngineCore.Algorithm
     {
         private DBObjectCollection Elements { get; set; }
         private double TesslateLength { get; set; }
-        public double Hershold { get; set; }
-        public ThConcaveBuilder(DBObjectCollection objs, double tesslateLength)
+        private double Hershold { get; set; }
+        public ThConcaveBuilder(DBObjectCollection objs, double hershold)
         {
             Elements = objs;
-            Hershold = tesslateLength*1.2; //建议值
-            TesslateLength = tesslateLength;
+            Hershold = hershold;
+            TesslateLength = Hershold / 1.2; //建议值
         }
         public DBObjectCollection Build()
         {
