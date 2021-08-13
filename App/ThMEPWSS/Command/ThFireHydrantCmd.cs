@@ -20,11 +20,12 @@ namespace ThMEPWSS.Command
         public ThFireHydrantCmd()
         {
             CommandName = "THDXXHSXTT";
+            ActionName = "生成";
         }
         public void Dispose()
         {
         }
-        override public void SubExecute()
+        public override void SubExecute()
         {
             try
             {
