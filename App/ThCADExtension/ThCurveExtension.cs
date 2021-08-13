@@ -92,5 +92,10 @@ namespace ThCADExtension
         {
             return curve.StartPoint.GetVectorTo(curve.EndPoint).GetNormal();
         }
+
+        public static double DistanceTo(this Curve curve, Point3d pt, bool extend)
+        {
+            return curve.GetClosestPointTo(pt, extend).DistanceTo(pt);
+        }
     }
 }

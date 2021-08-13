@@ -14,11 +14,13 @@ namespace ThMEPEngineCore.Engine
     {
         public List<string> DoorMarkLayerFilter { get; set; }
         public List<string> DoorStoneLayerFilter { get; set; }
+
         public ThDB3DoorExtractionEngine()
         {
             DoorMarkLayerFilter = new List<string>();
             DoorStoneLayerFilter = new List<string>();
         }
+
         public override void Extract(Database database)
         {
             Init(database);
@@ -37,6 +39,7 @@ namespace ThMEPEngineCore.Engine
             Results.AddRange(doorMarkVisitor.Results);
             Results.AddRange(doorStoneVisitor.Results);
         }
+
         private void Init(Database database)
         {
             if (DoorMarkLayerFilter.Count == 0)

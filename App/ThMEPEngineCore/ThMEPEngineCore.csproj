@@ -85,9 +85,10 @@
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
-    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThColumnBuilderEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3RailingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3RailingRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3RoomMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="FireCompartment\ThFireCompartmentExtendEngine.cs" />
@@ -156,13 +158,11 @@
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
-    <Compile Include="Model\ThIfcZone.cs" />
     <Compile Include="Service\ThAcPolygonSimplifier.cs" />
     <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
-    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="Service\ThDclResultParseService.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
@@ -230,8 +230,6 @@
     <Compile Include="Engine\ThDrainageWellRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3CorniceExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3CorniceRecognitionEngine.cs" />
-    <Compile Include="Engine\ThDB3RailingExtractionVisitor.cs" />
-    <Compile Include="Engine\ThDB3RailingRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoomBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomMarkRecognitionEngine.cs" />
@@ -415,6 +413,7 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThStairDoorService.cs" />
     <Compile Include="Service\ThTesslateService.cs" />
     <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
     <Compile Include="Service\ThElementSimplifier.cs" />

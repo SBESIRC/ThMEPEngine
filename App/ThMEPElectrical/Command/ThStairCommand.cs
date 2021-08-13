@@ -13,6 +13,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPElectrical.Stair;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -48,8 +49,9 @@ namespace ThMEPElectrical.Command
                 {
                     "E-BL302",
                     "E-BFEL800",
-                    "E-BFAS110"
-
+                    "E-BFAS110",
+                    "E-BFEL110",
+                    "E-BFAS410-4"
                 };
                 var HALFPLAT_LAYOUT_EQUIPMENT_LIST = new List<string>
                 {
@@ -62,33 +64,30 @@ namespace ThMEPElectrical.Command
                     .Cast<ThIfcStair>()
                     .ForEach(o =>
                     {
+                        var doorsEngine = new ThStairDoorService();
+                        var doors = doorsEngine.GetDoorList(o.srcBlock);
                         if (o.PlatForLayout.Count != 0)
                         {
-                            var pline = new Polyline();
-                            pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
-                            pline.Closed = true;
-                            acadDatabase.ModelSpace.Add(pline);
+                            //var pline = new Polyline();
+                            //pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
+                            //pline.Closed = true;
+                            //acadDatabase.ModelSpace.Add(pline);
 
                             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
                             {
                                 var scale = new Scale3d(100);
                                 var layoutEngine = new ThStairEngine();
-                                for (int i = 0; i < PLAT_LAYOUT_EQUIPMENT_LIST.Count(); i++) 
+                                for (int i = 0; i < PLAT_LAYOUT_EQUIPMENT_LIST.Count(); i++)
                                 {
                                     acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(PLAT_LAYOUT_EQUIPMENT_LIST[i]), false);
                                     var objId = layoutEngine.Insert(PLAT_LAYOUT_EQUIPMENT_LIST[i], scale);
-                                    layoutEngine.Displacement(objId, o.PlatForLayout);
+                                    layoutEngine.Displacement(objId, o.PlatForLayout, doors);
                                 }
                             }
                         }
 
                         if (o.HalfPlatForLayout.Count != 0)
                         {
-                            var halfPline = new Polyline();
-                            halfPline.CreatePolyline(new Point3dCollection(o.HalfPlatForLayout.ToArray()));
-                            halfPline.Closed = true;
-                            acadDatabase.ModelSpace.Add(halfPline);
-
                             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
                             {
                                 var scale = new Scale3d(100);
@@ -97,7 +96,7 @@ namespace ThMEPElectrical.Command
                                 {
                                     acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(HALFPLAT_LAYOUT_EQUIPMENT_LIST[i]), false);
                                     var objId = layoutEngine.Insert(HALFPLAT_LAYOUT_EQUIPMENT_LIST[i], scale);
-                                    layoutEngine.Displacement(objId, o.HalfPlatForLayout);
+                                    layoutEngine.Displacement(objId, o.HalfPlatForLayout, doors);
                                 }
                             }
                         }

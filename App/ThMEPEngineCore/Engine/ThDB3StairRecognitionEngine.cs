@@ -4,9 +4,7 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -28,21 +26,21 @@ namespace ThMEPEngineCore.Engine
 
     public class ThDB3StairRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override void Recognize(Database database, Point3dCollection frame)
         {
             var engine = new ThDB3StairExtractionEngine();
             engine.Extract(database);
-            Recognize(engine.Results, polygon);
+            Recognize(engine.Results, frame);
         }
 
-        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection frame)
         {
             var stairBlocks = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
+            if (frame.Count > 0)
             {
                 var blocksSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                foreach (var filterObj in blocksSpatialIndex.SelectCrossingPolygon(polygon))
+                foreach (var filterObj in blocksSpatialIndex.SelectCrossingPolygon(frame))
                 {
                     stairBlocks.Add(filterObj as BlockReference);
                 }
@@ -57,7 +55,8 @@ namespace ThMEPEngineCore.Engine
                 var ifcStair = new ThIfcStair
                 {
                     PlatForLayout = GetPlatForLayout(block, true),
-                    HalfPlatForLayout = GetHalfPlatForLayout(GetPlatForLayout(block, false))
+                    HalfPlatForLayout = GetHalfPlatForLayout(block, false),
+                    srcBlock = block
                 };
                 Elements.Add(ifcStair);
             }
@@ -235,8 +234,9 @@ namespace ThMEPEngineCore.Engine
             return vertices;
         }
 
-        private List<Point3d> GetHalfPlatForLayout(List<Point3d> vertices)
+        private List<Point3d> GetHalfPlatForLayout(BlockReference stair, bool isPlat)
         {
+            var vertices = GetPlatForLayout(stair, isPlat);
             if (vertices.Count == 0)
             {
                 return vertices;

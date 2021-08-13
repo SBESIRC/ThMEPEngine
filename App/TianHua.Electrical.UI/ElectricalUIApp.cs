@@ -1,17 +1,12 @@
-﻿using AcHelper;
-using Linq2Acad;
+﻿using Linq2Acad;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
-using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Command;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical.BlockConvert;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using Autodesk.AutoCAD.Geometry;
 
 namespace TianHua.Electrical.UI
 {
