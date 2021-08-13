@@ -1,36 +1,25 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThDB3DoorExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public List<string> DoorMarkLayerFilter { get; set; }
-        public List<string> DoorStoneLayerFilter { get; set; }
-
-        public ThDB3DoorExtractionEngine()
-        {
-            DoorMarkLayerFilter = new List<string>();
-            DoorStoneLayerFilter = new List<string>();
-        }
-
         public override void Extract(Database database)
         {
-            Init(database);
             var doorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
             {
-                LayerFilter = this.DoorMarkLayerFilter,
+                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database),
             };
             var doorStoneVisitor = new ThDB3DoorStoneExtractionVisitor()
             {
-                LayerFilter = this.DoorStoneLayerFilter,
+                LayerFilter = ThDoorStoneLayerManager.XrefLayers(database),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(doorMarkVisitor);
@@ -38,18 +27,6 @@ namespace ThMEPEngineCore.Engine
             extractor.Extract(database);
             Results.AddRange(doorMarkVisitor.Results);
             Results.AddRange(doorStoneVisitor.Results);
-        }
-
-        private void Init(Database database)
-        {
-            if (DoorMarkLayerFilter.Count == 0)
-            {
-                DoorMarkLayerFilter = ThDoorMarkLayerManager.XrefLayers(database);
-            }
-            if (DoorStoneLayerFilter.Count == 0)
-            {
-                DoorStoneLayerFilter = ThDoorStoneLayerManager.XrefLayers(database);
-            }
         }
     }
 
