@@ -1,10 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
-using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -26,6 +23,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             HasInfoTablesRoRead = false;
         }
         public Point3dCollection SelectedArea;//框定区域
+        public Extents3d InfoRegion;//款选提资范围
         public List<List<Point3dCollection>> FloorAreaList;//楼层区域
         public List<List<int>> FloorNumList;//楼层列表
         private List<string> undpdsfloorListDatas { get; set; }//楼层表
@@ -101,6 +99,22 @@ namespace ThMEPWSS.Diagram.ViewModel
                 FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
                 undpdsfloorListDatas.Reverse();
                 return;
+            }
+        }
+        /// <summary>
+        /// 框选提资表
+        /// </summary>
+        public Extents3d SelectRegionForInfoTable()
+        {
+            using (Active.Document.LockDocument())
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var InfoArea = ThMEPWSS.Common.Utils.SelectAreas();
+                if (InfoArea.Count <= 3)
+                {
+                    return new Extents3d();
+                }
+                return new Extents3d(InfoArea[0], InfoArea[2]);
             }
         }
         /// <summary>

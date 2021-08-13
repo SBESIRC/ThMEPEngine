@@ -1,6 +1,10 @@
-﻿using System.Windows;
+﻿using AcHelper;
+using Linq2Acad;
+using System.Windows;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Command;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -23,10 +27,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.Close();
         }
         private void OK_Click(object sender, RoutedEventArgs e)
-        {
-            viewmodel.HasInfoTablesRoRead = true;
+        {         
             this.DialogResult = true;
             this.Close();
+            var extent = viewmodel.SelectRegionForInfoTable();
+            viewmodel.InfoRegion = extent;
+            viewmodel.HasInfoTablesRoRead = true;
         }
     }
 }

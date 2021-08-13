@@ -11,6 +11,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public Dictionary<string, PressureDrainageSystemDiagramStorey> FloorDict { get; set; }//楼层字典
         public List<List<int>> FloorNumList { get; set; }
         public List<Point3d> FloorLocPoints { get; set; }//楼层定位点
+        public string InitialLayer { get; set; }
         public PressureDrainageModelData()
         {
             FloorLineSpace = new double();
@@ -37,6 +38,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Extents3d> WrappingPipes;//套管
         public List<SubmergedPumpClass> SubmergedPumps;
         public List<Point3d> StoryFrameBasePt;
+        public string InitialLayer;
     }
     public class DrainWellClass
     {
@@ -65,6 +67,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public double totalQ = 0;//总流量
         public int AppendusedpumpCount = 0;
         public bool IsInitialDrainWell = false;
+        public bool IsAdditionPipe = false;
+        public int IsBridgePipe = 0;//用于绘图，判断是否为连接立管
     }
     public class HorizontalLabelClass
     {
@@ -106,6 +110,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public int DrainWellPipeIndex { get; set; }
         public List<int> verticalPipeId { get; set; }
         public List<Point3d> SameUnitsStartPt { get; set; }
+        public string InitialLayer { get; set; }
     }
     public class PipeLineUnit
     {

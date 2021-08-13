@@ -10,9 +10,8 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.PressureDrainageSystem.Model;
-using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
-using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 using static ThMEPWSS.PressureDrainageSystem.Service.PressureDrainageSystemDiagramService;
+using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class PipeLineSystemUnitConstructionService
@@ -778,6 +777,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="pipelineUnit"></param>
         private void ReDrawHorizontalPipeInPipeUnit(PipeLineUnit pipelineUnit)
         {
+            string layer = "0";
+            foreach (var line in pipelineUnit.HorizontalPipes)
+            {
+                if (line.Layer == "W-DRAI-DOME-PIPE") layer = "W-DRAI-DOME-PIPE";
+            }
             double tol = 100;//两横管直线具有相同端点的容差
             List<Point3d> ptsVtcalPipe = new List<Point3d>();
             List<Line> lines = new List<Line>();
@@ -865,6 +869,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             while (cond_QuitCycle > 0);
             pipelineUnit.HorizontalPipes.Clear();
+            if (layer == "W-DRAI-DOME-PIPE")
+            {
+                lines.ForEach(o => o.Layer = layer);
+            }
             foreach (var line in lines)
             {
                 pipelineUnit.HorizontalPipes.Add(line);

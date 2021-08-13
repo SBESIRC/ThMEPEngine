@@ -89,6 +89,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (uiUNDPDrainageSystemInfoCheck.viewmodel.HasInfoTablesRoRead)
                 {
                     viewModel.HasInfoTablesRoRead = true;
+                    viewModel.InfoRegion = uiUNDPDrainageSystemInfoCheck.viewmodel.InfoRegion;
                 }
                 viewModel.PreGenerateDiagram(cmd);
             }

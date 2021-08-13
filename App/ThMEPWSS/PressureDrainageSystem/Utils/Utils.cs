@@ -158,7 +158,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                     double d4 = line2.GetClosestPointTo(line1.EndPoint, false).DistanceTo(line1.EndPoint);
                     dis1 = d1 < d3 ? d1 : d3;
                     dis2 = d2 < d4 ? d2 : d4;
-                    if (Math.Min(dis1, dis2) < tol / 2)
+                    if (Math.Min(dis1, dis2) < 50)
                     {
                         return true;
                     }
@@ -370,7 +370,136 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             return type.IsNotPublic && type.Name.StartsWith("Imp") && type.Namespace == "Autodesk.AutoCAD.DatabaseServices";
         }
 
+        /// <summary>
+        /// 实现一个Icomparer接口根据指定轴坐标大小排序点集
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="dm"></param>
+        /// <returns></returns>
+        public static List<Point3d> SortPointsBasedSpecailCoordinates(List<Point3d> points, int dm)
+        {
+            var comparer = new CoordComparer(dm);
+            points.Sort(comparer);
+            return points;
+        }
+        public class CoordComparer : IComparer<Point3d>
+        {
+            public CoordComparer(int dm)
+            {
+                Dm = dm;
+            }
+            private int Dm;
+            public int Compare(Point3d a, Point3d b)
+            {
+                var coordsA = new List<double>() { a.X, a.Y, a.Z };
+                var coordsB = new List<double>() { b.X, b.Y, b.Z };
+                if (coordsA[Dm] == coordsB[Dm]) return 0;
+                else if (coordsA[Dm] < coordsB[Dm]) return -1;
+                else return 1;
+            }
+        }
+
+        /// <summary>
+        /// 实现一个Icomparer接口排序double
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static List<double> SortDouble(List<double> nums)
+        {
+            var comparer = new DoubleComparer();
+            nums.Sort(comparer);
+            return nums;
+        }
+        public class DoubleComparer : IComparer<double>
+        {
+            public DoubleComparer()
+            {
+                    
+            }
+            public int Compare(double a, double b)
+            {
+                if (a == b) return 0;
+                else if (a < b) return -1;
+                else return 1;
+            }
+        }
+
+        /// <summary>
+        /// 实现一个从左到右排序线段的Icomparer类
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static List<Line> SortLinesFromLeftToRight(List<Line> lines)
+        {
+            var comparer = new LineComparer();
+            lines.Sort(comparer);
+            return lines;
+        }
+        public class LineComparer : IComparer<Line>
+        {
+            public LineComparer()
+            {
+            }
+            public int Compare(Line a, Line b)
+            {
+                double aX = a.StartPoint.X < a.EndPoint.X ? a.StartPoint.X : a.EndPoint.X;
+                double bX = b.StartPoint.X < b.EndPoint.X ? b.StartPoint.X : b.EndPoint.X;
+                if (aX == bX) return 0;
+                else if (aX < bX) return -1;
+                else return 1;
+            }
+        }
+
         //业务型函数
+
+        /// <summary>
+        /// 实现排序排水井的一个Comparer类
+        /// </summary>
+        public class DrainWellComparer : IComparer<BlockReference>
+        {
+            public DrainWellComparer()
+            {
+            }
+            public int Compare(BlockReference br1,BlockReference br2)
+            {
+                double a = GetSerialOfDrainWell(br1);
+                double b = GetSerialOfDrainWell(br2);
+                if (a==b) return 0;
+                else if (a < b) return -1;
+                else return 1;
+            }
+        }
+
+        /// <summary>
+        /// 根据水井编号排序水井
+        /// </summary>
+        /// <param name="brs"></param>
+        /// <returns></returns>
+        public static List<BlockReference> SortDrainWellBySerials(List<BlockReference> brs)
+        {
+            DrainWellComparer comparer = new();
+            brs.Sort(comparer);
+            return brs;
+        }
+
+        /// <summary>
+        /// 返回排水井的序号
+        /// </summary>
+        /// <param name="br"></param>
+        /// <returns></returns>
+        public static double GetSerialOfDrainWell(BlockReference br)
+        {
+            if (br.GetAttributesStrValue("-") == "-") return 0;
+            else
+            {
+                try
+                {
+                    double serial= double.Parse(br.GetAttributesStrValue("-"));
+                    return serial;
+                }
+                catch { return -1; }
+            }                         
+        }
         /// <summary>
         /// 计算潜水泵立管合并后的总管径
         /// </summary>
@@ -563,6 +692,43 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 lin = new Line(pt1, pt2);
                 return true;
             }
+        }
+
+        /// <summary>
+        /// 判断两组DBText列表的文字内容是否相同
+        /// </summary>
+        /// <param name="texts1"></param>
+        /// <param name="texts2"></param>
+        /// <returns></returns>
+        public static bool IsSameDBTextsList(List<DBText> texts1, List<DBText> texts2)
+        {
+            foreach (var a in texts1)
+            {
+                int cond_found = 0;
+                foreach (var b in texts2)
+                {
+                    if (a.TextString == b.TextString)
+                    {
+                        cond_found = 1;
+                        break;
+                    }
+                }
+                if (cond_found == 0) return false;
+            }
+            foreach (var a in texts2)
+            {
+                int cond_found = 0;
+                foreach (var b in texts1)
+                {
+                    if (a.TextString == b.TextString)
+                    {
+                        cond_found = 1;
+                        break;
+                    }
+                }
+                if (cond_found == 0) return false;
+            }
+            return true;
         }
     }
 }

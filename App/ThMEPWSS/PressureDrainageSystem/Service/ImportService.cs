@@ -26,7 +26,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         if (!adb.Blocks.Contains(brname)) adb.Blocks.Import(Db.Blocks.ElementOrDefault(brname));
                     }
                     //导入不存在的图层并确认图层unlocked
-                    List<string> layerNames = new() { "W-RAIN-PIPE", "W-NOTE", "W-RAIN-Y-PIPE", "W-BUSH" };
+                    List<string> layerNames = new() { "W-RAIN-PIPE", "W-NOTE", "W-RAIN-Y-PIPE", "W-BUSH", "W-DRAI-DOME-PIPE" };
                     List<short> layerColorIndex = new() { 255, 255, 210, 255 };
                     for (int i = 0; i < layerNames.Count; i++)
                     {
@@ -36,7 +36,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                         else
                         {
-                            DbHelper.EnsureLayerOn(layerNames[i]);
+                            try
+                            {
+                                DbHelper.EnsureLayerOn(layerNames[i]);
+                            }
+                            catch { }
                         }
                     }
                 }
