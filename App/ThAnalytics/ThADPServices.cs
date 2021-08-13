@@ -24,5 +24,6 @@ namespace ThAnalytics
 
         //记录天华命令事件
         void RecordTHCommandEvent(string cmdName, double duration);
+        void RecordTHCommandEvent(string cmdName, string eventName, double duration);
     }
 }

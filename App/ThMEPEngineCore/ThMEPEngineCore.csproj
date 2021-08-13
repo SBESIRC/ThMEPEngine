@@ -79,6 +79,7 @@
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
+    <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
@@ -600,6 +601,10 @@
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>DotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThAnalytics\ThMEPAnalytics.csproj">
+      <Project>{edf8eb87-5032-47ef-a922-23760bda3d42}</Project>
+      <Name>ThMEPAnalytics</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
       <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>

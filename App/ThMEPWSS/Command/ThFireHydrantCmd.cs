@@ -11,18 +11,20 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.EditorInput;
 using AcHelper;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.Command
 {
-    public class ThFireHydrantCmd : IAcadCommand, IDisposable
+    public class ThFireHydrantCmd : ThMEPBaseCommand, IDisposable
     {
         public ThFireHydrantCmd()
         {
+            CommandName = "THDXXHSXTT";
         }
         public void Dispose()
         {
         }
-        public void Execute()
+        override public void SubExecute()
         {
             try
             {
