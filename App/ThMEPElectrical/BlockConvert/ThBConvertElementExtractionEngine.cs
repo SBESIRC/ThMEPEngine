@@ -1,10 +1,5 @@
 ﻿using System;
-using NFox.Cad;
-using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 

@@ -151,7 +151,7 @@ namespace ThMEPElectrical.Command
                             {
                                 // 获取转换后的块信息
                                 ThBlockConvertBlock transformedBlock = null;
-                                switch(mode)
+                                switch (mode)
                                 {
                                     case ConvertMode.STRONGCURRENT:
                                         {
@@ -198,7 +198,7 @@ namespace ThMEPElectrical.Command
                                     {
                                         var wipeOut = new ThBConvertWipeOut();
                                         wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
-                                    }  
+                                    }
 
                                     // 插入新的块引用
                                     var scale = new Scale3d(Scale);

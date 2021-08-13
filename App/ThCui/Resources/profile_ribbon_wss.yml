@@ -41,7 +41,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "潜水泵"
           attributes: { "IsVisible": true, "IsEnabled": true }
-        - text: "消火栓"
+        - text: "消火栓连管"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWUNDERGROUNDSYSTEM"

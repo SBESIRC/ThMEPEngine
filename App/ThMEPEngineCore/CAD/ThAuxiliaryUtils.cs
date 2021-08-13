@@ -236,5 +236,28 @@ namespace ThMEPEngineCore.CAD
             }
             return result;
         }
+        public static double GetArea(this Entity polygon)
+        {
+            if (polygon is Polyline polyline)
+            {
+                return polyline.Area;
+            }
+            else if (polygon is MPolygon mPolygon)
+            {
+                return mPolygon.Area;
+            }
+            else if (polygon is Circle circle)
+            {
+                return circle.Area;
+            }
+            else if (polygon is Ellipse ellipse)
+            {
+                return ellipse.Area;
+            }
+            else
+            {
+                throw new System.NotSupportedException();
+            }
+        }
     }
 }

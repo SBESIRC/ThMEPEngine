@@ -96,18 +96,25 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if (platforms.Count == 1)
                 {
-                    platform = platforms[0] as Polyline;
-                    if (down.Any())
+                    if(isPlat)
                     {
-                        listPlatform = GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams);
-                    }
-                    else if (up.Any())
-                    {
-                        listPlatform = GetLatoutList(platform, beamCenter, up.ToCollection(), false, beams);
+                        platform = platforms[0] as Polyline;
+                        if (down.Any())
+                        {
+                            listPlatform = GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams);
+                        }
+                        else if (up.Any())
+                        {
+                            listPlatform = GetLatoutList(platform, beamCenter, up.ToCollection(), false, beams);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException();
+                        }
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        return new List<Point3d>();
                     }
                 }
                 else if (platforms.Count == 2)
@@ -119,7 +126,7 @@ namespace ThMEPEngineCore.Engine
                         var downPoint = down.ToCollection().GeometricExtents().CenterPoint();
                         if (platform.Distance(downPoint) > halfPlatform.Distance(downPoint))
                         {
-                            changeOrder(platform, halfPlatform);
+                            ChangeOrder(ref platform, ref halfPlatform);
                         }
                         if (isPlat)
                         {
@@ -135,7 +142,7 @@ namespace ThMEPEngineCore.Engine
                         var upPoint = up.ToCollection().GeometricExtents().CenterPoint();
                         if (platform.Distance(upPoint) < halfPlatform.Distance(upPoint))
                         {
-                            changeOrder(platform, halfPlatform);
+                            ChangeOrder(ref platform, ref halfPlatform);
                         }
                         if (isPlat)
                         {
@@ -210,14 +217,14 @@ namespace ThMEPEngineCore.Engine
             {
                 if (downPoint.DistanceTo(labelPoint) > upPoint.DistanceTo(labelPoint))
                 {
-                    changeOrder(downPoint, upPoint);
+                    ChangeOrder(ref downPoint, ref upPoint);
                 }
             }
             else
             {
                 if (downPoint.DistanceTo(labelPoint) < upPoint.DistanceTo(labelPoint))
                 {
-                    changeOrder(downPoint, upPoint);
+                    ChangeOrder(ref downPoint, ref upPoint);
                 }
             }
 
@@ -244,14 +251,14 @@ namespace ThMEPEngineCore.Engine
             return newVertices;
         }
 
-        private void changeOrder(Point3d downPoint, Point3d upPoint)
+        private void ChangeOrder(ref Point3d downPoint, ref Point3d upPoint)
         {
             var temp = downPoint;
             downPoint = upPoint;
             upPoint = temp;
         }
 
-        private void changeOrder(Polyline platform, Polyline halfPlatform)
+        private void ChangeOrder(ref Polyline platform, ref Polyline halfPlatform)
         {
             var temp = platform;
             platform = halfPlatform;

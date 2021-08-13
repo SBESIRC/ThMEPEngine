@@ -140,9 +140,21 @@ Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R19.FanS
     
 }
 
+Task Requires.Dotfuscator {
+    $script:dotfuscatorCli = resolve-path "..\Tools\ConfuserEx\Confuser.CLI.exe"
+}
+
+Task Dotfuscator -Depends Requires.Dotfuscator, Compile.Engine, Compile.Resource {
+	exec {
+		& $dotfuscatorCli -n "confusedDlls40.crproj" 
+		& $dotfuscatorCli -n "confusedDlls45.crproj"
+		& $dotfuscatorCli -n "confusedDlls46.crproj"
+	} 
+}
+
 # temporarily disable code sign
 # $buildType build for ThCADPluginInstaller
-Task Compile.Installer -Depends Compile.Engine, Compile.Resource {
+Task Compile.Installer -Depends Dotfuscator, Compile.Engine, Compile.Resource {
     if ($buildType -eq $null) {
         throw "No build type specified"
     }

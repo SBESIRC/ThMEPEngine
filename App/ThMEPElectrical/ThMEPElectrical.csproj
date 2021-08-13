@@ -109,6 +109,7 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Command\ThSecurityPlaneSystemPipeCommand.cs" />
+    <Compile Include="Command\ThStairCommand.cs" />
     <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFireAlarmDataSetFactory.cs" />
     <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
@@ -255,6 +257,7 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
+    <Compile Include="Staircase\ThStairEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />

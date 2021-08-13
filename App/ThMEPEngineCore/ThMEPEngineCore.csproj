@@ -85,6 +85,7 @@
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThColumnBuilderEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3RoomMarkExtractionVisitor.cs" />
@@ -155,16 +156,19 @@
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
+    <Compile Include="Model\ThIfcZone.cs" />
     <Compile Include="Service\ThAcPolygonSimplifier.cs" />
     <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
+    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="Service\ThDclResultParseService.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThEntityContainerBuilder.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
