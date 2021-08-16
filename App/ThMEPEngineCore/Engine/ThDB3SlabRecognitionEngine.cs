@@ -14,10 +14,8 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3SlabExtractionVisitor()
-            {
-                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database),
-            };
+            //V1.0楼板提取规则：没有图层限制，在超链接中判断Category为楼板
+            var visitor = new ThDB3SlabExtractionVisitor();            
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);

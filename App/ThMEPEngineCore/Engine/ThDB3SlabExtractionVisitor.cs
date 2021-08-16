@@ -62,7 +62,12 @@ namespace ThMEPEngineCore.Engine
 
         public override bool IsBuildElement(Entity entity)
         {
-            return entity.Hyperlinks.Count > 0;
+            if(entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsSlab;
+            }
+            return false;
         }
 
         private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)
@@ -71,6 +76,10 @@ namespace ThMEPEngineCore.Engine
             {
                 Geometry = curve,
             };
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
     }
 }
