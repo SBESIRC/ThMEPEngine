@@ -42,11 +42,12 @@ namespace ThMEPWSS.Command
                 Vector3d xDir = (endPt - transPt).GetNormal();
                 Vector3d yDir = xDir.GetPerpendicularVector().GetNormal();
                 Vector3d zDir = Vector3d.ZAxis;
+                var oringinPt = transPt.TransformBy(matrix);
 
                 matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, startPt.X,
-                    xDir.Y, yDir.Y, zDir.Y, startPt.Y,
-                    xDir.Z, yDir.Z, zDir.Z, startPt.Z,
+                    xDir.X, yDir.X, zDir.X, transPt.X,
+                    xDir.Y, yDir.Y, zDir.Y, transPt.Y,
+                    xDir.Z, yDir.Z, zDir.Z, transPt.Z,
                     0.0, 0.0, 0.0, 1.0});
 
                 return true;
@@ -68,7 +69,13 @@ namespace ThMEPWSS.Command
             var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
 
             //获取柱
-            columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            //columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            //var objs = new DBObjectCollection();
+            //columns.ForEach(x => objs.Add(x));
+            //ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            //columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
+            var columnBuilder = new ThColumnBuilderEngine();
+            columns = columnBuilder.Build(acdb.Database, polyline.Vertices()).Select(o => o.Outline as Polyline).ToList();
             var objs = new DBObjectCollection();
             columns.ForEach(x => objs.Add(x));
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
