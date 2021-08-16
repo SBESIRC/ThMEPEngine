@@ -38,6 +38,7 @@ namespace TianHua.Electrical.UI
                     LayoutType = LayoutType,
                     AreaLayout = AreaLayout,
                     RoofThickness = Parameter.RoofThickness,
+                    BlockScale = Parameter.BlockScale,
                 };
                 SmokeLayoutUI.InitForm(_SmokeLayoutDataModel);
             }

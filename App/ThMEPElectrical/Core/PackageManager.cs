@@ -534,7 +534,7 @@ namespace ThMEPElectrical.Core
             // 转到WCS
             if (ptLst.Count > 0)
             {
-                BlockInsertor.MakeBlockInsert(ptLst, placePara.sensorType);
+                BlockInsertor.MakeBlockInsert(ptLst, placePara.sensorType,0,placePara.BlockScale);
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
@@ -582,7 +582,7 @@ namespace ThMEPElectrical.Core
                 tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
                 if (ptLst.Count > 0)
                 {
-                    BlockInsertor.MakeBlockInsert(ptLst, Parameter.sensorType, ucsProfileData.rotateAngle);
+                    BlockInsertor.MakeBlockInsert(ptLst, Parameter.sensorType, ucsProfileData.rotateAngle, Parameter.BlockScale);
                     var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                     var curves = GeometryTrans.Circles2Curves(circles);
                     DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME, Color.FromRgb(0, 0, 255));
@@ -683,7 +683,7 @@ namespace ThMEPElectrical.Core
             // 转到WCS
             if (ptLst.Count > 0)
             {
-                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType,0,placePara.BlockScale);
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
@@ -721,7 +721,7 @@ namespace ThMEPElectrical.Core
             // 转到WCS
             if (ptLst.Count > 0)
             {
-                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType,0,placePara.BlockScale);
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);

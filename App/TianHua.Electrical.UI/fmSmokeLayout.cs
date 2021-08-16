@@ -250,10 +250,13 @@ namespace TianHua.Electrical.UI
 
             m_SmokeLayout.SlopeRoof = FuncStr.NullToStr(ComBoxSlope.Text);
 
+            m_SmokeLayout.BlockScale = FuncStr.NullToDouble(ComboxBlockScale.Text);
+
             // 设置参数
             ThMEPElectricalService.Instance.Parameter = new PlaceParameter()
             {
                 RoofThickness = m_SmokeLayout.RoofThickness,
+                BlockScale = m_SmokeLayout.BlockScale,
             };
 
             // 发送命令

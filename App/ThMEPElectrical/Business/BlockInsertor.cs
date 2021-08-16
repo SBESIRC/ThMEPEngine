@@ -22,13 +22,14 @@ namespace ThMEPElectrical.Business
             get;
             private set;
         }
-
+        private double m_scale;
         private double m_angle;
-        public BlockInsertor(List<Point3d> insertPts, SensorType sensorType, double angle = 0)
+        public BlockInsertor(List<Point3d> insertPts, SensorType sensorType, double angle = 0,double scale=100)
         {
             InsertPts = insertPts;
             Sensor = sensorType;
             m_angle = angle;
+            m_scale = scale;
         }
 
         /// <summary>
@@ -36,9 +37,9 @@ namespace ThMEPElectrical.Business
         /// </summary>
         /// <param name="insertPts"></param>
         /// <param name="sensorType"></param>
-        public static void MakeBlockInsert(List<Point3d> insertPts, SensorType sensorType, double angle = 0)
+        public static void MakeBlockInsert(List<Point3d> insertPts, SensorType sensorType, double angle = 0, double scale = 100)
         {
-            var blockInsertor = new BlockInsertor(insertPts, sensorType, angle);
+            var blockInsertor = new BlockInsertor(insertPts, sensorType, angle, scale);
 
             blockInsertor.Do();
         }
@@ -55,7 +56,7 @@ namespace ThMEPElectrical.Business
                     {
                         db.Database.InsertModel(
                             ThMEPCommon.SENSORLAYERNMAE, 
-                            ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, o,  ThMEPCommon.BlockScale, m_angle);
+                            ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, o, new Scale3d(m_scale), m_angle);
                     });
                 }
                 else
@@ -65,7 +66,7 @@ namespace ThMEPElectrical.Business
                     {
                         db.Database.InsertModel(
                             ThMEPCommon.SENSORLAYERNMAE, 
-                            ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, o, ThMEPCommon.BlockScale, m_angle);
+                            ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, o, new Scale3d(m_scale), m_angle);
                     });
                 }
             }
