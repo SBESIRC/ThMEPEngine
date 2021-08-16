@@ -45,7 +45,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
             return false;
-
         }
     }
 }

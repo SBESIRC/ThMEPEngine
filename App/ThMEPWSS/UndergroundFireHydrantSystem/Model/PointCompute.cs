@@ -61,7 +61,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return new Line();
         }
 
-
         public static bool PointIsLineTerm(Point3d pt1, Line line, double tolerance = 10.0)
         {
             if (pt1.DistanceTo(line.StartPoint) < tolerance || pt1.DistanceTo(line.EndPoint) < tolerance)

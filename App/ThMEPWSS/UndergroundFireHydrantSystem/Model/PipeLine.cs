@@ -145,16 +145,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     var casingPt = General.GetMidPt(cPt1, cPt2);
                     if (casingPt.DistanceTo(pt1._pt) < casingPt.DistanceTo(pt2._pt))
                     {
-                        fireHydrantSysIn.ptTypeDic[pt1] = "Valve-casing";
+                        fireHydrantSysIn.PtTypeDic[pt1] = "Valve-casing";
                     }
                     else
                     {
-                        fireHydrantSysIn.ptTypeDic[pt2] = "Valve-casing";
+                        fireHydrantSysIn.PtTypeDic[pt2] = "Valve-casing";
                     }
                 }
                 if(casingObj.Count > 1)
                 {
-                    ;
                     var pt = General.GetMidPt(pt1._pt, pt2._pt);
                     double minDist = 9999;
                     Point3d targetPt = new Point3d();
@@ -172,17 +171,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     }
                     if (targetPt.DistanceTo(pt1._pt) < targetPt.DistanceTo(pt2._pt))
                     {
-                        fireHydrantSysIn.ptTypeDic[pt1] = "Valve-casing";
+                        fireHydrantSysIn.PtTypeDic[pt1] = "Valve-casing";
                     }
                     else
                     {
-                        fireHydrantSysIn.ptTypeDic[pt2] = "Valve-casing";
+                        fireHydrantSysIn.PtTypeDic[pt2] = "Valve-casing";
                     }
                 }
-
             }
             PipeLineSplit(ref lineList, valveList);
-
         }
 
 
@@ -218,7 +215,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
         }
-
 
         public static void PipeLineSplit(ref List<Line> pipeLineList, List<Line> valveLineList)
         {

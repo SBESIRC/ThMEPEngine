@@ -29,7 +29,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 if (!nullMark)
                 {
-                    fireHydrantSysIn.markLineList.Add(markL);
+                    fireHydrantSysIn.MarkLineList.Add(markL);
                 }
 
             }

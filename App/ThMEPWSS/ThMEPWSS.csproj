@@ -404,6 +404,10 @@
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="Command\ThFireHydrantCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\General.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\LoopLine.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\Parallel.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\TextGet.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\ValveGet.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\Block.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystem.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
@@ -411,10 +415,8 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\BlockInsert.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Dist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\MarkLine.cs" />
@@ -424,9 +426,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\PointAngle.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtDic.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtSet.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Rects.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Sort.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\PolyLineSplit.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtInPtList.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThExtractHYDTPipeService.cs" />

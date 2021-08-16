@@ -1,9 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -15,29 +11,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var cur = startPt;
             var getNextPt = true;//拿到下个点置为false
-            //foreach (var hp in fireHydrantSysIn.hydrantPosition)
-            //{
-                //if (hp._pt.DistanceTo(cur._pt) < DisToTerm)//找到终点
-                //{
-                //    termPts.Add(cur);
-                //    foreach(var pt in tempPts)
-                //    {
-                //        BranchDepthSearch(startPt, ref visited, ref termPts, ref valvePts, loopPath, fireHydrantSysIn);
-                //    }
-                //    return;
-                //}
-            //}
-            if(fireHydrantSysIn.ptDic[cur].Count == 1)
+            
+            if(fireHydrantSysIn.PtDic[cur].Count == 1)
             {
                 termPts.Add(cur);
                 foreach (var pt in tempPts)
                 {
                     BranchDepthSearch(pt, visited, termPts, tempPts, valvePts, loopPath, fireHydrantSysIn);
-
                 }
                 return;
             }
-            foreach (var pt in fireHydrantSysIn.ptDic[cur])
+            foreach (var pt in fireHydrantSysIn.PtDic[cur])
             {
                 if (loopPath.Contains(pt))//若起始点的临近点是环路点，pass
                 {
@@ -118,9 +102,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return;
             }
 
-            var neighbors = fireHydrantSysIn.ptDic[cur];//当前点的邻接点
+            var neighbors = fireHydrantSysIn.PtDic[cur];//当前点的邻接点
             var subLoopPoint = false;//次环标志
-            foreach (List<Point3dEx> nd in fireHydrantSysIn.nodeList)
+            foreach (List<Point3dEx> nd in fireHydrantSysIn.NodeList)
             {
                 if (nd.Contains(cur))
                 { 
@@ -137,7 +121,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 if (subLoopPoint)//次环点
                 {
-                    if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.angleList[cur]))
+                    if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
                     {
                         continue;
                     }
@@ -160,7 +144,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             if (cur.Equals(target))
             {
-                if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.angleList[cur]))
+                if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.AngleList[cur]))
                 {
                     var rstPath = new List<Point3dEx>(tempPath);
                     var flag = true;
@@ -194,10 +178,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     return;
                 }
             }
-            var neighbors = fireHydrantSysIn.ptDic[cur];
+            var neighbors = fireHydrantSysIn.PtDic[cur];
             var subLoopPoint = false;
             var subStartPoint = false;
-            foreach (var nd in fireHydrantSysIn.nodeList)
+            foreach (var nd in fireHydrantSysIn.NodeList)
             {
                 if (nd.Contains(cur))
                 {
@@ -216,7 +200,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 if (subLoopPoint)
                 {
-                    if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.angleList[cur]))
+                    if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
                     {
                         continue;
                     }
@@ -224,7 +208,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 if (subStartPoint)
                 {
-                    if (!PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.angleList[cur]))
+                    if (!PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
                     {
                         continue;
                     }
