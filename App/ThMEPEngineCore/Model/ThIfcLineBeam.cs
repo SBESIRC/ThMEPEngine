@@ -68,11 +68,11 @@ namespace ThMEPEngineCore.Model
         }
         public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
         {
-            return Create(ThLineBeamOutliner.ExtendBoth(olderLineBeam, startExtend, endExtend), olderLineBeam.Height);
+            return Create(ThLineBeamOutliner.ExtendBoth(olderLineBeam, startExtend, endExtend), olderLineBeam.Height, olderLineBeam.DistanceToFloor);
         }
         public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam, Point3d startPt, Point3d endPt)
         {
-            return Create(ThLineBeamOutliner.CreatOutline(startPt, endPt, olderLineBeam.Width), olderLineBeam.Height);
+            return Create(ThLineBeamOutliner.CreatOutline(startPt, endPt, olderLineBeam.Width), olderLineBeam.Height,olderLineBeam.DistanceToFloor);
         }
     }
 }

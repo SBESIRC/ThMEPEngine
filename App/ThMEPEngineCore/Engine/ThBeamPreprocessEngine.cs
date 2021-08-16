@@ -44,6 +44,7 @@ namespace ThMEPEngineCore.Engine
         {
             var results = new List<ThIfcLineBeam>();
             var height = beams.Max(o => o.Height);
+            var smallestD = beams.Min(o => o.DistanceToFloor); //DistanceToFloor
             beams.Select(o => o.Outline)
                 .ToCollection()
                 .LooseUnion()
@@ -51,7 +52,7 @@ namespace ThMEPEngineCore.Engine
                 .ForEachDbObject(o =>
                 {
                     var rectangle = o.GetMinimumRectangle();
-                    results.Add(ThIfcLineBeam.Create(rectangle, height));
+                    results.Add(ThIfcLineBeam.Create(rectangle, height, smallestD));
                 });
             return results;
         }
