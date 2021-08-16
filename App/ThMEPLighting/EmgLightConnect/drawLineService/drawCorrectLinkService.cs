@@ -176,6 +176,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static void moveSegPoint(Point3d intersectPt, int idx, ref Polyline pl)
         {
+            var tol = 300;
             var seg = new Line();
             if (pl.GetPoint3dAt(idx).IsEqualTo(intersectPt, new Tolerance(1, 1)))
             {
@@ -190,7 +191,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
 
             var dir = (seg.EndPoint - seg.StartPoint).GetNormal();
-            Point3d newEndPoint = intersectPt + dir * 100;
+            Point3d newEndPoint = intersectPt + dir * tol;
             pl.SetPointAt(idx, newEndPoint.ToPoint2d());
         }
 

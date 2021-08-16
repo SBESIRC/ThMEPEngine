@@ -299,7 +299,7 @@ namespace ThMEPLighting.EmgLight.Service
             var importLayout = StructureService.SeparateStructByLine(FilteredLayout, ExtendLineList, TolLane);
 
             var extendPoly = GeomUtils.ExpandLine(ExtendLineList[0], TolLane, 0, TolLane, 0);
-            DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead, Color.FromColorIndex(ColorMethod.ByColor,44));
+            DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead,44);
 
             //BuildStructCenter(importLayout);
             BuildStructCenterInLaneCoor(importLayout);
