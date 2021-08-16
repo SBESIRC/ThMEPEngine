@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -37,7 +36,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcBuildingElementData> HandlePolyline(Polyline polyline, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
-            if (IsBuildElement(polyline) && IsDoorStone(polyline))
+            if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
                 if (polyline.Area > 0.0 && clone != null)
@@ -58,12 +57,12 @@ namespace ThMEPEngineCore.Engine
         }
         private new bool IsBuildElement(Entity entity)
         {
-            return entity.Hyperlinks.Count > 0;
-        }
-        private bool IsDoorStone(Curve curve)
-        {
-            var thPropertySet = ThPropertySet.CreateWithHyperlink(curve.Hyperlinks[0].Description);
-            return thPropertySet.IsDoor;
-        }        
+            if(entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsDoor;
+            }
+            return false;
+        }     
     }
 }

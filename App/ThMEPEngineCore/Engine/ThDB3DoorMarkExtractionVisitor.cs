@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -40,7 +40,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcBuildingElementData> HandleDbText(DBText dbText, Matrix3d matrix)
         {
             var texts = new List<DBText>();
-            if (IsBuildElement(dbText) && IsDoorMark(dbText))
+            if (IsBuildElement(dbText) && CheckLayerValid(dbText))
             {
                 var clone = dbText.Clone() as DBText;
                 clone.TransformBy(matrix);
@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcBuildingElementData> HandleMText(MText mText, Matrix3d matrix)
         {
             var texts = new List<MText>();
-            if (IsBuildElement(mText) && IsDoorMark(mText))
+            if (IsBuildElement(mText) && CheckLayerValid(mText))
             {
                 var clone = mText.Clone() as MText;
                 clone.TransformBy(matrix);
@@ -78,12 +78,12 @@ namespace ThMEPEngineCore.Engine
         }
         private new bool IsBuildElement(Entity entity)
         {
-            return entity.Hyperlinks.Count > 0;
-        }
-        private bool IsDoorMark(Entity entity)
-        {
-            var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
-            return thPropertySet.IsDoor;
+            if (entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsDoor;
+            }
+            return false;
         }
         private Point3d GetTextPosition(object ent)
         {

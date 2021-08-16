@@ -1,11 +1,11 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -13,6 +13,8 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
+            //V1.0门垛提取规则：图层：“DEFPOINTS-加数字”,在超链接中判断Category为门
+            //V1.0门标注提取规则：图层：“DEFPOINTS”,在超链接中判断Category为门
             var doorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
             {
                 LayerFilter = ThDoorMarkLayerManager.XrefLayers(database),
