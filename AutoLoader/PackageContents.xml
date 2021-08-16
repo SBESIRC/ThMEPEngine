@@ -167,7 +167,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
@@ -185,7 +184,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
@@ -203,7 +201,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
@@ -475,6 +472,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
+                <Command Local="THYJZM" Global="THYJZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -484,6 +482,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
+                <Command Local="THYJZM" Global="THYJZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -493,6 +492,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="LightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
+                <Command Local="THYJZM" Global="THYJZM" />
             </Commands>
         </ComponentEntry>
     </Components>
