@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThDB3RailingExtractionEngine : ThBuildingElementExtractionEngine
     {
+        //V1.0栏杆提取规则：图层:"AE-HDWR",超链接中Category为栏杆
         public override void Extract(Database database)
         {
             var visitor = new ThDB3RailingExtractionVisitor()

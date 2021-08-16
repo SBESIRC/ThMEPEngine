@@ -182,8 +182,7 @@ namespace ThMEPEngineCore.CAD
                 if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
                     && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
                 {
-                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_RAILING
-                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_RAILING;
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_RAILING;
                 }
                 return false;
             }
