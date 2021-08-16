@@ -14,21 +14,13 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
-            {
-                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
-            };
-            var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
-            {
-                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database),
-            };
+            //V1.0建筑墙提取规则：没有图层限制，在超链接中判断Category为墙
+            var archWallVisitor = new ThDB3ArchWallExtractionVisitor();
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(archWallVisitor);
-            extractor.Accept(pcArchWallVisitor);
             extractor.Extract(database);
             Results = new List<ThRawIfcBuildingElementData>();
             Results.AddRange(archWallVisitor.Results);
-            Results.AddRange(pcArchWallVisitor.Results);
         }
     }
 

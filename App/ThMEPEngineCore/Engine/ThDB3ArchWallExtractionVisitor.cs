@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -26,7 +27,12 @@ namespace ThMEPEngineCore.Engine
         }
         public override bool IsBuildElement(Entity entity)
         {
-            return entity.Hyperlinks.Count > 0;
+            if(entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink2(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsArchWall;
+            }
+            return false;
         }
         private List<ThRawIfcBuildingElementData> HandleCurve(Polyline polyline, Matrix3d matrix)
         {
@@ -44,6 +50,10 @@ namespace ThMEPEngineCore.Engine
                 }
             }
             return results;
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
     }
 }
