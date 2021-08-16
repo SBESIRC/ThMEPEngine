@@ -12,8 +12,8 @@ namespace ThMEPLighting.EmgLight.Common
         {
             emgLight = 0,
             evac = 1,
-           otherSecBlk = 2,
-           ale=3,
+            otherSecBlk = 2,
+            ale = 3,
         }
     }
 }

@@ -13,6 +13,17 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class mergeOneSecBlkSideService
     {
+        public static void mergeScatterBlockSide(List<ThSingleSideBlocks> singleSideBlocks)
+        {
+            var tol = new Tolerance(10, 10);
+            
+            //for (int i = 0; i < singleSideBlocks.Count; i++)
+            //{
+            //    var secPt = singleSideBlocks[i].secBlk;
+                
+            //}
+        }
+
         public static void mergeOneSecBlockSide(List<ThSingleSideBlocks> singleSideBlocks)
         {
             var tol = new Tolerance(1, 1);

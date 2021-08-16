@@ -83,7 +83,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static Vector3d getDirectionBlock(BlockReference block)
         {
-            //may has bug, make sure the UCS coordinate is coorect. may be changed to use blockReference matrix(????
+            //may have bug, make sure the UCS coordinate is coorect. may be need to change to use blockReference matrix(????
             var dir = Vector3d.YAxis.RotateBy(block.Rotation, Vector3d.ZAxis).GetNormal();
 
             return dir;

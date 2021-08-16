@@ -57,15 +57,16 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 connPt = ptOnOutlineSidePt(pts[pts.Count - 1], blk);
             }
-            else
-            {
-                
-                var connecPtDistDict = blk.getConnectPt().ToDictionary(x => x, x => lineTemp.GetDistToPoint (x,false));
-                connecPtDistDict = connecPtDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
 
+            var connecPtDistDict = blk.getConnectPt().ToDictionary(x => x, x => lineTemp.GetDistToPoint(x, false));
+            connecPtDistDict = connecPtDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+            //如果找不到，找最近的
+            if (connPt == Point3d.Origin)
+            {
                 foreach (var pt in connecPtDistDict)
                 {
-                    if (pt.Value  > tolTooCloseDist)
+                    if (pt.Value > tolTooCloseDist)
                     {
                         connPt = pt.Key;
                         break;
@@ -75,11 +76,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         continue;
                     }
                 }
-                if (connPt == Point3d.Origin)
-                {
-                    connPt = connecPtDistDict.First().Key;
-                }
+            }
 
+            //如果还找不到，直接连第一个
+            if (connPt == Point3d.Origin)
+            {
+                connPt = connecPtDistDict.First().Key;
             }
 
             return connPt;
@@ -159,14 +161,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 for (int j = prevPolyInx + 1; j < ptPolyInx + 1; j++)
                 {
-                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d (), 0, 0, 0);
+                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d(), 0, 0, 0);
                 }
             }
             if (prevPolyInx > ptPolyInx)
             {
                 for (int j = prevPolyInx; j > ptPolyInx; j--)
                 {
-                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d (), 0, 0, 0);
+                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d(), 0, 0, 0);
                 }
             }
             if (bAddedConn == true)
@@ -265,7 +267,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             returnPl.AddVertexAt(returnPl.NumberOfVertices, spPrj.ToPoint2d(), 0, 0, 0);
             for (int i = spInx; i < epInx; i++)
             {
-                returnPl.AddVertexAt(returnPl.NumberOfVertices, pl.GetPoint3dAt(i + 1).ToPoint2d (), 0, 0, 0);
+                returnPl.AddVertexAt(returnPl.NumberOfVertices, pl.GetPoint3dAt(i + 1).ToPoint2d(), 0, 0, 0);
             }
             returnPl.AddVertexAt(returnPl.NumberOfVertices, epPrj.ToPoint2d(), 0, 0, 0);
 

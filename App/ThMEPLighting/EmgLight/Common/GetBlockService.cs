@@ -12,6 +12,7 @@ namespace ThMEPLighting.EmgLight.Common
     public class GetBlockService
     {
         public Dictionary<BlockReference, BlockReference> emgLight = new Dictionary<BlockReference, BlockReference>();
+        public Dictionary<BlockReference, BlockReference> emgLightDouble = new Dictionary<BlockReference, BlockReference>();
         public Dictionary<BlockReference, BlockReference> evacR = new Dictionary<BlockReference, BlockReference>();
         public Dictionary<BlockReference, BlockReference> evacRL = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitE = new Dictionary<BlockReference, BlockReference>();
@@ -45,6 +46,8 @@ namespace ThMEPLighting.EmgLight.Common
         public void getBlocksData(Polyline bufferFrame, ThMEPOriginTransformer transformer, List<Polyline> holes = null)
         {
             emgLight = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer, holes);
+            emgLightDouble = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightDoubleBlockName, transformer, holes);
+
             evacR = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EvacRBlockName, transformer, holes);
             evacRL = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EvacLRBlockName, transformer, holes);
 
@@ -85,6 +88,7 @@ namespace ThMEPLighting.EmgLight.Common
         public void getBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockList)
         {
             blockList.Add(EmgBlkType.BlockType.emgLight, emgLight.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.emgLight].AddRange(emgLightDouble.Select(x => x.Value).ToList());
             blockList.Add(EmgBlkType.BlockType.evac, evacR.Select(x => x.Value).ToList());
             blockList[EmgBlkType.BlockType.evac].AddRange(evacRL.Select(x => x.Value).ToList());
 
@@ -140,7 +144,7 @@ namespace ThMEPLighting.EmgLight.Common
                                                                 new Point3d (0,-2.25,0),
                                                                 new Point3d (1.25,0,0),
                                                                 new Point3d (0,1.25,0)});
-
+            addBlkConnectDict(blkConnectDict, "E-BFEL500", rightTopPt1);
             addBlkConnectDict(blkConnectDict, "E-BFEL200", rightTopPt1);
             addBlkConnectDict(blkConnectDict, "E-BFEL210", rightTopPt1);
             addBlkConnectDict(blkConnectDict, "E-BFEL100", rightTopPt1);
@@ -190,44 +194,60 @@ namespace ThMEPLighting.EmgLight.Common
             var ptList = blkSizeDict[blk.Name].Select(x => x).ToList();
             connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
 
+            var blkOutlineTemp = new List<Point3d>();
+            blkOutlineTemp.Add(new Point3d(ptList[0].X, ptList[3].Y, 0));
+            blkOutlineTemp.Add(new Point3d(ptList[0].X, ptList[1].Y, 0));
+            blkOutlineTemp.Add(new Point3d(ptList[2].X, ptList[1].Y, 0));
+            blkOutlineTemp.Add(new Point3d(ptList[2].X, ptList[3].Y, 0));
+            blkOutlineTemp = blkOutlineTemp.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+
             if (groupBlk != null)
             {
                 var ptListGroup = blkSizeDict[groupBlk.Name];
                 var connectPtGroup = ptListGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
                 var bottomPt = connectPtGroup[1];
-
                 var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
+
+                var blkOutlineGroup = new List<Point3d>();
+                blkOutlineGroup.Add(new Point3d(ptListGroup[0].X, ptListGroup[3].Y, 0));
+                blkOutlineGroup.Add(new Point3d(ptListGroup[0].X, ptListGroup[1].Y, 0));
+                blkOutlineGroup.Add(new Point3d(ptListGroup[2].X, ptListGroup[1].Y, 0));
+                blkOutlineGroup.Add(new Point3d(ptListGroup[2].X, ptListGroup[3].Y, 0));
+                blkOutlineGroup = blkOutlineGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
 
                 //确定group的灯组是贴在下边点还是上边点
                 if (inx == 1 || inx == 3)
                 {
-                    var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
-                    ptList[inx] = ptNew;
+                    //var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
+                    //ptList[inx] = ptNew;
 
-                    connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+                    //connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+                    
+                    connectPt[inx] = connectPtGroup[3];
+                    var l = new Line(blkOutlineGroup[0], blkOutlineGroup[3]);
+
+                    if (inx == 1)
+                    {
+                        var new1= l.GetClosestPointTo(blkOutlineTemp[1],true  );
+                        blkOutlineTemp[1] = new1;
+                        var new2 = l.GetClosestPointTo(blkOutlineTemp[2], true);
+                        blkOutlineTemp[2] = new2;
+                    }
+                    else if (inx == 3)
+                    {
+                        var new0 = l.GetClosestPointTo(blkOutlineTemp[0], true);
+                        blkOutlineTemp[0] = new0;
+                        var new3 = l.GetClosestPointTo(blkOutlineTemp[3], true);
+                        blkOutlineTemp[3] = new3;
+                    }
                 }
             }
 
-            blkOutline = new Polyline();
-
-            //blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
-            //blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
-            //blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
-            //blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
-            //blkOutline.TransformBy(blk.BlockTransform);
-
-            var blkOutlineTemp = new Polyline();
-
-            blkOutlineTemp.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
-            blkOutlineTemp.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
-            blkOutlineTemp.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
-            blkOutlineTemp.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
-            blkOutlineTemp.TransformBy(blk.BlockTransform);
-
             //transformy以后 z值有可能不完全是0 之后计算有错误
-            for (int i = 0; i < blkOutlineTemp.NumberOfVertices; i++)
+            blkOutline = new Polyline();
+            for (int i = 0; i < blkOutlineTemp.Count ; i++)
             {
-                var pt = blkOutlineTemp.GetPoint3dAt(i); //getpoint2dat 会有bug返回xy值为镜面坐标（不知道为啥
+                var pt = blkOutlineTemp[i]; //getpoint2dat 会有bug返回xy值为镜面坐标（不知道为啥
                 blkOutline.AddVertexAt(blkOutline.NumberOfVertices, new Point2d(pt.X, pt.Y), 0, 0, 0);
             }
 

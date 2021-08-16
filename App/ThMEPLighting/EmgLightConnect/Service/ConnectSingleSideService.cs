@@ -33,8 +33,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                    });
                });
 
-            DrawUtils.ShowGeometry(connectMainLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            DrawUtils.ShowGeometry(connectSecLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 70));
+            DrawUtils.ShowGeometry(connectMainLine, EmgConnectCommon.LayerConnectLine, 130);
+            DrawUtils.ShowGeometry(connectSecLine, EmgConnectCommon.LayerConnectLine, 70);
 
         }
 
@@ -52,7 +52,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     line.secBlk.ForEach(x => mLine.AddVertexAt(mLine.NumberOfVertices, x.ToPoint2D(), 0, 0, 0));
                     line.addMainBlock.ForEach(x => mLine.AddVertexAt(mLine.NumberOfVertices, x.ToPoint2D(), 0, 0, 0));
 
-                    line.groupBlock.ForEach(x => DrawUtils.ShowGeometry(x.Value, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130)));
+                    line.groupBlock.ForEach(x => DrawUtils.ShowGeometry(x.Value, EmgConnectCommon.LayerOptimalSingleSideGroup,  130));
 
 
                     count = count + line.Count;
@@ -61,11 +61,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 if (mLine.NumberOfVertices > 0)
                 {
-                    DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
+                    DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, 130,30);
                 }
             }
 
-            DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
+            DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, 130);
 
         }
 
@@ -78,7 +78,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             }
 
-            DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 30));
+            DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerConnectLine, 30);
         }
 
         public static void forDebugLaneSideNo(List<ThSingleSideBlocks> singleSideBlocks)
@@ -104,7 +104,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var zDir = side.laneSide[0].Item2 == 0 ? 1 : -1;
                 var newPt = midPoint + 100 * (lanePoly.EndPoint - lanePoly.StartPoint).GetNormal().RotateBy(Math.PI / 2, Vector3d.ZAxis * zDir);
 
-                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "l5laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
+                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "l5laneSide",  30, 25, 200);
             }
 
         }
@@ -113,13 +113,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
         {
             for (int j = 0; j < pts.Count; j++)
             {
-                DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), layer, Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+                DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), layer, 40, 25, 200);
             }
         }
 
         public static void forDebugBlkOutline(List<ThBlock> blks)
         {
-            blks.ForEach(x => DrawUtils.ShowGeometry(x.outline, EmgConnectCommon.LayerBlkOutline, Color.FromColorIndex(ColorMethod.ByColor, 40)));
+            blks.ForEach(x => DrawUtils.ShowGeometry(x.outline, EmgConnectCommon.LayerBlkOutline, 40));
         }
     }
 

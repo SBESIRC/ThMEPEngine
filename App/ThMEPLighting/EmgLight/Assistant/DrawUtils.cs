@@ -11,7 +11,7 @@ namespace ThMEPLighting.EmgLight.Assistant
 {
     public class DrawUtils
     {
-        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, int colorIndex, int lineWeightNum)
         {
             var objectIds = new List<ObjectId>();
             if (curves == null || curves.Count == 0)
@@ -19,12 +19,13 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
-                if (color == null)
-                {
-                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
-                }
+
+                Color color = Color.FromColorIndex(ColorMethod.ByColor, (short)colorIndex);
 
                 CreateLayer(LayerName, color);
+
+                var lineWeight = (LineWeight)lineWeightNum;
+
                 foreach (var curve in curves)
                 {
                     if (curve != null)
@@ -38,104 +39,6 @@ namespace ThMEPLighting.EmgLight.Assistant
                 }
             }
 
-            return objectIds;
-        }
-
-        private static List<ObjectId> DrawProfile(Entity curve, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
-        {
-            var objectIds = new List<ObjectId>();
-            if (curve == null)
-                return objectIds;
-
-            using (var db = AcadDatabase.Active())
-            {
-                if (color == null)
-                {
-                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
-                }
-
-
-                CreateLayer(LayerName, color);
-
-                var clone = curve.Clone() as Entity;
-                clone.Layer = LayerName;
-                clone.Color = color;
-                clone.LineWeight = lineWeight;
-                objectIds.Add(db.ModelSpace.Add(clone));
-            }
-            return objectIds;
-        }
-
-        private static List<ObjectId> DrawProfile(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
-        {
-            var objectIds = new List<ObjectId>();
-            if (pt == null)
-                return objectIds;
-
-            using (var db = AcadDatabase.Active())
-            {
-                Entity clone = null;
-                if (color == null)
-                {
-                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
-                }
-
-                CreateLayer(LayerName, color);
-
-                if (symbol == "C")
-                {
-                    clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
-                }
-                else if (symbol == "S")
-                {
-                    var sq = new Polyline();
-                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - 200, pt.Y + 200),0,0,0);
-                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + 200, pt.Y + 200), 0, 0, 0);
-                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + 200, pt.Y - 200), 0, 0, 0);
-                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - 200, pt.Y - 200), 0, 0, 0);
-                    sq.Closed  = true;
-                    clone = sq;
-                 }
-                else
-                {
-                    clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
-                }
-
-
-                clone.Layer = LayerName;
-                clone.Color = color;
-                clone.LineWeight = lineWeight;
-                objectIds.Add(db.ModelSpace.Add(clone));
-            }
-            return objectIds;
-        }
-
-        private static List<ObjectId> DrawProfile(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
-        {
-            var objectIds = new List<ObjectId>();
-            if (pt == null)
-                return objectIds;
-
-            using (var db = AcadDatabase.Active())
-            {
-                if (color == null)
-                {
-                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
-                }
-                CreateLayer(LayerName, color);
-
-                DBText text = new DBText();
-                text.Position = pt;
-                text.TextString = s;
-                text.Rotation = 0;
-                text.Height = hight;
-                text.Color = color;
-                text.LineWeight = lineWeight;
-                text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
-
-                text.Layer = LayerName;
-                objectIds.Add(db.ModelSpace.Add(text));
-            }
             return objectIds;
         }
 
@@ -191,79 +94,114 @@ namespace ThMEPLighting.EmgLight.Assistant
             return layerRecord.ObjectId;
         }
 
-        private static List<ObjectId> DrawProfileDebug(List<Entity> curves, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfileDebug(List<Entity> curves, string LayerName, int colorIndex, int lineWeightNum)
         {
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
             if (!debugSwitch)
                 return new List<ObjectId>();
 
-            return DrawProfile(curves, LayerName, color, lineWeight);
+            return DrawProfile(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Entity curves, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(Point3d pt, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int r = 200, string symbol = "C")
         {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
-            if (!debugSwitch)
-                return new List<ObjectId>();
+            if (pt == null || pt == Point3d.Origin)
+            {
+                return;
+            }
 
-            return DrawProfile(curves, LayerName, color, lineWeight);
+            Entity clone = null;
+
+            if (symbol == "C")
+            {
+                clone = new Circle(pt, new Vector3d(0, 0, 1), r);
+            }
+            else if (symbol == "S")
+            {
+                var sq = new Polyline();
+                sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - r, pt.Y + r), 0, 0, 0);
+                sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + r, pt.Y + r), 0, 0, 0);
+                sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + r, pt.Y - r), 0, 0, 0);
+                sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - r, pt.Y - r), 0, 0, 0);
+                sq.Closed = true;
+                clone = sq;
+            }
+            else if (symbol == "T")
+            {
+
+            }
+            else
+            {
+                clone = new Circle(pt, new Vector3d(0, 0, 1), r);
+            }
+
+            DrawUtils.ShowGeometry(clone, LayerName, colorIndex, lineWeightNum);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
+        public static void ShowGeometry(Point3d pt, string s, string LayerName, int colorIndex = 3, int lineWeightNum = 25, double hight = 1000)
         {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
-            if (!debugSwitch)
-                return new List<ObjectId>();
+            if (pt == null || pt == Point3d.Origin)
+            {
+                return;
+            }
 
-            return DrawProfile(pt, LayerName, color, lineWeight, symbol);
+            DBText text = new DBText();
+            text.Position = pt;
+            text.TextString = s;
+            text.Rotation = 0;
+            text.Height = hight;
+            text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
+
+            DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
-            if (!debugSwitch)
-                return new List<ObjectId>();
-
-            return DrawProfile(pt, s, LayerName, color, lineWeight, hight);
-        }
-
-        public static void ShowGeometry(List<Line> geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
-        {
-            var curves = new List<Entity>();
-            geom.ForEach(e => curves.Add(e));
-            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
-        }
-        public static void ShowGeometry(List<Polyline> geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
-        {
-            var curves = new List<Entity>();
-            geom.ForEach(e => curves.Add(e));
-            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
-        }
-        public static void ShowGeometry(Polyline geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(Entity geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             var curves = new List<Entity>();
             curves.Add(geom);
-            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
+            DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(Line geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(List<Line> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
             var curves = new List<Entity>();
-            curves.Add(geom);
-            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
+            curves.AddRange(geom);
+            DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
 
-        public static void ShowGeometry(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
+        public static void ShowGeometry(List<Polyline> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
-            DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight, symbol);
+            var curves = new List<Entity>();
+            curves.AddRange(geom);
+            DrawUtils.DrawProfileDebug(curves, LayerName, colorIndex, lineWeightNum);
         }
-        public static void ShowGeometry(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
+
+        public static void ShowGeometry(List<Entity> geom, string LayerName, int colorIndex = 3, int lineWeightNum = 25)
         {
-            DrawUtils.DrawProfileDebug(pt, s, LayerName, color, lineWeight, hight);
+            DrawUtils.DrawProfileDebug(geom, LayerName, colorIndex, lineWeightNum);
+        }
+
+        public static void ShowGeometry(Point3d pt, Vector3d dir, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int l = 200)
+        {
+            if (pt == null || pt == Point3d.Origin)
+            {
+                return;
+            }
+            dir = dir.GetNormal();
+            var ptE = pt + dir * l;
+
+            var line = new Line(pt, ptE);
+
+            var ptA1 = ptE + dir.RotateBy(150 * Math.PI / 180, -Vector3d.ZAxis) * l / 5;
+            var Arrow1 = new Line(ptE, ptA1);
+
+            var ptA2 = ptE + dir.RotateBy(150 * Math.PI / 180, Vector3d.ZAxis) * l / 5;
+            var Arrow2 = new Line(ptE, ptA2);
+
+            DrawUtils.ShowGeometry(line, LayerName, colorIndex, lineWeightNum);
+            DrawUtils.ShowGeometry(Arrow1, LayerName, colorIndex, lineWeightNum);
+            DrawUtils.ShowGeometry(Arrow2, LayerName, colorIndex, lineWeightNum);
         }
 
     }

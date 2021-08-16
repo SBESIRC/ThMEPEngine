@@ -49,11 +49,11 @@ namespace ThMEPLighting.EmgLight.Common
                 {
                     for (int j = 0; j < mergedOrderedLane[i].Count; j++)
                     {
-                        DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), EmgLightCommon.LayerLane, Color.FromColorIndex(ColorMethod.ByColor, 161));
+                        DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), EmgLightCommon.LayerLane, 161);
                     }
-                    DrawUtils.ShowGeometry(mergedOrderedLane[i], EmgLightCommon.LayerLane, Color.FromColorIndex(ColorMethod.ByColor, 210));
+                    DrawUtils.ShowGeometry(mergedOrderedLane[i], EmgLightCommon.LayerLane, 210);
                 }
-                DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), EmgLightCommon.LayerLane, Color.FromColorIndex(ColorMethod.ByColor, 1));
+                DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), EmgLightCommon.LayerLane, 1);
                 /////
             }
             return mergedOrderedLane;
@@ -91,16 +91,22 @@ namespace ThMEPLighting.EmgLight.Common
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        public static void GetStructureInfo(AcadDatabase acdb, Polyline transBufferFrame, ThMEPOriginTransformer transformer, out List<Polyline> columns, out List<Polyline> walls)
+        public static void GetStructureInfo(AcadDatabase acdb, Polyline bufferFrame, Polyline transBufferFrame, ThMEPOriginTransformer transformer, out List<Polyline> columns, out List<Polyline> walls)
         {
-            var ColumnExtractEngine = new ThColumnExtractionEngine();
-            ColumnExtractEngine.Extract(acdb.Database);
-            DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
-            ColumnExtractEngine.Results.ForEach(x => transformer.Transform(x.Geometry));
-            DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
+            //var ColumnExtractEngine = new ThColumnExtractionEngine();
+            //ColumnExtractEngine.Extract(acdb.Database);
+            ////DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
+            //ColumnExtractEngine.Results.ForEach(x => transformer.Transform(x.Geometry));
+            //DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
+            //var ColumnEngine = new ThColumnRecognitionEngine();
+            //ColumnEngine.Recognize(ColumnExtractEngine.Results, transBufferFrame.Vertices());
 
-            var ColumnEngine = new ThColumnRecognitionEngine();
-            ColumnEngine.Recognize(ColumnExtractEngine.Results, transBufferFrame.Vertices());
+            var columnBuilder = new ThColumnBuilderEngine();
+            var columnsModelList = columnBuilder.Build(acdb.Database, bufferFrame.Vertices());
+            columns = columnsModelList.Select(x => x.Outline as Polyline).ToList();
+            DrawUtils.ShowGeometry(columns, "l0clolmn");
+            columns.ForEach(x => transformer.Transform(x));
+            DrawUtils.ShowGeometry(columns, "l0clolmn");
 
             // 启动墙识别引擎
             var ShearWallExtractEngine = new ThShearWallExtractionEngine();
@@ -115,21 +121,21 @@ namespace ThMEPLighting.EmgLight.Common
             var archWallEngine = new ThDB3ArchWallRecognitionEngine();
             archWallEngine.Recognize(archWallExtractEngine.Results, transBufferFrame.Vertices());
 
-            ////获取柱
-            columns = new List<Polyline>();
-            columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            var objs = new DBObjectCollection();
-            columns.ForEach(x => objs.Add(x));
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(transBufferFrame).Cast<Polyline>().ToList();
-
             //获取剪力墙
             walls = new List<Polyline>();
             walls = ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            objs = new DBObjectCollection();
+            var objs = new DBObjectCollection();
             walls.ForEach(x => objs.Add(x));
-            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(transBufferFrame).Cast<Polyline>().ToList();
+
+            //////获取柱
+            //columns = new List<Polyline>();
+            //columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            //var objs = new DBObjectCollection();
+            //columns.ForEach(x => objs.Add(x));
+            //ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            //columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(transBufferFrame).Cast<Polyline>().ToList();
 
             //获取建筑墙
             foreach (var o in archWallEngine.Elements)
@@ -169,7 +175,7 @@ namespace ThMEPLighting.EmgLight.Common
                     {
                         var blockTrans = block.Clone() as BlockReference;
 
-                       if (blk.Where(x => x.Key.Position.IsEqualTo(blockTrans.Position, tol)).Count() == 0)
+                        if (blk.Where(x => x.Key.Position.IsEqualTo(blockTrans.Position, tol)).Count() == 0)
                         {
                             transformer.Transform(blockTrans);
                             blockTrans.Position = new Point3d(blockTrans.Position.X, blockTrans.Position.Y, 0);

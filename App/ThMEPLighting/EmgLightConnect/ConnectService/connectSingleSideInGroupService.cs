@@ -204,7 +204,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         }
 
         /// <summary>
-        /// debug:用最小生成树排序
+        /// 用最小生成树排序, 这个方法误差太大不能用
         /// </summary>
         /// <param name="ALE"></param>
         /// <param name="sigleSideGroup"></param>

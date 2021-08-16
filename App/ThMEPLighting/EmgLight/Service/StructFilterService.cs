@@ -32,21 +32,21 @@ namespace ThMEPLighting.EmgLight.Service
             var closeColumn = GetStruct(m_columns, EmgLightCommon.TolLane);
             var closeWall = GetStruct(m_walls, EmgLightCommon.TolLane);
 
-            DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, 1, 35);
+            DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, 92, 35);
 
             foreach (Line l in m_thLane.geom)
             {
                 var linePoly = GeomUtils.ExpandLine(l, EmgLightCommon.TolLane, 0, EmgLightCommon.TolLane, 0);
-                DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, Color.FromColorIndex(ColorMethod.ByColor, 44));
+                DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, 44);
             }
 
             //打散构建并生成数据结构
             var columnSegment = StructureService.BrakeStructToStructSeg(closeColumn);
             var wallSegment = StructureService.BrakeStructToStructSeg(closeWall);
 
-            DrawUtils.ShowGeometry(columnSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(wallSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(columnSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, 1, 35);
+            DrawUtils.ShowGeometry(wallSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, 92, 35);
 
             //选取构建平行车道线的边
             var parallelColmuns = getStructureParallelPart(columnSegment);
@@ -55,8 +55,8 @@ namespace ThMEPLighting.EmgLight.Service
             //破墙
             var brokeWall = StructureService.breakWall(parallelWalls, EmgLightCommon.TolBrakeWall);
 
-            DrawUtils.ShowGeometry(parallelColmuns.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(brokeWall.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(parallelColmuns.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, 5, 35);
+            DrawUtils.ShowGeometry(brokeWall.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, 5, 35);
 
 
             //将构建按车道线方向分成左(0)右(1)两边
@@ -66,10 +66,10 @@ namespace ThMEPLighting.EmgLight.Service
             StructureService.removeDuplicateStruct(usefulColumns);
             StructureService.removeDuplicateStruct(usefulWalls);
 
-            DrawUtils.ShowGeometry(usefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(usefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(usefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(usefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(usefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, 161, 35);
+            DrawUtils.ShowGeometry(usefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, 161, 35);
+            DrawUtils.ShowGeometry(usefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, 11, 35);
+            DrawUtils.ShowGeometry(usefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, 11, 35);
 
             LayoutService layoutServer = new LayoutService(usefulColumns, usefulWalls, m_thLane);
 
@@ -82,29 +82,36 @@ namespace ThMEPLighting.EmgLight.Service
 
             ////滤掉重合部分
             filterOverlapStruc(layoutServer);
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, 11, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, 11, 35);
 
 
             //过滤柱与墙交叉的部分
             FilterStructIntersect(layoutServer.UsefulColumns, m_walls, layoutServer, EmgLightCommon.TolIntersect);
             FilterStructIntersect(layoutServer.UsefulWalls, m_columns, layoutServer, EmgLightCommon.TolIntersect);
 
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, 140, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, 140, 35);
 
             ////滤掉框外边的部分
             getInsideFramePart(layoutServer, frame);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), "l61NotIntersectFrame", 140, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), "l61NotIntersectFrame", 140, 35);
 
             ////滤掉框后边的部分
             filterStrucBehindFrame(layoutServer, frame);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), "l61OutFrame", 140, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), "l61OutFrame", 140, 35);
 
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            ////过滤掉很短的墙
+            filterTooShortWall(layoutServer, EmgLightCommon.TolBrakeWall-50);
+
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 11, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 11, 35);
 
         }
 
@@ -363,7 +370,26 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        private void filterTooShortWall(LayoutService layoutServer, double tol)
+        {
+            //var tooShortWall = layoutServer.UsefulWalls[0].Where(x => x.geom.Length < tol).ToList();
+            //layoutServer.UsefulWalls[0].RemoveAll(x => tooShortWall.Contains(x));
+            //layoutServer.UsefulStruct[0].RemoveAll(x => tooShortWall.Contains(x));
 
+            //tooShortWall = layoutServer.UsefulWalls[1].Where(x => x.geom.Length < tol).ToList();
+            //layoutServer.UsefulWalls[1].RemoveAll(x => tooShortWall.Contains(x));
+            //layoutServer.UsefulStruct[1].RemoveAll(x => tooShortWall.Contains(x));
+
+            var tooShortWall = layoutServer.UsefulStruct[0].Where(x => x.geom.Length < tol).ToList();
+            layoutServer.UsefulStruct[0].RemoveAll(x => tooShortWall.Contains(x));
+            layoutServer.UsefulWalls[0].RemoveAll(x => tooShortWall.Contains(x));
+            layoutServer.UsefulColumns [0].RemoveAll(x => tooShortWall.Contains(x));
+
+            tooShortWall = layoutServer.UsefulStruct[1].Where(x => x.geom.Length < tol).ToList();
+            layoutServer.UsefulStruct[1].RemoveAll(x => tooShortWall.Contains(x));
+            layoutServer.UsefulWalls[1].RemoveAll(x => tooShortWall.Contains(x));
+            layoutServer.UsefulColumns[1].RemoveAll(x => tooShortWall.Contains(x));
+        }
     }
 
 

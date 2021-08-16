@@ -19,9 +19,11 @@ namespace ThMEPLighting.EmgLightConnect.Model
         private List<Point3d> m_tolBlk;
         private List<Point3d> m_reMainBlk;
         private List<Point3d> m_reSecBlk;
+
         private Matrix3d m_matrix;
         private List<(Point3d, Point3d)> m_ptConnect;
         private List<(Polyline, List<Point3d>)> m_moveLaneList;
+        private Dictionary<Point3d, Point3d> m_orderLanePts;
 
         #region properties
         public int laneSideNo { get; set; }
@@ -80,16 +82,20 @@ namespace ThMEPLighting.EmgLightConnect.Model
             {
                 if (m_matrix == new Matrix3d())
                 {
-
-                    var dir = (laneSide.Last().Item1.EndPoint - laneSide.First().Item1.StartPoint).GetNormal();
-                    var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
-                    m_matrix = Matrix3d.Displacement(laneSide.First().Item1.StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    m_matrix = getLaneMatrix(laneSide.First().Item1.StartPoint, laneSide.Last().Item1.EndPoint);
                 }
                 return m_matrix;
             }
 
         }
 
+        private static Matrix3d getLaneMatrix(Point3d startPt, Point3d endPt)
+        {
+            var dir = (endPt - startPt).GetNormal();
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            var matrix = Matrix3d.Displacement(startPt.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+            return matrix;
+        }
         public List<Point3d> reMainBlk
         {
             get
@@ -130,9 +136,11 @@ namespace ThMEPLighting.EmgLightConnect.Model
             this.m_tolBlk = new List<Point3d>();
             this.m_ptConnect = new List<(Point3d, Point3d)>();
 
+
             this.m_reMainBlk = new List<Point3d>();
             this.m_reSecBlk = new List<Point3d>();
             this.m_moveLaneList = new List<(Polyline, List<Point3d>)>();
+            this.m_orderLanePts = new Dictionary<Point3d, Point3d>();
         }
 
         public void setEmgGroup(Dictionary<Point3d, Point3d> groupBlock)
@@ -220,6 +228,8 @@ namespace ThMEPLighting.EmgLightConnect.Model
             }
         }
 
+
+
         //public void orderMainBlock()
         //{
         //    m_mainBlk = m_mainBlk.OrderBy(x => x.TransformBy(Matrix.Inverse()).X).ToList();
@@ -234,6 +244,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
         {
             m_reSecBlk = m_reSecBlk.OrderBy(x => x.TransformBy(Matrix.Inverse()).X).ToList();
         }
+
 
         public void setReMainBlk(List<Point3d> regroupMain)
         {
@@ -302,7 +313,57 @@ namespace ThMEPLighting.EmgLightConnect.Model
             return returnList;
         }
 
+        public Point3d transformPtToLaneWithAccurateY(Point3d pt)
+        {
+            var ptTrans = new Point3d();
 
+            if (m_orderLanePts.Count == 0)
+            {
+                orderLanePts();
+            }
+
+            var ptTransTemp = pt.TransformBy(Matrix.Inverse());
+
+            for (int i = 0; i < m_orderLanePts.Count - 1; i++)
+            {
+                var linePt = m_orderLanePts.ElementAt(i);
+                var lintPtN = m_orderLanePts.ElementAt(i+1);
+
+                if (linePt.Value.X <= ptTransTemp.X && ptTransTemp.X <= lintPtN.Value.X)
+                {
+                    var matrixSeg = getLaneMatrix(linePt.Key, lintPtN.Key);
+                    var ptInLineSegTrans = pt.TransformBy(matrixSeg.Inverse());
+                    ptTrans = new Point3d(ptTransTemp.X, ptInLineSegTrans.Y, 0);
+                    break;
+                }
+            }
+
+            return ptTrans;
+        }
+
+
+
+        private void orderLanePts()
+        {
+            var tol = new Tolerance(10, 10);
+            var pts = new List<Point3d>();
+
+            foreach (var l in m_laneSide)
+            {
+                var notInList = pts.Where(x => x.IsEqualTo(l.Item1.StartPoint, tol));
+                if (notInList.Count() == 0)
+                {
+                    pts.Add(l.Item1.StartPoint);
+                }
+                notInList = pts.Where(x => x.IsEqualTo(l.Item1.EndPoint, tol));
+                if (notInList.Count() == 0)
+                {
+                    pts.Add(l.Item1.EndPoint);
+                }
+            }
+
+            m_orderLanePts = pts.ToDictionary(x => x, x => x.TransformBy(Matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
+        }
     }
 
 }

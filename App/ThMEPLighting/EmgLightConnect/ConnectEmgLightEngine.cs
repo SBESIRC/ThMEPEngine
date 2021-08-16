@@ -42,31 +42,21 @@ namespace ThMEPLighting.EmgLightConnect
             {
                 foreach (var ba in a.Value)
                 {
-                    DrawUtils.ShowGeometry(ba.Position, EmgConnectCommon.LayerBlockCenter, Color.FromColorIndex(ColorMethod.ByColor, 50), LineWeight.LineWeight035);
+                    DrawUtils.ShowGeometry(ba.Position, EmgConnectCommon.LayerBlockCenter, 50, 35);
                 }
             }
 
-            for (int i = 0; i < singleSideBlocks.Count; i++)
-            {
-                var side = singleSideBlocks[i];
+            //for (int i = 0; i < singleSideBlocks.Count; i++)
+            //{
+            //    var side = singleSideBlocks[i];
 
-                short color = Convert.ToInt16(i);
+            //    var color = i % 8;
 
-                while (color > 8)
-                {
-                    color = Convert.ToInt16(color - 8);
-                }
+            //    side.mainBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter, color, 35));
+            //    side.secBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter,  color, 35,200, "S"));
 
-                side.mainBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter, Color.FromColorIndex(ColorMethod.ByColor, color), LineWeight.LineWeight035));
-                side.secBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter, Color.FromColorIndex(ColorMethod.ByColor, color), LineWeight.LineWeight035, "S"));
+            //}
 
-            }
-
-            bool b = false;
-            if (b == true)
-            {
-                return null;
-            }
 
             ////分组
             //沿车道线成环分区
@@ -83,8 +73,10 @@ namespace ThMEPLighting.EmgLightConnect
             graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
             graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
 
-            //mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
+            //mergeOneSecBlkSideService.mergeScatterBlockSide(singleSideBlocks);
+            ////mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
             mergeOneSecBlkSideService.mergeOneSecBlockSide(singleSideBlocks);
+
 
             //连线数据
             reclassMainSec.regroupMainSec(singleSideBlocks, frame, holes);
@@ -122,12 +114,12 @@ namespace ThMEPLighting.EmgLightConnect
 
             ConnectSingleSideService.forDebugBlkOutline(blkList);
 
-            DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 70));
-            DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 30));
+            DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, 130);
+            DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, 70);
+            DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal,  30);
 
             newLink = drawCorrectLinkService.CorrectIntersectLink(linkLine, blkList);
-            DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal, Color.FromColorIndex(ColorMethod.ByColor, 241));
+            DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal,  241);
 
 
             return newLink;

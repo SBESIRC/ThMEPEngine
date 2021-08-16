@@ -31,8 +31,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         public static void connecSecToMain(Point3d ALE, List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
         {
-
-            //debug 没有main 只有sec的情况处理不了
             foreach (var side in singleSideBlocks)
             {
                 if (side.reMainBlk.Count > 0)

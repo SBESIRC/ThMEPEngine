@@ -42,6 +42,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var allBlk = side.getTotalBlock();
 
             var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+
+            //var allBlkDict = allBlk.ToDictionary(x => x, x => side.transformPtToLaneWithAccurateY(x)).OrderBy(item => item.Value.X).ToList();
             var laneEndPt = side.laneSide.Last().Item1.EndPoint.TransformBy(side.Matrix.Inverse());
 
             if (side.mainBlk.Count > 0)
@@ -71,9 +73,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 double dSide = allBlkDict.Where(x => x.Key.IsEqualTo(side.mainBlk[0], new Tolerance(10, 10))).FirstOrDefault().Value.Y;
 
                 regroupMain = allBlkDict.Where(x => dSide * x.Value.Y > 0
-                && Ymin <= Math.Abs(x.Value.Y) && Math.Abs(x.Value.Y) <= YMax
-                && x.Value.X > -EmgConnectCommon.TolRegroupMainYRange && x.Value.X <= laneEndPt.X + EmgConnectCommon.TolRegroupMainYRange)
-                .Select(x => x.Key).ToList();
+                                            && Ymin <= Math.Abs(x.Value.Y) && Math.Abs(x.Value.Y) <= YMax
+                                            && x.Value.X > -EmgConnectCommon.TolRegroupMainYRange && x.Value.X <= laneEndPt.X + EmgConnectCommon.TolRegroupMainYRange)
+                                        .Select(x => x.Key).ToList();
 
                 //regroupMain.AddRange(side.mainBlk);
                 regroupMain = regroupMain.Distinct().ToList();
@@ -104,6 +106,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             side.setReSecBlk(regroupSecBlk);
 
         }
+
 
         private static void breakMainGroup(ThSingleSideBlocks side, Polyline frame, List<Polyline> holes)
         {
@@ -185,7 +188,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         /// <param name="side"></param>
         /// <param name="offset"></param>
         /// <param name="offSetDir"></param>
-        /// <returns></returns>
+        /// <returns>平移好的车道线</returns>
         private static List<Line> moveLane(ThSingleSideBlocks side, out double offset, out int offSetDir)
         {
             //找平移量
@@ -217,6 +220,17 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return tempMoveLineList;
         }
 
+        /// <summary>
+        /// 根据外框和洞切割平移车道线并找到每段的偏移量
+        /// </summary>
+        /// <param name="tempMoveLine"></param>
+        /// <param name="frame"></param>
+        /// <param name="holes"></param>
+        /// <param name="offset"></param>
+        /// <param name="side"></param>
+        /// <param name="lanePoly"></param>
+        /// <param name="moveLanePoly"></param>
+        /// <returns>偏移量，这个偏移量的line</returns>
         private static List<(double, List<Line>)> checkMoveLineIntersectOutFrame(List<Line> tempMoveLine, Polyline frame, List<Polyline> holes, double offset, ThSingleSideBlocks side, out Polyline lanePoly, out Polyline moveLanePoly)
         {
             List<(double, List<Line>)> offsetList = new List<(double, List<Line>)>();
@@ -274,6 +288,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="overlapPoly"></param>
+        /// <param name="lanePoly"></param>
+        /// <param name="offsetOri"></param>
+        /// <returns>overlapPoly 切分成line。找到连续且共同偏移量double，合并line 到list</returns>
         private static List<(double, List<Line>)> getNewOffsetSeg(Polyline overlapPoly, Polyline lanePoly, double offsetOri)
         {
             int TolDistDalta = 10;
@@ -504,7 +525,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 distance = offsetMax;
             }
-          
+
             Algorithms.PolyClean_RemoveDuplicatedVertex(lanePoly);
             var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
 
@@ -534,11 +555,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
         }
 
         /// <summary>
-        /// list <idx of item in offsetInfo, (lane seg start pt, lane seg start pt in lane matrix）, （lane seg end pt, lane seg end pt in lane matrix)>
+        /// 每一段偏移线对应的车道线点位和点位在车道线坐标系下的值
         /// </summary>
         /// <param name="offsetInfo"></param>
         /// <param name="sideMatrix"></param>
-        /// <returns></returns>
+        /// <returns>idx of item in offsetInfo,(lane seg start pt, lane seg start pt in lane matrix）, （lane seg end pt, lane seg end pt in lane matrix) </returns>
         private static List<(int, KeyValuePair<Point3d, Point3d>, KeyValuePair<Point3d, Point3d>)> getMoveLaneSegStartEndPt(List<(double, List<Line>)> offsetList, Matrix3d sideMatrix)
         {
             List<(int, KeyValuePair<Point3d, Point3d>, KeyValuePair<Point3d, Point3d>)> offsetOrderList = new List<(int, KeyValuePair<Point3d, Point3d>, KeyValuePair<Point3d, Point3d>)>();

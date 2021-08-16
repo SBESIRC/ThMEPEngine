@@ -82,7 +82,7 @@ namespace ThMEPLighting.EmgLight.Common
             var ExtendLine = new Line(ExtendPolyStart, ExtendPolyEnd);
             var ExtendPoly = GeomUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
 
-            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly, Color.FromColorIndex ( ColorMethod.ByColor,44));
+            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly,44);
 
             return ExtendPoly;
         }
