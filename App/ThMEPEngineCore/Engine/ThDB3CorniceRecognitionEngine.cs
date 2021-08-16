@@ -3,7 +3,6 @@ using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,10 +13,8 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3CorniceExtractionVisitor()
-            {
-                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database),
-            };
+            //V1.0线脚提取规则：没有图层限制，在超链接中判断Category为线脚
+            var visitor = new ThDB3CorniceExtractionVisitor();
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);

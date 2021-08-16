@@ -1,11 +1,10 @@
-﻿using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Linq;
 using ThCADExtension;
-using System.Linq;
-using System;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -77,6 +76,10 @@ namespace ThMEPEngineCore.Engine
                 return thPropertySet.IsCornice;
             }
             return false;
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
     }
 }
