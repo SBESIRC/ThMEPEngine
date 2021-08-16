@@ -1,12 +1,12 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -14,6 +14,7 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
+            //V1.0窗户提取规则：图层:"AE-WIND",超链接中Category为窗
             var visitor = new ThDB3WindowExtractionVisitor()
             {
                 LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
