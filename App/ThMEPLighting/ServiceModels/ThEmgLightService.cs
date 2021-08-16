@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ThMEPLighting.Common;
 
 namespace ThMEPLighting.ServiceModels
 {
@@ -19,8 +15,13 @@ namespace ThMEPLighting.ServiceModels
             this.MaxDeleteDistance = 10000;
             this.MaxDeleteAngle = 30;
             this.IsHostingLight = false;
+            this.BlockScale = (double)ThEnumBlockScale.DrawingScale1_100;
         }
         public static ThEmgLightService Instance = new ThEmgLightService();
+        /// <summary>
+        /// 灯块的绘制比例
+        /// </summary>
+        public double BlockScale { get; set; }
         public bool IsHostingLight { get; set; }
         /// <summary>
         /// 灯之间最大间距
