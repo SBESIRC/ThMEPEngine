@@ -370,6 +370,14 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THDXXHSXTT_SMALL",
                 "IDI_THCAD_THDXXHSXTT_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("压力排水",
+                "天华地下压力排水系统图",
+                "THDXPSXTT",
+                "天华地下压力排水系统图",
+                "IDI_THCAD_THDXPSXTT_SMALL",
+                "IDI_THCAD_THDXPSXTT_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateWDetailAxonometryPanel(RibbonTabSource tab)

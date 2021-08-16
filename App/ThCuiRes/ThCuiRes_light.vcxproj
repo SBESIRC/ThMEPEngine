@@ -236,7 +236,7 @@
     <Image Include="Images\THSSZSD_light_large.ico" />
     <Image Include="Images\THKJHZ_light_small.ico" />    
     <Image Include="Images\THKJHZ_light_large.ico" />
-	  <Image Include="Images\THKJMM_light_small.ico" />    
+	<Image Include="Images\THKJMM_light_small.ico" />    
     <Image Include="Images\THKJMM_light_large.ico" />
     <Image Include="Images\THKJSQ_light_small.ico" />    
     <Image Include="Images\THKJSQ_light_large.ico" />
@@ -272,6 +272,8 @@
     <Image Include="Images\THPYSPM_light_large.ico" />
     <Image Include="Images\THXHSXTT_light_small.ico" />    
     <Image Include="Images\THXHSXTT_light_large.ico" />
+    <Image Include="Images\THDXPSXTT_light_small.ico" />    
+    <Image Include="Images\THDXPSXTT_light_large.ico" />
     <Image Include="Images\THDXXHSXTT_light_small.ico" />    
     <Image Include="Images\THDXXHSXTT_light_large.ico" />
     <Image Include="Images\THJSDY_light_small.ico" />    
