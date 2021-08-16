@@ -65,72 +65,29 @@ namespace ThMEPElectrical.Stair
                 else if (name == "E-BFEL110")
                 {
                     var halfLength = 0.0;
-                    var angle = 0.0;
                     var widthVector = GetWidthVector(blockReference, ref halfLength);
+                    var layoutLine = LayoutLine(platform, doors, halfLength);
                     var positionTidal = ToPoint3d((platform[0].GetAsVector() + platform[1].GetAsVector()) / 2);
-                    position = ToVector3d(positionTidal) + GetUnitVector(platform[0], platform[3]) * widthVector.Length / 2;
-                    Avoid(blockReference, platform, doors, position, positionTidal, ref angle);
-                    angle = GetAngle(widthVector, GetVector(platform[0], platform[3]), angle);
+                    var newDirection = new Vector3d();
+                    Avoid(platform, doors, positionTidal, layoutLine, ref position, ref newDirection, widthVector);
+                    var angle = GetAngle(widthVector, newDirection);
                     blockReference.TransformBy(Matrix3d.Rotation(angle, Vector3d.ZAxis, GetCenterPoint(blockReference)));
                 }
                 // 平台靠近下行方向1/4位置壁装布置
                 else if (name == "E-BFAS410-4")
                 {
                     var halfLength = 0.0;
-                    var angle = 0.0;
                     var widthVector = GetWidthVector(blockReference, ref halfLength);
+                    var layoutLine = LayoutLine(platform, doors, halfLength);
                     var positionTidal = ToPoint3d((platform[0].GetAsVector() + GetVector(platform[0], platform[1]) / 4));
-                    position = ToVector3d(positionTidal) + GetUnitVector(platform[0], platform[3]) * widthVector.Length / 2;
-                    Avoid(blockReference, platform, doors, position, positionTidal, ref angle);
-                    angle = GetClockwise(widthVector, GetVector(platform[0], platform[3]), angle);
+                    var newDirection = new Vector3d();
+                    Avoid(platform, doors, positionTidal, layoutLine, ref position, ref newDirection, widthVector);
+                    var angle = GetClockwise(widthVector, newDirection);
                     blockReference.TransformBy(Matrix3d.Rotation(angle, Vector3d.ZAxis, GetCenterPoint(blockReference)));
                 }
 
                 var offset = position - targetBlockDataPosition.GetAsVector();
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
-            }
-        }
-
-        private void Avoid(BlockReference blockReference, List<Point3d> platform, List<List<Point3d>> doors, Vector3d position, Point3d positionTidal, ref double angle)
-        {
-            var halfLength = 0.0;
-            var widthVector = GetWidthVector(blockReference, ref halfLength);
-            for (int i = 0; i < doors.Count(); i++)
-            {
-                // 若位置点位于门附近
-                var line = new Line(doors[i][0], doors[i][1]);
-                if (line.DistanceTo(positionTidal, false) < halfLength)
-                {
-                    var newDoor = DoorExtend(doors[i], halfLength, platform);
-                    if (newDoor.Count == 0)
-                    {
-                        var adjustPoint0 = ToPoint3d(ToVector3d(platform[0]) + GetUnitVector(platform[0], platform[3]) * halfLength);
-                        var adjustPoint1 = ToPoint3d(ToVector3d(platform[1]) + GetUnitVector(platform[1], platform[2]) * halfLength);
-                        if (positionTidal.DistanceTo(adjustPoint0) < positionTidal.DistanceTo(adjustPoint1))
-                        {
-                            positionTidal = adjustPoint0;
-                            position = ToVector3d(positionTidal) + GetUnitVector(platform[0], platform[1]) * widthVector.Length / 2;
-                            angle = Math.PI / 2;
-                        }
-                        else
-                        {
-                            positionTidal = adjustPoint1;
-                            position = ToVector3d(positionTidal) + GetUnitVector(platform[1], platform[0]) * widthVector.Length / 2;
-                            angle = -Math.PI / 2;
-                        }
-                    }
-                    else if (newDoor.Count == 1)
-                    {
-                        positionTidal = newDoor[0];
-                        position = ToVector3d(positionTidal) + GetUnitVector(platform[0], platform[3]) * widthVector.Length / 2;
-                    }
-                    else
-                    {
-                        positionTidal = newDoor[0].DistanceTo(positionTidal) < newDoor[1].DistanceTo(positionTidal)
-                                        ? newDoor[0] : newDoor[1];
-                        position = ToVector3d(positionTidal) + GetUnitVector(platform[0], platform[3]) * widthVector.Length / 2;
-                    }
-                }
             }
         }
 
@@ -144,26 +101,25 @@ namespace ThMEPElectrical.Stair
             return (endPoint.GetAsVector() - starPoint.GetAsVector()) / (starPoint.DistanceTo(endPoint));
         }
 
-        private double GetAngle(Vector3d vector, Vector3d referenceVector, double adjust)
+        private double GetAngle(Vector3d vector, Vector3d referenceVector)
         {
-            var angle = GetClockwise(vector, referenceVector, adjust);
-            if (angle > Math.PI / 2 || angle - 10 * ThStairCommon.radian_tolerance <=- Math.PI / 2)
+            var angle = GetClockwise(vector, referenceVector);
+            if (angle > Math.PI / 2 || angle - 10 * ThStairCommon.radian_tolerance <= -Math.PI / 2)
             {
                 angle = angle - Math.PI;
             }
             return angle;
         }
 
-        private double GetClockwise(Vector3d vector, Vector3d referenceVector, double adjust)
+        private double GetClockwise(Vector3d vector, Vector3d referenceVector)
         {
-            var angle = adjust;
             if ((vector.X * referenceVector.Y - vector.Y * referenceVector.X) > 0)
             {
-                return vector.GetAngleTo(referenceVector) + angle;
+                return vector.GetAngleTo(referenceVector);
             }
             else
             {
-                return -vector.GetAngleTo(referenceVector) + angle;
+                return -vector.GetAngleTo(referenceVector);
             }
         }
 
@@ -194,30 +150,6 @@ namespace ThMEPElectrical.Stair
             }
         }
 
-        //private bool JudgePosition(Point3d point, List<Point3d> platform, List<List<Point3d>> doors, double halfLength, ref Point3d newPoint)
-        //{
-        //    for (int i = 0; i < platform.Count(); i++)
-        //    {
-        //        if (point.DistanceTo(platform[i]) < halfLength)
-        //        {
-
-        //            return false;
-        //        }
-        //    }
-        //    if (new Line(platform[2], platform[3]).Distance(point) < 10)
-        //    {
-        //        return false;
-        //    }
-        //    for (int i = 0; i < doors.Count(); i++)
-        //    {
-        //        if (new Line(doors[i][0], doors[i][1]).Distance(point) < halfLength)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
-
         private Point3d ToPoint3d(Vector3d vector)
         {
             return new Point3d(vector.X, vector.Y, vector.Z);
@@ -228,47 +160,105 @@ namespace ThMEPElectrical.Stair
             return new Vector3d(point.X, point.Y, point.Z);
         }
 
-        // 返回位置点是否位于门的halfLength范围附近，位于则返回true
-        //private bool JudgePositionInDoor(Point3d point,List<Point3d> doorExtend, ref Point3d newPoint)
-        //{
-        //    newPoint = doorExtend[0].DistanceTo(point) < doorExtend[1].DistanceTo(point) ? doorExtend[0] : doorExtend[1];
-
-        //    return (new Line(door[0], door[1]).Distance(point) < halfLength);
-        //}
-
-        private List<Point3d> DoorExtend(List<Point3d> door, double halfLength, List<Point3d> platform)
+        private List<List<Line>> LayoutLine(List<Point3d> platform, List<List<Point3d>> doors, double halfLength)
         {
-            var doorExtend = new List<Point3d>();
-            var unitVector = GetUnitVector(door[0], door[1]);
-            var firstPoint = ToPoint3d((ToVector3d(door[0]) - unitVector * halfLength));
-            var secondPoint = ToPoint3d((ToVector3d(door[1]) + unitVector * halfLength));
-            if (Valid(firstPoint, halfLength, platform))
+            var layoutArea = new List<List<Point3d>>();
+            for (int i = 0; i < 3; i++)
             {
-                doorExtend.Add(firstPoint);
+                layoutArea.Add(new List<Point3d>());
             }
-            if (Valid(secondPoint, halfLength, platform))
+            layoutArea[0].Add(platform[0]);
+            layoutArea[0].Add(platform[1]);
+            layoutArea[1].Add(platform[1]);
+            layoutArea[1].Add(platform[2]);
+            layoutArea[2].Add(platform[3]);
+            layoutArea[2].Add(platform[0]);
+            for (int i = 0; i < doors.Count; i++)
             {
-                doorExtend.Add(secondPoint);
-            }
-            return doorExtend;
-        }
-
-        private bool Valid(Point3d position, double halfLength, List<Point3d> platform)
-        {
-            var minDistance = 2 * halfLength;
-            foreach (var point in platform)
-            {
-                var distance = position.DistanceTo(point);
-                if (minDistance > distance)
+                if (new Line(platform[0], platform[1]).DistanceTo(doors[i][0], false) < 10)
                 {
-                    minDistance = distance;
+                    layoutArea[0].Add(doors[i][0]);
+                    layoutArea[0].Add(doors[i][1]);
+                }
+                else if (new Line(platform[1], platform[2]).DistanceTo(doors[i][0], false) < 10)
+                {
+                    layoutArea[1].Add(doors[i][0]);
+                    layoutArea[1].Add(doors[i][1]);
+                }
+                else if (new Line(platform[3], platform[0]).DistanceTo(doors[i][0], false) < 10)
+                {
+                    layoutArea[2].Add(doors[i][0]);
+                    layoutArea[2].Add(doors[i][1]);
                 }
             }
-            if (minDistance > halfLength)
+            Sort(layoutArea);
+            var layoutLine = new List<List<Line>>();
+            for (int i = 0; i < layoutArea.Count; i++)
             {
-                return true;
+                layoutLine.Add(new List<Line>());
+                for (int j = 1; j < layoutArea[i].Count; j += 2)
+                {
+                    var line = new Line(layoutArea[i][j - 1], layoutArea[i][j]);
+                    if (line.Length > 2 * halfLength)
+                    {
+                        layoutLine[i].Add(NewLine(line, halfLength));
+                    }
+                }
             }
-            return false;
+            return layoutLine;
+        }
+
+        private void Sort(List<List<Point3d>> layoutArea)
+        {
+            for (int i = 0; i < layoutArea.Count; i++)
+            {
+                for (int j = 1; j < layoutArea[i].Count; j++)
+                {
+                    for (int k = j + 1; k < layoutArea[i].Count; k++)
+                    {
+                        if (layoutArea[i][j].DistanceTo(layoutArea[i][0]) > layoutArea[i][k].DistanceTo(layoutArea[i][0]))
+                        {
+                            var temp = layoutArea[i][j];
+                            layoutArea[i][j] = layoutArea[i][k];
+                            layoutArea[i][k] = temp;
+                        }
+                    }
+                }
+            }
+        }
+
+        private Line NewLine(Line line, double halfLength)
+        {
+            var newStartPoint = ToPoint3d(ToVector3d(line.StartPoint) + GetUnitVector(line.StartPoint, line.EndPoint) * halfLength);
+            var newEndPoint = ToPoint3d(ToVector3d(line.EndPoint) + GetUnitVector(line.EndPoint, line.StartPoint) * halfLength);
+            return new Line(newStartPoint, newEndPoint);
+        }
+
+        private void Avoid(List<Point3d> platform, List<List<Point3d>> doors, Point3d positionTidal, List<List<Line>> layoutLine, ref Vector3d position, ref Vector3d newDirection, Vector3d widthVector)
+        {
+            var directionList = new List<Vector3d>
+                    {
+                        GetUnitVector(platform[0], platform[3]),
+                        GetUnitVector(platform[1], platform[0]),
+                        GetUnitVector(platform[0], platform[1])
+                    };
+            var minDistance = -1.0;
+            var newPositionTidal = positionTidal;
+            newDirection = directionList[0];
+            for (int i = 0; i < layoutLine.Count; i++)
+            {
+                for (int j = 0; j < layoutLine[i].Count; j++)
+                {
+                    var distance = layoutLine[i][j].DistanceTo(positionTidal, false);
+                    if (minDistance > distance || minDistance < 0.0)
+                    {
+                        minDistance = distance;
+                        newPositionTidal = layoutLine[i][j].GetClosestPointTo(positionTidal, false);
+                        newDirection = directionList[i];
+                    }
+                }
+            }
+            position = ToVector3d(newPositionTidal) + newDirection * widthVector.Length / 2;
         }
     }
 }
