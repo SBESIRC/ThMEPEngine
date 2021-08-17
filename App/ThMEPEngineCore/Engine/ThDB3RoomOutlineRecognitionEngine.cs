@@ -16,7 +16,11 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3RoomOutlineExtractionVisitor();
+            //V1.0房间轮廓线提取规则：图层:"DEFPOINTS_ROOM"，在超链接中判断是否有Category和Boundary字段
+            var visitor = new ThDB3RoomOutlineExtractionVisitor()
+            {
+                LayerFilter = ThDB3RoomLayerManager.CurveXrefLayers(database),
+            };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
