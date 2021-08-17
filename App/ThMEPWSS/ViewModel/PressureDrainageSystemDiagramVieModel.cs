@@ -11,6 +11,7 @@ using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
+using Dreambuild.AutoCAD;
 
 
 namespace ThMEPWSS.Diagram.ViewModel

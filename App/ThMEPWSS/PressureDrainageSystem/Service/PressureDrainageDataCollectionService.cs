@@ -1,6 +1,8 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
@@ -9,7 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPElectrical;
+using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
+using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.CADExtensionsNs;
@@ -47,7 +53,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 this.CollectInfoTables(viewmodel);
             }
+
+            this.CollectWalls(viewmodel);
         }
+
         /// <summary>
         /// 提取图纸数据
         /// </summary>
@@ -544,6 +553,36 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             foreach (var frame in frames)
             {
                 this.CollectedData.StoryFrameBasePt.Add(new Point3d(frame.datumPoint.X, frame.datumPoint.Y, 0));
+            }
+        }
+
+        /// <summary>
+        /// 收集墙线
+        /// </summary>
+        public void CollectWalls(PressureDrainageSystemDiagramVieModel viewmodel)
+        {
+            using (var Doclock = Active.Document.LockDocument())
+            using (var adb = AcadDatabase.Active())
+            {
+                List<Polyline> frames = new List<Polyline>();
+
+                Point3d ptmin = viewmodel.SelectedArea[0].X < viewmodel.SelectedArea[2].X ? viewmodel.SelectedArea[0] : viewmodel.SelectedArea[2];
+                Point3d ptmax = viewmodel.SelectedArea[0].X < viewmodel.SelectedArea[2].X ? viewmodel.SelectedArea[2] : viewmodel.SelectedArea[0];
+                Extents3d ex = new Extents3d(ptmin, ptmax);
+                frames.Add(ex.ToRectangle());
+
+                var pt = frames.First().StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                frames = frames.Select(x =>{return ThMEPFrameService.Normalize(x);}).ToList();
+                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+                List<Polyline> res = new();
+                foreach (var outFrame in frames)
+                {
+                    getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    walls.ForEach(e => res.Add(e));
+                }
+                this.CollectedData.WallPolyLines = new List<Polyline>();
+                this.CollectedData.WallPolyLines.AddRange(res);
             }
         }
     }

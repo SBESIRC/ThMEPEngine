@@ -31,6 +31,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             AppendOtherDataToModeldates();
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
             AppendDrainWellsToModeldates();
+            AppendWallLinesToModeldates();
         }
         
         /// <summary>
@@ -104,6 +105,30 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells.Add(well);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 将墙线添加进modeldates
+        /// </summary>
+        private void AppendWallLinesToModeldates()
+        {
+            Extents3d ext = GetBoundaryExtendList(Viewmodel)[0];
+            Modeldatas.WallLines = new List<Polyline>();
+            List<Line> lines = new List<Line>();
+            foreach (var ply in CollectDataService.CollectedData.WallPolyLines)
+            {
+                if (ext.IsPointIn(ply.GetMidpoint()))
+                {
+                    //ply.AddToCurrentSpace();
+                    //Modeldatas.WallLines.Add(ply);
+                    lines.AddRange(ply.ExplodeLines());
+                }
+            }
+            foreach (var line in lines)
+            {
+                line.ColorIndex = (int)ColorIndex.Cyan;
+                //line.AddToCurrentSpace();
             }
         }
 
