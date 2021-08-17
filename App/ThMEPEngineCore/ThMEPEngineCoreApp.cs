@@ -1034,7 +1034,7 @@ namespace ThMEPEngineCore
                     datas = data.MergeData();
                 }
                 // print for test
-                datas.Cast<Entity>().ToList().CreateGroup(acadDatabase.Database,1);
+                //datas.Cast<Entity>().ToList().CreateGroup(acadDatabase.Database,1);
                 var concaveBuilder = new ThConcaveBuilder(datas, hersLength);
                 results = concaveBuilder.Build();
                 results.Cast<Entity>().ToList().CreateGroup(acadDatabase.Database, 4);

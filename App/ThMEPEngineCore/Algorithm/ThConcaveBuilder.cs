@@ -2,12 +2,10 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -41,13 +39,6 @@ namespace ThMEPEngineCore.Algorithm
             // 转点集合并过滤相近点
             var pts = TransPoints(lines);
             pts = FilterClosedPoints(pts, Point3dTolerance);
-
-            // for test
-            lines.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database,5);
-            pts.Cast<Point3d>()
-                .Select(p => new Circle(p, Vector3d.ZAxis, 1.5))
-                .Cast<Entity>().ToList()
-                .CreateGroup(AcHelper.Active.Database,1);
 
             // 构建
             var concaveHull = new ThCADCoreNTSConcaveHull(pts.ToNTSGeometry(), Hershold);
