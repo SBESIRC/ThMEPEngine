@@ -981,6 +981,66 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractContourLineByConcave", CommandFlags.Modal)]
+        public void THExtractContourLineByConcave()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var hersLength = 200.0;
+                var pdo = new PromptDoubleOptions("\n输入修复的长度值<200>");
+                pdo.AllowNegative = false;
+                pdo.AllowZero = false;
+                pdo.AllowNone = false;
+                pdo.AllowArbitraryInput = true;
+                var pdr = Active.Editor.GetDouble(pdo);
+                if(pdr.Status == PromptStatus.OK)
+                {
+                    hersLength = pdr.Value;
+                }
+
+                var options = new PromptKeywordOptions("\n选择处理模式");
+                options.Keywords.Add("建筑模式", "A", "建筑模式(A)");
+                options.Keywords.Add("结构模式", "S", "结构模式(S)");
+                options.Keywords.Default = "结构模式";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var datas = new DBObjectCollection();
+                var results = new DBObjectCollection();
+                if (result2.StringResult == "建筑模式")
+                {
+                    var data = new Model1Data(acadDatabase.Database, frame.Vertices());
+                    datas = data.MergeData();
+                }
+                else
+                {
+                    var data = new Model2Data(acadDatabase.Database, frame.Vertices());
+                    datas = data.MergeData();
+                }
+                // print for test
+                datas.Cast<Entity>().ToList().CreateGroup(acadDatabase.Database,1);
+                var concaveBuilder = new ThConcaveBuilder(datas, hersLength);
+                results = concaveBuilder.Build();
+                results.Cast<Entity>().ToList().CreateGroup(acadDatabase.Database, 4);
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THExtractStair", CommandFlags.Modal)]
         public void THExtractStair()
         {
