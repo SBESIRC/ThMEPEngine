@@ -6,10 +6,16 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
+    public enum DataSource
+    {
+        DB3,
+        Raw,
+    }
     public class ThRawIfcBuildingElementData
     {
         public object Data { get; set; }
         public Entity Geometry { get; set; }
+        public DataSource Source { get; set; }
     }
 
     public abstract class ThBuildingElementExtractionEngine
