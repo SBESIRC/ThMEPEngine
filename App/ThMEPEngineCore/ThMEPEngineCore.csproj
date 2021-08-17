@@ -170,6 +170,7 @@
     <Compile Include="Service\ThAcPolygonSimplifier.cs" />
     <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
+    <Compile Include="Service\ThDB3RoomLayerManager.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
     <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
