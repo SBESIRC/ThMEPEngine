@@ -379,6 +379,7 @@
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataClassDefinition.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageSystemDiagram.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataReader.cs" />
+    <Compile Include="PressureDrainageSystem\Service\GetPrimitivesService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageSystemDiagramService.cs" />
     <Compile Include="PressureDrainageSystem\Service\ImportService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PipeLineSystemUnitConstructionService.cs" />
@@ -487,10 +488,6 @@
     <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
       <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
       <Name>ThControlLibraryWPF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
-      <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
-      <Name>ThMEPElectrical</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
