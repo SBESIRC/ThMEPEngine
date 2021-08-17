@@ -776,75 +776,45 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THExtractDrainageWell", CommandFlags.Modal)]
         public void THExtractDrainageWell()
         {
-            using (var acadDatabase = AcadDatabase.Active())
-            using (var curveEngine = new ThDrainageWellRecognitionEngine())
-            using (var blockEngine = new ThDrainageWellBlockRecognitionEngine())
+            using (var acadDb = AcadDatabase.Active())            
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                var frame = ThWindowInteraction.GetPolyline(
+                  PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                if (frame.Area < 1e-4)
                 {
                     return;
                 }
-                if (!(acadDatabase.Element<Entity>(result.ObjectId) is Polyline))
+                var pts = frame.Vertices();
+                var center = pts.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(center);
+                var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
+
+                var drainageCurveExtraction = new ThDrainageWellExtractionEngine();
+                drainageCurveExtraction.Extract(acadDb.Database);
+                drainageCurveExtraction.Results.ForEach(o => transformer.Transform(o.Geometry));
+                var curveEngine = new ThDrainageWellRecognitionEngine();
+                curveEngine.Recognize(drainageCurveExtraction.Results,newPts);
+
+                var drainageBlkExtraction = new ThDrainageWellBlockExtractionEngine();
+                drainageBlkExtraction.Extract(acadDb.Database);
+                drainageBlkExtraction.Results.ForEach(o => transformer.Transform(o.Geometry));
+                var drainageBlkEngine = new ThDrainageWellBlockRecognitionEngine();
+                drainageBlkEngine.Recognize(drainageBlkExtraction.Results,newPts);
+
+                var objs = new DBObjectCollection();
+                curveEngine.Geos.ForEach(o => objs.Add(o));
+                drainageBlkEngine.Geos.Cast<BlockReference>().ForEach(o =>
                 {
-                    return;
-                }
-                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.NormalizeEx(frame);
-                if (nFrame.Area > 1)
-                {
-                    curveEngine.Recognize(acadDatabase.Database, nFrame.Vertices());
-                    blockEngine.Recognize(acadDatabase.Database, nFrame.Vertices());
-                    var objs = new DBObjectCollection();
-                    curveEngine.Geos.ForEach(o => objs.Add(o));
-                    blockEngine.Geos.Cast<BlockReference>().ForEach(o =>
-                    {
-                        ThDrawTool.Explode(o)
-                            .Cast<Entity>()
-                            .Where(p => p is Line || p is Polyline)
-                            .ForEach(p => objs.Add(p));
-                    });
+                    ThDrawTool.Explode(o)
+                        .Cast<Entity>()
+                        .Where(p => p is Line || p is Polyline)
+                        .ForEach(p => objs.Add(p));
+                });
 
-                    var originIds = new ObjectIdList();
-                    objs.Cast<Entity>().ForEach(o =>
-                    {
-                        o.ColorIndex = 4;
-                        o.SetDatabaseDefaults();
-                        originIds.Add(acadDatabase.ModelSpace.Add(o));
-                    });
-                    if (originIds.Count > 0)
-                    {
-                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), originIds);
-                    }
-
-
-                    var breakService = new ThBreakDrainageFacilityService();
-                    breakService.Break(objs);
-
-                    var drainageWellIds = new ObjectIdList();
-                    breakService.CollectingWells.ForEach(o =>
-                    {
-                        o.ColorIndex = 5;
-                        o.SetDatabaseDefaults();
-                        drainageWellIds.Add(acadDatabase.ModelSpace.Add(o));
-                    });
-                    if (drainageWellIds.Count > 0)
-                    {
-                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageWellIds);
-                    }
-
-                    var drainageDitchIds = new ObjectIdList();
-                    breakService.DrainageDitches.ForEach(o =>
-                    {
-                        o.ColorIndex = 6;
-                        o.SetDatabaseDefaults();
-                        drainageDitchIds.Add(acadDatabase.ModelSpace.Add(o));
-                    });
-                    if (drainageDitchIds.Count > 0)
-                    {
-                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageDitchIds);
-                    }
-                }
+                var breakService = new ThBreakDrainageFacilityService();
+                breakService.Break(objs);
+                breakService.DrainageDitches.CreateGroup(acadDb.Database, 1);
+                breakService.CollectingWells.CreateGroup(acadDb.Database, 2);
             }
         }
 
