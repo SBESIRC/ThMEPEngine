@@ -9,13 +9,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThConcaveBuilder
+    public class ThMEPConcaveBuilder
     {
         private const double Point3dTolerance = 1.0;
         private DBObjectCollection Elements { get; set; }
         private double TesslateLength { get; set; }
         private double Hershold { get; set; }
-        public ThConcaveBuilder(DBObjectCollection objs, double hershold)
+        public ThMEPConcaveBuilder(DBObjectCollection objs, double hershold)
         {
             Elements = objs;
             Hershold = hershold;
