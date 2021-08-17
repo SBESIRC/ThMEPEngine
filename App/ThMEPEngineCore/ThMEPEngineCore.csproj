@@ -596,6 +596,7 @@
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
     <Compile Include="ThMEPEngineCoreLayerUtils.cs" />
     <Compile Include="ThMEPEngineCoreRoomCmds.cs" />
+    <Compile Include="ThMEPEngineCoreRoomService.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
   </ItemGroup>

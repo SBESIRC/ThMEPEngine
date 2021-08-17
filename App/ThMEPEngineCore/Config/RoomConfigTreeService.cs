@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
-using System.Text;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Config
 {
@@ -125,7 +122,7 @@ namespace ThMEPEngineCore.Config
             foreach (var treeNode in roomTree)
             {
                 var thisNode = treeNode;
-                if(thisNode.nodeName == roomName)
+                if(thisNode.nodeName == roomName || CompareRoom(thisNode.synonym,roomName))
                 {
                     if (thisNode.tags.Contains(publicRoom))
                     {
@@ -193,6 +190,42 @@ namespace ThMEPEngineCore.Config
                 return Regex.IsMatch(roomB, str);
             }
 
+            return false;
+        }
+
+        /// <summary>
+        /// 判断一个字符串数组中是否包括指定房间名
+        /// </summary>
+        /// <param name="roomList"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        public static bool CompareRoom(List<string> roomList, string room)
+        {
+            foreach(var roomTidal in roomList)
+            {
+                if (roomTidal == room)
+                {
+                    return true;
+                }
+
+                if (roomTidal.Contains("*"))
+                {
+                    string str = roomTidal;
+                    if (roomTidal[0] != '*')
+                    {
+                        str = '^' + str;
+                    }
+                    if (roomTidal[roomTidal.Length - 1] != '*')
+                    {
+                        str = str + '$';
+                    }
+                    str = str.Replace("*", ".*");
+                    if (Regex.IsMatch(room, str)) 
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
