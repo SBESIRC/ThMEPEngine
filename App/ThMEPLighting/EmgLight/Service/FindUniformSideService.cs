@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using Linq2Acad;
+using ThCADExtension;
+using ThCADCore.NTS;
 using ThMEPLighting.EmgLight.Model;
 
 namespace ThMEPLighting.EmgLight.Service
@@ -135,5 +140,72 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
+        //public static int sideHasEvac(LayoutService layoutServer, Dictionary<BlockReference, BlockReference> evac, out Dictionary<BlockReference, BlockReference> evacInLane)
+        //{
+        //    int side = -1;
+        //    double TolBuffer = 1000;
+        //    evacInLane = new Dictionary<BlockReference, BlockReference>();
+
+        //    if (evac.Count > 0)
+        //    {
+        //        var side0Struc = layoutServer.UsefulStruct[0].Select(x => x.centerPt);
+        //        var side1Struc = layoutServer.UsefulStruct[1].Select(x => x.centerPt);
+
+        //        var evacInSide0 = evac.Where(x => side0Struc.Where(s => s.DistanceTo(x.Value.Position) <= TolBuffer).Count() > 0).ToDictionary(x => x.Key, x => x.Value);
+        //        var evacInSide1 = evac.Where(x => side1Struc.Where(s => s.DistanceTo(x.Value.Position) <= TolBuffer).Count() > 0).ToDictionary(x => x.Key, x => x.Value);
+
+        //        if (evacInSide0.Count > 0 || evacInSide1.Count > 0)
+        //        {
+        //            if (evacInSide0.Count >= evacInSide1.Count )
+        //            {
+        //                side = 0;
+        //                evacInLane = evacInSide0;
+        //            }
+        //            else
+        //            {
+        //                side = 1;
+        //                evacInLane = evacInSide1;
+        //            }
+        //        }
+        //    }
+
+        //    return side;
+        //}
+
+        public static int sideHasEvac(LayoutService layoutServer, Dictionary<BlockReference, BlockReference> evac, out Dictionary<Point3d, Point3d> evacInLane)
+        {
+            int side = -1;
+            double TolYBuffer = 6000;
+            evacInLane = new Dictionary<Point3d, Point3d>();
+
+            if (evac.Count > 0)
+            {
+                var evacToLaneDict = evac.ToDictionary(x => x.Value.Position, x => layoutServer.thLane.TransformPointToLine(x.Value.Position));
+
+                var evacPtInSide0 = evacToLaneDict.Where(x => 0 <= x.Value.Y && x.Value.Y <= TolYBuffer &&
+                                                            0 <= x.Value.X && x.Value.X <= layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[0].Last()).X)
+                                                            .ToDictionary (x=>x.Key ,x=>x.Value );
+
+                var evacPtInSide1 = evacToLaneDict.Where(x => -TolYBuffer <= x.Value.Y && x.Value.Y <= 0 &&
+                                                            0 <= x.Value.X && x.Value.X <= layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[1].Last()).X)
+                                                            .ToDictionary(x => x.Key, x => x.Value);
+
+                if (evacPtInSide0.Count > 0 || evacPtInSide1.Count > 0)
+                {
+                    if (evacPtInSide0.Count >= evacPtInSide1.Count)
+                    {
+                        side = 0;
+                        evacInLane = evacPtInSide0;
+                    }
+                    else
+                    {
+                        side = 1;
+                        evacInLane = evacPtInSide1;
+                    }
+                }
+            }
+
+            return side;
+        }
     }
 }

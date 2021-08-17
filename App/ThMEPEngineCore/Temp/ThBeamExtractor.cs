@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -38,7 +39,15 @@ namespace ThMEPEngineCore.Temp
                 Beams = service.Polys;
             }
             Beams.ForEach(o => o.Closed = true);
-            Beams = Beams.Select(o => ThTesslateService.Tesslate(o, TesslateLength) as Polyline).ToList();
+
+            var simplifer = new ThElementSimplifier()
+            {
+                TESSELLATE_ARC_LENGTH = TesslateLength,
+            };
+            var objs = simplifer.Tessellate(Beams.ToCollection());
+            objs = simplifer.MakeValid(Beams.ToCollection());
+            objs = simplifer.Simplify(objs);
+           Beams = objs.Cast<Polyline>().Select(o => ThTesslateService.Tesslate(o, TesslateLength) as Polyline).ToList();
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -47,10 +56,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if(GroupSwitch)
-                {
-                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
-                }
+                geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

@@ -206,5 +206,23 @@ namespace ThMEPElectrical.StructureHandleService
 
             return null;
         }
+
+        /// <summary>
+        /// 获取防火分区
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public List<Entity> GetFireFrame(Polyline polyline)
+        {
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                var builder = new ThFireCompartmentBuilder()
+                {
+                    LayerFilter = new List<string>() { "AI-防火分区" },
+                };
+                var compartments = builder.BuildFromMS(db.Database, polyline.Vertices());
+                return compartments.Select(x => x.Boundary).ToList();
+            }
+        }
     }
 }

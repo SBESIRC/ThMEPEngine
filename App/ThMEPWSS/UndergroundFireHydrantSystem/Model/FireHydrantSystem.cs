@@ -5,17 +5,13 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
-    class FireHydrantSystemOut
+    public class FireHydrantSystemOut
     {
         public Dictionary<Point3dEx, Point3dEx> BranchDrawDic { get; set; }
         public List<Line> LoopLine { get; set; }
@@ -29,6 +25,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
+        public Dictionary<Point3dEx, DBText> ExtraTextDic { get; set; }
 
         public FireHydrantSystemOut()
         {
@@ -45,6 +42,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var opt = new PromptPointOptions("指定消火栓系统图插入点: \n");
             InsertPoint = Active.Editor.GetPoint(opt).Value;
             DNList = new List<DBText>();
+            ExtraTextDic = new Dictionary<Point3dEx, DBText>();
         }
 
         public void Draw()
@@ -52,7 +50,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             using ( var acadDatabase = AcadDatabase.Active())
             {
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
-                //ThMEPWSS.Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
                 foreach (var line in LoopLine)
                 {
                     line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
@@ -68,7 +65,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 {
                     acadDatabase.CurrentSpace.Add(line);
                 }
-            
 
                 foreach(var pipeInt in PipeInterrupted.Keys)
                 {
@@ -108,37 +104,39 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         }
     }
 
-    class FireHydrantSystemIn
+    public class FireHydrantSystemIn
     {
-        public List<List<Line>> markLineList { get; set; }
-        public List<List<Point3dEx>> nodeList { get; set; }
-        public Dictionary<Point3dEx, double> angleList { get; set; }
-        public Dictionary<Point3dEx, string> markList { get; set; }
-        public Dictionary<Point3dEx, string> ptTypeDic { get; set; }
-        public List<Point3dEx> hydrantPosition { get; set; }
-        public Dictionary<Point3dEx, TermPoint> termPointDic { get; set; }
-        public Dictionary<Point3dEx, List<Point3dEx>> ptDic { get; set; }
-        public Dictionary<Line, List<Line>> leadLineDic { get; set; }
-        public Dictionary<LineSegEx, string> ptDNDic { get; set; }
+        public List<List<Line>> MarkLineList { get; set; }
+        public List<List<Point3dEx>> NodeList { get; set; }
+        public Dictionary<Point3dEx, double> AngleList { get; set; }
+        public Dictionary<Point3dEx, string> MarkList { get; set; }
+        public Dictionary<Point3dEx, string> PtTypeDic { get; set; }
+        public List<Point3dEx> HydrantPosition { get; set; }
+        public Dictionary<Point3dEx, TermPoint> TermPointDic { get; set; }
+        public Dictionary<Point3dEx, List<Point3dEx>> PtDic { get; set; }
+        public Dictionary<Line, List<Line>> LeadLineDic { get; set; }
+        public Dictionary<LineSegEx, string> PtDNDic { get; set; }
         public Dictionary<Point3dEx, string> SlashDic { get; set; }
-        public double textWidth { get; set; }
-        public double pipeWidth { get; set; }
+        public double TextWidth { get; set; }
+        public double PipeWidth { get; set; }
         public bool ValveIsBkReference { get; set; }
         public List<Point3d> GateValves { get; set; }
+        public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public FireHydrantSystemIn()
         {
-            markLineList = new List<List<Line>>();//环管标记所在直线
-            nodeList = new List<List<Point3dEx>>();//次环节点
-            angleList = new Dictionary<Point3dEx, double>();//次环节点角度
-            markList = new Dictionary<Point3dEx, string>();//次环节点名称
-            ptTypeDic = new Dictionary<Point3dEx, string>();//当前点的类型字典对
-            hydrantPosition = new List<Point3dEx>(); //消火栓端点
-            termPointDic = new Dictionary<Point3dEx, TermPoint>();//端点字典对
-            ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//当前点和邻接点字典对
-            leadLineDic = new Dictionary<Line, List<Line>>();//引线和邻接线字典对
-            ptDNDic = new Dictionary<LineSegEx, string>();//当前点的DN字典对
+            MarkLineList = new List<List<Line>>();//环管标记所在直线
+            NodeList = new List<List<Point3dEx>>();//次环节点
+            AngleList = new Dictionary<Point3dEx, double>();//次环节点角度
+            MarkList = new Dictionary<Point3dEx, string>();//次环节点名称
+            PtTypeDic = new Dictionary<Point3dEx, string>();//当前点的类型字典对
+            HydrantPosition = new List<Point3dEx>(); //消火栓端点
+            TermPointDic = new Dictionary<Point3dEx, TermPoint>();//端点字典对
+            PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//当前点和邻接点字典对
+            LeadLineDic = new Dictionary<Line, List<Line>>();//引线和邻接线字典对
+            PtDNDic = new Dictionary<LineSegEx, string>();//当前点的DN字典对
             SlashDic = new Dictionary<Point3dEx, string>();//斜点的DN字典对
             GateValves = new List<Point3d>(); //闸阀中点位置
+            TermDnDic = new Dictionary<Point3dEx, string>();//端点的标注
         }
     }
 }

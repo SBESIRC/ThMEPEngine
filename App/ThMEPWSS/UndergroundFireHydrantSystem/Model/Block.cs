@@ -1,12 +1,4 @@
-﻿using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
-
-namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
+﻿namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
     class Block
     {
@@ -29,42 +21,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             public const string LoopMark = "消火栓环管标记";
             public const string LoopNodeMark = "消火栓环管节点标记";
             public const string FireHydrant = "室内消火栓系统";
-        }
-
-
-        public class WaterSuplyUtils
-        {
-            public static string WaterSuplyBlockFilePath
-            {
-                get
-                {
-                    return ThCADCommon.WSSDwgPath();
-                }
-            }
-            //加载需要使用的模块
-            public static void ImportNecessaryBlocks()
-            {
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
-                using (AcadDatabase blockDb = AcadDatabase.Open(WaterSuplyBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
-                {
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.CheckValve));//截止阀
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.AutoExhaustValve));//自动排气阀系统1
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PressureReducingValve));//减压阀
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.VacuumBreaker));//真空破坏器
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterMeter));//水表1
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterPipeInterrupted));//水管中断
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterTap));//水龙头
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Elevation));//标高
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PipeDiameter));//给水管经100
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PRValveDetail));//减压阀详图
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Casing));//套管系统
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.ButterflyValve));//蝶阀
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.GateValve));//闸阀
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopMark));//
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopNodeMark));//
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FireHydrant));//
-                }
-            }
         }
     }
 }

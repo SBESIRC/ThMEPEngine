@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThEStoreyExtractor : ThExtractorBase, IPrint
     {
-        public List<ThEStoreyInfo> Storeys { get; protected set; }        
+        public List<ThEStoreyInfo> Storeys { get; set; }        
         public ThEStoreyExtractor()
         {
             UseDb3Engine = true;
@@ -31,11 +31,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
             var engine = new ThEStoreysRecognitionEngine();
             engine.Recognize(database, pts);
             Storeys = engine.Elements.Cast<ThEStoreys>().Select(o => new ThEStoreyInfo(o)).ToList();
-            Storeys.ForEach(o =>
+            for(int i = 0; i < Storeys.Count; i++)
             {
-                var curve = ThTesslateService.Tesslate(o.Boundary, TesslateLength);
-                o.Boundary = curve as Polyline;
-            });
+                var curve = ThTesslateService.Tesslate(Storeys[i].Boundary, TesslateLength);
+                Storeys[i].Boundary = curve as Polyline;
+            }
         }
         public override List<ThGeometry> BuildGeometries()
         {

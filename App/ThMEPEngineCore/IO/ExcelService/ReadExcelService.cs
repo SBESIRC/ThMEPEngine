@@ -217,6 +217,7 @@ namespace ThMEPEngineCore.IO.ExcelService
             {
                 workbook.Write(ms);
                 ms.Flush();
+                workbook.Close();
                 return ms;
             }
         }

@@ -9,8 +9,6 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -19,9 +17,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     public static class CreateClearEmgLamp
     {
-        private static double scaleNum = 100;
-        public static double XWidth = 500;
-        public static double YWidth = 250;
         static List<string> lampBlockNames = new List<string>()
             {
                 ThMEPLightingCommon.PILOTLAMP_WALL_TWOWAY_SINGLESIDE,
@@ -31,7 +26,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_SINGLESIDE,
                 ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE
             };
-        public static ObjectId CreatePilotLamp(this Database database, Point3d pt, Vector3d layoutDir,string blockName,bool isHosting, Dictionary<string, string> attNameValues) 
+        public static ObjectId CreatePilotLamp(this Database database, Point3d pt, Vector3d layoutDir,string blockName,bool isHosting, Dictionary<string, string> attNameValues,double scaleNum) 
         {
             double rotateAngle = Vector3d.XAxis.GetAngleTo(layoutDir);
             //控制旋转角度

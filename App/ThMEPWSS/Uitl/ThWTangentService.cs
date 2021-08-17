@@ -1,4 +1,4 @@
-﻿using ThCADExtension;
+﻿using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Uitl
@@ -16,11 +16,9 @@ namespace ThMEPWSS.Uitl
         public static ThWTangentService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        public bool IsSprinkler(Entity obj)
+        public bool IsSprinkler(Entity e)
         {
-            var dxfName = obj.GetRXClass().DxfName;
-            return dxfName == ThCADCommon.DxfName_TCH_EQUIPMENT_16 ||
-                dxfName == ThCADCommon.DxfName_TCH_EQUIPMENT_12;
+            return ThMEPTCHService.IsTCHSprinkler(e);
         }
     }
 }

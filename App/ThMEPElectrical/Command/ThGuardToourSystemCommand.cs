@@ -15,6 +15,7 @@ using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService;
 using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
@@ -131,7 +132,7 @@ namespace ThMEPElectrical.Command
                     dir = new Vector3d(dir.X, -dir.Y, 0);
                 }
                 double rotateAngle = Vector3d.YAxis.GetAngleTo(dir, Vector3d.ZAxis);
-                InsertBlockService.InsertBlock(ThMEPCommon.GT_LAYER_NAME, ThMEPCommon.TIMERECORDER_BLOCK_NAME, pt, rotateAngle, 100);
+                InsertBlockService.InsertBlock(ThMEPCommon.GT_LAYER_NAME, ThMEPCommon.TIMERECORDER_BLOCK_NAME, pt, rotateAngle, ThElectricalUIService.Instance.Parameter.scale);
             }
         }
     }

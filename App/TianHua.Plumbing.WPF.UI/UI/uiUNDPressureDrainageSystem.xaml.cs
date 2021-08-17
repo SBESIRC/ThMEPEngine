@@ -22,27 +22,31 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel = new PressureDrainageSystemDiagramVieModel();
             this.DataContext = viewModel;
         }
-        private void PDSSet_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 楼层线间距参数设置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SetParameter_Click(object sender, RoutedEventArgs e)
         {
-            if (null == viewModel)
-            {
-                MessageBox.Show("数据错误：获取选中住户分区失败，无法进行后续操作");
-                return;
-            }
             var systemSet = new uiUNDPDrainageSystemSet(viewModel);
             var ret = systemSet.ShowDialog();
-            if (ret == false)
-            {
-                //用户取消了操作
-                return;
-            }
-            //用户确认，进行后续的业务逻辑
-            //step1 保存用户的输入信息
+            if (ret == false) return;
         }
+        /// <summary>
+        /// 楼层框定
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PDSSelectFloor_Click(object sender, RoutedEventArgs e)
         {
             viewModel.CreateFloorFraming();
         }
+        /// <summary>
+        /// 读取楼层信息
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PDSReadStoreys_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -51,7 +55,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             catch { }
         }
-        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 生成系统图
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GenerateDiagramButton_Click(object sender, RoutedEventArgs e)
         {
             using (var cmd = new ThUNDPDrainageSystemDiagramCmd(viewModel))
             {
@@ -64,7 +73,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 var ret = infoCheck.ShowDialog();
                 if (ret == false)
                 {
-                    //用户取消了操作
                     return;
                 }
                 Point3d insertPt = new Point3d();
@@ -81,13 +89,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (uiUNDPDrainageSystemInfoCheck.viewmodel.HasInfoTablesRoRead)
                 {
                     viewModel.HasInfoTablesRoRead = true;
+                    viewModel.InfoRegion = uiUNDPDrainageSystemInfoCheck.viewmodel.InfoRegion;
                 }
-
-                cmd.Execute();
+                viewModel.PreGenerateDiagram(cmd);
             }
         }
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
         }
     }
 }

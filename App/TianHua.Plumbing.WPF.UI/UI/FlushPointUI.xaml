@@ -9,7 +9,7 @@
              xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d" 
-             Width="180" Height="525" MinWidth="180" MinHeight="525" Title="冲洗点位" ResizeMode="NoResize">
+             Width="180" Height="540" MinWidth="180" MinHeight="550" Title="冲洗点位" ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <converters:ArrangePositionBooleanConverter x:Key="apConverter"/>
@@ -84,6 +84,7 @@
             <RowDefinition Height="120"></RowDefinition>
             <RowDefinition Height="90"></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition Height="20"></RowDefinition>
             <RowDefinition Height="60"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -216,7 +217,13 @@
         </StackPanel>
         <Line Grid.Row="6" Grid.Column="0" X1="0" Y1="0" X2="200" Y2="0" StrokeDashArray="6"
               Stroke="Gray"  StrokeThickness="2" VerticalAlignment="Center"></Line>
-        <StackPanel Grid.Row="7" VerticalAlignment="Center">
+        <StackPanel Grid.Row="7" Orientation="Vertical">
+            <CheckBox Name="chkLayoutOnColumn" Content="仅布置在孤立柱上" Width="120"
+                      Style="{StaticResource CheckBoxTextStyle}" IsThreeState="False"
+                      IsChecked="{Binding Parameter.OnlyLayoutOnColumn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            </CheckBox>
+        </StackPanel>
+        <StackPanel Grid.Row="8" VerticalAlignment="Center">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"></RowDefinition>

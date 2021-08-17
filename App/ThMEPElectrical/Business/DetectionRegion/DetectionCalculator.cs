@@ -77,11 +77,19 @@ namespace ThMEPElectrical.Business
             {
                 if (item is Polyline polyline)
                 {
+                    if (polyline.Area < 100) 
+                    {
+                        continue;
+                    }
                     detectionPolygons.Add(new DetectionPolygon(polyline));
                     drawCurves.Add(polyline);
                 }
                 else if (item is MPolygon mPolygon)
                 {
+                    if (mPolygon.Area < 100) 
+                    {
+                        continue;
+                    }
                     detectionPolygons.Add(GeomUtils.MPolygon2PolygonInfo(mPolygon));
                     drawCurves.Add(mPolygon);
                 }

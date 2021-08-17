@@ -63,6 +63,9 @@
     <Compile Include="FireProtectionSystemDiagram\Models\FloorDataModel.cs" />
     <Compile Include="FireProtectionSystemDiagram\Models\LineElementCreate.cs" />
     <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
+    <Compile Include="FlushPoint\Data\ThFpArchitectureExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThFpColumnExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThFpShearwallExtractor.cs" />
     <Compile Include="FlushPoint\Service\ThAdjustWashPointPositionService.cs" />
     <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
@@ -377,7 +380,7 @@
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageSystemDiagram.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataReader.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageSystemDiagramService.cs" />
-    <Compile Include="PressureDrainageSystem\Service\ImportBlockReferenceService.cs" />
+    <Compile Include="PressureDrainageSystem\Service\ImportService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PipeLineSystemUnitConstructionService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataClassifyByStoriesService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageDataCollectionService.cs" />
@@ -401,6 +404,10 @@
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="Command\ThFireHydrantCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\General.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\LoopLine.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\Parallel.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\TextGet.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Method\ValveGet.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\Block.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystem.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\PipeLine.cs" />
@@ -408,10 +415,8 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\TermPoint.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\BlockInsert.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Dist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\MarkLine.cs" />
@@ -421,9 +426,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\PointAngle.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtDic.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtSet.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\Rects.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Sort.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Service\PolyLineSplit.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtInPtList.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\PtOnLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThExtractHYDTPipeService.cs" />
@@ -448,7 +451,6 @@
     <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
-    <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THJSXTT.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
@@ -457,7 +459,6 @@
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />
-    <Compile Include="Uitl\SystemDiagramUtils.cs" />
     <Compile Include="Uitl\ThWTangentService.cs" />
     <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>

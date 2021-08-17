@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Engine
 {

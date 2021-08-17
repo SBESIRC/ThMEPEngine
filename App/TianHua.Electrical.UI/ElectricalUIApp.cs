@@ -1,14 +1,12 @@
-﻿using AcHelper;
-using Linq2Acad;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
+﻿using Linq2Acad;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using TianHua.Electrical.UI.CapitalConverter;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI
 {
@@ -40,11 +38,13 @@ namespace TianHua.Electrical.UI
                     LayoutType = LayoutType,
                     AreaLayout = AreaLayout,
                     RoofThickness = Parameter.RoofThickness,
+                    BlockScale = Parameter.BlockScale,
                 };
                 SmokeLayoutUI.InitForm(_SmokeLayoutDataModel);
             }
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
         }
+
         [CommandMethod("TIANHUACAD", "THTZZH", CommandFlags.Modal)]
         public void THTZZH()
         {
@@ -62,7 +62,7 @@ namespace TianHua.Electrical.UI
                 {
                     Scale = uiCapitalConverter.Parameter.BlkScaleValue,
                 };
-                if(uiCapitalConverter.Parameter.HavcOps &&
+                if (uiCapitalConverter.Parameter.HavcOps &&
                     uiCapitalConverter.Parameter.WssOps)
                 {
                     cmd.Category = ConvertCategory.ALL;
@@ -110,6 +110,13 @@ namespace TianHua.Electrical.UI
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
+        }
+
+        [CommandMethod("TIANHUACAD", "THLTSBBZ", CommandFlags.Modal)]
+        public void THLTSBBZ()
+        {
+            var cmd = new ThStairCommand();
+            cmd.Execute();
         }
 
         private string LayoutType

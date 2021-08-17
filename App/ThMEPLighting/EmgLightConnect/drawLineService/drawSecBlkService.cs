@@ -31,7 +31,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     if ((side.reSecBlk.Contains(ptL.Item1) && side.getTotalBlock().Contains(ptL.Item2)) || (side.reSecBlk.Contains(ptL.Item2) && side.getTotalBlock().Contains(ptL.Item1)))
                     {
                         var linkTemp = linkSecToMain(ptL, blkList, out var blkS, out var blkE);
-                        var link = drawEmgPipeService. CorrectConflictFrame(frame, linkTemp, blkS, blkE, holes);
+                        var link = drawEmgPipeService.CorrectConflictFrame(frame, linkTemp, blkS, blkE, holes);
                         connList.Add(link);
                     }
                 }
@@ -95,7 +95,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-       
+
 
 
     }

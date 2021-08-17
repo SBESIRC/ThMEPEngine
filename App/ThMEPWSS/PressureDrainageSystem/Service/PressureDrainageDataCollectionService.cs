@@ -9,17 +9,18 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.CADExtensionsNs;
+using ThMEPWSS.Common;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using ThMEPWSS.PressureDrainageSystem.Utils;
 using ThMEPWSS.Uitl;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
-using ThMEPWSS.Common;
+
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class PressureDrainageDataCollectionService
@@ -44,7 +45,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             GenerateNecessaryVerticalPipe();
             if (viewmodel.HasInfoTablesRoRead)
             {
-                this.CollectInfoTables();
+                this.CollectInfoTables(viewmodel);
             }
         }
         /// <summary>
@@ -110,6 +111,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     Line line = new Line(e.StartPoint.ToPoint2d().ToPoint3d(), e.EndPoint.ToPoint2d().ToPoint3d());
                     this.CollectedData.LabelLines.Add(line);
                 }
+                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-FRPT-NOTE") && IsTianZhengElement(e)))
+                {
+                    foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Line>())
+                    {
+                        Line line = new Line(e.StartPoint.ToPoint2d().ToPoint3d(), e.EndPoint.ToPoint2d().ToPoint3d());
+                        this.CollectedData.LabelLines.Add(line);
+                    }
+                }
             }
         }
         /// <summary>
@@ -134,7 +143,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         this.CollectedData.Labels.Add(dBText);
                     }
                 }
-                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS") && PressureDrainageUtils.IsTianZhengElement(e)))
+                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS") && IsTianZhengElement(e)))
                 {
                     foreach (var e in entity.ExplodeToDBObjectCollection().OfType<DBText>())
                     {
@@ -364,30 +373,40 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.HorizontalPipes = new List<Line>();
                 foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE"))))
                 {
+                    var layer = e.Layer;
                     if (e is Line line && line.Length > 0)
                     {
-                        this.CollectedData.HorizontalPipes.Add(new Line(line.StartPoint.ToPoint2d().ToPoint3d(), line.EndPoint.ToPoint2d().ToPoint3d()));
+                        var li = new Line(line.StartPoint.ToPoint2d().ToPoint3d(), line.EndPoint.ToPoint2d().ToPoint3d());
+                        li.Layer = layer;
+                        this.CollectedData.HorizontalPipes.Add(li);
                     }
                     else if (PressureDrainageUtils.IsTianZhengElement(e) && PressureDrainageUtils.TryConvertToLineSegment(e, out Line convertedLine) && convertedLine.Length > 0)
                     {
                         var explodedLine = e.ExplodeToDBObjectCollection().OfType<Line>().Where(k => k.Length > 0).ToList();
                         if (explodedLine.Count == 1)
                         {
-                            this.CollectedData.HorizontalPipes.Add(new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d()));
+                            var li = (new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d()));
+                            li.Layer = layer;
+                            this.CollectedData.HorizontalPipes.Add(li);
                         }
                         else if (explodedLine.Count > 1)
                         {
-                            this.CollectedData.HorizontalPipes.Add(new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d()));
+                            var li = new Line(explodedLine[0].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[0].EndPoint.ToPoint2d().ToPoint3d());
+                            li.Layer = layer;
+                            this.CollectedData.HorizontalPipes.Add(li);
                             Point3d pt1 = default, pt2 = default;
                             var tmpLineList = new List<Line>();
                             for (int i = 1; i < explodedLine.Count; i++)
                             {
-                                this.CollectedData.HorizontalPipes.Add(new Line(explodedLine[i].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[i].EndPoint.ToPoint2d().ToPoint3d()));
+                                var p = new Line(explodedLine[i].StartPoint.ToPoint2d().ToPoint3d(), explodedLine[i].EndPoint.ToPoint2d().ToPoint3d());
+                                p.Layer = layer;
+                                this.CollectedData.HorizontalPipes.Add(p);
                                 pt1 = explodedLine[i - 1].EndPoint.ToPoint2d().ToPoint3d();
                                 pt2 = explodedLine[i].StartPoint.ToPoint2d().ToPoint3d();
                                 var tmpLine = new Line(pt1, pt2);
                                 if (tmpLine.Length > 0)
                                 {
+                                    tmpLine.Layer = layer;
                                     tmpLineList.Add(tmpLine);
                                 }
                             }
@@ -398,6 +417,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 foreach (var e in Entities.OfType<Entity>().Where(e => ((e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE")))
                      && PressureDrainageUtils.IsTianZhengElement(e)).Where(e => e.ExplodeToDBObjectCollection().OfType<Polyline>().Any()))
                 {
+                    var layer = e.Layer;
                     var plys = e.ExplodeToDBObjectCollection().OfType<Polyline>();
                     foreach (var ply in plys)
                     {
@@ -405,6 +425,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         for (int i = 1; i < vertices.Count; i++)
                         {
                             Line lin = new Line(vertices[i - 1], vertices[i]);
+                            lin.Layer = layer;
                             this.CollectedData.HorizontalPipes.Add(lin);
                         }
                     }
@@ -429,56 +450,100 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         public void GenerateNecessaryVerticalPipe()
         {
-            foreach (var j in this.CollectedData.SubmergedPumps)
+            using (AcadDatabase adb = AcadDatabase.Active())
             {
-                int dd = 0;
-                foreach (var k in this.CollectedData.VerticalPipes)
+                foreach (var j in this.CollectedData.SubmergedPumps)
                 {
-                    if (j.Extents.GetCenter().DistanceTo(k.Center) < 2000)
+                    int dd = 0;
+                    foreach (var k in this.CollectedData.VerticalPipes)
                     {
-                        dd = 1;
-                        break;
+                        if (j.Extents.ToRectangle().GetClosePoint(k.Center).DistanceTo(k.Center) < 300 || j.Extents.IsPointIn(k.Center))
+                        {
+                            dd = 1;
+                            break;
+                        }
+                    }
+                    if (dd == 0)
+                    {
+                        double toldis = 50;
+                        Point3d ptlocPipe = j.Extents.CenterPoint();
+                        foreach (var lin in this.CollectedData.HorizontalPipes)
+                        {
+                            if (j.Extents.IsPointIn(lin.StartPoint) || j.Extents.ToRectangle().GetClosePoint(lin.StartPoint).DistanceTo(lin.StartPoint) < toldis)
+                            {
+                                ptlocPipe = lin.StartPoint;
+                                break;
+                            }
+                            else if (j.Extents.IsPointIn(lin.EndPoint) || j.Extents.ToRectangle().GetClosePoint(lin.EndPoint).DistanceTo(lin.EndPoint) < toldis)
+                            {
+                                ptlocPipe = lin.EndPoint;
+                                break;
+                            }
+                        }
+                        Circle ci = new Circle(ptlocPipe, Vector3d.ZAxis, 50);
+                        ci.Layer = "W-DRAI-EQPM";
+
+                        double mindis = double.PositiveInfinity;
+                        int index = -1;
+                        for (int i = 0; i < this.CollectedData.HorizontalPipes.Count; i++)
+                        {
+                            double curdis = this.CollectedData.HorizontalPipes[i].GetClosestPointTo(ci.Center, false).DistanceTo(ci.Center);
+                            if (curdis < mindis)
+                            {
+                                mindis = curdis;
+                                index = i;
+                            }
+                        }
+                        Line line = new Line(this.CollectedData.HorizontalPipes[index].GetClosestPointTo(ci.Center, false), ci.Center);
+                        if (line.Length > 0)
+                        {
+                            this.CollectedData.HorizontalPipes.Add(line);
+                        }
+                        adb.Database.CreateAILayer("AdditonPipe",(short)0);
+                        ci.Layer = "AdditonPipe";
+                        this.CollectedData.VerticalPipes.Add(ci);
                     }
                 }
-                if (dd == 0)
-                {
-                    Circle ci = new Circle(j.Extents.CenterPoint(), Vector3d.ZAxis, 50);
-                    ci.Layer = "W-DRAI-EQPM";
-                    this.CollectedData.VerticalPipes.Add(ci);
-                }
             }
+           
         }
         /// <summary>
         /// 收集提资表数据
         /// </summary>
-        public void CollectInfoTables()
+        public void CollectInfoTables(PressureDrainageSystemDiagramVieModel viewmodel)
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 foreach (var br in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName().Contains("集水井提资表表身")))
                 {
-                    foreach (var pump in this.CollectedData.SubmergedPumps)
+                    if (viewmodel.InfoRegion.IsPointIn(br.Bounds.Value.CenterPoint()))
                     {
-                        if (pump.Serial == br.GetAttributesStrValue("集水井编号"))
+                        foreach (var pump in this.CollectedData.SubmergedPumps)
                         {
-                            pump.Allocation = br.Id.GetDynBlockValue("水泵配置");
-                            pump.Location = br.GetAttributesStrValue("位置");
-                            double.TryParse(br.GetAttributesStrValue("流量"), out pump.paraQ);
-                            double.TryParse(br.GetAttributesStrValue("扬程"), out pump.paraH);
-                            double.TryParse(br.GetAttributesStrValue("电量"), out pump.paraN);
-                            double.TryParse(br.GetAttributesStrValue("电量"), out pump.Depth);
+                            if (pump.Serial == br.GetAttributesStrValue("集水井编号"))
+                            {
+                                pump.Allocation = br.Id.GetDynBlockValue("水泵配置");
+                                pump.Location = br.GetAttributesStrValue("位置");
+                                double.TryParse(br.GetAttributesStrValue("流量"), out pump.paraQ);
+                                double.TryParse(br.GetAttributesStrValue("扬程"), out pump.paraH);
+                                double.TryParse(br.GetAttributesStrValue("电量"), out pump.paraN);
+                                double.TryParse(br.GetAttributesStrValue("井深"), out pump.Depth);
+                            }
                         }
                     }
                 }
             }
         }
+        /// <summary>
+        /// 提取楼层框定定位点
+        /// </summary>
         public void CollectStoryFrame()
         {
-            var frames= FramedReadUtil.ReadAllFloorFramed();
+            var frames = FramedReadUtil.ReadAllFloorFramed();
             this.CollectedData.StoryFrameBasePt = new();
             foreach (var frame in frames)
             {
-                this.CollectedData.StoryFrameBasePt.Add(frame.datumPoint);
+                this.CollectedData.StoryFrameBasePt.Add(new Point3d(frame.datumPoint.X, frame.datumPoint.Y, 0));
             }
         }
     }

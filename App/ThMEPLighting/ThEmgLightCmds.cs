@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AcHelper;
-using Linq2Acad;
-using ThCADExtension;
+
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+
+using AcHelper;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Assistant;
@@ -22,8 +26,25 @@ namespace ThMEPLighting
 {
     public class ThEmgLightCmds
     {
-        [CommandMethod("TIANHUACAD", "THYJZM", CommandFlags.Modal)]
-        public void ThEmgLight()
+        [CommandMethod("TIANHUACAD", "THYJZMDC", CommandFlags.Modal)]
+        public void ThEmgLightSingle()
+        {
+            //单侧 singleside =1
+            //var singleSide = UISettingService.Instance.singleSide;
+            var singleSide = 1;
+            ThEmgLight(singleSide);
+        }
+
+        [CommandMethod("TIANHUACAD", "THYJZMSC", CommandFlags.Modal)]
+        public void ThEmgLightDouble()
+        {
+            //双侧 singleside =0
+            //var singleSide = UISettingService.Instance.singleSide;
+            var singleSide = 0;
+            ThEmgLight(singleSide);
+        }
+
+        private void ThEmgLight(int singleSide)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -45,6 +66,12 @@ namespace ThMEPLighting
                     return;
                 }
 
+                var scale = UISettingService.Instance.scale;
+                var blkType = UISettingService.Instance.blkType;
+
+
+                var blkName = blkType == 0 ? ThMEPLightingCommon.EmgLightBlockName : ThMEPLightingCommon.EmgLightDoubleBlockName;
+
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     //获取外包框
@@ -52,9 +79,13 @@ namespace ThMEPLighting
                     var frameClone = frame.WashClone() as Polyline;
                     var centerPt = frameClone.StartPoint;
 
+                    //debug
+                    //centerPt = new Point3d();
+
                     //处理外包框
                     var transformer = new ThMEPOriginTransformer(centerPt);
                     transformer.Transform(frameClone);
+                    frameClone.Closed = true;
                     var nFrame = ThMEPFrameService.NormalizeEx(frameClone);
                     if (nFrame.Area < 1)
                     {
@@ -62,49 +93,55 @@ namespace ThMEPLighting
                     }
 
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
-                    var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
-                    var shrinkFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
-                    DrawUtils.ShowGeometry(bufferFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
-                    DrawUtils.ShowGeometry(shrinkFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
+                    var bufferTransFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
+                    var shrinkTransFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
+                    var bufferFrame = bufferTransFrame.Clone() as Polyline;
+                    transformer.Reset(bufferFrame);
+                    DrawUtils.ShowGeometry(bufferFrame, EmgLightCommon.LayerFrame, 130, 35);
+                    DrawUtils.ShowGeometry(bufferTransFrame, EmgLightCommon.LayerFrame, 130, 35);
+                    DrawUtils.ShowGeometry(shrinkTransFrame, EmgLightCommon.LayerFrame, 130, 35);
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
 
                     //取块
                     var getBlockS = new GetBlockService();
-                    getBlockS.getBlocksData(bufferFrame, transformer);
-
+                    getBlockS.getBlocksData(bufferTransFrame, transformer);
+                    Dictionary<BlockReference, BlockReference> evacBlk = new Dictionary<BlockReference, BlockReference>();
+                    getBlockS.evacR.ForEach(x => evacBlk.Add(x.Key, x.Value));
+                    getBlockS.evacRL.ForEach(x => evacBlk.Add(x.Key, x.Value));
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
                     //RemoveBlockService.ClearEmergencyLight(block);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
-
-                    var b = false;
-                    if (b == true)
-                    {
-                        continue;
-                    }
+                    RemoveBlockService.ClearEmergencyLight(getBlockS.emgLightDouble);
 
                     //获取车道线
-                    var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
+                    var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkTransFrame, bufferTransFrame, acdb, transformer);
 
                     //获取建筑信息（柱和墙）
-                    GetSourceDataService.GetStructureInfo(acdb, bufferFrame, transformer, out List<Polyline> columns, out List<Polyline> walls);
+                    GetSourceDataService.GetStructureInfo(acdb, bufferFrame, bufferTransFrame, transformer, out List<Polyline> columns, out List<Polyline> walls);
 
                     //主车道布置信息
                     LayoutEmgLightEngine layoutEngine = new LayoutEmgLightEngine();
-                    var layoutInfo = layoutEngine.LayoutLight(bufferFrame, mergedOrderedLane, columns, walls);
+                    layoutEngine.frame = bufferTransFrame;
+                    layoutEngine.lanes = mergedOrderedLane;
+                    layoutEngine.columns = columns;
+                    layoutEngine.walls = walls;
+                    layoutEngine.evacBlk = evacBlk;
+                    layoutEngine.singleSide = singleSide;
+                    var layoutInfo = layoutEngine.LayoutLight();
 
                     //如果应急灯和疏散灯重合则移动应急灯
-                    layoutEngine.moveEmg(getBlockS, ref layoutInfo);
+                    layoutEngine.moveEmg(ref layoutInfo);
 
                     //换回布置
                     layoutEngine.ResetResult(ref layoutInfo, transformer);
 
                     //布置构建
-                    double scale = LayoutEmgLightEngine.getScale(getBlockS);
-                    InsertLightService.InsertSprayBlock(layoutInfo, scale);
+                    //double scale = LayoutEmgLightEngine.getScale(getBlockS);
+                    InsertLightService.InsertSprayBlock(layoutInfo, scale, blkName);
                 }
             }
         }
@@ -159,6 +196,8 @@ namespace ThMEPLighting
                 {
                     centerPt = new Point3d();
                 }
+                //debug
+                //centerPt = new Point3d();
                 var transformer = new ThMEPOriginTransformer(centerPt);
 
 

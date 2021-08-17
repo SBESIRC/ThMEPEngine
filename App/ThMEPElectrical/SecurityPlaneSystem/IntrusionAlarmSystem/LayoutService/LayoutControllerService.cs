@@ -5,27 +5,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
 {
     public class LayoutControllerService
     {
         double angle = 45;
-        double blockWidth = 300;
-        double blockLength = 500;
-        public ControllerModel LayoutController(List<Polyline> structs, Polyline door, Point3d doorPt, Vector3d doorDir)
+        double blockTol = 300;
+        double blockWidth = 3 * ThElectricalUIService.Instance.Parameter.scale;
+        double blockLength = 5 * ThElectricalUIService.Instance.Parameter.scale;
+        public ControllerModel LayoutController(List<Polyline> structs, Polyline room, Polyline door, Point3d doorPt, Vector3d doorDir)
         {
-            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, blockWidth, true).FirstOrDefault();
+            var layoutInfo = UtilService.CalLayoutInfo(structs, doorDir, doorPt, door, angle, blockTol, true)
+                .Where(x => room.Contains(x.Value) || room.Distance(x.Value) < 10).FirstOrDefault();
             var checkDir = doorDir;
             if (layoutInfo.Key == null)
             {
                 var crossDir = Vector3d.ZAxis.CrossProduct(doorDir);
-                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                layoutInfo = UtilService.CalLayoutInfo(structs, crossDir, doorPt, door, angle, blockTol)
+                    .Where(x => room.Contains(x.Value) || room.Distance(x.Value) < 10).FirstOrDefault();
                 if (layoutInfo.Key == null)
                 {
-                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, blockWidth * 2).FirstOrDefault();
+                    layoutInfo = UtilService.CalLayoutInfo(structs, -crossDir, doorPt, door, angle, blockTol)
+                        .Where(x => room.Contains(x.Value) || room.Distance(x.Value) < 10).FirstOrDefault();
                 }
                 checkDir = (doorPt - layoutInfo.Value).GetNormal();
             }

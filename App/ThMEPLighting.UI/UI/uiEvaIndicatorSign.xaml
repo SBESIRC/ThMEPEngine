@@ -66,6 +66,13 @@
                 </ComboBox>
                 <Label Content="m" VerticalContentAlignment="Bottom"  Focusable="False" />
             </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
+                <Label Content="指示灯图纸比例：" VerticalContentAlignment="Center"/>
+                <ComboBox Width="90" Height="22" 
+                          SelectedItem="{Binding BlockSacleSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding BlockScaleItems,Mode=OneWay,NotifyOnSourceUpdated=True}"/>
+            </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"  Focusable="False" ></Border>
             <Label Content="图层控制：" Margin="0,5,0,0" Focusable="False" ></Label>
             <CheckBox Margin="5,5,0,0" Content="显示疏散路径" IsTabStop="True"  Focusable="True" TabIndex="6" Name="checkFEIHide" Checked="checkFEIHide_Checked" Unchecked="checkFEIHide_Unchecked"></CheckBox>

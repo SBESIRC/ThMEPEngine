@@ -1,23 +1,24 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using System.Collections.Generic;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPElectrical.FireAlarm.Service;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using Dreambuild.AutoCAD;
 
 namespace FireAlarm.Data
 {
-    class ThFireApartExtractor : ThExtractorBase, IPrint, IGroup
+    class ThFireApartExtractor : ThExtractorBase, IPrint, IGroup,ITransformer
     {
         public List<Polyline> FireAparts { get; protected set; }
 
@@ -62,6 +63,10 @@ namespace FireAlarm.Data
                 ElementLayer = this.ElementLayer,
             };
             extractService.Extract(database, pts);
+
+            extractService.Polys.ForEach(o => Transformer.Transform(o));
+            FireAparts = extractService.Polys.ToList();
+
             // 如果楼层框线没有防火分区，就认为楼层框线是一个防火分区
             var spatialIndex = new ThCADCoreNTSSpatialIndex(FireAparts.ToCollection());
             StoreyInfos.ForEach(o =>
@@ -73,7 +78,7 @@ namespace FireAlarm.Data
                     FireAparts.Add(fireApartOutline);
                 }
             });
-            FireAparts = extractService.Polys
+            FireAparts = FireAparts
                 .Where(o => o.Area >= SmallAreaTolerance)
                 .Select(o => ThCleanEntityService.Tesslate(o))
                 .Cast<Polyline>()
@@ -119,5 +124,16 @@ namespace FireAlarm.Data
         {
             FireAparts.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
+
+        public void Transform()
+        {
+            Transformer.Transform(FireAparts.ToCollection());
+        }
+
+        public void Reset()
+        {
+            Transformer.Reset(FireAparts.ToCollection());
+        }
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
     }
 }

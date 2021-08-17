@@ -29,6 +29,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AFASRegion\AFASRegion.cs" />
+    <Compile Include="AFASRegion\Model\AFASBeamContour.cs" />
+    <Compile Include="AFASRegion\Model\AFASDetector.cs" />
+    <Compile Include="AFASRegion\AFASBeamExtendFactory.cs" />
+    <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
@@ -91,6 +96,7 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\TxtStrucInfoCommand.cs" />
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGroundGridCommand.cs" />
@@ -104,6 +110,7 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Command\ThSecurityPlaneSystemPipeCommand.cs" />
+    <Compile Include="Command\ThStairCommand.cs" />
     <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
@@ -122,6 +129,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFireAlarmDataSetFactory.cs" />
     <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
@@ -221,6 +229,7 @@
     <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\AccessControlConnectService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\ConnectPipeService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\IntrucsionAlarmConnectService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ACModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\IAModel.cs" />
@@ -249,6 +258,8 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
+    <Compile Include="Staircase\ThStairCommon.cs" />
+    <Compile Include="Staircase\ThStairEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />
@@ -335,6 +346,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="AFASRegion\Engion\" />
+    <Folder Include="AFASRegion\Service\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
     <Folder Include="FireAlarm\Model\" />

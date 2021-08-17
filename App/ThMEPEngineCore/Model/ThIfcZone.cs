@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
+namespace ThMEPEngineCore.Model
 {
-    class Dist
+    public class ThIfcZone : ThIfcSystem
     {
+        //
     }
 }

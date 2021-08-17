@@ -41,7 +41,7 @@ namespace ThMEPWSS.Command
                     }
 
                     //导入外部模块数据
-                    ImportBlockReferenceService blockImportService = new ImportBlockReferenceService();
+                    ImportService blockImportService = new ImportService();
                     blockImportService.Import();
 
                     //生成系统图           
@@ -50,7 +50,7 @@ namespace ThMEPWSS.Command
                     diagram.Draw(this.InsertPt);
 
                     sw.Stop();
-                    Active.Editor.WriteMessage("系统图绘制完成，用时" + sw.Elapsed.TotalSeconds.ToString("0.00") + "秒\n");
+                    Active.Editor.WriteMessage($"系统图绘制完成，用时{sw.Elapsed.TotalSeconds.ToString("0.00")}秒\n");
                 }
             }
             catch (Exception ex)

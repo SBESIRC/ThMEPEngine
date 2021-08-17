@@ -8,6 +8,7 @@ using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.Service
 {
@@ -16,6 +17,10 @@ namespace ThMEPEngineCore.Service
         public static List<DclInfo> Parse(string content)
         {
             var results = new List<DclInfo>();
+            if(!IsValid(content))
+            {
+                return results;
+            }
             var serializer = GeoJsonSerializer.Create();
             using (var stringReader = new StringReader(content))
             using (var jsonReader = new JsonTextReader(stringReader))
@@ -58,6 +63,13 @@ namespace ThMEPEngineCore.Service
                 });
             }
             return results;
+        }
+
+        private static bool IsValid(string content)
+        {
+            string pattern ="(\"" + "features"+"\")"+@"\s+[:]{1}\s+(null)";
+            var rg = new Regex(pattern);
+            return !rg.IsMatch(content);
         }
     }
     public class DclInfo

@@ -72,9 +72,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 var endPtEx = new Point3dEx(l.EndPoint);
 
                 //start
-                if (fireHydrantSysIn.ptDic.ContainsKey(startPtEx))
+                if (fireHydrantSysIn.PtDic.ContainsKey(startPtEx))
                 {
-                    var startPtNeighbors = fireHydrantSysIn.ptDic[startPtEx];
+                    var startPtNeighbors = fireHydrantSysIn.PtDic[startPtEx];
                     if (startPtNeighbors.Count == 1)
                     {
                         tmpLine.Add(l);
@@ -83,9 +83,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 }
 
                 //end
-                if (fireHydrantSysIn.ptDic.ContainsKey(endPtEx))
+                if (fireHydrantSysIn.PtDic.ContainsKey(endPtEx))
                 {
-                    var startPtNeighbors = fireHydrantSysIn.ptDic[endPtEx];
+                    var startPtNeighbors = fireHydrantSysIn.PtDic[endPtEx];
                     if (startPtNeighbors.Count == 1)
                     {
                         tmpLine.Add(l);
@@ -107,25 +107,25 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                     var endPtEx = new Point3dEx(l.EndPoint);
 
                     //start
-                    if (fireHydrantSysIn.ptDic.ContainsKey(startPtEx))
+                    if (fireHydrantSysIn.PtDic.ContainsKey(startPtEx))
                     {
-                        var startPtNeighbors = fireHydrantSysIn.ptDic[startPtEx];
+                        var startPtNeighbors = fireHydrantSysIn.PtDic[startPtEx];
                         if (startPtNeighbors.Count == 1)
                         {
                             pipeLines.Remove(l);
-                            fireHydrantSysIn.ptDic[endPtEx].Remove(startPtEx);
+                            fireHydrantSysIn.PtDic[endPtEx].Remove(startPtEx);
                             continue;
                         }
                     }
 
                     //end
-                    if (fireHydrantSysIn.ptDic.ContainsKey(endPtEx))
+                    if (fireHydrantSysIn.PtDic.ContainsKey(endPtEx))
                     {
-                        var startPtNeighbors = fireHydrantSysIn.ptDic[endPtEx];
+                        var startPtNeighbors = fireHydrantSysIn.PtDic[endPtEx];
                         if (startPtNeighbors.Count == 1)
                         {
                             pipeLines.Remove(l);
-                            fireHydrantSysIn.ptDic[startPtEx].Remove(endPtEx);
+                            fireHydrantSysIn.PtDic[startPtEx].Remove(endPtEx);
                             continue;
                         }
                     }
@@ -169,7 +169,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
                 PipeLine.PipeLineSplit(ref lineList, pointList,1.0,2.0);//管线打断
 
-                fireHydrantSysIn.ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
+                fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
                 foreach (var L in lineList)
                 {
                     var pt1 = new Point3dEx(L.StartPoint);

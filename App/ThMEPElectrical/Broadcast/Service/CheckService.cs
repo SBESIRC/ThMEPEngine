@@ -81,6 +81,10 @@ namespace ThMEPElectrical.Broadcast.Service
 
         public List<Polyline> FilterWalls(List<Polyline> walls, List<Line> lines, double expandLength, double tol)
         {
+            if (walls.Count <= 0)
+            {
+                return walls;
+            }
             var wallCollections = walls.ToCollection();
             var resPolys = lines.SelectMany(x =>
             {

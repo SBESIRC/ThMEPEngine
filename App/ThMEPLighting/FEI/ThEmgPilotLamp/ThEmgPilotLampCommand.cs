@@ -162,7 +162,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         else 
                         {
                             //壁装
-                            createPt = createPt + item.directionSide.MultiplyBy(250 / 2);
+                            createPt = createPt + item.directionSide.MultiplyBy((2.5* ThEmgLightService.Instance.BlockScale) / 2);
                             switch (item.endType) 
                             {
                                 case 140://壁装 E/N
@@ -175,47 +175,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             }
                         }
                         CreateClearEmgLamp.LoadBlockToDocument(acdb.Database);
-                        CreateClearEmgLamp.CreatePilotLamp(acdb.Database, createPt, createDir, blockName,item.isHoisting, new Dictionary<string, string>());
+                        CreateClearEmgLamp.CreatePilotLamp(acdb.Database, createPt, createDir, blockName,item.isHoisting, new Dictionary<string, string>(), ThEmgLightService.Instance.BlockScale);
                     }
                 }
             }
-        }
-        void SPointArrow(AcadDatabase acdb, ThMEPOriginTransformer originTransformer,Point3d sp,Point3d ep) 
-        {
-            Line line = new Line(sp, ep);
-            Vector3d dir = line.LineDirection();
-            SPointArrow(acdb, originTransformer, sp, dir);
-        }
-        void SPointArrow(AcadDatabase acdb, ThMEPOriginTransformer originTransformer, Point3d sp, Vector3d dir)
-        {
-            Vector3d normal = new Vector3d(0, 0, 1);
-            Point3d tempPt = sp + dir.MultiplyBy(100);
-            Vector3d x = -dir.RotateBy(Math.PI / 6, normal);
-            Point3d tempEp = tempPt + x.MultiplyBy(100);
-            Line line1 = new Line(tempPt, tempEp);
-            x = -dir.RotateBy(-Math.PI / 6, normal);
-            tempEp = tempPt + x.MultiplyBy(100);
-            Line line2 = new Line(tempPt, tempEp);
-            originTransformer.Reset(line1);
-            acdb.ModelSpace.Add(line1);
-            originTransformer.Reset(line2);
-            acdb.ModelSpace.Add(line2);
-        }
-        void PointToView(AcadDatabase acdb, ThMEPOriginTransformer originTransformer, Point3d sp)
-        {
-            Vector3d x = new Vector3d(1, 0, 0);
-            Vector3d y = new Vector3d(0, 1, 0);
-            Point3d tempPt = sp - x.MultiplyBy(100);
-            Point3d tempEp = sp + x.MultiplyBy(100);
-            Line line1 = new Line(tempPt, tempEp);
-            originTransformer.Reset(line1);
-            acdb.ModelSpace.Add(line1);
-            tempPt = sp - y.MultiplyBy(100);
-            tempEp = sp + y.MultiplyBy(100);
-            Line line2 = new Line(tempPt, tempEp);
-            originTransformer.Reset(line2);
-            acdb.ModelSpace.Add(line2);
-
         }
         /// <summary>
         /// 计算外包框和其中的洞

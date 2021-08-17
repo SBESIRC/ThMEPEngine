@@ -1,26 +1,29 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Engine;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.IO;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using Dreambuild.AutoCAD;
 
 namespace FireAlarm.Data
 {
-    public class ThFaRoomExtractor : ThRoomExtractor, IGroup, ISetStorey
+    public class ThFaRoomExtractor : ThRoomExtractor, IGroup, ISetStorey,ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaRoomExtractor()
         {
@@ -29,18 +32,37 @@ namespace FireAlarm.Data
         public override void Extract(Database database, Point3dCollection pts)
         {
             //获取本地的房间框线
-            var roomEngine = new ThRoomOutlineRecognitionEngine();
-            roomEngine.RecognizeMS(database, pts);
-            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            //对于起、终点间距小于一定距离的，做缝合
-            rooms.ForEach(o => o.Boundary = ThHandleNonClosedPolylineService.Handle(o.Boundary as Polyline));
-            //过滤无效的房间框线
-            rooms = rooms.Where(o => (o.Boundary as Polyline).Area >= 1.0).ToList();
+            var roomOutlineExtraction = new ThRoomOutlineExtractionEngine();
+            roomOutlineExtraction.ExtractFromMS(database);
 
             //获取本地的房间标注
+            var roomMarkExtraction = new ThRoomMarkExtractionEngine();
+            roomMarkExtraction.ExtractFromMS(database);
+
+            roomOutlineExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            roomMarkExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
+
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(p =>
+            {
+                var pt = new Point3d(p.X, p.Y, p.Z);
+                Transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            var roomEngine = new ThRoomOutlineRecognitionEngine();
+            roomEngine.Recognize(roomOutlineExtraction.Results, newPts);
+            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
             var markEngine = new ThRoomMarkRecognitionEngine();
-            markEngine.RecognizeMS(database, pts);
+            markEngine.Recognize(roomMarkExtraction.Results, newPts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+
+            //对于起、终点间距小于一定距离的，做缝合
+            for(int i = 0; i < rooms.Count; i++)
+            {
+                rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Polyline);
+            }
+            //过滤无效的房间框线
+            rooms = rooms.Where(o => (o.Boundary as Polyline).Area >= 1.0).ToList();
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
@@ -132,16 +154,35 @@ namespace FireAlarm.Data
             var roomPolygon = room.ToNTSPolygon();
             var areaDic = new Dictionary<Entity, double>();
             foreach(Entity fireApart in fireAparts)
-            {
-                var firePolygon = fireApart.ToNTSPolygon();
+            {                
+                var bufferService = new ThNTSBufferService();
+                var objs = fireApart.ToNTSPolygon().Buffer(0).ToDbCollection(true);
                 double intersectArea = 0.0;
-                foreach(Entity intersect in roomPolygon.Intersection(firePolygon).ToDbCollection())
+                foreach (Entity obj in objs)
                 {
-                    intersectArea += intersect.ToNTSPolygon().Area;
+                    var newFireApart = bufferService.Buffer(obj, -1.0);
+                    var firePolygon = newFireApart.ToNTSPolygon();
+                    foreach (Entity intersect in roomPolygon.Intersection(firePolygon).ToDbCollection())
+                    {
+                        if (intersect is Polyline || intersect is MPolygon)
+                        {
+                            intersectArea += intersect.ToNTSPolygon().Area;
+                        }
+                    }
                 }
                 areaDic.Add(fireApart, intersectArea);
             }
             return areaDic.OrderByDescending(o => o.Value).First().Key;
+        }
+
+        public void Transform()
+        {
+            Rooms.ForEach(o => Transformer.Transform(o.Boundary));
+        }
+
+        public void Reset()
+        {
+            Rooms.ForEach(o => Transformer.Reset(o.Boundary));
         }
     }
 }

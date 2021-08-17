@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -10,12 +9,13 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
-    class TermPoint
+    public class TermPoint
     {
         public Point3dEx PtEx { get; set; }//端点
         public Line StartLine { get; set; }//标注起始线
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
+        public string PipeNumber2 { get; set; }//标注
         public int Type { get; set; }//1 消火栓; 2 其他区域; 3 同时供消火栓与其他区域; 4 水泵接合器
         private double Tolerance { get; set; }//容差
         public TermPoint(Point3dEx ptEx)
@@ -51,11 +51,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 return;
             }
-            var adjs = fireHydrantSysIn.leadLineDic[StartLine];
+            var adjs = fireHydrantSysIn.LeadLineDic[StartLine];
             if (adjs.Count > 1)
             {
                 return;
             }
+            double minDist = 100;
             foreach (var l in labelLine)
             {
                 if (l is null)
@@ -66,12 +67,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 var ept = l.EndPoint;
                 var spt1 = StartLine.StartPoint;
                 var ept1 = StartLine.EndPoint;
-                var tolerance = 100;
                 if(!l.Equals(StartLine))
                 {
-                    if (spt.DistanceTo(spt1) < tolerance || spt.DistanceTo(ept1) < tolerance || ept.DistanceTo(spt1) < tolerance || ept.DistanceTo(ept1) < tolerance)
+                    if (StartLine.GetLinesDist(l)< minDist)
                     {
                         TextLine = l;
+                        minDist = StartLine.GetLinesDist(l);
                     }
                 }
             }
@@ -79,18 +80,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public void SetPipeNumber(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var leftX = 0.0;
-            var rightX = 0.0;
-            var leftY = 0.0;
-            var rightY = 0.0;
-            var textHeight = 500;
+            var textHeight = 350;
+            double leftX;
+            double rightX;
+            double leftY;
+            double rightY;
             if (TextLine.StartPoint.X < TextLine.EndPoint.X)
             {
                 leftX = TextLine.StartPoint.X;
                 rightX = TextLine.EndPoint.X;
                 leftY = TextLine.StartPoint.Y;
                 rightY = TextLine.EndPoint.Y;
-
             }
             else
             {
@@ -102,15 +102,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
             var pt1 = new Point3d(leftX, leftY + textHeight, 0);
             var pt2 = new Point3d(rightX, rightY, 0);
+            string str = ExtractText(spatialIndex, pt1, pt2);
+            PipeNumber = str;
+            pt1 = new Point3d(leftX, leftY - 150, 0);
+            pt2 = new Point3d(rightX, rightY - textHeight, 0);
+            var str2 = ExtractText(spatialIndex, pt1, pt2);
+            PipeNumber2 = str2;
+            if (PipeNumber2 is null)
+            {
+                return;
+            }
+            if(PipeNumber2.Contains("X") || PipeNumber2.Contains("-"))
+            {
+                PipeNumber2 = "";
+            }
+        }
+
+        private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex, Point3d pt1, Point3d pt2)
+        {
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//文字范围
-            
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
-            foreach(var obj in DBObjs)
+            var pipeNumber = "";
+            foreach (var obj in DBObjs)
             {
                 if (obj is DBText br)
                 {
-                    PipeNumber = br.TextString;
+                    pipeNumber = br.TextString;
                 }
                 else
                 {
@@ -118,15 +136,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     dynamic o = ad;
                     if ((o.ObjectName as string).Equals("TDbText"))
                     {
-                        PipeNumber = o.Text;
+                        pipeNumber = o.Text;
                     }
                 }
             }
+            return pipeNumber;
         }
-
         public void SetType(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var xRange = 1200;
+            var xRange = 250;
             var yRange = 250;
             var pt1 = new Point3d(PtEx._pt.X - xRange, PtEx._pt.Y + yRange, 0);
             var pt2 = new Point3d(PtEx._pt.X + xRange, PtEx._pt.Y - yRange, 0);

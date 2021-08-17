@@ -92,12 +92,20 @@ namespace ThMEPIdentity
 
         public bool IsTHCommand(string name)
         {
-            return THMEPCOMMANDS.ContainsKey(name);
+            if (THMEPCOMMANDS.ContainsKey(name))
+            {
+                return true;
+            }
+            return name.StartsWith("TH");
         }
 
         public string Description(string name)
         {
-            return THMEPCOMMANDS[name];
+            if (THMEPCOMMANDS.ContainsKey(name))
+            {
+                return THMEPCOMMANDS[name];
+            }
+            return string.Empty;
         }
     }
 }

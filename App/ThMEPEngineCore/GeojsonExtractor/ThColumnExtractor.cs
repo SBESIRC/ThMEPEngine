@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
     public class ThColumnExtractor : ThExtractorBase, IPrint
     {
         public List<Polyline> Columns { get; protected set; }
-        private List<ThIfcRoom> Rooms { get; set; }
+        public List<ThIfcRoom> Rooms { get; set; }
         public ThColumnExtractor()
         {
             Category = BuiltInCategory.Column.ToString();

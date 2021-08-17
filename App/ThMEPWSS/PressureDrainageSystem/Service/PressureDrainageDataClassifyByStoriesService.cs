@@ -10,7 +10,6 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.PressureDrainageSystem.Model;
-using ThMEPWSS.Uitl;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
@@ -221,8 +220,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 }
                                 else
                                 {
-                                    pipe.Identifier += bText.TextString;
-                                    pipe.SameTypeIdentifiers.Add(pipe.Identifier);
+                                    if (bText.TextString.Contains("F") || bText.TextString.Contains("L"))
+                                    {
+                                        pipe.Identifier += bText.TextString;
+                                        pipe.SameTypeIdentifiers.Add(pipe.Identifier);
+                                    }
                                 }
                             }
                         }

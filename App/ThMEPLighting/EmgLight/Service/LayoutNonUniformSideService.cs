@@ -39,7 +39,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="columnDistList"></param>
         /// <param name="uniformSideLayout"></param>
         /// <param name="layout"></param>
-        public void LayoutOppositeSide(int uniformSide, List<ThLane> laneList)
+        public void LayoutOppositeSide(int uniformSide, List<ThLane> laneList, int tolMin, int tolMax)
         {
             int nonUniformSide = uniformSide == 0 ? 1 : 0;
 
@@ -66,10 +66,10 @@ namespace ThMEPLighting.EmgLight.Service
                         //均匀边每个分布,第一个点对边找点
                         m_layoutService.prjPtToLine(m_uniformSideLayout.First().Key, out CloestPt);
 
-                        ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
+                        ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, tolMin, EmgLightCommon.TolLane);
                         StructureService.FindClosestStructToPt(m_layoutService.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out var closestStruct);
 
-                        AddToNonUniformLayoutList(closestStruct, EmgLightCommon.TolLightRangeMin, laneList);
+                        AddToNonUniformLayoutList(closestStruct, tolMin, laneList);
 
                     }
 
@@ -80,19 +80,19 @@ namespace ThMEPLighting.EmgLight.Service
                         {
                             //均匀边每个分布
                             m_layoutService.prjPtToLine(m_uniformSideLayout.ElementAt(i).Key, out CloestPt);
-                            ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
+                            ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, tolMin, EmgLightCommon.TolLane);
                             StructureService.FindClosestStructToPt(m_layoutService.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out var closestStruct);
 
-                            AddToNonUniformLayoutList(closestStruct, EmgLightCommon.TolLightRangeMin, laneList);
+                            AddToNonUniformLayoutList(closestStruct, tolMin, laneList);
                         }
                         else if (m_uniformSideLayout.ElementAt(i).Value == 0)
                         {
                             //均匀边隔柱分布
                             m_layoutService.findMidPointOnLine(m_uniformSideLayout.ElementAt(i - 1).Key.centerPt, m_uniformSideLayout.ElementAt(i).Key.centerPt, out var midPt);
-                            ExtendPoly = GeomUtils.CreateExtendPoly(midPt, m_layoutService.thLane.dir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
+                            ExtendPoly = GeomUtils.CreateExtendPoly(midPt, m_layoutService.thLane.dir, tolMin, EmgLightCommon.TolLane);
                             StructureService.FindClosestStructToPt(m_layoutService.UsefulStruct[nonUniformSide], midPt, ExtendPoly, out var closestStruct);
 
-                            AddToNonUniformLayoutList(closestStruct, EmgLightCommon.TolLightRangeMin, laneList);
+                            AddToNonUniformLayoutList(closestStruct, tolMin, laneList);
                         }
                     }
                 }
@@ -106,10 +106,10 @@ namespace ThMEPLighting.EmgLight.Service
                     if (m_uniformSideLayout.Count > 1)
                     {
                         distToNext = m_uniformSideLayout.Last().Key.centerPt.DistanceTo(m_uniformSideLayout.ElementAt(m_uniformSideLayout.Count - 2).Key.centerPt);
-                        if (distToNext > EmgLightCommon.TolLightRangeMin)
+                        if (distToNext > tolMin)
                         {
                             m_layoutService.prjPtToLine(m_uniformSideLayout.Last().Key, out CloestPt);
-                            ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
+                            ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, tolMin, EmgLightCommon.TolLane);
                         }
                     }
                 }
@@ -117,16 +117,16 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     //对边最后一个点是已布点,检查车道线后面长度是否需要对面补点
                     m_layoutService.prjPtToLineEnd(m_uniformSideLayout.Last().Key, out var LastPartLines);
-                    if (LastPartLines.Length > EmgLightCommon.TolLightRangeMax)
+                    if (LastPartLines.Length > tolMax)
                     {
-                        CloestPt = LastPartLines.GetPointAtDist(EmgLightCommon.TolLightRangeMax);
-                        ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
+                        CloestPt = LastPartLines.GetPointAtDist(tolMax);
+                        ExtendPoly = GeomUtils.CreateExtendPoly(CloestPt, m_layoutService.thLane.dir, tolMin, EmgLightCommon.TolLane);
                     }
                 }
                 if (ExtendPoly != null)
                 {
                     StructureService.FindClosestStructToPt(m_layoutService.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out var closestStruct);
-                    AddToNonUniformLayoutList(closestStruct, EmgLightCommon.TolLightRangeMin, laneList);
+                    AddToNonUniformLayoutList(closestStruct, tolMin, laneList);
                 }
             }
             else
@@ -135,26 +135,52 @@ namespace ThMEPLighting.EmgLight.Service
                 if (m_layoutService.UsefulStruct[uniformSide].Count > 0)
                 {
                     //均匀边有构建, 加入[均匀边]最后点
-                    AddToNonUniformLayoutList(m_layoutService.UsefulStruct[uniformSide].Last(), EmgLightCommon.TolLightRangeMin, laneList);
+                    AddToNonUniformLayoutList(m_layoutService.UsefulStruct[uniformSide].Last(), tolMin, laneList);
                 }
                 else
                 {
                     //均匀边没有构建,在非均匀边每隔8500布置一个点
-                    AddToNonUniformLayoutList(m_layoutService.UsefulStruct[nonUniformSide].First(), EmgLightCommon.TolLightRangeMin, laneList);
+                    //update 20210805 单边布置。检查后面的点如果后面不足tol 则当前点也要布置
+                    AddToNonUniformLayoutList(m_layoutService.UsefulStruct[nonUniformSide].First(), tolMin, laneList);
                     var layIndex = 0;
                     for (int i = 1; i < m_layoutService.UsefulStruct[nonUniformSide].Count; i++)
                     {
+                        var bAdd = false;
                         var dist = m_layoutService.getCenterInLaneCoor(m_layoutService.UsefulStruct[nonUniformSide][i]).X - m_layoutService.getCenterInLaneCoor(m_layoutService.UsefulStruct[nonUniformSide][layIndex]).X;
-                        if (dist > EmgLightCommon.TolLightRangeMax)
+                        if (dist >= tolMax)
+                        {
+                            bAdd = true;
+                        }
+                        else
+                        {
+                            if (i != m_layoutService.UsefulStruct[nonUniformSide].Count - 1)
+                            {
+                                var distNext = m_layoutService.getCenterInLaneCoor(m_layoutService.UsefulStruct[nonUniformSide][i]).X - m_layoutService.getCenterInLaneCoor(m_layoutService.UsefulStruct[nonUniformSide][i + 1]).X;
+                                if (distNext >= tolMax)
+                                {
+                                    bAdd = true;
+                                }
+                            }
+                            else
+                            {
+                                //最后一个点，往前不到buff，往后检查到车道线末尾
+                                m_layoutService.prjPtToLineEnd(m_nonUniformSideLayout.Last(), out var LastPartLines);
+                                if (LastPartLines.Length >= tolMax)
+                                {
+                                    bAdd = true;
+                                }
+                            }
+                        }
+                        if (bAdd == true)
                         {
                             layIndex = i;
-                            AddToNonUniformLayoutList(m_layoutService.UsefulStruct[nonUniformSide][i], EmgLightCommon.TolLightRangeMin, laneList);
+                            AddToNonUniformLayoutList(m_layoutService.UsefulStruct[nonUniformSide][i], tolMin, laneList);
                         }
                     }
                 }
             }
 
-            DrawUtils.ShowGeometry(m_nonUniformSideLayout.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructLayout, Color.FromColorIndex(ColorMethod.ByColor, 210), LineWeight.LineWeight050);
+            DrawUtils.ShowGeometry(m_nonUniformSideLayout.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructLayout,210, 50);
             m_layoutList.AddRange(m_nonUniformSideLayout.Distinct().ToList());
         }
 

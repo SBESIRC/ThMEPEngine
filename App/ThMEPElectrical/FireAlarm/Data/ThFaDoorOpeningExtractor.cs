@@ -14,60 +14,108 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
 
 namespace FireAlarm.Data
 {
-    public class ThFaDoorOpeningExtractor : ThExtractorBase,IPrint,IGroup, ISetStorey
+    public class ThFaDoorOpeningExtractor : ThExtractorBase,IPrint,IGroup, ISetStorey, ITransformer
     {
         private List<ThIfcRoom> Rooms { get; set; }
         public List<ThIfcDoor> Doors { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-        private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }       
+        private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+
         public ThFaDoorOpeningExtractor()
         {
             Doors = new List<ThIfcDoor>();
             StoreyInfos = new List<ThStoreyInfo>();
-            Category = BuiltInCategory.Door.ToString();
+            Category = BuiltInCategory.DoorOpening.ToString();
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            //From DB3
-            var db3doors = new List<ThIfcDoor>();
-            using (var doorEngine = new ThDB3DoorRecognitionEngine())
+            var db3Doors = ExtractDb3Door(database, pts);
+            var localDoors = ExtractMsDoor(database, pts);
+            //对Clean的结果进一步过虑
+            for (int i = 0; i < localDoors.Count; i++)
             {
-                doorEngine.Recognize(database, pts);
-                db3doors = doorEngine.Elements.Cast<ThIfcDoor>().ToList();
+                localDoors[i].Outline = ThCleanEntityService.Buffer(localDoors[i].Outline as Polyline, 25);
             }
-            //From Local
+
+            //处理重叠
+            var conflictService = new ThHandleConflictService(
+                db3Doors.Select(o => o.Outline).ToList(),
+                localDoors.Select(o => o.Outline).ToList());
+            conflictService.Handle();
+            Doors.AddRange(db3Doors.Where(o => conflictService.Results.Contains(o.Outline)).ToList());
+            var originDoorEntites = Doors.Select(o => o.Outline).ToList();
+            Doors.AddRange(conflictService.Results
+                .Where(o => !originDoorEntites.Contains(o))
+                .Select(o=> new ThIfcDoor { Outline = o })
+                .ToList());
+
+            var objs = Doors.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
+            Doors = Doors.Where(o => objs.Contains(o.Outline)).ToList();
+        }
+        private List<ThIfcDoor> ExtractDb3Door(Database database, Point3dCollection pts)
+        {
+            // 构件索引服务
+            ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
+            {
+                BuiltInCategory.ArchitectureWall,
+                BuiltInCategory.Column,
+                BuiltInCategory.CurtainWall,
+                BuiltInCategory.ShearWall,
+                BuiltInCategory.Window
+            });
+            ThSpatialIndexCacheService.Instance.Transformer = transformer;
+            ThSpatialIndexCacheService.Instance.Build(database, pts);
+
+            var doorExtraction = new ThDB3DoorExtractionEngine();
+            doorExtraction.Extract(database);
+            doorExtraction.Results.ForEach(o =>
+            {
+                if (o is ThRawDoorMark doorMark)
+                {
+                    Transformer.Transform(doorMark.Data as Entity);
+                }
+                Transformer.Transform(o.Geometry);
+            });
+
+            var doorEngine = new ThDB3DoorRecognitionEngine();
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(p =>
+            {
+                var pt = new Point3d(p.X, p.Y, p.Z);
+                Transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            doorEngine.Recognize(doorExtraction.Results, newPts);
+            var db3Doors = doorEngine.Elements.Cast<ThIfcDoor>().ToList();
+            return db3Doors;
+        }
+        private List<ThIfcDoor> ExtractMsDoor(Database database, Point3dCollection pts)
+        {
             var localdoors = new List<ThIfcDoor>();
             var instance = new ThExtractPolylineService()
             {
                 ElementLayer = this.ElementLayer,
             };
             instance.Extract(database, pts);
+            instance.Polys.ForEach(o => Transformer.Transform(o));
             localdoors = instance.Polys
                 .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => new ThIfcDoor() { Outline = o }).ToList()
+                .Select(o => new ThIfcDoor { Outline=o})
+                .Cast<ThIfcDoor>()
                 .ToList();
-            //对Clean的结果进一步过虑
-            localdoors.ForEach(o => o.Outline = ThCleanEntityService.Buffer(o.Outline as Polyline, 25));
-
-            //处理重叠
-            var conflictService = new ThHandleConflictService(
-                db3doors.Select(o => o.Outline).ToList(),
-                localdoors.Select(o => o.Outline).ToList());
-            conflictService.Handle();
-            Doors.AddRange(db3doors.Where(o => conflictService.Results.Contains(o.Outline)).ToList());
-            var originDoorEntites = Doors.Select(o => o.Outline).ToList();
-            Doors.AddRange(conflictService.Results
-                .Where(o => !originDoorEntites.Contains(o))
-                .Select(o=> new ThIfcDoor { Outline = o })
-                .ToList());
+            return localdoors;
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -169,6 +217,16 @@ namespace FireAlarm.Data
         public override void SetRooms(List<ThIfcRoom> rooms)
         {
             this.Rooms = rooms;
+        }
+
+        public void Transform()
+        {
+            Doors.ForEach(o => Transformer.Transform(o.Outline));
+        }
+
+        public void Reset()
+        {
+            Doors.ForEach(o => Transformer.Reset(o.Outline));
         }
     }
 }

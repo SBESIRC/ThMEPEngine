@@ -12,8 +12,25 @@ namespace ThMEPWSS.FlushPoint.Model
             protectRadius = 30.0;
             plotScale = "1:100";
             floorSign = "B1";
+            onlyLayoutOnColumn = true;
         }
         public event PropertyChangedEventHandler PropertyChanged;
+        private bool onlyLayoutOnColumn;
+        /// <summary>
+        /// 仅布置在柱子上
+        /// </summary>
+        public bool OnlyLayoutOnColumn
+        {
+            get
+            {
+                return onlyLayoutOnColumn;
+            }
+            set
+            {
+                onlyLayoutOnColumn = value;
+                RaisePropertyChanged("OnlyLayoutOnColumn");
+            }
+        }
 
         private string plotScale = "";
         public string PlotScale

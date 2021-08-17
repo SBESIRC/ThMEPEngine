@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var PtList = new List<Point3dEx>();
             Point3dEx startPt;// 主环起始点
-            if (fireHydrantSysIn.ptDic[new Point3dEx(markLine[0].StartPoint)].Count == 1)
+            if (fireHydrantSysIn.PtDic[new Point3dEx(markLine[0].StartPoint)].Count == 1)
             {
                 startPt = new Point3dEx(markLine[0].StartPoint);
             }
@@ -35,7 +35,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 startPt = new Point3dEx(markLine[0].EndPoint);
             }
             Point3dEx targetPt;//主环终止点
-            if (fireHydrantSysIn.ptDic[new Point3dEx(markLine[1].StartPoint)].Count == 1)
+            if (fireHydrantSysIn.PtDic[new Point3dEx(markLine[1].StartPoint)].Count == 1)
             {
                 targetPt = new Point3dEx(markLine[1].StartPoint);
             }

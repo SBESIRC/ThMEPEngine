@@ -39,55 +39,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
     }
 
-    //public class ThExtractValveService//提取阀门
-    //{
-    //    public DBObjectCollection Extract(Database database, Point3dCollection polygon)
-    //    {
-    //        var objs = new DBObjectCollection();
-    //        using (var acadDatabase = AcadDatabase.Use(database))
-    //        {
-    //            var Results = acadDatabase
-    //               .ModelSpace
-    //               .OfType<Entity>()
-    //               .Where(o => IsHYDTPipeLayer(o.Layer));
-    //            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-    //            var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-    //            // 阀块
-    //            dbObjs.Cast<Entity>()
-    //                .Where(e => e is BlockReference)
-    //                .Where(e => IsValveBlock((BlockReference)e))
-    //                .ForEach(e => objs.Add(e));
-    //            // 天正阀
-    //            foreach(var obj in dbObjs)
-    //            {
-    //                if((obj as Entity).IsTCHValve())
-    //                {
-    //                    var dbColl = new DBObjectCollection();
-    //                    (obj as Entity).Explode(dbColl);
-    //                    dbColl.Cast<Entity>()
-    //                        .Where(e => e is BlockReference)
-    //                        .Where(e => IsValve((e as BlockReference).Name))
-    //                        .ForEach(e => objs.Add(e));
-    //                }
-    //            }
-    //            return objs;
-    //        }
-    //    }
-    //    private bool IsHYDTPipeLayer(string layer)
-    //    {
-    //        return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
-    //    }
-
-    //    private bool IsValveBlock(BlockReference blockReference)
-    //    {
-    //        var blkName = blockReference.GetEffectiveName().ToUpper();
-    //        return blkName == "蝶阀" || blkName.Contains("316");
-    //    }
-    //    private bool IsValve(string valveName)
-    //    {
-    //        return valveName.Contains("蝶阀") || valveName.Contains("316");
-    //    }
-    //}
     public class ThExtractValveService//提取阀门
     {
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
@@ -193,8 +144,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
     }
 
-
-
     public class ThExtractCasing//提取套管
     {
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
@@ -224,9 +173,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
     }
 
-
-
-
     public class ThExtractHydrant//提取管道末端标记
     {
         public IEnumerable<Entity> Results { get; private set; }
@@ -249,11 +195,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                            o.Layer.ToUpper() == "W-RAIN-EQPM" ||
                            o.Layer.ToUpper() == "W-WSUP-DIMS" ||
                            o.Layer.ToUpper() == "0");
-
-            //var targets = Results.Cast<Entity>()
-            //.Where(o => o.ObjectId.Handle.Value.Equals(921180));
-            //var objs2 = new DBObjectCollection();
-            //(targets.First() as Entity).Explode(objs2);
 
             Results1 = acadDatabase.ModelSpace
                    .OfType<Circle>()
@@ -431,11 +372,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         }
                         return;
                     }
-
-
                 }
             }
-
             else if (entity is Circle circle)//为圆
             {
                 DBobjs.Add(circle);
@@ -444,9 +382,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 return;
             }
-
-
-
         }
 
 
@@ -646,8 +581,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return markList;
         }
     }
-
-
     public class ThExtractLabelLine//引线提取
     {
         public DBObjectCollection DbTextCollection { get; private set; }
@@ -717,7 +650,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     LabelPosition.Add(new Line(pt1, pt2));
                 }
             }
-
+            LabelPosition = PipeLineList.CleanLaneLines3(LabelPosition);
             return LabelPosition;
         }
 
@@ -764,9 +697,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
     }
 
-
-
-
     public class ThExtractLabelText//文字提取
     {
         public List<Entity> Results { get; private set; }
@@ -777,7 +707,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             Results = new List<Entity>();
         }
 
-        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth)
+        public DBObjectCollection Extract(Database database, Point3dCollection polygon, ref double textWidth, ref string textModel)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -798,7 +728,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (bkr is Entity ent)
                     {
-                        ExplodeText(ent, dbTextCollection, ref textWidth);
+                        ExplodeText(ent, dbTextCollection, ref textWidth, ref textModel);
                     }
                 }
                 return dbTextCollection;
@@ -814,16 +744,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                    layer.ToUpper() == "W-RAIN-NOTE";
         }
 
-        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth)
+        private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
         {
             if (ent is DBText dbText)//DBText直接添加
             {
+                if(dbText.TextString.Contains("De"))
+                {
+                    return; ;
+                }
                 if (!dbText.TextString.Contains("DN"))
                 {
                     var tWidth = Math.Abs((ent as Entity).GeometricExtents.MaxPoint.X - (ent as Entity).GeometricExtents.MinPoint.X);
                     if (tWidth > textWidth && (ent as DBText).TextString.Contains("X"))
                     {
                         textWidth = tWidth;
+                        textModel = (ent as DBText).TextString;
                     }
                     dBObjects.Add(ent);
                 }
@@ -842,7 +777,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X"))
                     {
                         textWidth = tWidth;
-                        //textHeight = (text as DBText).Height;
+                        textModel = (ent as DBText).TextString;
                     }
                     dBObjects.Add((DBObject)text);
                 }
@@ -856,7 +791,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (obj is Entity ent1)
                     {
-                        ExplodeText(ent1, dBObjects, ref textWidth);
+                        ExplodeText(ent1, dBObjects, ref textWidth, ref textModel);
                     }
                 }
             }
@@ -864,10 +799,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
 
             }
-
         }
     }
-
 
     public class ThExtractFireHydrant//室内消火栓平面
     {
@@ -1072,12 +1005,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-
         private bool IsPipeDNLayer(string layer)
         {
             return (layer.ToUpper().Equals("W-FRPT-NOTE") ||
                     layer.ToUpper().Equals("W-FRPT-HYDT-DIMS") ||
                     layer.ToUpper().Equals("W-DRAI-DIMS") ||
+                    layer.ToUpper().Equals("W-RAIN-DIMS") ||
                     layer.ToUpper().Equals("TWT_TEXT"));
         }
 
@@ -1265,5 +1198,41 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     }
 
 
+    public class ThExtractStopLine
+    {
+        public List<Point3dEx> Extract(Database database, Point3dCollection polygon)
+        {
+            var objs = new DBObjectCollection();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Results = acadDatabase
+                   .ModelSpace
+                   .OfType<Entity>()
+                   .Where(o => o.Layer == "W-FRPT-HYDT-EQPM");
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                
+                dbObjs.Cast<Entity>()
+                      .Where(e => IsTCHequipment(e))
+                      .ForEach(e => objs.Add(Explode(e)));
+
+                var pts = new List<Point3dEx>();
+                objs.Cast<Entity>()
+                    .ForEach(e => pts.Add(new Point3dEx((e as BlockReference).Position)));
+                return pts;
+            }
+        }
+        private bool IsTCHequipment(Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
+        }
+        private DBObject Explode(Entity entity)
+        {
+            var dbObjs = new DBObjectCollection();
+            entity.Explode(dbObjs);
+            return dbObjs[0];
+        }
+    }
 }
 

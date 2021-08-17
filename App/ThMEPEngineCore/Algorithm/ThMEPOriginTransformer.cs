@@ -24,6 +24,10 @@ namespace ThMEPEngineCore.Algorithm
             Displacement = Matrix3d.Displacement(vector);
         }
 
+        public ThMEPOriginTransformer()
+        {
+        }
+
         public void Transform(Entity entity)
         {
             var matrix = Displacement;
@@ -34,6 +38,11 @@ namespace ThMEPEngineCore.Algorithm
         {
             var matrix = Displacement;
             TransformBy(objs, matrix);
+        }
+
+        public Point3d Transform(Point3d point)
+        {
+            return point.TransformBy(Displacement);
         }
 
         public void Transform(ref Point3d point)

@@ -133,22 +133,15 @@ namespace ThMEPEngineCore
                     }
                     else if (result3.StringResult == "全部")
                     {
-                        var elements = new List<ThIfcBuildingElement>();
-                        var engine1 = new ThColumnRecognitionEngine();
-                        engine1.Recognize(acadDatabase.Database, frame.Vertices());
-                        elements.AddRange(engine1.Elements);
-                        var engine2 = new ThDB3ColumnRecognitionEngine();
-                        engine2.Recognize(acadDatabase.Database, frame.Vertices());
-                        elements.AddRange(engine2.Elements);
-                        elements.Select(o => o.Outline)
-                            .ToCollection()
-                            .UnionPolygons()
-                            .Cast<Entity>()
+                        var columnBuilder = new ThColumnBuilderEngine();
+                        columnBuilder
+                            .Build(acadDatabase.Database, frame.Vertices())
+                            .Select(o => o.Outline)
                             .ForEach(o =>
-                            {
-                                acadDatabase.ModelSpace.Add(o);
-                                o.SetDatabaseDefaults();
-                            });
+                          {
+                              acadDatabase.ModelSpace.Add(o);
+                              o.SetDatabaseDefaults();
+                          });
                     }
                 }
                 else
@@ -191,30 +184,6 @@ namespace ThMEPEngineCore
                         });
                     }
                 }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THRecognizeColumn", CommandFlags.Modal)]
-        public void THRecognizeColumn()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-
-                var columnBuilder = new ThColumnBuilderEngine();
-                var columns = columnBuilder.Build(acadDatabase.Database, frame.Vertices());
-                CAD.ThAuxiliaryUtils.CreateGroup(columns.Select(o => o.Outline).ToList(), acadDatabase.Database, 1);
             }
         }
 
@@ -282,35 +251,44 @@ namespace ThMEPEngineCore
                     }
                     else if (result3.StringResult == "全部")
                     {
-                        var elements = new List<ThIfcBuildingElement>();
-                        var engine1 = new ThShearWallRecognitionEngine();
-                        engine1.Recognize(acadDatabase.Database, frame.Vertices());
-                        elements.AddRange(engine1.Elements);
-                        var engine2 = new ThDB3ShearWallRecognitionEngine();
-                        engine2.Recognize(acadDatabase.Database, frame.Vertices());
-                        elements.AddRange(engine2.Elements);
-                        elements.Select(o => o.Outline)
-                            .ToCollection()
-                            .UnionPolygons()
-                            .Cast<Entity>()
-                            .ForEach(o =>
-                            {
-                                acadDatabase.ModelSpace.Add(o);
-                                o.SetDatabaseDefaults();
-                            });
+                        var shearwallBuilder = new ThShearwallBuilderEngine();
+                        shearwallBuilder
+                            .Build(acadDatabase.Database, frame.Vertices())
+                            .Select(o => o.Outline)
+                            .ForEach(e =>
+                          {
+                              acadDatabase.ModelSpace.Add(e);
+                              e.SetDatabaseDefaults();
+                          });
                     }
                 }
                 else
                 {
-                    var engine = new ThDB3ShearWallExtractionEngine();
-                    engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
+                    if (result3.StringResult == "原始")
                     {
-                        results.Add(filterObj as Entity);
+                        var engine1 = new ThShearWallExtractionEngine();
+                        engine1.Extract(acadDatabase.Database);
+                        engine1.Results.ForEach(o => results.Add(o.Geometry));
                     }
-                    results.Cast<Entity>().ForEach(o =>
+                    else if(result3.StringResult == "平台")
+                    {
+                        var engine1 = new ThDB3ShearWallExtractionEngine();
+                        engine1.Extract(acadDatabase.Database);
+                        engine1.Results.ForEach(o => results.Add(o.Geometry));
+                    }
+                    else if (result3.StringResult == "全部")
+                    {
+                        var engine1 = new ThShearWallExtractionEngine();
+                        engine1.Extract(acadDatabase.Database);
+                        engine1.Results.ForEach(o => results.Add(o.Geometry));
+
+                        var engine2 = new ThDB3ShearWallExtractionEngine();
+                        engine2.Extract(acadDatabase.Database);
+                        engine2.Results.ForEach(o => results.Add(o.Geometry));
+                    }
+                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(results);
+                    spatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.SetDatabaseDefaults();
@@ -420,7 +398,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 var nFrame = ThMEPFrameService.Normalize(frame);
-                var engine = new ThCurtainWallExtractionEngine();
+                var engine = new ThDB3CurtainWallExtractionEngine();
                 engine.Extract(acadDatabase.Database);
                 var results = new DBObjectCollection();
                 var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
@@ -716,7 +694,7 @@ namespace ThMEPEngineCore
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
-                var railingRecognitionEngine = new ThRailingRecognitionEngine();
+                var railingRecognitionEngine = new ThDB3RailingRecognitionEngine();
                 railingRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 railingRecognitionEngine.Elements.ForEach(o =>
                 {
@@ -1000,6 +978,48 @@ namespace ThMEPEngineCore
                         o.SetDatabaseDefaults();
                     });
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractStair", CommandFlags.Modal)]
+        public void THExtractStair()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var engine = new ThDB3StairRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Elements.Cast<ThIfcStair>().ForEach(o =>
+                {
+                    if (o.PlatForLayout.Count != 0)
+                    {
+                        var pline = new Polyline();
+                        pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
+                        pline.Closed = true;
+                        acadDatabase.ModelSpace.Add(pline);
+                    }
+
+                    if (o.HalfPlatForLayout.Count != 0)
+                    {
+                        var halfPline = new Polyline();
+                        halfPline.CreatePolyline(new Point3dCollection(o.HalfPlatForLayout.ToArray()));
+                        halfPline.Closed = true;
+                        acadDatabase.ModelSpace.Add(halfPline);
+                    }
+                });
             }
         }
 

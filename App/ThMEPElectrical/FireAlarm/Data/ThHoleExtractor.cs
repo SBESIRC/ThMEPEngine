@@ -12,15 +12,18 @@ using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.IO;
 using NFox.Cad;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Algorithm;
 
 namespace FireAlarm.Data
 {
-    class ThHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey
+    class ThHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         public Dictionary<Polyline, List<string>> HoleDic { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThHoleExtractor()
         {
@@ -41,7 +44,7 @@ namespace FireAlarm.Data
                     var storeyInfo = Query(o.Key);
                     parentId = storeyInfo.Id;
                 }
-                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Value);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName,string.Join(",", o.Value.ToArray()));
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Boundary = o.Key;
                 geos.Add(geometry);
@@ -56,19 +59,25 @@ namespace FireAlarm.Data
                 ElementLayer = this.ElementLayer,
             };
             extractService.Extract(database, pts);
+
+            extractService.Polys.ForEach(o => Transformer.Transform(o));
+            var holes = extractService.Polys.ToList();
+            holes = holes.Select(o => ThHandleNonClosedPolylineService.Handle(o)).ToList();
             ThCleanEntityService clean = new ThCleanEntityService();
-            var holes = extractService.Polys
+            holes = holes
                 .Where(o => o.Area >= SmallAreaTolerance)
                 .Select(o => clean.Clean(o))
                 .Cast<Polyline>()
                 .ToList();
-            holes.ForEach(o => o = ThHandleNonClosedPolylineService.Handle(o));
             //对Clean的结果进一步过虑
             holes = holes.ToCollection().FilterSmallArea(1.0).Cast<Polyline>().ToList();
 
-            var textService = new ThExtractTextService();
+            var textService = new ThExtractTextService()
+            {
+               ElementLayer ="AI-房间名称", 
+            };
             textService.Extract(database, pts);
-
+            textService.Texts.ForEach(o => Transformer.Transform(o));
             // 获取洞包括的文字
             var textInfoService = new ThQueryHoleTextInfoService();
             HoleDic = textInfoService.Query(holes, textService.Texts);
@@ -92,6 +101,16 @@ namespace FireAlarm.Data
         {
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
+        }
+
+        public void Transform()
+        {
+            Transformer.Transform(HoleDic.Keys.ToCollection());
+        }
+
+        public void Reset()
+        {
+            Transformer.Reset(HoleDic.Keys.ToCollection());
         }
     }
 }

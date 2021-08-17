@@ -14,6 +14,8 @@ namespace ThMEPLighting
         public const string EPowerLayerName = "E-POWR-EQPM";
 
         public const string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名,size:3
+        public const string EmgLightDoubleBlockName = "E-BFEL500"; //消防应急灯图块名,size:1
+
         public const string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块,size:1
         public const string EvacLRBlockName = "E-BFEL210";     //疏散指示灯图块,size:1
 

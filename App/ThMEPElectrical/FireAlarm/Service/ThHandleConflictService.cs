@@ -1,6 +1,9 @@
 ﻿using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
+using ThMEPEngineCore.CAD;
+using System.Linq;
 
 namespace ThMEPElectrical.FireAlarm.Service
 {
@@ -11,8 +14,8 @@ namespace ThMEPElectrical.FireAlarm.Service
         public List<Entity> Results { get; private set; }
         public ThHandleConflictService(List<Entity> firstKeepElements,List<Entity> handleElements)
         {
-            FirstKeepElements = firstKeepElements;
-            HandleElements = handleElements;
+            FirstKeepElements = firstKeepElements.ToCollection().FilterSmallArea(1.0).Cast<Entity>().ToList();
+            HandleElements = handleElements.ToCollection().FilterSmallArea(1.0).Cast<Entity>().ToList();
             Results = new List<Entity>();
         }
         public void Handle()

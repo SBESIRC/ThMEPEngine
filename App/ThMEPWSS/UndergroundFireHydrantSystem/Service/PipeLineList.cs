@@ -23,6 +23,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void PipeLineAutoConnect(ref List<Line> lineList, ref FireHydrantSystemIn fireHydrantSysIn)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
+            lineList = CleanLaneLines3(lineList);
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -34,7 +35,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 GLineSegList.Add(l);
             }
-
             lineList = new List<Line>();//GLineSegment 转 line
             foreach (var gl in GLineSegList)
             {
@@ -45,16 +45,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     ;
                 }
                 var line = new Line(pt1._pt, pt2._pt);
-                lineList.Add(line);
-                if(!fireHydrantSysIn.ptDic[pt1].Contains(pt2))
+                if(line.Length<1)
                 {
-                    fireHydrantSysIn.ptDic[pt1].Add(pt2);
+                    continue;
                 }
-                if (!fireHydrantSysIn.ptDic[pt2].Contains(pt1))
+                lineList.Add(line);
+                if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
                 {
-                    fireHydrantSysIn.ptDic[pt2].Add(pt1);
+                    fireHydrantSysIn.PtDic[pt1].Add(pt2);
+                }
+                if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
+                {
+                    fireHydrantSysIn.PtDic[pt2].Add(pt1);
                 }
             }
+            lineList = CleanLaneLines3(lineList);
         }
 
          public static void PipeLineAutoConnect(ref List<Line> lineList)
@@ -97,7 +102,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void ConnectBreakLine(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList)
+        public static void ConnectBreakLine(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, 
+            ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
         {
             //连接不是端点的孤立线段
             var connectLine = new List<Line>();
@@ -105,11 +111,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var pt1 = new Point3dEx(line.StartPoint);
                 var pt2 = new Point3dEx(line.EndPoint);
+                var flag1 = true;
+                var flag2 = true;
+                foreach(var stop in stopPts)
+                {
+                    if(pt1._pt.DistanceTo(stop._pt) < 10)
+                    {
+                        flag1 = false;
+                        break;
+                    }
+                    if (pt2._pt.DistanceTo(stop._pt) < 10)
+                    {
+                        flag2 = false;
+                        break;
+                    }
+                }
                 if(line.Length < 50)
                 {
                     continue;//把一些短线直接跳过
                 }
-                if (fireHydrantSysIn.ptDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.hydrantPosition))
+                if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.HydrantPosition))
                 {
                     foreach(var l in lineList)
                     {
@@ -128,7 +149,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         }
                     }
                 }
-                if(fireHydrantSysIn.ptDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.hydrantPosition))
+                if(flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.HydrantPosition))
                 {
                     foreach (var l in lineList)
                     {
@@ -168,29 +189,29 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         pointList.Add(pt2);
                     }
 
-                    if (fireHydrantSysIn.ptDic.ContainsKey(pt1))
+                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1))
                     {
-                        if(!fireHydrantSysIn.ptDic[pt1].Contains(pt2))
+                        if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
                         {
-                            fireHydrantSysIn.ptDic[pt1].Add(pt2);
+                            fireHydrantSysIn.PtDic[pt1].Add(pt2);
                         }
                     }
                     else
                     {
                         var ptls = new List<Point3dEx>(){ pt2 };
-                        fireHydrantSysIn.ptDic.Add(pt1, ptls);
+                        fireHydrantSysIn.PtDic.Add(pt1, ptls);
                     }
-                    if (fireHydrantSysIn.ptDic.ContainsKey(pt2))
+                    if (fireHydrantSysIn.PtDic.ContainsKey(pt2))
                     {
-                        if (!fireHydrantSysIn.ptDic[pt2].Contains(pt1))
+                        if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
                         {
-                            fireHydrantSysIn.ptDic[pt2].Add(pt1);
+                            fireHydrantSysIn.PtDic[pt2].Add(pt1);
                         }
                     }
                     else
                     {
                         var ptls = new List<Point3dEx>() { pt1 };
-                        fireHydrantSysIn.ptDic.Add(pt2, ptls);
+                        fireHydrantSysIn.PtDic.Add(pt2, ptls);
                     }
                 }
             }

@@ -1,14 +1,15 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.IO;
@@ -17,10 +18,12 @@ using ThMEPEngineCore.Service;
 
 namespace FireAlarm.Data
 {
-    public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, ISetStorey
+    public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, ISetStorey, ITransformer
     {
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaFireproofshutterExtractor()
         {
@@ -29,30 +32,34 @@ namespace FireAlarm.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var extractService = new ThExtractPolylineService()
+            var localFireproofShutters = new DBObjectCollection();
+            var instance = new ThExtractPolylineService()
             {
                 ElementLayer = this.ElementLayer,
             };
-            extractService.Extract(database, pts);
-            ThCleanEntityService clean = new ThCleanEntityService();
-            FireproofShutter = extractService.Polys
-                .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => clean.Clean(o))
-                .Cast<Polyline>()
-                .ToList();
-            //对Clean的结果进一步过虑
-            FireproofShutter = FireproofShutter.ToCollection().FilterSmallArea(1.0).Cast<Polyline>().ToList();
+            instance.Extract(database, pts);
+            instance.Polys.ForEach(o => Transformer.Transform(o));
+            localFireproofShutters = instance.Polys.ToCollection();
 
-            FireproofShutter.ForEach(o =>
+            for (int i =0;i< localFireproofShutters.Count;i++)
             {
-                if(!IsClosed(o))
+                if (!IsClosed(localFireproofShutters[i] as Polyline))
                 {
                     var bufferService = new ThNTSBufferService();
-                    o = bufferService.Buffer(o, 100) as Polyline;
+                    localFireproofShutters[i] = bufferService.Buffer(localFireproofShutters[i] as Entity, 100) as Polyline;
                 }
-            });
+            }
+            ThCleanEntityService clean = new ThCleanEntityService();
+            localFireproofShutters = localFireproofShutters.FilterSmallArea(SmallAreaTolerance)
+                .Cast<Polyline>()
+                .Select(o => clean.Clean(o))
+                .Cast<Entity>()
+                .ToCollection();
+            //对Clean的结果进一步过虑
+            localFireproofShutters = localFireproofShutters.FilterSmallArea(SmallAreaTolerance);
+            FireproofShutter = localFireproofShutters.Cast<Polyline>().ToList();
         }
-        public new List<ThGeometry> BuildGeometries()
+        public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
             FireproofShutter.ForEach(o =>
@@ -84,13 +91,9 @@ namespace FireAlarm.Data
             {
                 var enlarge = bufferService.Buffer(o, 5.0);
                 var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count == 2)
+                if (neibours.Count > 0)
                 {
                     FireDoorNeibourIds.Add(o, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
-                }
-                else if (neibours.Count > 2)
-                {
-                    throw new NotSupportedException();
                 }
             });
         }
@@ -109,15 +112,9 @@ namespace FireAlarm.Data
         {
             return FireproofShutter.Cast<Entity>().ToList();
         }
-
-        private Polyline BufferSingle(Polyline polyline)
-        {
-            return polyline.BufferPL(100).Cast<Polyline>().OrderByDescending(o=>o.Area).First();
-        }
         private bool IsClosed(Polyline polyline)
         {
-            var newPoly = ThCleanEntityService.MakeValid(polyline);
-            if(newPoly.StartPoint.DistanceTo(newPoly.EndPoint)<=1.0)
+            if(polyline.StartPoint.DistanceTo(polyline.EndPoint)<=1.0)
             {
                 return true;
             }
@@ -125,6 +122,16 @@ namespace FireAlarm.Data
             {
                 return false;
             }
+        }
+
+        public void Transform()
+        {
+            Transformer.Transform(FireproofShutter.ToCollection());
+        }
+
+        public void Reset()
+        {
+            Transformer.Reset(FireproofShutter.ToCollection());
         }
     }
 }

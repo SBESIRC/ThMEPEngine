@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.UI.ViewModels
 {
@@ -23,6 +20,18 @@ namespace ThMEPLighting.UI.ViewModels
             ParallelSpaceItems.Add(new UListItemData("10", 0, (double)10.0));
             ParallelSpaceItems.Add(new UListItemData("15", 1, (double)15.0));
             ParallelSelectItem = ParallelSpaceItems.FirstOrDefault();
+
+            List<int> values = new List<int>
+            {
+                (int)ThEnumBlockScale.DrawingScale1_100,
+                (int)ThEnumBlockScale.DrawingScale1_150,
+            };
+            var raiseDim = CommonUtil.EnumDescriptionToList(typeof(ThEnumBlockScale), values);
+            foreach (var raise in raiseDim)
+            {
+                BlockScaleItems.Add(raise);
+            }
+            BlockSacleSelectItem = BlockScaleItems.Where(c => c.Value == (int)ThEnumBlockScale.DrawingScale1_100).FirstOrDefault();
         }
         /// <summary>
         /// 指示灯排布方式
@@ -52,6 +61,12 @@ namespace ThMEPLighting.UI.ViewModels
             get { return _parallelSpaceItems; }
             set { _parallelSpaceItems = value; this.RaisePropertyChanged(); }
         }
+        private ObservableCollection<UListItemData> _blockScaleItems = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> BlockScaleItems
+        {
+            get { return _blockScaleItems; }
+            set { _blockScaleItems = value; this.RaisePropertyChanged(); }
+        }
         private UListItemData _parallelSelectItem { get; set; }
         public UListItemData ParallelSelectItem 
         {
@@ -72,6 +87,17 @@ namespace ThMEPLighting.UI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+        private UListItemData _blockSacleSelectItem { get; set; }
+        public UListItemData BlockSacleSelectItem
+        {
+            get { return _blockSacleSelectItem; }
+            set
+            {
+                _blockSacleSelectItem = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
     }
     public enum LayoutTypeEnum
     {

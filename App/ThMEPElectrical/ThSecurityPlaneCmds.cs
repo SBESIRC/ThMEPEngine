@@ -54,5 +54,14 @@ namespace ThMEPElectrical
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THTXTINFO", CommandFlags.Modal)]
+        public void ThGetStruInfoToTxt()
+        {
+            using (var cmd = new TxtStrucInfoCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

@@ -11,18 +11,21 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.EditorInput;
 using AcHelper;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.Command
 {
-    public class ThFireHydrantCmd : IAcadCommand, IDisposable
+    public class ThFireHydrantCmd : ThMEPBaseCommand, IDisposable
     {
         public ThFireHydrantCmd()
         {
+            CommandName = "THDXXHSXTT";
+            ActionName = "生成";
         }
         public void Dispose()
         {
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {
@@ -50,8 +53,7 @@ namespace ThMEPWSS.Command
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
             var extraNodes = new List<Point3dEx>();//主环路连通阀点集
             var visited = new HashSet<Point3dEx>();//访问标志
-            //var subPtList = new List<Point3dEx>();//按照主环遍历顺序存放次环节点
-            foreach (var markLine in fireHydrantSysIn.markLineList)
+            foreach (var markLine in fireHydrantSysIn.MarkLineList)
             {
                 var startPt = new Point3dEx(new Point3d());
                 var targetPt = new Point3dEx(new Point3d());
@@ -84,9 +86,9 @@ namespace ThMEPWSS.Command
             }
 
             var subPathList = new List<List<Point3dEx>>();//次环路最终路径 List
-            foreach (var nd in fireHydrantSysIn.nodeList)
+            foreach (var nd in fireHydrantSysIn.NodeList)
             {
-                if (!fireHydrantSysIn.ptDic.ContainsKey(nd[0]))
+                if (!fireHydrantSysIn.PtDic.ContainsKey(nd[0]))
                 {
                     continue;
                 }
@@ -109,20 +111,16 @@ namespace ThMEPWSS.Command
             visited.Clear();
             PtSet.AddVisit(ref visited, mainPathList);
             PtSet.AddVisit(ref visited, subPathList);
-            //using (AcadDatabase currentDb = AcadDatabase.Active())
-            //{
-            //    DrawPipe(currentDb, mainPathList);
-            //    DrawPipe(currentDb, subPathList);
-            //}
             
             var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
             var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
-            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited, extraNodes);
-            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited, extraNodes);
+            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
+            PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
 
             GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList, fireHydrantSysIn, branchDic);//主环路获取
             GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
+            DrawPipe(curDb, subPathList[3]);
             fireHydrantSysOut.Draw();//绘制系统图
         }
 
@@ -137,6 +135,17 @@ namespace ThMEPWSS.Command
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+        }
+        public static void DrawPipe(AcadDatabase acadDatabase, List<Point3dEx> pathList)
+        {
+            
+                for (int i = 0; i < pathList.Count - 1; i++)
+                {
+                    var line = new Line(pathList[i]._pt, pathList[i + 1]._pt);
+                    line.LayerId = DbHelper.GetLayerId("X-SHET-LOGK");
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+            
         }
     }
 }

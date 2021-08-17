@@ -116,7 +116,7 @@ namespace ThMEPWSS.Uitl.ShadowIn2D
 
         private Line GetIntersectLine(Polyline polyline, Point3d point)
         {
-            var allLines = AllSegments(polyline);
+            var allLines = AllSegments(polyline).Where(x => x.Length > 1).ToList();
             foreach (var line in allLines)
             {
                 if (line.ToCurve3d().IsOn(point, new Tolerance(1, 1)))

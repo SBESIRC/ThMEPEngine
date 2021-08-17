@@ -43,6 +43,9 @@ namespace ThMEPElectrical
         public const string ELECTRICLOCK_BLOCK_NAME = "E-BACS21";                       //电锁图块
         public const string INTERCOM_BLOCK_NAME = "E-BACS01";                           //出入口对讲门口机图块
         public const string CARDREADER_BLOCK_NAME = "E-BACS41";                         //读卡器图块
+        //----出入口控制系统连管
+        public static readonly string AC_PIPE_LAYER_NAME = "E-ACS-WIRE";               //出入口控制系统连管图层
+        public static readonly string AC_PIPE_LINETYPE = "ByLayer";                        //出入口控制系统连管线型
         //----入侵报警系统                                                              
         public const string IA_LAYER_NAME = "E-IAS-DEVC";                               //入侵报警系统放置图层
         public const string CONTROLLER_BLOCK_NAME = "E-BIAS010";                        //入侵报警控制器
@@ -52,6 +55,9 @@ namespace ThMEPElectrical
         public const string DISABLEDALARM_BLOCK_NAME = "E-BIAS200";                     //残卫报警按钮
         public const string SOUNDLIGHTALARM_BLOCK_NAME = "E-BIAS020";                   //残卫声光报警器
         public const string EMERGENCYALARM_BLOCK_NAME = "E-BIAS201";                    //紧急报警按钮
+        //----入侵报警系统 连管
+        public static readonly string IA_PIPE_LAYER_NAME = "E-IAS-WIRE";               //入侵报警系统连管图层
+        public static readonly string IA_PIPE_LINETYPE = "ByLayer";                        //入侵报警系统连管线型
         //----电子巡更系统
         public const string GT_LAYER_NAME = "E-GTS-DEVC";                               //入侵报警系统放置图层
         public const string TIMERECORDER_BLOCK_NAME = "E-BGTS10";                        //入侵报警控制器

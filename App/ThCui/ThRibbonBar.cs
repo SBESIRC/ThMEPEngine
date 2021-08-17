@@ -349,10 +349,10 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THSJSB_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            row.AddNewButton("消火栓",
-                "天华消火栓联管",
+            row.AddNewButton("消火栓连管",
+                "天华消火栓连管",
                 "THDXXHS",
-                "天华消火栓联管",
+                "天华消火栓连管",
                 "IDI_THCAD_THDXXHS_SMALL",
                 "IDI_THCAD_THDXXHS_LARGE",
                 RibbonButtonStyle.LargeWithText);
@@ -369,6 +369,14 @@ namespace TianHua.AutoCAD.ThCui
                 "天华地下消火栓系统图",
                 "IDI_THCAD_THDXXHSXTT_SMALL",
                 "IDI_THCAD_THDXXHSXTT_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("压力排水",
+                "天华地下压力排水系统图",
+                "THDXPSXTT",
+                "天华地下压力排水系统图",
+                "IDI_THCAD_THDXPSXTT_SMALL",
+                "IDI_THCAD_THDXPSXTT_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
 

@@ -37,7 +37,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService
                     continue;
                 }
 
-                var room = thRoom.Boundary as Polyline;
+                var room = getLayoutStructureService.GetUseRoomBoundary(thRoom);
                 var bufferRoom = room.Buffer(15)[0] as Polyline;
                 var nDoors = getLayoutStructureService.GetNeedDoors(doors, bufferRoom);
                 var nColumns = getLayoutStructureService.GetNeedColumns(columns, room);

@@ -2,9 +2,6 @@
 using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -13,9 +10,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     {
         public double Tolerance = 1; //mm
         public Point3d _pt;
-        public Point3dEx(Point3d pt)
+
+        public Point3dEx(double tol = 1)
+        {
+            _pt = new Point3d();
+            Tolerance = tol;
+        }
+        public Point3dEx(Point3d pt, double tol = 1)
         {
             _pt = pt;
+            Tolerance = tol;
         }
 
         public Point3dEx(double x, double y, double z,double tol = 1)
@@ -54,7 +58,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             _spt = spt;
             _ept = ept;
         }
-
         public override int GetHashCode()
         {
             return _spt.GetHashCode() ^ _ept.GetHashCode();
@@ -77,49 +80,49 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     {
         public static void AddPoint(ref FireHydrantSystemIn fireHydrantSysIn, ref Point3dEx pt1, ref Point3dEx pt2, string type)
         {
-            if (fireHydrantSysIn.ptDic.Count == 0)
+            if (fireHydrantSysIn.PtDic.Count == 0)
             {
-                fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });
-                fireHydrantSysIn.ptDic.Add(pt2, new List<Point3dEx>() { pt1 });
-                fireHydrantSysIn.ptTypeDic.Add(pt1, type);
-                fireHydrantSysIn.ptTypeDic.Add(pt2, type);
+                fireHydrantSysIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
+                fireHydrantSysIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
+                fireHydrantSysIn.PtTypeDic.Add(pt1, type);
+                fireHydrantSysIn.PtTypeDic.Add(pt2, type);
                 return;
             }
 
-            if(fireHydrantSysIn.ptDic.ContainsKey(pt1))
+            if(fireHydrantSysIn.PtDic.ContainsKey(pt1))
             {
-                if (!fireHydrantSysIn.ptDic[pt1].Contains(pt2))
+                if (!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
                 {
-                    fireHydrantSysIn.ptDic[pt1].Add(pt2);
+                    fireHydrantSysIn.PtDic[pt1].Add(pt2);
                 }
-                if(!fireHydrantSysIn.ptTypeDic[pt1].Equals(type))
+                if(!fireHydrantSysIn.PtTypeDic[pt1].Equals(type))
                 {
-                    fireHydrantSysIn.ptTypeDic.Remove(pt1);
-                    fireHydrantSysIn.ptTypeDic.Add(pt1, type);
+                    fireHydrantSysIn.PtTypeDic.Remove(pt1);
+                    fireHydrantSysIn.PtTypeDic.Add(pt1, type);
                 }
             }
             else
             {
-                fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });
-                fireHydrantSysIn.ptTypeDic.Add(pt1, type);
+                fireHydrantSysIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
+                fireHydrantSysIn.PtTypeDic.Add(pt1, type);
             }
 
-            if (fireHydrantSysIn.ptDic.ContainsKey(pt2))
+            if (fireHydrantSysIn.PtDic.ContainsKey(pt2))
             {
-                if (!fireHydrantSysIn.ptDic[pt2].Contains(pt1))
+                if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
                 {
-                    fireHydrantSysIn.ptDic[pt2].Add(pt1);
+                    fireHydrantSysIn.PtDic[pt2].Add(pt1);
                 }
-                if (!fireHydrantSysIn.ptTypeDic[pt2].Equals(type))
+                if (!fireHydrantSysIn.PtTypeDic[pt2].Equals(type))
                 {
-                    fireHydrantSysIn.ptTypeDic.Remove(pt2);
-                    fireHydrantSysIn.ptTypeDic.Add(pt2, type);
+                    fireHydrantSysIn.PtTypeDic.Remove(pt2);
+                    fireHydrantSysIn.PtTypeDic.Add(pt2, type);
                 }
             }
             else
             {
-                fireHydrantSysIn.ptDic.Add(pt2, new List<Point3dEx>() { pt1 });
-                fireHydrantSysIn.ptTypeDic.Add(pt2, type);
+                fireHydrantSysIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
+                fireHydrantSysIn.PtTypeDic.Add(pt2, type);
             }
         }
 
@@ -129,36 +132,36 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 return;
             }
-            if (fireHydrantSysIn.ptDic.Count == 0)
+            if (fireHydrantSysIn.PtDic.Count == 0)
             {
-                fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });
-                fireHydrantSysIn.ptDic.Add(pt2, new List<Point3dEx>() { pt1 });
+                fireHydrantSysIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
+                fireHydrantSysIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
                 return;
             }
 
-            if (fireHydrantSysIn.ptDic.ContainsKey(pt1))
+            if (fireHydrantSysIn.PtDic.ContainsKey(pt1))
             {
-                if (!fireHydrantSysIn.ptDic[pt1].Contains(pt2))
+                if (!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
                 {
-                    fireHydrantSysIn.ptDic[pt1].Add(pt2);
+                    fireHydrantSysIn.PtDic[pt1].Add(pt2);
                 }
             
             }
             else
             {
-                fireHydrantSysIn.ptDic.Add(pt1, new List<Point3dEx>() { pt2 });
+                fireHydrantSysIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
             }
 
-            if (fireHydrantSysIn.ptDic.ContainsKey(pt2))
+            if (fireHydrantSysIn.PtDic.ContainsKey(pt2))
             {
-                if (!fireHydrantSysIn.ptDic[pt2].Contains(pt1))
+                if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
                 {
-                    fireHydrantSysIn.ptDic[pt2].Add(pt1);
+                    fireHydrantSysIn.PtDic[pt2].Add(pt1);
                 }
             }
             else
             {
-                fireHydrantSysIn.ptDic.Add(pt2, new List<Point3dEx>() { pt1 });
+                fireHydrantSysIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
             }
         }
 
@@ -168,27 +171,26 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 foreach (var pt in ptls)
                 {
-                    if (fireHydrantSysIn.ptDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch
+                    if (fireHydrantSysIn.PtDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch
                     {
-                        foreach (var nd in fireHydrantSysIn.nodeList)
+                        foreach (var nd in fireHydrantSysIn.NodeList)
                         {
                             if (nd.Contains(pt))//次环点SubLoop
                             {
-                                fireHydrantSysIn.ptTypeDic.Remove(pt);
-                                fireHydrantSysIn.ptTypeDic.Add(pt, "SubLoop");
+                                fireHydrantSysIn.PtTypeDic.Remove(pt);
+                                fireHydrantSysIn.PtTypeDic.Add(pt, "SubLoop");
                                 break;
                             }
-                            fireHydrantSysIn.ptTypeDic.Remove(pt);//支路点 Branch
-                            fireHydrantSysIn.ptTypeDic.Add(pt, "Branch");
+                            fireHydrantSysIn.PtTypeDic.Remove(pt);//支路点 Branch
+                            fireHydrantSysIn.PtTypeDic.Add(pt, "Branch");
                         }
-
                     }
 
-                    if (fireHydrantSysIn.ptDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
+                    if (fireHydrantSysIn.PtDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
                     {
-                        if (!fireHydrantSysIn.ptTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
+                        if (!fireHydrantSysIn.PtTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
                         {
-                            fireHydrantSysIn.ptTypeDic.Add(pt, "MainLoop");
+                            fireHydrantSysIn.PtTypeDic.Add(pt, "MainLoop");
                         }
                     }
                 }

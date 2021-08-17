@@ -40,6 +40,19 @@ namespace ThAnalytics
 
         public void RecordTHCommandEvent(string cmdName, double duration)
         {
+            RecordTHCommandEvent(cmdName, ThMEPCmdService.Instance.Description(cmdName), duration);
+        }
+
+        public void RecordSysVerEvent(string sysverName, string sysverValue)
+        {
+            Segmentation segmentation = new Segmentation();
+            segmentation.Add("名称", sysverName);
+            segmentation.Add("值", sysverValue);
+            THRecordingService.RecordEvent("CAD系统变量", 0, segmentation);
+        }
+
+        public void RecordTHCommandEvent(string cmdName, string eventName, double duration)
+        {
             // 非协同用户
             if (string.IsNullOrEmpty(ThAcsSystemService.Instance.UserId))
             {
@@ -55,18 +68,10 @@ namespace ThAnalytics
             // 记录命令事件
             Segmentation thsegmentation = new Segmentation();
             thsegmentation.Add("名称", cmdName);
-            thsegmentation.Add("功能", ThMEPCmdService.Instance.Description(cmdName));
+            thsegmentation.Add("功能", eventName);
             thsegmentation.Add("用户", ThAcsSystemService.Instance.UserId);
             thsegmentation.Add("项目", ThAcsSystemService.Instance.ProjectNumber);
             THRecordingService.RecordEvent("天华命令使用", (int)duration, thsegmentation);
-        }
-
-        public void RecordSysVerEvent(string sysverName, string sysverValue)
-        {
-            Segmentation segmentation = new Segmentation();
-            segmentation.Add("名称", sysverName);
-            segmentation.Add("值", sysverValue);
-            THRecordingService.RecordEvent("CAD系统变量", 0, segmentation);
         }
     }
 }

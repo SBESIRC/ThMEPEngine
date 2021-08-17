@@ -27,10 +27,26 @@ namespace ThMEPEngineCore.Algorithm
             return entity.GetRXClass().DxfName == ThCADCommon.DxfName_TCH_Text;
         }
 
+        /// <summary>
+        /// 是否是天正阀
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public static bool IsTCHValve(this Entity entity)
         {
             string dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("VALVE");
+        }
+
+        /// <summary>
+        /// 是否是天正喷头
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHSprinkler(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
         }
 
         /// <summary>

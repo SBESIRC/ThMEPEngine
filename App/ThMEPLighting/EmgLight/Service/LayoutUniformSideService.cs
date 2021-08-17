@@ -38,13 +38,13 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="distList"></param>
         /// <param name="uniformSideLayout"></param>
         /// <param name="layout"></param>
-        public void LayoutUniformSide(int uniformSide, List<ThLane> laneList, out Dictionary<ThStruct, int> uniformSideLayout)
+        public void LayoutUniformSide(int uniformSide, List<ThLane> laneList, out Dictionary<ThStruct, int> uniformSideLayout,int tolMin,int tolMax)
         {
             int layoutStatus = 0; //0:非布灯状态,1:布灯状态
             double cumulateDist = 0;
 
             //找车道线前段的已分布状况,决定第一个点
-            int initial = LayoutFirstUniformSide(uniformSide, laneList, ref cumulateDist);
+            int initial = LayoutFirstUniformSide(uniformSide, laneList, tolMax, ref cumulateDist);
 
             if (initial < m_uniformSideStructsList[uniformSide].Count)
             {
@@ -53,13 +53,13 @@ namespace ThMEPLighting.EmgLight.Service
                     if (i < m_uniformSideStructsList[uniformSide].Count - 1)
                     {
                         cumulateDist += m_distList[uniformSide][i];
-                        if (cumulateDist > EmgLightCommon.TolLightRangeMax)
+                        if (cumulateDist > tolMax)
                         {
                             //累计距离到下个柱距离>tol, 本柱需标记
                             if (layoutStatus != 0)
                             {
                                 //如果当前状态为布灯状态,将本柱加入
-                                AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 0, EmgLightCommon.TolLightRangeMin, false);
+                                AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 0, tolMin, false);
                                 layoutStatus = 0;
                             }
                             else
@@ -71,11 +71,11 @@ namespace ThMEPLighting.EmgLight.Service
                         }
 
                         //本柱到下个柱是否很远
-                        if (m_distList[uniformSide][i] > EmgLightCommon.TolLightRangeMax)
+                        if (m_distList[uniformSide][i] > tolMax)
                         {
                             //将自己和下个柱加入,累计距离清零
-                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 1, EmgLightCommon.TolLightRangeMin, true);
-                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i + 1], 1, EmgLightCommon.TolLightRangeMin, true);
+                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 1, tolMin, true);
+                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i + 1], 1, tolMin, true);
                             layoutStatus = 0;
                             cumulateDist = 0;
                         }
@@ -85,22 +85,22 @@ namespace ThMEPLighting.EmgLight.Service
                         //最后一个点特殊处理
                         if (layoutStatus != 0)
                         {
-                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 0, EmgLightCommon.TolLightRangeMin, false);
+                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], 0, tolMin, false);
                         }
                         else
                         {
                             //如果末尾还有点,标值-1
-                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], -1, EmgLightCommon.TolLightRangeMin, false);
+                            AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][i], -1, tolMin, false);
                         }
                     }
                 }
             }
             else
             {
-                AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][initial], 0, EmgLightCommon.TolLightRangeMin, false);
+                AddToUniformLayoutList(m_uniformSideStructsList[uniformSide][initial], 0, tolMin, false);
             }
 
-            DrawUtils.ShowGeometry(m_uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key.geom).ToList(), EmgLightCommon.LayerStructLayout, Color.FromColorIndex(ColorMethod.ByColor, 3), LineWeight.LineWeight050);
+            DrawUtils.ShowGeometry(m_uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key.geom).ToList(), EmgLightCommon.LayerStructLayout,  3, 50);
             m_layoutList.AddRange(m_uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key).ToList());
             uniformSideLayout = m_uniformSideLayout;
         }
@@ -117,7 +117,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="LastHasNoLightColumn"></param>
         /// <param name="sum"></param>
         /// <returns></returns>
-        private int LayoutFirstUniformSide(int uniformSide, List<ThLane> laneList, ref double sum)
+        private int LayoutFirstUniformSide(int uniformSide, List<ThLane> laneList,int tolMax, ref double sum)
         {
             //   A|   |B    |E       [uniform side]
             //-----s[-----------lane----------]e
@@ -132,7 +132,7 @@ namespace ThMEPLighting.EmgLight.Service
             if (m_layoutList.Count > 0)
             {
                 ////车道线往前做框buffer,选出车线头部的已布情况
-                var importLayout = m_layoutService.BuildHeadLayout(m_layoutList, EmgLightCommon.TolLightRangeMax, EmgLightCommon.TolLane);
+                var importLayout = m_layoutService.BuildHeadLayout(m_layoutList, tolMax, EmgLightCommon.TolLane);
 
                 //情况A:
                 var uniformSideHeadLayout = importLayout[uniformSide].Where(x => m_layoutService.getCenterInLaneCoor(x).X < 0).ToList();
@@ -164,7 +164,7 @@ namespace ThMEPLighting.EmgLight.Service
                         for (int i = 0; i < m_uniformSideStructsList[uniformSide].Count; i++)
                         {
                             var dist = m_layoutService.getCenterInLaneCoor(m_uniformSideStructsList[uniformSide][i]).X - m_layoutService.getCenterInLaneCoor(otherSideStartLayout.Last()).X;
-                            if (Math.Abs(dist) > EmgLightCommon.TolLightRangeMax)
+                            if (Math.Abs(dist) > tolMax)
                             {
                                 if (i > 0)
                                 {

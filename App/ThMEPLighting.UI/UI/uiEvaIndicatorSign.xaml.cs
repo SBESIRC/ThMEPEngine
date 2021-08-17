@@ -91,6 +91,7 @@ namespace ThMEPLighting.UI.UI
             var space = (double)signViewModel.ParallelSelectItem.Tag;
             ThEmgLightService.Instance.MaxLightSpace = space * 1000;
             ThEmgLightService.Instance.IsHostingLight = signViewModel.LightLayoutType == LayoutTypeEnum.HostingLayout;
+            ThEmgLightService.Instance.BlockScale = signViewModel.BlockSacleSelectItem.Value;
         }
 
         private void checkFEIHide_Checked(object sender, RoutedEventArgs e)

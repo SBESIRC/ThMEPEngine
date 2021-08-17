@@ -11,48 +11,79 @@ using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using NFox.Cad;
-using ThMEPElectrical.FireAlarm.Interfacce;
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using Dreambuild.AutoCAD;
 
 namespace FireAlarm.Data
 {
-    public class ThFaRailingExtractor :ThRailingExtractor, ISetStorey
+    public class ThFaRailingExtractor :ThRailingExtractor, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+
         public ThFaRailingExtractor()
         {
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            //From DB3
-            var db3Railings = new List<Polyline>();
-            using (var railingEngine = new ThRailingRecognitionEngine())
-            {
-                railingEngine.Recognize(database, pts);
-                db3Railings = railingEngine.Elements.Select(o => o.Outline as Polyline).ToList();
-            }
-            //From Local
-            var localRailings = new List<Polyline>();
-            var instance = new ThExtractPolylineService()
-            {
-                ElementLayer = this.ElementLayer,
-            };
-            instance.Extract(database, pts);
-            ThCleanEntityService clean = new ThCleanEntityService();
-            localRailings = instance.Polys
-                .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => clean.Clean(o))
-                .Cast<Polyline>()
-                .ToList();
+            var db3Railings = ExtractDb3Railing(database, pts);
+            var localRailings = ExtractMsRailing(database, pts);
+
             //对Clean的结果进一步过虑
-            localRailings = localRailings.ToCollection().FilterSmallArea(1.0).Cast<Polyline>().ToList();
+            localRailings = localRailings.FilterSmallArea(SmallAreaTolerance);
 
             //处理重叠
             var conflictService = new ThHandleConflictService(
                 localRailings.Cast<Entity>().ToList(),
                 db3Railings.Cast<Entity>().ToList());
             conflictService.Handle();
-            Railing = conflictService.Results.Cast<Polyline>().ToList();
+            var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
+            Railing = handleObjs.Cast<Polyline>().ToList();
+        }
+        private DBObjectCollection ExtractDb3Railing(Database database, Point3dCollection pts)
+        {
+            var db3Railings = new DBObjectCollection();
+            var db3RailingExtractionEngine = new ThDB3RailingExtractionEngine();
+            db3RailingExtractionEngine.Extract(database);
+            db3RailingExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+
+            var railingEngine = new ThDB3RailingRecognitionEngine();
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(p =>
+            {
+                var pt = new Point3d(p.X, p.Y, p.Z);
+                Transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            railingEngine.Recognize(db3RailingExtractionEngine.Results, newPts);
+            db3Railings = railingEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
+
+            return db3Railings;
+        }
+        private DBObjectCollection ExtractMsRailing(Database database, Point3dCollection pts)
+        {
+            var localRailings = new DBObjectCollection();
+            var instance = new ThExtractPolylineService()
+            {
+                ElementLayer = this.ElementLayer,
+            };
+            instance.Extract(database, pts);
+
+            instance.Polys.ForEach(o => Transformer.Transform(o));
+            localRailings = instance.Polys.ToCollection();
+
+            ThCleanEntityService clean = new ThCleanEntityService();
+            localRailings = localRailings.FilterSmallArea(SmallAreaTolerance)
+                .Cast<Polyline>()
+                .Select(o => clean.Clean(o))
+                .Cast<Entity>()
+                .ToCollection();
+
+            return localRailings;
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -83,6 +114,16 @@ namespace FireAlarm.Data
         public void Set(List<ThStoreyInfo> storeyInfos)
         {
             StoreyInfos = storeyInfos;
+        }
+
+        public void Transform()
+        {
+            Transformer.Transform(Railing.ToCollection());
+        }
+
+        public void Reset()
+        {
+            Transformer.Reset(Railing.ToCollection());
         }
     }
 }
