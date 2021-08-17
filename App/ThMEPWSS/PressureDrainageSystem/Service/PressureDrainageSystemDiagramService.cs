@@ -194,18 +194,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         someLayerPipeIndexes.Add(j, new List<int>());
                     }
-                    if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
-                    {
-                        for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
-                        {
-                            foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
-                            {
-                                Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
-                                line.ColorIndex = (int)ColorIndex.Cyan;
-                                line.AddToCurrentSpace();
-                            }
-                        }
-                    }
+                    //if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
+                    //{
+                    //    for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
+                    //    {
+                    //        foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
+                    //        {
+                    //            Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
+                    //            line.ColorIndex = (int)ColorIndex.Cyan;
+                    //            line.AddToCurrentSpace();
+                    //        }
+                    //    }
+                    //}
                     PipeLineSystemUnits[i].verticalPipeId.ForEach(o => ids.Add(o));
                     ids.Remove(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Id);
                     parLayers.Add(-1);
@@ -432,12 +432,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         br.Visible = true;
                         br.TransformBy(mat);
                     }
-                    foreach (var line in testLines[i])
-                    {
-                        Point3d pt = line.EndPoint.TransformBy(mat);
-                        var k = new Line(line.StartPoint, pt);
-                        k.AddToCurrentSpace();
-                    }
+                    //foreach (var line in testLines[i])
+                    //{
+                    //    Point3d pt = line.EndPoint.TransformBy(mat);
+                    //    var k = new Line(line.StartPoint, pt);
+                    //    k.AddToCurrentSpace();
+                    //}
                     if (i < allEntities.Count - 1)
                     {
                         totalspacine += maxExts[i].MaxPoint.X - maxExts[i + 1].MinPoint.X + spacing;
