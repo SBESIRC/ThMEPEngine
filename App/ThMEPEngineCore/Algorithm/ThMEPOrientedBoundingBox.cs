@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public static class ThOrientedBoundingBox
+    public static class ThMEPOrientedBoundingBox
     {
         /// <summary>
         /// Calculates the minimum bounding box.

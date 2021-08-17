@@ -1,16 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThMaximumInscribedRectangle
+    public class ThMEPMaximumInscribedRectangle
     {
         // Algorithm constants
         double aspectRatioStep = 0.5; // step size for the aspect ratio
@@ -412,7 +409,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <param name="lines"></param>
         /// <param name="line"></param>
         /// <returns></returns>
-        private List<Line> GetOverlapLines(List<Line> lines, Line line) 
+        private List<Line> GetOverlapLines(List<Line> lines, Line line)
         {
             Vector3d xDir = (line.EndPoint - line.StartPoint).GetNormal();
             Vector3d zDir = Vector3d.ZAxis;

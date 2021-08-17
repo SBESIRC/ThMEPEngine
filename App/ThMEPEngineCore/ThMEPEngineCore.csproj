@@ -67,12 +67,11 @@
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\RoutePlanData.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
-    <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
-    <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
+    <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPRegionService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
-    <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
+    <Compile Include="Algorithm\ThMEPOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
     <Compile Include="CAD\NameValueString.cs" />
