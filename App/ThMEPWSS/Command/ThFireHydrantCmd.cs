@@ -120,7 +120,6 @@ namespace ThMEPWSS.Command
             GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList, fireHydrantSysIn, branchDic);//主环路获取
             GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
-            DrawPipe(curDb, subPathList[3]);
             fireHydrantSysOut.Draw();//绘制系统图
         }
 

@@ -582,7 +582,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
 
             var pt1 = new Point3d(leftX, leftY + textHeight, 0);
-            var pt2 = new Point3d(rightX, rightY, 0);
+            var pt2 = new Point3d(rightX, rightY + 150, 0);
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//文字范围
 
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域

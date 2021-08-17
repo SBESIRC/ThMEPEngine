@@ -216,6 +216,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
 
+            foreach(var pt1 in pointList)
+            {
+                foreach(var pt2  in pointList)
+                {
+
+                    if(!pt1.Equals(pt2))
+                    {
+                        var line = new Line(pt1._pt, pt2._pt);
+                        if(line.Length < 10)
+                        {
+                            if(!lineList.Contains(line))
+                            {
+                                lineList.Add(new Line(pt1._pt, pt2._pt));
+                            }
+                            if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
+                            {
+                                fireHydrantSysIn.PtDic[pt1].Add(pt2);
+                            }
+                            if(!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
+                            {
+                                fireHydrantSysIn.PtDic[pt2].Add(pt1);
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         public static List<Line> CleanLaneLines2(List<Line> lines)

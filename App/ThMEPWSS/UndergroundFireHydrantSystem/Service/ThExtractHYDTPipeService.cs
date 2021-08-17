@@ -777,7 +777,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X"))
                     {
                         textWidth = tWidth;
-                        textModel = (ent as DBText).TextString;
+
+                        textModel = (text as DBText).TextString;
                     }
                     dBObjects.Add((DBObject)text);
                 }

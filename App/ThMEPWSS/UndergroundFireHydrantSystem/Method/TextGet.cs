@@ -18,7 +18,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
             }
 
-            if (pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B'))
+            if (pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B') || pipeNumber1.StartsWith("DX"))
             {
                 var textPt1 = new Point3d(pt4.X - textWidth, pt4.Y - 1700, 0);
                 var textPt2 = new Point3d(pt4.X, pt4.Y - 1700, 0);
