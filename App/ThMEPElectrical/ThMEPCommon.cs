@@ -69,7 +69,7 @@ namespace ThMEPElectrical
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
         public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);
-        public static readonly double spacingValue = 4500;
+        public static readonly double spacingValue = 3000;
 
         public static readonly double ShrinkDistance = -500; // 内缩距离
         public static readonly double ShrinkSmallDistance = -3; // 误差内缩距离
