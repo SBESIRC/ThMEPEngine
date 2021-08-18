@@ -16,6 +16,7 @@ using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore;
 
 namespace FireAlarm.Data
 {
@@ -96,6 +97,8 @@ namespace FireAlarm.Data
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
+            var service = new ThMEPEngineCoreRoomService();
+            service.Initialize();
             Rooms.ForEach(o =>
             {
                 var geometry = new ThGeometry();
@@ -108,6 +111,19 @@ namespace FireAlarm.Data
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Name);
+                string privacyContent = "";
+                if (o.Tags.Count > 0)
+                {
+                    var labels = service.GetLabels(o);
+                    if (labels.Count > 0)
+                    {
+                        if(service.IsPublic(labels))
+                        privacyContent="公有";
+                        else if(service.IsPrivate(labels))
+                            privacyContent = "私有";
+                    }
+                }
+                geometry.Properties.Add(ThExtractorPropertyNameManager.PrivacyPropertyName, privacyContent);
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
