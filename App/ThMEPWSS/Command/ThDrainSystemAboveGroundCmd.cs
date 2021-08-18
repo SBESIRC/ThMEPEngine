@@ -27,8 +27,6 @@ namespace ThMEPWSS.Command
     public class ThDrainSystemAboveGroundCmd : IAcadCommand, IDisposable
     {
         public string errorMsg = "";
-        
-
         ThWallColumnsEngine _wallColumnsEngine = null;
         ThRoomDataEngine _roomEngine = null;
         DoorWindowEngine _doorWindowEngine = null;
@@ -57,8 +55,6 @@ namespace ThMEPWSS.Command
             EnumEquipmentType.door,
             EnumEquipmentType.stairs,
         };
-
-        List<Polyline> testLines = new List<Polyline>();
         public ThDrainSystemAboveGroundCmd(List<FloorFramed> selectFloors, DrainageSystemAGViewmodel viewmodel) 
         {
             if (null != selectFloors && selectFloors.Count > 0)
@@ -66,10 +62,19 @@ namespace ThMEPWSS.Command
             if (null != viewmodel) 
             {
                 SetServicesModel.Instance.drawingScale = (EnumDrawingScale)viewmodel.ScaleSelectItem.Value;
-                SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter = (EnumPipeDiameter)viewmodel.WSVPipeDiameterSelectItem.Value;
+                var intSVPipeDiam = (int)viewmodel.WSVPipeDiameterSelectItem.Value;
+                if (intSVPipeDiam < 0)
+                {
+                    SetServicesModel.Instance.haveSewageVentilation = false;
+                }
+                else 
+                {
+                    SetServicesModel.Instance.haveSewageVentilation = true;
+                    SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter = (EnumPipeDiameter)viewmodel.WSVPipeDiameterSelectItem.Value;
+                }
                 SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter = (EnumPipeDiameter)viewmodel.WSWPipeDiameterSelectItem.Value;
                 SetServicesModel.Instance.toiletIsCaisson = viewmodel.ToiletIsCaisson;
-
+                
                 SetServicesModel.Instance.balconyRiserPipeDiameter = (EnumPipeDiameter)viewmodel.BPipeDiameterSelectItem.Value;
                 SetServicesModel.Instance.balconyWasteWaterRiserPipeDiameter = (EnumPipeDiameter)viewmodel.BWWPipeDiameterSelectItem.Value;
                 SetServicesModel.Instance.condensingRiserPipeDiameter = (EnumPipeDiameter)viewmodel.CPipeDiameterSelectItem.Value;
@@ -92,16 +97,16 @@ namespace ThMEPWSS.Command
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //所有的楼层框 必须有顶层，没有时不进行后续的生成
-                var allFrames = FramedReadUtil.ReadAllFloorFramed();
+                //var allFrames = FramedReadUtil.ReadAllFloorFramed();
                 _roomEngine = new ThRoomDataEngine();
-                if (!CheckData(allFrames))
+                var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
+                if (!CheckData(floorFrameds))
                 {
                     if (!string.IsNullOrEmpty(errorMsg)) 
                         Active.Database.GetEditor().WriteMessage(errorMsg);
                     return;
                 }
                 InitData(acdb.Database);
-
                 var allRooms = _roomEngine.GetAllRooms(livingHighestFloor.blockOutPointCollection);
                 _floorBlockEqums = DrainSysAGCommon.GetFloorBlocks(livingHighestFloor,_blockReferenceData,_basicElementEngine);
                 var tubeBlocks = new List<BlockReference>();
@@ -167,15 +172,8 @@ namespace ThMEPWSS.Command
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
                     createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
 
-
                 var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
                 RoofPipeLabelLayout(midY);
-                foreach (var pl in testLines) 
-                {
-                    if (null == pl)
-                        continue;
-                    acdb.ModelSpace.Add(pl);
-                }
 
                 var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                 var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);

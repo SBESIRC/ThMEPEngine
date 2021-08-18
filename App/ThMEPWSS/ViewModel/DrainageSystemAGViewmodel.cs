@@ -30,6 +30,7 @@ namespace ThMEPWSS.ViewModel
                 (int)EnumPipeDiameter.DN200,
             };
             var raiseDim = CommonUtil.EnumDescriptionToList(typeof(EnumPipeDiameter), values);
+            WSVPipeDiameterListItems.Add(new UListItemData("无",-1));
             foreach (var raise in raiseDim) 
             {
                 WSWPipeDiameterListItems.Add(raise);

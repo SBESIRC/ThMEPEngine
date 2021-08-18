@@ -53,7 +53,7 @@ namespace ThMEPWSS.Engine
             ///一次性获取所有的房间信息
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomBuilder = new ThRoomBuilderEngine();
+                var roomBuilder = new ThRoomBuilderEngineWSS();
                 var rooms = roomBuilder.BuildFromMS(acdb.Database, new Point3dCollection());
                 if (rooms != null && rooms.Count > 0)
                     _allRooms.AddRange(rooms);
