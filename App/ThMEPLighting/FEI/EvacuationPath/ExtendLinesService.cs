@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPLighting.FEI.BFSAlgorithm;
+using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPLighting.FEI.Model;
 using ThMEPLighting.FEI.Service;
 

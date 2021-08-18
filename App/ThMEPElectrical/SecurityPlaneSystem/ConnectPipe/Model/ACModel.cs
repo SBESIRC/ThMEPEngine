@@ -9,15 +9,13 @@ using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
 {
-    public class ACModel
+    public class ACModel : BlockModel
     {
-        public ACModel(BlockReference block)
+        public ACModel(BlockReference block) : base(block)
         {
             double width = 4 * ThElectricalUIService.Instance.Parameter.scale;
             double height = 5 * ThElectricalUIService.Instance.Parameter.scale;
-            position = new Point3d(block.Position.X, block.Position.Y, 0);
             layoutDir = -block.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
-            blockModel = block;
             ConnectPts = new List<Point3d>();
             var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
             ConnectPts.Add(position + layoutDir * (height / 2));
@@ -25,16 +23,6 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
             ConnectPts.Add(position + otherDir * (width / 2));
             ConnectPts.Add(position - otherDir * (width / 2));
         }
-
-        /// <summary>
-        /// 原始块
-        /// </summary>
-        public BlockReference blockModel { get; set; }
-
-        /// <summary>
-        /// 块基点
-        /// </summary>
-        public Point3d position { get; set; }
 
         /// <summary>
         /// 块布置方向

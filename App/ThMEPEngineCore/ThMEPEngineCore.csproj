@@ -65,6 +65,8 @@
     <Compile Include="Algorithm\AStarAlgorithm_New\MapService\Map.cs" />
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\AStarNode.cs" />
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\RoutePlanData.cs" />
+    <Compile Include="Algorithm\BFSAlgorithm\BFSNode.cs" />
+    <Compile Include="Algorithm\BFSAlgorithm\BFSPathPlaner.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />

@@ -50,13 +50,32 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
+                // 获取线槽图层
+                PromptSelectionOptions trunkingOptions = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择线槽类型",
+                    RejectObjectsOnLockedLayers = true,
+                    SinglePickInSpace = true,
+                };
+                var trunkingDxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Curve)).DxfName,
+                };
+                var trunkingFilter = ThSelectionFilterTool.Build(trunkingDxfNames);
+                var trunkingResult = Active.Editor.GetSelection(trunkingOptions, trunkingFilter);
+                if (trunkingResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
                 List<BlockReference> frameLst = new List<BlockReference>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
                     frameLst.Add(frame.Clone() as BlockReference);
                 }
-
+                string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
                 foreach (var frameBlock in frameLst)
                 {
                     var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
@@ -84,9 +103,12 @@ namespace ThMEPElectrical.Command
                     //获取连线图块
                     var blocks = GetBlocks(frame);
 
+                    //获取线槽
+                    var trunkings = getPrimitivesService.GetTrunkings(frame, trunkingLayer);
+
                     //连线
                     ConnectPipeService connectPipeService = new ConnectPipeService();
-                    connectPipeService.ConnectPipe(blocks, rooms, doors, columns, walls, floor);
+                    connectPipeService.ConnectPipe(frame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
                 }
             }
         }
