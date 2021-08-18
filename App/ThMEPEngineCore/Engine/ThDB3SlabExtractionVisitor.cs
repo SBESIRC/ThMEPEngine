@@ -37,7 +37,7 @@ namespace ThMEPEngineCore.Engine
             List<Curve> curves = new List<Curve>();
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
-                var clone = polyline.WashClone();
+                Curve clone = polyline.Clone() as Curve;
                 clone.TransformBy(matrix);
                 curves.Add(clone);
             }

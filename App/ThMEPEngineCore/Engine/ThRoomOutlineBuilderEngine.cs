@@ -29,6 +29,7 @@ namespace ThMEPEngineCore.Engine
             _data = _data.FilterSmallArea(AreaTolerance);
         }
 
+
         public DBObjectCollection Build(Point3d point)
         {
             Polyline MinPolyline = new Polyline();
@@ -47,7 +48,7 @@ namespace ThMEPEngineCore.Engine
             result.Add(MinPolyline);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(_data);
             var bufferService = new Service.ThNTSBufferService();
-            foreach(DBObject dbObj in spatialIndex.SelectWindowPolygon(bufferService.Buffer(MinPolyline,-0.01))) //解决NTS共边导致的错误
+            foreach(DBObject dbObj in spatialIndex.SelectWindowPolygon(bufferService.Buffer(MinPolyline,-1.0))) //解决NTS共边导致的错误
             {
                 result.Add(dbObj);
             }
