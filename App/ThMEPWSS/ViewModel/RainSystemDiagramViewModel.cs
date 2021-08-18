@@ -219,7 +219,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private bool _CouldHavePeopleOnRoof = false;
+        private bool _CouldHavePeopleOnRoof = true;
         public bool CouldHavePeopleOnRoof
         {
             get
@@ -267,7 +267,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private string _BalconyFloorDrainDN = "DN25";
+        private string _BalconyFloorDrainDN = "DN50";
         public string BalconyFloorDrainDN
         {
             get
@@ -280,7 +280,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private string _CondensePipeDN = "DN25";
+        private string _CondensePipeDN = "DN50";
         public string CondensePipeVerticalDN
         {
             get
@@ -293,7 +293,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private string _CondensePipeHorizontalDN = "DN25";
+        private string _CondensePipeHorizontalDN = "DN50";
         public string CondensePipeHorizontalDN
         {
             get
@@ -307,7 +307,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private string _BalconyRainPipeDN = "DN25";
+        private string _BalconyRainPipeDN = "DN100";
         public string BalconyRainPipeDN
         {
             get
@@ -349,7 +349,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private bool _CouldHavePeopleOnRoof = false;
+        private bool _CouldHavePeopleOnRoof = true;
         public bool CouldHavePeopleOnRoof
         {
             get
