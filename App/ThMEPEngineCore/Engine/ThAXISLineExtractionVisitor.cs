@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Engine
             }
             else if (dbObj is Mline mline)
             {
-                throw new NotSupportedException();
+                elements.AddRange(HandleMline(mline, matrix));
             }
         }
 
@@ -67,6 +67,18 @@ namespace ThMEPEngineCore.Engine
             {
                 var entitySet = new DBObjectCollection();
                 polyline.Explode(entitySet);
+                entitySet.Cast<Entity>().ForEach(o => results.Add(CreateBuildingElementData(o.GetTransformedCopy(matrix))));
+            }
+            return results;
+        }
+
+        private List<ThRawIfcBuildingElementData> HandleMline(Mline mline, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            if (IsBuildElement(mline) && CheckLayerValid(mline))
+            {
+                var entitySet = new DBObjectCollection();
+                mline.Explode(entitySet);
                 entitySet.Cast<Entity>().ForEach(o => results.Add(CreateBuildingElementData(o.GetTransformedCopy(matrix))));
             }
             return results;
