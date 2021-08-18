@@ -34,7 +34,12 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                 };
                 var filterlist = OpFilter.Bulid(o =>
                 o.Dxf((int)DxfCode.LayerName) == ThMEPCommon.BroadcastLayerName &
-                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                o.Dxf((int)DxfCode.BlockName) == string.Join(",", new string[] {
+                    "E-BFAS410-2",
+                    "E-BFAS410-3",
+                    "E-BFAS410-4",
+                }));
                 var braodcasts = new List<BlockReference>();
                 var allBraodcasts = Active.Editor.SelectAll(filterlist);
                 if (allBraodcasts.Status == PromptStatus.OK)
