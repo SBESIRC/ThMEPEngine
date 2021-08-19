@@ -78,8 +78,6 @@
     <Compile Include="EmgLight\Service\StructureService.cs" />
     <Compile Include="EmgLight\Common\GeomUtils.cs" />
     <Compile Include="EmgLight\Service\UISettingService.cs" />
-    <Compile Include="FEI\BFSAlgorithm\BFSNode.cs" />
-    <Compile Include="FEI\BFSAlgorithm\BFSPathPlaner.cs" />
     <Compile Include="FEI\EvacuationPath\ConnectIsolatedLaneService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />

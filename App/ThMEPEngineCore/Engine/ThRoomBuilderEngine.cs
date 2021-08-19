@@ -33,13 +33,13 @@ namespace ThMEPEngineCore.Engine
             return rooms;
         }
 
-        public void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
+        public virtual void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
         {
             BuildArea(rooms);
             SpaceMatchText(BuildTextContainers(marks, rooms));
         }
 
-        private List<ThIfcRoom> BuildArea(List<ThIfcRoom> rooms)
+        protected List<ThIfcRoom> BuildArea(List<ThIfcRoom> rooms)
         {
             if(rooms.Count>0)
             {
@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.Engine
             return rooms;
         }
 
-        private Dictionary<ThIfcTextNote, List<ThIfcRoom>> BuildTextContainers(
+        protected Dictionary<ThIfcTextNote, List<ThIfcRoom>> BuildTextContainers(
             List<ThIfcTextNote> textNotes, List<ThIfcRoom> rooms)
         {
             var textContainer = new Dictionary<ThIfcTextNote, List<ThIfcRoom>>();
@@ -73,7 +73,7 @@ namespace ThMEPEngineCore.Engine
             return textContainer;
         }
 
-        private List<Entity> SelectTextIntersectPolygon(List<Entity> curves, Polyline textOBB)
+        protected List<Entity> SelectTextIntersectPolygon(List<Entity> curves, Polyline textOBB)
         {
             return curves.Where(o =>
             {
@@ -94,7 +94,7 @@ namespace ThMEPEngineCore.Engine
             }).ToList();
         }
 
-        private void SpaceMatchText(Dictionary<ThIfcTextNote, List<ThIfcRoom>> textContainer)
+        protected void SpaceMatchText(Dictionary<ThIfcTextNote, List<ThIfcRoom>> textContainer)
         {
             textContainer.ForEach(o =>
             {

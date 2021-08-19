@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs.Cast<Curve>().ToList();
             }
-            curves.ForEach(o => Elements.Add(ThCornice.Create(o)));
+            curves.ForEach(o => Elements.Add(ThIfcCornice.Create(o)));
         }
     }
 }

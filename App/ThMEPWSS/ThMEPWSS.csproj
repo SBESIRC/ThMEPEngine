@@ -54,6 +54,7 @@
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDLineExtension.cs" />
     <Compile Include="DrainageSystemAD\ThDrainageADCommon.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDMessageServie.cs" />
+    <Compile Include="Engine\ThRoomBuilderEngineWSS.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />
@@ -379,6 +380,7 @@
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataClassDefinition.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageSystemDiagram.cs" />
     <Compile Include="PressureDrainageSystem\Model\PressureDrainageDataReader.cs" />
+    <Compile Include="PressureDrainageSystem\Service\GetPrimitivesService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PressureDrainageSystemDiagramService.cs" />
     <Compile Include="PressureDrainageSystem\Service\ImportService.cs" />
     <Compile Include="PressureDrainageSystem\Service\PipeLineSystemUnitConstructionService.cs" />

@@ -70,6 +70,29 @@ namespace ThMEPEngineCore
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
+
+                // 选择房间点
+                var selectPts = new List<Point3d>();
+                while (true)
+                {
+                    var ppo = new PromptPointOptions("\n选择房间内的一点");
+                    ppo.AllowNone = true;
+                    ppo.AllowArbitraryInput = true;
+                    var ptRes = Active.Editor.GetPoint(ppo);
+                    if (ptRes.Status == PromptStatus.OK)
+                    {
+                        selectPts.Add(ptRes.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if(selectPts.Count==0)
+                {
+                    return;
+                }
+
                 //提取数据+封面
                 Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
@@ -84,29 +107,18 @@ namespace ThMEPEngineCore
                 //交互+获取房间
                 // 输出房间
                 var layerId = acadDb.Database.CreateAILayer("AI-房间框线", 30);
-                var selectPts = new List<Point3d>();
-                while (true)
+
+                selectPts.ForEach(p =>
                 {
-                    var ppo = new PromptPointOptions("\n选择房间内的一点");
-                    ppo.AllowNone = true;
-                    ppo.AllowArbitraryInput = true;
-                    var ptRes = Active.Editor.GetPoint(ppo);
-                    if (ptRes.Status == PromptStatus.OK)
+                    builder.Build(p).Cast<Entity>().ForEach(o =>
                     {
-                        builder.Build(ptRes.Value).Cast<Entity>().ForEach(o =>
-                        {
-                            acadDb.ModelSpace.Add(o);
-                            o.LayerId = layerId;
-                            o.ColorIndex = (int)ColorIndex.BYLAYER;
-                            o.LineWeight = LineWeight.ByLayer;
-                            o.Linetype = "ByLayer";
-                        });
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                        acadDb.ModelSpace.Add(o);
+                        o.LayerId = layerId;
+                        o.ColorIndex = (int)ColorIndex.BYLAYER;
+                        o.LineWeight = LineWeight.ByLayer;
+                        o.Linetype = "ByLayer";
+                    });
+                });             
             }
         }
     }

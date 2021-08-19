@@ -165,34 +165,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 var blocks = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferRoom);
                 if (blocks.Count > 0)
                 {
-                    var iaBlocks = ClassifyBlock(blocks.Cast<BlockReference>().ToList());
+                    var iaBlocks = ModelClassifyService.ClassifyIABlock(blocks.Cast<BlockReference>().ToList());
                     blockGroup.Add(room, iaBlocks);
                 }
             }
 
             return blockGroup;
-        }
-
-        /// <summary>
-        /// 分类块
-        /// </summary>
-        /// <param name="IABlock"></param>
-        /// <returns></returns>
-        private List<IAModel> ClassifyBlock(List<BlockReference> IABlock)
-        {
-            List<IAModel> models = new List<IAModel>();
-            foreach (var block in IABlock)
-            {
-                if (block.Name == ThMEPCommon.CONTROLLER_BLOCK_NAME) models.Add(new IAControllerModel(block));
-                if (block.Name == ThMEPCommon.INFRAREDWALLDETECTOR_BLOCK_NAME) models.Add(new IAInfraredWallDetectorModel(block));
-                if (block.Name == ThMEPCommon.DOUBLEDETECTOR_BLOCK_NAME) models.Add(new IADoubleDetectorModel(block));
-                if (block.Name == ThMEPCommon.INFRAREDHOSITINGDETECTOR_BLOCK_NAME) models.Add(new IAInfraredHositingDetectorModel(block));
-                if (block.Name == ThMEPCommon.DISABLEDALARM_BLOCK_NAME) models.Add(new IADisabledAlarmButtun(block));
-                if (block.Name == ThMEPCommon.SOUNDLIGHTALARM_BLOCK_NAME) models.Add(new IASoundLightAlarm(block));
-                if (block.Name == ThMEPCommon.EMERGENCYALARM_BLOCK_NAME) models.Add(new IAEmergencyAlarmButton(block));
-            }
-
-            return models;
         }
     }
 }

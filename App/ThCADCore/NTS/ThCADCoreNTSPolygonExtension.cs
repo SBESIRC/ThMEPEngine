@@ -3,6 +3,8 @@ using System.Linq;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Algorithm.Locate;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -13,17 +15,26 @@ namespace ThCADCore.NTS
     {
         public static DBObjectCollection Difference(this AcPolygon polygon, AcPolygon other)
         {
-            return polygon.ToNTSPolygon().Difference(other.ToNTSPolygon()).ToDbCollection();
+            return OverlayNGRobust.Overlay(
+                polygon.ToNTSPolygon(),
+                other.ToNTSPolygon(),
+                SpatialFunction.Difference).ToDbCollection(false);
         }
 
         public static DBObjectCollection Difference(this AcPolygon polygon, DBObjectCollection curves)
         {
-            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
+            return OverlayNGRobust.Overlay(
+                polygon.ToNTSPolygon(),
+                curves.UnionGeometries(),
+                SpatialFunction.Difference).ToDbCollection(false);
         }
 
         public static DBObjectCollection DifferenceMP(this AcPolygon polygon, DBObjectCollection curves)
         {
-            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection(true);
+            return OverlayNGRobust.Overlay(
+                polygon.ToNTSPolygon(), 
+                curves.UnionGeometries(), 
+                SpatialFunction.Difference).ToDbCollection(true);
         }
 
         public static DBObjectCollection Intersection(this AcPolygon polygon, DBObjectCollection curves)

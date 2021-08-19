@@ -11,7 +11,7 @@ namespace ThCADCore.NTS
     public class ThCADCoreNTSKdTree : IDisposable
     {
         private KdTree<object> Tree { get; set; }
-        private Dictionary<KdNode<object>, Point3dCollection> Nodes { get; set; }
+        public Dictionary<KdNode<object>, Point3dCollection> Nodes { get; set; }
 
         public void Dispose()
         {

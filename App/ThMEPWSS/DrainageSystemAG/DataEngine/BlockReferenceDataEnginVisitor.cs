@@ -113,7 +113,17 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
             if (ent is BlockReference br)
             {
                 //TODO: 获取块的OBB
-                return xclip.Contains(br.GeometricExtents.ToRectangle());
+                try
+                {
+                    //块有些是空的,获取GeometricExtents会报错
+                    if (br.Bounds == null)
+                        return false;
+                    return xclip.Contains(br.GeometricExtents.ToRectangle());
+                }
+                catch 
+                {
+                    return false;
+                }
             }
             else
             {

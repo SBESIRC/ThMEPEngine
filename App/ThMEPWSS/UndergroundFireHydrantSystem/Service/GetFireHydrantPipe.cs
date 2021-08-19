@@ -175,7 +175,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         if (fireHydrantSysIn.TermPointDic[branchDic[pt].First()].Type.Equals(1))//终点是类型1，消火栓
                         {
                             string pipeNumber = fireHydrantSysIn.TermPointDic[branchDic[pt][0]].PipeNumber;//立管标号
-                            if (pipeNumber[0].Equals('X') || pipeNumber[0].Equals('B'))//消火栓
+                            if (pipeNumber[0].Equals('X') || pipeNumber[0].Equals('B') || pipeNumber.StartsWith("DX"))//消火栓
                             {
                                 GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                             }
@@ -387,7 +387,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, 3);
                 return;
             }
-            if(pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B'))
+            if(pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B') || pipeNumber1.StartsWith("DX"))
             {
                 GetBranchType1(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, true);
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[1], ValveDic, fireHydrantSysIn, 3);

@@ -223,7 +223,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 var blocks = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferRoom);
                 if (blocks.Count > 0)
                 {
-                    var iaBlocks = ClassifyBlock(blocks.Cast<BlockReference>().ToList());
+                    var iaBlocks = ModelClassifyService.ClassifyACBlock(blocks.Cast<BlockReference>().ToList());
                     blockGroup.Add(door, iaBlocks);
                 }
             }
@@ -248,31 +248,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 var blocks = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferRoom);
                 if (blocks.Count > 0)
                 {
-                    var iaBlocks = ClassifyBlock(blocks.Cast<BlockReference>().ToList());
+                    var iaBlocks = ModelClassifyService.ClassifyACBlock(blocks.Cast<BlockReference>().ToList());
                     blockGroup.Add(room, iaBlocks);
                 }
             }
 
             return blockGroup;
-        }
-
-        /// <summary>
-        /// 分类块
-        /// </summary>
-        /// <param name="IABlock"></param>
-        /// <returns></returns>
-        private List<ACModel> ClassifyBlock(List<BlockReference> IABlock)
-        {
-            List<ACModel> models = new List<ACModel>();
-            foreach (var block in IABlock)
-            {
-                if (block.Name == ThMEPCommon.BUTTON_BLOCK_NAME) models.Add(new ACButtun(block));
-                if (block.Name == ThMEPCommon.ELECTRICLOCK_BLOCK_NAME) models.Add(new ACElectricLock(block));
-                if (block.Name == ThMEPCommon.CARDREADER_BLOCK_NAME) models.Add(new ACCardReader(block));
-                if (block.Name == ThMEPCommon.INTERCOM_BLOCK_NAME) models.Add(new ACIntercom(block));
-            }
-
-            return models;
         }
     }
 }

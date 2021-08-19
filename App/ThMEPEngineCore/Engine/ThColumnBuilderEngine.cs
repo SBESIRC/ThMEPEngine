@@ -15,49 +15,68 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThColumnBuilderEngine : IDisposable
+    public class ThColumnBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-        private const double AREATOLERANCE = 1.0;
-        private const double BUFFERTOLERANCE = 1.0;
 
         public ThColumnBuilderEngine()
         {
         }
         public void Dispose()
         {
-        }
-
-        public List<ThIfcColumn> Build(Database db, Point3dCollection pts)
+        }    
+        
+        public override List<ThRawIfcBuildingElementData> Extract(Database db)
         {
-            // 获取数据
-            var columns = new DBObjectCollection();
+            var res = new List<ThRawIfcBuildingElementData>();
             var columnExtractor = new ThColumnExtractionEngine();
             columnExtractor.Extract(db);
             var db3ColumnExtractor = new ThDB3ColumnExtractionEngine();
-            db3ColumnExtractor.Extract(db);         
-            columnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
-            db3ColumnExtractor.Results.ForEach(e => columns.Add(e.Geometry));
+            db3ColumnExtractor.Extract(db);
+            columnExtractor.Results.ForEach(e => res.Add(new ThRawIfcBuildingElementData(){
+                                               Geometry=e.Geometry,
+                                               Source=DataSource.Raw
+                                           }));
+            db3ColumnExtractor.Results.ForEach(e => res.Add(new ThRawIfcBuildingElementData() { 
+                                                            Geometry=e.Geometry,
+                                                            Source=DataSource.DB3
+                                                }));
+            return res;
+        }
 
-            // 处理极远情况（>1E+10）
+        public override List<ThIfcBuildingElement> Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
+        {
+            var columnRecognize = new ThColumnRecognitionEngine();
+            var db3columnReconize = new ThDB3ColumnRecognitionEngine();
+            var res = new List<ThIfcBuildingElement>();
+            columnRecognize.Recognize(datas.Where(o=>o.Source==DataSource.Raw).ToList(), pts);
+            db3columnReconize.Recognize(datas.Where(o => o.Source == DataSource.DB3).ToList(), pts);
+            res.AddRange(columnRecognize.Elements);
+            res.AddRange(db3columnReconize.Elements);
+            return res;
+        }
+
+        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        {
+            var columns = Extract(db);
             var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
-            transformer.Transform(columns);
+            columns.ForEach(o => transformer.Transform(o.Geometry));
+
             var newPts = pts.OfType<Point3d>()
                 .Select(o => transformer.Transform(o))
                 .ToCollection();
 
             // 后处理
-            columns = FilterInRange(columns, newPts);
-            columns = Buffer(columns, -BUFFERTOLERANCE);
-            columns = Preprocess(columns);
-            columns = Buffer(columns, BUFFERTOLERANCE);
+            var buildingElements = Recognize(columns, newPts);
+            var handleColumns = buildingElements.Select(o => o.Outline).ToCollection();
+            handleColumns = Buffer(handleColumns, -BUFFERTOLERANCE);
+            handleColumns = Preprocess(handleColumns);
+            handleColumns = Buffer(handleColumns, BUFFERTOLERANCE);
 
             // 回复到原位置
-            transformer.Reset(columns);
-
-            // 返回
-            return columns.Cast<Polyline>().Select(e => ThIfcColumn.Create(e)).ToList();
-        }        
+            transformer.Reset(handleColumns);
+            return handleColumns.Cast<Polyline>().Select(e => ThIfcColumn.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+        }
         private DBObjectCollection Preprocess(DBObjectCollection columns)
         {
             var simplifier = new ThElementSimplifier();
@@ -95,14 +114,14 @@ namespace ThMEPEngineCore.Engine
                 return objs;
             }
         }
-        private DBObjectCollection Buffer(DBObjectCollection objs,double length)
+        private DBObjectCollection Buffer(DBObjectCollection objs, double length)
         {
             var results = new DBObjectCollection();
             var bufferService = new ThNTSBufferService();
             objs.Cast<Entity>().ForEach(e =>
             {
-                var entity = bufferService.Buffer(e,length);
-                if(entity!=null && GetArea(entity)>= AREATOLERANCE)
+                var entity = bufferService.Buffer(e, length);
+                if (entity != null && GetArea(entity) >= AREATOLERANCE)
                 {
                     results.Add(entity);
                 }

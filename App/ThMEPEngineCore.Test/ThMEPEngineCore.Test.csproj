@@ -15,6 +15,7 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="AcMPolygonMGD, Version=16.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThBuildEngineTest.cs" />
     <Compile Include="ThMEPEngineCoreTestApp.cs" />
   </ItemGroup>
   <Choose>

@@ -224,7 +224,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(),"DL"));
             }
-            blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+            if(SetServicesModel.Instance.haveSewageVentilation)
+                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
             blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
 
             PipingToBlock(roomModel, blockWidth);
@@ -271,7 +272,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
                 }
-                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+                if(SetServicesModel.Instance.haveSewageVentilation)
+                    blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
                 blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
                 blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "FL"));
             }
@@ -283,7 +285,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "DL"));
                 }
-                blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
+                if (SetServicesModel.Instance.haveSewageVentilation)
+                    blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString(), "TL"));
                 blockWidth.Add(new DynBlockWidthLength(blockNames, SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString(), "PL"));
             }
             var pipeRoom = new PipeRoomSpace(pipeRoomModel.pipeRoomModel, startPoint, shortAxis, longAxis,false);

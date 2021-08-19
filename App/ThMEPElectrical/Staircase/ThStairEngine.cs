@@ -70,7 +70,7 @@ namespace ThMEPElectrical.Stair
                     var positionTidal = ToPoint3d((platform[0].GetAsVector() + platform[1].GetAsVector()) / 2);
                     var newDirection = new Vector3d();
                     Avoid(platform, doors, positionTidal, layoutLine, ref position, ref newDirection, widthVector);
-                    var angle = GetAngle(widthVector, newDirection);
+                    var angle = AdjustAngle(widthVector, newDirection);
                     blockReference.TransformBy(Matrix3d.Rotation(angle, Vector3d.ZAxis, GetCenterPoint(blockReference)));
                 }
                 // 平台靠近下行方向1/4位置壁装布置
@@ -82,7 +82,7 @@ namespace ThMEPElectrical.Stair
                     var positionTidal = ToPoint3d((platform[0].GetAsVector() + GetVector(platform[0], platform[1]) / 4));
                     var newDirection = new Vector3d();
                     Avoid(platform, doors, positionTidal, layoutLine, ref position, ref newDirection, widthVector);
-                    var angle = GetClockwise(widthVector, newDirection);
+                    var angle = GetAngle(widthVector, newDirection);
                     blockReference.TransformBy(Matrix3d.Rotation(angle, Vector3d.ZAxis, GetCenterPoint(blockReference)));
                 }
 
@@ -101,9 +101,9 @@ namespace ThMEPElectrical.Stair
             return (endPoint.GetAsVector() - starPoint.GetAsVector()) / (starPoint.DistanceTo(endPoint));
         }
 
-        private double GetAngle(Vector3d vector, Vector3d referenceVector)
+        private double AdjustAngle(Vector3d vector, Vector3d referenceVector)
         {
-            var angle = GetClockwise(vector, referenceVector);
+            var angle = GetAngle(vector, referenceVector);
             if (angle > Math.PI / 2 || angle - 10 * ThStairCommon.radian_tolerance <= -Math.PI / 2)
             {
                 angle = angle - Math.PI;
@@ -111,7 +111,7 @@ namespace ThMEPElectrical.Stair
             return angle;
         }
 
-        private double GetClockwise(Vector3d vector, Vector3d referenceVector)
+        private double GetAngle(Vector3d vector, Vector3d referenceVector)
         {
             if ((vector.X * referenceVector.Y - vector.Y * referenceVector.X) > 0)
             {

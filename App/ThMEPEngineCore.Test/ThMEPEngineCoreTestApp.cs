@@ -357,7 +357,7 @@ namespace ThMEPEngineCore.Test
 
                 foreach (var pline in frameLst)
                 {
-                    ThMaximumInscribedRectangle thMaximumInscribedRectangle = new ThMaximumInscribedRectangle();
+                    ThMEPMaximumInscribedRectangle thMaximumInscribedRectangle = new ThMEPMaximumInscribedRectangle();
                     var rectangle = thMaximumInscribedRectangle.GetRectangle(pline);
                     acdb.ModelSpace.Add(rectangle);
                 }

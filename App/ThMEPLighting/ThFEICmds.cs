@@ -17,7 +17,6 @@ using ThMEPEngineCore.Algorithm.AStarAlgorithm.Point_PathFinding;
 using ThMEPLighting.DSFEL;
 using ThMEPLighting.DSFEL.Service;
 using ThMEPLighting.FEI;
-using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.PrintEntity;
 using ThMEPLighting.FEI.Service;

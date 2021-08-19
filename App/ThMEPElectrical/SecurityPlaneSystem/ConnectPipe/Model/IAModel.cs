@@ -5,24 +5,12 @@ using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
 {
-    public class IAModel
+    public class IAModel : BlockModel
     {
-        public IAModel(BlockReference block)
+        public IAModel(BlockReference block) : base(block)
         {
-            position = new Point3d(block.Position.X, block.Position.Y, 0);
             layoutDir = -block.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
-            blockModel = block;
         }
-
-        /// <summary>
-        /// 原始块
-        /// </summary>
-        public BlockReference blockModel { get; set; }
-
-        /// <summary>
-        /// 块基点
-        /// </summary>
-        public Point3d position { get; set; }
 
         /// <summary>
         /// 块布置方向

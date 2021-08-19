@@ -1,15 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.FEI.BFSAlgorithm
+namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
 {
     public class BFSPathPlaner
     {
@@ -42,7 +39,7 @@ namespace ThMEPLighting.FEI.BFSAlgorithm
 
             InitializeMap(frame); //初始化地图
             var startNode = InitializeStartNode(startPt); //初始化起点
-            
+
             //起点不是有效点则返回空
             if (startNode == null)
             {

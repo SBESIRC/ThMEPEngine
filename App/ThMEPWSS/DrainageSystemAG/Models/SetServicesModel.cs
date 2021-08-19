@@ -15,6 +15,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
             wasteSewageWaterRiserPipeDiameter = EnumPipeDiameter.DN100;
             wasteSewageVentilationRiserPipeDiameter = EnumPipeDiameter.DN100;
             toiletIsCaisson = false;
+            haveSewageVentilation = true;
             balconyWasteWaterRiserPipeDiameter = EnumPipeDiameter.DN100;
             balconyRiserPipeDiameter = EnumPipeDiameter.DN100;
             condensingRiserPipeDiameter = EnumPipeDiameter.DN50;
@@ -41,6 +42,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// 卫生间是否沉箱
         /// </summary>
         public bool toiletIsCaisson { get; set; }
+        public bool haveSewageVentilation { get; set; }
         /// <summary>
         /// 阳台废水立管直径
         /// </summary>

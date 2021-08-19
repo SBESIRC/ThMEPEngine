@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using Dreambuild;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -48,12 +49,29 @@ namespace ThMEPEngineCore.Engine
             _slab = _slab.BufferZeroPolyline();
             _cornice = _cornice.BufferZeroPolyline();
             //墙和门再buffer以便形成房间洞
-            _door = _door.BufferPolygons(BufferDistance);
-            _wall = _wall.BufferPolygons(BufferDistance);
+            _door = Buffer(_door, BufferDistance);
+            _wall = Buffer(_wall, BufferDistance);
+            //_door = _door.BufferPolygons(BufferDistance);有合并操作在内，舍弃
+            //_wall = _wall.BufferPolygons(BufferDistance);
             //窗和线脚也可能出现没有完全搭接的情况
-            _window = _window.BufferPolygons(BufferDistance);
-            _cornice = _cornice.BufferPolygons(BufferDistance);
-            _slab = _slab.BufferPolygons(BufferDistance);
+            _window = Buffer(_window, BufferDistance);
+            _cornice = Buffer(_cornice, BufferDistance);
+            _slab = Buffer(_slab, BufferDistance);
+            //_window = _window.BufferPolygons(BufferDistance);
+            //_cornice = _cornice.BufferPolygons(BufferDistance);
+            //_slab = _slab.BufferPolygons(BufferDistance);
+        }
+
+        private DBObjectCollection Buffer(DBObjectCollection polygons,double length)
+        {
+            var results = new DBObjectCollection();
+            polygons.Cast<Entity>().ForEach(e =>
+            {
+                e.ToNTSPolygon().Buffer(length,NetTopologySuite.Operation.Buffer.EndCapStyle.Square).ToDbCollection().Cast<Entity>()
+                .ForEach(o => results.Add(o));
+            });
+            results = results.FilterSmallArea(1.0);
+            return results;
         }
 
         /// <summary>

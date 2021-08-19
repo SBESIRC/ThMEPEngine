@@ -232,9 +232,13 @@
     <Compile Include="SecurityPlaneSystem\ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\IntrucsionAlarmConnectService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ACModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\BlockModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\IAModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ModelClassifyService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\VMModel.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\ConnectBlockService.cs" />
     <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\PipePathService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\SystemConnectPipeService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
     <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />

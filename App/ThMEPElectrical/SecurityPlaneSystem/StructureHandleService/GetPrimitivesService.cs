@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPElectrical.SecurityPlaneSystem.Utls;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
@@ -223,6 +224,51 @@ namespace ThMEPElectrical.StructureHandleService
                 var compartments = builder.BuildFromMS(db.Database, polyline.Vertices());
                 return compartments.Select(x => x.Boundary).ToList();
             }
+        }
+
+        /// <summary>
+        /// 获取线槽
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="layerName"></param>
+        /// <returns></returns>
+        public List<Line> GetTrunkings(Polyline polyline, string layerName)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var trunkingLines = acdb.ModelSpace
+                .OfType<Curve>()
+                .Where(o => o.Layer == layerName);
+                trunkingLines.ForEach(x =>
+                {
+                    var transCurve = x.Clone() as Curve;
+                    //originTransformer.Transform(transCurve);
+                    objs.Add(transCurve);
+                });
+            }
+
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var selectLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+            if (selectLines.Count <= 0)
+            {
+                return new List<Line>();
+            }
+            selectLines = selectLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            var resLines = new List<Line>();
+            foreach (var trunking in selectLines)
+            {
+                if (trunking is Line line)
+                {
+                    resLines.Add(line);
+                }
+                else if (trunking is Polyline poly)
+                {
+                    resLines.AddRange(poly.GetAllLinesInPolyline());
+                }
+            }
+
+            return resLines;
         }
     }
 }

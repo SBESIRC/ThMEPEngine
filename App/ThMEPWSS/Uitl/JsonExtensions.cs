@@ -125,6 +125,16 @@ namespace ThMEPWSS.JsonExtensionsNs
                 if (f(source[i])) yield return i;
             }
         }
+        public static List<T> ToList<T>(this IEnumerable<T> source, int cap)
+        {
+            var lst = new List<T>(cap);
+            foreach (var item in source) lst.Add(item);
+            return lst;
+        }
+        public static List<V> SelectList<K, V>(this IList<K> source, Func<K, V> f)
+        {
+            return source.Select(f).ToList(source.Count);
+        }
         public static string JoinN(this IEnumerable<string> strs)
         {
             return strs.JoinWith("\n");
