@@ -218,7 +218,6 @@ namespace ThMEPLighting.Garage.Engine
         private int CalculateLoopNumber(int lightNumbers)
         {
             var value = lightNumbers * 1.0 / 25;
-            value /= 2.0;
             double number = Math.Ceiling(value) * 2;
             if (number < 4)
             {
