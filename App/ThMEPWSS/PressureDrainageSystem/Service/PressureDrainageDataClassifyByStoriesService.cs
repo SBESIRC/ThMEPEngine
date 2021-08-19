@@ -140,7 +140,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         objTmpPlys.Add(plyColumns);
                     }
                 }
-                var concaveBuilder = new ThConcaveBuilder(objTmpPlys, 8000);
+                var concaveBuilder = new ThMEPConcaveBuilder(objTmpPlys, 8000);
                 objConcaveHull = concaveBuilder.Build();
                 Modeldatas.Boundaries = new List<Polyline>();
                 Modeldatas.Boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
