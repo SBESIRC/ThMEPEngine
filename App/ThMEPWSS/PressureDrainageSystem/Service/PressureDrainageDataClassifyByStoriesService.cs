@@ -1,10 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Diagram.ViewModel;
@@ -29,7 +31,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             AppendVerticalPipeDataToModeldatas();
             AppendOtherDataToModeldates();
-            Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
             AppendDrainWellsToModeldates();
             AppendWallLinesToModeldates();
         }
@@ -98,6 +99,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         private void AppendDrainWellsToModeldates()
         {
+            Modeldatas.FloorDict[Modeldatas.FloorListDatas[0]].DrainWells = new();
             Extents3d extents = GetBoundaryExtendList(Viewmodel)[0];
             foreach (var well in CollectDataService.CollectedData.DrainWells)
             {
@@ -113,22 +115,38 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// </summary>
         private void AppendWallLinesToModeldates()
         {
-            Extents3d ext = GetBoundaryExtendList(Viewmodel)[0];
-            Modeldatas.WallLines = new List<Polyline>();
-            List<Line> lines = new List<Line>();
-            foreach (var ply in CollectDataService.CollectedData.WallPolyLines)
+            using (AcadDatabase adb = AcadDatabase.Active())
             {
-                if (ext.IsPointIn(ply.GetMidpoint()))
+                Extents3d ext = GetBoundaryExtendList(Viewmodel)[0];
+                Modeldatas.WallLines = new List<Polyline>();
+                DBObjectCollection objWalls = new();
+                DBObjectCollection objColumns = new();
+                DBObjectCollection objConcaveHull = new();
+                DBObjectCollection objTmpPlys = new();
+                foreach (var plyWalls in CollectDataService.CollectedData.WallPolyLines)
                 {
-                    //ply.AddToCurrentSpace();
-                    //Modeldatas.WallLines.Add(ply);
-                    lines.AddRange(ply.ExplodeLines());
+                    if (ext.IsPointIn(plyWalls.GetMidpoint()))
+                    {
+                        objWalls.Add(plyWalls);
+                        objTmpPlys.Add(plyWalls);
+                        Modeldatas.WallLines.Add(plyWalls);
+                    }
                 }
-            }
-            foreach (var line in lines)
-            {
-                line.ColorIndex = (int)ColorIndex.Cyan;
-                //line.AddToCurrentSpace();
+                foreach (var plyColumns in CollectDataService.CollectedData.ColumnsPolyLines)
+                {
+                    if (ext.IsPointIn(plyColumns.GetMidpoint()))
+                    {
+                        objColumns.Add(plyColumns);
+                        objTmpPlys.Add(plyColumns);
+                    }
+                }
+                var concaveBuilder = new ThConcaveBuilder(objTmpPlys, 8000);
+                objConcaveHull = concaveBuilder.Build();
+                Modeldatas.Boundaries = new List<Polyline>();
+                Modeldatas.Boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
+                //objConcaveHull.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
+                //objWalls.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
+                //objColumns.Cast<Entity>().ToList().CreateGroup(adb.Database, (int)ColorIndex.Cyan);
             }
         }
 

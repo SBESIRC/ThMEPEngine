@@ -113,12 +113,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         floorLines.Add(floorLine);
                     }
                     DBText bText = new DBText();
-                    string textstring = i == 0 ? "1F" : "B" + i.ToString() + "F";
+                    string textstring = i == 0 ? "地库顶板" : "B" + i.ToString() + "F";
                     DefinePropertiesOfCADDBTexts(bText, "W-NOTE", textstring, floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(textHeight, textHeight, 0))), textHeight, DbHelper.GetTextStyleId("TH-STYLE3"));
                     bText.AddToCurrentSpace();
                     Dictionary<string, string> atts01 = new();
                     atts01.Add("标高", "X.XX");
-                    var blkId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(1200, 0, 0))), new Scale3d(0), 0, atts01);
+                    var blkId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(2200, 0, 0))), new Scale3d(0), 0, atts01);
                     blkId3.SetDynBlockValue("翻转状态1", (short)0);
                     blkId3.SetDynBlockValue("翻转状态2", (short)0);
                     var br = adb.Element<BlockReference>(blkId3);
@@ -194,18 +194,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         someLayerPipeIndexes.Add(j, new List<int>());
                     }
-                    //if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
-                    //{
-                    //    for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
-                    //    {
-                    //        foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
-                    //        {
-                    //            Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
-                    //            line.ColorIndex = (int)ColorIndex.Cyan;
-                    //            line.AddToCurrentSpace();
-                    //        }
-                    //    }
-                    //}
+                    if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
+                    {
+                        for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
+                        {
+                            foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
+                            {
+                                Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
+                                line.Layer = "AI-辅助";
+                                line.Linetype = "DASH";
+                                line.ColorIndex = 123;//低饱和度蓝
+                                line.AddToCurrentSpace();
+                            }
+                        }
+                    }
                     PipeLineSystemUnits[i].verticalPipeId.ForEach(o => ids.Add(o));
                     ids.Remove(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Id);
                     parLayers.Add(-1);
@@ -432,17 +434,21 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         br.Visible = true;
                         br.TransformBy(mat);
                     }
-                    //foreach (var line in testLines[i])
-                    //{
-                    //    Point3d pt = line.EndPoint.TransformBy(mat);
-                    //    var k = new Line(line.StartPoint, pt);
-                    //    k.AddToCurrentSpace();
-                    //}
+                    foreach (var line in testLines[i])
+                    {
+                        Point3d pt = line.EndPoint.TransformBy(mat);
+                        var k = new Line(line.StartPoint, pt);
+                        k.Layer = "AI-辅助";
+                        k.Linetype = "DASH";
+                        k.ColorIndex = 13;//低饱和度梅红
+                        k.AddToCurrentSpace();
+
+                    }
                     if (i < allEntities.Count - 1)
                     {
                         totalspacine += maxExts[i].MaxPoint.X - maxExts[i + 1].MinPoint.X + spacing;
                     }
-
+                    
                 }
                 for (int i = 0; i < floorLines.Count; i++)
                 {
@@ -464,15 +470,24 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             }
                         }
                         var cc = (Curve)floorLines[0];
-                        var crvs = cc.GetSplitCurves(pts).Cast<Line>().ToList();
-                        foreach (var e in crvs)
+                        if (pts.Count > 0)
                         {
-                            if (e.Length != 1200)
+                            var crvs = cc.GetSplitCurves(pts).Cast<Line>().ToList();
+                            foreach (var e in crvs)
                             {
-                                DefinePropertiesOfCADObjects(e, "W-NOTE");
-                                e.AddToCurrentSpace();
+                                if (e.Length != 1200)
+                                {
+                                    DefinePropertiesOfCADObjects(e, "W-NOTE");
+                                    e.AddToCurrentSpace();
+                                }
                             }
                         }
+                        else
+                        {
+                            DefinePropertiesOfCADObjects(floorLines[0], "W-NOTE");
+                            floorLines[0].AddToCurrentSpace();
+                        }
+
                     }
                 }
                 MessageBox.Show("共有排水单元" + allEntities.Count.ToString() + "组");
@@ -627,7 +642,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var brId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", ptlocbr2, new Scale3d(0), 0);
                     tmpBlocksLayerBUSH.Add(adb.Element<BlockReference>(brId2));
                 }
-                else//穿侧墙排水方式
+                else//穿侧墙排水方式:4
                 {
                     double disFromptloc = 3000;//固定值
                     Point3d pt1 = new Point3d(ptloc.X + disFromptloc, ptloc.Y, 0);
@@ -969,11 +984,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             List<Polyline> plys1 = new(), plys2 = new();
             List<DBText> dbs1 = new(), dbs2 = new();
             List<BlockReference> brs1 = new(), brs2 = new();
+            double maxY1 = 0;
+            double maxY2 = 0;
             foreach (var j in ent1)
             {
-                if (j is Line)
+                if (j is Line lin)
                 {
-                    lines1.Add((Line)j);
+                    lines1.Add(lin);
+                    maxY1 = maxY1 > lin.StartPoint.Y ? maxY1 : lin.StartPoint.Y;
+                    maxY1 = maxY1 > lin.EndPoint.Y ? maxY1 : lin.EndPoint.Y;
                 }
                 else if (j is Polyline)
                 {
@@ -990,9 +1009,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             foreach (var j in ent2)
             {
-                if (j is Line)
+                if (j is Line lin)
                 {
-                    lines2.Add((Line)j);
+                    lines2.Add(lin);
+                    maxY2 = maxY2 > lin.StartPoint.Y ? maxY2 : lin.StartPoint.Y;
+                    maxY2 = maxY2 > lin.EndPoint.Y ? maxY2 : lin.EndPoint.Y;
                 }
                 else if (j is Polyline)
                 {
@@ -1015,6 +1036,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 return false;
             }
+            if (maxY1 != maxY2) return false;
             List<Point3d> midpts1 = new(), midpts2 = new();
             foreach (var e in lines1)
             {
@@ -1026,7 +1048,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             midpts1 = SortPointsBasedSpecailCoordinates(midpts1, 1);
             midpts2 = SortPointsBasedSpecailCoordinates(midpts2, 1);
-            for (int i = 0; i < midpts1.Count; i++)
+            int num = Math.Min(midpts1.Count, midpts2.Count);
+            for (int i = 0; i < num; i++)
             {
                 if (midpts1[i].Y != midpts2[i].Y) return false;
             }

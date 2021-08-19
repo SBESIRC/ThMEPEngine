@@ -13,6 +13,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Point3d> FloorLocPoints { get; set; }//楼层定位点
         public string InitialLayer { get; set; }
         public List<Polyline> WallLines { get; set; }
+        public List<Polyline> Boundaries { get; set; }
         public PressureDrainageModelData()
         {
             FloorLineSpace = new double();
@@ -41,6 +42,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Point3d> StoryFrameBasePt;
         public string InitialLayer;
         public List<Polyline> WallPolyLines;
+        public List<Polyline> ColumnsPolyLines;
     }
     public class DrainWellClass
     {
@@ -131,5 +133,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public List<Line> HorizontalPipes { get; set; }
         public int[,] VertPipeConnectedArr { get; set; }
         public int DrainWellPipeIndex { get; set; }
+        public int DrainMode { get; set; }
     }
 }

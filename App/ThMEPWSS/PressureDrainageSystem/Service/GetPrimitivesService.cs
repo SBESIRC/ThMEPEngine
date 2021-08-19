@@ -1,33 +1,28 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class GetPrimitivesService
     {
-        public ThMEPOriginTransformer originTransformer;
-        public GetPrimitivesService(ThMEPOriginTransformer originTransformer)
+        protected ThMEPOriginTransformer Transformer { get; set; }
+        public GetPrimitivesService(ThMEPOriginTransformer transformer)
         {
-            this.originTransformer = originTransformer;
+            Transformer = transformer;
         }
 
         /// <summary>
@@ -140,40 +135,55 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var ColumnExtractEngine = new ThColumnExtractionEngine();
-                ColumnExtractEngine.Extract(acdb.Database);
-                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var ColumnEngine = new ThColumnRecognitionEngine();
-                ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
+                var pts = polyline.Vertices();
+                var newPts = pts.OfType<Point3d>().Select(p => Transformer.Transform(p)).ToCollection();
+                // 启动结构柱识别引擎(结构参照柱+DB3剖切生成柱)
+                var columnExtractEngine = new ThColumnExtractionEngine();
+                columnExtractEngine.Extract(acdb.Database);
+                columnExtractEngine.Results.ForEach(x => Transformer.Transform(x.Geometry));
+                var columnEngine = new ThColumnRecognitionEngine();
+                columnEngine.Recognize(columnExtractEngine.Results, newPts);
+                columnEngine.Elements.ForEach(e => Transformer.Reset(e.Outline));
 
-                // 启动墙识别引擎
-                var ShearWallExtractEngine = new ThShearWallExtractionEngine();
-                ShearWallExtractEngine.Extract(acdb.Database);
-                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var ShearWallEngine = new ThShearWallRecognitionEngine();
-                ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
+                var db3ColumnExtractEngine = new ThDB3ColumnExtractionEngine();
+                db3ColumnExtractEngine.Extract(acdb.Database);
+                db3ColumnExtractEngine.Results.ForEach(x => Transformer.Transform(x.Geometry));
+                var db3ColumnEngine = new ThDB3ColumnRecognitionEngine();
+                db3ColumnEngine.Recognize(db3ColumnExtractEngine.Results, newPts);
+                db3ColumnEngine.Elements.ForEach(e => Transformer.Reset(e.Outline));
 
+                // 启动墙识别引擎(结构参照墙+DB3剖切生成的墙)
+                var shearWallExtractEngine = new ThShearWallExtractionEngine();
+                shearWallExtractEngine.Extract(acdb.Database);
+                shearWallExtractEngine.Results.ForEach(x => Transformer.Transform(x.Geometry));
+                var shearWallEngine = new ThShearWallRecognitionEngine();
+                shearWallEngine.Recognize(shearWallExtractEngine.Results, newPts);
+                shearWallEngine.Elements.ForEach(e => Transformer.Reset(e.Outline));
+
+                var db3ShearwallExtractEngine = new ThDB3ShearWallExtractionEngine();
+                db3ShearwallExtractEngine.Extract(acdb.Database);
+                db3ShearwallExtractEngine.Results.ForEach(x => Transformer.Transform(x.Geometry));
+                var db3ShearWallEngine = new ThShearWallRecognitionEngine();
+                db3ShearWallEngine.Recognize(db3ShearwallExtractEngine.Results, newPts);
+                db3ShearWallEngine.Elements.ForEach(e => Transformer.Reset(e.Outline));
+
+                // DB3建筑墙
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                archWallExtractEngine.Results.ForEach(x => Transformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
-                archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
+                archWallEngine.Recognize(archWallExtractEngine.Results, newPts);
+                archWallEngine.Elements.ForEach(e => Transformer.Reset(e.Outline));
 
-                ////获取柱
+                //获取柱
                 columns = new List<Polyline>();
-                columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-                var objs = new DBObjectCollection();
-                columns.ForEach(x => objs.Add(x));
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+                columns = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                columns.AddRange(db3ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList());
 
                 //获取剪力墙
                 walls = new List<Polyline>();
-                walls = ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-                objs = new DBObjectCollection();
-                walls.ForEach(x => objs.Add(x));
-                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+                walls = shearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                walls.AddRange(db3ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList());
 
                 //获取建筑墙
                 foreach (var o in archWallEngine.Elements)

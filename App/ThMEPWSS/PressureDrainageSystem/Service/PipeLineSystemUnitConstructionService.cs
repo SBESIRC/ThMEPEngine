@@ -64,6 +64,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             Modeldatas.FloorDict[Modeldatas.FloorListDatas[layer]].SubmergedPumps.ForEach(e => submergedPumps.Add(e));
             GroupPipeLineUnitByGroupedHorizontalPipe(horizontalLines, verticalPipes, submergedPumps, layer);
             CompletePipeLineUnitInfoConstructedBasedOnHorizontalPipe(verticalPipes, layer);
+            ConfirmDrainageModeBeforeReGenerateHorizontals(layer);
             ReGenerateHorizontalPipeInPipeUnit(layer);
             ConstructPipeLineUnitForUniqueVerticalPipe(verticalPipes, layer);
             ConstructConnectedArrToStoryRecordVerticalPipeRelationshipInPipeUnit(layer);
@@ -171,7 +172,78 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
-       
+
+        /// <summary>
+        /// 在重生成横管连线之前确认排水系统单元的排水方式
+        /// </summary>
+        /// <param name="layer"></param>
+        private void ConfirmDrainageModeBeforeReGenerateHorizontals(int layer)
+        {
+            if (layer == 0)
+            {
+                foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
+                {
+
+                    foreach (var pipe in unit.VerticalPipes)
+                    {
+                        if (pipe.Label != null && pipe.Label.Contains(RoofCrossedId))
+                        {
+                            pipe.isUnitStart = true;
+                            double cond_QuitCycle = 0;
+                            foreach (var k in unit.VerticalPipes)
+                            {
+                                if (k.AppendedDrainWell != null)
+                                {
+                                    unit.DrainMode = 2;//穿顶板进水井
+                                    cond_QuitCycle += 1;
+                                    break;
+                                }
+                            }
+                            if (cond_QuitCycle == 0)
+                            {
+                                unit.DrainMode = 1;//穿顶板
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            var connectedLines = unit.HorizontalPipes;
+                            var walls = Modeldatas.WallLines;
+                            var boundaries = Modeldatas.Boundaries;
+                            foreach (var line in connectedLines)
+                            {
+                                foreach (var bound in boundaries)
+                                {
+                                    if (line.IntersectWithEx(bound).Count > 0)
+                                    {
+                                        unit.DrainMode = 3;//穿外墙
+                                        break;
+                                    }
+                                }
+                                if (unit.DrainMode == 3) break;
+                            }
+                            if (unit.DrainMode != 3 && connectedLines.Count > 0)
+                            {
+                                foreach (var line in connectedLines)
+                                {
+                                    foreach (var bound in walls)
+                                    {
+                                        if (line.IntersectWithEx(bound).Count > 0)
+                                        {
+                                            unit.DrainMode = 4;//穿侧墙
+                                            break;
+                                        }
+                                    }
+                                    if (unit.DrainMode == 4) break;
+                                }
+                            }
+                        }
+                    }
+                    unit.DrainMode = unit.DrainMode == 0 ? 3 : unit.DrainMode;//暂时默认其它方式均为穿外墙
+                }
+            }
+        }
+
         /// <summary>
         /// 重新生成排水单元组中排水横管的几何关系
         /// </summary>
@@ -556,11 +628,29 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
-      
+
         /// <summary>
         /// 判断每个排水系统单元的最终排水方式
         /// </summary>
         private void ConfirmDrainageModeForEachPipeLineUnits()
+        {
+            foreach (var unit in _pipeLineSystemUnits)
+            {
+                foreach (var pipe in unit.PipeLineUnits[0].VerticalPipes)
+                {
+                    if (pipe.AppendedDrainWell != null)
+                    {
+                        unit.DrainWell = pipe.AppendedDrainWell;
+                    }
+                }
+                unit.DrainageMode = unit.PipeLineUnits[0].DrainMode != 0 ? unit.PipeLineUnits[0].DrainMode : 1;
+            }
+        }
+
+        /// <summary>
+        /// 判断每个排水系统单元的最终排水方式
+        /// </summary>
+        private void ConfirmDrainageModeForEachPipeLineUnitsBackUp()
         {
             foreach (var unit in _pipeLineSystemUnits)
             {
@@ -591,6 +681,39 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             unit.DrainageMode = 1;//穿顶板
                         }
                         break;
+                    }
+                    else
+                    {
+                        var connectedLines= unit.PipeLineUnits[0].HorizontalPipes;
+                        var walls = Modeldatas.WallLines;
+                        var boundaries = Modeldatas.Boundaries;
+                        foreach (var line in connectedLines)
+                        {
+                            foreach (var bound in boundaries)
+                            {
+                                if (line.IntersectWithEx(bound).Count>0)
+                                {
+                                    unit.DrainageMode = 3;
+                                    break;
+                                }
+                            }
+                            if (unit.DrainageMode == 3) break;
+                        }
+                        if (unit.DrainageMode != 3 && connectedLines.Count>0)
+                        {
+                            foreach (var line in connectedLines)
+                            {
+                                foreach (var bound in walls)
+                                {
+                                    if (line.IntersectWithEx(bound).Count > 0)
+                                    {
+                                        unit.DrainageMode = 4;
+                                        break;
+                                    }
+                                }
+                                if (unit.DrainageMode == 4) break;
+                            }
+                        }
                     }
                 }
                 unit.DrainageMode = unit.DrainageMode == 0 ? 3 : unit.DrainageMode;//暂时默认其它方式均为穿外墙
