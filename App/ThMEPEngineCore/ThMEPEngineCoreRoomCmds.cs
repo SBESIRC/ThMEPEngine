@@ -81,7 +81,7 @@ namespace ThMEPEngineCore
                     var ptRes = Active.Editor.GetPoint(ppo);
                     if (ptRes.Status == PromptStatus.OK)
                     {
-                        selectPts.Add(ptRes.Value);
+                        selectPts.Add(ptRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem));
                     }
                     else
                     {
@@ -97,7 +97,9 @@ namespace ThMEPEngineCore
                 Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
                 data.Deburring();
-                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
+                var totaldata = data.MergeData();
+                selectPts = selectPts.Where(o => !data.ContatinPoint3d(o)).ToList();
+                var builder = new ThRoomOutlineBuilderEngine(totaldata);
 
                 if (builder.Count == 0)
                     return;

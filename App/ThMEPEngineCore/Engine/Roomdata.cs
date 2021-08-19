@@ -6,6 +6,8 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using Dreambuild;
+using NetTopologySuite.Operation.Buffer;
+using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -42,9 +44,14 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         public void Deburring()
         {
+            _wall = _wall.FilterSmallArea(1.0);
+            _door = _door.FilterSmallArea(1.0);
+            _window = _window.FilterSmallArea(1.0);
+
             //墙和楼板去毛皮
             _wall = _wall.BufferPolygons(-WallBufferDistance).BufferPolygons(WallBufferDistance);
-            _slab = _slab.BufferPolygons(-SlabBufferDistance).BufferPolygons(SlabBufferDistance);
+            _slab = BufferCollectionContainsLines(_slab, -SlabBufferDistance);
+            _slab = BufferCollectionContainsLines(_slab, SlabBufferDistance);
             //对面积为0的Polyline进行处理
             _slab = _slab.BufferZeroPolyline();
             _cornice = _cornice.BufferZeroPolyline();
@@ -55,19 +62,58 @@ namespace ThMEPEngineCore.Engine
             //_wall = _wall.BufferPolygons(BufferDistance);
             //窗和线脚也可能出现没有完全搭接的情况
             _window = Buffer(_window, BufferDistance);
-            _cornice = Buffer(_cornice, BufferDistance);
-            _slab = Buffer(_slab, BufferDistance);
+            _cornice = BufferCollectionContainsLines(_cornice, BufferDistance);
+            _slab = BufferCollectionContainsLines(_slab, BufferDistance);
             //_window = _window.BufferPolygons(BufferDistance);
             //_cornice = _cornice.BufferPolygons(BufferDistance);
             //_slab = _slab.BufferPolygons(BufferDistance);
         }
 
+        /// <summary>
+        /// 为包含碎线的DBObjectCollection进行buffer，并保留碎线
+        /// </summary>
+        /// <param name="polys"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        private DBObjectCollection BufferCollectionContainsLines(DBObjectCollection polys,double length)
+        {
+            DBObjectCollection res = new DBObjectCollection();
+            polys.Cast<Entity>().ForEach(o => 
+            {
+                if (o is Polyline poly && ThAuxiliaryUtils.DoubleEquals(poly.Area, 0.0))
+                {
+                    if (length < 0)
+                        res.Add(poly);//TODO: 碎线可能需要延伸一些长度
+                    else
+                    {
+                        var bufferRes = poly.ToNTSLineString().Buffer(
+                            length, new BufferParameters() { JoinStyle = JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square }).ToDbCollection();
+                        bufferRes.Cast<Entity>().ForEach(e => res.Add(e));
+                    }
+                }
+                else if(o is Polyline polygon && polygon.Area>1.0)
+                    polygon.ToNTSPolygon().Buffer(length, new BufferParameters() { JoinStyle = JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
+                    .ToDbCollection().Cast<Entity>()
+                    .ForEach(e => res.Add(e));
+            });
+            return res;
+        }
+
+
+        /// <summary>
+        /// 对每个Polyline进行buffer，而不进行多余的操作
+        /// </summary>
+        /// <param name="polygons"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         private DBObjectCollection Buffer(DBObjectCollection polygons,double length)
         {
             var results = new DBObjectCollection();
+            polygons = polygons.FilterSmallArea(1.0);
             polygons.Cast<Entity>().ForEach(e =>
             {
-                e.ToNTSPolygon().Buffer(length,NetTopologySuite.Operation.Buffer.EndCapStyle.Square).ToDbCollection().Cast<Entity>()
+                e.ToNTSPolygon().Buffer(length, new BufferParameters() { JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
+                .ToDbCollection().Cast<Entity>()
                 .ForEach(o => results.Add(o));
             });
             results = results.FilterSmallArea(1.0);
@@ -87,6 +133,21 @@ namespace ThMEPEngineCore.Engine
             _slab.Cast<DBObject>().ForEach(o => result.Add(o));
             _cornice.Cast<DBObject>().ForEach(o => result.Add(o));
             return result;
+        }
+        public bool ContatinPoint3d(Point3d p)
+        {
+            bool res = false;
+            foreach(DBObject obj in _wall)
+            {
+                if(obj is Polyline polyline && polyline.Area>1.0)
+                {
+                    if(polyline.Contains(p))
+                    {
+                        return true;
+                    }
+                }
+            }//后续可能需要增加门和窗。楼板目前还不能加
+            return res;
         }
     }
 }

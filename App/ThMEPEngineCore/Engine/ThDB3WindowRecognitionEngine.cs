@@ -55,8 +55,10 @@ namespace ThMEPEngineCore.Engine
             //后续，根据需要增加处理...
             if(curves.Count>0)
             {
-                var results = curves.ToCollection();                
-                foreach (Curve obj in results.Outline())
+                var results = curves.ToCollection();
+                results = results.Outline();
+                results = results.FilterSmallArea(1.0);
+                foreach (Curve obj in results)
                 {
                     Elements.Add(ThIfcWindow.Create(Wash(obj)));
                 }
