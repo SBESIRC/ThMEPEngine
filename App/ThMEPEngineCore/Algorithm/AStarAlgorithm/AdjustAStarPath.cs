@@ -104,7 +104,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             for (int i = 1; i <= xLength; i++)
             {
                 var pt = new Point(firPt.X + xDir * i, yValue);
-                if (map.IsObstacle(pt))
+                if (map.IsObstacle(pt) || !map.IsInBounds(pt))
                     return false;
             }
 
@@ -115,7 +115,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             {
                 var pt = new Point(xValue, firPt.Y + yDir * i);
 
-                if (map.IsObstacle(pt))
+                if (map.IsObstacle(pt) || !map.IsInBounds(pt))
                     return false;
             }
 
