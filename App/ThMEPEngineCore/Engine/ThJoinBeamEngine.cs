@@ -79,15 +79,31 @@ namespace ThMEPEngineCore.Engine
         }
         private ThIfcLineBeam Join(ThIfcLineBeam current, ThIfcLineBeam startLink, ThIfcLineBeam endLink)
         {
-            double startExtendDis = startLink != null ? current.StartPoint.DistanceTo(startLink.EndPoint) : 0.0;
-            double endExtendDis = endLink != null ? current.EndPoint.DistanceTo(endLink.StartPoint) : 0.0;
-            if (startExtendDis > 0.0)
+            var pts = new List<Point3d>();
+            pts.Add(current.StartPoint);
+            pts.Add(current.EndPoint);
+            if (startLink != null)
             {
-                startExtendDis += 5.0;
+                pts.Add(startLink.StartPoint);
+                pts.Add(startLink.EndPoint);
             }
-            if (endExtendDis > 0.0)
+            if (endLink != null)
             {
-                endExtendDis += 5.0;
+                pts.Add(endLink.StartPoint);
+                pts.Add(endLink.EndPoint);
+            }
+            double startExtendDis = 0.0;
+            double endExtendDis = 0.0;
+            var maxPts = pts.GetCollinearMaxPts();
+            if(maxPts.Item1.GetVectorTo(maxPts.Item2).DotProduct(current.StartPoint.GetVectorTo(current.EndPoint))>0)
+            {
+                startExtendDis = maxPts.Item1.DistanceTo(current.StartPoint)+5.0;
+                endExtendDis = maxPts.Item2.DistanceTo(current.EndPoint) + 5.0;
+            }
+            else
+            {
+                startExtendDis = maxPts.Item2.DistanceTo(current.StartPoint) + 5.0;
+                endExtendDis = maxPts.Item1.DistanceTo(current.EndPoint) + 5.0;
             }
             return ThIfcLineBeam.Create(current, startExtendDis, endExtendDis);
         }
