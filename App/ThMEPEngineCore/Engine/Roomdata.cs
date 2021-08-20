@@ -49,24 +49,17 @@ namespace ThMEPEngineCore.Engine
             _window = _window.FilterSmallArea(1.0);
 
             //墙和楼板去毛皮
-            _wall = _wall.BufferPolygons(-WallBufferDistance).BufferPolygons(WallBufferDistance);
+            _wall = Buffer(_wall, -WallBufferDistance);
+            _wall = Buffer(_wall, WallBufferDistance);
             _slab = BufferCollectionContainsLines(_slab, -SlabBufferDistance);
             _slab = BufferCollectionContainsLines(_slab, SlabBufferDistance);
-            //对面积为0的Polyline进行处理
-            _slab = _slab.BufferZeroPolyline();
-            _cornice = _cornice.BufferZeroPolyline();
             //墙和门再buffer以便形成房间洞
             _door = Buffer(_door, BufferDistance);
             _wall = Buffer(_wall, BufferDistance);
-            //_door = _door.BufferPolygons(BufferDistance);有合并操作在内，舍弃
-            //_wall = _wall.BufferPolygons(BufferDistance);
             //窗和线脚也可能出现没有完全搭接的情况
             _window = Buffer(_window, BufferDistance);
-            _cornice = BufferCollectionContainsLines(_cornice, BufferDistance);
-            _slab = BufferCollectionContainsLines(_slab, BufferDistance);
-            //_window = _window.BufferPolygons(BufferDistance);
-            //_cornice = _cornice.BufferPolygons(BufferDistance);
-            //_slab = _slab.BufferPolygons(BufferDistance);
+            _cornice = BufferCollectionContainsLines(_cornice, BufferDistance, true);
+            _slab = BufferCollectionContainsLines(_slab, BufferDistance, true);
         }
 
         /// <summary>
@@ -75,7 +68,7 @@ namespace ThMEPEngineCore.Engine
         /// <param name="polys"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        private DBObjectCollection BufferCollectionContainsLines(DBObjectCollection polys,double length)
+        private DBObjectCollection BufferCollectionContainsLines(DBObjectCollection polys,double length, bool lineflag=false)
         {
             DBObjectCollection res = new DBObjectCollection();
             polys.Cast<Entity>().ForEach(o => 
@@ -84,12 +77,14 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (length < 0)
                         res.Add(poly);//TODO: 碎线可能需要延伸一些长度
-                    else
+                    else if (lineflag)
                     {
                         var bufferRes = poly.ToNTSLineString().Buffer(
                             length, new BufferParameters() { JoinStyle = JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square }).ToDbCollection();
                         bufferRes.Cast<Entity>().ForEach(e => res.Add(e));
                     }
+                    else
+                        res.Add(poly);
                 }
                 else if(o is Polyline polygon && polygon.Area>1.0)
                     polygon.ToNTSPolygon().Buffer(length, new BufferParameters() { JoinStyle = JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
@@ -141,7 +136,7 @@ namespace ThMEPEngineCore.Engine
             {
                 if(obj is Polyline polyline && polyline.Area>1.0)
                 {
-                    if(polyline.Contains(p))
+                    if(polyline.ToNTSPolygon().Contains(p.ToNTSPoint()))
                     {
                         return true;
                     }

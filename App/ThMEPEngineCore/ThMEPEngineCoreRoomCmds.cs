@@ -112,7 +112,14 @@ namespace ThMEPEngineCore
 
                 selectPts.ForEach(p =>
                 {
-                    builder.Build(p).Cast<Entity>().ForEach(o =>
+                    if(!builder.RoomContainPoint(p))
+                    {
+                        builder.Build(p);
+                    }
+                });
+                builder.results.ForEach(e => 
+                {
+                    e.Cast<Entity>().ForEach(o =>
                     {
                         acadDb.ModelSpace.Add(o);
                         o.LayerId = layerId;
@@ -120,7 +127,8 @@ namespace ThMEPEngineCore
                         o.LineWeight = LineWeight.ByLayer;
                         o.Linetype = "ByLayer";
                     });
-                });             
+                });
+                    
             }
         }
     }
