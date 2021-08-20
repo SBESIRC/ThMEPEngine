@@ -9,15 +9,19 @@ using static ThMEPWSS.UndergroundFireHydrantSystem.Model.Block;
 
 namespace ThMEPWSS.ViewModel
 {
-    public class ThFireHydrantSystemViewModel
+    public class FireHydrantSystemViewModel
     {
+        public FireHydrantSystemViewModel()
+        {
+
+        }
+        public FireHydrantSystemSetViewModel SetViewModel { get; set; } = new FireHydrantSystemSetViewModel();
         public static void InsertLoopMark()
         {
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             {
-                //WaterSuplyUtils.ImportNecessaryBlocks();
-                ThMEPWSS.Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
+                Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
                 while (true)
                 {
                     var opt = new PromptPointOptions("请指定环管标记插入点: \n");
@@ -30,7 +34,7 @@ namespace ThMEPWSS.ViewModel
                     {
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", WaterSuplyBlockNames.LoopMark,
                                     pt.Value, new Scale3d(1, 1, 1), 0);
-                    }   
+                    }
                 }
             }
         }
@@ -40,8 +44,7 @@ namespace ThMEPWSS.ViewModel
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             {
-                //WaterSuplyUtils.ImportNecessaryBlocks();
-                ThMEPWSS.Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
+                Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
                 while (true)
                 {
                     var opt = new PromptPointOptions("请指定环管节点标记插入点: \n");
@@ -61,5 +64,7 @@ namespace ThMEPWSS.ViewModel
                 }
             }
         }
+
+        
     }
 }

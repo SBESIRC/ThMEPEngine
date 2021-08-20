@@ -418,6 +418,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Model\ThFireHydrantValve.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\BlockExplode.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\Casing.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\Check.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\DepthFirstSearch.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\GetFireHydrantPipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\LineOnLine.cs" />
@@ -436,7 +437,8 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
     <Compile Include="ViewModel\HydrantConnectPipeViewModel.cs" />
-    <Compile Include="ViewModel\ThFireHydrantSystemViewModel.cs" />
+    <Compile Include="ViewModel\FireHydrantSystemSetViewModel.cs" />
+    <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />

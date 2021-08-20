@@ -3,19 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.ViewModel;
+using TianHua.Plumbing.WPF.UI.UI;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
 {
@@ -24,14 +16,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
     /// </summary>
     public partial class uiFireHydrantSystem : ThCustomWindow
     {
+        public static FireHydrantSystemViewModel viewModel;
         public uiFireHydrantSystem()
         {
             InitializeComponent();
+            if (null == viewModel)
+                viewModel = new FireHydrantSystemViewModel();
+            this.DataContext = viewModel;
         }
-
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new ThFireHydrantCmd())
+            using (var cmd = new ThFireHydrantCmd(viewModel))
             {
                 cmd.Execute();
             }
@@ -39,12 +34,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
 
         private void LoopMark_Click(object sender, RoutedEventArgs e)
         {
-            ThFireHydrantSystemViewModel.InsertLoopMark();
+            FireHydrantSystemViewModel.InsertLoopMark();
         }
 
-        private void SubLoopMark_Click(object sender, RoutedEventArgs e)
+        private void NodeMark_Click(object sender, RoutedEventArgs e)
         {
-            ThFireHydrantSystemViewModel.InsertSubLoopMark();
+            FireHydrantSystemViewModel.InsertSubLoopMark();
+        }
+        private void btnSet_Click(object sender, RoutedEventArgs e)
+        {
+            var oldViewModel = viewModel.SetViewModel?.Clone();
+            uiFireHydrantSystemSet systemSet = new uiFireHydrantSystemSet(viewModel.SetViewModel);
+            systemSet.Owner = this;
+            var ret = systemSet.ShowDialog();
+            if (ret == false)
+            {
+                //用户取消了操作
+                viewModel.SetViewModel = oldViewModel;
+                return;
+            }
         }
     }
 }

@@ -162,7 +162,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             else
             {
-                if (PipeNumber[0] == 'X' || PipeNumber[0] == 'B' || PipeNumber.StartsWith("DX"))
+                if (PipeNumber.IsCurrentFloor())
                 {
                     Type = 1;//只供给消火栓
                 }

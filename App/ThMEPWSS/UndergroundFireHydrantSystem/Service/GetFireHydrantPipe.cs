@@ -175,7 +175,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         if (fireHydrantSysIn.TermPointDic[branchDic[pt].First()].Type.Equals(1))//终点是类型1，消火栓
                         {
                             string pipeNumber = fireHydrantSysIn.TermPointDic[branchDic[pt][0]].PipeNumber;//立管标号
-                            if (pipeNumber[0].Equals('X') || pipeNumber[0].Equals('B') || pipeNumber.StartsWith("DX"))//消火栓
+                            if (pipeNumber.IsCurrentFloor())//消火栓
                             {
                                 GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                             }
@@ -274,8 +274,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var pt1 = stpt._pt;
             var pt4 = pt1.OffsetX(800);
-            var pt5 = pt4.OffsetY(-5800);
-            var pt6 = pt1.OffsetY(-5800);
+            double floorHeight = fireHydrantSysIn.FloorHeight;
+            var pt5 = pt4.OffsetY(-floorHeight * 0.58);
+            var pt6 = pt1.OffsetY(-floorHeight * 0.58);
             var lineList = new List<Line>
             {
                 new Line(pt4, pt5),
@@ -299,6 +300,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private static void GetBranchType2(Point3dEx branchPt, ref FireHydrantSystemOut fireHydrantSysOut, Point3dEx stpt, Point3dEx tpt,
             Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn, double type = 2)
         {
+            double floorHeight = fireHydrantSysIn.FloorHeight;
+
             var textWidth = fireHydrantSysIn.TextWidth;
             string pipeNumber1 = "";
             string pipeNumber12 = "";
@@ -315,8 +318,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 pipeWidth = 600;
             }
             var pt4 = pt1.OffsetX(pipeWidth);
-            var pt5 = pt1.OffsetXY(pipeWidth, 3100);
-            var pt6 = pt1.OffsetXY(pipeWidth, 4070);
+            var pt5 = pt1.OffsetXY(pipeWidth, floorHeight * 0.4);
+            var pt6 = pt1.OffsetXY(pipeWidth, floorHeight * 0.5);
 
             LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
@@ -362,7 +365,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 strDN = fireHydrantSysIn.TermDnDic[tpt];
             }
-            var DN1 = ThTextSet.ThText(new Point3d(pt5.X + 400, pt4.Y + 1370, 0), Math.PI / 2, strDN);
+            var DN1 = ThTextSet.ThText(new Point3d(pt5.X + 350, pt4.Y + floorHeight * 0.2, 0), Math.PI / 2, strDN);
             fireHydrantSysOut.DNList.Add(DN1);
         }
 
@@ -387,7 +390,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, 3);
                 return;
             }
-            if(pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B') || pipeNumber1.StartsWith("DX"))
+            if(pipeNumber1.IsCurrentFloor())
             {
                 GetBranchType1(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, true);
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[1], ValveDic, fireHydrantSysIn, 3);
@@ -424,7 +427,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             Dictionary<Point3dEx, List<Point3dEx>> ValveDic, FireHydrantSystemIn fireHydrantSysIn)
         {
             double XGap = 800;
-            var YGap = 2200;
+            var floorHeight = fireHydrantSysIn.FloorHeight;
             string pipeNumber1 = "";
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
             {
@@ -432,10 +435,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             var pt1 = stpt._pt;
             var pt4 = new Point3d(pt1.X + XGap, pt1.Y, 0);
-            var pt5 = new Point3d(pt4.X, pt4.Y + YGap, 0);
+            var pt5 = new Point3d(pt4.X, pt4.Y + floorHeight * 0.25, 0);
             var pt51 = new Point3d(pt5.X + 900, pt5.Y, 0);
-            var pt6 = new Point3d(pt51.X, pt51.Y + 2870, 0);
-            var pt7 = new Point3d(pt6.X + 3500, pt6.Y, 0);
+            var pt6 = new Point3d(pt51.X, pt4.Y + floorHeight * 0.5 + 800, 0);
+            var pt7 = new Point3d(pt6.X + floorHeight * 0.3500, pt6.Y, 0);
             LoopLine.Split(ref fireHydrantSysOut, pt4, pt5);
             var lineList = new List<Line>();
             lineList.Add(new Line(pt4, pt5));

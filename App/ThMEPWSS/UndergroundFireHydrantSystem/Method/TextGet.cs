@@ -9,6 +9,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
     {
         public static void GetText(Point3dEx tpt, FireHydrantSystemIn fireHydrantSysIn, ref FireHydrantSystemOut fireHydrantSysOut, Point3d pt4, Point3d pt6)
         {
+            double floorHeight = fireHydrantSysIn.FloorHeight;
             var textWidth = fireHydrantSysIn.TextWidth;
             string pipeNumber1 = "";
             string pipeNumber12 = "";
@@ -18,10 +19,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 pipeNumber12 = fireHydrantSysIn.TermPointDic[tpt].PipeNumber2;//立管标号
             }
 
-            if (pipeNumber1[0].Equals('X') || pipeNumber1[0].Equals('B') || pipeNumber1.StartsWith("DX"))
+            if (pipeNumber1.IsCurrentFloor())
             {
-                var textPt1 = new Point3d(pt4.X - textWidth, pt4.Y - 1700, 0);
-                var textPt2 = new Point3d(pt4.X, pt4.Y - 1700, 0);
+                var textPt1 = new Point3d(pt4.X - textWidth, pt4.Y - floorHeight * 0.17, 0);
+                var textPt2 = new Point3d(pt4.X, pt4.Y - floorHeight * 0.17, 0);
                 var textLine = ThTextSet.ThTextLine(textPt1, textPt2);
                 fireHydrantSysOut.TextLine.Add(textLine);
 
@@ -39,7 +40,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
             {
                 strDN = fireHydrantSysIn.TermDnDic[tpt];
             }
-            var DN = ThTextSet.ThText(new Point3d(pt4.X + 400, pt4.Y - 2800, 0), Math.PI / 2, strDN);
+            var DN = ThTextSet.ThText(new Point3d(pt4.X + 350, pt4.Y - floorHeight * 0.4, 0), Math.PI / 2, strDN);
             fireHydrantSysOut.DNList.Add(DN);
         }
     }

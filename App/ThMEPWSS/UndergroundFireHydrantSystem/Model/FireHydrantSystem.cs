@@ -106,6 +106,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
     public class FireHydrantSystemIn
     {
+        public double FloorHeight { get; set; }
         public List<List<Line>> MarkLineList { get; set; }
         public List<List<Point3dEx>> NodeList { get; set; }
         public Dictionary<Point3dEx, double> AngleList { get; set; }
