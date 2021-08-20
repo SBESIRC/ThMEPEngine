@@ -65,6 +65,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             //            HoleIndex = new ThCADCoreNTSSpatialIndex(ObstacleHoles.ToCollection());
             LineIndex = new ThCADCoreNTSSpatialIndex(DicTermLines.Keys.ToList().ToCollection());
             RoomIndex = new ThCADCoreNTSSpatialIndex(ObstacleRooms.ToCollection());
+            foreach(var line in DicTermLines.Keys)
+            {
+                line.ColorIndex = 4;
+                Draw.AddToCurrentSpace(line);
+            }
         }
         public void ClearData()
         {
@@ -370,7 +375,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             Polyline hydrantPath = new Polyline();
             var hydrantpaths = new List<Polyline>();
-            var lines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(),3);
+            var lines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(),1);
             foreach (var line in lines)
             {
                 var tmpPath = HydrantPath(pt, line);
@@ -499,33 +504,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
             else
             {
-                //var tmpPts = StartOneStep(pt, holes, rooms, line);
-
-                //var hydrantpaths = new List<Polyline>();
-                //foreach (var tmpPt in tmpPts)
-                //{
-                //    var tmpPath = GetPathByAStar(frame, line, tmpPt, holes, rooms);
-                //    if (null == tmpPath)
-                //    {
-                //        continue;
-                //    }
-                //    if (!ThHydrantConnectPipeUtils.IsIntersect(tmpPath, line))
-                //    {
-                //        continue;
-                //    }
-                //    if (tmpPt.DistanceTo(pt) > 1)
-                //    {
-                //        tmpPath.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
-                //    }
-                //    hydrantpaths.Add(tmpPath);
-                //}
-
-                //if (hydrantpaths.Count == 0)
-                //{
-                //    return null;
-                //}
-                //hydrantpaths = hydrantpaths.OrderBy(o => PathCost(o)).ToList();
-                //resLine = hydrantpaths.First();
                 resLine = GetPathByAStar(frame, line, pt, holes, rooms);
                 AStarCount++;
             }

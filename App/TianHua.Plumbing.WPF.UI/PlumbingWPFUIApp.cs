@@ -156,5 +156,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             uiTHXHSXTT = new uiFireControlSystem();
             AcadApp.ShowModelessWindow(uiTHXHSXTT);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THLGHZ", CommandFlags.Modal)]
+        public void ThPipeDrawUI()
+        {
+            var ui = new uiPipeDrawControl();
+            AcadApp.ShowModelessWindow(ui);
+        }
     }
 }

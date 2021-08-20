@@ -22,20 +22,22 @@
             <Grid>
                 <Label Content="图块名称过滤"></Label>
             </Grid>
-            <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
+            <StackPanel  Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Bottom">
                 <Label Content="白名单:"/>
-                <TextBox Name="WhiteTextBox0" Height="23" TextWrapping="Wrap" Text="A-Well-1" Margin="0,5,0,0"/>
-                <TextBox Name="WhiteTextBox1" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
-                <TextBox Name="WhiteTextBox2" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
+                <Button Name="WhiteAddBtn" Content="+" Width="25" Margin="0,0,15,0" Click="WhiteAddBtn_Click"/>
+                <Button Name="WhiteRedBtn" Content="-" Width="25" Click="WhiteRedBtn_Click" />
+            </StackPanel>
+            <StackPanel x:Name="WhiteSpanel" Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
-            <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Bottom">
                 <Label Content="黑名单:"/>
-                <TextBox Name="BlackTextBox0" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
-                <TextBox Name="BlackTextBox1" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
-                <TextBox Name="BlackTextBox2" Height="23" TextWrapping="Wrap" Text="" Margin="0,5,0,0"/>
+                <Button Name="BlackAddBtn" Content="+" Width="25" Margin="0,0,15,0" Click="BlackAddBtn_Click"/>
+                <Button Name="BlackRedBtn" Content="-" Width="25" Click="BlackRedBtn_Click"/>
+            </StackPanel>
+            <StackPanel x:Name="BlackSpanel" Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2">

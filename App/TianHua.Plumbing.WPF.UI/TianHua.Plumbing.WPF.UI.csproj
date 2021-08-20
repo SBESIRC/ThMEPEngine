@@ -117,6 +117,9 @@
     <Compile Include="UI\uiFireHydrantSystemSet.xaml.cs">
       <DependentUpon>uiFireHydrantSystemSet.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiPipeDrawControl.xaml.cs">
+      <DependentUpon>uiPipeDrawControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
       <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
     </Compile>
@@ -214,6 +217,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiFireHydrantSystemSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiPipeDrawControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

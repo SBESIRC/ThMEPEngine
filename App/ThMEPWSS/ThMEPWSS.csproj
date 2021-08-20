@@ -71,10 +71,12 @@
     <Compile Include="FlushPoint\Service\ThNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThWashPointResultParseService.cs" />
     <Compile Include="HydrantConnectPipe\Command\ThHydrantConnectPipeAdjustPath.cs" />
+    <Compile Include="HydrantConnectPipe\Engine\ThHydrantLineRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThHydrantPipeMarkRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThNonBlockElementExtractor.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThBuildRoom.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantConnectPipeConfigInfo.cs" />
+    <Compile Include="HydrantConnectPipe\Model\ThHydrantLine.cs" />
     <Compile Include="HydrantConnectPipe\Model\ThHydrantPipeMark.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThBuildRoomService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThCivilAirWallService.cs" />

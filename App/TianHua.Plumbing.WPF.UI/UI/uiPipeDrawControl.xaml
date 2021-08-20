@@ -1,0 +1,54 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiPipeDrawControl"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    WindowStartupLocation="CenterOwner"
+                    Title="立管绘制"
+                    SizeToContent="Height"
+                    Width="150"
+                    Height="480"
+             mc:Ignorable="d" >
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Row="0">
+            <Grid>
+                <Label Content="单立管"></Label>
+            </Grid>
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
+                <Button x:Name="btnRoomWaterPipe" Content="屋面雨水立管" Click="btnRoomWaterPipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnBalconyPipe" Content="阳台立管" Click="btnBalconyPipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnCondensatePipe" Content="冷凝水立管" Click="btnCondensatePipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnFloorDrain" Content="地漏" Click="btnFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnSewageWastePipe" Content="污废合流立管" Click="btnSewageWastePipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnWasteWaterPipe" Content="废水立管" Click="btnWasteWaterPipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnVentilatePipe" Content="通气立管" Click="btnVentilatePipe_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnCaissonPipe" Content="沉箱立管" Click="btnCaissonPipe_Click" Margin="0,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="85*"/>
+                    <ColumnDefinition Width="47*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="立管组合" Grid.ColumnSpan="2"></Label>
+            </Grid>
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
+                <Button x:Name="btnRoomCondensateFloorDrain" Content="屋雨+冷凝+地漏" Click="btnRoomCondensateFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnCondensateFloorDrain" Content="冷凝+地漏" Click="btnCondensateFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnBalconyCondensateFloorDrain" Content="阳台+冷凝+地漏" Click="btnBalconyCondensateFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnRoomBalconyFloorDrain" Content="屋雨+阳台+地漏" Click="btnRoomBalconyFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnBalconyFloorDrain" Content="阳台+地漏" Click="btnBalconyFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnSewageWasteFloorDrain" Content="污废+地漏" Click="btnSewageWasteFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnWasteVentilateSewageWaste" Content="废水+通气+污废" Click="btnWasteVentilateSewageWaste_Click" Margin="0,0,0,5"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

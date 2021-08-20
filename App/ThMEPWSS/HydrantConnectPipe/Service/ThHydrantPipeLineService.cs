@@ -14,6 +14,7 @@ using ThMEPWSS.CADExtensionsNs;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using NFox.Cad;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -180,13 +181,125 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 return lineList;
             }
         }
-
         public List<Line> GetHydrantMainLine(Point3dCollection selectArea)
         {
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
             List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn, selectArea);
             pipeLines = PipeLineList.CleanLaneLines3(pipeLines);
             return pipeLines;
+        }
+
+        public void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, Point3dCollection selectArea)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var lineEngine = new ThHydrantLineRecognitionEngine();//提取供水管
+                lineEngine.Extract(selectArea);
+                var dbObjs = lineEngine.Dbjs;
+                foreach (Entity dbj in dbObjs)
+                {
+                    var startPt = new Point3d();
+                    var entPt = new Point3d();
+                    if (IsTianZhengElement(dbj))
+                    {
+                        GetTianZhengLinePt(dbj, out startPt, out entPt);
+                    }
+                    else
+                    {
+                        if (dbj is Line)
+                        {
+                            startPt = (dbj as Line).StartPoint;
+                            entPt = (dbj as Line).EndPoint;
+                        }
+                    }
+                    foreach (var l in branchLines)
+                    {
+                        var box = l.Buffer(10);
+                        box = box.Buffer(1.0)[0] as Polyline;
+                        var tmpLine = new Line(startPt, entPt);
+                        if(!tmpLine.IsParallelToEx(l))
+                        {
+                            continue;
+                        }
+                        tmpLine.Dispose();
+                        if (box.Contains(startPt) && box.Contains(entPt))
+                        {
+                            dbj.UpgradeOpen();
+                            dbj.Erase();
+                            dbj.DowngradeOpen();
+                            break;
+                        }
+                        else if(box.Contains(startPt) && !box.Contains(entPt))
+                        {
+                            //移动startPt到box边缘
+                            var tmpPts = box.IntersectWithEx(dbj);
+                            MoveLine(dbj, tmpPts[0], entPt);
+                            break;
+                        }
+                        else if (!box.Contains(startPt) && box.Contains(entPt))
+                        {
+                            //移动entPt到box边缘
+                            var tmpPts = box.IntersectWithEx(dbj);
+                            MoveLine(dbj, startPt, tmpPts[0]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        public static bool IsTianZhengElement(Entity ent)
+        {
+            return ThMEPEngineCore.Algorithm.ThMEPTCHService.IsTCHElement(ent);
+        }
+
+        private void GetTianZhengLinePt(Entity ent,out Point3d startPt,out Point3d endPt)
+        {
+            var pt1 = ent.GetType().GetProperty("StartPoint");
+            var pt2 = ent.GetType().GetProperty("EndPoint");
+            if(pt1 != null && pt2 != null)
+            {
+                startPt = (Point3d)pt1.GetValue(ent);
+                endPt = (Point3d)pt2.GetValue(ent);
+            }
+            else
+            {
+                List<Point3d> pts = new List<Point3d>();
+                foreach (Entity l in ent.ExplodeToDBObjectCollection())
+                {
+                    if(l is Polyline)
+                    {
+                        pts.Add((l as Polyline).StartPoint);
+                        pts.Add((l as Polyline).EndPoint);
+                    }
+                    else if(l is Line)
+                    {
+                        pts.Add((l as Line).StartPoint);
+                        pts.Add((l as Line).EndPoint);
+                    }
+                }
+                var pairPt = pts.GetCollinearMaxPts();
+                startPt = pairPt.Item1;
+                endPt = pairPt.Item2;
+            }
+        }
+        private void MoveLine(Entity ent,Point3d startPt,Point3d endPt)
+        {
+            ent.UpgradeOpen();
+            ent.Erase();
+            ent.DowngradeOpen();
+            using (var database = AcadDatabase.Active())
+            {
+                var tmpLine = new Line(startPt, endPt);
+                if( database.Layers.Contains("W-FRPT-1-HYDT-PIPE"))
+                {
+                    tmpLine.LayerId = DbHelper.GetLayerId("W-FRPT-1-HYDT-PIPE");
+                }
+                else if(database.Layers.Contains("W-FRPT-HYDT-PIPE"))
+                {
+                    tmpLine.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE");
+                }
+                database.CurrentSpace.Add(tmpLine);
+            }
         }
     }
 }

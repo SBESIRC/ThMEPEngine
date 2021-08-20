@@ -77,7 +77,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
                     sPx = sPx + 1;
                 }
             }
-            if (Math.Abs(sRow - eRow) > 1)
+            if (Math.Abs(sRow - eRow) > 0.001)
             {
                 if (sRow < eRow)
                 {
