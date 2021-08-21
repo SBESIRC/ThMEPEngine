@@ -87,7 +87,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
         }
-
         public static void AddValveLine(DBObjectCollection valveDB,
             ref FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList, ref List<Line> lineList, 
             ref List<Line> valveList, ThCADCoreNTSSpatialIndex casingSpatialIndex)

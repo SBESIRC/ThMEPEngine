@@ -61,7 +61,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             double lineEndColumn = endLine.EndPoint.X / step;
             double lineRow = endLine.StartPoint.Y / step;
             int lineStartPx = Convert.ToInt32(Math.Ceiling(lineStartColumn));     //line start point的X值
-            int lineEndPx = Convert.ToInt32(Math.Ceiling(lineEndColumn));         //line start point的X值
+            int lineEndPx = Convert.ToInt32(Math.Ceiling(lineEndColumn));         //line end point的X值
             int linePy = Convert.ToInt32(Math.Ceiling(lineRow));                  //line point的Y值
 
             var sRightSpace = sPx * step - transSP.X;
@@ -94,7 +94,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
                 lineEndPx = lineEndPx + 2;
                 lineStartPx = lineStartPx + 1;
             }
-            if (Math.Abs(sRow - lineRow) > 1)
+            if (Math.Abs(sRow - lineRow) > 0.01)
             {
                 if (sRow < lineRow)
                 {

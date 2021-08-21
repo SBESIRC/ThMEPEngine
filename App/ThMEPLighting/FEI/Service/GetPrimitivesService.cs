@@ -50,7 +50,7 @@ namespace ThMEPLighting.FEI
             {
                 return new List<List<Line>>();
             }
-            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Entity>().Where(y => y is Curve).Cast<Curve>().ToList()).ToList();
 
             //处理车道线
             var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 100.0, 2.0, Math.PI / 180.0);

@@ -23,6 +23,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiWaterWellPumpFilter : ThCustomWindow
     {
+        private List<TextBox> WhiteTextBox = new List<TextBox>();
+        private List<TextBox> BlackTextBox = new List<TextBox>();
         private WaterWellIdentifyConfigInfo identifyConfigInfo = new WaterWellIdentifyConfigInfo();
         public uiWaterWellPumpFilter()
         {
@@ -32,40 +34,31 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             return identifyConfigInfo;
         }
+        public void InitUi()
+        {
+            for (int i = 0; i < identifyConfigInfo.WhiteList.Count; i++)
+            {
+                var tmpTBox = new TextBox();
+                tmpTBox.Text = identifyConfigInfo.WhiteList[i];
+                tmpTBox.Margin = new Thickness(0.0, 0.0, 0.0, 5.0);
+                WhiteSpanel.Children.Add(tmpTBox);
+                WhiteTextBox.Add(tmpTBox);
+            }
+
+            for (int i = 0; i < identifyConfigInfo.BlackList.Count; i++)
+            {
+                var tmpTBox = new TextBox();
+                tmpTBox.Text = identifyConfigInfo.BlackList[i];
+                tmpTBox.Margin = new Thickness(0.0, 0.0, 0.0, 5.0);
+                BlackSpanel.Children.Add(tmpTBox);
+                BlackTextBox.Add(tmpTBox);
+            }
+        }
 
         public void SetWaterWellIdentifyConfigInfo(WaterWellIdentifyConfigInfo info)
         {
-            for(int i = 0; i < info.WhiteList.Count;i++)
-            {
-                if( 0 == i)
-                {
-                    WhiteTextBox0.Text = info.WhiteList[i];
-                }
-                else if (1 == i)
-                {
-                    WhiteTextBox1.Text = info.WhiteList[i];
-                }
-                else if (2 == i)
-                {
-                    WhiteTextBox2.Text = info.WhiteList[i];
-                }
-            }
-
-            for (int i = 0; i < info.BlackList.Count; i++)
-            {
-                if (0 == i)
-                {
-                    BlackTextBox0.Text = info.BlackList[i];
-                }
-                else if (1 == i)
-                {
-                    BlackTextBox1.Text = info.BlackList[i];
-                }
-                else if (2 == i)
-                {
-                    BlackTextBox2.Text = info.BlackList[i];
-                }
-            }
+            identifyConfigInfo = info;
+            InitUi();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -76,35 +69,57 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnOK_Click(object sender, RoutedEventArgs e)
         {
-            identifyConfigInfo.WhiteList.Clear();
-            if (!WhiteTextBox0.Text.IsNullOrEmpty())
+            for(int i = 0; i < WhiteTextBox.Count;i++)
             {
-                identifyConfigInfo.WhiteList.Add(WhiteTextBox0.Text);
-            }
-            if (!WhiteTextBox1.Text.IsNullOrEmpty())
-            {
-                identifyConfigInfo.WhiteList.Add(WhiteTextBox1.Text);
-            }
-            if (!WhiteTextBox2.Text.IsNullOrEmpty())
-            {
-                identifyConfigInfo.WhiteList.Add(WhiteTextBox2.Text);
+                identifyConfigInfo.WhiteList[i] = WhiteTextBox[i].Text;
             }
 
-            if (!BlackTextBox0.Text.IsNullOrEmpty())
+            for (int i = 0; i < BlackTextBox.Count; i++)
             {
-                identifyConfigInfo.BlackList.Add(BlackTextBox0.Text);
+                identifyConfigInfo.BlackList[i] = BlackTextBox[i].Text;
             }
-            if (!BlackTextBox1.Text.IsNullOrEmpty())
-            {
-                identifyConfigInfo.BlackList.Add(BlackTextBox1.Text);
-            }
-            if (!BlackTextBox2.Text.IsNullOrEmpty())
-            {
-                identifyConfigInfo.BlackList.Add(BlackTextBox2.Text);
-            }
-
             this.DialogResult = true;
             this.Close();
+        }
+
+        private void WhiteAddBtn_Click(object sender, RoutedEventArgs e)
+        {
+            identifyConfigInfo.WhiteList.Add("");
+            var tmpTBox = new TextBox();
+            tmpTBox.Margin = new Thickness(0.0, 0.0, 0.0, 5.0);
+            WhiteSpanel.Children.Add(tmpTBox);
+            WhiteTextBox.Add(tmpTBox);
+        }
+
+        private void WhiteRedBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (identifyConfigInfo.WhiteList.Count <= 3)
+            {
+                return;
+            }
+            identifyConfigInfo.WhiteList.Remove(identifyConfigInfo.WhiteList.Last());
+            WhiteSpanel.Children.Remove(WhiteTextBox.Last());
+            WhiteTextBox.Remove(WhiteTextBox.Last());
+        }
+
+        private void BlackAddBtn_Click(object sender, RoutedEventArgs e)
+        {
+            identifyConfigInfo.BlackList.Add("");
+            var tmpTBox = new TextBox();
+            tmpTBox.Margin = new Thickness(0.0, 0.0, 0.0, 5.0);
+            BlackSpanel.Children.Add(tmpTBox);
+            BlackTextBox.Add(tmpTBox);
+        }
+
+        private void BlackRedBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if(identifyConfigInfo.BlackList.Count <= 3)
+            {
+                return;
+            }
+            identifyConfigInfo.BlackList.Remove(identifyConfigInfo.BlackList.Last());
+            BlackSpanel.Children.Remove(BlackTextBox.Last());
+            BlackTextBox.Remove(BlackTextBox.Last());
         }
     }
 }

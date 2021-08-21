@@ -1,9 +1,9 @@
-﻿using Linq2Acad;
+﻿using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System.Collections.Generic;
 using System.IO;
 using ThCADExtension;
 using ThMEPEngineCore;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
@@ -43,6 +43,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             catch { }
                         }
                     }
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, "AI-辅助", 255);
+                    }
+                    catch { }
                 }
             }
         }

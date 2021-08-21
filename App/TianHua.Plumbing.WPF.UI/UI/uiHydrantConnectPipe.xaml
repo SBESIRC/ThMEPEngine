@@ -36,7 +36,7 @@
                 <Label Content="阀门和管径"></Label>
                 <CheckBox Content="设置支管蝶阀" IsChecked="{Binding SetupValve}" Margin="10,5,0,0"/>
                 <CheckBox Content="标注支管规格" IsChecked="{Binding MarkSpecif}" Margin="10,15,0,0"/>
-                <CheckBox Content="覆盖已绘图元" IsChecked="{Binding CoveredGraph}" Margin="10,15,0,0" Visibility="Hidden"/>
+                <CheckBox Content="覆盖已绘图元" IsChecked="{Binding CoveredGraph}" Margin="10,15,0,0"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2">

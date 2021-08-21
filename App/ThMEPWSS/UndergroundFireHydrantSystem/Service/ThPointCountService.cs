@@ -173,6 +173,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     if (fireHydrantSysIn.PtDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch
                     {
+                        fireHydrantSysIn.PtTypeDic.Remove(pt);//支路点 Branch
+                        fireHydrantSysIn.PtTypeDic.Add(pt, "Branch");
                         foreach (var nd in fireHydrantSysIn.NodeList)
                         {
                             if (nd.Contains(pt))//次环点SubLoop
@@ -181,8 +183,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 fireHydrantSysIn.PtTypeDic.Add(pt, "SubLoop");
                                 break;
                             }
-                            fireHydrantSysIn.PtTypeDic.Remove(pt);//支路点 Branch
-                            fireHydrantSysIn.PtTypeDic.Add(pt, "Branch");
                         }
                     }
 

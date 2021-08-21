@@ -32,6 +32,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         override protected List<Point> ReduceInflectionPoint<T>(List<Point> inflectionPoints, Map<T> map)
         {
             List<Point> path = new List<Point>();
+            if(inflectionPoints.Count == 3)
+            {
+                return inflectionPoints;
+            }
             
             while(inflectionPoints.Count >= 3)
             {

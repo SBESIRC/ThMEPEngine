@@ -12,13 +12,16 @@ using Autodesk.AutoCAD.EditorInput;
 using AcHelper;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
+using ThMEPWSS.ViewModel;
 
 namespace ThMEPWSS.Command
 {
     public class ThFireHydrantCmd : ThMEPBaseCommand, IDisposable
     {
-        public ThFireHydrantCmd()
+        readonly FireHydrantSystemViewModel _UiConfigs;
+        public ThFireHydrantCmd(FireHydrantSystemViewModel uiConfigs)
         {
+            _UiConfigs = uiConfigs;
             CommandName = "THDXXHSXTT";
             ActionName = "生成";
         }
@@ -46,6 +49,7 @@ namespace ThMEPWSS.Command
             var loopStartPt = Active.Editor.GetPoint(opt).Value;
             var selectArea = Common.Utils.SelectAreas();//生成候选区域
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
+            fireHydrantSysIn.FloorHeight = _UiConfigs.SetViewModel.FloorLineSpace;//楼层线间距
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
 
             GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea);//提取输入参数

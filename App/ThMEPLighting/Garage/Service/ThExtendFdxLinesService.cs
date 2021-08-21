@@ -55,7 +55,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Extend(Line fdxLine, Point3d pt)
         {
-            var linkLines = SearchLines(pt, 1.0);
+            var linkLines = SearchLines(pt, 5.0);
             linkLines = linkLines
                 .Where(o => !ThGeometryTool.IsCollinearEx(
                   fdxLine.StartPoint, fdxLine.EndPoint, o.StartPoint, o.EndPoint))

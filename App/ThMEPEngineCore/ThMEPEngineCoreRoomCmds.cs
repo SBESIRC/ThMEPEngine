@@ -81,7 +81,7 @@ namespace ThMEPEngineCore
                     var ptRes = Active.Editor.GetPoint(ppo);
                     if (ptRes.Status == PromptStatus.OK)
                     {
-                        selectPts.Add(ptRes.Value);
+                        selectPts.Add(ptRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem));
                     }
                     else
                     {
@@ -97,7 +97,9 @@ namespace ThMEPEngineCore
                 Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
                 data.Deburring();
-                var builder = new ThRoomOutlineBuilderEngine(data.MergeData());
+                var totaldata = data.MergeData();
+                selectPts = selectPts.Where(o => !data.ContatinPoint3d(o)).ToList();
+                var builder = new ThRoomOutlineBuilderEngine(totaldata);
 
                 if (builder.Count == 0)
                     return;
@@ -110,7 +112,14 @@ namespace ThMEPEngineCore
 
                 selectPts.ForEach(p =>
                 {
-                    builder.Build(p).Cast<Entity>().ForEach(o =>
+                    if(!builder.RoomContainPoint(p))
+                    {
+                        builder.Build(p);
+                    }
+                });
+                builder.results.ForEach(e => 
+                {
+                    e.Cast<Entity>().ForEach(o =>
                     {
                         acadDb.ModelSpace.Add(o);
                         o.LayerId = layerId;
@@ -118,7 +127,8 @@ namespace ThMEPEngineCore
                         o.LineWeight = LineWeight.ByLayer;
                         o.Linetype = "ByLayer";
                     });
-                });             
+                });
+                    
             }
         }
     }

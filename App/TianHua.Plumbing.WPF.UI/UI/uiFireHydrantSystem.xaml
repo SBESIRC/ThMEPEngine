@@ -4,10 +4,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                    Title="地下消火栓系统图"
-                    SizeToContent="WidthAndHeight"
-             mc:Ignorable="d" ResizeMode="NoResize"
-                     >
+             Title="地下消火栓系统图"
+             SizeToContent="WidthAndHeight"
+             mc:Ignorable="d" ResizeMode="NoResize">
+
     <Grid  Margin="5" >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -17,17 +17,19 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
             <WrapPanel Orientation="Vertical">
-                <cus:ImageButton Content="标记环管" Name="btnSelectFloor" Height="23" Width="70" Margin="0,5,0,0" TabIndex="1" Click="LoopMark_Click"></cus:ImageButton>
+                <cus:ImageButton  Content="标记环管" Name="MarkLoop" Height="20" Width="60" Margin="0,0,0,0" TabIndex="1" Click="LoopMark_Click"></cus:ImageButton>
+                <cus:ImageButton  Content="标记节点" Name="MarkNode" Height="20" Width="60" Margin="0,5,0,0" TabIndex="2" Click="NodeMark_Click"></cus:ImageButton>
             </WrapPanel>
+            <cus:ImageButton Content="参数设置" Name="btnSet" Height="45" Width="60" Margin="5,0,0,0" ImageTextLocation="TextOnly" Click="btnSet_Click" TabIndex="3"></cus:ImageButton>
+
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
             <WrapPanel Orientation="Vertical">
-                <cus:ImageButton x:Name="btnReadStoreys" Content="标记节点" Height="24" Width="70" Margin="0,5,0,0"  TabIndex="2" Click="SubLoopMark_Click"></cus:ImageButton>
             </WrapPanel>
         </StackPanel>
 
         <StackPanel Grid.Row="2" HorizontalAlignment="Right">
-            <cus:ImageButton Content="生成" Width="50" Height="23"  Margin="0,10,0,0" TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="生成" Width="50" Height="20"  Margin="0,10,0,0" TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

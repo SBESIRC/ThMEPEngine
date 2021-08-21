@@ -14,6 +14,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Garage.Service;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPLighting.Garage
 {
@@ -182,6 +183,33 @@ namespace ThMEPLighting.Garage
                 }
             }
             return new Point3dCollection();
+        }
+        public static Point3dCollection SelectPolylinePoints()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {                
+                var pts = new Point3dCollection();
+                var ppo = new PromptPointOptions("\n选择第一个点");
+                ppo.AllowNone = true;
+                ppo.AllowArbitraryInput = true;
+                while (true)
+                {
+                    var ppr = Active.Editor.GetPoint(ppo);
+                    if (ppr.Status == PromptStatus.OK)
+                    {
+                        pts.Add(ppr.Value);
+                        ppo.Message = "\n选择下一个点";
+                        ppo.UseBasePoint = true;
+                        ppo.UseDashedLine = true;
+                        ppo.BasePoint = ppr.Value;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return pts.OfType<Point3d>().Select(p=>p.TransformBy(Active.Editor.CurrentUserCoordinateSystem)).ToCollection();
+            }
         }
     }
 }

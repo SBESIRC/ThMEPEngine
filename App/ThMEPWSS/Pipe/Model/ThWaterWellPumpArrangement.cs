@@ -19,6 +19,12 @@ namespace ThMEPWSS.Pipe.Model
         public WaterWellIdentifyConfigInfo()
         {
             WhiteList.Add("A-Well-1");
+            WhiteList.Add("");
+            WhiteList.Add("");
+
+            BlackList.Add("");
+            BlackList.Add("");
+            BlackList.Add("");
         }
     }
     public class WaterWellConfigInfo

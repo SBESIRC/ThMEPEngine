@@ -228,9 +228,53 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// </summary>
         /// <param name="polylines"></param>
         /// <returns></returns>
+        private List<Polyline> CorrectIntersectPipeLine(List<Polyline> polylines, double length)
+        {
+            List<Polyline> resPolys = new List<Polyline>();
+            polylines = polylines.OrderBy(x => GeUtils.HandleConnectPolys(x).NumberOfVertices).ToList();
+            while (polylines.Count > 0)
+            {
+                var firPoly = polylines.First();
+                polylines.Remove(firPoly);
+                //找到相交线
+                var intersectPolys = polylines
+                    .ToDictionary(
+                    x => x,
+                    y =>
+                    {
+                        List<Point3d> pts = new List<Point3d>();
+                        foreach (Point3d pt in y.IntersectWithEx(firPoly))
+                        {
+                            if (pt.DistanceTo(y.StartPoint) > 1 && pt.DistanceTo(y.EndPoint) > 1)
+                            {
+                                pts.Add(pt);
+                            }
+                        }
+                        return pts;
+                    })
+                    .Where(x => x.Value.Count > 0)
+                    .ToDictionary(x => x.Key, y => y.Value.First());
+
+                if (intersectPolys.Count > 0)
+                {
+                    Point3d connectPt = firPoly.StartPoint.DistanceTo(intersectPolys.First().Value) < firPoly.EndPoint.DistanceTo(intersectPolys.First().Value)
+                            ? firPoly.StartPoint : firPoly.EndPoint;
+                }
+                resPolys.Add(firPoly);
+            }
+
+            return resPolys;
+        }
+
+        /// <summary>
+        /// 处理相交的连接线
+        /// </summary>
+        /// <param name="polylines"></param>
+        /// <returns></returns>
         private List<Polyline> CorrectIntersectPipeLine(List<Polyline> polylines)
         {
             List<Polyline> resPolys = new List<Polyline>();
+            polylines = polylines.OrderBy(x => GeUtils.HandleConnectPolys(x).NumberOfVertices).ToList();
             while (polylines.Count > 0)
             {
                 var firPoly = polylines.First();

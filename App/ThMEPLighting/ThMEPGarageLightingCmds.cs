@@ -30,7 +30,8 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 2;
-                var pts = ThGarageInteractionUtils.PolylineJig(colorIndex);
+                //var pts = ThGarageInteractionUtils.PolylineJig(colorIndex);
+                var pts = ThGarageInteractionUtils.SelectPolylinePoints();
                 if (pts.Count <= 1)
                 {
                     return;
@@ -50,7 +51,8 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 1;
-                var pts = ThGarageInteractionUtils.PolylineJig(colorIndex);
+                //var pts = ThGarageInteractionUtils.PolylineJig(colorIndex);
+                var pts = ThGarageInteractionUtils.SelectPolylinePoints();
                 if (pts.Count <= 1)
                 {
                     return;

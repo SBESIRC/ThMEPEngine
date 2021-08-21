@@ -14,10 +14,13 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
             }
-            if (form != null && !form.Visible)
+            if (form != null)
             {
                 SubscribeToMessages(form);
-                AcadApp.ShowModelessDialog(form);
+                if (!form.Visible)
+                {
+                    AcadApp.ShowModelessDialog(form);
+                }
             }
         }
 
@@ -37,11 +40,14 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
             }
-            if (form != null && form.Visible)
+            if (form != null)
             {
-                form.Hide();
-                HidefmOverView(form);
                 UnSubscribeToMessages(form);
+                if (form.Visible)
+                {
+                    form.Hide();
+                    HidefmOverView(form);
+                }
             }
         }
 

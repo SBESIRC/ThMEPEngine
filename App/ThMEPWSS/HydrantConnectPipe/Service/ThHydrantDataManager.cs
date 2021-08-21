@@ -1,16 +1,10 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPWSS.HydrantConnectPipe.Command;
-using ThMEPWSS.HydrantConnectPipe.Engine;
+using System.Data;
+using ThMEPEngineCore.Config;
+using ThMEPEngineCore.IO.ExcelService;
 using ThMEPWSS.HydrantConnectPipe.Model;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -76,12 +70,38 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var buildRoomService = new ThBuildRoomService();
             return buildRoomService.GetBuildRoom(selectArea);
         }
-
+        public static List<ThBuildRoom> GetBuildRoom(Point3dCollection selectArea,string strKey)
+        {
+            string path = "D:\\DATA\\Git\\ThMEPEngine\\AutoLoader\\Contents\\Support\\上海地区住宅-安防配置表.xlsx";
+            var buildRoomService = new ThBuildRoomService();
+            ReadExcelService excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(path, true);
+            var tableTree = GetRoomTableTree(dataSet);
+            var rooList = tableTree.CalRoomLst(strKey);
+            return buildRoomService.GetBuildRoom(selectArea, rooList);
+        }
         public static List<Line> ConnectLine(Point3dCollection selectArea)
         {
             var hydrantMainLineService = new ThHydrantPipeLineService();
             var lines = hydrantMainLineService.GetHydrantMainLine(selectArea);
             return lines;
+        }
+        public static void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, Point3dCollection selectArea)
+        {
+            var hydrantMainLineService = new ThHydrantPipeLineService();
+            hydrantMainLineService.RemoveBranchLines(branchLines, loopLines, selectArea);
+        }
+
+        private static List<RoomTableTree> GetRoomTableTree(DataSet dataSet)
+        {
+            foreach (System.Data.DataTable table in dataSet.Tables)
+            {
+                if (table.TableName.Contains("房间名称处理"))
+                {
+                    return RoomConfigTreeService.CreateRoomTree(table);
+                }
+            }
+            return null;
         }
     }
 }

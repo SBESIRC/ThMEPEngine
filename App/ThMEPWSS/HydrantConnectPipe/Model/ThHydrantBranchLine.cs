@@ -33,7 +33,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 var objcets = polyline.BufferPL(50);
                 var obb = objcets[0] as Polyline;
                 branchLine.BranchPolylineObb = obb;
-
             }
             return branchLine;
         }
@@ -42,6 +41,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             var lines = BranchPolyline.ToLines();
             foreach (var line in lines)
             {
+                line.ColorIndex = 5;
                 line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE-AI");
                 acadDatabase.CurrentSpace.Add(line);
             }

@@ -111,6 +111,15 @@
     <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiFireHydrantSystem.xaml.cs">
+      <DependentUpon>uiFireHydrantSystem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFireHydrantSystemSet.xaml.cs">
+      <DependentUpon>uiFireHydrantSystemSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiPipeDrawControl.xaml.cs">
+      <DependentUpon>uiPipeDrawControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
       <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
     </Compile>
@@ -126,9 +135,6 @@
     </Compile>
     <Compile Include="UI\DrainageSystemUI.xaml.cs">
       <DependentUpon>DrainageSystemUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\uiFireHydrantSystem.xaml.cs">
-      <DependentUpon>uiFireHydrantSystem.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiHydrantConnectPipe.xaml.cs">
       <DependentUpon>uiHydrantConnectPipe.xaml</DependentUpon>
@@ -206,6 +212,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\uiFireHydrantSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFireHydrantSystemSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiPipeDrawControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\uiUNDPDrainageSystemInfoCheck.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -223,10 +241,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\DrainageSystemUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\uiFireHydrantSystem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

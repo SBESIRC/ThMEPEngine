@@ -24,7 +24,7 @@ namespace ThMEPWSS.Command
         }
 
         public void Execute()
-        {          
+        {
             try
             {
                 using (var Doclock = Active.Document.LockDocument())

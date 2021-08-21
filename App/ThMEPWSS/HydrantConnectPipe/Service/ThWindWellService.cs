@@ -44,5 +44,31 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 return windWells;
             }
         }
+
+        public List<ThWindWell> GetWindWell(Point3dCollection selectArea,List<string> strNames)
+        {
+            using (var database = AcadDatabase.Active())
+            using (var roomEngine = new ThRoomBuilderEngine())
+            {
+                var rooms = roomEngine.BuildFromMS(database.Database, selectArea);
+                List<ThWindWell> windWells = new List<ThWindWell>();
+                foreach (var room in rooms)
+                {
+                    bool isWindWell = false;
+                    foreach (var tag in room.Tags)
+                    {
+                        if(strNames.Contains(tag))
+                        {
+                            isWindWell = true;
+                        }
+                    }
+                    if (isWindWell)
+                    {
+                        windWells.Add(ThWindWell.Create(room.Boundary));
+                    }
+                }
+                return windWells;
+            }
+        }
     }
 }

@@ -23,6 +23,7 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore
 {
@@ -1121,6 +1122,36 @@ namespace ThMEPEngineCore
                 aStarOptimizeRoute.SetObstacle(holes);
                 //var res = aStarOptimizeRoute.Plan(pt, line);
                 //acdb.ModelSpace.Add(res);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THBuildPolyGeo", CommandFlags.Modal)]
+        public void THBuildPolyGeo()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())            
+            {
+                var pso = new PromptSelectionOptions();
+                pso.MessageForAdding = "\n选择要导出的Polyline";
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var psr = Active.Editor.GetSelection(pso, filter);
+                if(psr.Status == PromptStatus.OK)
+                { 
+                    //输出
+                    var fileInfo = new FileInfo(Active.Document.Name);
+                    var path = fileInfo.Directory.FullName;
+                    var polys = psr.Value.GetObjectIds().Select(o => acadDatabase.Element<Polyline>(o)).ToList();
+                    polys.ForEach(p =>
+                    {
+                        var thGeo = new ThGeometry()
+                        {
+                            Boundary = p,
+                        };                        
+                        ThGeoOutput.Output(new List<ThGeometry> { thGeo }, path, fileInfo.Name + Guid.NewGuid().ToString());
+                    });
+                }
             }
         }
     }

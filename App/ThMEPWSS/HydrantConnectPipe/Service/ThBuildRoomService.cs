@@ -54,5 +54,45 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 return buildRooms;
             }
         }
+        public List<ThBuildRoom> GetBuildRoom(Point3dCollection selectArea,List<string> strNames)
+        {
+            using (var database = AcadDatabase.Active())
+            using (var roomEngine = new ThRoomBuilderEngine())
+            {
+                var rooms = roomEngine.BuildFromMS(database.Database, selectArea);
+                List<ThBuildRoom> buildRooms = new List<ThBuildRoom>();
+                foreach (var room in rooms)
+                {
+                    bool isBuildRoom = false;
+                    foreach (var tag in room.Tags)
+                    {
+                        if (strNames.Contains(tag))
+                        {
+                            isBuildRoom = true;
+                            break;
+                        }
+                    }
+                    if (isBuildRoom)
+                    {
+                        buildRooms.Add(ThBuildRoom.Create(room.Boundary));
+                    }
+                }
+                return buildRooms;
+            }
+        }
+        public List<ThBuildRoom> GetAllBuildRoom(Point3dCollection selectArea)
+        {
+            using (var database = AcadDatabase.Active())
+            using (var roomEngine = new ThRoomBuilderEngine())
+            {
+                var rooms = roomEngine.BuildFromMS(database.Database, selectArea);
+                List<ThBuildRoom> buildRooms = new List<ThBuildRoom>();
+                foreach (var room in rooms)
+                {
+                    buildRooms.Add(ThBuildRoom.Create(room.Boundary));
+                }
+                return buildRooms;
+            }
+        }
     }
 }

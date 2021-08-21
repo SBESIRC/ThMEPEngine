@@ -324,7 +324,7 @@ namespace ThMEPElectrical
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
-            return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Entity>().Where(y => y is Curve).Cast<Curve>().ToList()).ToList();
         }
 
         /// <summary>

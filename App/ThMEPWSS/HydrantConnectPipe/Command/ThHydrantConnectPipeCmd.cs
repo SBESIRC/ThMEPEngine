@@ -100,7 +100,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     List<Line> loopLines = new List<Line>();
                     List<Line> branchLines = new List<Line>();
                     ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
-                    var pathService = new ThCreateHydrantPathService();
+                    var pathService = new ThCreateHydrantPathService(); 
                     foreach (var shearWall in shearWalls)
                     {
                         pathService.SetObstacle(shearWall.Outline);
@@ -132,6 +132,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     //添加约束终止线
                     pathService.SetTermination(loopLines);
                     pathService.InitData();
+
+                    if (ConfigInfo.isCoveredGraph)
+                    {
+                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, range);
+                    }
 
                     var brLines = new List<ThHydrantBranchLine>();
                     foreach (var hydrantPipe in hydrantPipes)
