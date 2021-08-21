@@ -79,6 +79,11 @@ namespace ThMEPLighting
                 {
                     return;
                 }
+
+                //清除选择的框线内之前布置的结果
+                var clearService = new ThClearPreviouResultService();
+                clearService.Clear(acadDatabase.Database, regionBorders.Select(o => o.RegionBorder).ToList());
+                
                 regionBorders.ForEach(o =>
                 {
                     //移动到原点
@@ -111,8 +116,9 @@ namespace ThMEPLighting
                     //输出到当前图纸并还原回原始位置
                     var objs = new DBObjectCollection();
                     var transformer = new ThMEPOriginTransformer(o.RegionBorder.GetCentroidPoint());
-                    var objIds = ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter);
-                    objIds.ForEach(e => objs.Add(acadDatabase.Element<Entity>(e, true)));
+                    var createService = new ThCreateLightToDatabaseService(o, racewayParameter, arrangeParameter);
+                    createService.Create();
+                    createService.ObjIds.ForEach(e => objs.Add(acadDatabase.Element<Entity>(e, true)));
                     o.Transformer.Reset(objs);
                 });
             }
