@@ -104,7 +104,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             foreach (var rstPath in subPathList)
             {
                 var stPt1 = fireHydrantSysOut.InsertPoint;
-                var stPt = new Point3d(stPt1.X, stPt1.Y - 12000 * index, 0);
+                var stPt = new Point3d(stPt1.X, stPt1.Y - fireHydrantSysIn.FloorHeight * index, 0);
                 index += 1;
                 var ptStart = new Point3d(stPt.X, stPt.Y, 0);
                 var pipeGap = 400;
