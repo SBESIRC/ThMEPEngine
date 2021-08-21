@@ -42,7 +42,6 @@ namespace ThMEPWSS.Command
                 Vector3d xDir = (endPt - transPt).GetNormal();
                 Vector3d yDir = xDir.GetPerpendicularVector().GetNormal();
                 Vector3d zDir = Vector3d.ZAxis;
-                var oringinPt = transPt.TransformBy(matrix);
 
                 matrix = new Matrix3d(new double[]{
                     xDir.X, yDir.X, zDir.X, transPt.X,

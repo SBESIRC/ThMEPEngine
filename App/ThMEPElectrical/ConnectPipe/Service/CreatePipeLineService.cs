@@ -15,6 +15,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
     {
         readonly double tol = 1000;
         readonly double checkTol = 250;
+        readonly double moveLineDis = 150;
         public List<Polyline> CreatePipe(List<Polyline> connectPolys, List<BlockReference> broadcasts)
         {
             //计算小支管信息
@@ -32,7 +33,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
             var resPolys = ConnectOfftake(connectPtInfo);
 
             //处理有相交的连接线
-            resPolys = CorrectIntersectPipeLine(resPolys);
+            resPolys = CorrectIntersectPipeLine(resPolys, 200);
 
             return resPolys;
         }
@@ -103,7 +104,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 if (connectPolys.Count > 0)
                 {
                     var dir = (pts.Last() - pts.First()).GetNormal();
-                    Line line = new Line(connectPt + dir * 100, pts.First() + dir * 100);
+                    Line line = new Line(connectPt + dir * moveLineDis, pts.First() + dir * moveLineDis);
                     var resPt = ConenctAnglePt(line, connectPt, Math.Cos(Math.PI * (20.0 / 180)));
                     resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
                     resPoly.AddVertexAt(1, resPt.ToPoint2D(), 0, 0, 0);
@@ -259,8 +260,39 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 {
                     Point3d connectPt = firPoly.StartPoint.DistanceTo(intersectPolys.First().Value) < firPoly.EndPoint.DistanceTo(intersectPolys.First().Value)
                             ? firPoly.StartPoint : firPoly.EndPoint;
+                    var interPoly = intersectPolys.OrderByDescending(x => x.Value.DistanceTo(connectPt)).First();
+                    var distance = interPoly.Value.DistanceTo(connectPt) + length;
+
+                    List<Polyline> polys = new List<Polyline>(intersectPolys.Select(x => x.Key));
+                    polys.Add(firPoly);
+                    var longestLine = GeUtils.CalLongestLineByPoly(polys);
+
+                    Circle circle = new Circle(connectPt, Vector3d.ZAxis, distance);
+                    Point3dCollection pts = new Point3dCollection();
+                    circle.IntersectWith(firPoly, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                    if (pts.Count > 0)
+                    {
+                        firPoly = CreateNewConnectLine(firPoly, longestLine[firPoly], pts[0], connectPt, false);
+                    }
+                    foreach (var polyInfo in intersectPolys)
+                    {
+                        circle.IntersectWith(polyInfo.Key, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                        if (pts.Count > 0)
+                        {
+                            var secPoly = CreateNewConnectLine(polyInfo.Key, longestLine[polyInfo.Key], pts[0], connectPt, false);
+                            polylines.Add(secPoly);
+                        }
+                        else
+                        {
+                            resPolys.Add(polyInfo.Key);
+                        }
+                    }
+                    polylines.Add(firPoly);
                 }
-                resPolys.Add(firPoly);
+                else
+                {
+                    resPolys.Add(firPoly);
+                }
             }
 
             return resPolys;
