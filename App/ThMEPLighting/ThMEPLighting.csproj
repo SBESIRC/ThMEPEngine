@@ -121,6 +121,8 @@
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
     <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
+    <Compile Include="Garage\Service\ThAdjustLightDistributePosService.cs" />
+    <Compile Include="Garage\Service\ThAdjustSingleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThFindCenterLinePortsService.cs" />
     <Compile Include="Garage\Service\ThSeparateLightEdgeService.cs" />
     <Compile Include="Garage\Service\ThBuildFirstSecondPairService.cs" />
@@ -146,7 +148,7 @@
     <Compile Include="Garage\Service\ThCableTrayCutService.cs" />
     <Compile Include="Garage\Service\ThCreateLightToDatabaseService.cs" />
     <Compile Include="Garage\Service\ThDistributeLightService.cs" />
-    <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
+    <Compile Include="Garage\Service\ThAdjustDoubleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />

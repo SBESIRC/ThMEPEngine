@@ -1,84 +1,32 @@
-﻿using System.Linq;
-using ThMEPEngineCore.CAD;
+﻿using System;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
-    public class ThBuildSingleRowPosService
+    public class ThBuildSingleRowPosService: ThBuildLightPosService
     {
-        public Point3d EndPt { get; set; }
-        private Point3d StartPt { get; set; }
-        private List<ThLightEdge> Edges { get; set; }
-        private ThLightArrangeParameter ArrangeParameter { get; set; }
-        private ThQueryLightBlockService QueryLightBlockService { get; set; }
-        private ThBuildSingleRowPosService(
-            Point3d startPt,
+        public ThBuildSingleRowPosService(
             List<ThLightEdge> edges,
+            List<Tuple<Point3d, Point3d>> splitPts,
             ThLightArrangeParameter arrangeParameter,
             ThQueryLightBlockService queryLightBlockService)
+            :base(edges, splitPts, arrangeParameter, queryLightBlockService)
         {
-            StartPt = startPt;
-            Edges = edges;
-            ArrangeParameter = arrangeParameter;
-            QueryLightBlockService = queryLightBlockService;
         }
-        public static ThBuildSingleRowPosService Build(
-            Point3d startPt,
-            List<ThLightEdge> edges,
-            ThLightArrangeParameter arrangeParameter,
-            ThQueryLightBlockService queryLightBlockService)
+
+        public override void Build()
         {
-            var instance = new ThBuildSingleRowPosService(startPt,edges, arrangeParameter, queryLightBlockService);
-            instance.Build();
-            return instance;
-        }
-        private void Build()
-        {
-            var basePt = StartPt;
-            for(int i=0;i<Edges.Count;i++)
+            SplitPts.ForEach(o =>
             {
-                var currentEdge = Edges[i];
-                if (!currentEdge.IsDX)
+                var splitParameter = new ThLineSplitParameter
                 {
-                    //如果是非灯线的边，在其中点创建一个灯，用于传递起始灯编号
-                    var midPt = ThGeometryTool.GetMidPt(currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint);
-                    currentEdge.LightNodes.Add(new ThLightNode() { Position = midPt });
-                    continue;
-                }
-                var linkEdges = new List<ThLightEdge> { currentEdge };
-                int j = i+1;
-                for (; j < Edges.Count; j++)
-                {
-                    if (Edges[j].IsDX)
-                    {
-                        linkEdges.Add(Edges[j]);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                i = j - 1;
-                var maxPts=linkEdges.GetMaxPts();
-                var sp = maxPts.Item1;
-                var ep = maxPts.Item2;
-                if (basePt.DistanceTo(ep)< basePt.DistanceTo(sp))
-                {
-                    sp = maxPts.Item2;
-                    ep = maxPts.Item1;
-                }
-                EndPt = ep; //记录距离StartPt最远的点
-                basePt = ep;//获取下一段的起始点（主要是拐外处）
-                var splitParameter = new ThLineSplitParameter()
-                { 
-                    LineSp=sp,
-                    LineEp=ep,
+                    LineSp = o.Item1,
+                    LineEp = o.Item2,
+                    Margin = ArrangeParameter.Margin,
                     Interval = ArrangeParameter.Interval,
-                    Margin = ArrangeParameter.Margin
                 };
                 if (ArrangeParameter.AutoGenerate)
                 {
@@ -88,35 +36,7 @@ namespace ThMEPLighting.Garage.Service
                 {
                     BuildByExtractFromCad(splitParameter);
                 }
-            }
+            });
         }
-        private void BuildByCalculation(ThLineSplitParameter SplitParameter)
-        {
-            var installPoints = ThDistributeLightService.Distribute(SplitParameter);
-            DistributePoints(SplitParameter.LineSp, installPoints);
-        }
-        private void BuildByExtractFromCad(ThLineSplitParameter SplitParameter)
-        {
-            var line = new Line(SplitParameter.LineSp, SplitParameter.LineEp);
-            var installPoints = QueryLightBlockService.Query(line).OrderBy(o => SplitParameter.LineSp.DistanceTo(o)).ToList();
-            DistributePoints(SplitParameter.LineSp, installPoints);
-        }
-        private void DistributePoints(Point3d startPt, List<Point3d> installPoints)
-        {
-            foreach (var pt in installPoints)
-            {
-                double disance = startPt.DistanceTo(pt);
-                double length = 0.0;
-                foreach (var lightEdge in Edges)
-                {
-                    length += lightEdge.Edge.Length;
-                    if (disance <= length)
-                    {
-                        lightEdge.LightNodes.Add(new ThLightNode { Position = pt });
-                        break;
-                    }
-                }
-            }
-        }        
     }
 }

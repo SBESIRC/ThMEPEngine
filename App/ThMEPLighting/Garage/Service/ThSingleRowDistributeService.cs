@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
@@ -12,6 +15,10 @@ namespace ThMEPLighting.Garage.Service
         private ThLightGraphService LightGraph { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
         private ThQueryLightBlockService QueryLightBlockService { get; set; }
+        private ThCADCoreNTSSpatialIndex LineEdgeSpatialIndex { get; set; }
+        private List<ThLightEdge> Edges { get; set; }
+        private List<ThLightEdge> DistributedEdges { get; set; }        
+
         private ThSingleRowDistributeService(
             ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter,
@@ -20,6 +27,13 @@ namespace ThMEPLighting.Garage.Service
             LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
             QueryLightBlockService = queryLightBlockService;
+            Edges = new List<ThLightEdge>();
+            LightGraph.Links.ForEach(o =>
+            {
+                o.Path.ForEach(p => Edges.Add(p));
+            });
+            DistributedEdges = new List<ThLightEdge>();
+            LineEdgeSpatialIndex = new ThCADCoreNTSSpatialIndex(Edges.Select(e=>e.Edge).ToCollection());
         }
         public static void Distribute(
             ThLightGraphService lightGraph,
@@ -46,13 +60,13 @@ namespace ThMEPLighting.Garage.Service
                 for(;j< singleLinkPath.Path.Count;j++)
                 {
                     var preEdge = edges.Last();
-                    var currentEdge = singleLinkPath.Path[j];
+                    var nextEdge = singleLinkPath.Path[j];
                     if (ThGeometryTool.IsCollinearEx(
-                        currentEdge.Edge.StartPoint,
-                        currentEdge.Edge.EndPoint,
+                        nextEdge.Edge.StartPoint,
+                        nextEdge.Edge.EndPoint,
                         preEdge.Edge.StartPoint, preEdge.Edge.EndPoint))
                     {
-                        edges.Add(currentEdge);
+                        edges.Add(nextEdge);
                     }
                     else
                     {
@@ -61,9 +75,33 @@ namespace ThMEPLighting.Garage.Service
                 }
                 i = j - 1;
                 //建造路线上的灯(计算或从图纸获取)
-                var singleRowNumberInstance=ThBuildSingleRowPosService.Build(start,edges, ArrangeParameter,QueryLightBlockService);
-                start = singleRowNumberInstance.EndPt; //下一段的起始点是上一段的结束点
+                var maxPts = edges.GetMaxPts(); //获取直段最大的范围点
+                var distributeInstance = new ThAdjustSingleRowDistributePosService(
+                    maxPts, ArrangeParameter, Edges, DistributedEdges);
+                var splitPts = distributeInstance.Distribute(); //可以布置的区域
+                splitPts = RepairDir(splitPts, start); //修复方向
+                start = start.DistanceTo(maxPts.Item2) > start.DistanceTo(maxPts.Item1) ? maxPts.Item2 : maxPts.Item1; //调整起点到末端
+                var buildSingleRowService = new ThBuildSingleRowPosService(
+                    edges, splitPts, ArrangeParameter, QueryLightBlockService);
+                buildSingleRowService.Build();
+                DistributedEdges.AddRange(edges);
             }
-        }   
+        }
+        private List<Tuple<Point3d, Point3d>> RepairDir(List<Tuple<Point3d, Point3d>> splitPts, Point3d startPt)
+        {
+            var results = new List<Tuple<Point3d, Point3d>>();
+            splitPts.ForEach(o =>
+            {
+                if (startPt.DistanceTo(o.Item1) < startPt.DistanceTo(o.Item2))
+                {
+                    results.Add(Tuple.Create(o.Item1, o.Item2));
+                }
+                else
+                {
+                    results.Add(Tuple.Create(o.Item2, o.Item1));
+                }
+            });
+            return results;
+        }
     }
 }
