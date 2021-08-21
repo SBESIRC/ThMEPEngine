@@ -31,7 +31,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var lines = ThDrainageSystemServiceGeoCollector.GetLines(
                     acadDatabase.ModelSpace.OfType<Entity>().ToList(),
-                    layer => layer is "W-FRPT-1-HYDT-PIPE" or "W-FRPT-HYDT-PIPE");
+                    layer => layer is "W-FRPT-1-HYDT-PIPE" or "W-FRPT-HYDT-PIPE" || layer.Contains("W-FRPT-HYDT-PIPE"));
                 return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())
                     (polygon.ToRect().ToPolygon()).
                     SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();

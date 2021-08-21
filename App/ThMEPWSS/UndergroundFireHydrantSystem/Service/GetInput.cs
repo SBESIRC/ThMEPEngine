@@ -46,10 +46,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var casingSpatialIndex = new ThCADCoreNTSSpatialIndex(casingPts);
 
             PipeLine.AddValveLine(valveDB, ref fireHydrantSysIn, ref pointList, ref lineList, ref valveList, casingSpatialIndex);
-            foreach(var l in lineList)
-            {
-                acadDatabase.CurrentSpace.Add(l);
-            }
+            //foreach(var l in lineList)
+            //{
+            //    acadDatabase.CurrentSpace.Add(l);
+            //}
             var nodeEngine = new ThExtractNodeTag();//提取消火栓环管节点标记
             var nodeDB = nodeEngine.Extract(acadDatabase.Database, selectArea);
             fireHydrantSysIn.NodeList = nodeEngine.GetPointList();
