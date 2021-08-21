@@ -7,18 +7,6 @@ namespace ThMEPEngineCore.Service
 {
     public class ThStructureShearWallLayerManager: ThDbLayerManager
     {
-        public static List<string> CurveXrefLayers(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                return acadDatabase.Layers
-                    .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsShearWallCurveLayer(o.Name))
-                    .Select(o => o.Name)
-                    .ToList();
-            }
-        }
-
         public static List<string> HatchXrefLayers(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -29,43 +17,6 @@ namespace ThMEPEngineCore.Service
                     .Select(o => o.Name)
                     .ToList();
             }
-        }
-
-        private static bool IsShearWallCurveLayer(string name)
-        {
-            var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            if (!layerName.Contains("S_WALL"))
-            {
-                return false;
-            }
-            // 若图层名包含S_WALL，
-            // 则继续判断是否包含TEXT
-            if (layerName.Contains("HATCH"))
-            {
-                return false;
-            }
-            if (layerName.Contains("OTHE"))
-            {
-                return false;
-            }
-            if (layerName.Contains("CAP"))
-            {
-                return false;
-            }
-            if (layerName.Contains("TEXT"))
-            {
-                return false;
-            }
-            if (layerName.Contains("DETL"))
-            {
-                return false;
-            }
-            if (layerName.Contains("TPTN"))
-            {
-                return false;
-            }
-            // 返回指定的图层
-            return true;
         }
 
         private static bool IsShearWallHatchLayer(string name)
