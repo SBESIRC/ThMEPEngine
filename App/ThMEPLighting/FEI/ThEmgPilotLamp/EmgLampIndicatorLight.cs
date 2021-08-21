@@ -277,18 +277,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         int count = 0;
                         for (int i = 0; i < routePts.Count - 1; i++) 
                         {
-                            Line tempLine = new Line(routePts[i], routePts[i + 1]);
-                            foreach (var line in otherLines) 
-                            {
-                                var prjPt = EmgPilotLampUtil.PointToLine(tempLine.StartPoint, line);
-                                var dis = prjPt.DistanceTo(line.StartPoint) + prjPt.DistanceTo(line.EndPoint);
-                                var dis2 = prjPt.DistanceTo(tempLine.StartPoint) + prjPt.DistanceTo(tempLine.EndPoint);
-                                if (dis > (line.Length + 20))
-                                    continue;
-                                if (dis2 > (tempLine.Length + 20))
-                                    continue;
+                            if (PointInLaneLine(routePts[i]))
                                 count += 1;
-                            }
                         }
                         if (count > 1)
                             continue;
@@ -632,6 +622,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             foreach (var node in lineAllNodes)
             {
                 if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
+                    continue;
+                if (!PointInLaneLine(node.graphNode.nodePoint))
                     continue;
                 var route = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, node.graphNode, true).FirstOrDefault();
                 AddHostLightByRoute(hostLines, route, ref hisNodes, unHostLineExit, ref notCreatePoints, true, checkIsEndLine);
@@ -1161,6 +1153,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         break;
                     if (!_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(pointOnLine) < minSpace))
                     {
+                        if (isExtLine && !PointInLaneLine(pointOnLine))
+                            createPoint = pointOnLine;
                         var light1 = new LightLayout(pointOnLine, createPoint, null, leftDir, exitDir, leftDir, sNode, true);
                         light1.isCheckDelete = isFirst && isLightFirst;
                         light1.isTwoSide = isTwoSide;
@@ -1680,6 +1674,18 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 newLight.isTwoSide = light.isTwoSide;
                 _ligthLayouts.Add(newLight);
             }
+        }
+
+        bool PointInLaneLine(Point3d point)
+        {
+            if (null == _mainLines || _mainLines.Count < 1)
+                return false;
+            foreach (var item in _mainLines)
+            {
+                if (EmgPilotLampUtil.PointInLine(point, item))
+                    return true;
+            }
+            return false;
         }
     }
 }
