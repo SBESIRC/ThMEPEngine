@@ -20,6 +20,7 @@ using ThMEPEngineCore.Model.Common;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.WaterSupplyPipeSystem.model;
 
 namespace ThMEPWSS
 {

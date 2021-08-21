@@ -1,0 +1,549 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Linq2Acad;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using ThCADExtension;
+using ThMEPWSS.Pipe.Service;
+using ThCADCore.NTS;
+using NFox.Cad;
+using ThMEPEngineCore.Model.Common;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Diagram.ViewModel;
+using ThMEPEngineCore.Engine;
+using System.Text.RegularExpressions;
+using System.Windows;
+using ThMEPWSS.WaterSupplyPipeSystem.model;
+using ThMEPWSS.WaterSupplyPipeSystem.tool;
+using ThMEPWSS.Pipe.Engine;
+
+namespace ThMEPWSS.WaterSupplyPipeSystem
+{
+    public class WaterSuplyBlockNames
+    {
+        public const string CheckValve = "截止阀";
+        public const string AutoExhaustValve = "自动排气阀系统1";
+        public const string PressureReducingValve = "减压阀";
+        public const string VacuumBreaker = "真空破坏器";
+        public const string WaterMeter = "水表1";
+        public const string WaterPipeInterrupted = "水管中断";
+        public const string WaterTap = "水龙头1";
+        public const string Elevation = "标高";
+        public const string PipeDiameter = "给水管径100";
+        public const string PRValveDetail = "减压阀详图-AI";
+        public const string FloorFraming = "楼层框定";
+        public const string Casing = "套管系统";
+        public const string ButterflyValve = "蝶阀";
+        public const string GateValve = "闸阀";
+        public const string LoopMark = "消火栓环管标记";
+        public const string LoopNodeMark = "消火栓环管节点标记";
+        public const string FireHydrant = "室内消火栓系统1";
+    }
+    public class WaterSuplyUtils
+    {
+        public static string WaterSuplyBlockFilePath
+        {
+            get
+            {
+                return ThCADCommon.WSSDwgPath();
+            }
+        }
+        public static void ImportNecessaryBlocks()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+            using (AcadDatabase blockDb = AcadDatabase.Open(WaterSuplyBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
+            {
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.CheckValve));//截止阀
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.AutoExhaustValve));//自动排气阀系统1
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PressureReducingValve));//减压阀
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.VacuumBreaker));//真空破坏器
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterMeter));//水表1
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterPipeInterrupted));//水管中断
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.WaterTap));//水龙头
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Elevation));//标高
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PipeDiameter));//给水管经100
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.PRValveDetail));//减压阀详图
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.Casing));//套管系统
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.ButterflyValve));//蝶阀
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.GateValve));//闸阀
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopMark));//
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.LoopNodeMark));//
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FireHydrant));//
+            }
+        }
+    }
+    public enum LayingMethod //敷设方式
+    {
+        Piercing,  //穿梁
+        Buried     //埋地
+    }
+    //常用的计算工具
+    public static class ThWCompute
+    {
+        public static int[,] CreateZerosArray(int m, int n)//创建全0的二维数组
+        {
+            var result = new int[m, n];
+            for (int i = 0; i < m; i++)//遍历楼层
+            {
+                for (int j = 0; j < n; j++)//遍历分区
+                {
+                    result[i, j] = 0;
+                }
+            }
+            return result;
+        }
+
+        public static int[] CreateZerosArray(int m)//创建全0的二维数组
+        {
+            var result = new int[m];
+            for (int i = 0; i < m; i++)//遍历楼层
+            {
+                result[i] = 0;
+            }
+            return result;
+        }
+
+        public static double InnerProduct(int[] Array1, double[] Array2)//求两个数组的內积
+        {
+            double result = 0;
+            for (int i = 0; i < Array1.Length; i++)
+            {
+                result += Array1[i] * Array2[i];
+            }
+            return result;
+        }
+
+        public static List<int[]> CountKitchenNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            //统计厨房数
+            //创建厨房识别引擎
+            var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
+            engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
+            var ele = engineKitchen.Elements;
+            var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
+
+            var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+            var households = new int[floorAreaList.Count, floorAreaList[0].Count];
+            for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层
+            {
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    households[i, j] = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]).Count;
+                }
+            }
+
+            var floorKitchenNumList = CreateZerosArray(FloorNumbers, floorAreaList[0].Count);
+            for (int i = 0; i < floorList.Count; i++)
+            {
+                foreach (var f in floorList[i])
+
+                {
+                    for (int j = 0; j < floorAreaList[0].Count; j++)
+                    {
+                        floorKitchenNumList[f - 1, j] = households[i, j];
+                    }
+                }
+            }
+            var fHouseNumList = new List<int[]>();
+            for (int i = 0; i < floorKitchenNumList.Length / floorAreaList[0].Count; i++)
+            {
+                var house = new int[floorAreaList[0].Count];
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    house[j] = floorKitchenNumList[i, j];
+                }
+                fHouseNumList.Add(house);
+            }
+            return fHouseNumList;
+        }
+
+        public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList, List<int[]> households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor)
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            //统计卫生洁具数
+            var engine = new ThWCleanToolsRecongnitionEngine();
+            engine.Recognize(acadDatabase.Database, selectArea);
+            var allCleanToolsInSelectedArea = engine.Datas.Select(d => d.Geometry).ToCollection();
+            var allCleanToolsSpatialIndex = new ThCADCoreNTSSpatialIndex(allCleanToolsInSelectedArea);
+
+            var CleanToolList = new List<List<CleaningToolsSystem>>();
+            for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层块
+            {
+                foreach (var f in floorList[i])//遍历每个楼层
+                {
+                    var CleanTools = new List<CleaningToolsSystem>();
+                    for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                    {
+                        var cleanToolsInSubArea = allCleanToolsSpatialIndex.SelectCrossingPolygon(floorAreaList[i][j]);
+                        var allBlockNames = engine.Datas.Select(ct => ct.Data as string);
+                        var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                        foreach (var ct in cleanToolsInSubArea)
+                        {
+                            var ctBr = ct as BlockReference;
+                            cleanTools[ThCleanToolsManager.CleanToolIndex(ctBr.Name)] += 1;
+                        }
+                        var CleanTool = new CleaningToolsSystem(f, j, households[f - 1][j], cleanTools);
+                        CleanTools.Add(CleanTool);
+                    }
+                    CleanToolList.Add(CleanTools);
+                }
+            }
+            foreach (var nf in notExistFloor)
+            {
+                var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                var CleanTools = new List<CleaningToolsSystem>();
+                for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                {
+                    CleanTools.Add(new CleaningToolsSystem(nf, j, 0, cleanTools));
+                }
+                CleanToolList.Add(CleanTools);
+            }
+            CleanToolList = CleanToolList.OrderBy(l => l.First().GetFloorNumber()).ToList();
+            return CleanToolList;
+        }
+
+        //创建楼层列表
+        public static List<ThWSSDStorey> CreateStoreysList(int FloorNumbers, double FloorHeight, List<int> FlushFaucet, List<int> NoPRValve, List<int[]> households)
+        {
+            var StoreyList = new List<ThWSSDStorey>();
+            for (int i = 0; i < FloorNumbers; i++)
+            {
+                bool hasFlushFaucet = FlushFaucet.Contains(i + 1);  //有冲洗龙头为true
+                bool noValve = NoPRValve.Contains(i + 1);  //无减压阀为true                      
+                //楼层初始化
+                var storey = new ThWSSDStorey(i + 1, FloorHeight, hasFlushFaucet, noValve, households[i]);
+                StoreyList.Add(storey);
+            }
+            var zeroHouse = CreateZerosArray(households[0].Length);
+            StoreyList.Add(new ThWSSDStorey(FloorNumbers + 1, FloorHeight, false, false, zeroHouse));
+
+            return StoreyList;
+        }
+
+        public static List<ThWSuplySystemDiagram> CreatePipeSystem(ref List<double[]> NGLIST, ref List<double[]> U0LIST, List<int> lowestStorey,
+            List<int> highestStorey, double PipeOffset_X, List<List<CleaningToolsSystem>> floorCleanToolList, int areaIndex, double PipeGap,
+            double[] WaterEquivalent, DrainageSetViewModel setViewModel, double T, int maxHouseholdNums, List<string> pipeNumber)
+        {
+            var QL = setViewModel.MaxDayQuota;  //最高日用水定额 QL
+            var Kh = setViewModel.MaxDayHourCoefficient;  //最高日小时变化系数  Kh
+            var m = setViewModel.NumberOfHouseholds;   //每户人数  m
+
+            var PipeSystem = new List<ThWSuplySystemDiagram>();// 创建竖管系统列表
+
+            for (int i = 0; i < lowestStorey.Count; i++)  //对于每一根竖管 i 
+            {
+                //生成竖管对象并添加至竖管系统列表
+                PipeSystem.Add(new ThWSuplySystemDiagram(pipeNumber[i], lowestStorey[i], highestStorey[i], PipeOffset_X + i * PipeGap, highestStorey));
+                double[] NgList = new double[highestStorey[i]];//每层楼的当量总数
+                double[] NgTotalList = new double[highestStorey[i]];//每层楼的当量总数
+                double[] U0List = new double[highestStorey[i]];//每层楼的出流概率
+                double[] U0aveList = new double[highestStorey[i]];//每层楼的平均出流概率，用于立管计算
+
+                for (int j = highestStorey[i] - 1; j >= lowestStorey[i] - 1; j--)
+                {
+                    var toolNums = floorCleanToolList[j][areaIndex].GetCleaningTools();//当前层的卫生洁具数
+                    var householdNum = floorCleanToolList[j][areaIndex].GetHouseholdNums();
+                    if (householdNum == 0)
+                    {
+                        householdNum = maxHouseholdNums;
+                    }
+
+                    NgList[j] = InnerProduct(toolNums, WaterEquivalent) / householdNum;
+                    if (Math.Abs(NgList[j]) < 1e-6)
+                    {
+                        U0List[j] = 0;
+                    }
+                    else
+                    {
+                        U0List[j] = 100 * QL * m * Kh / (0.2 * NgList[j] * T * 3600);
+                    }
+                }
+                for (int j = lowestStorey[i] - 2; j >= 0; j--)
+                {
+                    NgList[j] = 0;
+                    U0List[j] = 0;
+                }
+                for (int j = lowestStorey[i] - 1; j < highestStorey[i]; j++)// 对于竖管 i 的第 j 个竖管单元(即第 j 层)
+                {
+                    U0aveList[j] = 0;
+                    NgTotalList[j] = 0;
+                    for (int k = j; k < highestStorey[i]; k++)
+                    {
+                        U0aveList[j] += U0List[k] * NgList[k];
+                        NgTotalList[j] += NgList[k];
+                    }
+                    if (Math.Abs(NgTotalList[j]) > 1e-6)
+                    {
+                        U0aveList[j] /= NgTotalList[j];
+                    }
+                }
+                for (int j = 0; j < lowestStorey[i] - 1; j++)// 对于竖管 i 的第 j 个竖管单元(即第 j 层)
+                {
+                    U0aveList[j] = U0aveList[lowestStorey[i] - 1];
+                    NgTotalList[j] = NgTotalList[lowestStorey[i] - 1];
+                }
+                for (int j = 0; j < highestStorey[i]; j++)
+                {
+                    var pipeCompute = new PipeCompute(U0aveList[j], NgTotalList[j]);
+                    var DN = pipeCompute.PipeDiameterCompute();
+                    PipeSystem[i].PipeUnits.Add(new ThWSSDPipeUnit(DN, j));
+                }
+                NGLIST.Add(NgTotalList);
+                U0LIST.Add(U0aveList);
+            }
+
+            return PipeSystem;
+        }
+
+        public static double[] GetBlockSize(BlockTable bt, string BlockValue)//获取block尺寸
+        {
+            if (bt.Has(BlockValue))
+            {
+                var objId = bt[BlockValue];//获取objectID
+                BlockReference br = new BlockReference(new Point3d(0, 0, 0), objId);//?
+                var extent = br.GeometricExtents;
+                var Length = extent.MaxPoint.X - extent.MinPoint.X;
+                var Hight = extent.MaxPoint.Y - extent.MinPoint.Y;
+                var Size = new double[] { Length, Hight };
+
+                return Size;
+            }
+            return new double[] { 0, 0 };
+        }
+
+        public static List<double[]> CreateBlockSizeList(BlockTable bt)
+        {
+            var BlockSize = new List<double[]>();//减压阀 截止阀 水表 自动排气阀 尺寸
+            //获取并添加 block 尺寸
+            BlockSize.Add(GetBlockSize(bt, WaterSuplyBlockNames.PressureReducingValve));
+            BlockSize.Add(GetBlockSize(bt, WaterSuplyBlockNames.CheckValve));
+            BlockSize.Add(GetBlockSize(bt, WaterSuplyBlockNames.WaterMeter));
+            BlockSize.Add(GetBlockSize(bt, WaterSuplyBlockNames.AutoExhaustValve));
+            return BlockSize;
+        }
+
+        public static Point3dCollection CreatePolyLine(Point3d pt1, Point3d pt2)
+        {
+            var ptls = new Point3d[5];
+            ptls[0] = pt1;
+            ptls[1] = new Point3d(pt2.X, pt1.Y, 0);
+            ptls[2] = pt2;
+            ptls[3] = new Point3d(pt1.X, pt2.Y, 0);
+            ptls[4] = pt1;
+            var SelectedArea = new Point3dCollection(ptls);
+            return SelectedArea;
+        }
+
+        public static List<Point3dCollection> CreateRectList(ThStoreys sobj)
+        {
+            var spt = sobj.ObjectId.GetBlockPosition();//获取楼层分割线的起始点
+            var eptX = spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("宽度"));
+            var eptY = spt.Y - Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("高度"));
+            var LineXList = new List<double>();
+            var index = 1;
+            for (int i = 0; i < sobj.ObjectId.GetDynProperties().Count; i++)
+            {
+                if (sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains("分割") &&
+                    sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains(" X"))
+                {
+                    var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
+                    if (SplitX < 0)
+                    {
+                        continue;
+                    }
+                    if (SplitX > eptX - spt.X)
+                    {
+                        continue;
+                    }
+                    LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
+                    index += 1;
+                }
+            }
+
+            var floorZone = new FloorZone(spt, new Point3d(eptX, eptY, 0), LineXList);
+            var rectList = floorZone.CreateRectList();//创建楼层分区的多段线
+
+            return rectList;
+        }
+
+
+        public static List<List<Point3dCollection>> CreateFloorAreaList(List<ThIfcSpatialElement> elements)//创建所有楼层的分区列表
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            var FloorAreaList = new List<List<Point3dCollection>>();
+            foreach (var obj in elements)//遍历楼层
+            {
+                if (obj is ThStoreys)
+                {
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (!br.IsDynamicBlock) continue;
+                    if (sobj.StoreyType.ToString().Contains("StandardStorey"))
+                    {
+                        if(!sobj.StoreyNumber.Trim().StartsWith("-") && !sobj.StoreyNumber.Trim().StartsWith("B"))
+                        {
+                            var rectList = CreateRectList(sobj);
+                            FloorAreaList.Add(rectList);//分区的多段线添加
+                        }
+                        
+                    }
+                }
+            }
+
+            return FloorAreaList;
+        }
+
+        public static List<List<int>> CreateFloorNumList(List<string> FloorNum) //提取每张图纸的楼层号
+        {
+            var FNumSplit = new List<string[]>();
+            foreach (var f in FloorNum)
+            {
+                FNumSplit.Add(f.Split(','));
+            }
+
+            var FloorNumList = new List<List<int>>();
+
+            foreach (var f in FNumSplit)
+            {
+                var fiNum = new List<int>();
+                for (int i = 0; i < f.Length; i++)
+                {
+                    if(f[i].Trim().StartsWith("-"))
+                    {
+                        continue;
+                    }
+                    if (f[i].Contains('-'))
+                    {
+                        var start = Convert.ToInt32(f[i].Split('-')[0]);
+                        var end = Convert.ToInt32(f[i].Split('-')[1]);
+                        for (int j = start; j <= end; j++)
+                        {
+                            var hasNum = false;
+                            foreach (var fi in FNumSplit)
+                            {
+                                if (fi.Contains(Convert.ToString(j)))
+                                {
+                                    hasNum = true;
+                                    break;
+                                }
+                            }
+                            if (!hasNum)
+                            {
+                                fiNum.Add(j);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        fiNum.Add(Convert.ToInt32(f[i].Trim('B')));
+                    }
+                }
+                if(fiNum.Count!=0)
+                {
+                    FloorNumList.Add(fiNum);
+                }
+            }
+
+            return FloorNumList;
+        }
+
+        //统计分区数
+        public static int CountAreaNums(List<List<Point3dCollection>> FloorAreaList, ThCADCoreNTSSpatialIndex kitchenIndex)
+        {
+            int AreaNums = 0;
+            var households = new int[FloorAreaList.Count, FloorAreaList[0].Count];
+            for (int i = 0; i < FloorAreaList.Count; i++)
+            {
+                var areaNums = 0;
+                for (int j = 0; j < FloorAreaList[i].Count; j++)
+                {
+                    households[i, j] = Convert.ToInt32(kitchenIndex.SelectCrossingPolygon(FloorAreaList[i][j]).Count > 0);
+                    if (households[i, j] > 0)
+                    {
+                        ;
+                    }
+                    areaNums += households[i, j];
+                }
+                if (AreaNums < areaNums)
+                {
+                    AreaNums = areaNums;
+                }
+            }
+            return AreaNums;
+        }
+
+        public static List<string> CreateTypeList(string ListType)
+        {
+            var strType = new List<string>();
+            for (int i = 0; i <= 9; i++)
+            {
+                strType.Add(Convert.ToString(i));
+            }
+            if (ListType.Equals("str"))
+            {
+                strType.Add("-");
+                strType.Add(",");
+            }
+            if (ListType.Equals("float"))
+            {
+                strType.Add(".");
+            }
+
+            return strType;
+        }
+
+        public static List<int> ExtractData(string floorls, string dataName)
+        {
+            var FlushFaucet = new List<int>();//冲洗龙头层
+            if (floorls != "")
+            {
+                foreach (var f in floorls.Split(','))
+                {
+                    if (f.Contains('-'))
+                    {
+                        var f1 = f.Split('-')[0];
+                        var f2 = f.Split('-').Last();
+                        if (f1 != "" && f2 != "")
+                        {
+                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
+                            {
+                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
+                                {
+                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
+                                    {
+                                        if (!FlushFaucet.Contains(i))
+                                        {
+                                            FlushFaucet.Add(i);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBox.Show(dataName + "输入有误，\"-\"左边数字必须小于右边");
+                                    return new List<int>();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show(dataName + "输入有误，\"-\"左右只能是数字");
+                            return new List<int>();
+                        }
+                    }
+                    else
+                    {
+                        if (f != "" && !FlushFaucet.Contains(Convert.ToInt32(f)))
+                        {
+                            FlushFaucet.Add(Convert.ToInt32(f));
+                        }
+                    }
+                }
+            }
+            return FlushFaucet;
+        }
+    }
+}
+

@@ -12,22 +12,23 @@ using System.Linq;
 using System.Windows.Forms;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Uitl.ExtensionsNs;
+using ThMEPWSS.WaterSupplyPipeSystem;
+using ThMEPWSS.WaterSupplyPipeSystem.model;
+using ThMEPWSS.WaterSupplyPipeSystem.tool;
 
 namespace ThMEPWSS.Command
 {
     public class ThWaterSuplySystemDiagramCmd : IAcadCommand, IDisposable
     {
         readonly DrainageViewModel _UiConfigs;
-
         public ThWaterSuplySystemDiagramCmd(DrainageViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
         }
-
         public void Dispose()
         {
         }
-
         public void Execute()
         {
             try
@@ -39,7 +40,6 @@ namespace ThMEPWSS.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-
         public void Execute(DrainageViewModel uiConfigs)
         {
             var tmpUiConfigs = uiConfigs;
@@ -153,9 +153,7 @@ namespace ThMEPWSS.Command
             using (var acadDatabase = AcadDatabase.Active()) 
             {
                 var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
-                var insertPt = Active.Editor.GetPoint(insertOpt);
-                double indexStartX = insertPt.Value.X;
-                double indexStartY = insertPt.Value.Y;
+                var insertPt = Active.Editor.GetPoint(insertOpt).Value;
 
                 var notExistFloor = new List<int>();//不存在的楼层号列表
                 for (int i = 0; i < floorNumbers; i++)
@@ -186,11 +184,10 @@ namespace ThMEPWSS.Command
 
                 //楼板线生成
                 var StoreyList = ThWCompute.CreateStoreysList(floorNumbers, FloorHeight, FlushFaucet, NoPRValve, households);
-
                 //楼层线绘制
                 for (int i = 0; i < floorNumbers + 1; i++)
                 {
-                    StoreyList[i].DrawStorey(i, floorNumbers, indexStartX, indexStartY, floorLength);
+                    StoreyList[i].DrawStorey(i, floorNumbers, insertPt, floorLength);
                 }
 
                 double T = 24;
@@ -216,7 +213,7 @@ namespace ThMEPWSS.Command
                 var pt = new List<double>();
                 for (int i = 0; i < PipeSystem.Count; i++)
                 {
-                    PipeSystem[i].DrawPipeLine(i, indexStartX, indexStartY, FloorHeight, PipeSystem.Count);
+                    PipeSystem[i].DrawPipeLine(i, insertPt, FloorHeight, PipeSystem.Count);
                     pt.Add(PipeSystem[i].GetPipeX());
                 }
 
@@ -224,7 +221,7 @@ namespace ThMEPWSS.Command
                 double[] PipeOffsetX = new double[floorNumbers];
                 for (int i = 0; i < PipeOffsetX.Length; i++)
                 {
-                    PipeOffsetX[i] = PipeOffset_X + indexStartX;
+                    PipeOffsetX[i] = PipeOffset_X + insertPt.X;
                     for (int j = 1; j < lowestStorey.Count; j++)
                     {
                         if (i + 1 >= lowestStorey[j])
@@ -258,7 +255,7 @@ namespace ThMEPWSS.Command
                         DN = pipeCompute.PipeDiameterCompute();
                     }
                    
-                    BranchPipe.Add(new ThWSSDBranchPipe(DN, StoreyList[i], indexStartY, PipeOffsetX[i], BlockSize, layingMethod, areaIndex));
+                    BranchPipe.Add(new ThWSSDBranchPipe(DN, StoreyList[i], insertPt.Y, PipeOffsetX[i], BlockSize, layingMethod, areaIndex));
                 }
 
                 //支管绘制
@@ -276,109 +273,8 @@ namespace ThMEPWSS.Command
                 {
                     if (pipeFloorList.Contains(i + 1))
                     {
-                        if (i + 1 == 5)//第五层放置减压阀详图
-                        {
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.PRValveDetail,
-                            BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
-                            var ptls = new Point3d[3];
-                            ptls[0] = BranchPipe[i - 1].GetPressureReducingValveSite();
-                            ptls[1] = new Point3d(BranchPipe[i - 1].GetPressureReducingValveSite().X + 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
-                            ptls[2] = BranchPipe[i].GetPRValveDetailSite();
-                            var polyline = new Polyline3d(0, new Point3dCollection(ptls), false);
-                            polyline.LayerId = DbHelper.GetLayerId("W-NOTE");
-                            acadDatabase.CurrentSpace.Add(polyline);
-                        }
-
-                        if (i + 1 >= 3) //第三层放置敷设方式说明
-                        {
-                            if (BranchPipe[i].GetHouseholds() != 0 && layFlag)
-                            {
-                                BranchPipe[i].DrawLayMethodNote();
-                                layFlag = false;
-                            }
-                        }
-
-                        if (i + 1 >= 6)//第六层放置水管引出标高
-                        {
-                            if (!BranchPipe[i].GetCheckValveSite().IsNull() && elevateFlag)
-                            {
-                                elevateFlag = false;
-                                for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
-                                {
-                                    var ptLs = new Point3d[4];
-                                    ptLs[0] = new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
-                                    ptLs[1] = new Point3d(ptLs[0].X + 500 + j * 300, ptLs[0].Y, 0);
-                                    ptLs[2] = new Point3d(ptLs[1].X, ptLs[1].Y + 350 * (BranchPipe[i].GetCheckValveSite().Count - j - 1), 0);
-                                    ptLs[3] = new Point3d(ptLs[2].X + 500, ptLs[2].Y, 0);
-
-                                    var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false)
-                                    {
-                                        LayerId = DbHelper.GetLayerId("W-WSUP-NOTE")
-                                    };
-                                    acadDatabase.CurrentSpace.Add(lineNote);
-
-                                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                                    ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0, new Dictionary<string, string> { { "标高", "X.XX" } });
-                                }
-                            }
-                        }
-
-                        if (BranchPipe[i].BranchPipes == null)
-                        {
-                            continue;
-                        }
-
-                        for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
-                        {
-                            //绘制截止阀
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                            BranchPipe[i].GetCheckValveSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
-                            //绘制水表
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.WaterMeter,
-                            BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
-                            //绘制水管中断
-                            if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
-                            {
-                                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
-                                BranchPipe[i].GetWaterPipeInterrupted()[j], new Scale3d(0.8 - 1.6 * layingMethod, 0.8, 0.8), Math.PI * (1 - layingMethod / 2.0));
-                            }
-                        }
-                        if (!NoPRValve.Contains(i + 1))//有减压阀层
-                        {
-                            //绘制减压阀
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
-                            BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.7, 0.7, 0.7), Math.PI * 3 / 2);
-                        }
-                        else//无减压阀层
-                        {
-                            //绘制截止阀
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                            BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.5, 0.5, 0.5), Math.PI * 3 / 2);
-                            
-                        }
-
-                        //绘制自动排气阀
-                        if(highestStorey.Contains(i+1))
-                        {
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-COOL-PIPE", WaterSuplyBlockNames.AutoExhaustValve,
-                            BranchPipe[i].GetAutoExhaustValveSite(), new Scale3d(0.5, 0.5, 0.5), 0);
-                            if (i + 1 == floorNumbers)//最高层放置自动排气阀说明
-                            {
-                                BranchPipe[i].DrawAutoExhaustValveNote();
-                            }
-                        }
-                        
-                        if (FlushFaucet.Contains(i + 1))
-                        {
-                            //绘制真空破坏器
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.VacuumBreaker,
-                            BranchPipe[i].GetVacuumBreakerSite(), new Scale3d(1, 1, 1), 0);
-                            //绘制水龙头
-                            var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterTap,
-                            BranchPipe[i].GetWaterTapSite(), new Scale3d(1, 1, 1), 0);
-                            //设置水龙头的动态属性
-                            objId.SetDynBlockValue("可见性", "向右");
-                        }
+                        Details.Add(i, acadDatabase, BranchPipe, ref layFlag, ref elevateFlag, floorCleanToolList, areaIndex,
+                            layingMethod, NoPRValve, highestStorey, floorNumbers, FlushFaucet);
                     }   
                 }
             }  

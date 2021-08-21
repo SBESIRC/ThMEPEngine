@@ -12,7 +12,7 @@ using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
 using Dreambuild.AutoCAD;
-
+using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {

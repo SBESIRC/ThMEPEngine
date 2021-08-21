@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -12,14 +11,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Forms;
 using ThCADCore.NTS;
-using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
-using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
-
+using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
@@ -31,15 +28,72 @@ namespace ThMEPWSS.Diagram.ViewModel
 
         public DrainageViewModel()
         {
-
         }
 
         public void CreateFloorFraming()
         {
-            ThMEPWSS.Common.Utils.CreateFloorFraming();
+            Common.Utils.CreateFloorFraming();
         }
 
-        public void InitListDatas()
+        public void InitListDatas2()
+        {
+            dynamicRadioButtons?.Clear();
+            FloorListDatas = new List<string>();
+            Common.Utils.FocusMainWindow();
+            using (Active.Document.LockDocument())
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                SelectedArea = Common.Utils.SelectAreas();
+                //var frames = FramedReadUtil.ReadAllFloorFramed();//赵工的提取方法
+                var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎
+                storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
+                if (storeysRecEngine.Elements.Count == 0)
+                {
+                    MessageBox.Show("框选区域没有有效楼层");
+                    return;
+                }
+                FloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase,
+                    storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray());
+
+                var FloorNum = storeysRecEngine.Elements
+                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
+                    .Select(floor => (floor as ThStoreys).StoreyNumber).ToList()
+                    .Where(e => !e.Trim().StartsWith("-") && !e.Trim().StartsWith("B")).ToList();
+
+                if (FloorNum.Count == 0)
+                {
+                    MessageBox.Show("框选区域没有标准楼层");
+                    return;
+                }
+                FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
+                FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
+
+                var AreaNums = 0;
+                var roomBuilder = new ThRoomBuilderEngine();
+                var rooms = roomBuilder.BuildFromMS(acadDatabase.Database, SelectedArea);
+                if (rooms.Count != 0)
+                {
+                    var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.Select(o => o.Boundary).ToCollection());
+                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                }
+                else
+                {
+                    var roomMarkEngine = new ThDB3RoomMarkRecognitionEngine();
+                    roomMarkEngine.Recognize(acadDatabase.Database, SelectedArea); //来源于参照
+                    var newRooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
+                    var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());
+                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                }
+
+                DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();
+                for (int i = 0; i < AreaNums; i++)
+                {
+                    DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
+                }
+            }
+        }
+
+        public void InitListDatas()//同时支持点选和框选
         {
             dynamicRadioButtons?.Clear();
             FloorListDatas = new List<string>();
@@ -60,7 +114,6 @@ namespace ThMEPWSS.Diagram.ViewModel
                 var filter = OpFilter.Bulid(o =>
                 o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
                 var result = Active.Editor.GetSelection(options, filter);
-
                 if (result.Status == PromptStatus.OK)//框选择成功
                 {
                     var selectedIds = result.Value.GetObjectIds();
@@ -150,7 +203,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();
                     for (int i = 0; i < AreaNums; i++)
                     {
-                        DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true});
+                        DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
                     }
                 }
             }
