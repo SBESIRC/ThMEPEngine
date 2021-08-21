@@ -176,7 +176,8 @@ namespace ThMEPWSS.Command
                 //统计厨房数
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
                 //统计卫生洁具数
-                var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea, notExistFloor);
+                var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea, 
+                    notExistFloor, floorNumbers);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
@@ -248,7 +249,7 @@ namespace ThMEPWSS.Command
                         U0i = 100 * QL * m * Kh / (0.2 * Ngi * T * 3600);
                     }
                     
-                    var pipeCompute = new PipeCompute(U0i, Ngi);
+                    var pipeCompute = new PipeCompute(U0i, Ngi* HouseholdNum);
                     var DN = "";
                     if (Math.Abs(Ngi) > 1e-6)
                     {
