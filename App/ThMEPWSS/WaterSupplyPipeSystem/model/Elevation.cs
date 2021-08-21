@@ -24,7 +24,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
                     {
                         var ptLs = new Point3d[4];
-                        ptLs[0] = new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
+                        ptLs[0] = BranchPipe[i].GetWaterPipeInterrupted()[j];
+                            //new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
 
                         if (j == 0)
                         {

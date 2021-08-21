@@ -160,6 +160,52 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             return fHouseNumList;
         }
 
+        public static List<int[]> CountToiletNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            //统计厨房数
+            //创建厨房识别引擎
+            var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
+            engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
+            var ele = engineKitchen.Elements;
+            var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
+
+            var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+            var households = new int[floorAreaList.Count, floorAreaList[0].Count];
+            for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层
+            {
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    households[i, j] = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]).Count;
+                }
+            }
+
+            var floorKitchenNumList = CreateZerosArray(FloorNumbers, floorAreaList[0].Count);
+            for (int i = 0; i < floorList.Count; i++)
+            {
+                foreach (var f in floorList[i])
+
+                {
+                    for (int j = 0; j < floorAreaList[0].Count; j++)
+                    {
+                        floorKitchenNumList[f - 1, j] = households[i, j];
+                    }
+                }
+            }
+            var fHouseNumList = new List<int[]>();
+            for (int i = 0; i < floorKitchenNumList.Length / floorAreaList[0].Count; i++)
+            {
+                var house = new int[floorAreaList[0].Count];
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    house[j] = floorKitchenNumList[i, j];
+                }
+                fHouseNumList.Add(house);
+            }
+            return fHouseNumList;
+        }
+
+
         public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList, List<int[]> households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor)
         {
             using var acadDatabase = AcadDatabase.Active();
@@ -168,6 +214,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             engine.Recognize(acadDatabase.Database, selectArea);
             var allCleanToolsInSelectedArea = engine.Datas.Select(d => d.Geometry).ToCollection();
             var allCleanToolsSpatialIndex = new ThCADCoreNTSSpatialIndex(allCleanToolsInSelectedArea);
+
+            
 
             var CleanToolList = new List<List<CleaningToolsSystem>>();
             for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层块

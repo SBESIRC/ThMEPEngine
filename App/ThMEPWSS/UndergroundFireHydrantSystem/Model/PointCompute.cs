@@ -34,9 +34,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return new Line();
         }
 
-        public static Line PointOnLine(Point3d pt, List<Line> lineList)
+        public static Line PointOnLine(Point3d pt, List<Line> lineList, double Tolerance = 10.0)
         {
-            double Tolerance = 10.0;
             double disTorlerance = 100;
             foreach (var line in lineList)
             {

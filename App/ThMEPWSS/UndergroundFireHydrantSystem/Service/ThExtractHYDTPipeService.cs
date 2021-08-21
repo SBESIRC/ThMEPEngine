@@ -457,7 +457,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName()));
+                   .Where(o => IsValve(o.GetEffectiveName()));
+                //.Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName()));
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 DBobj = spatialIndex.SelectCrossingPolygon(polygon);

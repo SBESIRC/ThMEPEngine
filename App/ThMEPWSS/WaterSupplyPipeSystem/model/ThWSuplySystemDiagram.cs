@@ -105,7 +105,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     var Position = new Point3d(GetPipeX(), insertPt.Y + FloorHeight * (j + 1) - 700 - FloorHeight / 3, 0);
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
                     Position, new Scale3d(1, 1, 1), Math.PI / 2);
-                    if (PipeNumber.Contains("JG"))
+                    if (PipeNumber.Contains("JG") && PipeUnits[j].GetPipeDiameter() == "")
                     {
                         objID.SetDynBlockValue("可见性", "DN15");
                     }
@@ -130,7 +130,16 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var textString = "";
             if (PipeNumber.Contains("JG"))
             {
-                textString = "接自市政给水管DN15(X.XXMPa)";
+
+                if(PipeUnits[0].GetPipeDiameter() == "")
+                {
+                    textString = "接自市政给水管DN15(X.XXMPa)";
+                }
+                else
+                {
+                    textString = "接自市政给水管" + PipeUnits[0].GetPipeDiameter() + "(X.XXMPa)";
+                }
+                
             }
             else
             {

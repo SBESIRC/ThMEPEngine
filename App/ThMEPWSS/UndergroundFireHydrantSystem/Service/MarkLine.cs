@@ -19,13 +19,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var nullMark = false;//手抖多画了一对环管标记
                 foreach (var v in pms)
                 {
-                    var line = PointCompute.PointOnLine(v, lineList);
+                    var line = PointCompute.PointOnLine(v, lineList, 30);
                     if (line.StartPoint.Equals(new Point3d(0, 0, 0)))
                     {
                         nullMark = true;
                         break;
                     }
-                    markL.Add(PointCompute.PointOnLine(v, lineList));
+                    markL.Add(PointCompute.PointOnLine(v, lineList, 30));
                 }
                 if (!nullMark)
                 {
