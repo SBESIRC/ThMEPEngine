@@ -94,7 +94,7 @@ namespace FireAlarm.Data
         private List<ThIfcBeam> ExtractDb3Beam(Database database, Point3dCollection pts)
         {
             var beams = new List<ThIfcBeam>();
-            var engine = new ThBeamExtractionEngine();
+            var engine = new ThDB3BeamExtractionEngine();
             engine.Extract(database);
             engine.Results.ForEach(o => beams.Add(ThIfcLineBeam.Create(o.Data as ThIfcBeamAnnotation)));
             beams.ForEach(o => transformer.Transform(o.Outline));

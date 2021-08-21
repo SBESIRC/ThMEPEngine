@@ -21,7 +21,7 @@ namespace ThMEPEngineCore
         {
             if (Convert.ToInt16(Application.GetSystemVariable("USERR1")) == 0)
             {
-                return new ThBeamRecognitionEngine();
+                return new ThDB3BeamRecognitionEngine();
             }
             else
             {

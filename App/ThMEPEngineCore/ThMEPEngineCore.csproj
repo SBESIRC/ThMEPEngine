@@ -228,7 +228,7 @@
     <Compile Include="Engine\ThAnnotationElementExtractor.cs" />
     <Compile Include="Engine\ThAnnotationElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ArchWallExtractionVisitor.cs" />
-    <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3BeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
@@ -290,7 +290,7 @@
     <Compile Include="Engine\ThDB3DoorRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ArchWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
-    <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3BeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />

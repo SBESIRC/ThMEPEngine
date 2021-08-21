@@ -9,11 +9,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3BeamExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThBeamExtractionVisitor()
+            var visitor = new ThDB3BeamExtractionVisitor()
             {
                 LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
             };
@@ -24,11 +24,11 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThBeamRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3BeamRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThBeamExtractionEngine();
+            var engine = new ThDB3BeamExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
@@ -49,7 +49,6 @@ namespace ThMEPEngineCore.Engine
                 var filterObjs = beamSpatialIndex.SelectCrossingPolygon(pline);
                 Elements = Elements.Where(o => filterObjs.Contains(o.Outline)).ToList();
             }
-
         }
     }
 }

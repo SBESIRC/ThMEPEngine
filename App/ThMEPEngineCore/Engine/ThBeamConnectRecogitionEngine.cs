@@ -1,7 +1,11 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -16,10 +20,11 @@ namespace ThMEPEngineCore.Engine
         public List<ThBeamLink> SecondaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThSingleBeamLink> SingleBeamLinks { get; set; } = new List<ThSingleBeamLink>();
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
+        public ThMEPOriginTransformer OriginTransformer { get; private set; }
+        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThDB3BeamRecognitionEngine BeamEngine { get; private set; }
+        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
 
-        public ThDB3ColumnRecognitionEngine ColumnEngine { get; private set; }
-        public ThBuildingElementRecognitionEngine BeamEngine { get; private set; }
-        public ThDB3ShearWallRecognitionEngine ShearWallEngine { get; private set; }
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
 
         public ThBeamConnectRecogitionEngine()
@@ -32,30 +37,85 @@ namespace ThMEPEngineCore.Engine
         }
         public static ThBeamConnectRecogitionEngine ExecutePreprocess(Database database, Point3dCollection polygon)
         {
-            ThBeamConnectRecogitionEngine beamConnectEngine = new ThBeamConnectRecogitionEngine();
-            beamConnectEngine.Preprocess(database, polygon);
+            var beamConnectEngine = new ThBeamConnectRecogitionEngine();
+            beamConnectEngine.CreateEngines(database, polygon);
+            beamConnectEngine.Preprocess();
+            beamConnectEngine.ResetEngines();
             return beamConnectEngine;
         }
         public static ThBeamConnectRecogitionEngine ExecuteRecognize(Database database, Point3dCollection polygon)
         {
-            ThBeamConnectRecogitionEngine beamConnectEngine = new ThBeamConnectRecogitionEngine();
-            beamConnectEngine.Recognize(database, polygon);
+            var beamConnectEngine = new ThBeamConnectRecogitionEngine();
+            beamConnectEngine.CreateEngines(database, polygon);
+            beamConnectEngine.Recognize();
+            beamConnectEngine.ResetEngines();
             return beamConnectEngine;
         }
-        private void Preprocess(Database database, Point3dCollection polygon)
+        private void CreateEngines(Database database, Point3dCollection pts)
         {
+            OriginTransformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
+            var newPts = pts.OfType<Point3d>().Select(o => OriginTransformer.Transform(o)).ToCollection();
+
             // 启动柱识别引擎
-            ColumnEngine = new ThDB3ColumnRecognitionEngine();
-            ColumnEngine.Recognize(database, polygon);
+            var extractor = new ThColumnExtractionEngine();
+            extractor.Extract(database);
+            extractor.Results.ForEach(x => OriginTransformer.Transform(x.Geometry));
+            ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine.Recognize(extractor.Results, newPts);
 
             // 启动墙识别引擎
-            ShearWallEngine = new ThDB3ShearWallRecognitionEngine();
-            ShearWallEngine.Recognize(database, polygon);
+            var extractor2 = new ThShearWallExtractionEngine();
+            extractor2.Extract(database);
+            extractor2.Results.ForEach(x => OriginTransformer.Transform(x.Geometry));
+            ShearWallEngine = new ThShearWallRecognitionEngine();
+            ShearWallEngine.Recognize(extractor2.Results, newPts);
 
             // 启动梁识别引擎
-            BeamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine();
-            BeamEngine.Recognize(database, polygon);
+            BeamEngine = new ThDB3BeamRecognitionEngine();
+            BeamEngine.Recognize(database, pts);
+            BeamEngine.Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(OriginTransformer.Displacement));
+        }
+        private void Recognize()
+        {
+            // 预处理
+            Preprocess();
 
+            //建立单根梁两端连接的物体列表
+            CreateSingleBeamLink();
+
+            // Pass One 通过单根梁过滤
+            FindSingleBeamLinkTwoVerComponent();
+
+            // Pass Two 在剩余梁中找出两个柱子或墙之间有多根梁的梁段
+            FindMultiBeamLinkInTwoVerComponent();
+
+            // Pass Three 在剩余梁中找出连接竖向构件的半主梁
+            FindHalfPrimaryBeamLink();
+
+            // Pass Four 在剩余梁中找出单端连接竖向构件的悬梁
+            FindOverhangingPrimaryBeamLink();
+
+            // Pass Five 在剩余梁中找出两端搭在主梁、半主梁和悬挑柱梁上的次梁
+            FindSecondaryBeamLink();
+
+            // Pass Six 在剩余梁中找出两端搭在主梁、半主梁、悬挑柱梁或次梁上的次次梁
+            FindSubSecondaryBeamLink();
+
+            // Pass Seven 把悬挑梁末端连接的未定义梁去除
+            RemoveUndefinedFromOverhanging();
+
+            // Pass Eight
+            FindRestSecondaryBeamLink();
+        }
+        private void ResetEngines()
+        {
+            var matrix3d = OriginTransformer.Displacement.Inverse();
+            ColumnEngine.Elements.ForEach(o => o.TransformBy(matrix3d));
+            ShearWallEngine.Elements.ForEach(o => o.TransformBy(matrix3d));
+            BeamEngine.Elements.ForEach(o => o.TransformBy(matrix3d));
+        }
+        private void Preprocess()
+        {
             // 创建空间索引
             CreateWallSpatialIndex();
             CreateBeamSpatialIndex();
@@ -86,38 +146,6 @@ namespace ThMEPEngineCore.Engine
                 ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
                 thSnapBeams.Snap();
             }
-        }
-        private void Recognize(Database database, Point3dCollection polygon)
-        {
-            // 预处理
-            Preprocess(database, polygon);
-
-            //建立单根梁两端连接的物体列表
-            CreateSingleBeamLink();
-
-            // Pass One 通过单根梁过滤
-            FindSingleBeamLinkTwoVerComponent();
-
-            // Pass Two 在剩余梁中找出两个柱子或墙之间有多根梁的梁段
-            FindMultiBeamLinkInTwoVerComponent();
-
-            // Pass Three 在剩余梁中找出连接竖向构件的半主梁
-            FindHalfPrimaryBeamLink();
-
-            // Pass Four 在剩余梁中找出单端连接竖向构件的悬梁
-            FindOverhangingPrimaryBeamLink();
-
-            // Pass Five 在剩余梁中找出两端搭在主梁、半主梁和悬挑柱梁上的次梁
-            FindSecondaryBeamLink();
-
-            // Pass Six 在剩余梁中找出两端搭在主梁、半主梁、悬挑柱梁或次梁上的次次梁
-            FindSubSecondaryBeamLink();
-
-            // Pass Seven 把悬挑梁末端连接的未定义梁去除
-            RemoveUndefinedFromOverhanging();
-
-            // Pass Eight
-            FindRestSecondaryBeamLink();
         }
         private void CreateColumnSpatialIndex()
         {

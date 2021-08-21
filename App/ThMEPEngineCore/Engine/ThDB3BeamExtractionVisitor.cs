@@ -8,7 +8,7 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThDB3BeamExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {

@@ -470,18 +470,25 @@ namespace ThMEPEngineCore
                 });
             }
         }
-        [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
-        public void ThExtractBeamConnect()
+        [CommandMethod("TIANHUACAD", "THEXTRACTBEAMCONNECT", CommandFlags.Modal)]
+        public void THEXTRACTBEAMCONNECT()
         {
-            List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
                 var thBeamTypeRecogitionEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(
