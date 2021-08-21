@@ -38,10 +38,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
                         {
                             continue;
                         }
-                        if(blkRef.GetEffectiveName() == "xsh")
-                        {
-
-                        }
                         if(!FindExternalReference)
                         {
                             //不要从外部参照提取

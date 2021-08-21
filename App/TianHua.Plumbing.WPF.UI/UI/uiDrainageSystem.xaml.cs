@@ -64,7 +64,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.InitListDatas();            
+            viewModel.InitListDatas2();            
         }
     }
 }

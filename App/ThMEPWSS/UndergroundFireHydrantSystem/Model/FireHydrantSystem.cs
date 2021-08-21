@@ -8,6 +8,7 @@ using Linq2Acad;
 using System.Collections.Generic;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {

@@ -65,11 +65,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             //            HoleIndex = new ThCADCoreNTSSpatialIndex(ObstacleHoles.ToCollection());
             LineIndex = new ThCADCoreNTSSpatialIndex(DicTermLines.Keys.ToList().ToCollection());
             RoomIndex = new ThCADCoreNTSSpatialIndex(ObstacleRooms.ToCollection());
-            foreach(var line in DicTermLines.Keys)
-            {
-                line.ColorIndex = 4;
-                Draw.AddToCurrentSpace(line);
-            }
+            //foreach(var line in DicTermLines.Keys)
+            //{
+            //    line.ColorIndex = 4;
+            //    Draw.AddToCurrentSpace(line);
+            //}
         }
         public void ClearData()
         {

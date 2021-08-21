@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Common
 {
