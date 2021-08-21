@@ -19,7 +19,12 @@ namespace ThMEPEngineCore.Algorithm
         public static Polyline Normalize(Polyline frame)
         {
             // 创建封闭多段线
-            var clone = frame.WashClone() as Polyline;
+            var obj = frame.WashClone();
+            if(obj == null || obj is Line)
+            {
+                return new Polyline();
+            }
+            var clone = obj as Polyline;
             clone.Closed = true;
 
             // 剔除尖状物
