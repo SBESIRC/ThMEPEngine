@@ -11,6 +11,7 @@ namespace TianHua.AutoCAD.ThCui
             if (tab != null)
             {
                 CreateHelpPanel(tab);
+                CreatePreconditionPanel(tab);
                 CreateWSSPanel(tab);
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
@@ -99,34 +100,9 @@ namespace TianHua.AutoCAD.ThCui
 
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
-            CreateEPrecondition(tab);
             CreateEAFASPanel(tab);
             CreateELightingPanel(tab);
             CreateEExchangePanel(tab);
-        }
-
-        private static void CreateEPrecondition(RibbonTabSource tab)
-        {
-            var panel = tab.AddNewPanel("EPRECONDITION", "前置输入");
-            var row = panel.AddNewRibbonRow();
-
-            // 楼层定义
-            row.AddNewButton("楼层定义",
-                "天华楼层定义",
-                "THLCDY",
-                "天华楼层定义",
-                "IDI_THCAD_THLCDY_SMALL",
-                "IDI_THCAD_THLCDY_LARGE",
-                RibbonButtonStyle.LargeWithText);
-
-            // 提车道中心线
-            row.AddNewButton("提车道中心线",
-                "天华提车道中心线",
-                "THTCD",
-                "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
-                "IDI_THCAD_THTCD_SMALL",
-                "IDI_THCAD_THTCD_LARGE",
-                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateEAFASPanel(RibbonTabSource tab)
@@ -427,6 +403,48 @@ namespace TianHua.AutoCAD.ThCui
                 "天华风机基础提资",
                 "IDI_THCAD_THFJJC_SMALL",
                 "IDI_THCAD_THFJJC_LARGE",
+                RibbonButtonStyle.LargeWithText);
+        }
+
+        private static void CreatePreconditionPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("PRECONDITION", "前置输入");
+            var row = panel.AddNewRibbonRow();
+
+            // 楼层定义
+            row.AddNewButton("楼层定义",
+                "天华楼层定义",
+                "THLCDY",
+                "天华楼层定义",
+                "IDI_THCAD_THLCDY_SMALL",
+                "IDI_THCAD_THLCDY_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 提车道中心线
+            row.AddNewButton("提车道中心线",
+                "天华提车道中心线",
+                "THTCD",
+                "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
+                "IDI_THCAD_THTCD_SMALL",
+                "IDI_THCAD_THTCD_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 提取空间
+            row.AddNewButton("提取空间",
+                "天华提取空间",
+                "THKJTQ",
+                "天华提取空间",
+                "IDI_THCAD_THKJTQ_SMALL",
+                "IDI_THCAD_THKJTQ_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 空间拾取
+            row.AddNewButton("空间拾取",
+                "天华空间拾取",
+                "THKJSQ",
+                "天华空间拾取",
+                "IDI_THCAD_THKJSQ_SMALL",
+                "IDI_THCAD_THKJSQ_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
 
