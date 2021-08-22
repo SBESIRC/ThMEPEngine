@@ -35,6 +35,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using static THDrainageService;
     using static ThMEPWSS.Assistant.DrawUtils;
     using ThMEPEngineCore.Model.Common;
+    using NetTopologySuite.Operation.Buffer;
     public class LabelItem
     {
         public string Label;
@@ -251,7 +252,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     {
         public List<string> Labels;
         public bool? IsLeftOrMiddleOrRight;
-        public double AiringValue;
         public List<ThwPipeRun> PipeRuns;
         public ThwOutput Output;
     }
@@ -2759,6 +2759,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         {
                             item.CanHaveAring = THESAURUSABDOMINAL;
                         }
+                        if (testExist(label, maxS + UNINTENTIONALLY))
+                        {
+                            item.CanHaveAring = THESAURUSABDOMINAL;
+                        }
+                        if (IsFL0(item.Label))
+                        {
+                            item.CanHaveAring = THESAURUSABDOMEN;
+                        }
                     }
                 }
                 {
@@ -4066,7 +4074,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 var notedPipesDict = new Dictionary<Geometry, string>();
                 var labelLinesGroup = GG(item.LabelLines);
                 var labelLinesGeos = GeosGroupToGeos(labelLinesGroup);
-                var labellinesf = F(labelLinesGeos);
+                var labellinesGeosf = F(labelLinesGeos);
                 var shortTranslatorLabels = new HashSet<string>();
                 var longTranslatorLabels = new HashSet<string>();
                 var dlinesGroups = GG(item.DLines);
@@ -4074,27 +4082,85 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 var vlinesGroups = GG(item.VLines);
                 var wrappingPipesf = F(item.WrappingPipes);
                 {
+                    var labelsf = F(item.Labels);
                     var pipesf = F(item.VerticalPipes);
                     foreach (var label in item.Labels)
                     {
-                        if (!IsMaybeLabelText(geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text)) continue;
-                        var lst = labellinesf(label);
+                        var text = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text;
+                        if (!IsDrainageLabelText(text)) continue;
+                        var lst = labellinesGeosf(label);
                         if (lst.Count == THESAURUSACCESSION)
                         {
                             var labelline = lst[QUOTATIONSHAKES];
-                            if (pipesf(GeoFac.CreateGeometry(label, labelline)).Count == QUOTATIONSHAKES)
+                            var pipes = pipesf(GeoFac.CreateGeometry(label, labelline));
+                            if (pipes.Count == QUOTATIONSHAKES)
                             {
                                 var lines = ExplodeGLineSegments(labelline);
                                 var points = GeoFac.GetLabelLineEndPoints(lines.Distinct(new GLineSegment.EqualityComparer(THESAURUSACCUSE)).ToList(), label, radius: THESAURUSACCUSE);
                                 if (points.Count == THESAURUSACCESSION)
                                 {
                                     var pt = points[QUOTATIONSHAKES];
-                                    var r = GRect.Create(pt, THESAURUSABSOLUTE);
-                                    geoData.VerticalPipes.Add(r);
-                                    var pl = r.ToPolygon();
-                                    cadDataMain.VerticalPipes.Add(pl);
-                                    item.VerticalPipes.Add(pl);
-                                    DrawTextLazy(THESAURUSADDICTED, pl.GetCenter());
+                                    if (!labelsf(pt.ToNTSPoint()).Any())
+                                    {
+                                        var r = GRect.Create(pt, THESAURUSABSOLUTE);
+                                        geoData.VerticalPipes.Add(r);
+                                        var pl = r.ToPolygon();
+                                        cadDataMain.VerticalPipes.Add(pl);
+                                        item.VerticalPipes.Add(pl);
+                                        DrawTextLazy(THESAURUSADDICTED, pl.GetCenter());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                {
+                    var labelsf = F(item.Labels);
+                    var pipesf = F(item.VerticalPipes);
+                    foreach (var label in item.Labels)
+                    {
+                        var text = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text;
+                        if (!IsDrainageLabelText(text)) continue;
+                        var lst = labellinesGeosf(label);
+                        if (lst.Count == THESAURUSACCESSION)
+                        {
+                            var labellinesGeo = lst[QUOTATIONSHAKES];
+                            if (labelsf(labellinesGeo).Count != THESAURUSACCESSION) continue;
+                            var lines = ExplodeGLineSegments(labellinesGeo).Where(x => x.IsValid).Distinct().ToList();
+                            var geos = lines.Select(x => x.ToLineString()).Cast<Geometry>().ToList();
+                            var f = F(geos);
+                            var tmp = f(label).ToList();
+                            if (tmp.Count == THESAURUSACCESSION)
+                            {
+                                var l1 = tmp[QUOTATIONSHAKES];
+                                tmp = f(l1).Where(x => x != l1).ToList();
+                                if (tmp.Count == THESAURUSACCESSION)
+                                {
+                                    var l2 = tmp[QUOTATIONSHAKES];
+                                    if (lines[geos.IndexOf(l2)].IsHorizontal(THESAURUSACCUSE))
+                                    {
+                                        tmp = f(l2).Where(x => x != l1 && x != l2).ToList();
+                                        if (tmp.Count == THESAURUSACCESSION)
+                                        {
+                                            var l3 = tmp[QUOTATIONSHAKES];
+                                            var seg = lines[geos.IndexOf(l3)];
+                                            var pts = new List<Point>() { seg.StartPoint.ToNTSPoint(), seg.EndPoint.ToNTSPoint() };
+                                            var _tmp = pts.Except(GeoFac.CreateIntersectsSelector(pts)(l2.Buffer(THESAURUSACCLAIM, EndCapStyle.Square))).ToList();
+                                            if (_tmp.Count == THESAURUSACCESSION)
+                                            {
+                                                var ptGeo = _tmp[QUOTATIONSHAKES];
+                                                var pipes = pipesf(ptGeo);
+                                                if (pipes.Count == THESAURUSACCESSION)
+                                                {
+                                                    var pipe = pipes[QUOTATIONSHAKES];
+                                                    if (!lbDict.ContainsKey(pipe))
+                                                    {
+                                                        lbDict[pipe] = text;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -4236,7 +4302,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             {
                                 var lb = geoData.Labels[cadDataMain.Labels.IndexOf(label)].Text ?? THESAURUSACCEPTABLE;
                                 if (!IsMaybeLabelText(lb)) continue;
-                                var lst = labellinesf(label);
+                                var lst = labellinesGeosf(label);
                                 if (lst.Count == THESAURUSACCESSION)
                                 {
                                     var labelline = lst[QUOTATIONSHAKES];
@@ -5697,6 +5763,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         {
             if (label == null) return THESAURUSABDOMEN;
             return IsY1L(label) || IsY2L(label) || IsNL(label) || IsYL(label);
+        }
+        public static bool IsDrainageLabelText(string label)
+        {
+            if (label == null) return THESAURUSABDOMEN;
+            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || IsWL(label);
         }
         public static bool IsMaybeLabelText(string label)
         {
