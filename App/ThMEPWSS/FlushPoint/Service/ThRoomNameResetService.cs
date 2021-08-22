@@ -39,7 +39,16 @@ namespace ThMEPWSS.FlushPoint.Service
                 {
                     IBuffer bufferService = new ThNTSBufferService();
                     var ent = bufferService.Buffer(o.Boundary, OffsetDis);
-                    var objs = spatialIndex.SelectWindowPolygon(ent);
+                    var objs = new DBObjectCollection();
+                    if(ent!=null)
+                    {
+                        objs = spatialIndex.SelectWindowPolygon(ent);
+                    }
+                    else
+                    {
+                        objs = spatialIndex.SelectWindowPolygon(o.Boundary);
+                    }
+                    
                     if (objs.Count >= 6)
                     {
                         o.Name = "停车区域";

@@ -5,6 +5,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Interface;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
@@ -53,26 +54,10 @@ namespace ThMEPEngineCore.Service
 
         private MPolygon BufferPolygon(MPolygon mPolygon, double length)
         {
-            var polygon = mPolygon.ToNTSPolygon();
-            var shell = polygon.Shell.ToDbPolyline();
-            var shellBufferObjs = shell.Buffer(length);
-            if (shellBufferObjs.Count > 0)
+            var polygon = mPolygon.ToNTSPolygon().Buffer(length).ToDbCollection(true);
+            if(polygon.Count>0)
             {
-                var shellPoly = shellBufferObjs[0] as Polyline;
-                var holePolys = new List<Polyline>();
-                foreach (var hole in polygon.Holes)
-                {
-                    var holePoly = hole.ToDbPolyline();
-                    var holeBufferObjs = holePoly.Buffer(-1.0 * length);
-                    if (holeBufferObjs.Count > 0)
-                    {
-                        holePolys.Add(holeBufferObjs[0] as Polyline);
-                    }
-                }
-                if (holePolys.Count == polygon.Holes.Length)
-                {
-                    return ThMPolygonTool.CreateMPolygon(shellPoly, holePolys.Cast<Curve>().ToList());
-                }
+                return polygon.Cast<Entity>().OrderByDescending(e => e.GetArea()).First() as MPolygon;
             }
             return null;
         }
