@@ -64,6 +64,7 @@
                 <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractDrainageWell" Global="THExtractDrainageWell" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -84,6 +85,7 @@
                 <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractDrainageWell" Global="THExtractDrainageWell" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -104,6 +106,7 @@
                 <Command Local="THExtractArchWall" Global="THExtractArchWall" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractDrainageWell" Global="THExtractDrainageWell" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -381,6 +384,7 @@
                 <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
+                <Command Local="THLGHZ"  Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
@@ -400,6 +404,7 @@
                 <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
+                <Command Local="THLGHZ"  Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
@@ -419,6 +424,7 @@
                 <Command Local="THDXXHS" Global="THDXXHS" />
                 <Command Local="THSJSB"  Global="THSJSB" />
                 <Command Local="THDXCX"  Global="THDXCX" />
+                <Command Local="THLGHZ"  Global="THLGHZ" />
                 <Command Local="THPSXTT" Global="THPSXTT" />
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
