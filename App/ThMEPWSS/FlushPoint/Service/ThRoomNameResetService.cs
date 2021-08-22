@@ -40,7 +40,7 @@ namespace ThMEPWSS.FlushPoint.Service
                     IBuffer bufferService = new ThNTSBufferService();
                     var ent = bufferService.Buffer(o.Boundary, OffsetDis);
                     var objs = new DBObjectCollection();
-                    if(ent!=null)
+                    if (ent != null) 
                     {
                         objs = spatialIndex.SelectWindowPolygon(ent);
                     }
