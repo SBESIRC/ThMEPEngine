@@ -48,6 +48,7 @@ namespace TianHua.Electrical
         /// 屋顶坡度
         /// </summary>
         public string SlopeRoof { get; set; }
+
         /// <summary>
         /// 烟温感比例
         /// </summary>

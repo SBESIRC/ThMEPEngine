@@ -77,7 +77,7 @@ namespace ThMEPElectrical
 
         public static readonly double ExtendBeamLength = 25; // 梁的延伸长度
         public static readonly double WallProfileShrinkDistance = -100; // 用户选择墙线内缩距离
-        public static readonly double PolyClosedDistance = 100; // 多段线视觉认为是闭合多段线的误差距离
+        public static readonly double PolyClosedDistance = 1000; // 多段线视觉认为是闭合多段线的误差距离
         public static readonly double EntityExtendDistance = 1000; // 选择图元延长的距离
         public static readonly double SecondBeamDivideHeight = 600; // 梁高差高度差值大于等于600划分
 
