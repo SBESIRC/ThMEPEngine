@@ -202,7 +202,7 @@ namespace ThMEPElectrical.Core
                 originTransformer.Transform(newPoint);
                 points.Add(newPoint);
             }
-            preWindow = new Point3dCollection(points.ToArray());
+            //preWindow = new Point3dCollection(points.ToArray());
             var transOutLine = new List<Curve>();
             foreach (var curve in wallCurves)
             {

@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Diagnostics;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Operation
 {
@@ -23,9 +24,11 @@ namespace ThMEPEngineCore.Operation
         /// <param name="yLength"></param>
         public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, Matrix3d transMatrix, double spacingValue)
         {
-            minSpace = spacingValue;
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(colums.ToCollection());
+            var useCols = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
-            List<Point3d> points = GetColumCenter(colums);
+            minSpace = spacingValue;
+            List<Point3d> points = GetColumCenter(useCols);
             Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(Vector3d.XAxis);
 
             var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
