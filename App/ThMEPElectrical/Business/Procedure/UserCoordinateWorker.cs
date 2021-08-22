@@ -1,15 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADExtension;
+using ThMEPElectrical.Business.ClearScene;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Model;
-using ThMEPElectrical.Assistant;
-using ThCADExtension;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPElectrical.Business.ClearScene;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business.Procedure
 {
@@ -18,45 +15,48 @@ namespace ThMEPElectrical.Business.Procedure
         public List<PolygonInfo> WallProfileInfos;
         private string m_ucsLayerName;
         private List<Curve> m_srcWallCurves;
+        private ThMEPOriginTransformer m_originTransformer;
 
         private List<Polyline> m_srcWallPolys; // poly 墙线
 
 
-        public static List<PolygonInfo> MakeUserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName)
+        public static List<PolygonInfo> MakeUserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName, ThMEPOriginTransformer originTransformer)
         {
-            var ucsCoorWorker = new UserCoordinateWorker(srcWallCurves, ucsLayerName);
+            var ucsCoorWorker = new UserCoordinateWorker(srcWallCurves, ucsLayerName, originTransformer);
             ucsCoorWorker.Do();
             return ucsCoorWorker.WallProfileInfos;
         }
 
-        public static List<PolygonInfo> MakeUserCoordinateWorkerFromSelectPolys(List<Polyline> wallPolys, string ucsLayerName)
+        public static List<PolygonInfo> MakeUserCoordinateWorkerFromSelectPolys(List<Polyline> wallPolys, string ucsLayerName, ThMEPOriginTransformer originTransformer)
         {
-            var ucsCoorWorker = new UserCoordinateWorker(wallPolys, ucsLayerName);
+            var ucsCoorWorker = new UserCoordinateWorker(wallPolys, ucsLayerName, originTransformer);
             ucsCoorWorker.DoWallPolys();
             return ucsCoorWorker.WallProfileInfos;
         }
 
-        public UserCoordinateWorker(List<Polyline> srcWallPolys, string ucsLayerName)
+        public UserCoordinateWorker(List<Polyline> srcWallPolys, string ucsLayerName, ThMEPOriginTransformer originTransformer)
         {
             m_srcWallPolys = srcWallPolys;
             m_ucsLayerName = ucsLayerName;
+            m_originTransformer = originTransformer;
         }
 
-        public UserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName)
+        public UserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName, ThMEPOriginTransformer originTransformer)
         {
             m_srcWallCurves = srcWallCurves;
             m_ucsLayerName = ucsLayerName;
+            m_originTransformer = originTransformer;
         }
 
         public void DoWallPolys()
         {
-            var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName);
+            var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName, m_originTransformer);
             CalculatePolygonInfo(ucsInfos, m_srcWallPolys);
         }
 
         public void Do()
         {
-            var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName);
+            var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName, m_originTransformer);
             var wallPolys = SplitWallWorker.MakeSplitWallProfiles(m_srcWallCurves);
             //DrawUtils.DrawProfile(wallPolys.Polylines2Curves(), "wallPolys");
             //WallProfileInfos = new List<PolygonInfo>();

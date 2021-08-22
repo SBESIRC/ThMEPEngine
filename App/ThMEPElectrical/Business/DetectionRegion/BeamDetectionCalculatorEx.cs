@@ -8,6 +8,7 @@ using ThCADCore.NTS;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business
 {
@@ -15,7 +16,7 @@ namespace ThMEPElectrical.Business
     {
         private List<Polyline> m_innerProfiles = null; // 用于扣减 主梁，柱子，剪力墙
         private List<SecondBeamProfileInfo> m_secondBeamInfos = null; // 生成关系组， 次梁
-
+        ThMEPOriginTransformer m_originTransformer;
 
         /// <summary>
         /// 计算主梁或者次梁的数据结构
@@ -23,18 +24,19 @@ namespace ThMEPElectrical.Business
         /// <param name="polyline"> 墙</param>
         /// <param name="polylines">内轮廓</param>
         /// <param name="secondBeams"> 次梁</param>
-        public static List<PlaceInputProfileData> MakeDetectionDataEx(Polyline polyline, List<Polyline> polylines, List<SecondBeamProfileInfo> secondBeams)
+        public static List<PlaceInputProfileData> MakeDetectionDataEx(Polyline polyline, List<Polyline> polylines, List<SecondBeamProfileInfo> secondBeams, ThMEPOriginTransformer originTransformer)
         {
-            var detection = new BeamDetectionCalculatorEx(polyline, polylines, secondBeams);
+            var detection = new BeamDetectionCalculatorEx(polyline, polylines, secondBeams,originTransformer);
             detection.DoBeamSpan();
             return detection.RegionBeamSpanProfileData;
         }
 
-        public BeamDetectionCalculatorEx(Polyline wallProfile, List<Polyline> innerHoles, List<SecondBeamProfileInfo> secondBeams = null)
+        public BeamDetectionCalculatorEx(Polyline wallProfile, List<Polyline> innerHoles, List<SecondBeamProfileInfo> secondBeams = null, ThMEPOriginTransformer originTransformer=null)
             : base(wallProfile)
         {
             m_innerProfiles = innerHoles;
             m_secondBeamInfos = secondBeams;
+            m_originTransformer = originTransformer;
         }
 
         
@@ -58,7 +60,7 @@ namespace ThMEPElectrical.Business
 
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(divideDetectRegion);
-            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
+            DrawUtils.DrawGroup(RegionBeamSpanProfileData,m_originTransformer);
         }
 
         /// <summary>

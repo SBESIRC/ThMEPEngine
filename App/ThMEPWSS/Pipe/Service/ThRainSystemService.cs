@@ -599,6 +599,17 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             }
             else if (dxfName == CONVENTIONALIZED)
             {
+                if (entity.Layer is THESAURUSABSTRUSE or THESAURUSABSENCE)
+                {
+                    foreach (var c in entity.ExplodeToDBObjectCollection().OfType<Circle>().Where(IsLayerVisible))
+                    {
+                        if (c.Radius > distinguishDiameter)
+                        {
+                            var bd = c.Bounds.ToGRect().TransformBy(matrix);
+                            reg(fs, bd, pipes);
+                        }
+                    }
+                }
                 if (entity.Layer is THESAURUSABSORB)
                 {
                     dynamic o = entity;
@@ -1683,7 +1694,16 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (s == storey)
                         {
                             var drData = drDatas[i];
-                            if (drData.LongTranslatorLabels.Contains(label)) return THESAURUSABDOMINAL;
+                            if (drData.LongTranslatorLabels.Contains(label))
+                            {
+                                var tmp = storeysItems[i].Labels.Where(IsNumStorey).ToList();
+                                if (tmp.Count > THESAURUSACCESSION)
+                                {
+                                    var floor = tmp.Select(GetStoreyScore).Max() + UNINTENTIONALLY;
+                                    if (storey != floor) return THESAURUSABDOMEN;
+                                }
+                                return THESAURUSABDOMINAL;
+                            }
                         }
                     }
                 }
@@ -1732,7 +1752,18 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (s == storey)
                         {
                             var drData = drDatas[i];
-                            return drData.ShortTranslatorLabels.Contains(label);
+                            if (drData.ShortTranslatorLabels.Contains(label))
+                            {
+                                {
+                                    var tmp = storeysItems[i].Labels.Where(IsNumStorey).ToList();
+                                    if (tmp.Count > THESAURUSACCESSION)
+                                    {
+                                        var floor = tmp.Select(GetStoreyScore).Max() + UNINTENTIONALLY;
+                                        if (storey != floor) return THESAURUSABDOMEN;
+                                    }
+                                }
+                                return THESAURUSABDOMINAL;
+                            }
                         }
                     }
                 }
@@ -2177,6 +2208,8 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 }
             }
             var iRF = allStoreys.IndexOf(INTERCHANGEABLY);
+            var iRF1 = allStoreys.IndexOf(THESAURUSACCESSIBLE);
+            var iRF2 = allStoreys.IndexOf(THESAURUSACCESSORY);
             {
                 foreach (var kv in pipeInfoDict)
                 {
@@ -2285,6 +2318,28 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                             if (hanging.FloorDrainsCount > QUOTATIONSHAKES && !hanging.HasCondensePipe)
                             {
                                 item.Items[iRF - THESAURUSACCESSION] = default;
+                            }
+                        }
+                    }
+                }
+                foreach (var kv in pipeInfoDict)
+                {
+                    var label = kv.Key;
+                    var item = kv.Value;
+                    if (iRF >= THESAURUSACCESSION && iRF1 > QUOTATIONSHAKES)
+                    {
+                        if (!item.Items[iRF1].Exist && item.Items[iRF].Exist && item.Items[iRF - THESAURUSACCESSION].Exist)
+                        {
+                            item.Items[iRF] = default;
+                        }
+                    }
+                    if (item.PipeType == PipeType.Y1L)
+                    {
+                        if (item.Hangings.All(x => x.WaterBucket is null))
+                        {
+                            if (iRF >= THESAURUSACCESSION && !item.Items[iRF].Exist && !item.Items.TryGet(iRF + THESAURUSACCESSION).Exist && !item.Items.TryGet(iRF + THESAURUSACCIDENT).Exist && item.Items[iRF - THESAURUSACCESSION].Exist)
+                            {
+                                item.Hangings[iRF].WaterBucket = WaterBucketItem.TryParse(THESAURUSACCLIMATIZE);
                             }
                         }
                     }
@@ -2912,6 +2967,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 for (int j = QUOTATIONSHAKES; j < COUNT; j++)
                 {
                     var hasAring = THESAURUSABDOMEN;
+                    Point2d airingBasePt = default;
                     var iRF = allStoreys.IndexOf(INTERCHANGEABLY);
                     var gpItem = pipeGroupItems[j];
                     var thwPipeLine = new ThwPipeLine();
@@ -2971,6 +3027,12 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     }
                     void handlePipeLine(ThwPipeLine thwPipeLine, PipeRunLocationInfo[] infos)
                     {
+                        void _DrawAiringSymbol(Point2d basePt, bool couldHavePeopleOnRoof)
+                        {
+                            DrawAiringSymbol(basePt, couldHavePeopleOnRoof);
+                            hasAring = THESAURUSABDOMINAL;
+                            airingBasePt = basePt;
+                        }
                         {
                             var shouldDrawAringSymbol = gpItem.PipeType == PipeType.NL ? (viewModel?.Params?.HasAiringForCondensePipe ?? THESAURUSABDOMINAL) : THESAURUSABDOMINAL;
                             var couldHavePeopleOnRoof = viewModel?.Params?.CouldHavePeopleOnRoof ?? THESAURUSABDOMEN;
@@ -2982,8 +3044,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var hanging = gpItem.Hangings[k];
                                     if (hanging.HasCondensePipe)
                                     {
-                                        DrawAiringSymbol(infos[k].BasePoint.OffsetY(ALUMINOSILICATE), couldHavePeopleOnRoof);
-                                        hasAring = THESAURUSABDOMINAL;
+                                        _DrawAiringSymbol(infos[k].BasePoint.OffsetY(ALUMINOSILICATE), couldHavePeopleOnRoof);
                                         return;
                                     }
                                 }
@@ -2992,8 +3053,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var hanging = gpItem.Hangings[k];
                                     if (hanging.FloorDrainsCount > QUOTATIONSHAKES)
                                     {
-                                        DrawAiringSymbol(infos[k].BasePoint.OffsetY(-ALSOAMPHISCIANS - THESAURUSADMINISTER), couldHavePeopleOnRoof);
-                                        hasAring = THESAURUSABDOMINAL;
+                                        _DrawAiringSymbol(infos[k].BasePoint.OffsetY(-ALSOAMPHISCIANS - THESAURUSADMINISTER), couldHavePeopleOnRoof);
                                         return;
                                     }
                                 }
@@ -3008,8 +3068,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                         var pt = info.BasePoint;
                                         var seg = new GLineSegment(pt, pt.OffsetY(ThWSDStorey.RF_OFFSET_Y));
                                         drawDomePipe(seg);
-                                        DrawAiringSymbol(seg.EndPoint, couldHavePeopleOnRoof);
-                                        hasAring = THESAURUSABDOMINAL;
+                                        _DrawAiringSymbol(seg.EndPoint, couldHavePeopleOnRoof);
                                     }
                                 }
                                 else
@@ -3730,7 +3789,16 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                 var hanging = gpItem.Hangings[k];
                                 if (hanging.HasCondensePipe)
                                 {
-                                    linesKillers.Add(GRect.Create(infos[k].StartPoint.OffsetY(-THESAURUSACCESSION), THESAURUSABANDON).ToPolygon());
+                                    var info = infos[k];
+                                    if (hasAring)
+                                    {
+                                        if (info.StartPoint.Y < airingBasePt.Y)
+                                        {
+                                            ok = THESAURUSABDOMINAL;
+                                            break;
+                                        }
+                                    }
+                                    linesKillers.Add(GRect.Create(info.StartPoint.OffsetY(-THESAURUSACCESSION), THESAURUSABANDON).ToPolygon());
                                     ok = THESAURUSABDOMINAL;
                                     break;
                                 }
@@ -3741,7 +3809,16 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var hanging = gpItem.Hangings[k];
                                     if (hanging.FloorDrainsCount > QUOTATIONSHAKES)
                                     {
-                                        linesKillers.Add(GRect.Create(infos[k].EndPoint.OffsetY(-THESAURUSACCESSION), THESAURUSABANDON).ToPolygon());
+                                        var info = infos[k];
+                                        if (hasAring)
+                                        {
+                                            if (info.EndPoint.Y < airingBasePt.Y)
+                                            {
+                                                ok = THESAURUSABDOMINAL;
+                                                break;
+                                            }
+                                        }
+                                        linesKillers.Add(GRect.Create(info.EndPoint.OffsetY(-THESAURUSACCESSION), THESAURUSABANDON).ToPolygon());
                                         ok = THESAURUSABDOMINAL;
                                         break;
                                     }
@@ -5545,13 +5622,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public static void PreFixGeoData(RainGeoData geoData)
         {
             geoData.FixData();
-            static bool isNotWantedText(string t)
-            {
-                if (t == null) return THESAURUSABDOMINAL;
-                if (t.StartsWith(THESAURUSACCENT) || t.Contains(THESAURUSALTITUDE)) return THESAURUSABDOMINAL;
-                return THESAURUSABDOMEN;
-            }
-            geoData.Labels = geoData.Labels.Where(x => !isNotWantedText(x.Text)).ToList();
+            geoData.Labels = geoData.Labels.Where(x => IsMaybeLabelText(x.Text)).ToList();
             for (int i = QUOTATIONSHAKES; i < geoData.LabelLines.Count; i++)
             {
                 var seg = geoData.LabelLines[i];
@@ -5854,7 +5925,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const int THESAURUSACCEDE = 20;
         public const string THESAURUSACCELERATE = "TCH_VPIPEDIM";
         public const string THESAURUSACCELERATION = "TCH_TEXT";
-        public const string THESAURUSACCENT = "De";
         public const string THESAURUSACCENTUATE = "雨水井编号";
         public const string THESAURUSACCEPT = "-";
         public const string THESAURUSACCEPTABLE = "";
@@ -5875,6 +5945,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string CONGRATULATIONS = "重力型雨水斗DN100";
         public const string THESAURUSACCLAMATION = "侧入型雨水斗DN100";
         public const string ACCLIMATIZATION = "1F";
+        public const string THESAURUSACCLIMATIZE = "重力雨水斗DN100";
         public const string THESAURUSACCOMMODATE = "W-NOTE";
         public const double ACCOMMODATINGLY = 2500.0;
         public const double ACCOMMODATIVENESS = 5500.0;
@@ -6041,7 +6112,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string ALTERNATIVENESS = "楼层框定";
         public const string THESAURUSALTERNATIVE = "侧入式雨水斗DN100";
         public const string THESAURUSALTHOUGH = "TCH_EQUIPMENT";
-        public const string THESAURUSALTITUDE = "地库";
         public const string AMBIDEXTROUSNESS = "A$C6BDE4816";
         public const string THESAURUSAMBITIOUS = "楼上";
         public const string ALSOAMBIVALENCY = "屋面雨水斗";
