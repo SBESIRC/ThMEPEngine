@@ -41,7 +41,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             var lines = BranchPolyline.ToLines();
             foreach (var line in lines)
             {
-//                line.ColorIndex = 5;
+                line.ColorIndex = 5;
                 line.LayerId = DbHelper.GetLayerId("W-FRPT-HYDT-PIPE-AI");
                 acadDatabase.CurrentSpace.Add(line);
             }
@@ -92,6 +92,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 {
                     angle = angle - Math.PI;
                 }
+                double tmpAngle = angle + Math.PI / 2.0;
+                var tmpVecotr = new Vector3d(Math.Cos(tmpAngle), Math.Sin(tmpAngle), 0.0);
+                position = position + 50 * tmpVecotr;
+
                 var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", riserName, position, new Scale3d(1, 1, 1), angle);
                 var blk = acadDatabase.Element<BlockReference>(blkId);
                 if (blk.IsDynamicBlock)
@@ -111,7 +115,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                     }
                 }
             }
-
         }
         private bool InsertValve(AcadDatabase acadDatabase, List<Line> lines)
         {
