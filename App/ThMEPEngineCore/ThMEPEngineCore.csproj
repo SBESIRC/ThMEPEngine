@@ -84,6 +84,7 @@
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
+    <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
