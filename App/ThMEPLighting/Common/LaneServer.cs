@@ -48,10 +48,13 @@ namespace ThMEPLighting.Common
 
             while (debug == true && isAllTraversed(edges) == false)
             {
+                int minOutdegree = nodeCollection.Where(x => isAllTraversed(x.Value) == false).Min(x => x.Value.Count);
+
                 //debug = false;
                 foreach (var ptOnce in nodeCollection)
                 {
-                    if (ptOnce.Value.Count == 1)
+                    //if (ptOnce.Value.Count == 1)
+                    if (ptOnce.Value.Count == minOutdegree)
                     {
                         startPoint = ptOnce.Key;
                         break;
@@ -64,7 +67,7 @@ namespace ThMEPLighting.Common
                 var orderedMergedLanesPart = mergeOrderedLane(orderedLane);
                 //找这一组里面的最优解
 
-                var optimalOrderedMergedLanes = findOptimalLanes(orderedMergedLanesPart, nodeCollection, startPoint);
+                var optimalOrderedMergedLanes = findOptimalLanes(orderedMergedLanesPart, nodeCollection, startPoint, minOutdegree);
 
                 foreach (var path in optimalOrderedMergedLanes)
                 {
@@ -180,7 +183,7 @@ namespace ThMEPLighting.Common
             return bReturn;
         }
 
-        private static List<List<Line>> findOptimalLanes(List<List<Line>> orderedMergedLanesPart, Dictionary<Point3d, List<ThLightEdge>> nodeCollection, Point3d startPoint)
+        private static List<List<Line>> findOptimalLanes(List<List<Line>> orderedMergedLanesPart, Dictionary<Point3d, List<ThLightEdge>> nodeCollection, Point3d startPoint,int minOutdegree)
         {
             List<List<List<Line>>> allOrderedMergedLanes = new List<List<List<Line>>>();
 
@@ -189,7 +192,8 @@ namespace ThMEPLighting.Common
             //找到各线段终点并重新计算
             foreach (var path in orderedMergedLanesPart)
             {
-                if (nodeCollection[path.Last().EndPoint].Count == 1)
+               // if (nodeCollection[path.Last().EndPoint].Count == 1)
+                    if (nodeCollection[path.Last().EndPoint].Count == minOutdegree)
                 {
                     List<ThLightEdge> repeatEdge = new List<ThLightEdge>();
                     orderedMergedLanesPart.ForEach(ls => ls.ForEach(l => repeatEdge.Add(new ThLightEdge((Line)l.Clone()))));
