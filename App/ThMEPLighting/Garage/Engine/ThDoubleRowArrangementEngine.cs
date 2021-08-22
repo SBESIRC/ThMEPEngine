@@ -53,6 +53,7 @@ namespace ThMEPLighting.Garage.Engine
             List<ThWireOffsetData> innerOuterCircles)
         {
             //为了选起点，建图成功
+            //对传入的中心线和1号线做预处理
             var centerLines = new List<Line>();
             var firstLines = new List<Line>();
             innerOuterCircles.ForEach(o => centerLines.Add(o.Center));
