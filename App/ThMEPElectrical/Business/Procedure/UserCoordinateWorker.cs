@@ -62,7 +62,7 @@ namespace ThMEPElectrical.Business.Procedure
             //WallProfileInfos = new List<PolygonInfo>();
             //return;
 
-            ClearSmoke.MakeClearSmoke(wallPolys);
+            ClearSmoke.MakeClearSmoke(wallPolys,m_originTransformer);
             CalculatePolygonInfo(ucsInfos, wallPolys);
         }
 

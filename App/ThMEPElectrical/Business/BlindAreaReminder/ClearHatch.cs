@@ -7,22 +7,25 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business.BlindAreaReminder
 {
     public class ClearHatch
     {
         private List<PolygonInfo> m_polygonInfos;
+        private ThMEPOriginTransformer m_originTransformer;
 
-        public static void MakeClearHatch(List<PolygonInfo> polygonInfos)
+        public static void MakeClearHatch(List<PolygonInfo> polygonInfos, ThMEPOriginTransformer originTransformer=null)
         {
-            var clearHatch = new ClearHatch(polygonInfos);
+            var clearHatch = new ClearHatch(polygonInfos, originTransformer);
             clearHatch.DoClearHatch();
         }
 
-        public ClearHatch(List<PolygonInfo> polygonInfos)
+        public ClearHatch(List<PolygonInfo> polygonInfos, ThMEPOriginTransformer originTransformer)
         {
             m_polygonInfos = polygonInfos;
+            m_originTransformer = originTransformer;
         }
 
         public void DoClearHatch()
@@ -52,9 +55,12 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
             var extents = hatch.Bounds.Value;
             var nearPos = extents.CenterPoint();
 
+            var copyPoint = nearPos;
+            if (null != m_originTransformer)
+                copyPoint = m_originTransformer.Transform(copyPoint);
             foreach (PolygonInfo polygon in m_polygonInfos)
             {
-                if (GeomUtils.PtInLoop(polygon.ExternalProfile, nearPos))
+                if (GeomUtils.PtInLoop(polygon.ExternalProfile, copyPoint))
                     return true;
             }
 

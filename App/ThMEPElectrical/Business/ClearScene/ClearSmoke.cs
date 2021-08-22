@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Business.BlindAreaReminder;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business.ClearScene
 {
@@ -16,16 +17,18 @@ namespace ThMEPElectrical.Business.ClearScene
     {
         private List<Polyline> m_polylines;
         private List<PolygonInfo> m_polygonInfos = new List<PolygonInfo>();
+        private ThMEPOriginTransformer m_originTransformer;
 
-        public static void MakeClearSmoke(List<Polyline> polylines)
+        public static void MakeClearSmoke(List<Polyline> polylines, ThMEPOriginTransformer originTransformer)
         {
-            var clearSmoke = new ClearSmoke(polylines);
+            var clearSmoke = new ClearSmoke(polylines, originTransformer);
             clearSmoke.DoClear();
         }
 
-        public ClearSmoke(List<Polyline> polylines)
+        public ClearSmoke(List<Polyline> polylines, ThMEPOriginTransformer originTransformer)
         {
             m_polylines = polylines;
+            m_originTransformer = originTransformer;
             foreach (var poly in m_polylines)
                 m_polygonInfos.Add(new PolygonInfo(poly));
         }
@@ -61,14 +64,17 @@ namespace ThMEPElectrical.Business.ClearScene
                 }
             }
 
-            ClearHatch.MakeClearHatch(m_polygonInfos);
+            ClearHatch.MakeClearHatch(m_polygonInfos,m_originTransformer);
         }
 
         private bool IsInvalid(Point3d point)
         {
+            var copyPoint = new Point3d(point.X, point.Y, point.Z);
+            if (null != m_originTransformer)
+                copyPoint = m_originTransformer.Transform(copyPoint);
             foreach (var poly in m_polylines)
             {
-                if (GeomUtils.PtInLoop(poly, point))
+                if (GeomUtils.PtInLoop(poly, copyPoint))
                     return true;
             }
 
