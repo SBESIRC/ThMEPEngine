@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.Operation
             var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
             var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
 #if DEBUG
-            string GridLineLayer = "AD-Gird";     //轴网线图层
+            string GridLineLayer = "AD-Grid";     //轴网线图层
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 LayerTools.AddLayer(acdb.Database, GridLineLayer);
