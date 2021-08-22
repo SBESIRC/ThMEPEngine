@@ -7,6 +7,10 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -30,6 +34,15 @@ namespace ThMEPElectrical.BlockConvert
         {
             var target = new ThBlockReferenceData(blkRef);
             FillProperties(target, source);
+            if (source.EffectiveName.Contains("风机") ||
+                source.EffectiveName.Contains("组合式空调器") ||
+                source.EffectiveName.Contains("暖通其他设备标注") ||
+                source.EffectiveName.Contains("风冷热泵") ||
+                source.EffectiveName.Contains("冷水机组") ||
+                source.EffectiveName.Contains("冷却塔"))
+            {
+                AdjustLoadLabel(target);
+            }
             blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(target.Attributes));
         }
 
@@ -314,6 +327,54 @@ namespace ThMEPElectrical.BlockConvert
             }
 
             // 
+        }
+
+        private void AdjustLoadLabel(ThBlockReferenceData targetBlockData)
+        {
+            var entitiesClone = new DBObjectCollection();
+            double textMaxWidth = double.MinValue;
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(targetBlockData.Database))
+            {
+                var entities = new DBObjectCollection();
+                var blkref = acadDatabase.Element<BlockReference>(targetBlockData.ObjId);
+                blkref.Explode(entities);
+                entities = entities.Cast<Entity>()
+                        .Where(e => e.Layer == "E-UNIV-NOTE")
+                        .Where(e => e is DBText)
+                        .ToCollection();
+                var stringList = targetBlockData.Attributes.Values;
+                for (int i = 0; i < entities.Count; i++) 
+                {
+                    foreach (string str in stringList)
+                    {
+                        var mText = new MText();
+                        mText.Contents = str;
+                        mText.TextStyleId = (entities[i] as DBText).TextStyleId;
+                        mText.TextHeight = (entities[i] as DBText).Height;
+
+                        var pt1 = new Point2d((entities[i] as DBText).Position.X, (entities[i] as DBText).Position.Y);
+                        var pt2 = new Point2d(pt1.X + mText.ActualWidth, pt1.Y);
+                        var pt3 = new Point2d(pt2.X, pt2.Y + mText.ActualHeight);
+                        var pt4 = new Point2d(pt1.X, pt1.Y + mText.ActualHeight);
+                        var pts = new Point2dCollection() { pt1, pt2, pt3, pt4 };
+                        var obb = ThDrawTool.CreatePolyline(pts);
+                        var mt = Matrix3d.Rotation((entities[i] as DBText).Rotation, (entities[i] as DBText).Normal, (entities[i] as DBText).Position);
+                        obb.TransformBy(mt);
+                        var width = GetWidth(obb);
+                        if (width > textMaxWidth)
+                        {
+                            textMaxWidth = width;
+                        }
+                    }
+                }
+            }
+            textMaxWidth = textMaxWidth > 1600 ? (textMaxWidth + 500) : 2100;
+            targetBlockData.CustomProperties.SetValue("标注表格宽度", textMaxWidth);
+        }
+
+        private double GetWidth(Polyline textObb)
+        {
+            return textObb.ToLines().OrderByDescending(o => o.Length).First().Length;
         }
     }
 }
