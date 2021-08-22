@@ -26,19 +26,23 @@ namespace ThMEPWSS.Common
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var allBlockReference = acdb.ModelSpace.OfType<BlockReference>();
-                   
+
                 foreach (var block in allBlockReference)
                 {
                     if (!block.GetEffectiveName().Equals(floorBlockName))
                         continue;
-                    resFloors.Add(new FloorFramed(block,block.Id));
+                    resFloors.Add(new FloorFramed(block, block.Id));
                 }
             }
             return resFloors;
         }
 
-        public static bool SelectFloorFramed(out List<FloorFramed> resFloors)
+        public static bool SelectFloorFramed(out List<FloorFramed> resFloors, Action cb = null)
         {
+            if (cb != null)
+            {
+                cb(); resFloors = null; return false;
+            }
             bool selectSucceed = false;
             resFloors = new List<FloorFramed>();
             using (Active.Document.LockDocument())
@@ -70,24 +74,24 @@ namespace ThMEPWSS.Common
             return selectSucceed;
         }
 
-        public static List<FloorFramed> FloorFramedOrder(List<FloorFramed> orderFloors,bool isDes)
+        public static List<FloorFramed> FloorFramedOrder(List<FloorFramed> orderFloors, bool isDes)
         {
             var resFloors = new List<FloorFramed>();
             var tempFramed = orderFloors.OrderBy(c => c.endFloorOrder).ToList();
-            if(isDes)
+            if (isDes)
                 tempFramed = orderFloors.OrderByDescending(c => c.endFloorOrder).ToList();
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("小屋面")).ToList());
             resFloors.AddRange(tempFramed.Where(c => c.floorType.Equals("大屋面")).ToList());
-            foreach (var item in tempFramed) 
+            foreach (var item in tempFramed)
             {
                 if (item.floorType.Contains("屋面"))
                     continue;
                 resFloors.Add(item);
             }
-                
+
             return resFloors;
         }
-        public static List<Line> FloorFrameSpliteLines(FloorFramed floorFramed) 
+        public static List<Line> FloorFrameSpliteLines(FloorFramed floorFramed)
         {
             var spt = floorFramed.floorBlock.Position;
             var spliteLines = new List<Line>();
@@ -106,7 +110,7 @@ namespace ThMEPWSS.Common
                     DynamicBlockReferenceProperty property = dynColls[i];
                     if (property.PropertyName.Contains(str))
                     {
-                        
+
                         var allNums = StringAllNumber(property.PropertyName);
                         if (allNums == null || allNums.Count < 1)
                             continue;
@@ -116,7 +120,7 @@ namespace ThMEPWSS.Common
                     }
                 }
                 allSpliteInts = allSpliteInts.OrderBy(c => c).ToList();
-                for (int i = 0; i < allSpliteInts.Count; i++) 
+                for (int i = 0; i < allSpliteInts.Count; i++)
                 {
                     var disSplite = BlockTools.GetDynBlockValue(floorFramed.blockId, string.Format("{0}{1}", str, allSpliteInts[i]));
                     var spliteX = BlockTools.GetDynBlockValue(floorFramed.blockId, string.Format("{0}{1} {2}", strSplite, allSpliteInts[i], "X"));
@@ -131,7 +135,7 @@ namespace ThMEPWSS.Common
             return spliteLines;
         }
 
-        public static List<int> StringAllNumber(string str) 
+        public static List<int> StringAllNumber(string str)
         {
             List<int> intNums = new List<int>();
             if (string.IsNullOrEmpty(str))
