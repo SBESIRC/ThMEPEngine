@@ -104,7 +104,7 @@ namespace ThMEPLighting
                     Dictionary<BlockReference, BlockReference> evacBlk = new Dictionary<BlockReference, BlockReference>();
                     getBlockS.evacR.ForEach(x => evacBlk.Add(x.Key, x.Value));
                     getBlockS.evacRL.ForEach(x => evacBlk.Add(x.Key, x.Value));
-                    var revCloud = GetSourceDataService.ExtractRevCloud(bufferTransFrame, EmgLightCommon.LayerComment, transformer);
+                    var revCloud = GetSourceDataService.ExtractRevCloud(bufferTransFrame, EmgLightCommon.LayerComment, EmgLightCommon.LayerCommentColor, transformer);
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);

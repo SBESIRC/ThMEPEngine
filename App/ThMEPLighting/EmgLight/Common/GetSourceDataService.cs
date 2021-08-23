@@ -199,14 +199,14 @@ namespace ThMEPLighting.EmgLight.Common
             return blk;
         }
 
-        public static Dictionary<Polyline, Polyline> ExtractRevCloud(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer)
+        public static Dictionary<Polyline, Polyline> ExtractRevCloud(Polyline bufferFrame, string LayerName,short color, ThMEPOriginTransformer transformer)
         {
             var objs = new DBObjectCollection();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var line = acadDatabase.ModelSpace
                       .OfType<Polyline>()
-                      .Where(o => o.Layer == LayerName);
+                      .Where(o => o.Layer == LayerName && o.ColorIndex == color);
 
                 List<Polyline> lineList = line.Select(x => x.WashClone()).Cast<Polyline>().ToList();
 
