@@ -119,6 +119,8 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
+                    var mapping = new Dictionary<ThBlockReferenceData, bool>();
+                    srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
                     XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
@@ -186,6 +188,12 @@ namespace ThMEPElectrical.Command
                                 // 转换
                                 if (transformedBlock != null)
                                 {
+                                    // 避免重复转换
+                                    if (mapping[o] == true)
+                                    {
+                                        return;
+                                    }
+
                                     // 导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
@@ -254,6 +262,9 @@ namespace ThMEPElectrical.Command
                                     {
                                         engine.SetDatbaseProperties(b, o, targetBlockLayer);
                                     });
+
+                                    // 标记已经转换的块
+                                    mapping[o] = false;
                                 }
                             });
                     }
