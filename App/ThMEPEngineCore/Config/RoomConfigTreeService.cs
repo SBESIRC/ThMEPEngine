@@ -122,7 +122,7 @@ namespace ThMEPEngineCore.Config
             foreach (var treeNode in roomTree)
             {
                 var thisNode = treeNode;
-                if(thisNode.nodeName == roomName || CompareRoom(thisNode.synonym,roomName))
+                if (thisNode.nodeName == roomName || CompareRoom(thisNode.synonym, roomName))
                 {
                     if (thisNode.tags.Contains(publicRoom))
                     {

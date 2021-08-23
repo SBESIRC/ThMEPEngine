@@ -52,12 +52,10 @@ namespace ThMEPElectrical.Command
                 {
                     if (r.Tags.Count > 0) 
                     {
-                        var labels = service.GetLabels(r);
-                        if (labels.Count > 0) 
+                        if (service.MustLayoutArea(r))
                         {
-                            service.IsPublic(labels);
+                            acadDatabase.ModelSpace.Add(r.Boundary);
                         }
-                        
                     }
                 });
             }
