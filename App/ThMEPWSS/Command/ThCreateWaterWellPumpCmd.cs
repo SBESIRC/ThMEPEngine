@@ -79,6 +79,30 @@ namespace ThMEPWSS.Command
             }
             return deepWellPump;
         }
+
+
+        public List<Line> GetRoomLine(Point3dCollection range)
+        {
+            using (var database = AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Use(database.Database))
+            {
+                List<Line> resLine = new List<Line>();
+                var partSpace = acadDb.ModelSpace.OfType<Entity>()
+                        .Where(o => o.Layer.Contains("AI-房间框线")).ToList();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+                var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+
+                foreach (var obj in dbObjects)
+                {
+                    if (obj is Polyline)
+                    {
+                        var pl = obj as Polyline;
+                        resLine.AddRange(pl.ToLines());
+                    }
+                }
+                return resLine;
+            }
+        }
         public List<Line> GetWallColumnEdgesInRange(Tuple<Point3d, Point3d> input)
         {
             var range = new Point3dCollection();
@@ -86,8 +110,11 @@ namespace ThMEPWSS.Command
             range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
             range.Add(input.Item2);
             range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-            IWallEdgeData wallData = new ThWWallEdgeService();
-            return wallData.GetWallEdges(Active.Database,range);
+            IWallEdgeData wallData = new ThDB3WallEdgeService();
+            List<Line> resLine = new List<Line>();
+            resLine.AddRange(GetRoomLine(range));
+            resLine.AddRange(wallData.GetWallEdges(Active.Database, range));
+            return resLine;
         }
         public List<Point3d> GetParkSpacePointInRange(Tuple<Point3d, Point3d> input)
         {
@@ -224,7 +251,7 @@ namespace ThMEPWSS.Command
                         //{
                         //    var clone = o.Clone() as Line;
                         //    objIds.Add(database.ModelSpace.Add(clone));
-                        //    clone.ColorIndex = 1;
+                        //    clone.ColorIndex = 3;
                         //});
                         //if(objIds.Count>0)
                         //{

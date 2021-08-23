@@ -13,8 +13,8 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
         public List<Line> GetWallEdges(Database db, Point3dCollection pts)
         {
             var results = new List<Line>();
-            using (var columnEngine = new ThColumnRecognitionEngine())
-            using (var shearWallEngine = new ThShearWallRecognitionEngine())
+            using (var columnEngine = new ThDB3ColumnRecognitionEngine())
+            using (var shearWallEngine = new ThDB3ShearWallRecognitionEngine())
             using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
             {
                 columnEngine.Recognize(db, pts);
