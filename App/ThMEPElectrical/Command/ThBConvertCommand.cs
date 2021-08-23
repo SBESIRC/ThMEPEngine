@@ -119,6 +119,7 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
+                    var mapping = new Dictionary<ThBlockReferenceData, bool>();
                     XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
@@ -149,6 +150,10 @@ namespace ThMEPElectrical.Command
                                 }
                             }).ForEach(o =>
                             {
+                                if(!mapping.ContainsKey(o))
+                                {
+                                    mapping.Add(o, false);
+                                }
                                 // 获取转换后的块信息
                                 ThBlockConvertBlock transformedBlock = null;
                                 switch (mode)
@@ -201,59 +206,73 @@ namespace ThMEPElectrical.Command
                                     }
 
                                     // 插入新的块引用
-                                    var scale = new Scale3d(Scale);
-                                    var engine = CreateConvertEngine(mode);
-                                    var objId = engine.Insert(targetBlockName, scale, o);
-
-                                    // 设置新插入的块引用的镜像变化
-                                    engine.Mirror(objId, o);
-
-                                    // 设置新插入的块引用的角度
-                                    engine.Rotate(objId, o);
-
-                                    // 设置新插入的块引用位置
-                                    engine.Displacement(objId, o);
-
-                                    // 设置动态块可见性
-                                    engine.SetVisibilityState(objId, o);
-
-                                    // 将源块引用的属性“刷”到新的块引用
-                                    engine.MatchProperties(objId, o);
-
-                                    // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
-                                    // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
-                                    var refIds = new ObjectIdCollection();
-                                    if (rule.Explodable())
+                                    bool tag;
+                                    if(mapping.TryGetValue(o, out tag))
                                     {
-                                        ExplodeWithErase(objId, refIds);
-
-                                        // 如果是“单台潜水泵”，继续炸一次
-                                        var objIds = new ObjectIdCollection();
-                                        foreach(ObjectId item in refIds)
+                                        if (!tag)
                                         {
-                                            if (item.GetBlockName() == "单台潜水泵")
+                                            if (mapping.Remove(o))
                                             {
-                                                ExplodeWithErase(item, objIds);
+                                                mapping.Add(o, true);
                                             }
-                                            else
+                                            var scale = new Scale3d(Scale);
+                                            var engine = CreateConvertEngine(mode);
+                                            var objId = engine.Insert(targetBlockName, scale, o);
+
+                                            if (objId != new ObjectId())
                                             {
-                                                objIds.Add(item);
+                                                // 设置新插入的块引用的镜像变化
+                                                engine.Mirror(objId, o);
+
+                                                // 设置新插入的块引用的角度
+                                                engine.Rotate(objId, o);
+
+                                                // 设置新插入的块引用位置
+                                                engine.Displacement(objId, o);
+
+                                                // 设置动态块可见性
+                                                engine.SetVisibilityState(objId, o);
+
+                                                // 将源块引用的属性“刷”到新的块引用
+                                                engine.MatchProperties(objId, o);
+
+                                                // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
+                                                // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
+                                                var refIds = new ObjectIdCollection();
+                                                if (rule.Explodable())
+                                                {
+                                                    ExplodeWithErase(objId, refIds);
+
+                                                    // 如果是“单台潜水泵”，继续炸一次
+                                                    var objIds = new ObjectIdCollection();
+                                                    foreach (ObjectId item in refIds)
+                                                    {
+                                                        if (item.GetBlockName() == "单台潜水泵")
+                                                        {
+                                                            ExplodeWithErase(item, objIds);
+                                                        }
+                                                        else
+                                                        {
+                                                            objIds.Add(item);
+                                                        }
+                                                    }
+
+                                                    // 获取最终结果
+                                                    refIds = objIds;
+                                                }
+                                                else
+                                                {
+                                                    refIds.Add(objId);
+                                                }
+
+                                                // 设置块引用的数据库属性
+                                                refIds.Cast<ObjectId>().ForEach(b =>
+                                                {
+                                                    engine.SetDatbaseProperties(b, o, targetBlockLayer);
+                                                });
                                             }
                                         }
-
-                                        // 获取最终结果
-                                        refIds = objIds;
                                     }
-                                    else
-                                    {
-                                        refIds.Add(objId);
-                                    }
-
-                                    // 设置块引用的数据库属性
-                                    refIds.Cast<ObjectId>().ForEach(b =>
-                                    {
-                                        engine.SetDatbaseProperties(b, o, targetBlockLayer);
-                                    });
                                 }
                             });
                     }
