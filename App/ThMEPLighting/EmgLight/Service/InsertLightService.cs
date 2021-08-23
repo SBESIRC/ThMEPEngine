@@ -52,8 +52,15 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 foreach (var pl in commentLine)
                 {
+                    //revcloud can only print to the current layer.
+                    //so it changes the active layer to the required layer, then changes back.
+                    //画云线。 云线只能画在当前图层。所以先转图层画完在转回来。
+                    var oriLayer = Active.Database.Clayer;
+
                     pl.Layer = EmgLightCommon.LayerComment;
                     var objId = db.ModelSpace.Add(pl);
+                    Active.Database.SetCurrentLayer(EmgLightCommon.LayerComment); 
+
 #if ACAD_ABOVE_2014
                     Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", objId, "_No");
 #else
@@ -67,6 +74,7 @@ namespace ThMEPLighting.EmgLight.Service
                        new TypedValue((int)LispDataType.Text, "_No"));
                     Active.Editor.AcedCmd(args);
 #endif
+                    Active.Database.Clayer = oriLayer;
                 }
             }
         }

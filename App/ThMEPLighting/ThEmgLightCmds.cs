@@ -96,6 +96,7 @@ namespace ThMEPLighting
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
+                    DrawUtils.CreateLayer(EmgLightCommon.LayerComment, Color.FromColorIndex(ColorMethod.ByLayer, EmgLightCommon.LayerCommentColor));
 
                     //取块
                     var getBlockS = new GetBlockService();
@@ -103,12 +104,14 @@ namespace ThMEPLighting
                     Dictionary<BlockReference, BlockReference> evacBlk = new Dictionary<BlockReference, BlockReference>();
                     getBlockS.evacR.ForEach(x => evacBlk.Add(x.Key, x.Value));
                     getBlockS.evacRL.ForEach(x => evacBlk.Add(x.Key, x.Value));
+                    var revCloud = GetSourceDataService.ExtractRevCloud(bufferTransFrame, EmgLightCommon.LayerComment, transformer);
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
                     //RemoveBlockService.ClearEmergencyLight(block);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLightDouble);
+                    RemoveBlockService.ClearPolyline(revCloud);
 
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkTransFrame, bufferTransFrame, acdb, transformer);
@@ -139,7 +142,6 @@ namespace ThMEPLighting
                     //double scale = LayoutEmgLightEngine.getScale(getBlockS);
                     InsertLightService.InsertSprayBlock(layoutInfo, scale, blkName);
 
-                    DrawUtils.CreateLayer(EmgLightCommon.LayerComment, Color.FromColorIndex(ColorMethod.ByLayer, EmgLightCommon.LayerCommentColor));
                     InsertLightService.InsertCommentLine(commentList);
                 }
             }
@@ -267,7 +269,7 @@ namespace ThMEPLighting
             var frameClone = frame.WashClone() as Polyline;
             //处理外包框
             transformer.Transform(frameClone);
-            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone,tol);
+            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
 
             return nFrame;
 
