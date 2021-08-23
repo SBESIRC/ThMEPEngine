@@ -54,7 +54,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 foreach (string label in ConfigInfo.WhiteList)
                 {
-                    if (name.Contains(label))
+                    if (name.EndsWith(label) && label != "")
                     {
                         //将该空间添加到list中
                         return true;
