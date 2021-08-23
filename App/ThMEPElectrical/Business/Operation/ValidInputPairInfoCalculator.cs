@@ -54,7 +54,7 @@ namespace ThMEPElectrical.Business.Operation
                 if (validPolys.Count > 0)
                 {
                     foreach (Polyline resPoly in validPolys)
-                        m_validPlaceProfileDatas.Add(new PlaceInputProfileData(resPoly, secondBeamProfiles));
+                        m_validPlaceProfileDatas.Add(new PlaceInputProfileData(resPoly, secondBeamProfiles, curPlaceProfileData.Holes));
                 }
             }
         }
