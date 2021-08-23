@@ -37,6 +37,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         private List<Entity> DataCollection { get; set; }
 
         /// <summary>
+        /// 短路隔离器集合
+        /// </summary>
+        private List<Entity> SICollection { get; set; }
+
+        /// <summary>
         /// 已捕捉到的数据集合
         /// </summary>
         private List<Entity> CacheDataCollection { get; set; }
@@ -70,6 +75,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             CrossAlarms = new List<Point3d>();
             GlobleNTSMappingDic = new Dictionary<Entity, Entity>();
             DataCollection = Datas;
+            SICollection = Datas.Where(o=>o is BlockReference blk && blk.AttributeCollection.Cast<AttributeReference>().Any(x => x.TextString == "SI")).ToList();
             Datas.ForEach(e =>
             {
                 if (e is BlockReference br)
@@ -88,6 +94,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             this.Database = db;
             this.globleBlockAttInfoDic = blockAttInfoDic;
             this.IsJF = isJF;
+            SIRule = (e) =>
+            {
+                return (e is BlockReference blk && blk.Name == "E-BFAS540") || SICollection.Contains(e);
+            }; 
         }
 
         /// <summary>

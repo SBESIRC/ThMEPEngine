@@ -14,7 +14,7 @@ using Linq2Acad;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
-    public  class ThRequiredElementVisitor : ThDistributionElementExtractionVisitor
+    public class ThRequiredElementVisitor : ThDistributionElementExtractionVisitor
     {
         private List<string> BlockNameSet = new List<string>() { "E-BFAS011", "E-BFAS010", "E-BFAS520", "E-BDB004", "E-BFAS630-3", "E-BFAS540", "E-BFAS621-2", "E-BFAS550", "E-BFAS510", "E-BFAS510-3", "E-BFAS520-3", "E-BFAS621-3", "E-BFAS731", "E-BFAS732", "E-BFAS522" };
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -36,8 +36,9 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override bool IsDistributionElement(Entity entity)
         {
-            string blockName = (entity as BlockReference).Name;
-            return BlockNameSet.Contains(blockName);
+            BlockReference blkref = entity as BlockReference;
+            return BlockNameSet.Contains(blkref.Name) ||
+                blkref.Id.GetAttributesInBlockReferenceEx().Any(o => o.Value == "SI");
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
