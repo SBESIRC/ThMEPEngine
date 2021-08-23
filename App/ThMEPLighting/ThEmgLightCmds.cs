@@ -142,7 +142,7 @@ namespace ThMEPLighting
                     //double scale = LayoutEmgLightEngine.getScale(getBlockS);
                     InsertLightService.InsertSprayBlock(layoutInfo, scale, blkName);
 
-                    InsertLightService.InsertCommentLine(commentList);
+                    InsertLightService.InsertRevcloud(commentList);
                 }
             }
         }

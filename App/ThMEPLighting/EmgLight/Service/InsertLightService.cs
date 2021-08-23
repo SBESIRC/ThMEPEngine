@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
-using AcHelper;
+﻿using AcHelper;
 using DotNetARX;
 using Linq2Acad;
-
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
 using ThMEPLighting.EmgLight.Common;
-using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -45,22 +42,24 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
-
-        public static void InsertCommentLine(List<Polyline> commentLine)
+        public static void InsertRevcloud(List<Polyline> commentLine)
         {
             using (var db = AcadDatabase.Active())
             {
-                foreach (var pl in commentLine)
+                var layerId = db.Database.CreateAILayer(EmgLightCommon.LayerComment, 1);
+                commentLine.ForEach(o =>
                 {
-                    //revcloud can only print to the current layer.
-                    //so it changes the active layer to the required layer, then changes back.
-                    //画云线。 云线只能画在当前图层。所以先转图层画完在转回来。
-                    var oriLayer = Active.Database.Clayer;
-
-                    pl.Layer = EmgLightCommon.LayerComment;
-                    var objId = db.ModelSpace.Add(pl);
-                    Active.Database.SetCurrentLayer(EmgLightCommon.LayerComment); 
-
+                    // 创建云线
+                    ObjectId revcloud = ObjectId.Null;
+                    var objId = db.ModelSpace.Add(o);
+                    void handler(object s, ObjectEventArgs e)
+                    {
+                        if (e.DBObject is Polyline polyline)
+                        {
+                            revcloud = e.DBObject.ObjectId;
+                        }
+                    }
+                    db.Database.ObjectAppended += handler;
 #if ACAD_ABOVE_2014
                     Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", objId, "_No");
 #else
@@ -74,8 +73,13 @@ namespace ThMEPLighting.EmgLight.Service
                        new TypedValue((int)LispDataType.Text, "_No"));
                     Active.Editor.AcedCmd(args);
 #endif
-                    Active.Database.Clayer = oriLayer;
-                }
+                    db.Database.ObjectAppended -= handler;
+
+                    // 设置运行属性
+                    var revcloudObj = db.Element<Entity>(revcloud, true);
+                    revcloudObj.LayerId = layerId;
+                    revcloudObj.ColorIndex = (int)ColorIndex.BYLAYER;
+                });
             }
         }
     }
