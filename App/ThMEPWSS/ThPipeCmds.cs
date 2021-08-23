@@ -32,29 +32,5 @@ namespace ThMEPWSS
                 ThApplyPipesEngine.Apply(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
             }
         }
-        [CommandMethod("TIANHUACAD", "THKJTQ2", CommandFlags.Modal)]
-        public static void THKJTQ2()
-        {
-            using (var cmd = new ThPipeExtractSpaceCmd())
-            {
-                cmd.Execute();
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THKJHZ", CommandFlags.Modal)]
-        public static void THKJHZ()
-        {
-            using (var cmd = new ThPipeDrawSpaceCmd())
-            {
-                cmd.Execute();
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THKJMC", CommandFlags.Modal)]
-        public static void THKJMC()
-        {
-            using (var cmd = new ThPipeDrawSpaceNameCmd())
-            {
-                cmd.Execute();
-            }
-        }
     }
 }

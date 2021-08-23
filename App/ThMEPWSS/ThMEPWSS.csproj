@@ -112,9 +112,6 @@
     <Compile Include="Command\ThHydrantProtectionRadiusCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
-    <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
-    <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
-    <Compile Include="Command\ThPipeExtractSpaceCmd.cs" />
     <Compile Include="Command\ThPipeInsertFloorFrameCmd.cs" />
     <Compile Include="Command\ThRainSystemDiagramCmd.cs" />
     <Compile Include="Command\ThSprinklerBlindAreaCmd.cs" />
