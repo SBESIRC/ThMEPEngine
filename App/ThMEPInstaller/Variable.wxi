@@ -7,9 +7,9 @@
   <!-- The manufacturer, for setup package publisher and folder info -->
   <?define Manufacturer = "天华AI研究中心" ?>
   <!-- The version number of this setup package-->
-  <?define Version = "1.4.9" ?>
+  <?define Version = "1.5.0" ?>
   <!-- Product code -->
-  <?define ProductCode = "34CCEBEF-586B-45C7-AB6A-DC9F9D854CDA" ?>
+  <?define ProductCode = "928733C8-15B0-48B4-8BE3-5346D072491C" ?>
   <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
   <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
   <!-- Autoloader path. -->
