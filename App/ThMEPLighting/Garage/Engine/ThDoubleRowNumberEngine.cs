@@ -43,42 +43,69 @@ namespace ThMEPLighting.Garage.Engine
 
             //获取一号线上所有的端口点
             var firstPorts = GetFirstLinePorts(FirstLightEdges.Select(o => o.Edge).ToList());
-            if(Ports.Count==0 || LineEdges.Count==0 || FirstLightEdges.Count==0)
+            if(LineEdges.Count==0 || FirstLightEdges.Count==0)
             {
                 return;
             }
-            Point3d firstStart;
+            Point3d firstStart= LineEdges[0].Edge.StartPoint;
             var nubmeredLightEdges = new List<ThLightEdge>();
             do
             {
                 if (FirstLightEdges.Where(o => o.IsDX).Count() == 0 )
                 {
                     break;
-                }                
-                if(LineEdges.Count>0 && Ports.Count>0)
+                }
+                #region ---------获取图的起点----------
+                if (LineEdges.Count>0)
                 {
-                    var res = FindPropertyStart(LineEdges, Ports[0]);
-                    if(res!=null)
+                    //优先获取具有端口点的边
+                    if(Ports.Count > 0)
                     {
-                        firstStart = GetFirstStart(firstPorts, res.Value);
+                        var res = FindPropertyStart(LineEdges, Ports[0]);
+                        if (res != null)
+                        {
+                            firstStart = GetFirstStart(firstPorts, res.Value);
+                        }
+                        else if (firstPorts.Count > 0)
+                        {
+                            firstStart = firstPorts[0];
+                        }
+                        else
+                        {
+                            firstStart = FirstLightEdges[0].Edge.StartPoint;
+                        }
                     }
                     else if(firstPorts.Count>0)
                     {
-                        firstStart=firstPorts[0];
-                    }
-                    else
-                    {
-                        firstStart = FirstLightEdges[0].Edge.StartPoint;
+                        var centerLinePorts = new List<Point3d>();
+                        LineEdges.ForEach(l =>
+                        {
+                            centerLinePorts.Add(l.Edge.StartPoint);
+                            centerLinePorts.Add(l.Edge.EndPoint);
+                        });
+                        var centerPort = GetCenterPort(centerLinePorts, firstPorts[0]); //获取1号边端口点对应的中心点
+                        var res = FindPropertyStart(LineEdges, centerPort); //获取中心线上最优的起点
+                        if(res != null)
+                        {
+                            firstStart = GetFirstStart(firstPorts, res.Value); //获取中心线上最优的起点对应的1号线的起点
+                        }
+                        else
+                        {
+                            firstStart = firstPorts[0];
+                        }
                     }
                 }
                 else if(firstPorts.Count>0)
                 {
+                    //当中心线遍历完了，还剩余1号边的话，继续遍历
                     firstStart = firstPorts[0];
                 }
                 else 
                 {
-                    firstStart = FirstLightEdges[0].Edge.StartPoint;
+                    //表示中心线全部遍历完
+                    break;
                 }
+                #endregion
                 //为1号边建图
                 var firstLightGraph = ThLightGraphService.Build(FirstLightEdges, firstStart);
                 if(firstLightGraph==null)
@@ -131,6 +158,19 @@ namespace ThMEPLighting.Garage.Engine
             {
                 var dis = Math.Abs(pt.DistanceTo(centerStart) - ArrangeParameter.RacywaySpace / 2.0);
                 if(dis<=20.0)
+                {
+                    return pt;
+                }
+            }
+            return res.First();
+        }
+        private Point3d GetCenterPort(List<Point3d> centerPorts, Point3d firstPort)
+        {
+            var res = centerPorts.OrderBy(o => o.DistanceTo(firstPort));
+            foreach (var pt in res)
+            {
+                var dis = Math.Abs(pt.DistanceTo(firstPort) - ArrangeParameter.RacywaySpace / 2.0);
+                if (dis <= 20.0)
                 {
                     return pt;
                 }

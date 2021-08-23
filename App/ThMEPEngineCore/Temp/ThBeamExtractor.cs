@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.Temp
         {
             if(UseDb3Engine)
             {
-                var engine = new ThBeamRecognitionEngine();
+                var engine = new ThDB3BeamRecognitionEngine();
                 engine.Recognize(database, pts);
                 Beams = engine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             }

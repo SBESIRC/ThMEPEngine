@@ -4,21 +4,21 @@ using DotNetARX;
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.Common;
-using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
 {
     public class ThCreateLightToDatabaseService
     {
-        private ObjectIdList ObjIds { get; set; }
+        public ObjectIdList ObjIds { get; private set; }
         private ThRegionBorder RegionBorder { get; set; }
         private ThRacewayParameter RacewayParameter { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
-        private ThCreateLightToDatabaseService(
+        public ThCreateLightToDatabaseService(
             ThRegionBorder regionBorder, 
             ThRacewayParameter racewayParameter,
             ThLightArrangeParameter arrangeParameter)
@@ -28,21 +28,13 @@ namespace ThMEPLighting.Garage.Service
             ArrangeParameter = arrangeParameter;
             RacewayParameter = racewayParameter;
         }
-        public static ObjectIdList Create(
-            ThRegionBorder regionBorder,
-            ThRacewayParameter racewayParameter,
-            ThLightArrangeParameter arrangeParameter)
-        {
-            var instance = new ThCreateLightToDatabaseService(
-                regionBorder, racewayParameter, arrangeParameter);
-            instance.Create();
-            return instance.ObjIds;
-        }
-        private void Create()
+        
+        public void Create()
         {
             ObjIds.AddRange(CreateGroup());
             ObjIds.AddRange(CreateLightAndNumber());
         }
+
         private ObjectIdList CreateGroup()
         {
             using (var acadDb = AcadDatabase.Active())

@@ -10,6 +10,7 @@ using DotNetARX;
 using ThMEPElectrical.Model;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Assistant
 {
@@ -128,7 +129,7 @@ namespace ThMEPElectrical.Assistant
         /// 组显示数据
         /// </summary>
         /// <param name="inputProfileDatas"></param>
-        public static void DrawGroup(List<PlaceInputProfileData> inputProfileDatas)
+        public static void DrawGroup(List<PlaceInputProfileData> inputProfileDatas, ThMEPOriginTransformer originTransformer)
         {
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
             if (!debugSwitch)
@@ -136,7 +137,7 @@ namespace ThMEPElectrical.Assistant
 
             foreach (var singleProfileData in inputProfileDatas)
             {
-                DrawSingleInputProfileData(singleProfileData);
+                DrawSingleInputProfileData(singleProfileData,originTransformer);
             }
         }
 
@@ -213,13 +214,29 @@ namespace ThMEPElectrical.Assistant
         /// 创建组
         /// </summary>
         /// <param name="inputProfileData"></param>
-        public static void DrawSingleInputProfileData(PlaceInputProfileData inputProfileData)
+        public static void DrawSingleInputProfileData(PlaceInputProfileData inputProfileData, ThMEPOriginTransformer originTransformer)
         {
             var mainBeam = inputProfileData.MainBeamOuterProfile;
             var secondBeams = inputProfileData.SecondBeamProfiles;
 
-            var mainIds = DrawProfileDebug(new List<Curve>() { mainBeam }, "mainBeam", Color.FromRgb(255, 0, 0));
-            var secondBeamIds = DrawProfileDebug(secondBeams.Polylines2Curves(), "secondBeams", Color.FromRgb(0, 255, 0));
+            var tempMainLine = (Curve)mainBeam.Clone();
+            if (null != originTransformer && null != mainBeam) 
+            {
+                originTransformer.Reset(tempMainLine);
+            }
+            var mainIds = DrawProfileDebug(new List<Curve>() { tempMainLine }, "mainBeam", Color.FromRgb(255, 0, 0));
+            var tempLines = secondBeams.Polylines2Curves();
+            var secondLines = new List<Curve>();
+            if (null != secondBeams && secondBeams.Count>0 && null != originTransformer) 
+            {
+                secondBeams.ForEach(c => 
+                {
+                    var tempCopy = (Curve)c.Clone();
+                    originTransformer.Reset(tempCopy);
+                    secondLines.Add(tempCopy);
+                });
+            }
+            var secondBeamIds = DrawProfileDebug(secondLines, "secondBeams", Color.FromRgb(0, 255, 0));
 
             var totalIds = new ObjectIdList();
             totalIds.AddRange(mainIds);

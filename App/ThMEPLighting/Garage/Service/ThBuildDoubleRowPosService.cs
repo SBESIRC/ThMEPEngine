@@ -9,13 +9,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
-    public class ThBuildDoubleRowPosService
+    public abstract class ThBuildLightPosService
     {
-        private List<ThLightEdge> Edges { get; set; }
-        private List<Tuple<Point3d, Point3d>> SplitPts { get; set; }
-        private ThLightArrangeParameter ArrangeParameter { get; set; }
-        private ThQueryLightBlockService QueryLightBlockService { get; set; }
-        private ThBuildDoubleRowPosService(
+        protected List<ThLightEdge> Edges { get; set; }
+        protected List<Tuple<Point3d, Point3d>> SplitPts { get; set; }
+        protected ThLightArrangeParameter ArrangeParameter { get; set; }
+        protected ThQueryLightBlockService QueryLightBlockService { get; set; }
+        public ThBuildLightPosService(
             List<ThLightEdge> edges,
             List<Tuple<Point3d, Point3d>> splitPts,
             ThLightArrangeParameter arrangeParameter,
@@ -26,16 +26,45 @@ namespace ThMEPLighting.Garage.Service
             ArrangeParameter = arrangeParameter;
             QueryLightBlockService = queryLightBlockService;
         }
-        public static void Build(
+        public abstract void Build();
+        protected virtual void BuildByCalculation(ThLineSplitParameter splitParameter)
+        {
+            var installPoints = ThDistributeLightService.Distribute(splitParameter);
+            DistributePoints(installPoints);
+        }
+        protected virtual void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
+        {
+            var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
+            var points = QueryLightBlockService.Query(line);
+            points = points.OrderBy(o => o.DistanceTo(splitParameter.LineSp)).ToList();
+            DistributePoints(points);
+        }
+        protected virtual void DistributePoints(List<Point3d> installPoints)
+        {
+            foreach (var pt in installPoints)
+            {
+                foreach (var lightEdge in Edges)
+                {
+                    if (ThGeometryTool.IsPointInLine(lightEdge.Edge.StartPoint, lightEdge.Edge.EndPoint, pt))
+                    {
+                        lightEdge.LightNodes.Add(new ThLightNode { Position = pt });
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    public class ThBuildDoubleRowPosService : ThBuildLightPosService
+    {
+        public ThBuildDoubleRowPosService(
             List<ThLightEdge> edges,
             List<Tuple<Point3d, Point3d>> splitPts,
             ThLightArrangeParameter arrangeParameter,
-            ThQueryLightBlockService queryLightBlockService)
+            ThQueryLightBlockService queryLightBlockService) 
+            : base(edges, splitPts, arrangeParameter, queryLightBlockService)
         {
-            var instance = new ThBuildDoubleRowPosService(edges, splitPts, arrangeParameter, queryLightBlockService);
-            instance.Build();
         }
-        private void Build()
+        public override void Build()
         {
             SplitPts.ForEach(o =>
             {
@@ -55,32 +84,6 @@ namespace ThMEPLighting.Garage.Service
                     BuildByExtractFromCad(splitParameter);
                 }
             });
-        }
-        private void BuildByCalculation(ThLineSplitParameter splitParameter)
-        {
-            var installPoints = ThDistributeLightService.Distribute(splitParameter);
-            DistributePoints(installPoints);
-        }
-        private void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
-        {
-            var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
-            var points = QueryLightBlockService.Query(line);
-            points=points.OrderBy(o => o.DistanceTo(splitParameter.LineSp)).ToList();
-            DistributePoints(points);
-        }
-        private void DistributePoints(List<Point3d> installPoints)
-        {
-            foreach (var pt in installPoints)
-            {
-                foreach (var lightEdge in Edges)
-                {
-                    if (ThGeometryTool.IsPointInLine(lightEdge.Edge.StartPoint, lightEdge.Edge.EndPoint, pt))
-                    {
-                        lightEdge.LightNodes.Add(new ThLightNode { Position = pt });
-                        break;
-                    }
-                }
-            }
         }
     }
 }

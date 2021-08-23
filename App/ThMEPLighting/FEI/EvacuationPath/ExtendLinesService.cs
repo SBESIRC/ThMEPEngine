@@ -17,6 +17,10 @@ namespace ThMEPLighting.FEI.EvacuationPath
         double mergeAngle = Math.PI / 6;
         public List<ExtendLineModel> CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
         {
+            if (enterBlocks.Count <= 0)
+            {
+                return new List<ExtendLineModel>();
+            }
             List<Line> allLanes = new List<Line>(xLanes.SelectMany(x => x.Select(y => y)));
             allLanes.AddRange(yLanes.SelectMany(x => x.Select(y => y)));
 

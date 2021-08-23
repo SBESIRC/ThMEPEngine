@@ -1,14 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.Model;
-using ThCADCore.NTS;
 using ThMEPElectrical.Assistant;
-using NFox.Cad;
-using ThMEPElectrical.Geometry;
+using ThMEPElectrical.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business
 {
@@ -20,18 +14,20 @@ namespace ThMEPElectrical.Business
         private List<Polyline> m_gridPolys; // 原始的轴网线
         private List<Polyline> m_holes; // 内部洞相关数据
         private List<Polyline> m_swallColumnPlys; // 剪力墙柱子数据
+        ThMEPOriginTransformer m_originTransformer;
 
-        public GridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys)
+        public GridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys, ThMEPOriginTransformer originTransformer)
             : base(wallPoly)
         {
             m_gridPolys = gridPolys;
             m_holes = holes;
             m_swallColumnPlys = swallColumnPlys;
+            m_originTransformer = originTransformer;
         }
 
-        public static List<PlaceInputProfileData> MakeGridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys)
+        public static List<PlaceInputProfileData> MakeGridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys, ThMEPOriginTransformer originTransformer)
         {
-            var gridDetectionCalculator = new GridDetectionCalculator(wallPoly, gridPolys, holes, swallColumnPlys);
+            var gridDetectionCalculator = new GridDetectionCalculator(wallPoly, gridPolys, holes, swallColumnPlys, originTransformer);
             gridDetectionCalculator.Do();
 
             return gridDetectionCalculator.RegionBeamSpanProfileData;
@@ -53,7 +49,7 @@ namespace ThMEPElectrical.Business
             CalculateDetectionRegionWithHoles(detectRegions, m_swallColumnPlys);
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(detectRegions);
-            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
+            DrawUtils.DrawGroup(RegionBeamSpanProfileData, m_originTransformer);
         }
 
 

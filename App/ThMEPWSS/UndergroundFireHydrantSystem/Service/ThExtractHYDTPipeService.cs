@@ -31,7 +31,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var lines = ThDrainageSystemServiceGeoCollector.GetLines(
                     acadDatabase.ModelSpace.OfType<Entity>().ToList(),
-                    layer => layer is "W-FRPT-1-HYDT-PIPE" or "W-FRPT-HYDT-PIPE" || layer.Contains("W-FRPT-HYDT-PIPE"));
+                    layer => layer.Contains("W-FRPT") && 
+                             layer.Contains("HYDT") && 
+                             layer.Contains("PIPE"));
                 return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())
                     (polygon.ToRect().ToPolygon()).
                     SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
@@ -457,7 +459,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName()));
+                   .Where(o => IsValve(o.GetEffectiveName()));
+                //.Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName()));
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 DBobj = spatialIndex.SelectCrossingPolygon(polygon);

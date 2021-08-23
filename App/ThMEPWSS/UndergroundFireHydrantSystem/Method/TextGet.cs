@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System;
+using System.Linq;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
@@ -24,7 +25,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 var textPt1 = new Point3d(pt4.X - textWidth, pt4.Y - floorHeight * 0.17, 0);
                 var textPt2 = new Point3d(pt4.X, pt4.Y - floorHeight * 0.17, 0);
                 var textLine = ThTextSet.ThTextLine(textPt1, textPt2);
-                fireHydrantSysOut.TextLine.Add(textLine);
+                if(pipeNumber1.Trim().Count()!=0)
+                {
+                    fireHydrantSysOut.TextLine.Add(textLine);
+                }
+                
 
                 var text = ThTextSet.ThText(textPt1, pipeNumber1.Trim());
                 fireHydrantSysOut.TextList.Add(text);

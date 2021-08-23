@@ -104,7 +104,7 @@ namespace ThMEPLighting.Garage
                     result.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.Normalize(border);
+                        var newBorder = ThMEPFrameService.NormalizeEx(border);
                         if (newBorder.Area > 0)
                         {
                             var dbOBjs = acdb.ModelSpace

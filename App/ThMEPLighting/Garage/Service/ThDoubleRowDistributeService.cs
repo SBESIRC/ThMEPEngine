@@ -31,6 +31,8 @@ namespace ThMEPLighting.Garage.Service
             ThWireOffsetDataService wireOffsetDataService,
             ThQueryLightBlockService queryLightBlockService)
         {
+            Edges = new List<ThLightEdge>();
+            DistributedEdges = new List<ThLightEdge>();
             LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
             WireOffsetDataService = wireOffsetDataService;
@@ -59,7 +61,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private void BuildDistributedEdges(ThLinkPath singleLinkPath)
         {
-            var basePt = singleLinkPath.Start;
+            var start = singleLinkPath.Start;
             for (int i = 0; i < singleLinkPath.Path.Count; i++)
             {
                 var currentEdge = singleLinkPath.Path[i];
@@ -93,11 +95,13 @@ namespace ThMEPLighting.Garage.Service
                 //建造路线上的灯(计算或从图纸获取)
                 var maxPts = edges.GetMaxPts();
                 //分析在线路上无需布灯的区域，返回可以布点的区域
-                var distributeInstance = new ThDoubleRowDistributeExService(maxPts, ArrangeParameter, Edges, DistributedEdges, WireOffsetDataService);
+                var distributeInstance = new ThAdjustDoubleRowDistributePosService(maxPts, ArrangeParameter, Edges, DistributedEdges, WireOffsetDataService);
                 var splitPts= distributeInstance.Distribute();
-                splitPts = RepairDir(splitPts, basePt);
-                basePt = basePt.DistanceTo(maxPts.Item2)> basePt.DistanceTo(maxPts.Item1)?maxPts.Item2:maxPts.Item1;
-                ThBuildDoubleRowPosService.Build(edges, splitPts,ArrangeParameter, QueryLightBlockService);
+                splitPts = RepairDir(splitPts, start);
+                start = start.DistanceTo(maxPts.Item2)> start.DistanceTo(maxPts.Item1)?maxPts.Item2:maxPts.Item1;
+                var doubleRowService = new ThBuildDoubleRowPosService(
+                    edges, splitPts, ArrangeParameter, QueryLightBlockService);
+                doubleRowService.Build();
                 DistributedEdges.AddRange(edges);
             }
         }

@@ -549,10 +549,10 @@ namespace ThMEPElectrical.Business.MainBeam
             var leftLine = placeRectInfo.LeftLine;
             var bottomLine = placeRectInfo.BottomLine;
 
-            var rectArea = leftLine.Length * bottomLine.Length;
+            //var rectArea = leftLine.Length * bottomLine.Length;
 
             // 一个可以布置完的
-            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea
+            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && placeRectInfo.srcPolyline.Area < m_parameter.ProtectArea
                 && GeomUtils.IsValidSinglePlace(leftLine.Length, bottomLine.Length, m_parameter.ProtectRadius))
             {
                 return GeomUtils.CalculateCentroidFromPoly(srcTransPoly);

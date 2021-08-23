@@ -89,7 +89,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             CalcExitLayout();
 
             //拐角处的吊装判断
-            CalcMainCornerHost();
+            CalcMainCornerHost(3500);
 
             RemoveCornerHost();
 
@@ -274,13 +274,27 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         var dot = exitDir.DotProduct(node.outDirection);
                         if (Math.Abs(dot) > 0.3)
                             continue;
-                        int count = 0;
-                        for (int i = 0; i < routePts.Count - 1; i++) 
+                        var interPoints = new List<Point3d>();
+                        for (int i = 0; i < routePts.Count - 1; i++)
                         {
-                            if (PointInLaneLine(routePts[i]))
-                                count += 1;
+                            //if (PointInLaneLine(routePts[i],1000))
+                            //count += 1;
+                            var tempLine = new Line(routePts[i], routePts[i + 1]);
+                            foreach (var line in otherLines)
+                            {
+                                var prjPt = EmgPilotLampUtil.PointToLine(tempLine.StartPoint, line);
+                                var dis = prjPt.DistanceTo(line.StartPoint) + prjPt.DistanceTo(line.EndPoint);
+                                var dis2 = prjPt.DistanceTo(tempLine.StartPoint) + prjPt.DistanceTo(tempLine.EndPoint);
+                                if (dis > (line.Length + 20))
+                                    continue;
+                                if (dis2 > (tempLine.Length + 20))
+                                    continue;
+                                if (interPoints.Any(c => c.DistanceTo(prjPt) < 100))
+                                    continue;
+                                interPoints.Add(prjPt);
+                            }
                         }
-                        if (count > 1)
+                        if (interPoints.Count > 1)
                             continue;
                         var route = EmgPilotLampUtil.InitRouteByPoints(_targetInfo.allNodes,routePts);
 
@@ -292,7 +306,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <summary>
         /// 计算主要疏散路径，壁装拐角处的吊装判断和生成
         /// </summary>
-        private void CalcMainCornerHost()
+        private void CalcMainCornerHost(double minHostLightDis=2500)
         {
             if (null == _wallGraphNodes || _wallGraphNodes.Count < 1)
                 return;
@@ -361,7 +375,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     continue;
                 var moveVect = GetHostMoveVector(item.Key.graphNode);
                 createPoint = item.Key.graphNode.nodePoint + moveVect;
-                if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(c.pointInOutSide)<2000 && c.linePoint.DistanceTo(createPoint) < 2500))
+                if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(c.pointInOutSide)< minHostLightDis && c.linePoint.DistanceTo(createPoint) < minHostLightDis))
                     continue;
                 var light = new LightLayout(item.Key.nodePointInLine, createPoint, null,item.Value,item.Key.outDirection,item.Value,item.Key.graphNode, true);
                 light.isTwoSide = isTwoSide;

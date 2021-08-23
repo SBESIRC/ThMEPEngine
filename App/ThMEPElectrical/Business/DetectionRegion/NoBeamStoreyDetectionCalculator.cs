@@ -1,11 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Business
 {
@@ -16,6 +13,7 @@ namespace ThMEPElectrical.Business
     {
         private List<Polyline> m_gridPolys;
         private List<Polyline> m_swallColumns;
+        private ThMEPOriginTransformer m_originTransformer;
 
         /// <summary>
         /// 无梁楼盖处理
@@ -24,14 +22,14 @@ namespace ThMEPElectrical.Business
         /// <param name="columns"></param>
         /// <param name="wallProfile"></param>
         /// <returns></returns>
-        public static List<PlaceInputProfileData> MakeNoBeamStoreyDetectionCalculator(List<Polyline> gridPolys, List<Polyline> swallColumns, Polyline wallProfile)
+        public static List<PlaceInputProfileData> MakeNoBeamStoreyDetectionCalculator(List<Polyline> gridPolys, List<Polyline> swallColumns, Polyline wallProfile, ThMEPOriginTransformer originTransformer)
         {
-            var noBeamStoreyCalculator = new NoBeamStoreyDetectionCalculator(gridPolys, swallColumns, wallProfile);
+            var noBeamStoreyCalculator = new NoBeamStoreyDetectionCalculator(gridPolys, swallColumns, wallProfile,originTransformer);
             noBeamStoreyCalculator.Do();
             return noBeamStoreyCalculator.RegionBeamSpanProfileData;
         }
 
-        public NoBeamStoreyDetectionCalculator(List<Polyline> gridPolys, List<Polyline> swallColumns, Polyline wallProfile)
+        public NoBeamStoreyDetectionCalculator(List<Polyline> gridPolys, List<Polyline> swallColumns, Polyline wallProfile, ThMEPOriginTransformer originTransformer)
             : base(wallProfile)
         {
             m_gridPolys = gridPolys;
@@ -51,7 +49,7 @@ namespace ThMEPElectrical.Business
             CalculateDetectionRegionWithHoles(detectRegions, m_swallColumns);
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(detectRegions);
-            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
+            DrawUtils.DrawGroup(RegionBeamSpanProfileData,m_originTransformer);
         }
     }
 }

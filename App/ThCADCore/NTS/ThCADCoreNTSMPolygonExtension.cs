@@ -76,6 +76,10 @@ namespace ThCADCore.NTS
 
         public static Polygon ToNTSPolygon(this MPolygon mPolygon)
         {
+            if(mPolygon==null || mPolygon.Area<=1e-6)
+            {
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+            }
             Polyline shell = null;
             List<Polyline> holes = new List<Polyline>();
             for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)

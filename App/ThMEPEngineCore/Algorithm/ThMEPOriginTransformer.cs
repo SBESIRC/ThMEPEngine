@@ -9,7 +9,7 @@ namespace ThMEPEngineCore.Algorithm
 {
     public class ThMEPOriginTransformer
     {
-        private Matrix3d Displacement { get; set; }
+        public Matrix3d Displacement { get; set; }
 
         public ThMEPOriginTransformer(Point3d center)
         {
@@ -75,7 +75,6 @@ namespace ThMEPEngineCore.Algorithm
 
         private void TransformBy(ref Point3d point, Matrix3d matrix)
         {
-
             point = point.TransformBy(matrix);
         }
 

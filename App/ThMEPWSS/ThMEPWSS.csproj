@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="Command\ThPipeDrawCmd.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />

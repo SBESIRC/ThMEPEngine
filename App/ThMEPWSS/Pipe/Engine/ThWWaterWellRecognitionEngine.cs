@@ -47,7 +47,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var name = reference.GetEffectiveName();
                 foreach (string label in ConfigInfo.BlackList)
                 {
-                    if (name.Contains(label))
+                    if (name.Contains(label) && label != "")
                     {
                         return false;
                     }

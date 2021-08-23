@@ -42,7 +42,6 @@ namespace ThMEPWSS.Command
                 Vector3d xDir = (endPt - transPt).GetNormal();
                 Vector3d yDir = xDir.GetPerpendicularVector().GetNormal();
                 Vector3d zDir = Vector3d.ZAxis;
-                var oringinPt = transPt.TransformBy(matrix);
 
                 matrix = new Matrix3d(new double[]{
                     xDir.X, yDir.X, zDir.X, transPt.X,
@@ -69,13 +68,7 @@ namespace ThMEPWSS.Command
             var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
 
             //获取柱
-            //columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            //var objs = new DBObjectCollection();
-            //columns.ForEach(x => objs.Add(x));
-            //ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            //columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-            var columnBuilder = new ThColumnBuilderEngine();
-            columns = columnBuilder.Build(acdb.Database, polyline.Vertices()).Select(o => o.Outline as Polyline).ToList();
+            columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             var objs = new DBObjectCollection();
             columns.ForEach(x => objs.Add(x));
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);

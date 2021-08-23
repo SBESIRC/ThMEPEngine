@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Temp
         {
             if (UseDb3Engine)
             {
-                var beamEngine = new ThBeamRecognitionEngine();
+                var beamEngine = new ThDB3BeamRecognitionEngine();
                 beamEngine.Recognize(database, pts);
                 Beams=beamEngine.Elements.Cast<ThIfcBeam>().ToList();
             }

@@ -8,8 +8,8 @@
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
              xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             mc:Ignorable="d" 
-             Width="180" Height="540" MinWidth="180" MinHeight="550" Title="冲洗点位" ResizeMode="NoResize">
+             mc:Ignorable="d" SizeToContent="Height"
+             Width="180" MinWidth="180" Title="冲洗点位" ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <converters:ArrangePositionBooleanConverter x:Key="apConverter"/>
@@ -75,7 +75,7 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="3">
+    <Grid Margin="3,3,3,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
@@ -85,7 +85,7 @@
             <RowDefinition Height="90"></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
             <RowDefinition Height="20"></RowDefinition>
-            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -223,7 +223,7 @@
                       IsChecked="{Binding Parameter.OnlyLayoutOnColumn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
             </CheckBox>
         </StackPanel>
-        <StackPanel Grid.Row="8" VerticalAlignment="Center">
+        <StackPanel Grid.Row="8" VerticalAlignment="Center" Visibility="Collapsed">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"></RowDefinition>

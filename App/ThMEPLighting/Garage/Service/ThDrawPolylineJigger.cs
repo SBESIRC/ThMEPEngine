@@ -84,7 +84,8 @@ namespace ThMEPLighting.Garage.Service
 
         protected override SamplerStatus Sampler(JigPrompts prompts)
         {
-            JigPromptPointOptions prOptions1 = new JigPromptPointOptions("\n请指定下一点或[确定(Enter)]");
+            var prOptions1 = new JigPromptPointOptions("\n请指定下一点或[确定(Enter)]");
+            prOptions1.UseBasePoint = false;
             if(mAllVertexes.Count==0)
             {
                 prOptions1.UserInputControls =
@@ -97,9 +98,10 @@ namespace ThMEPLighting.Garage.Service
                 prOptions1.UserInputControls =
                 UserInputControls.NullResponseAccepted |
                 UserInputControls.Accept3dCoordinates |
-                UserInputControls.GovernedByOrthoMode |
-                UserInputControls.GovernedByUCSDetect;
+                UserInputControls.GovernedByUCSDetect |
+                UserInputControls.GovernedByOrthoMode;
             }
+            
             PromptPointResult prResult1 = prompts.AcquirePoint(prOptions1);
             if (prResult1.Status == PromptStatus.Cancel || 
                 prResult1.Status == PromptStatus.Error)
@@ -107,11 +109,11 @@ namespace ThMEPLighting.Garage.Service
                 return SamplerStatus.Cancel;
             }
             Point3d tempPt = prResult1.Value.TransformBy(UCS.Inverse());
-            if (tempPt.DistanceTo(mLastVertex) <= 1.0)
-            {
-                return SamplerStatus.NoChange;
-            }
             mLastVertex = tempPt;
+            //if (tempPt.DistanceTo(mLastVertex) <= 1.0)
+            //{
+            //    return SamplerStatus.NoChange;
+            //}
             return SamplerStatus.OK;
         }
     }

@@ -22,7 +22,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
 
             //寻找起点
-            var startPt = CreateDistancePoint(polyline, blockPt);
+            var startPt = CreateDistancePoint(polyline, holes, blockPt);
 
             //创建延伸线
             //----简单的一条延伸线且不穿洞
@@ -106,27 +106,32 @@ namespace ThMEPLighting.FEI.EvacuationPath
         }
 
         /// <summary>
-        /// 计算起始点离外框线大于800距离
+        /// 计算起始点离外框线大400距离
         /// </summary>
         /// <param name="frame"></param>
         /// <param name="blockPt"></param>
         /// <returns></returns>
-        private Point3d CreateDistancePoint(Polyline frame, Point3d blockPt)
+        private Point3d CreateDistancePoint(Polyline frame, List<Polyline> holes, Point3d blockPt)
         {
             Point3d resPt = blockPt;
-            int i = 0;
-            while (i <= 4)
+            List<Polyline> avoidPolys = new List<Polyline>(holes);
+            avoidPolys.Add(frame);
+            foreach (var poly in avoidPolys)
             {
-                i++;
-                var closetPt = frame.GetClosestPointTo(resPt, false);
-                var ptDistance = resPt.DistanceTo(closetPt);
-                if (ptDistance >= distance)
+                int i = 0;
+                while (i <= 4)
                 {
-                    break;
-                }
+                    i++;
+                    var closetPt = poly.GetClosestPointTo(resPt, false);
+                    var ptDistance = resPt.DistanceTo(closetPt);
+                    if (ptDistance >= distance)
+                    {
+                        break;
+                    }
 
-                var moveDir = (resPt - closetPt).GetNormal();
-                resPt = resPt + moveDir * (distance - ptDistance);
+                    var moveDir = (resPt - closetPt).GetNormal();
+                    resPt = resPt + moveDir * (distance - ptDistance);
+                }
             }
 
             return resPt;

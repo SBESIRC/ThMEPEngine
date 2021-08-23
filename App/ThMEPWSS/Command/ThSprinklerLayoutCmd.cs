@@ -76,7 +76,7 @@ namespace ThMEPWSS.Command
                     //获取构建信息
                     var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
                     ThSprinklerLayoutCmdUtils.GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
-
+                    
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
                     holes.ForEach(x => x.TransformBy(matrix.Inverse()));

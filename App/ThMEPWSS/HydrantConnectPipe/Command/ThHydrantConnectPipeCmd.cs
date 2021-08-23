@@ -94,6 +94,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var stairsRooms = ThHydrantDataManager.GetStairsRooms(range);//获取楼梯间
                     var structureCols = ThHydrantDataManager.GetStructuralCols(range);//获取结构柱
                     var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
+                    var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
                     var buildRooms = ThHydrantDataManager.GetBuildRoom(range);//获取建筑房间
 
@@ -139,36 +140,40 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     }
 
                     var brLines = new List<ThHydrantBranchLine>();
-                    foreach (var hydrantPipe in hydrantPipes)
+                    foreach (var hydrant in hydrants)
                     {
-                        bool isOnLine = false;
-                        foreach (var l in loopLines)
+                        if (ThHydrantConnectPipeUtils.HydrantIsContainPipe(hydrant, hydrantPipes))
                         {
-                            if (l.PointOnLine(hydrantPipe.PipePosition, false, 50))
+                            bool isOnLine = false;
+                            foreach (var l in loopLines)
                             {
-                                isOnLine = true;
-                                break;
+                                if (l.PointOnLine(hydrant.FireHydrantPipe.PipePosition, false, 50))
+                                {
+                                    isOnLine = true;
+                                    break;
+                                }
+                            }
+                            if (isOnLine)
+                            {
+                                continue;
+                            }
+
+                            //创建路径
+                            pathService.SetStartPoint(hydrant.FireHydrantPipe.PipePosition);//设置立管点为起始点
+                            var path = pathService.CreateHydrantPath();
+                            if (path != null)
+                            {
+                                var brLine = ThHydrantBranchLine.Create(path);
+                                brLines.Add(brLine);
+
+                                var objcets = path.BufferPL(200)[0];
+                                var obb = objcets as Polyline;
+                                pathService.AddObstacle(obb);
+                                path.Dispose();
                             }
                         }
-                        if (isOnLine)
-                        {
-                            continue;
-                        }
-
-                        //创建路径
-                        pathService.SetStartPoint(hydrantPipe.PipePosition);//设置立管点为起始点
-                        var path = pathService.CreateHydrantPath();
-                        if (path != null)
-                        {
-                            var brLine = ThHydrantBranchLine.Create(path);
-                            brLines.Add(brLine);
-
-                            var objcets = path.BufferPL(200)[0];
-                            var obb = objcets as Polyline;
-                            pathService.AddObstacle(obb);
-                            path.Dispose();
-                        }
                     }
+
                     foreach (var brLine in brLines)
                     {
                         brLine.Draw(database);

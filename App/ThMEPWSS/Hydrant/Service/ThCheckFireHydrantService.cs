@@ -166,7 +166,7 @@ namespace ThMEPWSS.Hydrant.Service
                     var circle = new Circle(o.Item2, Vector3d.ZAxis, 200.0);
                     circle.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
                     ents.Add(circle);
-                    ents.CreateGroup(acadDb.Database, colorIndex++);
+                    ents.CreateGroup(acadDb.Database, (colorIndex++)%256);
                 });
             }
         }

@@ -11,6 +11,19 @@ panels:
           - text: "专业切换"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlPRECONDITION"
+    name: "PRECONDITION"
+    title: "前置输入"
+    items:
+        - text: "楼层定义"
+          attributes: { "IsVisible": false, "IsEnabled": false }
+        - text: "提车道中心线"
+          attributes: { "IsVisible": false, "IsEnabled": false }
+        - text: "提取空间"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "空间拾取"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWGROUNDPLAN"
     name: "WGROUNDPLAN"
     title: "地上平面图"
@@ -95,15 +108,6 @@ panels:
           - text: "整体修改"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlEPRECONDITION"
-    name: "EPRECONDITION"
-    title: "前置输入"
-    items:
-        - text: "楼层定义"
-          attributes: { "IsVisible": true, "IsEnabled": true }
-        - text: "提车道中心线"
-          attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEAFAS"
     name: "EAFAS"
     title: "火灾报警系统"

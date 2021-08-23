@@ -1734,6 +1734,12 @@ namespace ThMEPWSS.Assistant
         {
             return TrySelectRect()?.ToPoint3dCollection();
         }
+        public static Point3dCollection TrySelectRangeEx()
+        {
+            var range = ThMEPWSS.Common.Utils.SelectAreas();
+            if (range.Count == 0) return null;
+            return range;
+        }
         public static Tuple<Point3d, Point3d> TrySelectRect()
         {
             var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");

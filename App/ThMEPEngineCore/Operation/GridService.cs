@@ -1,12 +1,13 @@
 ﻿using System;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using AcHelper;
+using ThMEPEngineCore.Diagnostics;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Operation
 {
@@ -23,34 +24,38 @@ namespace ThMEPEngineCore.Operation
         /// <param name="yLength"></param>
         public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, Matrix3d transMatrix, double spacingValue)
         {
-            minSpace = spacingValue;
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(colums.ToCollection());
+            var useCols = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
-            List<Point3d> points = GetColumCenter(colums);
+            minSpace = spacingValue;
+            List<Point3d> points = GetColumCenter(useCols);
             Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(Vector3d.XAxis);
 
             var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
             var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
-#if DEBUG
-            string GridLineLayer = "AD-Gird";     //轴网线图层
-            using (AcadDatabase acdb = AcadDatabase.Active())
+
+            if (ThMEPDebugService.IsEnabled())
             {
-                LayerTools.AddLayer(acdb.Database, GridLineLayer);
-                foreach (var fGird in firGrids.Value)
+                string GridLineLayer = "AD-Grid";
+                using (AcadDatabase acdb = AcadDatabase.Active())
                 {
-                    var rotateGrid = fGird.Clone() as Polyline;
-                    rotateGrid.TransformBy(transMatrix);
-                    rotateGrid.Layer = GridLineLayer;
-                    acdb.ModelSpace.Add(rotateGrid);
-                }
-                foreach (var sGird in secGrids.Value)
-                {
-                    var rotateGrid = sGird.Clone() as Polyline;
-                    rotateGrid.TransformBy(transMatrix);
-                    rotateGrid.Layer = GridLineLayer;
-                    acdb.ModelSpace.Add(rotateGrid);
+                    LayerTools.AddLayer(acdb.Database, GridLineLayer);
+                    foreach (var fGird in firGrids.Value)
+                    {
+                        var rotateGrid = fGird.Clone() as Polyline;
+                        rotateGrid.TransformBy(transMatrix);
+                        rotateGrid.Layer = GridLineLayer;
+                        acdb.ModelSpace.Add(rotateGrid);
+                    }
+                    foreach (var sGird in secGrids.Value)
+                    {
+                        var rotateGrid = sGird.Clone() as Polyline;
+                        rotateGrid.TransformBy(transMatrix);
+                        rotateGrid.Layer = GridLineLayer;
+                        acdb.ModelSpace.Add(rotateGrid);
+                    }
                 }
             }
-#endif
 
             return new List<KeyValuePair<Vector3d, List<Polyline>>>()
             {

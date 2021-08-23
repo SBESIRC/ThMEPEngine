@@ -118,6 +118,9 @@ namespace ThMEPElectrical.Command
                         //{
                         //    acadDatabase.ModelSpace.Add(item);
                         //}
+                        List<List<Line>> otherLanes = new List<List<Line>>();
+                        var lanes = getPrimitivesService.GetLanes(polyFrame, out otherLanes);
+                        lanes.AddRange(otherLanes);
                         var blocks = GetBlocks(polyFrame);
                         if (blocks.Count > 0)
                         {
@@ -126,17 +129,33 @@ namespace ThMEPElectrical.Command
                             OutputPolylines(holes, "洞口" + i.ToString(), 100);
                             OutputPolylines(roomPolys, "房间框线" + i.ToString(), 10);
                             OutputPolylines(new List<Polyline>() { polyFrame }, "防火分区" + i.ToString(), 10);
+                            OutputLines(lanes.SelectMany(x => x).ToList(), "中心线" + i.ToString());
                         }
                     }
                 }
             }
         }
 
+        private void OutputLines(List<Line> lines, string txtName)
+        {
+            var strs = lines.Select(x =>
+            {
+                string str = "(";
+                str = str + "(" + x.StartPoint.X.ToString() + "," + x.StartPoint.Y.ToString() + "),";
+                str = str + "(" + x.EndPoint.X.ToString() + "," + x.EndPoint.Y.ToString() + ")";
+                str = str + ")";
+                return str;
+            }).ToList();
+            IOOperateService.OutputTxt("C:\\Users\\tangyongjing\\Desktop\\test\\" + txtName, strs);
+        }
+
+
         private void OutputPts(List<Point3d> pts, string txtName)
         {
             var strs = pts.Select(x => "(" + x.X.ToString() + "," + x.Y.ToString() + ")").ToList();
             IOOperateService.OutputTxt("C:\\Users\\tangyongjing\\Desktop\\test\\" + txtName, strs);
         }
+
         private void OutputPolylines(List<Polyline> polys, string txtName, double Weight)
         {
             var strs = polys.Select(x =>

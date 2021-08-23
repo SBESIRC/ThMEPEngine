@@ -69,7 +69,7 @@ namespace ThMEPElectrical
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
         public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);
-        public static readonly double spacingValue = 3000;
+        public static readonly double spacingValue = 4050;
 
         public static readonly double ShrinkDistance = -500; // 内缩距离
         public static readonly double ShrinkSmallDistance = -3; // 误差内缩距离
@@ -77,7 +77,7 @@ namespace ThMEPElectrical
 
         public static readonly double ExtendBeamLength = 25; // 梁的延伸长度
         public static readonly double WallProfileShrinkDistance = -100; // 用户选择墙线内缩距离
-        public static readonly double PolyClosedDistance = 100; // 多段线视觉认为是闭合多段线的误差距离
+        public static readonly double PolyClosedDistance = 1000; // 多段线视觉认为是闭合多段线的误差距离
         public static readonly double EntityExtendDistance = 1000; // 选择图元延长的距离
         public static readonly double SecondBeamDivideHeight = 600; // 梁高差高度差值大于等于600划分
 
