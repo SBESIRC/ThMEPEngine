@@ -277,7 +277,20 @@ namespace ThMEPElectrical
                 resPLines.AddRange(pInfo.InnerProfiles);
             }
 
-            return resPLines;
+            List<Polyline> resPolys = new List<Polyline>();
+            foreach (var frame in resPLines)
+            {
+                if (frame is Polyline poly && poly.Closed)
+                {
+                    resPolys.Add(poly);
+                }
+                else if (frame is Polyline secPoly && !secPoly.Closed && secPoly.StartPoint.DistanceTo(secPoly.EndPoint) < 1000)
+                {
+                    secPoly.Closed = true;
+                    resPolys.Add(secPoly);
+                }
+            }
+            return resPolys;
         }
 
         /// <summary>
