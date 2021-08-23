@@ -144,6 +144,17 @@ namespace ThMEPLighting.EmgLight
             layoutInfo = resetResult;
         }
 
+        public void ResetResult(ref List<Polyline> plList, ThMEPOriginTransformer transformer)
+        {
+
+            plList.ForEach(x =>
+            {
+                transformer.Reset( x);
+            });
+
+        }
+
+
         public void moveEmg(ref Dictionary<Polyline, (Point3d, Vector3d)> layoutInfo)
         {
             var tol = EmgLightCommon.TolGroupEvcaEmg;

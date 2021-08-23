@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    public class UISettingService
+    public class LayoutUISettingService
     {
         public double scale { get; set; }
         public int singleSide { get; set; } //0:double side, 1:single side
         public int blkType { get; set; }
 
-        public static UISettingService Instance = new UISettingService();
+        public static LayoutUISettingService Instance = new LayoutUISettingService();
 
-        public UISettingService()
+        public LayoutUISettingService()
         {
             scale = EmgLightCommon.BlockScaleNum;
             blkType = 0;
             singleSide = 0;
         }
-
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThMEPLighting.EmgLightConnect.Model;
 using ThMEPLighting.EmgLight.Service;
@@ -66,7 +67,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         //}
 
 
-        public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath, List<ThSingleSideBlocks> singleSideBlocks)
+        public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath, List<ThSingleSideBlocks> singleSideBlocks, List<Polyline> holes,int groupMin, int groupMax)
         {
             List<List<List<int>>> allGroupPathTemp = new List<List<List<int>>>();
             List<List<List<int>>> allGroupPath = new List<List<List<int>>>();
@@ -96,7 +97,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                             sideCountDict.Add(laneSideIndex, blockCount);
                         }
 
-                        if (sumNo(blockSum, blockCount) && distanceInTol(partPathBlocks, laneSideBlocks))
+                        if (sumNo(blockSum, blockCount,groupMax ) && distanceInTol(partPathBlocks, laneSideBlocks, holes))
                         {
                             blockSum = blockSum + blockCount;
                             partPath.Add(laneSideIndex);
@@ -118,7 +119,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 allGroupPathTemp.Add(groupPath);
 
-                if (minBlockCount(groupPath, sideCountDict) == false)
+                if (minBlockCount(groupPath, sideCountDict, groupMin) == false)
                 {
                     allGroupPath.Add(groupPath);
                 }
@@ -134,21 +135,21 @@ namespace ThMEPLighting.EmgLightConnect.Service
         }
 
 
-        private static bool sumNo(int blockSum, int blockCount)
+        private static bool sumNo(int blockSum, int blockCount,int groupMax)
         {
             var bReturn = false;
 
-            if ((blockSum + blockCount) <= EmgConnectCommon.TolMaxLigthNo)
+            if ((blockSum + blockCount) <= groupMax)
             {
                 bReturn = true;
             }
             return bReturn;
         }
 
-        private static bool distanceInTol(List<ThSingleSideBlocks> partPathBlocks, ThSingleSideBlocks laneSideBlocks)
+        private static bool distanceInTol(List<ThSingleSideBlocks> partPathBlocks, ThSingleSideBlocks laneSideBlocks, List<Polyline> holes)
         {
             var bReturn = false;
-
+            var tol = EmgConnectCommon.TolSaperateGroupMaxDistance;
 
             var partPathBlocksPoints = partPathBlocks.SelectMany(x => x.getTotalBlock()).ToList();
             var laneSideBlocksPoints = laneSideBlocks.getTotalBlock();
@@ -168,10 +169,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     break;
                 }
+
                 foreach (var pointInNextLane in laneSideBlocksPoints)
                 {
-                    double dist = pointInNextLane.DistanceTo(pointInGroup);
-                    if (dist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
+
+                    double interDist =   intersectWithHoles(pointInNextLane, pointInGroup, holes);
+
+                    double dist = pointInNextLane.DistanceTo(pointInGroup) + interDist;
+                    if (dist <= tol)
                     {
                         bReturn = true;
                         break;
@@ -183,14 +188,31 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return bReturn;
         }
 
-        private static bool minBlockCount(List<List<int>> groupPath, Dictionary<int, int> sideCountDict)
+        private static double intersectWithHoles(Point3d pt1, Point3d pt2, List<Polyline> holes)
+        {
+            double intersect = 0;
+            Line l = new Line(pt1, pt2);
+
+            foreach (var hole in holes)
+            {
+                var intersectPt = hole.Intersect(l, Intersect.OnBothOperands);
+                if (intersectPt.Count > 0)
+                {
+                    intersect = intersect + Math.Sqrt(hole.Area) * 2;
+                }
+            }
+
+            return intersect;
+        }
+
+        private static bool minBlockCount(List<List<int>> groupPath, Dictionary<int, int> sideCountDict,int groupMin)
         {
             var bTooSmallCount = false;
 
             for (int i = 0; i < groupPath.Count; i++)
             {
                 var count = groupPath[i].Select(x => sideCountDict[x]).Sum();
-                if (0 < count && count < EmgConnectCommon .TolMinLigthNo)
+                if (0 < count && count < groupMin)
                 {
                     bTooSmallCount = true;
                     break;

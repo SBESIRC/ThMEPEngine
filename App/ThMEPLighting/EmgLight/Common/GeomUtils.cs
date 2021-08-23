@@ -82,11 +82,43 @@ namespace ThMEPLighting.EmgLight.Common
             var ExtendLine = new Line(ExtendPolyStart, ExtendPolyEnd);
             var ExtendPoly = GeomUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
 
-            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly,44);
+            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly, 44);
 
             return ExtendPoly;
         }
 
+        public static Matrix3d getLineMatrix(Point3d startPt, Point3d endPt)
+        {
+            var dir = (endPt - startPt).GetNormal();
+            //getAngleTo根据右手定则旋转(一般逆时针)
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            var matrix = Matrix3d.Displacement(startPt.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+            return matrix;
+        }
 
+        public static Dictionary<Point3d, Point3d> orderLineListPts(List<Line> lineList, Matrix3d lineMatrix)
+        {
+            var tol = new Tolerance(10, 10);
+            var pts = new List<Point3d>();
+            var orderLinePts = new Dictionary<Point3d, Point3d>();
+
+            foreach (var l in lineList)
+            {
+                var notInList = pts.Where(x => x.IsEqualTo(l.StartPoint, tol));
+                if (notInList.Count() == 0)
+                {
+                    pts.Add(l.StartPoint);
+                }
+                notInList = pts.Where(x => x.IsEqualTo(l.EndPoint, tol));
+                if (notInList.Count() == 0)
+                {
+                    pts.Add(l.EndPoint);
+                }
+            }
+
+             orderLinePts = pts.ToDictionary(x => x, x => x.TransformBy(lineMatrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
+
+            return orderLinePts;
+        }
     }
 }

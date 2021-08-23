@@ -1,10 +1,14 @@
-﻿using DotNetARX;
-using Linq2Acad;
+﻿using System.Collections.Generic;
+
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using AcHelper;
+using DotNetARX;
+using Linq2Acad;
+
 using ThMEPLighting.EmgLight.Common;
+using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -42,5 +46,29 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
 
+        public static void InsertCommentLine(List<Polyline> commentLine)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var pl in commentLine)
+                {
+                    pl.Layer = EmgLightCommon.LayerComment;
+                    var objId = db.ModelSpace.Add(pl);
+#if ACAD_ABOVE_2014
+                    Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", objId, "_No");
+#else
+                    ResultBuffer args = new ResultBuffer(
+                       new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
+                       new TypedValue((int)LispDataType.Text, "_ARC"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "_Object"),
+                       new TypedValue((int)LispDataType.ObjectId, objId),
+                       new TypedValue((int)LispDataType.Text, "_No"));
+                    Active.Editor.AcedCmd(args);
+#endif
+                }
+            }
+        }
     }
 }

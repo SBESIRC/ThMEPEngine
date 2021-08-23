@@ -14,7 +14,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class mergeOneMainBlkSideService
     {
-        public static void mergeOneBlockSide(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, List<Line>> pointList, ThLaneSideGraph sideGraph)
+        public static void mergeOneBlockSide(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, List<Line>> pointList, ThLaneSideGraph sideGraph, int groupMax)
         {
 
             var oneBlockSide = singleSideBlocks.Where(x => x.mainBlk.Count == 1).ToList();
@@ -28,16 +28,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 if (targetSide == null)
                 {
                     //找同边
-                    targetSide = findConnectSide(side, singleSideBlocks, sideGraph);
-
+                    targetSide = findConnectSide(side, singleSideBlocks, sideGraph, groupMax);
                 }
 
                 if (targetSide == null)
                 {
                     //找跨边直线
                     //debug 相连边0 个block跳过
-                    targetSide = findStrightSide(side, singleSideBlocks, pointList);
-
+                    targetSide = findStrightSide(side, singleSideBlocks, pointList, groupMax);
                 }
 
                 //if (targetSide == null)
@@ -80,7 +78,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static ThSingleSideBlocks findConnectSide(ThSingleSideBlocks side, List<ThSingleSideBlocks> singleSideBlocks, ThLaneSideGraph sideGraph)
+        private static ThSingleSideBlocks findConnectSide(ThSingleSideBlocks side, List<ThSingleSideBlocks> singleSideBlocks, ThLaneSideGraph sideGraph, int groupMax)
         {
             ThSingleSideBlocks fromSide = null;
             ThSingleSideBlocks toSide = null;
@@ -89,14 +87,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var thisLane = side.laneSide.Select(x => x.Item1).ToList();
 
             var toSideTemp = singleSideBlocks.Where(x => sideGraph.sideVertexNodeList[side.laneSideNo].firstEdge != null && x.laneSideNo == sideGraph.sideVertexNodeList[side.laneSideNo].firstEdge.nodeIndex).FirstOrDefault();
-            if (toSideTemp != null && toSideTemp.getTotalMainBlock ().Count > 0)
+            if (toSideTemp != null && toSideTemp.getTotalMainBlock().Count > 0)
             {
                 var toLane = toSideTemp.laneSide.Select(x => x.Item1).ToList();
                 var sameLane = toLane.Where(x => thisLane.Contains(x)); //不是同一条线的对面
                 var minDist = toSideTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
                 var sumBlk = toSideTemp.Count + side.Count;
 
-                if (sameLane.Count() == 0 && sumBlk <= EmgConnectCommon.TolMaxLigthNo && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance && turnNotOver180(side, toSideTemp))
+                if (sameLane.Count() == 0 && sumBlk <= groupMax && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance && turnNotOver180(side, toSideTemp))
                 {
                     toSide = toSideTemp;
                 }
@@ -111,7 +109,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var minDist = fromSideTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
                 var sumBlk = fromSideTemp.Count + side.Count;
 
-                if (sameLane.Count() == 0 && sumBlk <= EmgConnectCommon.TolMaxLigthNo && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance && turnNotOver180(side, fromSideTemp))
+                if (sameLane.Count() == 0 && sumBlk <= groupMax && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance && turnNotOver180(side, fromSideTemp))
                 {
                     fromSide = fromSideTemp;
                 }
@@ -235,7 +233,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         /// <param name="singleSideBlocks"></param>
         /// <param name="pointList"></param>
         /// <returns></returns>
-        private static ThSingleSideBlocks findStrightSide(ThSingleSideBlocks side, List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, List<Line>> pointList)
+        private static ThSingleSideBlocks findStrightSide(ThSingleSideBlocks side, List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, List<Line>> pointList, int groupMax)
         {
             var ptTol = new Tolerance(1, 1);
             ThSingleSideBlocks target = null;
@@ -276,7 +274,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 minDistS = sPtConnTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
                 var sumBlk = sPtConnTemp.Count + side.Count;
 
-                if (sumBlk <= EmgConnectCommon.TolMaxLigthNo && minDistS <= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                if (sumBlk <= groupMax && minDistS <= EmgConnectCommon.TolSaperateGroupMaxDistance)
                 {
                     sPtConnSide = sPtConnTemp;
                 }
@@ -287,7 +285,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 minDistE = ePtConnTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
                 var sumBlk = ePtConnTemp.Count + side.Count;
 
-                if (sumBlk <= EmgConnectCommon.TolMaxLigthNo && minDistE <= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                if (sumBlk <= groupMax && minDistE <= EmgConnectCommon.TolSaperateGroupMaxDistance)
                 {
                     ePtConnSide = ePtConnTemp;
                 }

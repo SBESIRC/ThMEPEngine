@@ -16,7 +16,7 @@ namespace ThMEPLighting.EmgLightConnect
 {
     public class ConnectEmgLightEngine
     {
-        public static List<Polyline> ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame, List<Polyline> holes)
+        public static List<Polyline> ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame, List<Polyline> holes, int groupMin, int groupMax)
         {
             var newLink = new List<Polyline>();
 
@@ -50,10 +50,10 @@ namespace ThMEPLighting.EmgLightConnect
             //{
             //    var side = singleSideBlocks[i];
 
-            //    var color = i % 8;
+            //    int color = i % 8;
 
             //    side.mainBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter, color, 35));
-            //    side.secBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter,  color, 35,200, "S"));
+            //    side.secBlk.ForEach(x => DrawUtils.ShowGeometry(x, EmgConnectCommon.LayerBlockCenter, color, 35, 200, "S"));
 
             //}
 
@@ -69,11 +69,7 @@ namespace ThMEPLighting.EmgLightConnect
 
             ConnectSingleSideService.forDebugLaneSideNo(singleSideBlocks);
 
-            //车道道路成图
-            graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
-            graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
-
-            //mergeOneSecBlkSideService.mergeScatterBlockSide(singleSideBlocks);
+            mergeOneSecBlkSideService.mergeScatterBlockSide(singleSideBlocks);
             ////mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
             mergeOneSecBlkSideService.mergeOneSecBlockSide(singleSideBlocks);
 
@@ -87,11 +83,22 @@ namespace ThMEPLighting.EmgLightConnect
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugSingleSideBlocks(singleSideBlocks);
 
+            //var bDebug = true;
+            //if (bDebug ==true)
+            //{
+            //    return newLink;
+            //}
+
+
+            //车道道路成图
+            graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
+            graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
+
             //找出图所有的可能路径
             var allPath = graphService.SeachGraph(sideGraph);
 
             //找分组方式
-            var allGroupPath = findOptimalGroupService.findGroupPath(allPath, singleSideBlocks);
+            var allGroupPath = findOptimalGroupService.findGroupPath(allPath, singleSideBlocks, holes, groupMin, groupMax);
 
             //找最佳分组方式
             var OptimalGroupBlocks = findOptimalGroupService.findOptimalGroup(allGroupPath, singleSideBlocks);
@@ -116,10 +123,10 @@ namespace ThMEPLighting.EmgLightConnect
 
             DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, 130);
             DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, 70);
-            DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal,  30);
+            DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal, 30);
 
             newLink = drawCorrectLinkService.CorrectIntersectLink(linkLine, blkList);
-            DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal,  241);
+            DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal, 241);
 
 
             return newLink;

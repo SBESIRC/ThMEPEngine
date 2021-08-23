@@ -182,13 +182,22 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 var evacToLaneDict = evac.ToDictionary(x => x.Value.Position, x => layoutServer.thLane.TransformPointToLine(x.Value.Position));
 
-                var evacPtInSide0 = evacToLaneDict.Where(x => 0 <= x.Value.Y && x.Value.Y <= TolYBuffer &&
-                                                            0 <= x.Value.X && x.Value.X <= layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[0].Last()).X)
-                                                            .ToDictionary (x=>x.Key ,x=>x.Value );
+                var evacPtInSide0 = new Dictionary<Point3d, Point3d>();
+                var evacPtInSide1 = new Dictionary<Point3d, Point3d>();
 
-                var evacPtInSide1 = evacToLaneDict.Where(x => -TolYBuffer <= x.Value.Y && x.Value.Y <= 0 &&
+                if (layoutServer.UsefulStruct[0].Count > 0)
+                {
+                     evacPtInSide0 = evacToLaneDict.Where(x => 0 <= x.Value.Y && x.Value.Y <= TolYBuffer &&
+                                                            0 <= x.Value.X && x.Value.X <= layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[0].Last()).X)
+                                                            .ToDictionary(x => x.Key, x => x.Value);
+                }
+
+                if (layoutServer.UsefulStruct[1].Count > 0)
+                {
+                     evacPtInSide1 = evacToLaneDict.Where(x => -TolYBuffer <= x.Value.Y && x.Value.Y <= 0 &&
                                                             0 <= x.Value.X && x.Value.X <= layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[1].Last()).X)
                                                             .ToDictionary(x => x.Key, x => x.Value);
+                }
 
                 if (evacPtInSide0.Count > 0 || evacPtInSide1.Count > 0)
                 {

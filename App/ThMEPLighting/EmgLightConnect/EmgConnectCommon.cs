@@ -12,8 +12,8 @@ namespace ThMEPLighting.EmgLightConnect
         public static int TolSaperateGroupMaxDistance = 15000;
         public static int TolTooClosePt = 800;
         public static int TolBlkMaxConnect = 4;
-        public static int TolMaxLigthNo = 25;
-        public static int TolMinLigthNo = 5;
+        //public static int TolMaxLigthNo = 25;
+        //public static int TolMinLigthNo = 5;
 
         public static int TolGroupBlkLane = 6000;
         public static int TolGroupBlkLaneHead = 400;
