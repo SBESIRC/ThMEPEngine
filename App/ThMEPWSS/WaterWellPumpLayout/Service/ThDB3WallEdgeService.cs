@@ -13,16 +13,16 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
         public List<Line> GetWallEdges(Database db, Point3dCollection pts)
         {
             var results = new List<Line>();
-            using (var columnEngine = new ThDB3ColumnRecognitionEngine())
-            using (var shearWallEngine = new ThDB3ShearWallRecognitionEngine())
-            using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
+            using (var columnEngine = new ThColumnBuilderEngine())
+            using (var shearWallEngine = new ThShearwallBuilderEngine())
+            using (var archWallEngine = new ThArchWallBuilderEngine())
             {
-                columnEngine.Recognize(db, pts);
-                shearWallEngine.Recognize(db, pts); 
-                archWallEngine.Recognize(db, pts);
-                results.AddRange(ThWaterWellPumpUtils.ToLines(columnEngine.Elements.Cast<ThIfcColumn>().Select(o => o.Outline).ToList()));
-                results.AddRange(ThWaterWellPumpUtils.ToLines(shearWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
-                results.AddRange(ThWaterWellPumpUtils.ToLines(archWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
+                var columns = columnEngine.Build(db, pts);
+                var shearwalls =  shearWallEngine.Build(db, pts);
+                var archwalls = archWallEngine.Build(db, pts);                
+                results.AddRange(ThWaterWellPumpUtils.ToLines(columns.Cast<ThIfcColumn>().Select(o => o.Outline).ToList()));
+                results.AddRange(ThWaterWellPumpUtils.ToLines(shearwalls.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
+                results.AddRange(ThWaterWellPumpUtils.ToLines(archwalls.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
                 return results;
             }
         }
