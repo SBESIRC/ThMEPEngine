@@ -264,7 +264,7 @@ namespace ThMEPElectrical.Command
                                     });
 
                                     // 标记已经转换的块
-                                    mapping[o] = false;
+                                    mapping[o] = true;
                                 }
                             });
                     }
