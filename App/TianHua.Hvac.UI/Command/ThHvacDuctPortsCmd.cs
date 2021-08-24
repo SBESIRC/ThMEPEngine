@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
 using ThMEPHVAC.Model;
 using Autodesk.AutoCAD.Geometry;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -18,7 +20,7 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
-        private static readonly ThMEPHVACParam in_param = new ThMEPHVACParam();
+        private static readonly DuctPortsParam in_param = new DuctPortsParam();
         private Point3d start_point;
         public void Dispose() { }
 
@@ -30,7 +32,7 @@ namespace TianHua.Hvac.UI.Command
             Get_exclude_line("请选择不布置风口的线", out DBObjectCollection exclude_line);
             if (exclude_line.Count >= center_lines.Count)
             {
-                ThMEPHVACService.Prompt_msg("没有选择要布置风口的管段");
+                ThDuctPortsService.Prompt_msg("没有选择要布置风口的管段");
                 return;
             }
             if (!Get_duct_port_info())
@@ -40,7 +42,7 @@ namespace TianHua.Hvac.UI.Command
             graph_res.Do_anay(in_param.port_num, new ThDuctPortsModifyPort(), center_lines);
             if (graph_res.merged_endlines.Count == 0)
             {
-                ThMEPHVACService.Prompt_msg("选择错误起始点");
+                ThDuctPortsService.Prompt_msg("选择错误起始点");
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
@@ -70,7 +72,7 @@ namespace TianHua.Hvac.UI.Command
                     return;
                 }
                 var sf = ThSelectionFilterTool.Build(dxfNames);
-                center_lines = Get_center_line("请选择中心线", sf, out string layer);
+                center_lines = Get_center_line("请选择中心线", out string layer, sf);
                 if (center_lines.Count == 0)
                     return;
                 var mat = Matrix3d.Displacement(start_point.GetAsVector());
@@ -120,7 +122,9 @@ namespace TianHua.Hvac.UI.Command
                 }
             }
         }
-        private DBObjectCollection Get_center_line(string prompt, SelectionFilter sf, out string layer)
+        private DBObjectCollection Get_center_line(string prompt, 
+                                                   out string layer, 
+                                                   SelectionFilter sf)
         {
             layer = "0";
             PromptSelectionOptions options = new PromptSelectionOptions()
@@ -135,12 +139,10 @@ namespace TianHua.Hvac.UI.Command
                 var objIds = result.Value.GetObjectIds();
                 var coll = objIds.ToObjectIdCollection();
                 layer = ThDuctPortsDrawService.Get_cur_layer(coll);
-                var lines = coll.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
-                ThDuctPortsDrawService.Move_to_origin(start_point, lines);
-                lines = ThMEPHVACLineProc.Pre_proc(lines);
+                var lines = Pre_proc(coll);
                 if (lines.Polygonize().Count != 0)
                 {
-                    ThMEPHVACService.Prompt_msg("中心线包含环");
+                    ThDuctPortsService.Prompt_msg("中心线包含环");
                     return new DBObjectCollection();
                 }
                 ThDuctPortsDrawService.Remove_ids(objIds);
@@ -155,6 +157,22 @@ namespace TianHua.Hvac.UI.Command
         {
             var startRes = Active.Editor.GetPoint(prompt);
             return new Point3d (startRes.Value.X, startRes.Value.Y, 0);
+        }
+        private DBObjectCollection Pre_proc(ObjectIdCollection objs)
+        {
+            var lines = objs.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
+            ThDuctPortsDrawService.Move_to_origin(start_point, lines);
+            var service = new ThLaneLineCleanService();
+            var res = ThLaneLineEngine.Explode(service.Clean(lines));
+            var extendLines = new DBObjectCollection();
+            foreach (Line line in res)
+                extendLines.Add(line.ExtendLine(1.0));
+            lines = ThLaneLineEngine.Noding(extendLines);
+            lines = ThLaneLineEngine.CleanZeroCurves(lines);
+            lines = lines.LineMerge();
+            lines = ThLaneLineEngine.Explode(lines);
+            
+            return lines;
         }
     }
 }

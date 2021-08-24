@@ -21,8 +21,8 @@ namespace TianHua.Hvac.UI
         public string port_range;
         private double air_speed_max;
         private double air_speed_min;
-        private ThMEPHVACParam param;
-        public fmDuctPorts(ThMEPHVACParam param)
+        private DuctPortsParam param;
+        public fmDuctPorts(DuctPortsParam param)
         {
             InitializeComponent();
             this.param = param;
@@ -46,7 +46,7 @@ namespace TianHua.Hvac.UI
             is_redraw = checkBox1.Checked;
         }
 
-        private void Component_init(ThMEPHVACParam param)
+        private void Component_init(DuctPortsParam param)
         {
             textBox2.Text = param.air_volume.ToString();
             textBox3.Text = param.air_speed.ToString();

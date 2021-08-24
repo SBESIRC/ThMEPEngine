@@ -17,9 +17,9 @@ namespace ThMEPHVAC.Model
         }
         public void Draw_dimension(List<Duct_ports_Info> infos, Point2d dir_wall_point, Point2d ver_wall_point, Point3d start_pos)
         {
-            //var l = infos[0].l;
-            //if (!ThMEPHVACService.Is_vertical(l) && !ThMEPHVACService.Is_horizontal(l))
-            //    return;
+            var l = infos[0].l;
+            if (!ThDuctPortsService.Is_vertical(l) && !ThDuctPortsService.Is_horizontal(l))
+                return;
             Insert_ver_dimension(infos, ver_wall_point, start_pos);
             Insert_dir_dimension(infos, dir_wall_point, start_pos);
         }
@@ -38,7 +38,7 @@ namespace ThMEPHVAC.Model
                         if (infos.Count > 0)
                         {
                             var info = infos[0];
-                            Vector3d dir_vec = ThMEPHVACService.Get_edge_direction(info.l);
+                            Vector3d dir_vec = ThDuctPortsService.Get_edge_direction(info.l);
                             var positions = info.ports_info;
                             if (positions.Count > 0)
                             {
@@ -53,7 +53,7 @@ namespace ThMEPHVAC.Model
         }
         private AlignedDimension Create_align_dim(Point3d p1, Point3d p2, Vector3d vertical_vec, ObjectId layerId)
         {
-            string style = ThMEPHVACService.Get_dim_style(scale);
+            string style = ThDuctPortsService.Get_dim_style(scale);
             using (var adb = AcadDatabase.Active())
             {
                 var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, adb.Database);
@@ -62,7 +62,7 @@ namespace ThMEPHVAC.Model
                     XLine1Point = p1,
                     XLine2Point = p2,
                     DimensionText = "",
-                    DimLinePoint = ThMEPHVACService.Get_mid_point(p1, p2) + vertical_vec * 2000,
+                    DimLinePoint = ThDuctPortsService.Get_mid_point(p1, p2) + vertical_vec * 2000,
                     ColorIndex = 256,
                     DimensionStyle = id,
                     LayerId = layerId,
@@ -80,7 +80,7 @@ namespace ThMEPHVAC.Model
                 for (int i = 0; i < infos.Count; ++i)
                 {
                     var info = infos[i];
-                    Vector3d dir_vec = ThMEPHVACService.Get_edge_direction(info.l);
+                    Vector3d dir_vec = ThDuctPortsService.Get_edge_direction(info.l);
                     Vector3d vertical_vec = Get_dimension_vertical_vec(dir_vec);
                     for (int j = 0; j < info.ports_info.Count - 1; ++j)
                     {
@@ -113,8 +113,8 @@ namespace ThMEPHVAC.Model
                     Point3d end_port_p = info.ports_info[info.ports_info.Count - 1].position;
                     Point3d srt_p = info.l.StartPoint;
                     Point3d end_p = info.l.EndPoint;
-                    if (ThMEPHVACService.Is_between_points(wall_p, srt_port_p, end_port_p) ||
-                        ThMEPHVACService.Is_between_points(wall_p, srt_p, end_p))
+                    if (ThDuctPortsService.Is_between_points(wall_p, srt_port_p, end_port_p) ||
+                        ThDuctPortsService.Is_between_points(wall_p, srt_p, end_p))
                     {
                         Search_nearest_point(info, wall_p, out int min_idx);
                         Do_insert_wall_point(info, wall_p, min_idx);
@@ -133,7 +133,7 @@ namespace ThMEPHVAC.Model
             Point3d total_srt_p = (first_info.ports_info.Count > 0) ? first_info.ports_info[0].position : first_info.l.StartPoint;
             var info = last_info.ports_info;
             Point3d total_end_p = (info.Count > 0) ? info[info.Count - 1].position : last_info.l.EndPoint;
-            if (!ThMEPHVACService.Is_between_points(wall_p, total_srt_p, total_end_p))
+            if (!ThDuctPortsService.Is_between_points(wall_p, total_srt_p, total_end_p))
             {
                 if (wall_p.DistanceTo(total_srt_p) < wall_p.DistanceTo(total_end_p))
                     first_info.ports_info.Insert(0, new Port_Info(1, wall_p));
@@ -163,7 +163,7 @@ namespace ThMEPHVAC.Model
             {
                 Point3d min_p = info.ports_info[min_idx].position;
                 Vector3d dir1 = (wall_p - min_p).GetNormal();
-                Vector3d dir2 = ThMEPHVACService.Get_edge_direction(info.l);
+                Vector3d dir2 = ThDuctPortsService.Get_edge_direction(info.l);
                 // 插入的墙点的风量设为1与变径处的0风量做区分
                 if (dir1 != dir2)
                     info.ports_info.Insert(min_idx, new Port_Info(1, wall_p));
@@ -183,7 +183,7 @@ namespace ThMEPHVAC.Model
                     pre_srt_p = end_p;
                     continue;
                 }
-                if (ThMEPHVACService.Is_between_points(wall_p, pre_srt_p, srt_p))
+                if (ThDuctPortsService.Is_between_points(wall_p, pre_srt_p, srt_p))
                 {
                     infos[i].ports_info.Insert(0, new Port_Info(1, wall_p));
                     return true;
@@ -197,13 +197,13 @@ namespace ThMEPHVAC.Model
             Vector3d vertical_vec;
             if (Math.Abs(dir_vec.X) < 1e-3)
             {
-                vertical_vec = (dir_vec.Y > 0) ? ThMEPHVACService.Get_right_vertical_vec(dir_vec) :
-                                                 ThMEPHVACService.Get_left_vertical_vec(dir_vec);
+                vertical_vec = (dir_vec.Y > 0) ? ThDuctPortsService.Get_right_vertical_vec(dir_vec) :
+                                                 ThDuctPortsService.Get_left_vertical_vec(dir_vec);
             }
             else if (dir_vec.X > 0)
-                vertical_vec = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
+                vertical_vec = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
             else
-                vertical_vec = ThMEPHVACService.Get_left_vertical_vec(dir_vec);
+                vertical_vec = ThDuctPortsService.Get_left_vertical_vec(dir_vec);
             return vertical_vec;
         }
         private void Draw_gap_dimension(int idx, 
@@ -235,7 +235,7 @@ namespace ThMEPHVAC.Model
             next_p = next_info.ports_info[0].position;
             Point3d wall_point = new Point3d(dir_wall_point.X, dir_wall_point.Y, 0);
             Point3d last_p = info.ports_info[info.ports_info.Count - 1].position;
-            if (ThMEPHVACService.Is_between_points(wall_point, next_p, last_p) && 
+            if (ThDuctPortsService.Is_between_points(wall_point, next_p, last_p) && 
                 wall_point.DistanceTo(Point3d.Origin) > 1e-3)
                 return wall_point;
             else

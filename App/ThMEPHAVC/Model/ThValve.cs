@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using ThMEPHVAC.Duct;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPHVAC.IO;
-using ThMEPHVAC.Duct;
+using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.IO;
+using System.Linq;
+using System;
 
 namespace ThMEPHVAC.Model
 {

@@ -15,31 +15,16 @@ namespace TianHua.Hvac.UI.Command
 
         public void Execute()
         {
-            var objIds = Get_modify_duct_id("选择要修改的管段");
-            if (objIds == null || objIds.Length == 0)
+            var ids = Get_center_line("选择要修改的管段", out Duct_modify_param param);
+            if (ids == null)
                 return;
-            var type = ThDuctPortsInterpreter.Get_entity_type(objIds);
-            if (type == "Duct" || type == "Vertical_bypass")
-            {
-                var ids = Get_center_line(objIds, out Duct_modify_param param);
-                if (ids == null || ids.Length == 0)
-                    return;
-                var dlg = new fmDuctModify(param.air_volume, param.duct_size);
-                if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
-                    return;
-                if (type == "Duct")
-                {
-                    _ = new ThDuctPortsModifyDuct(ids, dlg.duct_size, param);
-                }
-                else
-                {
-                    new ThFanModifyVBypass(ids, dlg.duct_size, param);
-                }
-            }
-            else
-                ThMEPHVACService.Prompt_msg("请选择管段");
+            var dlg = new fmDuctModify(param.air_volume, param.duct_size);
+            if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
+                return;
+            string duct_size = dlg.duct_size;
+            _ = new ThDuctPortsModifyDuct(ids, duct_size, param);
         }
-        private ObjectId[] Get_modify_duct_id(string prompt)
+        private ObjectId[] Get_center_line(string prompt, out Duct_modify_param param)
         {
             var options = new PromptSelectionOptions()
             {
@@ -50,29 +35,32 @@ namespace TianHua.Hvac.UI.Command
                 SingleOnly = true
             };
             var result = Active.Editor.GetSelection(options);
+            param = new Duct_modify_param();
             if (result.Status == PromptStatus.OK)
             {
-                return result.Value.GetObjectIds();
+                var objIds = result.Value.GetObjectIds();
+                var list = ThDuctPortsInterpreter.Get_value_list(objIds);
+                if (list == null)
+                {
+                    ThDuctPortsService.Prompt_msg("请使用最新管道生成工具生成XData");
+                    return null;
+                }
+                var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
+                param = ThDuctPortsInterpreter.Get_duct_param(list, groupId.Handle);
+                if (param.type == "")
+                {
+                    ThDuctPortsService.Prompt_msg("该管段未包含XData");
+                    return null;
+                }
+                if (param.type != "Duct")
+                {
+                    ThDuctPortsService.Prompt_msg("请选择管段");
+                    return null;
+                }
+                return objIds;
             }
-            return null;
-        }
-        private ObjectId[] Get_center_line(ObjectId[] objIds, out Duct_modify_param param)
-        {
-            param = new Duct_modify_param();
-            var list = ThDuctPortsInterpreter.Get_value_list(objIds);
-            if (list == null)
-            {
-                ThMEPHVACService.Prompt_msg("请使用最新管道生成工具生成XData");
+            else
                 return null;
-            }
-            var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
-            param = ThDuctPortsInterpreter.Get_duct_param(list, groupId.Handle);
-            if (param.type == "")
-            {
-                ThMEPHVACService.Prompt_msg("该管段未包含XData");
-                return null;
-            }
-            return objIds;
         }
     }
 }

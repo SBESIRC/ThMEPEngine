@@ -19,7 +19,7 @@ namespace TianHua.Hvac.UI
         [CommandMethod("TIANHUACAD", "THFJF", CommandFlags.Modal)]
         public void Thfjf()
         {
-            using (var cmd = new ThHvacFjfCmd())
+            using (var cmd = new THHvacFjfCmd())
             {
                 cmd.Execute();
             }

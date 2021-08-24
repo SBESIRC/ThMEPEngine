@@ -83,6 +83,7 @@ namespace ThMEPHVAC.Duct
             refPoint = targetpoint;
             return source;
         }
+
         private void DoBuildGraph(Point3d searchpoint, Line currentline)
         {
             var poly = new Polyline();

@@ -31,18 +31,6 @@ namespace ThMEPHVAC.Model
             this.rotate_angle = rotate_angle;
         }
     }
-    public class Hole_modify_param
-    {
-        public Handle handle;
-        public string hole_name;
-        public string hole_layer;
-        public Point2d judge_p;
-        public Point2d insert_p;
-        public double rotate_angle;
-        public double len;
-        public double width;
-        public Hole_modify_param() { }
-    }
     public class Valve_modify_param
     {
         public Handle handle;
@@ -74,18 +62,18 @@ namespace ThMEPHVAC.Model
             start_id = ObjectId.Null.Handle;
             port_widths = new List<double>();
         }
-        public Entity_modify_param(string type,
-                                   Handle start_id,
-                                   List<Point2d> pos,
-                                   List<Point2d> pos_ext,
-                                   List<double> port_widths)
+        public Entity_modify_param(string type_,
+                                   Handle start_id_,
+                                   List<Point2d> pos_,
+                                   List<Point2d> pos_ext_,
+                                   List<double> port_widths_)
         {
-            this.pos = pos;
-            this.type = type;
-            this.pos_ext = pos_ext;
-            this.start_id = start_id;
-            this.port_widths = port_widths;
+            pos = pos_;
+            type = type_;
+            pos_ext = pos_ext_;
+            start_id = start_id_;
             handle = ObjectId.Null.Handle;
+            port_widths = port_widths_;
         }
     }
     public class Duct_modify_param
@@ -94,31 +82,25 @@ namespace ThMEPHVAC.Model
         public Point2d ep;
         public Handle handle;
         public Handle start_handle;
-        public string type;
         public string duct_size;
         public double air_volume;
-        public double elevation;
-        public Duct_modify_param() { }
-        public Duct_modify_param(string duct_size, 
-                                 double air_volume,
-                                 double elevation,
-                                 Point2d sp,
-                                 Point2d ep,
-                                 Handle start_handle)
+        public string type;
+        public Duct_modify_param() 
         {
-            type = "Duct";
-            this.sp = sp;
-            this.ep = ep;
-            this.elevation = elevation;
-            this.duct_size = duct_size;
-            this.air_volume = air_volume;
-            this.start_handle = start_handle;
+            air_volume = 0;
+            duct_size = string.Empty;
         }
-    }
-    public class VT_elbow_modify_param
-    {
-        public Handle handle;
-        public Point2d detect_p;
-        public VT_elbow_modify_param() { }
+        public Duct_modify_param(string duct_size_, 
+                                 double air_volume_,
+                                 Point2d sp_,
+                                 Point2d ep_,
+                                 Handle start_handle_)
+        {
+            duct_size = duct_size_;
+            air_volume = air_volume_;
+            sp = sp_;
+            ep = ep_;
+            start_handle = start_handle_;
+        }
     }
 }

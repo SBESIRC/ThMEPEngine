@@ -29,7 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\ModifyParam.cs" />
-    <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
     <Compile Include="Model\ThDuctPortsConstructor.cs" />
@@ -44,24 +43,21 @@
     <Compile Include="Model\ThDuctPortsFactory.cs" />
     <Compile Include="Model\ThDuctPortsInterpreter.cs" />
     <Compile Include="Model\ThDuctPortsJudger.cs" />
-    <Compile Include="Model\ThFanModifyVBypass.cs" />
-    <Compile Include="Model\ThMEPHVACParam.cs" />
+    <Compile Include="Model\DuctPortsParam.cs" />
+    <Compile Include="Model\ThDuctPortsPrimitiveFence.cs" />
     <Compile Include="Model\ThDuctPortsReadComponent.cs" />
     <Compile Include="Model\ThDuctPortsRecoder.cs" />
     <Compile Include="Model\ThDuctPortsModifyDuct.cs" />
     <Compile Include="Model\ThDuctPortsModifyPort.cs" />
     <Compile Include="Model\ThDuctPortsReDrawFactory.cs" />
-    <Compile Include="Model\ThFanDraw.cs" />
-    <Compile Include="Model\ThMEPHVACLineProc.cs" />
-    <Compile Include="Model\ThMEPHVACService.cs" />
+    <Compile Include="Model\ThDuctPortsService.cs" />
     <Compile Include="Model\ThDuctPortsShapeService.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
     <Compile Include="Model\ThTee.cs" />
-    <Compile Include="Model\ThVerticalBypassFactory.cs" />
     <Compile Include="Model\ThVTee.cs" />
     <Compile Include="CAD\ThDuctParameter.cs" />
     <Compile Include="CAD\ThDbModelFan.cs" />
-    <Compile Include="Model\ThFanAnalysis.cs" />
+    <Compile Include="CAD\ThFanInletOutletAnalysisEngine.cs" />
     <Compile Include="CAD\ThHolesAndValvesEngine.cs" />
     <Compile Include="CAD\ThHvacDuctFittingFactoryService.cs" />
     <Compile Include="CAD\ThHvacValveDbExtension.cs" />

@@ -49,7 +49,7 @@ namespace ThMEPHVAC.Model
                 var p = q.Dequeue();
                 if (!set.Add(srt_p))
                     return;
-                var detect_poly = ThMEPHVACService.Create_detect_poly(p);
+                var detect_poly = ThDuctPortsService.Create_detect_poly(p);
                 var res = index.SelectCrossingPolygon(detect_poly);
                 foreach (Line l in res)
                 {
