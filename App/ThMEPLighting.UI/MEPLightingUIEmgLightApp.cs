@@ -12,27 +12,42 @@ namespace ThMEPLighting.UI
 {
     public class MEPLightingUIEmgLightApp: IExtensionApplication
     {
-        UIEmgLightLayout uiEmgLight = null;
+        UIEmgLightLayout uiEmgLightLayout = null;
+        UIEmgLightConnect uiEmgLightConnect = null;
 
         public void Initialize()
         {
-            uiEmgLight = null;
+            uiEmgLightLayout = null;
+            uiEmgLightConnect = null;
         }
         public void Terminate()
         {
-            uiEmgLight = null;
+            uiEmgLightLayout = null;
+            uiEmgLightConnect = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYJZM", CommandFlags.Modal)]
         public void THYJZMUI()
         {
-            if (uiEmgLight != null  && uiEmgLight.IsLoaded)
+            if (uiEmgLightLayout != null  && uiEmgLightLayout.IsLoaded)
                 return;
 
-            uiEmgLight = new UIEmgLightLayout();
-            AcadApp.ShowModelessWindow(uiEmgLight);
+            uiEmgLightLayout = new UIEmgLightLayout();
+            AcadApp.ShowModelessWindow(uiEmgLightLayout);
         
         }
+
+        [CommandMethod("TIANHUACAD", "THYJZMLXUI", CommandFlags.Modal)]
+        public void THYJZMLXUI()
+        {
+            if (uiEmgLightConnect != null && uiEmgLightConnect.IsLoaded)
+                return;
+
+            uiEmgLightConnect = new UIEmgLightConnect();
+            AcadApp.ShowModelessWindow(uiEmgLightConnect);
+
+        }
+
 
     }
 }

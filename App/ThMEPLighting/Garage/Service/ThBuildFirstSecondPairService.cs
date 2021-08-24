@@ -44,6 +44,12 @@ namespace ThMEPLighting.Garage.Service
                 //var sp = newLine.StartPoint - perpendVec.MultiplyBy(RacywaySpace);
                 //var ep = newLine.EndPoint - perpendVec.MultiplyBy(RacywaySpace);
                 var secondlines = Filter(offsetLine.StartPoint, offsetLine.EndPoint);
+                if(secondlines.Count==0)
+                {
+                    objs = newLine.GetOffsetCurves(length);
+                    offsetLine = objs[0] as Line;
+                    secondlines = Filter(offsetLine.StartPoint, offsetLine.EndPoint);
+                }
                 Pairs.Add(o, secondlines);
             });
         }

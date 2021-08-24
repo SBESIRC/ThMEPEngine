@@ -21,10 +21,7 @@ namespace ThMEPLighting.EmgLight.Model
             geom = lane;
             dir = (geom.Last().EndPoint - geom.First().StartPoint).GetNormal();
             length = geom.Sum(x => x.Length);
-            //getAngleTo根据右手定则旋转(一般逆时针)
-            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
-            matrix = Matrix3d.Displacement(geom.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-
+            matrix = GeomUtils.getLineMatrix(geom.First().StartPoint, geom.Last().EndPoint);
         }
 
         public List<Line> geom { get; }

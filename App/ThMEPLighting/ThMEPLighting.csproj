@@ -48,6 +48,7 @@
     <Compile Include="EmgLightConnect\Model\ThSingleSideBlocks.cs" />
     <Compile Include="EmgLightConnect\Service\BlockListService.cs" />
     <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
+    <Compile Include="EmgLightConnect\Service\ConnectUISettingService.cs" />
     <Compile Include="EmgLightConnect\Service\frameAnalysisService.cs" />
     <Compile Include="EmgLightConnect\Service\InsertConnectLineService.cs" />
     <Compile Include="EmgLightConnect\Service\mergeOneMainBlkSideService.cs" />
@@ -65,19 +66,20 @@
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
     <Compile Include="EmgLight\Model\ThLane.cs" />
     <Compile Include="EmgLight\Model\ThStruct.cs" />
+    <Compile Include="EmgLight\Service\commentLineService.cs" />
     <Compile Include="EmgLight\Service\FindUniformSideService.cs" />
     <Compile Include="EmgLight\Common\GetSourceDataService.cs" />
     <Compile Include="EmgLight\Service\InsertLightService.cs" />
     <Compile Include="Common\LaneServer.cs" />
     <Compile Include="EmgLight\Service\LayoutNonUniformSideService.cs" />
     <Compile Include="EmgLight\Service\LayoutSingleSideService.cs" />
+    <Compile Include="EmgLight\Service\LayoutUISettingService.cs" />
     <Compile Include="EmgLight\Service\LayoutUniformSideService.cs" />
     <Compile Include="EmgLight\Common\RemoveBlockService.cs" />
     <Compile Include="EmgLight\Service\LayoutService.cs" />
     <Compile Include="EmgLight\Service\StructFilterService.cs" />
     <Compile Include="EmgLight\Service\StructureService.cs" />
     <Compile Include="EmgLight\Common\GeomUtils.cs" />
-    <Compile Include="EmgLight\Service\UISettingService.cs" />
     <Compile Include="FEI\EvacuationPath\ConnectIsolatedLaneService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
@@ -90,7 +92,6 @@
     <Compile Include="FEI\PrintEntity\PrintService.cs" />
     <Compile Include="FEI\Service\ClearComponentService.cs" />
     <Compile Include="FEI\Service\GetPrimitivesService.cs" />
-    <Compile Include="FEI\LayoutFEIService.cs" />
     <Compile Include="FEI\Model\ExtendLineModel.cs" />
     <Compile Include="FEI\Service\CheckService.cs" />
     <Compile Include="FEI\Service\GeUtils.cs" />
@@ -121,9 +122,9 @@
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
     <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
-    <Compile Include="Garage\Service\ThAdjustDoubleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThAdjustLightDistributePosService.cs" />
     <Compile Include="Garage\Service\ThAdjustSingleRowDistributePosService.cs" />
+    <Compile Include="Garage\Service\ThCdzmLightGraphService.cs" />
     <Compile Include="Garage\Service\ThClearPreviouResultService.cs" />
     <Compile Include="Garage\Service\ThFindCenterLinePortsService.cs" />
     <Compile Include="Garage\Service\ThSeparateLightEdgeService.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Garage\Service\ThCableTrayCutService.cs" />
     <Compile Include="Garage\Service\ThCreateLightToDatabaseService.cs" />
     <Compile Include="Garage\Service\ThDistributeLightService.cs" />
+    <Compile Include="Garage\Service\ThAdjustDoubleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
@@ -179,6 +181,7 @@
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
     <Compile Include="Garage\Service\ThShortenLineService.cs" />
     <Compile Include="Garage\Service\ThSingleRowDistributeService.cs" />
+    <Compile Include="Garage\ThGarageUtils.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
     <Compile Include="Garage\Service\ThLinkElbowService.cs" />

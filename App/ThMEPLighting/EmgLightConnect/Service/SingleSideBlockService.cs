@@ -180,19 +180,49 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         public static void restBlockToSingleSideBlocks(Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, Point3d> emgEvacGroup)
         {
-            //有可能主要块放到不正确的组里
-            foreach (var pair in blockList)
+            var closeTol = 12000;
+
+            var farBlock = blockList.SelectMany(x => x.Value).Select(x => x.Position).ToList();
+            var farBlkLink = new Dictionary<int, List<int>>();
+            var mergeBlock = new List<List<int>>();
+
+            for (int i = 0; i < farBlock.Count; i++)
             {
-                foreach (var block in pair.Value)
+                var closeI = farBlock.Where(x => x != farBlock[i] && x.DistanceTo(farBlock[i]) < closeTol).ToList()
+                                        .Select(x => farBlock.IndexOf(x))
+                                        .Where(x => x >= 0).ToList();
+
+                farBlkLink.Add(i, closeI);
+            }
+
+            foreach (var blkLink in farBlkLink)
+            {
+                var already = mergeBlock.SelectMany(x => x);
+                if (already.Contains(blkLink.Key) == false)
                 {
-                    var closePoint = singleSideBlocks.SelectMany(x => x.getTotalBlock()).OrderBy(y => y.DistanceTo(block.Position)).FirstOrDefault();
-                    var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
+                    var thisLink = new List<int>() { blkLink.Key };
+                    getDescendant(farBlkLink[blkLink.Key], farBlkLink, thisLink);
+                    mergeBlock.Add(thisLink);
+                }
+            }
 
-                    group.secBlk.Add(block.Position);
+            var allSide = singleSideBlocks.SelectMany(x => x.getTotalBlock()).ToList();
 
-                    if (pair.Key == EmgConnectCommon.BlockGroupType.mainBlock)
+            foreach (var list in mergeBlock)
+            {
+                var listPts = list.Select(x => farBlock[x]).ToList();
+                var closedDists = returnValueCalculation.getDistMatrix(listPts, allSide);
+                var closedPtIndex = closedDists.OrderBy(x => x.Item3).FirstOrDefault();
+                var closedSidePt = allSide[closedPtIndex.Item2];
+                var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closedSidePt)).FirstOrDefault();
+
+                if (group != null)
+                {
+                    group.secBlk.AddRange(listPts);
+
+                    foreach (var pt in listPts)
                     {
-                        var groupPt = emgEvacGroup.Where(x => x.Key.IsEqualTo(block.Position, new Tolerance(1, 1))).ToList();
+                        var groupPt = emgEvacGroup.Where(x => x.Key.IsEqualTo(pt, new Tolerance(1, 1))).ToList();
                         if (groupPt.Count > 0)
                         {
                             group.groupBlock.Add(groupPt[0].Key, groupPt[0].Value);
@@ -200,10 +230,52 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     }
                 }
             }
-
-            singleSideBlocks.ForEach(x => RemoveBlockFromList(x, blockList));
-
         }
+
+        private static void getDescendant(List<int> Child, Dictionary<int, List<int>> farBlkLink, List<int> thisLink)
+        {
+            var nextChild = Child.Where(x => thisLink.Contains(x) == false).ToList();
+            if (nextChild.Count != 0)
+            {
+                thisLink.AddRange(nextChild);
+                foreach (var c in nextChild)
+                {
+                    getDescendant(farBlkLink[c], farBlkLink, thisLink);
+                }
+            }
+        }
+
+
+        //public static void restBlockToSingleSideBlocks(Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, List<ThSingleSideBlocks> singleSideBlocks, Dictionary<Point3d, Point3d> emgEvacGroup)
+        //{
+        //    //有可能主要块放到不正确的组里
+        //    foreach (var pair in blockList)
+        //    {
+        //        foreach (var block in pair.Value)
+        //        {
+        //            var closePoint = singleSideBlocks.SelectMany(x => x.getTotalBlock()).OrderBy(y => y.DistanceTo(block.Position)).FirstOrDefault();
+        //            var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
+        //            if (group != null)
+        //            {
+        //                group.secBlk.Add(block.Position);
+
+        //                if (pair.Key == EmgConnectCommon.BlockGroupType.mainBlock)
+        //                {
+        //                    var groupPt = emgEvacGroup.Where(x => x.Key.IsEqualTo(block.Position, new Tolerance(1, 1))).ToList();
+        //                    if (groupPt.Count > 0)
+        //                    {
+        //                        group.groupBlock.Add(groupPt[0].Key, groupPt[0].Value);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    singleSideBlocks.ForEach(x => RemoveBlockFromList(x, blockList));
+
+        //}
+
+
 
         private static void RemoveBlockFromList(ThSingleSideBlocks blockGroup, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList)
         {
@@ -286,6 +358,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             GroupEmgLightEvac(blockSourceList[EmgBlkType.BlockType.emgLight], blockSourceList[EmgBlkType.BlockType.evac], out var mainPt, out groupBlock);
             blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, mainPt);
         }
+
 
         //public static void classifySecBlocks(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, Point3d ALE)
         //{

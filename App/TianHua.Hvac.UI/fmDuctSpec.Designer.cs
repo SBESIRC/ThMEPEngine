@@ -29,6 +29,9 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.label7 = new System.Windows.Forms.Label();
+            this.TxtHeight = new DevExpress.XtraEditors.TextEdit();
+            this.ComBoxDrawingRatio = new DevExpress.XtraEditors.ComboBoxEdit();
             this.TxtOuterTube1 = new DevExpress.XtraEditors.TextEdit();
             this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
             this.LabAirSpeedInner = new System.Windows.Forms.Label();
@@ -71,14 +74,13 @@
             this.layoutControlItem19 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem20 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem21 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.ComBoxDrawingRatio = new DevExpress.XtraEditors.ComboBoxEdit();
             this.layoutControlItem11 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.TxtHeight = new DevExpress.XtraEditors.TextEdit();
             this.layoutControlItem22 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.label7 = new System.Windows.Forms.Label();
             this.layoutControlItem23 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube2.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube1.Properties)).BeginInit();
@@ -109,9 +111,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem19)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem20)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem21)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem22)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem23)).BeginInit();
             this.SuspendLayout();
@@ -149,6 +149,46 @@
             this.layoutControl1.Size = new System.Drawing.Size(171, 631);
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
+            // 
+            // label7
+            // 
+            this.label7.Location = new System.Drawing.Point(115, 67);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(49, 26);
+            this.label7.TabIndex = 27;
+            this.label7.Text = "m";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // TxtHeight
+            // 
+            this.TxtHeight.EditValue = "3.00";
+            this.TxtHeight.Location = new System.Drawing.Point(41, 70);
+            this.TxtHeight.Name = "TxtHeight";
+            this.TxtHeight.Properties.Appearance.Options.UseTextOptions = true;
+            this.TxtHeight.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
+            this.TxtHeight.Properties.DisplayFormat.FormatString = "#.00";
+            this.TxtHeight.Properties.Mask.EditMask = "[0-9][0-9]*(\\.[0-9]{1,2})?";
+            this.TxtHeight.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtHeight.Size = new System.Drawing.Size(67, 20);
+            this.TxtHeight.StyleController = this.layoutControl1;
+            this.TxtHeight.TabIndex = 26;
+            this.TxtHeight.EditValueChanged += new System.EventHandler(this.TxtHeight_EditValueChanged);
+            // 
+            // ComBoxDrawingRatio
+            // 
+            this.ComBoxDrawingRatio.EditValue = "1:150";
+            this.ComBoxDrawingRatio.Location = new System.Drawing.Point(65, 10);
+            this.ComBoxDrawingRatio.Name = "ComBoxDrawingRatio";
+            this.ComBoxDrawingRatio.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.ComBoxDrawingRatio.Properties.Items.AddRange(new object[] {
+            "1:150",
+            "1:100",
+            "1:50"});
+            this.ComBoxDrawingRatio.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.ComBoxDrawingRatio.Size = new System.Drawing.Size(96, 20);
+            this.ComBoxDrawingRatio.StyleController = this.layoutControl1;
+            this.ComBoxDrawingRatio.TabIndex = 25;
             // 
             // TxtOuterTube1
             // 
@@ -670,22 +710,6 @@
             this.layoutControlItem21.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem21.TextVisible = false;
             // 
-            // ComBoxDrawingRatio
-            // 
-            this.ComBoxDrawingRatio.EditValue = "1:150";
-            this.ComBoxDrawingRatio.Location = new System.Drawing.Point(65, 10);
-            this.ComBoxDrawingRatio.Name = "ComBoxDrawingRatio";
-            this.ComBoxDrawingRatio.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.ComBoxDrawingRatio.Properties.Items.AddRange(new object[] {
-            "1:150",
-            "1:100",
-            "1:50"});
-            this.ComBoxDrawingRatio.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.ComBoxDrawingRatio.Size = new System.Drawing.Size(96, 20);
-            this.ComBoxDrawingRatio.StyleController = this.layoutControl1;
-            this.ComBoxDrawingRatio.TabIndex = 25;
-            // 
             // layoutControlItem11
             // 
             this.layoutControlItem11.Control = this.ComBoxDrawingRatio;
@@ -698,21 +722,6 @@
             this.layoutControlItem11.TextSize = new System.Drawing.Size(50, 20);
             this.layoutControlItem11.TextToControlDistance = 5;
             // 
-            // TxtHeight
-            // 
-            this.TxtHeight.EditValue = "3.00";
-            this.TxtHeight.Location = new System.Drawing.Point(41, 70);
-            this.TxtHeight.Name = "TxtHeight";
-            this.TxtHeight.Properties.Appearance.Options.UseTextOptions = true;
-            this.TxtHeight.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
-            this.TxtHeight.Properties.DisplayFormat.FormatString = "#.00";
-            this.TxtHeight.Properties.Mask.EditMask = "[1-9][0-9]*(\\.[0-9]{1,2})?";
-            this.TxtHeight.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
-            this.TxtHeight.Size = new System.Drawing.Size(67, 20);
-            this.TxtHeight.StyleController = this.layoutControl1;
-            this.TxtHeight.TabIndex = 26;
-            this.TxtHeight.EditValueChanged += new System.EventHandler(this.TxtHeight_EditValueChanged);
-            // 
             // layoutControlItem22
             // 
             this.layoutControlItem22.Control = this.TxtHeight;
@@ -722,15 +731,6 @@
             this.layoutControlItem22.Size = new System.Drawing.Size(108, 30);
             this.layoutControlItem22.Text = "标高:";
             this.layoutControlItem22.TextSize = new System.Drawing.Size(28, 14);
-            // 
-            // label7
-            // 
-            this.label7.Location = new System.Drawing.Point(115, 67);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(49, 26);
-            this.label7.TabIndex = 27;
-            this.label7.Text = "m";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // layoutControlItem23
             // 
@@ -758,6 +758,8 @@
             this.Load += new System.EventHandler(this.fmDuctSpec_Load);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube2.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube1.Properties)).EndInit();
@@ -788,9 +790,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem19)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem20)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem21)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem22)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem23)).EndInit();
             this.ResumeLayout(false);

@@ -18,7 +18,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
     {
         public static List<Polyline> CorrectIntersectLink(List<Polyline> polylines, List<ThBlock> blkList)
         {
-            Tolerance tol = new Tolerance(1, 1);
+            Tolerance tol = new Tolerance(20, 20);
+            int tolPt = 20;
             List<Polyline> resPolys = new List<Polyline>();
 
             while (polylines.Count > 0)
@@ -26,23 +27,77 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var firPoly = polylines.First();
                 polylines.Remove(firPoly);
                 //找到相交线
-                var intersectPolys = polylines
-                    .ToDictionary(
-                    x => x,
-                    x =>
+                //var intersectPolys = polylines
+                //    .ToDictionary(
+                //    x => x,
+                //    x =>
+                //    {
+                //        //相交
+                //        List<Point3d> pts = new List<Point3d>();
+                //        foreach (Point3d pt in x.IntersectWithEx(firPoly))
+                //        {
+                //            if (pt.DistanceTo(x.StartPoint) > 1 && pt.DistanceTo(x.EndPoint) > 1)
+                //            {
+                //                pts.Add(pt);
+                //            }
+                //        }
+                //        return pts;
+                //    })
+                //    .Where(x => x.Value.Count > 0)
+                //    .ToDictionary(x => x.Key, y => y.Value.First());
+
+                var intersectPts = new Dictionary<Polyline, List<Point3d>>();
+                foreach (var poly in polylines)
+                {
+                    List<Point3d> pts = new List<Point3d>();
+                    foreach (Point3d pt in poly.IntersectWithEx(firPoly))
                     {
-                        List<Point3d> pts = new List<Point3d>();
-                        foreach (Point3d pt in x.IntersectWithEx(firPoly))
+                        if (pt.DistanceTo(poly.StartPoint) > tolPt && pt.DistanceTo(poly.EndPoint) > tolPt)
                         {
-                            if (pt.DistanceTo(x.StartPoint) > 1 && pt.DistanceTo(x.EndPoint) > 1)
+                            pts.Add(pt);
+                        }
+                    }
+
+                    //视觉重合
+                    var ptsTemp = new List<Point3d>();
+                    for (int i = 0; i < firPoly.NumberOfVertices - 1; i++)
+                    {
+                        for (int j = 0; j < poly.NumberOfVertices - 1; j++)
+                        {
+                            var pt = firPoly.GetPoint3dAt(i);
+                            var seg = new Line(poly.GetPoint3dAt(j), poly.GetPoint3dAt(j + 1));
+                            if (pt.IsPointOnLine(seg, tolPt))
+                            {
+                                ptsTemp.Add(pt);
+                            }
+
+                            var pt2 = poly.GetPoint3dAt(j);
+                            var seg2 = new Line(firPoly.GetPoint3dAt(i), firPoly.GetPoint3dAt(i + 1));
+                            if (pt2.IsPointOnLine(seg2, tolPt))
+                            {
+                                ptsTemp.Add(pt2);
+                            }
+                        }
+                    }
+                    foreach (var pt in ptsTemp)
+                    {
+                        if (pt.DistanceTo(poly.StartPoint) > tolPt && pt.DistanceTo(poly.EndPoint) > tolPt
+                            && pt.DistanceTo(firPoly.StartPoint) > tolPt && pt.DistanceTo(firPoly.EndPoint) > tolPt)
+                        {
+                            var alreadyIn = pts.Where(x => x.DistanceTo(pt) <= tolPt);
+                            if (alreadyIn.Count() == 0)
                             {
                                 pts.Add(pt);
                             }
                         }
-                        return pts;
-                    })
-                    .Where(x => x.Value.Count > 0)
-                    .ToDictionary(x => x.Key, y => y.Value.First());
+                    }
+
+                    intersectPts.Add(poly, pts);
+                }
+
+              var  intersectPolys = intersectPts.Where(x => x.Value.Count > 0)
+                                            .ToDictionary(x => x.Key, y => y.Value.First());
+
 
                 //if (intersectPolys.Count ==1 )
                 if (intersectPolys.Count > 0)
@@ -55,7 +110,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         polylines.Remove(intersectPoly.Key);
                         secPoly = intersectPoly.Key;
                         correctLink(intersectPt, blkList, ref firPoly, ref secPoly);
-                        resPolys.Add(secPoly);
+                        polylines.Add(secPoly);
+                        //resPolys.Add(secPoly);
                     }
 
                 }
@@ -135,7 +191,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 reversePl.ReverseCurve();
                 bReverse = true;
             }
-           
+
             return bReverse;
         }
 
@@ -149,7 +205,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 moveSegPoint(intersectPt, firInterIdx, ref firPolyNew);
             }
-            else if (secInterIdx > 0)
+            if (secInterIdx > 0)
             {
                 moveSegPoint(intersectPt, secInterIdx, ref secPolyNew);
             }
@@ -208,7 +264,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static int getSeg(Point3d intersecPt, Polyline polyline)
         {
-            var tol = new Tolerance(1, 1);
+            var tol = new Tolerance(20, 20);
             var idx = -1;
             var closetPt = polyline.GetClosestPointTo(intersecPt, false);
 

@@ -47,7 +47,7 @@ namespace ThMEPLighting.Garage.Engine
             {
                 return;
             }
-            Point3d firstStart= LineEdges[0].Edge.StartPoint;
+            Point3d firstStart= FirstLightEdges[0].Edge.StartPoint;
             var nubmeredLightEdges = new List<ThLightEdge>();
             do
             {
@@ -107,14 +107,13 @@ namespace ThMEPLighting.Garage.Engine
                 }
                 #endregion
                 //为1号边建图
-                var firstLightGraph = ThLightGraphService.Build(FirstLightEdges, firstStart);
-                if(firstLightGraph==null)
-                {
-                    return;
-                }
+                //var aaa =FirstLightEdges.Select(o => Tuple.Create(o.Edge.StartPoint, o.Edge.EndPoint));
+                var firstLightGraph = new ThCdzmLightGraphService(FirstLightEdges, firstStart);
+                firstLightGraph.Build();
                 //布点
-                var distributedEdges = ThDoubleRowDistributeService.Distribute(
-                    firstLightGraph, ArrangeParameter, WireOffsetDataService, QueryLightBlockService);
+                var distributedService = new ThDoubleRowDistributeService(firstLightGraph,
+                    ArrangeParameter, WireOffsetDataService, QueryLightBlockService);
+                distributedService.Distribute();
                 UpdateLoopNumber(firstLightGraph);
                 //对1号线的边编号
                 ThDoubleRowNumberService.Number(firstLightGraph, ArrangeParameter, WireOffsetDataService);

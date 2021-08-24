@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using ThMEPEngineCore.CAD;
+using ThCADExtension;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -24,6 +24,10 @@ namespace ThMEPLighting.Garage.Service
         }
         protected override void Number()
         {
+            if (LightGraph == null || LightGraph.Links.Count == 0)
+            {
+                return;
+            }
             LightGraph.Links.ForEach(o => Number(o));
         }
         private void Number(ThLinkPath singleLinkPath)
@@ -46,13 +50,10 @@ namespace ThMEPLighting.Garage.Service
                 for(;j< singleLinkPath.Path.Count;j++)
                 {
                     var preEdge = edges.Last();
-                    var currentEdge = singleLinkPath.Path[j];
-                    if (ThGeometryTool.IsCollinearEx(
-                        currentEdge.Edge.StartPoint,
-                        currentEdge.Edge.EndPoint,
-                        preEdge.Edge.StartPoint, preEdge.Edge.EndPoint))
+                    var nextEdge = singleLinkPath.Path[j];
+                    if (ThGarageUtils.IsLessThan45Degree(preEdge.Edge.LineDirection(), nextEdge.Edge.LineDirection()))
                     {
-                        edges.Add(currentEdge);
+                        edges.Add(nextEdge);
                     }
                     else
                     {

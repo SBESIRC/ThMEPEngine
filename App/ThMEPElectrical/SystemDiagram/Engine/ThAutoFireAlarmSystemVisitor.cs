@@ -40,6 +40,14 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             if (IsDistributionElement(blkref) && CheckLayerValid(blkref) && IsDistributeElementBlock(blkref))
             {
                 var dic = blkref.Id.GetAttributesInBlockReferenceEx();
+                if(dic.Any(o=>o.Value=="APEa"))
+                {
+                    ThBlockConfigModel.SetGlobleAPEa();
+                }
+                if (dic.Any(o => o.Value == "APEf"))
+                {
+                    ThBlockConfigModel.SetGlobleAPEf();
+                }
                 if (IsRequiredElement(blkref, dic))
                 {
                     var info = new ElementInfo()
@@ -62,9 +70,9 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             bool IsRequired = false;
             ThBlockConfigModel.BlockConfig.ForEach(o =>
             {
-            switch (o.StatisticMode)
-            {
-                case StatisticType.BlockName:
+                switch (o.StatisticMode)
+                {
+                    case StatisticType.BlockName:
                         {
                             if (o.BlockName == blkref.Name || (o.HasAlias && o.AliasList.Contains(blkref.Name)))
                             {

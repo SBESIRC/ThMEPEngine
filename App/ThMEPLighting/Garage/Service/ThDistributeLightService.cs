@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 
 namespace ThMEPLighting.Garage.Service
@@ -30,36 +29,45 @@ namespace ThMEPLighting.Garage.Service
             {
                 return;
             }
-            double length = SplitParameter.LineSp.DistanceTo(SplitParameter.LineEp)
-                - SplitParameter.StartConstraintLength
-                - SplitParameter.EndConstraintLength;
-            double restLength = length % SplitParameter.Interval;
-            double splitNum = (length - restLength) / SplitParameter.Interval;
-            if (restLength/2.0< SplitParameter.Margin)
+            double totalTength = SplitParameter.Length; //总长
+            double restLength = totalTength % SplitParameter.Interval; //剩余
+            if (restLength / 2.0 < SplitParameter.Margin)
             {
+                //修正
                 restLength += SplitParameter.Interval;
-                splitNum -= 1;
             }
-            Vector3d normal = SplitParameter.LineSp.GetVectorTo(SplitParameter.LineEp).GetNormal();
-            Point3d startPt = SplitParameter.LineSp + normal.MultiplyBy(SplitParameter.StartConstraintLength);
-            Point3d baseSplitPt = startPt + normal.MultiplyBy(restLength / 2.0);
-            if(restLength>0.0)
+            var forwardLength = restLength / 2.0;
+            while (forwardLength < totalTength)
             {
-                SplitPoints.Add(baseSplitPt);
+                SplitPoints.Add(GetDistributePoint(forwardLength).Value);
+                forwardLength += SplitParameter.Interval;
             }
-            for (int i=1;i< splitNum;i++)
+        }
+        private Point3d? GetDistributePoint(double length)
+        {
+            Point3d? result = null;
+            if (length<0)
             {
-                Point3d nextSplitPt = baseSplitPt + normal.MultiplyBy(i * SplitParameter.Interval);
-                SplitPoints.Add(nextSplitPt);
+                return result;
             }
-            if(restLength > 0.0)
+            if(length<1e-6)
             {
-                var lastPt = SplitParameter.LineEp - normal.MultiplyBy(restLength / 2.0);
-                if (!SplitPoints.Where(o => o.DistanceTo(lastPt) <= 1.0).Any())
+                return SplitParameter.Segment[0];
+            }
+            var sum = 0.0;
+            for(int i=0;i< SplitParameter.Segment.Count-1;i++)
+            {
+                var vec = SplitParameter.Segment[i].GetVectorTo(SplitParameter.Segment[i + 1]);
+                if (length<= (sum+ vec.Length))
                 {
-                    SplitPoints.Add(lastPt);
+                    return SplitParameter.Segment[i] + vec.GetNormal().MultiplyBy(length - sum);
+                }
+                else
+                {
+                    sum += vec.Length;
                 }
             }
+            return result;
         }
 
         private bool IsValid()
@@ -72,12 +80,12 @@ namespace ThMEPLighting.Garage.Service
             {
                 return false;
             }
-            if (SplitParameter.LineSp.DistanceTo(SplitParameter.LineEp) < 1.0)
+            if (SplitParameter.Segment.Count<2)
             {
                 //表示出入起终点是重复点
                 return false;
             }
-            if (SplitParameter.LineSp.DistanceTo(SplitParameter.LineEp)< SplitParameter.Margin*2)
+            if (SplitParameter.Segment[0].DistanceTo(SplitParameter.Segment[SplitParameter.Segment.Count-1]) < SplitParameter.Margin*2)
             {
                 return false;
             }
@@ -86,11 +94,24 @@ namespace ThMEPLighting.Garage.Service
     }
     public class ThLineSplitParameter
     {
-        public Point3d LineSp { get; set; }
-        public Point3d LineEp { get; set; }
+        public List<Point3d> Segment { get; set; }
         public double Margin { get; set; }
         public double Interval { get; set; }
-        public double StartConstraintLength { get; set; } 
-        public double EndConstraintLength { get; set; }
+        public ThLineSplitParameter()
+        {
+            Segment = new List<Point3d>();
+        }
+        public double Length
+        {
+            get
+            {
+                double length = 0.0;
+                for(int i=0;i< Segment.Count-1;i++)
+                {
+                    length += Segment[i].DistanceTo(Segment[i+1]);
+                }
+                return length;
+            }
+        }
     }
 }

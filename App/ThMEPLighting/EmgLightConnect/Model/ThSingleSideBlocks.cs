@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLightConnect.Model
 {
@@ -82,20 +83,14 @@ namespace ThMEPLighting.EmgLightConnect.Model
             {
                 if (m_matrix == new Matrix3d())
                 {
-                    m_matrix = getLaneMatrix(laneSide.First().Item1.StartPoint, laneSide.Last().Item1.EndPoint);
+                    m_matrix = GeomUtils.getLineMatrix(laneSide.First().Item1.StartPoint, laneSide.Last().Item1.EndPoint);
                 }
                 return m_matrix;
             }
 
         }
 
-        private static Matrix3d getLaneMatrix(Point3d startPt, Point3d endPt)
-        {
-            var dir = (endPt - startPt).GetNormal();
-            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
-            var matrix = Matrix3d.Displacement(startPt.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-            return matrix;
-        }
+
         public List<Point3d> reMainBlk
         {
             get
@@ -319,7 +314,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
 
             if (m_orderLanePts.Count == 0)
             {
-                orderLanePts();
+                m_orderLanePts = GeomUtils.orderLineListPts(m_laneSide.Select(x => x.Item1).ToList(), Matrix);
             }
 
             var ptTransTemp = pt.TransformBy(Matrix.Inverse());
@@ -327,11 +322,11 @@ namespace ThMEPLighting.EmgLightConnect.Model
             for (int i = 0; i < m_orderLanePts.Count - 1; i++)
             {
                 var linePt = m_orderLanePts.ElementAt(i);
-                var lintPtN = m_orderLanePts.ElementAt(i+1);
+                var lintPtN = m_orderLanePts.ElementAt(i + 1);
 
                 if (linePt.Value.X <= ptTransTemp.X && ptTransTemp.X <= lintPtN.Value.X)
                 {
-                    var matrixSeg = getLaneMatrix(linePt.Key, lintPtN.Key);
+                    var matrixSeg = GeomUtils.getLineMatrix(linePt.Key, lintPtN.Key);
                     var ptInLineSegTrans = pt.TransformBy(matrixSeg.Inverse());
                     ptTrans = new Point3d(ptTransTemp.X, ptInLineSegTrans.Y, 0);
                     break;
@@ -343,27 +338,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
 
 
 
-        private void orderLanePts()
-        {
-            var tol = new Tolerance(10, 10);
-            var pts = new List<Point3d>();
 
-            foreach (var l in m_laneSide)
-            {
-                var notInList = pts.Where(x => x.IsEqualTo(l.Item1.StartPoint, tol));
-                if (notInList.Count() == 0)
-                {
-                    pts.Add(l.Item1.StartPoint);
-                }
-                notInList = pts.Where(x => x.IsEqualTo(l.Item1.EndPoint, tol));
-                if (notInList.Count() == 0)
-                {
-                    pts.Add(l.Item1.EndPoint);
-                }
-            }
-
-            m_orderLanePts = pts.ToDictionary(x => x, x => x.TransformBy(Matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
-        }
     }
 
 }

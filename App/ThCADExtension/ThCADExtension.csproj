@@ -59,6 +59,7 @@
     <Compile Include="ThPoint3dCollectionExtensions.cs" />
     <Compile Include="ThMPolygonExtension.cs" />
     <Compile Include="ThPolylineExtension.cs" />
+    <Compile Include="ThRectangleExtension.cs" />
     <Compile Include="ThRegionTool.cs" />
     <Compile Include="ThSelectionFilterTool.cs" />
     <Compile Include="ThSolidTool.cs" />

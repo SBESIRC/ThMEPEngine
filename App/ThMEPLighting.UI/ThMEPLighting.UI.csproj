@@ -47,7 +47,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="emgLightLayout\emgLightConnectViewModel.cs" />
     <Compile Include="emgLightLayout\emgLightLayoutViewModel.cs" />
+    <Compile Include="emgLightLayout\UIEmgLightConnect.xaml.cs">
+      <DependentUpon>UIEmgLightConnect.xaml</DependentUpon>
+    </Compile>
     <Compile Include="emgLightLayout\UIEmgLightLayout.xaml.cs">
       <DependentUpon>UIEmgLightLayout.xaml</DependentUpon>
     </Compile>
@@ -103,6 +107,10 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="emgLightLayout\UIEmgLightConnect.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="emgLightLayout\UIEmgLightLayout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

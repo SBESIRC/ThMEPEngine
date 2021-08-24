@@ -49,5 +49,20 @@ namespace ThMEPEngineCore
                     0.0, 0.0, 0.0, 1.0});
             return matrix;
         }
+
+        /// <summary>
+        /// 创建polyline轴网线
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <returns></returns>
+        public static Polyline GetPolylineByPts(List<Point3d> pts)
+        {
+            Polyline poly = new Polyline();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                poly.AddVertexAt(i, pts[i].ToPoint2D(), 0, 0, 0);
+            }
+            return poly;
+        }
     }
 }

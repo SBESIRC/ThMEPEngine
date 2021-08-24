@@ -41,9 +41,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
             List<double> yTransValue = new List<double>();
             var allBlk = side.getTotalBlock();
 
-            var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+            //var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
 
-            //var allBlkDict = allBlk.ToDictionary(x => x, x => side.transformPtToLaneWithAccurateY(x)).OrderBy(item => item.Value.X).ToList();
+            var allBlkDict = allBlk.ToDictionary(x => x, x => side.transformPtToLaneWithAccurateY(x)).OrderBy(item => item.Value.X).ToList();
             var laneEndPt = side.laneSide.Last().Item1.EndPoint.TransformBy(side.Matrix.Inverse());
 
             if (side.mainBlk.Count > 0)
@@ -82,7 +82,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
             else if (side.secBlk.Count > 0)
             {
-                yTransValue = allBlkDict.Where(x => side.secBlk.Contains(x.Key)).Select(x => x.Value.Y).ToList();
+                var tolLane = EmgConnectCommon.TolGroupBlkLane;
+                //tolLane = 6000;
+                //没有主块的线
+                yTransValue = allBlkDict.Where(x => side.secBlk.Contains(x.Key) && Math.Abs(x.Value.Y) <= tolLane).Select(x => x.Value.Y).ToList();
+                if (yTransValue .Count ==0)
+                {
+                    yTransValue = allBlkDict.Where(x => side.secBlk.Contains(x.Key)).Select(x => x.Value.Y).ToList();
+                }
 
                 double ySecMean = 20000;
                 ySecMean = yTransValue
@@ -242,7 +249,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
                 var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
                 moveLanePoly = moveLineTemp.Clone() as Polyline;
-
+                DrawUtils.ShowGeometry(moveLanePoly, "l0moveLanePoly", 76);
                 var checkIntersectPoly = lanePoly.Clone() as Polyline;
 
                 for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
@@ -318,7 +325,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 var angle = lineDir.GetAngleTo(laneDir, Vector3d.ZAxis);
 
-                if (Math.Abs(Math.Cos(angle)) < Math.Cos(30 * Math.PI / 180))
+                if (Math.Abs(Math.Cos(angle)) < Math.Cos(45 * Math.PI / 180))
                 {
                     continue;
                 }
@@ -408,7 +415,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             Dictionary<int, List<KeyValuePair<Point3d, Point3d>>> offsetBlk = new Dictionary<int, List<KeyValuePair<Point3d, Point3d>>>();
 
             var allBlk = side.getTotalBlock();
-            var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+            //var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+            var allBlkDict = allBlk.ToDictionary(x => x, x => side.transformPtToLaneWithAccurateY(x)).OrderBy(item => item.Value.X).ToList();
 
             foreach (var blk in allBlkDict)
             {

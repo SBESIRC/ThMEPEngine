@@ -48,12 +48,17 @@ namespace ThMEPWSS.FlushPoint.Service
             for (int i = 0; i < column.NumberOfVertices; i++)
             {
                 var lineSegment = column.GetLineSegmentAt(i);
+                if(lineSegment.Length<1e-4)
+                {
+                    continue;
+                }
                 var dir = lineSegment.StartPoint.GetVectorTo(lineSegment.EndPoint).GetPerpendicularVector();
                 var position = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
                 collector.Add(position);
                 var extendPt = position + dir.GetNormal().MultiplyBy(5.0);
                 if (column.Contains(extendPt))
                 {
+
                     dir = dir.Negate();
                 }
                 if (CanLayout(position, dir))

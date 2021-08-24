@@ -212,15 +212,21 @@ namespace ThMEPLighting
         /// <returns></returns>
         private List<Polyline> HandleFrame(List<Curve> frameLst)
         {
-            //var polygonInfos = NoUserCoordinateWorker.MakeNoUserCoordinateWorker(frameLst);
-            //List<Polyline> resPLines = new List<Polyline>();
-            //foreach (var pInfo in frameLst)
-            //{
-            //    resPLines.Add(pInfo.ExternalProfile);
-            //    resPLines.AddRange(pInfo.InnerProfiles);
-            //}
+            List<Polyline> resPolys = new List<Polyline>();
+            foreach (var frame in frameLst)
+            {
+                if (frame is Polyline poly && poly.Closed)
+                {
+                    resPolys.Add(poly);
+                }
+                else if (frame is Polyline secPoly && !secPoly.Closed && secPoly.StartPoint.DistanceTo(secPoly.EndPoint) < 1000)
+                {
+                    secPoly.Closed = true;
+                    resPolys.Add(secPoly);
+                }
+            }
 
-            return frameLst.Cast<Polyline>().ToList();
+            return resPolys;
         }
     }
 }  

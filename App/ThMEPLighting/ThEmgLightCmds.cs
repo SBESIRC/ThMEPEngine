@@ -11,7 +11,9 @@ using Autodesk.AutoCAD.Runtime;
 using AcHelper;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
@@ -20,7 +22,6 @@ using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLight.Common;
 using ThMEPLighting.EmgLightConnect;
 using ThMEPLighting.EmgLightConnect.Service;
-
 
 namespace ThMEPLighting
 {
@@ -66,27 +67,19 @@ namespace ThMEPLighting
                     return;
                 }
 
-                var scale = UISettingService.Instance.scale;
-                var blkType = UISettingService.Instance.blkType;
+                var scale = LayoutUISettingService.Instance.scale;
+                var blkType = LayoutUISettingService.Instance.blkType;
 
 
                 var blkName = blkType == 0 ? ThMEPLightingCommon.EmgLightBlockName : ThMEPLightingCommon.EmgLightDoubleBlockName;
 
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    //获取外包框
+                    ////获取外包框
                     var frame = acdb.Element<Polyline>(obj);
-                    var frameClone = frame.WashClone() as Polyline;
-                    var centerPt = frameClone.StartPoint;
-
-                    //debug
-                    //centerPt = new Point3d();
-
-                    //处理外包框
-                    var transformer = new ThMEPOriginTransformer(centerPt);
-                    transformer.Transform(frameClone);
-                    frameClone.Closed = true;
-                    var nFrame = ThMEPFrameService.NormalizeEx(frameClone);
+                    var transOriPt = frame.StartPoint;
+                    var transformer = new ThMEPOriginTransformer(transOriPt);
+                    var nFrame = processFrame(frame, transformer);
                     if (nFrame.Area < 1)
                     {
                         continue;
@@ -103,6 +96,7 @@ namespace ThMEPLighting
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
+                    DrawUtils.CreateLayer(EmgLightCommon.LayerComment, Color.FromColorIndex(ColorMethod.ByLayer, EmgLightCommon.LayerCommentColor));
 
                     //取块
                     var getBlockS = new GetBlockService();
@@ -110,12 +104,14 @@ namespace ThMEPLighting
                     Dictionary<BlockReference, BlockReference> evacBlk = new Dictionary<BlockReference, BlockReference>();
                     getBlockS.evacR.ForEach(x => evacBlk.Add(x.Key, x.Value));
                     getBlockS.evacRL.ForEach(x => evacBlk.Add(x.Key, x.Value));
+                    var revCloud = GetSourceDataService.ExtractRevCloud(bufferTransFrame, EmgLightCommon.LayerComment, EmgLightCommon.LayerCommentColor, transformer);
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
                     //RemoveBlockService.ClearEmergencyLight(block);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLightDouble);
+                    RemoveBlockService.ClearPolyline(revCloud);
 
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkTransFrame, bufferTransFrame, acdb, transformer);
@@ -132,16 +128,21 @@ namespace ThMEPLighting
                     layoutEngine.evacBlk = evacBlk;
                     layoutEngine.singleSide = singleSide;
                     var layoutInfo = layoutEngine.LayoutLight();
+                    var commentList = commentLineService.getCommentLine(layoutInfo, columns);
+
 
                     //如果应急灯和疏散灯重合则移动应急灯
                     layoutEngine.moveEmg(ref layoutInfo);
 
                     //换回布置
                     layoutEngine.ResetResult(ref layoutInfo, transformer);
+                    layoutEngine.ResetResult(ref commentList, transformer);
 
                     //布置构建
                     //double scale = LayoutEmgLightEngine.getScale(getBlockS);
                     InsertLightService.InsertSprayBlock(layoutInfo, scale, blkName);
+
+                    InsertLightService.InsertRevcloud(commentList);
                 }
             }
         }
@@ -191,27 +192,20 @@ namespace ThMEPLighting
                 var ALEOri = (acdb.Element<BlockReference>(sResult.Value.GetObjectIds().First()) as BlockReference);
 
                 //确定位移中心
-                var centerPt = ALEOri.Position;
-                if (Math.Abs(centerPt.X) < 10E7)
+                var transOriPt = ALEOri.Position;
+                if (Math.Abs(transOriPt.X) < 10E7)
                 {
-                    centerPt = new Point3d();
+                    transOriPt = new Point3d();
                 }
-                //debug
-                //centerPt = new Point3d();
-                var transformer = new ThMEPOriginTransformer(centerPt);
 
-
+                var transformer = new ThMEPOriginTransformer(transOriPt);
 
                 var frameList = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
-                    var frameClone = frame.WashClone() as Polyline;
-
-                    //处理外包框
-                    transformer.Transform(frameClone);
-                    var nFrame = ThMEPFrameService.NormalizeEx(frameClone);
+                    var nFrame = processFrame(frame, transformer);
                     if (nFrame.Area < 1)
                     {
                         continue;
@@ -237,11 +231,6 @@ namespace ThMEPLighting
 
                     //清除连线。待补
 
-                    var b = false;
-                    if (b == true)
-                    {
-                        continue;
-                    }
                     //取块
                     var getBlockS = new GetBlockService();
                     getBlockS.getBlocksData(bufferFrame, transformer, nHoles);
@@ -253,8 +242,6 @@ namespace ThMEPLighting
                     transformer.Transform(ALE);
                     blockList.Add(EmgBlkType.BlockType.ale, new List<BlockReference> { ALE });
 
-
-
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
 
@@ -263,13 +250,64 @@ namespace ThMEPLighting
                         return;
                     }
 
-                    var connectLine = ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
+                    var min = ConnectUISettingService.Instance.groupMin;
+                    var max = ConnectUISettingService.Instance.groupMax;
+
+                    var connectLine = ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles, min, max);
 
                     ConnectEmgLightEngine.ResetResult(ref connectLine, transformer);
 
                     InsertConnectLineService.InsertConnectLine(connectLine);
                 }
             }
+        }
+
+        private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
+        {
+            var tol = 1000;
+            //获取外包框
+            var frameClone = frame.WashClone() as Polyline;
+            //处理外包框
+            transformer.Transform(frameClone);
+            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
+
+            return nFrame;
+
+        }
+
+        [CommandMethod("TIANHUACAD", "THtestIntersection", CommandFlags.Modal)]
+        public void thTestIntersection()
+        {
+            var a = new Polyline();
+            a.AddVertexAt(a.NumberOfVertices, new Point2d(100, 0), 0, 0, 0);
+            a.AddVertexAt(a.NumberOfVertices, new Point2d(200, 100), 0, 0, 0);
+            a.AddVertexAt(a.NumberOfVertices, new Point2d(0, 100), 0, 0, 0);
+            a.Closed = true;
+            DrawUtils.ShowGeometry(a, "l0test", 3);
+
+            //0.000001行 但0.00001找不到
+            var b = new Polyline();
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 100.00001), 0, 0, 0);
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 100.00000001), 0, 0, 0);
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 150), 0, 0, 0);
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 150), 0, 0, 0);
+            b.Closed = true;
+            DrawUtils.ShowGeometry(b, "l0test", 4);
+
+            var intpts = a.Intersect(b, Intersect.OnBothOperands);
+            intpts.ForEach(x => DrawUtils.ShowGeometry(x, "l0test", 4, 25, 10));
+
+            var intpts2 = b.Intersect(a, Intersect.OnBothOperands);
+            intpts2.ForEach(x => DrawUtils.ShowGeometry(x, "l0test", 4, 25, 10, "S"));
+
+            var interC = a.Intersection(new DBObjectCollection() { b });
+            var interCE = interC.Cast<Entity>().ToList();
+            DrawUtils.ShowGeometry(interCE, "l0test", 7);
+
+            var interC2 = b.Intersection(new DBObjectCollection() { a });
+            var interCE2 = interC2.Cast<Entity>().ToList();
+            DrawUtils.ShowGeometry(interCE2, "l0test", 1);
+
         }
 
         [System.Diagnostics.Conditional("DEBUG")]

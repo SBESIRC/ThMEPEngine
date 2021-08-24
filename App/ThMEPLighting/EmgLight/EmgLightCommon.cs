@@ -42,6 +42,10 @@ namespace ThMEPLighting.EmgLight
         public static string LayerStruct = "l7Struct";
         public static string LayerStructLayout = "l8StructLayout";
 
+
+        public static string LayerComment = "AI-圈注";
+        public static short LayerCommentColor = 1;
+
         public static Dictionary<string, double> blk_move_length = new Dictionary<string, double>() {
             {ThMEPLightingCommon.EmgLightBlockName,2.25},
             {ThMEPLightingCommon.EmgLightDoubleBlockName, 1.25},

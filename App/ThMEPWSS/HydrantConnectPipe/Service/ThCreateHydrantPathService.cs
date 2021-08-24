@@ -375,7 +375,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             Polyline hydrantPath = new Polyline();
             var hydrantpaths = new List<Polyline>();
-            var lines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(),1);
+            var lines = ThHydrantConnectPipeUtils.GetNearbyLine(StartPoint, DicTermLines.Keys.ToList(),2);
             foreach (var line in lines)
             {
                 var tmpPath = HydrantPath(pt, line);

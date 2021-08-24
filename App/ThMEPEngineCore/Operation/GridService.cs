@@ -31,8 +31,8 @@ namespace ThMEPEngineCore.Operation
             List<Point3d> points = GetColumCenter(useCols);
             Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(Vector3d.XAxis);
 
-            var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
-            var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
+            var firGrids = MoveClosedGridWithBoundary(CreateGridLine(matrix, points, polyline));
+            var secGrids = MoveClosedGridWithBoundary(CreateGridLine(RotateMatrix(matrix), points, polyline));
 
             if (ThMEPDebugService.IsEnabled())
             {
@@ -85,7 +85,6 @@ namespace ThMEPEngineCore.Operation
             polyPts = polyPts.Select(x => x.TransformBy(matrix.Inverse())).ToList();
             double minY = polyPts.First().Y;
             double maxY = polyPts.Last().Y;
-            points.AddRange(polyPts);
 
             List<Polyline> gridPoly = new List<Polyline>();
             points = points.OrderByDescending(x => x.X).ToList();
@@ -117,14 +116,14 @@ namespace ThMEPEngineCore.Operation
                 groupPts.Add(new Point3d(sp.X, maxY, 0));
                 groupPts.Add(new Point3d(sp.X, minY, 0));
                 groupPts = groupPts.OrderBy(x => x.Y).ToList();
-                Polyline poly = new Polyline();
-                for (int i = 0; i < groupPts.Count; i++)
-                {
-                    poly.AddVertexAt(i, groupPts[i].ToPoint2D(), 0, 0, 0);
-                }
+                Polyline poly = ThMEPEngineCoreGeUtils.GetPolylineByPts(groupPts);
                 gridPoly.Add(poly);
             }
 
+            var firPts = new List<Point3d>() { new Point3d(polyPts.First().X, minY, 0), new Point3d(polyPts.First().X, maxY, 0) };
+            gridPoly.Insert(0, ThMEPEngineCoreGeUtils.GetPolylineByPts(firPts));
+            var secPts = new List<Point3d>() { new Point3d(polyPts.Last().X, minY, 0), new Point3d(polyPts.Last().X, maxY, 0) };
+            gridPoly.Add(ThMEPEngineCoreGeUtils.GetPolylineByPts(secPts));
             gridPoly.ForEach(x => x.TransformBy(matrix));
             return new KeyValuePair<Vector3d, List<Polyline>>(matrix.CoordinateSystem3d.Xaxis, gridPoly);
         }
@@ -175,6 +174,54 @@ namespace ThMEPEngineCore.Operation
         /// 去掉离得过近的轴网线
         /// </summary>
         /// <param name="grids"></param>
+        private KeyValuePair<Vector3d, List<Polyline>> MoveClosedGridWithBoundary(KeyValuePair<Vector3d, List<Polyline>> grids)
+        {
+            var gridLines = grids.Value;
+            int index = 1;
+            int indexJ = 2;
+            //清空起始线和结束线周围的线
+            List<Polyline> holdLines = new List<Polyline>() { gridLines.First(), gridLines.Last() };
+            var startRangeLines = gridLines.Except(holdLines).Where(x => x.Distance(gridLines.First()) < minSpace).ToList();
+            var endRangeLines = gridLines.Except(holdLines).Where(x => x.Distance(gridLines.Last()) < minSpace).ToList();
+            gridLines = gridLines.Except(startRangeLines).ToList();
+            gridLines = gridLines.Except(endRangeLines).ToList();
+
+            List<Polyline> removePolys = new List<Polyline>();
+            while (index < gridLines.Count)
+            {
+                if (indexJ >= gridLines.Count - 1)
+                {
+                    break;
+                }
+
+                var poly = gridLines[index];
+                var nextPoly = gridLines[indexJ];
+                if (poly.Distance(nextPoly) < minSpace)
+                {
+                    if (poly.NumberOfVertices >= nextPoly.NumberOfVertices)
+                    {
+                        removePolys.Add(nextPoly);
+                    }
+                    else
+                    {
+                        removePolys.Add(poly);
+                        index = indexJ;
+                    }
+                }
+                else
+                {
+                    index = indexJ;
+                }
+                indexJ++;
+            }
+
+            return new KeyValuePair<Vector3d, List<Polyline>>(grids.Key, gridLines.Except(removePolys).ToList());
+        }
+
+        /// <summary>
+        /// 去掉离得过近的轴网线
+        /// </summary>
+        /// <param name="grids"></param>
         private KeyValuePair<Vector3d, List<Polyline>> MoveClosedGrid(KeyValuePair<Vector3d, List<Polyline>> grids)
         {
             var gridLines = grids.Value;
@@ -192,11 +239,11 @@ namespace ThMEPEngineCore.Operation
 
                 if (poly.Distance(nextPoly) < minSpace)
                 {
-                    if (index == 0)
-                    {
-                        removePolys.Add(nextPoly);
-                    }
-                    else if (indexJ == gridLines.Count - 1)
+                    //if (index == 0)
+                    //{
+                    //    removePolys.Add(nextPoly);
+                    //}
+                    if (indexJ == gridLines.Count - 1)
                     {
                         removePolys.Add(poly);
                     }

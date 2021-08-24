@@ -39,7 +39,7 @@ namespace ThMEPLighting.UI.emgLightLayout
                 emgLightVM = new emgLightLayoutViewModel();
             }
 
-            var value = UISettingService.Instance.scale;
+            var value = LayoutUISettingService.Instance.scale;
 
             this.DataContext = emgLightVM;
 
@@ -51,17 +51,17 @@ namespace ThMEPLighting.UI.emgLightLayout
             if (Active.Document == null)
                 return;
 
-            UISettingService.Instance.scale =  (double)emgLightVM.scaleItem.Tag;
-            UISettingService.Instance.blkType = (int)emgLightVM.blkType;
-            UISettingService.Instance.singleSide = (int)emgLightVM.singleLayout;
+            LayoutUISettingService.Instance.scale =  (double)emgLightVM.scaleItem.Tag;
+            LayoutUISettingService.Instance.blkType = (int)emgLightVM.blkType;
+            LayoutUISettingService.Instance.singleSide = (int)emgLightVM.singleLayout;
 
-            if (UISettingService.Instance.singleSide == 0)
+            if (LayoutUISettingService.Instance.singleSide == 0)
             {
                 //两侧布点
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THYJZMSC");
                 FocusToCAD();
             }
-            else if (UISettingService.Instance.singleSide == 1)
+            else if (LayoutUISettingService.Instance.singleSide == 1)
             {
                 //单侧布点
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THYJZMDC");

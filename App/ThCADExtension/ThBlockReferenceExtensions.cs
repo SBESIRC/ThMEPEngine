@@ -149,8 +149,7 @@ namespace ThCADExtension
             {                
                 var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
                 var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
-                rectangle.TransformBy(ecs2Wcs);
-                return rectangle;
+                return rectangle.GetTransformedRectangle(ecs2Wcs);
             }
         }
 

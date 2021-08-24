@@ -15,12 +15,15 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
             List<BlockModel> models = new List<BlockModel>();
             //分类视频监控系统系统块
             var vmBlocks = ClassifyVMBlock(cBlocks);
+            models.AddRange(vmBlocks);
             //分类紧急报警系统块
             cBlocks = cBlocks.Except(vmBlocks.Select(x => x.blockModel)).ToList();
             var iaBlocks = ClassifyIABlock(cBlocks);
+            models.AddRange(iaBlocks);
             //分类出入口控制系统块
             cBlocks = cBlocks.Except(iaBlocks.Select(x => x.blockModel)).ToList();
             var acBlocks = ClassifyACBlock(cBlocks);
+            models.AddRange(acBlocks);
 
             return models;
         }

@@ -1,9 +1,13 @@
-﻿using DotNetARX;
+﻿using System.Collections.Generic;
+
+using AcHelper;
+using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using ThMEPEngineCore;
 using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLight.Service
@@ -41,6 +45,45 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        public static void InsertRevcloud(List<Polyline> commentLine)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var layerId = db.Database.CreateAILayer(EmgLightCommon.LayerComment, 1);
+                commentLine.ForEach(o =>
+                {
+                    // 创建云线
+                    ObjectId revcloud = ObjectId.Null;
+                    var objId = db.ModelSpace.Add(o);
+                    void handler(object s, ObjectEventArgs e)
+                    {
+                        if (e.DBObject is Polyline polyline)
+                        {
+                            revcloud = e.DBObject.ObjectId;
+                        }
+                    }
+                    db.Database.ObjectAppended += handler;
+#if ACAD_ABOVE_2014
+                    Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", objId, "_No");
+#else
+                    ResultBuffer args = new ResultBuffer(
+                       new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
+                       new TypedValue((int)LispDataType.Text, "_ARC"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "_Object"),
+                       new TypedValue((int)LispDataType.ObjectId, objId),
+                       new TypedValue((int)LispDataType.Text, "_No"));
+                    Active.Editor.AcedCmd(args);
+#endif
+                    db.Database.ObjectAppended -= handler;
 
+                    // 设置运行属性
+                    var revcloudObj = db.Element<Entity>(revcloud, true);
+                    revcloudObj.LayerId = layerId;
+                    revcloudObj.ColorIndex = (int)ColorIndex.BYLAYER;
+                });
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ panels:
         - text: "提车道中心线"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "提取空间"
-          attributes: { "IsVisible": true, "IsEnabled": true }
+          attributes: { "IsVisible": false, "IsEnabled": false }
         - text: "空间拾取"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }

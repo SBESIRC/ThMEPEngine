@@ -550,12 +550,15 @@ namespace ThMEPElectrical.Business.MainBeam
             var bottomLine = placeRectInfo.BottomLine;
 
             //var rectArea = leftLine.Length * bottomLine.Length;
-
-            // 一个可以布置完的
-            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && placeRectInfo.srcPolyline.Area < m_parameter.ProtectArea
-                && GeomUtils.IsValidSinglePlace(leftLine.Length, bottomLine.Length, m_parameter.ProtectRadius))
+            var pts = GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
+            if (pts.Count >= 1)
             {
-                return GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
+                // 一个可以布置完的
+                if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && placeRectInfo.srcPolyline.Area < m_parameter.ProtectArea
+                    && GeomUtils.IsValidSinglePlace(placeRectInfo.srcPolyline, pts[0], m_parameter.ProtectRadius))
+                {
+                    return pts;//GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
+                }
             }
 
             // 垂直个数

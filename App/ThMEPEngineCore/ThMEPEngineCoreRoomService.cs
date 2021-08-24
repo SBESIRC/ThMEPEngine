@@ -17,6 +17,8 @@ namespace ThMEPEngineCore
         readonly static string evacuationLighting = "疏散照明";
         readonly static string roomConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
         readonly static string roomNameControl = "房间名称处理";
+        readonly static List<string> mustLayoutArea = new List<string> { "楼梯间", "前室" };
+        readonly static List<string> cannotLayoutArea = new List<string> { "井道", "存储房间", "设备机房", "无障碍套型", "居住套型" };
 
         private List<RoomTableTree> Tree { get; set; }
 
@@ -30,7 +32,7 @@ namespace ThMEPEngineCore
 
         public List<string> GetLabels(ThIfcRoom room)
         {
-            foreach(var roomName in room.Tags)
+            foreach (var roomName in room.Tags)
             {
                 var labels = Search(Tree, roomName);
                 if (labels.Count != 0)
@@ -41,25 +43,95 @@ namespace ThMEPEngineCore
             return new List<string>();
         }
 
-        public List<string> Search(List<RoomTableTree> tree, string roomName)
+        private List<string> Search(List<RoomTableTree> tree, string roomName)
         {
-            var tags = new List<string>();
+            var listString = new List<string>();
             foreach (var treeNode in tree)
             {
-                if (treeNode.nodeName == roomName)
+                if (treeNode.nodeName == roomName || RoomConfigTreeService.CompareRoom(treeNode.synonym, roomName))
                 {
-                    return  treeNode.tags;
+                    return treeNode.tags;
                 }
                 else if (treeNode.child.Count > 0)
                 {
-                    tags = Search(treeNode.child, roomName);
-                    if (tags.Count > 0) 
+                    listString = Search(treeNode.child, roomName);
+                    if (listString.Count > 0)
                     {
-                        return tags;
+                        return listString;
                     }
                 }
             }
-            return tags;
+            return listString;
+        }
+
+        private bool JudgeRoomType(List<RoomTableTree> tree, string roomName, List<string> listString)
+        {
+            var tag = false;
+            foreach (var roomType in listString)
+            {
+                var roomTableTree = RoomTypeIteration(tree, roomName, roomType);
+                tag = JudgeRoomName(roomTableTree, roomName, roomType);
+                if (tag)
+                {
+                    return tag;
+                }
+            }
+            return tag;
+        }
+
+        private RoomTableTree RoomTypeIteration(List<RoomTableTree> tree, string roomName, string roomType)
+        {
+            foreach (var treeNode in tree)
+            {
+                if (treeNode.nodeName == roomType)
+                {
+                    return treeNode;
+                }
+                else if (treeNode.child.Count > 0)
+                {
+                    var roomTableTree = RoomTypeIteration(treeNode.child, roomName, roomType);
+                    if (roomTableTree.nodeName != null)
+                    {
+                        return roomTableTree;
+                    }
+                }
+            }
+            return new RoomTableTree();
+        }
+
+        private bool JudgeRoomName(RoomTableTree treeNode, string roomName, string roomType)
+        {
+            if (treeNode.nodeName == roomName || RoomConfigTreeService.CompareRoom(treeNode.synonym, roomName))
+            {
+                return true;
+            }
+            else if (treeNode.child.Count > 0)
+            {
+                if (JudgeRoomName(treeNode.child, roomName, roomType))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool JudgeRoomName(List<RoomTableTree> tree, string roomName, string roomType)
+        {
+            foreach (var treeNode in tree)
+            {
+                if (treeNode.nodeName == roomName || RoomConfigTreeService.CompareRoom(treeNode.synonym, roomName))
+                {
+                    return true;
+                }
+                else if (treeNode.child.Count > 0)
+                {
+                    if (JudgeRoomName(treeNode.child, roomName, roomType))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -69,7 +141,7 @@ namespace ThMEPEngineCore
         /// <returns></returns>
         public bool IsPublic(List<string> labels)
         {
-            foreach(var label in labels)
+            foreach (var label in labels)
             {
                 if (string.IsNullOrEmpty(label))
                 {
@@ -166,6 +238,40 @@ namespace ThMEPEngineCore
                     return false;
                 }
                 return label.Contains(evacuationLighting);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 判断房间是否为必布区域
+        /// </summary>
+        /// <param name="labels"></param>
+        /// <returns></returns>
+        public bool MustLayoutArea(ThIfcRoom room)
+        {
+            foreach (var roomName in room.Tags)
+            {
+                if (JudgeRoomType(Tree, roomName, mustLayoutArea))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 判断房间是否为不可布区域
+        /// </summary>
+        /// <param name="labels"></param>
+        /// <returns></returns>
+        public bool CannotLayoutArea(ThIfcRoom room)
+        {
+            foreach (var roomName in room.Tags)
+            {
+                if (JudgeRoomType(Tree, roomName, cannotLayoutArea))
+                {
+                    return true;
+                }
             }
             return false;
         }

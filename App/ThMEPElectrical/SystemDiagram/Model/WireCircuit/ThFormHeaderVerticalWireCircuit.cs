@@ -23,42 +23,78 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 //the one
                 Polyline OnePolyLine = new Polyline(4);
                 OnePolyLine.Closed = true;
-                OnePolyLine.AddVertexAt(0, new Point2d(-3000, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                OnePolyLine.AddVertexAt(0, new Point2d(-3000, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 OnePolyLine.AddVertexAt(1, new Point2d(-3000, OuterFrameLength * FloorIndex), 0, 0, 0);
                 OnePolyLine.AddVertexAt(2, new Point2d(0, OuterFrameLength * FloorIndex), 0, 0, 0);
-                OnePolyLine.AddVertexAt(3, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                OnePolyLine.AddVertexAt(3, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(OnePolyLine);
                 DBText OneText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                 OneText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader1;
-                OneText.Position = new Point3d(-1500, OuterFrameLength * this.FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight / 2, 0);
+                OneText.Position = new Point3d(-1500, OuterFrameLength * this.FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight, 0);
                 OneText.AlignmentPoint = OneText.Position;
                 Result.Add(OneText);
                 //the Two
                 Polyline TwoPolyLine = new Polyline(4);
                 TwoPolyLine.Closed = true;
-                TwoPolyLine.AddVertexAt(0, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
-                TwoPolyLine.AddVertexAt(1, new Point2d(0, OuterFrameLength * FloorIndex), 0, 0, 0);
-                TwoPolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex), 0, 0, 0);
-                TwoPolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                TwoPolyLine.AddVertexAt(0, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
+                TwoPolyLine.AddVertexAt(1, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                TwoPolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                TwoPolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(TwoPolyLine);
                 DBText TwoText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                 TwoText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader2;
-                TwoText.Position = new Point3d(9000, OuterFrameLength * this.FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight / 2, 0);
+                TwoText.Position = new Point3d(9000, OuterFrameLength * this.FloorIndex + 2250, 0);
                 TwoText.AlignmentPoint = TwoText.Position;
                 Result.Add(TwoText);
                 //the Three
                 Polyline ThreePolyLine = new Polyline(4);
                 ThreePolyLine.Closed = true;
-                ThreePolyLine.AddVertexAt(0, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
-                ThreePolyLine.AddVertexAt(1, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex), 0, 0, 0);
-                ThreePolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex), 0, 0, 0);
-                ThreePolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                ThreePolyLine.AddVertexAt(0, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
+                ThreePolyLine.AddVertexAt(1, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                ThreePolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                ThreePolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(ThreePolyLine);
                 DBText ThreeText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                 ThreeText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader3;
-                ThreeText.Position = new Point3d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum + 10500, OuterFrameLength * this.FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight / 2, 0);
+                ThreeText.Position = new Point3d(40500, OuterFrameLength * this.FloorIndex + 2250, 0);
                 ThreeText.AlignmentPoint = ThreeText.Position;
                 Result.Add(ThreeText);
+
+                for (int i = 0; i < ThAutoFireAlarmSystemCommon.SystemDiagramTitleBars.Count; i++)
+                {
+                    if (i != 18)
+                    {
+                        Polyline PolyLine = new Polyline(4);
+                        PolyLine.Closed = true;
+                        PolyLine.AddVertexAt(0, new Point2d(OuterFrameLength * i, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                        PolyLine.AddVertexAt(1, new Point2d(OuterFrameLength * i, OuterFrameLength * FloorIndex), 0, 0, 0);
+                        PolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (i + 1), OuterFrameLength * FloorIndex), 0, 0, 0);
+                        PolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (i + 1), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                        Result.Add(PolyLine);
+                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        Text.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramTitleBars[i];
+                        Text.Position = new Point3d(OuterFrameLength * i + 1500, OuterFrameLength * this.FloorIndex + 750, 0);
+                        Text.AlignmentPoint = Text.Position;
+                        Result.Add(Text);
+                    }
+                    else
+                    {
+                        //消防水泵联动列比较特殊，要占两格
+                        Polyline PolyLine = new Polyline(4);
+                        PolyLine.Closed = true;
+                        PolyLine.AddVertexAt(0, new Point2d(OuterFrameLength * i, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                        PolyLine.AddVertexAt(1, new Point2d(OuterFrameLength * i, OuterFrameLength * FloorIndex), 0, 0, 0);
+                        PolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (i + 2), OuterFrameLength * FloorIndex), 0, 0, 0);
+                        PolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (i + 2), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
+                        Result.Add(PolyLine);
+                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        Text.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramTitleBars[i];
+                        Text.Position = new Point3d(OuterFrameLength * i + 3000, OuterFrameLength * this.FloorIndex + 750, 0);
+                        Text.AlignmentPoint = Text.Position;
+                        Result.Add(Text);
+                        i++;
+                    }
+                }
             }
             //设置线型
             Result.ForEach(o =>

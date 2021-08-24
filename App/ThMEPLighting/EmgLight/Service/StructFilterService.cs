@@ -79,6 +79,12 @@ namespace ThMEPLighting.EmgLight.Service
 
         public void FilterStruct(LayoutService layoutServer, Polyline frame)
         {
+            ////过滤掉很短的墙
+            filterTooShortWall(layoutServer, EmgLightCommon.TolBrakeWall - 50);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), "l4tooShort", 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), "l4tooShort", 161, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), "l4tooShort", 11, 35);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), "l4tooShort", 11, 35);
 
             ////滤掉重合部分
             filterOverlapStruc(layoutServer);
@@ -102,11 +108,6 @@ namespace ThMEPLighting.EmgLight.Service
 
             ////滤掉框后边的部分
             filterStrucBehindFrame(layoutServer, frame);
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), "l61OutFrame", 140, 35);
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), "l61OutFrame", 140, 35);
-
-            ////过滤掉很短的墙
-            filterTooShortWall(layoutServer, EmgLightCommon.TolBrakeWall-50);
 
             DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 161, 35);
             DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, 161, 35);
@@ -124,13 +125,40 @@ namespace ThMEPLighting.EmgLight.Service
         /// <returns></returns>
         private List<ThStruct> getStructureParallelPart(List<ThStruct> structureSegment)
         {
-            //平行于车道线的边
-            var structureLayoutSegment = structureSegment.Where(x =>
-            {
-                bool bAngle = Math.Abs(m_thLane.dir.DotProduct(x.dir)) / (m_thLane.dir.Length * x.dir.Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
-                return bAngle;
-            }).ToList();
+            ////平行于车道线的边
+            //var structureLayoutSegment = structureSegment.Where(x =>
+            //{
+            //    bool bAngle = Math.Abs(m_thLane.dir.DotProduct(x.dir)) / (m_thLane.dir.Length * x.dir.Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
+            //    return bAngle;
+            //}).ToList();
 
+            var tolAngle = 20;
+            var structureLayoutSegment = new List<ThStruct>();
+
+            //平行于车道线的边
+            var orderLanePts = GeomUtils.orderLineListPts(m_thLane.geom, m_thLane.matrix);
+
+            for (int i = 0; i < orderLanePts.Count - 1; i++)
+            {
+                var segMatrix = GeomUtils.getLineMatrix(orderLanePts.ElementAt(i).Key, orderLanePts.ElementAt(i + 1).Key);
+                var lintPtN = orderLanePts.ElementAt(i + 1).Key.TransformBy(segMatrix.Inverse());
+
+                foreach (var s in structureSegment)
+                {
+                    var ptTransTemp = s.centerPt.TransformBy(segMatrix.Inverse());
+
+                    if (0 <= ptTransTemp.X && ptTransTemp.X <= lintPtN.X)
+                    {
+                        var segDir = (orderLanePts.ElementAt(i + 1).Key - orderLanePts.ElementAt(i).Key).GetNormal();
+                        var cosSegStruct = Math.Abs(segDir.DotProduct(s.dir)) / (segDir.Length * s.dir.Length);
+
+                        if (cosSegStruct > Math.Cos(tolAngle * Math.PI / 180))
+                        {
+                            structureLayoutSegment.Add(s);
+                        }
+                    }
+                }
+            }
 
             return structureLayoutSegment;
         }
@@ -236,6 +264,7 @@ namespace ThMEPLighting.EmgLight.Service
                     }
                 }
             }
+         
             for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
             {
                 foreach (var removeStru in intersectSegList)
@@ -252,53 +281,63 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         private void filterOverlapStruc(LayoutService layoutServer)
         {
+            var orderLanePts = GeomUtils.orderLineListPts(layoutServer.thLane.geom, layoutServer.thLane.matrix);
+
             for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
             {
                 Dictionary<ThStruct, ThStruct> removeList = new Dictionary<ThStruct, ThStruct>();
-                for (int curr = 0; curr < layoutServer.UsefulStruct[i].Count; curr++)
+                for (int iLane = 0; iLane < orderLanePts.Count - 1; iLane++)
                 {
-                    for (int j = curr; j < layoutServer.UsefulStruct[i].Count; j++)
+                    var segMatrix = GeomUtils.getLineMatrix(orderLanePts.ElementAt(iLane).Key, orderLanePts.ElementAt(iLane + 1).Key);
+                    var lintPtN = orderLanePts.ElementAt(iLane + 1).Key.TransformBy(segMatrix.Inverse());
+
+                    for (int curr = 0; curr < layoutServer.UsefulStruct[i].Count; curr++)
                     {
-                        if (j != curr)
+                        for (int j = curr; j < layoutServer.UsefulStruct[i].Count; j++)
                         {
-                            if (removeList.ContainsKey(layoutServer.UsefulStruct[i][curr]) == false)
+                            if (j != curr)
                             {
-
-
-                                var currCenter = layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][curr]);
-                                var closeStart = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][j].geom.StartPoint);
-                                var closeEnd = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][j].geom.EndPoint);
-
-                                if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                                if (removeList.ContainsKey(layoutServer.UsefulStruct[i][curr]) == false)
                                 {
-                                    if (Math.Abs(currCenter.Y) > Math.Abs(layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][j]).Y))
+                                    var currCenter = layoutServer.UsefulStruct[i][curr].centerPt.TransformBy(segMatrix.Inverse());
+                                    var closeStart = layoutServer.UsefulStruct[i][j].geom.StartPoint.TransformBy(segMatrix.Inverse());
+                                    var closeEnd = layoutServer.UsefulStruct[i][j].geom.EndPoint.TransformBy(segMatrix.Inverse());
+                                    var closeCenter = layoutServer.UsefulStruct[i][j].centerPt .TransformBy(segMatrix.Inverse());
+
+                                    if ((0 <= currCenter.X && currCenter.X <= lintPtN.X) &&
+                                         ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X)))
                                     {
-                                        removeList.Add(layoutServer.UsefulStruct[i][curr], layoutServer.UsefulStruct[i][j]);
-                                        var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][curr]).Select(q => q.Key).ToList();
-                                        keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][j]);
+                                        if (Math.Abs(currCenter.Y) > Math.Abs(closeCenter.Y))
+                                        {
+                                            removeList.Add(layoutServer.UsefulStruct[i][curr], layoutServer.UsefulStruct[i][j]);
+                                            var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][curr]).Select(q => q.Key).ToList();
+                                            keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][j]);
+                                        }
                                     }
                                 }
-                            }
-                            if (removeList.ContainsKey(layoutServer.UsefulStruct[i][j]) == false)
-                            {
-
-                                var currCenter = layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][j]);
-                                var closeStart = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][curr].geom.StartPoint);
-                                var closeEnd = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][curr].geom.EndPoint);
-                                if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                                if (removeList.ContainsKey(layoutServer.UsefulStruct[i][j]) == false)
                                 {
-                                    if (Math.Abs(currCenter.Y) > Math.Abs(layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][curr]).Y))
+                                    var currCenter = layoutServer.UsefulStruct[i][j].centerPt.TransformBy(segMatrix.Inverse());
+                                    var closeStart = layoutServer.UsefulStruct[i][curr].geom.StartPoint.TransformBy(segMatrix.Inverse());
+                                    var closeEnd = layoutServer.UsefulStruct[i][curr].geom.EndPoint.TransformBy(segMatrix.Inverse());
+                                    var closeCenter = layoutServer.UsefulStruct[i][curr].centerPt.TransformBy(segMatrix.Inverse());
+
+                                    if ((0 <= currCenter.X && currCenter.X <= lintPtN.X) &&
+                                        ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X)))
                                     {
-                                        removeList.Add(layoutServer.UsefulStruct[i][j], layoutServer.UsefulStruct[i][curr]);
-                                        var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][j]).Select(q => q.Key).ToList();
-                                        keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][curr]);
+                                        if (Math.Abs(currCenter.Y) > Math.Abs(closeCenter.Y))
+                                        {
+                                            removeList.Add(layoutServer.UsefulStruct[i][j], layoutServer.UsefulStruct[i][curr]);
+                                            var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][j]).Select(q => q.Key).ToList();
+                                            keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][curr]);
+                                        }
                                     }
                                 }
                             }
                         }
-
                     }
                 }
+
                 foreach (var removeStru in removeList)
                 {
                     if (layoutServer.UsefulColumns[i].Remove(removeStru.Key) == true)
@@ -383,7 +422,7 @@ namespace ThMEPLighting.EmgLight.Service
             var tooShortWall = layoutServer.UsefulStruct[0].Where(x => x.geom.Length < tol).ToList();
             layoutServer.UsefulStruct[0].RemoveAll(x => tooShortWall.Contains(x));
             layoutServer.UsefulWalls[0].RemoveAll(x => tooShortWall.Contains(x));
-            layoutServer.UsefulColumns [0].RemoveAll(x => tooShortWall.Contains(x));
+            layoutServer.UsefulColumns[0].RemoveAll(x => tooShortWall.Contains(x));
 
             tooShortWall = layoutServer.UsefulStruct[1].Where(x => x.geom.Length < tol).ToList();
             layoutServer.UsefulStruct[1].RemoveAll(x => tooShortWall.Contains(x));

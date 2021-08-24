@@ -2243,14 +2243,17 @@ namespace TianHua.FanSelection.UI
             {
                 return;
             }
-            if (_FanDataModel.FanSelectionStateInfo != null && _FanDataModel.FanSelectionStateInfo.fanSelectionState == FanSelectionState.LowNotFound &&
-             _FanDataModel.FanSelectionStateInfo.RecommendPointInLow != null && _FanDataModel.FanSelectionStateInfo.RecommendPointInLow.Count == 2)
-            {
-                XtraMessageBox.Show(string.Format(" 低速挡的工况点与高速挡差异过大,低速档风量的推荐值在{0}m³/h左右,总阻力的推荐值小于{1}Pa. ",
-                    _FanDataModel.FanSelectionStateInfo.RecommendPointInLow[0], _FanDataModel.FanSelectionStateInfo.RecommendPointInLow[1]
-                    ), "警告", MessageBoxButtons.OK);
-                return;
-            }
+
+            //if (_FanDataModel.FanSelectionStateInfo != null && 
+            //    _FanDataModel.FanSelectionStateInfo.fanSelectionState == FanSelectionState.LowNotFound &&
+            //    _FanDataModel.FanSelectionStateInfo.RecommendPointInLow != null && 
+            //    _FanDataModel.FanSelectionStateInfo.RecommendPointInLow.Count == 2)
+            //{
+            //    XtraMessageBox.Show(string.Format(" 低速挡的工况点与高速挡差异过大,低速档风量的推荐值在{0}m³/h左右,总阻力的推荐值小于{1}Pa. ",
+            //        _FanDataModel.FanSelectionStateInfo.RecommendPointInLow[0], _FanDataModel.FanSelectionStateInfo.RecommendPointInLow[1]
+            //        ), "警告", MessageBoxButtons.OK);
+            //    return;
+            //}
 
             m_fmFanModel.InitForm(_FanDataModel, m_ListFan);
 

@@ -12,15 +12,15 @@ namespace ThMEPElectrical.SystemDiagram.Model
     /// </summary>
     public static class ThBlockConfigModel
     {
+        private static bool HaveMEPa = false;
+        private static bool HaveMEPf = false;
+
         public static List<ThBlockModel> BlockConfig;
         public static void Init()
         {
             if (!BlockConfig.IsNull())
             {
-                //重新加载用户配置
-                var SpecialBlock = BlockConfig.Where(o => o.StatisticMode == StatisticType.RelyOthers);
-                SpecialBlock.First(o => o.UniqueName == "短路隔离器").DependentStatisticalRule = FireCompartmentParameter.ShortCircuitIsolatorCount;
-                SpecialBlock.First(o => o.UniqueName == "消防广播火栓强制启动模块").DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount;
+                InitConfig();
                 return;
             }
             BlockConfig = new List<ThBlockModel>();
@@ -885,6 +885,37 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
+            InitConfig();
+        }
+
+        public static void InitConfig()
+        {
+            //重新加载用户配置
+            BlockConfig.First(o => o.UniqueName == "短路隔离器").DependentStatisticalRule = FireCompartmentParameter.ShortCircuitIsolatorCount;
+            BlockConfig.First(o => o.UniqueName == "消防广播火栓强制启动模块").DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount;
+
+            //new logic
+            HaveMEPa = false; HaveMEPf = false;
+            BlockConfig.First(o => o.UniqueName == "防排抽烟机").AssociatedBlocks[0].attNameValues = new Dictionary<string, string>() { { "BOX", "APE" } };
+            BlockConfig.First(o => o.UniqueName == "喷淋泵").AssociatedBlocks[0].attNameValues = new Dictionary<string, string>() { { "BOX", "APE" } };
+        }
+
+        public static void SetGlobleAPEa()
+        {
+            if (!HaveMEPa)
+            {
+                HaveMEPa = true;
+                BlockConfig.First(o => o.UniqueName == "防排抽烟机").AssociatedBlocks[0].attNameValues = new Dictionary<string, string>() { { "BOX", "APEa" } };
+            }
+        }
+
+        public static void SetGlobleAPEf()
+        {
+            if (!HaveMEPf)
+            {
+                HaveMEPf = true;
+                BlockConfig.First(o => o.UniqueName == "喷淋泵").AssociatedBlocks[0].attNameValues = new Dictionary<string, string>() { { "BOX", "APEf" } };
+            }
         }
     }
 }

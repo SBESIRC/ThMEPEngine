@@ -67,6 +67,18 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        public static void ClearPolyline(Dictionary<Polyline , Polyline> lines)
+        {
+            var objs = new DBObjectCollection();
+            lines.Select(x => x.Key).ForEachDbObject(o => objs.Add(o));
+            foreach (Polyline pl in objs)
+            {
+                pl.UpgradeOpen();
+                pl.Erase();
+            }
+        }
+
+
         public static void ClearEmgConnect()
         {
             var sLayerName = ThMEPLightingCommon.EmgLightConnectLayerName;
