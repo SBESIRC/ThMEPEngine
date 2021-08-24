@@ -26,6 +26,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private double _lightDeleteMaxSpace = 10000;
         private double _lightDeleteMaxAngle = 30;
         private double _wallLightMergeAngle = 45;
+        private double _pointInLineDistance = 1500;
         //删除对向指示灯的最大间距
         private double _delOpSideHostLightMaxDis = 2500;
         public List<LineGraphNode> _wallGraphNodes;//壁装的在线的那一侧
@@ -637,7 +638,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
                     continue;
-                if (!PointInLaneLine(node.graphNode.nodePoint))
+                if (!PointInLaneLine(node.graphNode.nodePoint, _pointInLineDistance))
                     continue;
                 var route = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, node.graphNode, true).FirstOrDefault();
                 AddHostLightByRoute(hostLines, route, ref hisNodes, unHostLineExit, ref notCreatePoints, true, checkIsEndLine);
@@ -1167,7 +1168,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         break;
                     if (!_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(pointOnLine) < minSpace))
                     {
-                        if (isExtLine && !PointInLaneLine(pointOnLine))
+                        if (isExtLine && !PointInLaneLine(pointOnLine,_pointInLineDistance))
                             createPoint = pointOnLine;
                         var light1 = new LightLayout(pointOnLine, createPoint, null, leftDir, exitDir, leftDir, sNode, true);
                         light1.isCheckDelete = isFirst && isLightFirst;
@@ -1690,13 +1691,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
         }
 
-        bool PointInLaneLine(Point3d point)
+        bool PointInLaneLine(Point3d point,double outDis, double extDis=5)
         {
             if (null == _mainLines || _mainLines.Count < 1)
                 return false;
             foreach (var item in _mainLines)
             {
-                if (EmgPilotLampUtil.PointInLine(point, item))
+                if (EmgPilotLampUtil.PointInLine(point, item,extDis,outDis))
                     return true;
             }
             return false;
