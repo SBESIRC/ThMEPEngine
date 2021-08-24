@@ -26,68 +26,69 @@ namespace ThMEPWSS
         public void ThRouteMainPipe()
         {
 #if (ACAD2016 || ACAD2018)
-
-            //取起点
-            var startPt = SelectPoint("\n请选择给水起点");
-            if (startPt == Point3d.Origin)
+            try
             {
-                return;
-            }
+                //取起点
+                var startPt = SelectPoint("\n请选择给水起点");
+                if (startPt == Point3d.Origin)
+                {
+                    return;
+                }
 
-            //取框线
-            var regionPts = SelectRecPoints("\n请框选洁具,选择左上角点", "\n请框选洁具,再选择右下角点");
-            if (regionPts.Item1 == regionPts.Item2)
-            {
-                return;
-            }
+                //取框线
+                var regionPts = SelectRecPoints("\n请框选洁具,选择左上角点", "\n请框选洁具,再选择右下角点");
+                if (regionPts.Item1 == regionPts.Item2)
+                {
+                    return;
+                }
 
-            var frame = toFrame(regionPts);
-            if (frame == null || frame.NumberOfVertices == 0)
-            {
-                return;
-            }
+                var frame = toFrame(regionPts);
+                if (frame == null || frame.NumberOfVertices == 0)
+                {
+                    return;
+                }
 
-            if (frame.Contains(startPt) == false)
-            {
-                //Active.Editor .WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
-               ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
-                return;
-            }
+                if (frame.Contains(startPt) == false)
+                {
+                    //Active.Editor .WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
+                    ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
+                    return;
+                }
 
-            var areaId = Guid.NewGuid().ToString();
-            var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
-            var region = new ThDrainageSDRegion(frame, areaId);
-          
-            ////转换坐标系
-            //Polyline transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-            //if (frame != null && frame.NumberOfVertices > 0)
-            //{
-            //    transFrame = transPoly(frame, ref transformer);
-            //}
-            //var pts = transFrame.VerticesEx(100.0);
+                var areaId = Guid.NewGuid().ToString();
+                var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
+                var region = new ThDrainageSDRegion(frame, areaId);
 
-            var dataSet = new ThDrainageSDDataExchange();
-            dataSet.AreaID = areaId;
-            dataSet.SupplyStart = supplyPt;
-            dataSet.Region = region;
+                ////转换坐标系
+                //Polyline transFrame = new Polyline();
+                ThMEPOriginTransformer transformer = null;
+                //if (frame != null && frame.NumberOfVertices > 0)
+                //{
+                //    transFrame = transPoly(frame, ref transformer);
+                //}
+                //var pts = transFrame.VerticesEx(100.0);
 
-            //取厕所
-            var pts = frame.VerticesEx(100.0);
-            List<ThTerminalToilet> allToiletList = null;
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var drainageExtractor = new ThDrainageSDExtractor();
-                drainageExtractor.Transfer = transformer;
-                drainageExtractor.Extract(acadDb.Database, pts);
-                allToiletList = drainageExtractor.SanTmnList;
-            }
+                var dataSet = new ThDrainageSDDataExchange();
+                dataSet.AreaID = areaId;
+                dataSet.SupplyStart = supplyPt;
+                dataSet.Region = region;
 
-            //取房间,建筑
-            List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
-            using (var acadDb = AcadDatabase.Active())
-            {
-                archiExtractor = new List<ThExtractorBase>()
+                //取厕所
+                var pts = frame.VerticesEx(100.0);
+                List<ThTerminalToilet> allToiletList = null;
+                using (var acadDb = AcadDatabase.Active())
+                {
+                    var drainageExtractor = new ThDrainageSDExtractor();
+                    drainageExtractor.Transfer = transformer;
+                    drainageExtractor.Extract(acadDb.Database, pts);
+                    allToiletList = drainageExtractor.SanTmnList;
+                }
+
+                //取房间,建筑
+                List<ThExtractorBase> archiExtractor = new List<ThExtractorBase>();
+                using (var acadDb = AcadDatabase.Active())
+                {
+                    archiExtractor = new List<ThExtractorBase>()
                 {
                     new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
                     new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
@@ -95,42 +96,47 @@ namespace ThMEPWSS
                     new ThDrainageToiletRoomExtractor() { ColorIndex = 6,GroupSwitch=true },
                 };
 
-                archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
-                archiExtractor.ForEach(o =>
-                {
-                    if (o is IAreaId needAreaID)
+                    archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
+                    archiExtractor.ForEach(o =>
                     {
-                        needAreaID.setAreaId(areaId);
-                    }
-                });
+                        if (o is IAreaId needAreaID)
+                        {
+                            needAreaID.setAreaId(areaId);
+                        }
+                    });
+                }
+
+                var allLink = ThDrainageSDConnectCoolSupplyEngine.ThConnectCoolSupplyEngine(archiExtractor, allToiletList, dataSet);
+                DrawUtils.ShowGeometry(allLink, "l07finalLink", 142, 30);
+
+                var allStack = ThDrainageSDStackEngine.getStackPoint(dataSet.TerminalList);
+                allStack.ForEach(x => DrawUtils.ShowGeometry(x, "l10stack", 30, 25, 25));
+
+                var allAngleValves = ThDrainageSDAngleValvesEngine.getAngleValves(dataSet.TerminalList);
+                allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l20Valves", 11, 25, 100));
+
+                ThDrainageSDTreeService.buildPipeTree(dataSet);
+                ThDrainageSDTreeService.printTree(dataSet.PipeTreeRoot, "l063tree");
+
+                var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
+                allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l31ShutValves", 50, 35, 200));
+
+                var allDims = ThDrainageSDDimEngine.getDim(dataSet);
+                allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
+
+                var finalLink = ThDrainageSDShutValveEngine.cutPipe(allShutValve, allLink);
+
+                //final print
+                ThDrainageSDInsertService.InsertConnectPipe(finalLink);
+                ThDrainageSDInsertService.InsertStackPoint(allStack);
+                ThDrainageSDInsertService.InsertValve(allAngleValves);
+                ThDrainageSDInsertService.InsertValve(allShutValve);
+                ThDrainageSDInsertService.InsertDim(allDims);
             }
-
-            var allLink = ThDrainageSDConnectCoolSupplyEngine.ThConnectCoolSupplyEngine(archiExtractor, allToiletList, dataSet);
-            DrawUtils.ShowGeometry(allLink, "l07finalLink", 142, 30);
-
-            var allStack = ThDrainageSDStackEngine.getStackPoint(dataSet.TerminalList);
-            allStack.ForEach(x => DrawUtils.ShowGeometry(x, "l10stack", 30, 25, 25));
-
-            var allAngleValves = ThDrainageSDAngleValvesEngine.getAngleValves(dataSet.TerminalList);
-            allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l20Valves", 11, 25, 100));
-
-            ThDrainageSDTreeService.buildPipeTree(dataSet);
-            ThDrainageSDTreeService.printTree(dataSet.PipeTreeRoot, "l063tree");
-
-            var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
-            allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l31ShutValves", 50, 35, 200));
-
-            var allDims = ThDrainageSDDimEngine.getDim(dataSet);
-            allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
-
-            var finalLink = ThDrainageSDShutValveEngine.cutPipe(allShutValve, allLink);
-
-            //final print
-            ThDrainageSDInsertService.InsertConnectPipe(finalLink);
-            ThDrainageSDInsertService.InsertStackPoint(allStack);
-            ThDrainageSDInsertService.InsertValve(allAngleValves);
-            ThDrainageSDInsertService.InsertValve(allShutValve);
-            ThDrainageSDInsertService.InsertDim(allDims);
+            catch (System.Exception ex)
+            {
+                Active.Editor.WriteLine(ex.Message);
+            }
 #endif
         }
 
