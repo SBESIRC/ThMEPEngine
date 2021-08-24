@@ -994,7 +994,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         
                     }
                 }
-                
             }
         }
        
@@ -1125,7 +1124,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     if (pLine != null)
                     {
                         var dot = pDir.DotProduct(exitDir);
-                        if (dot < -0.2 || pLine.EndPoint.DistanceTo(nodePoint) > 10)
+                        if (pLine.EndPoint.DistanceTo(nodePoint) > 10)
                             return addLights;
                     }
                 }

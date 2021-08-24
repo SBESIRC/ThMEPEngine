@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -22,56 +23,35 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         {
             //这里根据用户选项
             this._isHostFirst= ThEmgLightService.Instance.IsHostingLight;
+            this.AddPolyLineIds = new List<ObjectId>();
         }
         public void Dispose(){}
 
+        public List<ObjectId> AddPolyLineIds;
+        private ThMEPOriginTransformer _originTransformer;
+        private Dictionary<Polyline, List<Polyline>> _holeInfo;
+
+        public void InitData(ThMEPOriginTransformer originTransformer, Dictionary<Polyline, List<Polyline>> outPolylines) 
+        {
+            _originTransformer = originTransformer;
+            _holeInfo = outPolylines;
+        }
         public void Execute()
         {
+            this.AddPolyLineIds.Clear();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                //获取外包框
-                List<Curve> frameLst = new List<Curve>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acdb.Element<Polyline>(obj);
-                    frameLst.Add(frame.Clone() as Polyline);
-                }
-                var pt = frameLst.First().StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                frameLst = frameLst.Where(c=>c.Area>10).Select(x =>
-                {
-                    originTransformer.Transform(x);
-                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
-                }).ToList();
-
-                var plines = HandleFrame(frameLst);
-                var holeInfo = CalHoles(plines);
-                foreach (var pline in holeInfo)
+                EmgPilotLampUtil.CreateLayer(ThMEPLightingCommon.REVCLOUD_LAYER, Color.FromColorIndex(ColorMethod.ByLayer,1));
+                foreach (var pline in _holeInfo)
                 {
                     //清除区域内的 已经生成的指示灯
-                    CreateClearEmgLamp.ClearEFIExitPilotLamp(pline.Key, originTransformer);
+                    CreateClearEmgLamp.ClearEFIExitPilotLamp(pline.Key, _originTransformer);
+                    CreateClearEmgLamp.ClearExtractRevCloud(pline.Key, ThMEPLightingCommon.REVCLOUD_LAYER,_originTransformer,ThMEPLightingCommon.EMGPILOTREVCLOUD_CORLOR_INDEX);
 
                     //Ⅰ类线  车道线到出口线  -  图层：出口路径
                     //Ⅱ类线  计算或调整后的车道中心线  图层：主要疏散路径
                     //Ⅲ类线  计算或调整后的辅助疏散路径线 图层：辅助疏散路径
-                    GetPrimitivesService primitivesService = new GetPrimitivesService(originTransformer);
+                    GetPrimitivesService primitivesService = new GetPrimitivesService(_originTransformer);
                     //获取疏散路径(Ⅰ类线)
                     var exitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
                     if ((exitLines == null || exitLines.Count < 1))
@@ -79,6 +59,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         //没有疏散路径，不进行处理
                         continue;
                     }
+
                     //获取车道线信息（Ⅱ类线）
                     var mainLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
 
@@ -86,6 +67,29 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var assitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
                     //获取次要疏散路径（Ⅲ类线-壁装）
                     var assitHostLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
+
+                    var tempHostLines = new List<Curve>();
+                    exitLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
+                    assitHostLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
+                    var tempLaneLines = new List<Curve>();
+                    mainLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
+                    assitLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
+                    var emgLaneLineMark = new EmgLaneLineMark(tempLaneLines,tempHostLines);
+                    var markLines = emgLaneLineMark.MarkLines(800);
+                    var objs = new DBObjectCollection();
+                    tempHostLines.ForEach(x => objs.Add(x));
+                    tempLaneLines.ForEach(x => objs.Add(x));
+
+                    foreach (var item in markLines) 
+                    {
+                        var pl = (Curve)item.Clone();
+                        pl.Layer = ThMEPLightingCommon.REVCLOUD_LAYER;
+                        pl.ColorIndex =ThMEPLightingCommon.EMGPILOTREVCLOUD_CORLOR_INDEX;
+                        _originTransformer.Reset(pl);
+                        var plId = acdb.ModelSpace.Add(pl);
+                        if (null != plId && plId.IsValid)
+                            AddPolyLineIds.Add(plId);
+                    }
 
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
@@ -122,7 +126,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         Point3d sp = item.pointInOutSide;
                         Point3d ep = sp + item.direction.MultiplyBy(10);
                         var createPt = item.pointInOutSide;
-                        originTransformer.Reset(ref createPt);
+                        _originTransformer.Reset(ref createPt);
                         Vector3d createDir = item.directionSide.CrossProduct(Vector3d.ZAxis);
                         if (createDir.DotProduct(item.direction) < 0)
                             createDir = createDir.Negate();
@@ -179,40 +183,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     }
                 }
             }
-        }
-        /// <summary>
-        /// 计算外包框和其中的洞
-        /// </summary>
-        /// <param name="frames"></param>
-        /// <returns></returns>
-        private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)
-        {
-            frames = frames.OrderByDescending(x => x.Area).ToList();
-
-            Dictionary<Polyline, List<Polyline>> holeDic = new Dictionary<Polyline, List<Polyline>>(); //外包框和洞口
-            while (frames.Count > 0)
-            {
-                var firFrame = frames[0];
-                frames.Remove(firFrame);
-
-                var bufferFrames = firFrame.Buffer(1)[0] as Polyline;
-                var holes = frames.Where(x => bufferFrames.Contains(x)).ToList();
-                frames.RemoveAll(x => holes.Contains(x));
-
-                holeDic.Add(firFrame, holes);
-            }
-
-            return holeDic;
-        }
-
-        /// <summary>
-        /// 处理外包框线
-        /// </summary>
-        /// <param name="frameLst"></param>
-        /// <returns></returns>
-        private List<Polyline> HandleFrame(List<Curve> frameLst)
-        {
-            return frameLst.Cast<Polyline>().ToList();
         }
     }
 }

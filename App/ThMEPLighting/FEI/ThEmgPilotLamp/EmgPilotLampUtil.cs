@@ -1,5 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,52 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     class EmgPilotLampUtil
     {
+        public static ObjectId CreateLayer(string aimLayer, Color color, bool IsPlottable = false)
+        {
+            LayerTableRecord layerRecord = null;
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var layer in db.Layers)
+                {
+                    if (layer.Name.ToUpper().Equals(aimLayer.ToUpper()))
+                    {
+                        layerRecord = db.Layers.Element(aimLayer);
+                        break;
+                    }
+                }
+
+                // 创建新的图层
+                if (layerRecord == null)
+                {
+                    layerRecord = db.Layers.Create(aimLayer);
+                    if (color == null)
+                    {
+                        color = Color.FromRgb(255, 0, 0);
+                    }
+                    layerRecord.Color = color;
+                    layerRecord.IsPlottable = IsPlottable;
+                }
+                //else
+                //{
+                //    if (!layerRecord.Color.Equals(color))
+                //    {
+                //        layerRecord.UpgradeOpen();
+                //        layerRecord.Color = color;
+                //        layerRecord.IsPlottable = false;
+                //        layerRecord.DowngradeOpen();
+                //    }
+                //    if (!layerRecord.LineWeight.Equals(lineWeight))
+                //    {
+                //        layerRecord.UpgradeOpen();
+                //        layerRecord.LineWeight = lineWeight;
+                //        layerRecord.IsPlottable = false;
+                //        layerRecord.DowngradeOpen();
+                //    }
+                //}
+            }
+
+            return layerRecord.ObjectId;
+        }
         /// <summary>
         /// 点投影到线
         /// </summary>
