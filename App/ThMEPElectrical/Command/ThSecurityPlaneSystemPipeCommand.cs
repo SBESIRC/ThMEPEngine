@@ -60,7 +60,8 @@ namespace ThMEPElectrical.Command
                 };
                 var trunkingDxfNames = new string[]
                 {
-                    RXClass.GetClass(typeof(Curve)).DxfName,
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
                 var trunkingFilter = ThSelectionFilterTool.Build(trunkingDxfNames);
                 var trunkingResult = Active.Editor.GetSelection(trunkingOptions, trunkingFilter);
