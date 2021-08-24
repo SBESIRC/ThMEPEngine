@@ -13,7 +13,10 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3ColumnExtractionVisitor();
+            var visitor = new ThDB3ColumnExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);

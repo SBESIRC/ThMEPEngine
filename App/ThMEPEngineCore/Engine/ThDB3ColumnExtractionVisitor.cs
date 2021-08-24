@@ -37,11 +37,6 @@ namespace ThMEPEngineCore.Engine
             return false;
         }
 
-        public override bool CheckLayerValid(Entity entity)
-        {
-            return true;
-        }
-
         private List<ThRawIfcBuildingElementData> HandleHatch(Hatch hatch, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
