@@ -41,6 +41,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 //连接孤立车道线
                 CreateExtendLineWithAStarService createExtendLine = new CreateExtendLineWithAStarService();
                 var startExtendLines = createExtendLine.CreateStartLines(frame, closetLaneInfo.Value.Item1, closetLaneInfo.Value.Item2, holes);
+                startExtendLines.ForEach(x => x.priority = Priority.firstLevel);
                 resExtendLines.AddRange(startExtendLines);
 
                 //更新孤立车道线信息(更新剩下的孤立车道线和新的连接点)
