@@ -7,7 +7,7 @@ namespace ThMEPEngineCore.Engine
     public abstract class ThDistributionElementExtractionVisitor
     {
         public HashSet<string> LayerFilter { get; set; }
-        public List<ThRawIfcDistributionElementData> Results { get; protected set; }
+        public List<ThRawIfcDistributionElementData> Results { get; set; }
 
         public ThDistributionElementExtractionVisitor()
         {

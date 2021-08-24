@@ -8,6 +8,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -25,10 +26,13 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var fireExtinguisherExtractor = new ThFireExtinguisherRecognitionEngine(Vistor);
             fireExtinguisherExtractor.Recognize(database, pts);
+            Vistor.Results = new List<ThRawIfcDistributionElementData>();
+
             fireExtinguisherExtractor.RecognizeMS(database, pts);
+            Vistor.Results = new List<ThRawIfcDistributionElementData>();
+
             var centerPoints = fireExtinguisherExtractor.Elements.Select(o => GetCenter(o.Outline as Polyline)).ToList();
             FireExtinguishers = centerPoints.Select(o => new DBPoint(o)).ToList();
-
         }
         public override List<ThGeometry> BuildGeometries()
         {

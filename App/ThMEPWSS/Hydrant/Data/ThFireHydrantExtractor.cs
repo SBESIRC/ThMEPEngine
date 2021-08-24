@@ -10,6 +10,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -38,13 +39,18 @@ namespace ThMEPWSS.Hydrant.Data
             //后期再做远距离移动
             var hydrantExtractor = new ThFireHydrantRecognitionEngine(vistor);
             hydrantExtractor.Recognize(database, pts);
+            vistor.Results = new List<ThRawIfcDistributionElementData>();
             hydrantExtractor.RecognizeMS(database, pts);
+            vistor.Results = new List<ThRawIfcDistributionElementData>();
+
             hydrantExtractor.Elements.ForEach(o =>
             {
                 var obb = o.Outline as Polyline;
                 var center = GetCenter(obb);
                 HydrantOutline.Add(new DBPoint(center), obb);
             });
+
+            hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
             FireHydrants = HydrantOutline.Select(o => o.Key).ToList();
             if (FilterMode == FilterMode.Window)
             {
