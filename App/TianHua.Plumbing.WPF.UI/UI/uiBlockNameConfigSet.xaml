@@ -33,7 +33,7 @@
                 <DataGridTemplateColumn Header="" Width="Auto" CanUserSort="False" CanUserResize="False" >
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:ImageButton Name="delBtn"  Tag="{Binding layerName}"  ImageTextLocation="TextOnly" Content="-" Width="20" Height="20" Margin="5" Click="DelBtn_Click" />
+                            <cus:ImageButton Name="delBtn"  Tag="{Binding layerName}"  ImageTextLocation="TextOnly" Content="-" Width="20" Height="12" Margin="5" Click="DelBtn_Click" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
