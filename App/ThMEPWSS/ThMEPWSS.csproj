@@ -44,6 +44,8 @@
     <Compile Include="Common\LevelFloorUtil.cs" />
     <Compile Include="DrainageSystemAD\Engine\ThDrainageADConvertEngine.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADDiameterDim.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\RaisePipeConvert.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDADBlkOutput.cs" />
     <Compile Include="DrainageSystemAD\Model\ThDrainageSDADDataExchange.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertLineService.cs" />
@@ -133,7 +135,6 @@
     <Compile Include="DrainageSystemAG\Bussiness\FloorDrainConvert.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeDrainConnect.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLineLabelLayout.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RoomKitchenToiletLayout.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementVisitor.cs" />

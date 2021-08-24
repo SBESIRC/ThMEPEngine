@@ -58,7 +58,7 @@ namespace ThMEPWSS.ViewModel
             BlockNameConfigList.Add("地漏", new List<List<string>>() { ls11, ls12 });
 
             Blocks.Add("拖把池");
-            var ls13 = new List<string>() { "W-drain-3", "W-drain-4" };
+            var ls13 = new List<string>() { "A-Kitchen-9" };
             var ls14 = new List<string>();
             BlockNameConfigList.Add("拖把池", new List<List<string>>() { ls13, ls14 });
 

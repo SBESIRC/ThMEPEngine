@@ -3,12 +3,9 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPWSS.DrainageSystemAG.DataEngine;
+using ThMEPEngineCore.Model;
 using ThMEPWSS.DrainageSystemAG.Models;
-using ThMEPWSS.Engine;
 using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
@@ -19,16 +16,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     class RoofLayout
     {
         List<RoofPointInfo> _roofWaterBuckets = new List<RoofPointInfo>();
+        Dictionary<string, List<ThIfcRoom>> _roofFloorRooms = new Dictionary<string, List<ThIfcRoom>>();
         List<FloorFramed> _roofFloors;
         List<FloorFramed> _maxRoofFloors;
         List<FloorFramed> _minRoofFloors;
-        ThRoomDataEngine _roomEngine;
-        public RoofLayout(List<FloorFramed> roofFloors, BlockReferenceDataEngine equipmentData,ThRoomDataEngine roomEngine, BasicElementEngine basicElementEngine) 
+        public RoofLayout(List<FloorFramed> roofFloors, List<RoofPointInfo> roofWaterBuckets, Dictionary<string, List<ThIfcRoom>> roofFloorRooms) 
         {
-            _roomEngine = roomEngine;
             _roofFloors = new List<FloorFramed>();
             _maxRoofFloors = new List<FloorFramed>();
             _minRoofFloors = new List<FloorFramed>();
+            _roofFloorRooms = new Dictionary<string, List<ThIfcRoom>>();
             if (null == roofFloors || roofFloors.Count < 1)
                 return;
             foreach (var floor in roofFloors)
@@ -41,55 +38,19 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     _maxRoofFloors.Add(floor);
                 else
                     _minRoofFloors.Add(floor);
-                var plEquipment = DrainSysAGCommon.GetFloorBlocks(floor, equipmentData, basicElementEngine); //equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
-                if (plEquipment == null || plEquipment.Count < 1)
-                    continue;
-
-                var tempRooWaterBuckets = new List<RoofPointInfo>();
-                foreach (var item in plEquipment)
-                {
-                    if (null == item || (item.enumEquipmentType != EnumEquipmentType.gravityRainBucket && item.enumEquipmentType != EnumEquipmentType.sideRainBucket))
-                        continue;
-                    if (null == item.blockReferences || item.blockReferences.Count < 1)
-                        continue;
-                    foreach (var block in item.blockReferences)
-                    {
-                        var mcs2wcs = block.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        var circles = DrainSysAGCommon.GetBlockInnerElement<Circle>(block, mcs2wcs);
-                        if (circles == null || circles.Count < 1)
-                        {
-                            circles = DrainSysAGCommon.GetBlockInnerElement<Arc>(block, mcs2wcs);
-                        }
-                        if (null == circles || circles.Count < 1)
-                            continue;
-                        foreach (var entity in circles)
-                        {
-                            if (entity is Circle)
-                            {
-                                var cir = entity as Circle;
-                                var center = new Point3d(cir.Center.X, cir.Center.Y, 0);
-                                tempRooWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
-                                break;
-
-                            }
-                            else if (entity is Arc)
-                            {
-                                var arc = entity as Arc;
-                                var center = new Point3d(arc.Center.X, arc.Center.Y, 0);
-                                var testPoint = center.TransformBy(mcs2wcs);
-                                tempRooWaterBuckets.Add(new RoofPointInfo(floor, item.enumEquipmentType, center));
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                //有定位点偏移的，进一步过滤
-                foreach (var item in tempRooWaterBuckets) 
-                {
-                    if (!roofFloors.Any(c => c.outPolyline.Contains(item.centerPoint)))
-                        continue;
+            }
+            if (null != roofWaterBuckets && roofWaterBuckets.Count > 0)
+            {
+                foreach (var item in roofWaterBuckets)
                     _roofWaterBuckets.Add(item);
+            }
+            if (null != roofFloorRooms && roofFloorRooms.Count > 0)
+            {
+                foreach (var keyValue in roofFloorRooms) 
+                {
+                    if (null == keyValue.Key || null == keyValue.Value || keyValue.Value.Count < 1)
+                        continue;
+                    _roofFloorRooms.Add(keyValue.Key,keyValue.Value);
                 }
             }
         }
@@ -115,18 +76,15 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         {
             //小屋面数据只到大屋面
             var retRes = new List<CreateBlockInfo>();
-            var maxRoofConvert = MaxRoofPipeConvert();
-            //if (maxRoofConvert.Count > 0)
-            //    retRes.AddRange(maxRoofConvert);
+
+            //var maxRoofConvert = MaxRoofPipeConvert();
+            //var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
+            //if (copyMaxRoofPipeToLiving.Count > 0)
+            //    retRes.AddRange(copyMaxRoofPipeToLiving);
+
             var minToMaxRoofs = MinRoofToMaxRoof();
             if (minToMaxRoofs.Count > 0)
                 retRes.AddRange(minToMaxRoofs);
-            //var copyToLiving = CopyY1LToLivingFloor(livingFloor, retRes);
-            //if (copyToLiving.Count > 0)
-            //    retRes.AddRange(copyToLiving);
-            var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
-            if (copyMaxRoofPipeToLiving.Count > 0)
-                retRes.AddRange(copyMaxRoofPipeToLiving);
 
             //将住人屋面的部分立管复制到屋面
             var copyAddBlocks = CopyPipeToMaxRoof(copyBlocks, livingFloor.datumPoint);
@@ -135,6 +93,43 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var maxToMinRoofs=  MaxRoofToMinRoof(copyAddBlocks);
             if (maxToMinRoofs.Count > 0)
                 retRes.AddRange(maxToMinRoofs);
+            return retRes;
+        }
+        public List<CreateBlockInfo> RoofY1LConverter(FloorFramed livingFloor, List<EquipmentBlockSpace> floorY1LBlcoks,out List<CreateBasicElement> addLines,double findY1LDis) 
+        {
+            //获取改楼层的Y1L
+            addLines = new List<CreateBasicElement>();
+            var retRes = new List<CreateBlockInfo>();
+            var maxRoofConvert = MaxRoofPipeConvert();
+            var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
+            foreach (var item in copyMaxRoofPipeToLiving) 
+            {
+                if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1) 
+                {
+                    retRes.Add(item);
+                    continue;
+                }
+                var liveFloorY1L = floorY1LBlcoks.Where(c => c.blockCenterPoint.DistanceTo(item.createPoint) < findY1LDis).FirstOrDefault();
+                if (null == liveFloorY1L)
+                {
+                    retRes.Add(item);
+                    continue;
+                }
+                var copyBlock = DrainSysAGCommon.CopyOneBlock(item, livingFloor.datumPoint, livingFloor.datumPoint, livingFloor.floorUid);
+                var changePoint = liveFloorY1L.blockCenterPoint;
+                var offSet = changePoint - item.createPoint;
+                var itemOldPoint = item.createPoint;
+                item.createPoint = changePoint;
+                retRes.Add(item);
+
+                if (itemOldPoint.DistanceTo(changePoint) < 100)
+                    continue;
+                //位置偏差大需要连线
+                copyBlock.tag = DrainSysAGCommon.NOTCOPYTAG;
+                retRes.Add(copyBlock);
+                addLines.Add(new CreateBasicElement(copyBlock.floorId, new Line(item.createPoint, copyBlock.createPoint), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+            }
+
             return retRes;
         }
         List<CreateBlockInfo> MaxRoofPipeConvert() 
@@ -222,7 +217,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<CreateBlockInfo> MaxRoofToMinRoof(List<CreateBlockInfo> maxRoofCopy) 
         {
             var retRes = new List<CreateBlockInfo>();
-            if (null == maxRoofCopy || maxRoofCopy.Count < 1 || _roomEngine == null)
+            if (null == maxRoofCopy || maxRoofCopy.Count < 1)
                 return retRes;
             if (_maxRoofFloors == null || _maxRoofFloors.Count<1 || _minRoofFloors ==null || _minRoofFloors.Count<1)
                 return retRes;
@@ -230,7 +225,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             foreach (var mRoof in _maxRoofFloors) 
             {
                 //获取屋面的空间
-                var thisAllRooms = _roomEngine.GetAllRooms(mRoof.blockOutPointCollection);
+                var thisAllRooms = _roofFloorRooms.Where(c=>c.Key.Equals(mRoof.floorUid)).FirstOrDefault().Value;
                 if (null == thisAllRooms || thisAllRooms.Count < 1)
                     continue;
                 foreach (var cBlock in maxRoofCopy)

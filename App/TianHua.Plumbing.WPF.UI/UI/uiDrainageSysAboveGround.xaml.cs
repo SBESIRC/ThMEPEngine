@@ -30,6 +30,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         static DrainageSystemAGViewmodel setViewModel = null;
         bool _createFrame = false;
         bool _readFloor = false;
+        uiPipeDrawControl uiPipeDraw;
         public uiDrainageSysAboveGround()
         {
             InitializeComponent();
@@ -112,8 +113,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             //直接设置后，后续的页面逻辑会卡UI线程，需要刷新一下界面
             try
             {
+                var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
                 FormUtil.DisableForm(gridForm);
-                ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(viewModel.FloorFrameds.ToList(), setViewModel);
+                ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(viewModel.FloorFrameds.ToList(), setViewModel, config);
                 thDrainSystem.Execute();
                 //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
                 ThMEPWSS.Common.Utils.FocusToCAD();
@@ -139,6 +141,32 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (null == selectItem)
                 return;
             Interaction.ZoomObjects(new List<ObjectId> { selectFloor.blockId });
+        }
+
+        private void btnDrawPipe_Click(object sender, RoutedEventArgs e)
+        {
+            //放置重复打开
+            if (null != uiPipeDraw && uiPipeDraw.IsLoaded)
+            {
+                uiPipeDraw.ShowActivated = true;
+                return;
+            }
+            try
+            {
+                this.Hide();
+                uiPipeDraw = new uiPipeDrawControl();
+                uiPipeDraw.Owner = this;
+                uiPipeDraw.Closed += ChildWindowClosed;
+                uiPipeDraw.Show();
+            }
+            catch (Exception ex) 
+            {
+                this.Show();
+            }
+        }
+        public void ChildWindowClosed(object sender, EventArgs e)
+        {
+            this.Show();
         }
     }
     class ShowListViewModel : NotifyPropertyChangedBase
