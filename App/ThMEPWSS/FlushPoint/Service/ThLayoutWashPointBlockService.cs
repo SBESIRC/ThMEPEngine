@@ -40,7 +40,10 @@ namespace ThMEPWSS.FlushPoint.Service
             LayoutData.WashPoints.ForEach(o =>
             {
                 var vec = CalculateDirection(o);
-                ptDic.Add(o, vec);
+                if(!ptDic.ContainsKey(o))
+                {
+                    ptDic.Add(o, vec);
+                }
             });
             return Print(ptDic);
         }

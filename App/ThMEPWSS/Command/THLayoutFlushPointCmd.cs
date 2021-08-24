@@ -110,38 +110,39 @@ namespace ThMEPWSS.Command
                 var washPoints = ThWashPointResultParseService.Parse(result);
 
                 // 过滤哪些点位靠近排水设施，哪些远离排水设施
+                // 因暂时不考虑对远离和靠近排水设施的过滤。注释掉相关代码，后期根据需求再打开
                 var filterService = new ThFilterWashPointsService()
                 {
                     Rooms = roomExtractor.Rooms.Select(o=>o.Boundary).ToList(),
                     DrainFacilityExtractor = extractors[4] as ThDrainFacilityExtractor,
                 };
-                filterService.Filter(washPoints);
-
+                //filterService.Filter(washPoints);
                 var layoutInfo = filterService.LayoutInfo; //用于保存插入块的结果、靠近/远离排水设施的点 
 
                 var layOutPts = washPoints; //区域满布
-                if (FlushPointVM.Parameter.ArrangePosition == ArrangePositionOps.OnlyDrainageFacility)
-                {
-                    layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
-                }
+                //if (FlushPointVM.Parameter.ArrangePosition == ArrangePositionOps.OnlyDrainageFacility)
+                //{
+                //    layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
+                //}
                 //调整点位位置               
                 var adjustService = new ThAdjustWashPointPositionService(columns, parkingStalls, walls);
                 adjustService.Adjust(layOutPts);
 
                 // 打印块
                 ThFlushPointUtils.SortWashPoints(layOutPts);
-                
+
                 var layoutData = new WashPointLayoutData()
                 {
                     Columns = columns.Cast<Entity>().ToList(),
                     Walls = walls,
                     Rooms = rooms.Select(o => o.Boundary).ToList(),
-                    WashPoints = layOutPts,
                     Db = acadDb.Database,
+                    WashPoints = layOutPts,
                     PtRange = 10.0,
                 };
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
                 layoutInfo.LayoutBlock = layoutService.Layout();
+                layoutData.WashPoints = layoutInfo.LayoutBlock.Keys.ToList(); //直接用layOutPts可能存在重复点
 
                 var markService = new ThLayoutWashPointMarkService(layoutData);
                 markService.Layout();
