@@ -42,7 +42,8 @@ namespace ThMEPEngineCore.LaneLine
                 {
                     if (line.Length > ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH)
                     {
-                        objs.Add(line.WashClone() as Line);
+                        // WashClone()会导致其端点
+                        objs.Add(line.Clone() as Line);
                     }
                 }
                 else if (curve is Arc arc)

@@ -25,12 +25,12 @@ namespace ThMEPHVAC.CAD
     }
     public struct Duct_InParam
     {
-        public string tee_info;
-        public string tee_pattern;
-        public string in_duct_info;
-        public string out_duct_info;
-        public string text_size_info;
-        public string elevation_info;
+        public string bypass_size;
+        public string bypass_pattern;
+        public string in_duct_size;
+        public string out_duct_size;
+        public string scale;
+        public string elevation;
         public bool is_io_reverse;
     }
     public class ThInletOutletDuctDrawEngine
@@ -56,8 +56,7 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> InletCenterLineGraph { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         private List<Vector2d> TextVec { get; set; }
-        public Vector3d valve_dis_vec { get; set; }
-        private bool is_io_reverse { get; set; }
+        private Duct_InParam in_param;
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
             Duct_InParam in_param,
             double selected_bypass_len,
@@ -65,13 +64,22 @@ namespace ThMEPHVAC.CAD
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
-            string tee_info = in_param.tee_info;
-            string tee_pattern = in_param.tee_pattern;
-            string innerduct_info = in_param.in_duct_info;
-            string outerduct_info = in_param.out_duct_info;
-            string elevation_info = in_param.elevation_info;
-            string text_size_info = in_param.text_size_info;
-            
+            Init(fanmodel, in_param, inletcenterlinegraph, outletcenterlinegraph);
+            SetInletOutletSize(in_param.in_duct_size, in_param.out_duct_size, in_param.bypass_size, in_param.elevation);
+            SetInletElbows(bypass_line);
+            SetOutletElbows(bypass_line);
+            SetInOutHoses(fanmodel.scenario);
+            bool isAxial = fanmodel.Model.IsAXIALModel();
+            double len = selected_bypass_len;
+            SetInletDucts(fanmodel.scenario, isAxial, bypass_line, in_param.scale, len, in_param.bypass_pattern == "RBType3");
+            SetOutletDucts(fanmodel.scenario, isAxial, bypass_line, in_param.scale, len, in_param.bypass_pattern == "RBType3");
+        }
+        private void Init(ThDbModelFan fanmodel, 
+                          Duct_InParam in_param, 
+                          AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
+                          AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
+        {
+            this.in_param = in_param;
             InletOpening = new FanOpeningInfo()
             {
                 Width = fanmodel.FanInlet.Width,
@@ -89,14 +97,6 @@ namespace ThMEPHVAC.CAD
             InletCenterLineGraph = inletcenterlinegraph;
             OutletCenterLineGraph = outletcenterlinegraph;
             FanInOutType = fanmodel.IntakeForm;
-
-            is_io_reverse = in_param.is_io_reverse;
-
-            SetInletOutletSize(innerduct_info,
-                               outerduct_info,
-                               tee_info,
-                               elevation_info);
-
             InletDuctSegments = new List<ThIfcDistributionElement>();
             OutletDuctSegments = new List<ThIfcDistributionElement>();
             InletDuctReducings = new List<ThIfcDistributionElement>();
@@ -106,16 +106,7 @@ namespace ThMEPHVAC.CAD
             InletDuctHoses = new List<ThIfcDistributionElement>();
             OutletDuctHoses = new List<ThIfcDistributionElement>();
             TextVec = new List<Vector2d>();
-
-            SetInletElbows(bypass_line);
-            SetOutletElbows(bypass_line);
-            SetInOutHoses(fanmodel.FanScenario);
-            bool isAxial = fanmodel.Model.IsAXIALModel();
-            double len = selected_bypass_len;
-            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
-            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
         }
-
         public void RunInletDrawEngine(ThDbModelFan fanmodel, string textSize)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
@@ -150,15 +141,14 @@ namespace ThMEPHVAC.CAD
             string text_size;
             if (is_in)
             {
-                text_size = pst_param.in_duct_info;
+                text_size = pst_param.in_duct_size;
                 base_point = Model.FanInletBasePoint;
             }
             else
             {
-                text_size = pst_param.out_duct_info;
+                text_size = pst_param.out_duct_size;
                 base_point = Model.FanOutletBasePoint;
             }
-            
             string modelLayer = Model.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             var Create_service = new ThHvacDuctFittingFactoryService();
@@ -192,7 +182,7 @@ namespace ThMEPHVAC.CAD
                                         string tee_info,
                                         string elevation_info)
         {
-            if (!is_io_reverse)
+            if (!in_param.is_io_reverse)
             {
                 InletDuctWidth = innerromeductinfo.Split('x').First().NullToDouble();
                 InletDuctHeight = innerromeductinfo.Split('x').Last().NullToDouble();
@@ -244,11 +234,9 @@ namespace ThMEPHVAC.CAD
                 {
                     return;
                 }
-
                 //仅对于非上进的风机画变径，对于上进的，不画变径
                 double reducingBigEndWidth = Math.Max(InletOpening.Width, InletDuctWidth);
                 double reducingSmallEndWidth = Math.Min(InletOpening.Width, InletDuctWidth);
-
                 var ductReducingParameters = new ThIfcDuctReducingParameters()
                 {
                     BigEndWidth = reducingBigEndWidth,
@@ -283,7 +271,6 @@ namespace ThMEPHVAC.CAD
                     {
                         reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.big);
                     }
-
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180 - Math.PI;
                     reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
@@ -304,6 +291,7 @@ namespace ThMEPHVAC.CAD
             }
             Line max_line = Max_line_exclude_bypass(InletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
+            var tor = new Tolerance(5, 5);
             foreach (var ductgraphedge in InletCenterLineGraph.Edges)
             {
                 bool text_enable = false;
@@ -316,13 +304,12 @@ namespace ThMEPHVAC.CAD
                 Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
                 double rotateangle = edgevector.Angle;
                 string s_evel = string.Empty;
-                if (ThServiceTee.Is_same_line(max_line, cur_line))
+                if (ThMEPHVACService.Is_same_line(max_line, cur_line, tor))
                 {
                     text_enable = true;
                     s_evel = null;
                 }
                 bool is_bypass = false;
-                //if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 if (ThServiceTee.Is_bypass(srt_p, end_p, bypass_line))
                 {
                     is_bypass = true;
@@ -350,7 +337,6 @@ namespace ThMEPHVAC.CAD
                 {
                     return;
                 }
-
                 //仅对于非上进的风机画变径，对于上进的，不画变径
                 double reducingBigEndWidth = Math.Max(OutletOpening.Width, OutletDuctWidth);
                 double reducingSmallEndWidth = Math.Min(OutletOpening.Width, OutletDuctWidth);
@@ -406,11 +392,11 @@ namespace ThMEPHVAC.CAD
                 {
                     OutletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength + ThDuctUtils.GetHoseLength(scenario);
                 }
-
             }
             string s_evel = string.Empty;
             Line max_line = Max_line_exclude_bypass(OutletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
+            var tor = new Tolerance(5, 5);
             foreach (var ductgraphedge in OutletCenterLineGraph.Edges)
             {
                 bool text_enable = false;
@@ -418,19 +404,15 @@ namespace ThMEPHVAC.CAD
                 Point3d end_p = ductgraphedge.Target.Position;
                 double edge_len = ductgraphedge.EdgeLength;
                 Line cur_line = new Line(srt_p, end_p);
-                var DuctParameters = Create_duct_param( srt_p, end_p, edge_len, OutletDuctWidth, OutletDuctHeight, bypass_line);
-
-                
+                var DuctParameters = Create_duct_param(srt_p, end_p, edge_len, OutletDuctWidth, OutletDuctHeight, bypass_line);
                 // 给最长的非旁通线添加标注
-                if (ThServiceTee.Is_same_line(max_line, cur_line))
+                if (ThMEPHVACService.Is_same_line(max_line, cur_line, tor))
                 {
                     text_enable = true;
                     s_evel = Elevation.ToString();
                 }
-
                 bool is_bypass = false;
                 if (ThServiceTee.Is_bypass(srt_p, end_p, bypass_line))
-                //if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
                 }
@@ -577,51 +559,33 @@ namespace ThMEPHVAC.CAD
         }
 
         private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, 
-                                   string ductlayer, string centerlinelayer, string flangelayer, string textlayer, string textSize)
+                                   string geo_layer, string centerline_layer, string flg_layer, string textlayer, string textSize)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
                 foreach (var Segment in DuctSegments)
                 {
+                    var mat = Segment.Matrix;
                     // 绘制风管
-                    var linetypeId = ByLayerLineTypeId();
-                    var layerId = CreateLayer(ductlayer);
-                    foreach (Curve dbobj in Segment.Representation)
+                    ThDuctPortsDrawService.Draw_lines(Segment.Representation, mat, geo_layer, out ObjectIdList geo_ids);
+                    ThDuctPortsDrawService.Draw_lines(Segment.FlangeLine, mat, flg_layer, out ObjectIdList flg_ids);
+                    ThDuctPortsDrawService.Draw_lines(Segment.Centerline, mat, centerline_layer, out ObjectIdList center_ids);
+                    if (Segment.Centerline.Count == 1)
                     {
-                        dbobj.ColorIndex = 256;
-                        dbobj.LayerId = layerId;
-                        dbobj.LinetypeId = linetypeId;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
-                        dbobj.SetDatabaseDefaults();
+                        ThMEPHVACService.Get_duct_ports(Segment.Centerline[0] as Line, out List<Point3d> ports, out List<Point3d> ports_ext);
+                        ThDuctPortsDrawService.Draw_ports(ports, ports_ext, mat, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                        //var duct_param = ThMEPHVACService.Create_duct_modify_param(Segment.Centerline, in_param.out_duct_size, 0, ObjectId.Null.Handle);
+                        //ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
                     }
-                    // 绘制风管中心线
-                    linetypeId = CreateDuctCenterlinetype();
-                    layerId = CreateDuctCenterlineLayer(centerlinelayer);
-                    foreach (Curve dbobj in Segment.Centerline)
+                    else if (Segment.Centerline.Count == 3)
                     {
-                        dbobj.ColorIndex = 256;
-                        dbobj.LayerId = layerId;
-                        dbobj.LinetypeId = linetypeId;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
-                        dbobj.SetDatabaseDefaults();
+                        ThMEPHVACService.Get_elbow_ports(Segment.Centerline, out List<Point3d> ports, out List<Point3d> ports_ext);
+                        ThDuctPortsDrawService.Draw_ports(ports, ports_ext, mat, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                        var elbow_param = ThMEPHVACService.Create_special_modify_param("Elbow", mat, ObjectId.Null.Handle, Segment.FlangeLine, Segment.Centerline);
+                        ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, elbow_param);
                     }
-
-                    
-                    // 绘制法兰线
-                    linetypeId = ByLayerLineTypeId();
-                    layerId = CreateLayer(flangelayer);
-                    foreach (Curve dbobj in Segment.FlangeLine)
-                    {
-                        dbobj.ColorIndex = 256;
-                        dbobj.LayerId = layerId;
-                        dbobj.LinetypeId = linetypeId;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
-                        dbobj.SetDatabaseDefaults();
-                    }
-
+                    else
+                        throw new NotImplementedException();
                     //插入管道信息标注
                     if (!Segment.InformationText.IsNull())
                     {
@@ -646,14 +610,14 @@ namespace ThMEPHVAC.CAD
                             return;
                         t.TextString = str[0];
                         t.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(t);
+                        db.ModelSpace.Add(t);
                         Segment.InformationText.TextString = str[1];
                         Vector2d v = TextVec[0];
                         TextVec.RemoveAt(0);
                         double factor = ((v.X < 0) || (Math.Abs(v.X) < 1e-9 && v.Y < 0)) ? -1 : 1;
                         Matrix3d dis_mat = Matrix3d.Displacement(new Vector3d(v.X, v.Y, 0) * factor * dis);
                         Segment.InformationText.TransformBy(dis_mat * Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(Segment.InformationText);
+                        db.ModelSpace.Add(Segment.InformationText);
 
                         Segment.InformationText.SetDatabaseDefaults();
                     }

@@ -7,16 +7,17 @@ namespace TianHua.Hvac.UI
 {
     public partial class fmBypass : Form
     {
-        public string IValveWidth { get; set; }
-        public string TeeWidth { get; set; }
-        public string OValveWidth { get; set; }
-        public string tee_pattern { get; set; }
-        private double air_vloume { get; set; }
-        public DuctSpecModel fan_model { get; set; }
-        public fmBypass(string airVloume)
+        public double air_vloume;
+        public string valve_width;
+        public string bypass_size;
+        public string o_valve_width;
+        public string bypass_pattern;
+        public DuctSpecModel fan_model;
+        public fmBypass(double air_volume)
         {
             InitializeComponent();
-            air_vloume = Double.Parse(airVloume) / 2;
+            splitContainer2.Panel2Collapsed = true;
+            air_vloume = air_volume * 0.5;
         }
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
@@ -38,7 +39,7 @@ namespace TianHua.Hvac.UI
             {
                 if (c is RadioButton && (c as RadioButton).Checked)
                 {
-                    tee_pattern = c.Name;
+                    bypass_pattern = c.Name;
                     break;
                 }
             }
@@ -49,20 +50,19 @@ namespace TianHua.Hvac.UI
             {
                 string s = listBox1.SelectedItem.ToString();
                 string[] str = s.Split('x');
-                IValveWidth = str[0];
-                OValveWidth = str[1];
-                TeeWidth = s;
+                valve_width = str[0];
+                o_valve_width = str[1];
+                bypass_size = s;
             }
             else
             {
                 if (!string.IsNullOrEmpty(textBox2.Text) && !string.IsNullOrEmpty(textBox3.Text))
                 {
-                    IValveWidth = textBox2.Text;
-                    OValveWidth = textBox3.Text;
-                    TeeWidth = textBox2.Text + "x" + textBox3.Text;
+                    valve_width = textBox2.Text;
+                    o_valve_width = textBox3.Text;
+                    bypass_size = textBox2.Text + "x" + textBox3.Text;
                 }
             }
-            
         }
         private void buttonOK_Click(object sender, EventArgs e)
         {
@@ -113,14 +113,13 @@ namespace TianHua.Hvac.UI
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(textBox2.Text) &&
-                !string.IsNullOrEmpty(textBox3.Text))
+            if (!string.IsNullOrEmpty(textBox2.Text) && !string.IsNullOrEmpty(textBox3.Text))
             {
                 double air_speed = air_vloume / 3600 / 
                                   (Double.Parse(textBox2.Text) *
                                    Double.Parse(textBox3.Text) / 1000000);
-                label2.Text = "计算风速    " + air_speed.ToString("0.00") + " m/s";
-                TeeWidth = textBox2.Text + "x" + textBox3.Text;
+                label2.Text = air_speed.ToString("0.00");
+                bypass_size = textBox2.Text + "x" + textBox3.Text;
             }
         }
 
@@ -132,8 +131,8 @@ namespace TianHua.Hvac.UI
                 double air_speed = air_vloume / 3600 /
                                   (Double.Parse(textBox2.Text) *
                                    Double.Parse(textBox3.Text) / 1000000);
-                label2.Text = "计算风速    " + air_speed.ToString("0.00") + " m/s";
-                TeeWidth = textBox2.Text + "x" + textBox3.Text;
+                label2.Text = air_speed.ToString("0.00");
+                bypass_size = textBox2.Text + "x" + textBox3.Text;
             }
         }
 

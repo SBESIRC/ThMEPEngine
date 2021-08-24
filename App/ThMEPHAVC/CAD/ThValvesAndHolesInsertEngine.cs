@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
@@ -22,8 +17,8 @@ namespace ThMEPHVAC.CAD
             {
                 var blockName = ValveModel.ValveBlockName;
                 var layerName = ValveModel.ValveBlockLayer;
-                Active.Database.ImportLayer(layerName);
-                Active.Database.ImportValve(blockName);
+                Active.Database.ImportLayer(layerName, true);
+                Active.Database.ImportValve(blockName, true);
                 var objId = Active.Database.InsertValve(blockName, layerName);
                 objId.SetValveWidth(ValveModel.Width, ValveModel.WidthPropertyName);
                 objId.SetValveModel(ValveModel.ValveVisibility);

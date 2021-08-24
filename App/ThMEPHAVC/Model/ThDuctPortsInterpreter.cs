@@ -12,18 +12,18 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsInterpreter
     {
-        public static void Get_basic_param(ObjectId[] obj_list, out DuctPortsParam param, out Point2d start_point)
+        public static void Get_basic_param(ObjectId[] obj_list, out ThMEPHVACParam param, out Point2d start_point)
         {
             var list = Do_get_value_list(obj_list, ThHvacCommon.RegAppName_Duct_Param);
             var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
             if (!values.Any())
             {
-                param = new DuctPortsParam();
+                param = new ThMEPHVACParam();
                 start_point = Point2d.Origin;
                 return;
             }
             int inc = 0;
-            param = new DuctPortsParam
+            param = new ThMEPHVACParam
             {
                 is_redraw = (string)values.ElementAt(inc++).Value == "True",
                 port_num = Int32.Parse((string)values.ElementAt(inc++).Value),
@@ -57,9 +57,16 @@ namespace ThMEPHVAC.Model
         public static void Get_ducts(out List<Duct_modify_param> ducts)
         {
             ducts = new List<Duct_modify_param>();
-            var ductIds = ThDuctPortsReadComponent.Read_duct_ids();
+            var ductIds = ThDuctPortsReadComponent.Read_ids_by_type("Duct");
             foreach (var id in ductIds)
                 ducts.Add(Get_duct_by_id(id));
+        }
+        public static void Get_vt_elbow(out List<VT_elbow_modify_param> vt_elbows)
+        {
+            vt_elbows = new List<VT_elbow_modify_param>();
+            var vt_elbows_ids = ThDuctPortsReadComponent.Read_ids_by_type("Vertical_elbow");
+            foreach (var id in vt_elbows_ids)
+                vt_elbows.Add(Get_vt_elbow_by_id(id));
         }
         public static Duct_modify_param Get_duct_by_id(ObjectId id)
         {
@@ -67,12 +74,60 @@ namespace ThMEPHVAC.Model
             var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
             return Get_duct_param(duct_list, id.Handle);
         }
+        public static VT_elbow_modify_param Get_vt_elbow_by_id(ObjectId id)
+        {
+            var ids = new ObjectId[] { id };
+            var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
+            return Get_vt_elbow_param(duct_list, id.Handle);
+        }
         public static void Get_valves(out List<Valve_modify_param> valves)
         {
+            var dic = new Dictionary<Polyline, Valve_modify_param>();
             valves = new List<Valve_modify_param>();
             var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风阀");
             foreach (var id in valveIds)
+            {
+                var blk = (BlockReference)id.GetEntity();
+                var poly = new Polyline();
+                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                dic.Add(poly, Get_valve_param(id, "风阀"));
                 valves.Add(Get_valve_param(id, "风阀"));
+            }
+            valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("防火阀");
+            foreach (var id in valveIds)
+                valves.Add(Get_valve_param(id, "防火阀"));
+        }
+        public static void Get_valves_dic(out Dictionary<Polyline, Valve_modify_param> dic)
+        {
+            dic = new Dictionary<Polyline, Valve_modify_param>();
+            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风阀");
+            foreach (var id in valveIds)
+            {
+                var blk = (BlockReference)id.GetEntity();
+                var poly = new Polyline();
+                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                dic.Add(poly, Get_valve_param(id, "风阀"));
+            }
+            valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("防火阀");
+            foreach (var id in valveIds)
+            {
+                var blk = (BlockReference)id.GetEntity();
+                var poly = new Polyline();
+                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                dic.Add(poly, Get_valve_param(id, "防火阀"));
+            }
+        }
+        public static void Get_holes_dic(out Dictionary<Polyline, Hole_modify_param> dic)
+        {
+            dic = new Dictionary<Polyline, Hole_modify_param>();
+            var holeIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("洞口");
+            foreach (var id in holeIds)
+            {
+                var blk = (BlockReference)id.GetEntity();
+                var poly = new Polyline();
+                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                dic.Add(poly, Get_hole_param(id, "洞口"));
+            }
         }
         public static void Get_ports(out List<Port_modify_param> ports)
         {
@@ -101,8 +156,8 @@ namespace ThMEPHVAC.Model
             var param = new Valve_modify_param();
             ThDuctPortsDrawService.Get_valve_dyn_block_properity(id, out Point3d insert_p, out double width, 
                     out double height, out double text_angle, out double rotate_angle, out string valve_visibility);
-            var dir_vec = ThDuctPortsService.Get_dir_vec_by_angle(rotate_angle - Math.PI * 0.5);
-            var vertical_r = ThDuctPortsService.Get_right_vertical_vec(dir_vec);
+            var dir_vec = ThMEPHVACService.Get_dir_vec_by_angle(rotate_angle - Math.PI * 0.5);
+            var vertical_r = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
             param.handle = id.Handle;
             param.valve_name = valve_name;
             param.valve_layer = id.GetBlockLayer();
@@ -113,6 +168,22 @@ namespace ThMEPHVAC.Model
             param.width = width;
             param.height = height;
             param.text_angle = text_angle;
+            return param;
+        }
+        private static Hole_modify_param Get_hole_param(ObjectId id, string hole_name)
+        {
+            var param = new Hole_modify_param();
+            ThDuctPortsDrawService.Get_hole_dyn_block_properity(id, out Point3d insert_p, out double len, out double width, out double rotate_angle);
+            var dir_vec = ThMEPHVACService.Get_dir_vec_by_angle(rotate_angle - Math.PI * 0.5);
+            var vertical_r = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
+            param.handle = id.Handle;
+            param.hole_name = hole_name;
+            param.hole_layer = id.GetBlockLayer();
+            param.insert_p = insert_p.ToPoint2D();
+            param.judge_p = param.insert_p - 0.5 * width * vertical_r;
+            param.len = len;
+            param.width = width;
+            param.rotate_angle = rotate_angle;
             return param;
         }
         public static Port_modify_param Get_port_param(ObjectId id)
@@ -136,11 +207,12 @@ namespace ThMEPHVAC.Model
                 return param;
             int inc = 0;
             param.handle = group_handle;
-            param.start_handle = ThDuctPortsService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
+            param.start_handle = ThMEPHVACService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
             param.type = (string)values.ElementAt(inc++).Value;
-            if (param.type != "Duct")
+            if (param.type != "Duct" && param.type != "Vertical_bypass")
                 return param;
             param.air_volume = Double.Parse((string)values.ElementAt(inc++).Value);
+            param.elevation = Double.Parse((string)values.ElementAt(inc++).Value);
             param.duct_size = (string)values.ElementAt(inc++).Value;
             using (var db = AcadDatabase.Active())
             {
@@ -153,6 +225,26 @@ namespace ThMEPHVAC.Model
             }                
             return param;
         }
+        public static VT_elbow_modify_param Get_vt_elbow_param(TypedValueList list, Handle group_handle)
+        {
+            var param = new VT_elbow_modify_param();
+            var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
+            if (!values.Any())
+                return param;
+            param.handle = group_handle;
+            var type = (string)values.ElementAt(1).Value;
+            if (type != "Vertical_elbow")
+                return param;
+            using (var db = AcadDatabase.Active())
+            {
+                var id = db.Database.GetObjectId(false, group_handle, 0);
+                var portIndex2PositionDic = ThDuctPortsReadComponent.GetBypassPortsOfGroup(id);
+                if (portIndex2PositionDic.Count == 0)
+                    return param;
+                param.detect_p = portIndex2PositionDic["0"].ToPoint2D();
+            }
+            return param;
+        }
         private static Entity_modify_param Get_entity_param(TypedValueList list, Handle group_handle)
         {
             var param = new Entity_modify_param();
@@ -161,7 +253,7 @@ namespace ThMEPHVAC.Model
                 var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
                 int inc = 0;
                 param.handle = group_handle;
-                param.start_id = ThDuctPortsService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
+                param.start_id = ThMEPHVACService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
                 param.type = (string)values.ElementAt(inc++).Value;
                 if (!values.Any() || param.type == "Duct")
                     return param;
@@ -185,7 +277,6 @@ namespace ThMEPHVAC.Model
             var list = new TypedValueList();
             foreach (var g_id in g_ids)
             {
-
                 list = g_id.GetXData(reg_app_name);
                 if (list == null)
                     continue;
@@ -205,6 +296,24 @@ namespace ThMEPHVAC.Model
                 }
             }
             return String.Empty;
+        }
+        public static string Get_entity_type(ObjectId[] obj_ids)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var list = new TypedValueList();
+                foreach (var id in obj_ids)
+                {
+                    var groups = id.GetGroups();
+                    foreach (var g in groups)
+                    {
+                        var type = Get_entity_type(g);
+                        if (type != "")
+                            return type;
+                    }
+                }
+                return String.Empty;
+            }
         }
         public static TypedValueList Get_value_list(ObjectId[] obj_ids)
         {

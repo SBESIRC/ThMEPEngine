@@ -6,10 +6,12 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
+using ThCADCore.NTS;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPHVAC.Model
 {
-    public class ThDuctPortsService
+    public class ThMEPHVACService
     {
         public static double Calc_duct_width(bool is_first, 
                                              double ui_air_speed, 
@@ -74,23 +76,27 @@ namespace ThMEPHVAC.Model
         }
         public static double Get_width(string size)
         {
+            if (size == null)
+                return 0;
             string[] width = size.Split('x');
             if (width.Length != 2)
-                throw new NotImplementedException();
+                throw new NotImplementedException("Duct size info doesn't contain width or height");
             return Double.Parse(width[0]);
         }
         public static double Get_height(string size)
         {
+            if (size == null)
+                return 0;
             string[] width = size.Split('x');
             if (width.Length != 2)
-                throw new NotImplementedException();
+                throw new NotImplementedException("Duct size info doesn't contain width or height");
             return Double.Parse(width[1]);
         }
         public static void Seperate_size_info(string size, out double width, out double height)
         {
             string[] s = size.Split('x');
             if (s.Length != 2)
-                throw new NotImplementedException();
+                throw new NotImplementedException("Duct size info doesn't contain width or height");
             width = Double.Parse(s[0]);
             height = Double.Parse(s[1]);
         }
@@ -242,8 +248,11 @@ namespace ThMEPHVAC.Model
         {
             var judger = -Vector3d.YAxis;
             double angle = dir_vec.GetAngleTo(judger);
-            if (judger.CrossProduct(dir_vec).Z < 0)
-                angle = -angle;
+            var z = judger.CrossProduct(dir_vec).Z;
+            if (Math.Abs(z) < 1e-3)
+                z = 0;
+            if (z < 0)
+                angle = 2 * Math.PI - angle;
             return angle;
         }
         public static double Get_text_height(string scale)
@@ -273,33 +282,54 @@ namespace ThMEPHVAC.Model
                 style = "TH-DIM50";
             return style;
         }
-        public static Duct_modify_param Create_duct_modify_param(Line_Info cur_seg, 
-                                                                 string duct_size, 
+        public static Duct_modify_param Create_duct_modify_param(DBObjectCollection center_line,
+                                                                 string duct_size,
+                                                                 string elevation,
                                                                  double air_volume,
                                                                  Handle start_handle)
         {
-            if (cur_seg.center_line.Count > 0)
+            if (center_line.Count > 0)
             {
-                var center_line = cur_seg.center_line[0] as Line;
-                var sp = center_line.StartPoint.ToPoint2D();
-                var ep = center_line.EndPoint.ToPoint2D();
-                return new Duct_modify_param(duct_size, air_volume, sp, ep, start_handle);
+                var line = center_line[0] as Line;
+                var sp = line.StartPoint.ToPoint2D();
+                var ep = line.EndPoint.ToPoint2D();
+                return new Duct_modify_param(duct_size, air_volume, Double.Parse(elevation), sp, ep, start_handle);
             }
             else
                 throw new NotImplementedException();
         }
-        public static Entity_modify_param Create_special_modify_param(Line_Info cur_seg,
-                                                                      Handle start_handle,
-                                                                      string type,
-                                                                      Matrix3d mat)
+        public static Duct_modify_param Create_duct_modify_param(DBObjectCollection center_line,
+                                                                 string duct_size,
+                                                                 double air_volume,
+                                                                 ThMEPHVACParam param,
+                                                                 Handle start_handle)
+        {
+            if (center_line.Count > 0)
+            {
+                var line = center_line[0] as Line;
+                var sp = line.StartPoint.ToPoint2D();
+                var ep = line.EndPoint.ToPoint2D();
+                var height = Get_height(duct_size);
+                bool is_first = duct_size == param.in_duct_size;
+                double elevation = is_first ? param.elevation : (param.elevation * 1000 + param.main_height - height) / 1000;
+                return new Duct_modify_param(duct_size, air_volume, elevation, sp, ep, start_handle);
+            }
+            else
+                throw new NotImplementedException();
+        }
+        public static Entity_modify_param Create_special_modify_param( string type,
+                                                                       Matrix3d mat,
+                                                                       Handle start_handle,
+                                                                       DBObjectCollection flange,
+                                                                       DBObjectCollection center_line)
         {
             var pos_list = new List<Point2d>();
             var pos_ext_list = new List<Point2d>();
             var port_widths = new List<double>();
             int inc = 0;
-            for (int i = 0; i < cur_seg.center_line.Count; ++i)
+            for (int i = 0; i < center_line.Count; ++i)
             {
-                var l = cur_seg.center_line[i];
+                var l = center_line[i];
                 if (l.GetType() != typeof(Line))
                     continue;
                 var line = l as Line;
@@ -308,7 +338,7 @@ namespace ThMEPHVAC.Model
                 var ep = p.ToPoint2D();
                 pos_list.Add(ep);
                 pos_ext_list.Add(ep - dir_vec);
-                var flg = cur_seg.flg[inc++] as Line;
+                var flg = flange[inc++] as Line;
                 port_widths.Add(flg.Length - 90);
             }
             return new Entity_modify_param(type, start_handle, pos_list, pos_ext_list, port_widths);
@@ -485,11 +515,26 @@ namespace ThMEPHVAC.Model
                 ports_ext.Add(l.EndPoint - dir_vec);
             }
         }
-        public static void Get_ports(Line l, out List<Point3d> ports, out List<Point3d> ports_ext)
+        public static void Get_duct_ports(Line l, out List<Point3d> ports, out List<Point3d> ports_ext)
         {
             var dir_vec = Get_edge_direction(l);
             ports = new List<Point3d>() { l.StartPoint, l.EndPoint };
             ports_ext = new List<Point3d>() { l.StartPoint + dir_vec, l.EndPoint - dir_vec };
+        }
+        public static void Get_elbow_ports(DBObjectCollection center_lines, out List<Point3d> ports, out List<Point3d> ports_ext)
+        {
+            ports = new List<Point3d>();
+            ports_ext = new List<Point3d>();
+            foreach (var e in center_lines)
+            {
+                if (e is Line)
+                {
+                    var l = e as Line;
+                    var dir_vec = Get_edge_direction(l);
+                    ports.Add(l.EndPoint);
+                    ports_ext.Add(l.EndPoint - dir_vec);
+                }
+            }
         }
         public static Vector2d Vec3_to_vec2(Vector3d vec)
         {
@@ -526,14 +571,16 @@ namespace ThMEPHVAC.Model
             double min_y = Math.Min(p1.Y, p2.Y);
             return new Point3d(min_x, min_y, 0);
         }
+        public static Polyline Get_line_extend(Point2d sp, Point2d ep, double ext_len)
+        {
+            var p1 = new Point3d(sp.X, sp.Y, 0);
+            var p2 = new Point3d(ep.X, ep.Y, 0);
+            var l = new Line(p1, p2);
+            return l.Buffer(ext_len * 0.5);
+        }
         public static Polyline Get_line_extend(Line l, double ext_len)
         {
-            var pl = new Polyline();
-            var dir_vec = Get_edge_direction(l);
-            var l_vec = Get_left_vertical_vec(dir_vec);
-            var r_vec = Get_right_vertical_vec(dir_vec);
-            pl.CreateRectangle((l.StartPoint + l_vec * ext_len).ToPoint2D(), (l.EndPoint + r_vec * ext_len).ToPoint2D());
-            return pl;
+            return l.Buffer(ext_len * 0.5);
         }
         public static Point3d Round_point(Point3d p, int tail_num)
         {
@@ -556,6 +603,200 @@ namespace ThMEPHVAC.Model
             var dir_vec = Get_edge_direction(l);
             var vec = (p - l.StartPoint).GetNormal();
             return dir_vec.CrossProduct(vec).Z > 0;
+        }
+        public static void Search_poly_border(DBObjectCollection lines, out Point2d top, out Point2d left, out Point2d right, out Point2d bottom)
+        {
+            top = new Point2d(0, Double.MinValue);
+            left = new Point2d(Double.MaxValue, 0);
+            right = new Point2d(Double.MinValue, 0);
+            bottom = new Point2d(0, Double.MaxValue);
+            foreach (Line l in lines)
+            {
+                Update_border(l.StartPoint.ToPoint2D(), ref top, ref left, ref right, ref bottom);
+                Update_border(l.EndPoint.ToPoint2D(), ref top, ref left, ref right, ref bottom);
+            }
+        }
+        private static void Update_border(Point2d p, ref Point2d top, ref Point2d left, ref Point2d right, ref Point2d bottom)
+        {
+            if (p.X > right.X)
+                right = p;
+            if (p.X < left.X)
+                left = p;
+            if (p.Y > top.Y)
+                top = p;
+            if (p.Y < bottom.Y)
+                bottom = p;
+        }
+        public static void Search_poly_border(DBObjectCollection lines, out Fence_Info fence)
+        {
+            fence = new Fence_Info();
+            foreach (Line l in lines)
+            {
+                Update_border(l.StartPoint.ToPoint2D(), ref fence);
+                Update_border(l.EndPoint.ToPoint2D(), ref fence);
+            }
+        }
+        private static void Update_border(Point2d p, ref Fence_Info fence)
+        {
+            if (p.X > fence.right)
+                fence.right = p.X;
+            if (p.X < fence.left)
+                fence.left = p.X;
+            if (p.Y > fence.top)
+                fence.top = p.Y;
+            if (p.Y < fence.bottom)
+                fence.bottom = p.Y;
+        }
+        public static bool Is_in_fence(Point3d p, Fence_Info fence)
+        {
+            return (p.X > fence.left && p.X < fence.right) && (p.Y > fence.bottom && p.Y < fence.top);
+        }
+        public static bool Is_connected(Line l1, Line l2, Tolerance tor)
+        {
+            return l1.StartPoint.IsEqualTo(l2.StartPoint, tor) || l1.StartPoint.IsEqualTo(l2.EndPoint, tor) ||
+                   l1.EndPoint.IsEqualTo(l2.StartPoint, tor) || l1.EndPoint.IsEqualTo(l2.EndPoint, tor);
+        }
+        public static Point3d Line_set_with_one_intersection(DBObjectCollection set1, 
+                                                             DBObjectCollection set2,
+                                                             out Line cross1,
+                                                             out Line cross2)
+        {
+            cross1 = new Line();
+            cross2 = new Line();
+            var tor = new Tolerance(1.5, 1.5);
+            foreach (Line l1 in set1)
+            {
+                foreach (Line l2 in set2)
+                {
+                    var p = Intersect_point(l1, l2);
+                    if (!p.IsEqualTo(Point3d.Origin, tor))
+                    {
+                        cross1 = l1;
+                        cross2 = l2;
+                        return p;
+                    }
+                }
+            }
+            return Point3d.Origin;
+        }
+        public static Point3d Intersect_point(Line l1, Line l2)
+        {
+            var vec1 = l1.EndPoint - l1.StartPoint;
+            var vec2 = l2.EndPoint - l2.StartPoint;
+            var cross_x = l2.StartPoint.X - l1.StartPoint.X;
+            var cross_y = l2.StartPoint.Y - l1.StartPoint.Y;
+            var det = vec2.X * vec1.Y - vec2.Y * vec1.X;
+            if (Math.Abs(det) < 1e-9)
+                return Point3d.Origin;//The two line segmenta are parallel 
+            var det_inv = 1.0f / det;
+            var S = (vec2.X * cross_y - vec2.Y * cross_x) * det_inv;
+            var T = (vec1.X * cross_y - vec1.Y * cross_x) * det_inv;
+            if (Math.Abs(S) < 1e-9)
+                S = 0;
+            if (Math.Abs(T) < 1e-9)
+                T = 0;
+            if (S < 0 || S > 1 || T < 0 || T > 1)
+                return Point3d.Origin;//Intersection not within line segments
+            else
+                return l1.StartPoint + vec1 * S;
+        }
+        public static bool Is_in_polyline(Point3d p, Polyline pl)
+        {
+            bool is_out = true;
+            int edge_num = pl.NumberOfVertices - 1;
+            for (int i = 0; i < edge_num; ++i)
+            {
+                var p1 = pl.GetPoint3dAt(i);
+                var p2 = pl.GetPoint3dAt(i + 1);
+                var dir_vec = (p2 - p1).GetNormal();
+                var judge_dir_vec = (p - p1).GetNormal();
+                if (i == 0)
+                {
+                    is_out = dir_vec.CrossProduct(judge_dir_vec).Z > 0;
+                    continue;
+                }
+                var judge = dir_vec.CrossProduct(judge_dir_vec).Z > 0;
+                if (is_out ^ judge)
+                    return false;
+            }
+            return true;
+        }
+        public static bool Is_out_polyline(DBObjectCollection lines, DBObjectCollection fence)
+        {
+            if (lines.Count > 0)
+            {
+                var first = lines[0] as Line;
+                var is_out = !Is_in_polyline(first.StartPoint, fence);
+                foreach (Line l in lines)
+                    is_out = is_out && (!Is_in_polyline(l.EndPoint, fence));
+                return is_out;
+            }
+            return false;
+        }
+        public static bool Is_in_polyline(Point3d p, DBObjectCollection lines)
+        {
+            var shadow = new DBObjectCollection();
+            foreach (Line obj in lines)
+                shadow.Add(obj);
+            var pts = new Point3dCollection();
+            var search_p = (shadow[0] as Line).StartPoint;
+            pts.Add(search_p);
+            while (shadow.Count > 0)
+            {
+                var cur_l = Search_p(search_p, shadow, out Point3d other_p);
+                pts.Add(other_p);
+                shadow.Remove(cur_l);
+                search_p = other_p;
+            }
+            var pl = new Polyline();
+            pl.CreatePolyline(pts);
+            return Is_in_polyline(p, pl);
+        }
+        private static Line Search_p(Point3d p, DBObjectCollection lines, out Point3d other_p)
+        {
+            var tor = new Tolerance(1.5, 1.5);
+            foreach (Line l in lines)
+            {
+                if (p.IsEqualTo(l.StartPoint, tor) || p.IsEqualTo(l.EndPoint, tor))
+                {
+                    other_p = p.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
+                    return l;
+                }
+            }
+            throw new NotImplementedException("search point not belongs wall lines");
+        }
+        public static double Get_elbow_open_angle(Special_graph_Info info)
+        {
+            var l1 = info.lines[0];
+            var l2 = info.lines[1];
+            var v1 = Get_2D_edge_direction(l1);
+            var v2 = Get_2D_edge_direction(l2);
+            return v1.GetAngleTo(v2);
+        }
+        public static double Get_reducing_len(double big, double small)
+        {
+            double reducinglength = 0.5 * (big - small) / Math.Tan(20 * Math.PI / 180);
+            return reducinglength < 100 ? 100 : reducinglength > 1000 ? 1000 : reducinglength;
+        }
+        public static double Get_line_dis(Point3d l1_sp, Point3d l1_ep, Point3d l2_sp, Point3d l2_ep)
+        {
+            var l1 = new LineString(new Coordinate[] { l1_sp.ToNTSCoordinate(), l1_ep.ToNTSCoordinate() });
+            var l2 = new LineString(new Coordinate[] { l2_sp.ToNTSCoordinate(), l2_ep.ToNTSCoordinate() });
+            return l1.Distance(l2);
+        }
+        public static Line Get_max_line(DBObjectCollection lines)
+        {
+            var max_line = new Line();
+            double max_len = 0;
+            foreach (Line l in lines)
+            {
+                if (max_len < l.Length)
+                {
+                    max_len = l.Length;
+                    max_line = l;
+                }
+            }
+            return max_line;
         }
     }
 }
