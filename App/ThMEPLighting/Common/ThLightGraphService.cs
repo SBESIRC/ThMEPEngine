@@ -10,9 +10,9 @@ namespace ThMEPLighting.Common
 {
     public class ThLightGraphService
     {
-        private Point3d Start { get; set; }
-        private List<ThLightEdge> Edges { get; set; }
-        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+        protected Point3d Start { get; set; }
+        protected List<ThLightEdge> Edges { get; set; }
+        protected ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public List<ThLinkPath> Links { get; set; }
         public Point3d StartPoint
         {
@@ -21,20 +21,23 @@ namespace ThMEPLighting.Common
                 return Start;
             }
         }
-        private ThLightGraphService(List<ThLightEdge> edges, Point3d start)
+
+        protected ThLightGraphService(List<ThLightEdge> edges, Point3d start)
         {
             Edges = edges;
             Start = start;
             Links = new List<ThLinkPath>();
             SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(edges.Select(o => o.Edge).ToList());
         }
+
         public static ThLightGraphService Build(List<ThLightEdge> edges, Point3d start)
         {
             var instance = new ThLightGraphService(edges, start);
             instance.Build();
             return instance;
         }
-        private void Build()
+
+        public virtual void Build()
         {
             //根据编号第一个端口点，查找起始边
             var startEdge = FindStartEdge();
@@ -44,7 +47,7 @@ namespace ThMEPLighting.Common
             }
             //查找以此边为起始边的直链
             //直线端点相互连接的链条
-            var links = new List<ThLightEdge> { startEdge };                    
+            var links = new List<ThLightEdge> { startEdge };
             Find(links, Start);
             UpdateEdge(links, Start);
             var linkPath = new ThLinkPath
@@ -56,13 +59,14 @@ namespace ThMEPLighting.Common
             Links.Add(linkPath);
             Travese(links);
         }
-        private void Travese(List<ThLightEdge> lightEdges)
+
+        protected virtual void Travese(List<ThLightEdge> lightEdges)
         {
             foreach (var lightEdge in lightEdges)
             {
                 foreach (var branch in lightEdge.MultiBranch)
                 {
-                    if(branch.Item2.IsTraversed)
+                    if (branch.Item2.IsTraversed)
                     {
                         continue;
                     }
@@ -73,23 +77,25 @@ namespace ThMEPLighting.Common
                     {
                         Start = branch.Item1,
                         Path = branchLinks,
-                        PreEdge= lightEdge
+                        PreEdge = lightEdge
                     };
                     Links.Add(linkPath);
                     Travese(branchLinks);
                 }
             }
         }
-        private void UpdateEdge(List<ThLightEdge> lightEdges, Point3d start)
+
+        protected virtual void UpdateEdge(List<ThLightEdge> lightEdges, Point3d start)
         {
             //先将直链设为已遍历
             lightEdges.ForEach(o => o.IsTraversed = true);
             lightEdges.ForEach(o =>
             {
-                start=UpdateEdge(o, start);
-            });            
+                start = UpdateEdge(o, start);
+            });
         }
-        private Point3d UpdateEdge(ThLightEdge lightEdge,Point3d start)
+
+        protected virtual Point3d UpdateEdge(ThLightEdge lightEdge, Point3d start)
         {
             //找出第一根边上的分支
             Point3d nextPt = GetNextLinkPt(lightEdge, start);
@@ -97,25 +103,27 @@ namespace ThMEPLighting.Common
             lightEdge.Update(start);
             return nextPt;
         }
-        private ThLightEdge FindStartEdge()
+
+        protected virtual ThLightEdge FindStartEdge()
         {
-            var edges = Edges.Where(o => 
-            o.Edge.IsLink(Start,ThGarageLightCommon.RepeatedPointDistance)).ToList();
+            var edges = Edges.Where(o =>
+            o.Edge.IsLink(Start, ThGarageLightCommon.RepeatedPointDistance)).ToList();
             return edges.Count > 0 ? edges.First() : null;
         }
+
         /// <summary>
         /// 查找相连的线
         /// </summary>
         /// <param name="links"></param>
         /// <param name="start"></param>
-        private void Find(List<ThLightEdge> links, Point3d start)
+        protected virtual void Find(List<ThLightEdge> links, Point3d start)
         {
             //当Degree为零，或碰到已遍历的边结束
             Point3d findPt = GetNextLinkPt(links[links.Count - 1], start);
             var portEdges = SearchEdges(findPt, ThGarageLightCommon.RepeatedPointDistance);
             portEdges = portEdges
                 .Where(o => !links.Contains(o))
-                .Where(o=>!o.IsTraversed).ToList();
+                .Where(o => !o.IsTraversed).ToList();
             if (portEdges.Count == 0)
             {
                 return;
@@ -128,9 +136,10 @@ namespace ThMEPLighting.Common
             links.Add(neighbourEdge);
             Find(links, findPt);
         }
-        private List<ThLightEdge> SearchEdges(Point3d portPt, double length)
+
+        protected virtual List<ThLightEdge> SearchEdges(Point3d portPt, double length)
         {
-            Polyline envelope = ThDrawTool.CreateSquare(portPt, length*2.0);
+            Polyline envelope = ThDrawTool.CreateSquare(portPt, length * 2.0);
             var searchObjs = SpatialIndex.SelectCrossingPolygon(envelope);
             var linkLines = searchObjs
                 .Cast<Line>()
@@ -140,7 +149,8 @@ namespace ThMEPLighting.Common
                 .Where(o => linkLines.Contains(o.Edge))
                 .ToList();
         }
-        private ThLightEdge FindNeighbourEdge(ThLightEdge currentEdge, List<ThLightEdge> linkEdges)
+
+        protected virtual ThLightEdge FindNeighbourEdge(ThLightEdge currentEdge, List<ThLightEdge> linkEdges)
         {
             var collinearEdges = linkEdges.Where(o => ThGeometryTool.IsCollinearEx(
                   currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint,
@@ -162,12 +172,13 @@ namespace ThMEPLighting.Common
                 return null;
             }
         }
+
         /// <summary>
         /// 查找主分支连接的次分支
         /// </summary>
         /// <param name="mainEdge">主分支</param>
         /// <param name="portPt">主分支的端点</param>
-        private void BuildMultiBranch(ThLightEdge mainEdge,Point3d portPt)
+        protected virtual void BuildMultiBranch(ThLightEdge mainEdge, Point3d portPt)
         {
             //在portPt处查找相连的分支
             var branchRes = new List<Tuple<Point3d, ThLightEdge>>();
@@ -176,7 +187,7 @@ namespace ThMEPLighting.Common
             var vec = startPt.GetVectorTo(endPt).GetNormal();
             startPt = startPt - vec.MultiplyBy(ThGarageLightCommon.RepeatedPointDistance);
             endPt = endPt + vec.MultiplyBy(ThGarageLightCommon.RepeatedPointDistance);
-            Polyline outline = ThDrawTool.ToOutline(startPt,endPt,2.0);
+            Polyline outline = ThDrawTool.ToOutline(startPt, endPt, 2.0);
             var objs = SpatialIndex.SelectCrossingPolygon(outline);
             objs.Remove(mainEdge.Edge);
             //找到与portPt连接的点
@@ -193,7 +204,7 @@ namespace ThMEPLighting.Common
                 .Where(o => !ThGeometryTool.IsCollinearEx(
                     mainEdge.Edge.StartPoint, mainEdge.Edge.EndPoint,
                     o.Edge.StartPoint, o.Edge.EndPoint));
-            if((collinearEdges.Count()+ unCollinearEdges.Count())<=1)
+            if ((collinearEdges.Count() + unCollinearEdges.Count()) <= 1)
             {
                 //如果端点只连接了一条边，则返回
                 return;
@@ -201,7 +212,7 @@ namespace ThMEPLighting.Common
             else
             {
                 var edges = new List<ThLightEdge>();
-                edges.AddRange(collinearEdges.Where(o=>o.IsTraversed==false));
+                edges.AddRange(collinearEdges.Where(o => o.IsTraversed == false));
                 edges.AddRange(unCollinearEdges.Where(o => o.IsTraversed == false));
                 edges.ForEach(o =>
                 {
@@ -214,21 +225,23 @@ namespace ThMEPLighting.Common
                 mainEdge.MultiBranch = branchRes.OrderBy(o => portPt.DistanceTo(o.Item1)).ToList();
             }
         }
-        private Point3dCollection BuildBranchPt(ThLightEdge mainBranch, ThLightEdge secondaryBranch)
+
+        protected virtual Point3dCollection BuildBranchPt(ThLightEdge mainBranch, ThLightEdge secondaryBranch)
         {
             var pts = new Point3dCollection();
             mainBranch.Edge.IntersectWith(secondaryBranch.Edge,
                 Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }
-        private Point3d GetNextLinkPt(ThLightEdge lightEdge,Point3d start)
+        protected virtual Point3d GetNextLinkPt(ThLightEdge lightEdge, Point3d start)
         {
             Point3d preEdgeSp = lightEdge.Edge.StartPoint;
             Point3d preEdgeEp = lightEdge.Edge.EndPoint;
-            return start.DistanceTo(preEdgeSp) < start.DistanceTo(preEdgeEp)?
+            return start.DistanceTo(preEdgeSp) < start.DistanceTo(preEdgeEp) ?
                 preEdgeEp : preEdgeSp;
         }
     }
+
     public class ThLinkPath
     {
         public Point3d Start { get; set; }
@@ -246,7 +259,7 @@ namespace ThMEPLighting.Common
                 double sum = 0;
                 Path.ForEach(p => sum += p.Edge.Length);
                 return sum;
-            }            
+            }
         }
     }
 }

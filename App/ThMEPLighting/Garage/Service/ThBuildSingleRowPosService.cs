@@ -10,21 +10,20 @@ namespace ThMEPLighting.Garage.Service
     {
         public ThBuildSingleRowPosService(
             List<ThLightEdge> edges,
-            List<Tuple<Point3d, Point3d>> splitPts,
+            List<List<Point3d>> segments,
             ThLightArrangeParameter arrangeParameter,
             ThQueryLightBlockService queryLightBlockService)
-            :base(edges, splitPts, arrangeParameter, queryLightBlockService)
+            :base(edges, segments, arrangeParameter, queryLightBlockService)
         {
         }
 
         public override void Build()
         {
-            SplitPts.ForEach(o =>
+            Segments.ForEach(o =>
             {
                 var splitParameter = new ThLineSplitParameter
                 {
-                    LineSp = o.Item1,
-                    LineEp = o.Item2,
+                    Segment=o,
                     Margin = ArrangeParameter.Margin,
                     Interval = ArrangeParameter.Interval,
                 };

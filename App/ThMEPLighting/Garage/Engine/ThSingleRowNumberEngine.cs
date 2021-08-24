@@ -29,44 +29,50 @@ namespace ThMEPLighting.Garage.Engine
         }
         public override void Build()
         {
-            //对传入的灯边界不在进行任何处理
-            Point3d findSp = Start;
+            //对传入的灯边界不在进行任何处理            
+            if (LineEdges.Count == 0)
+            {
+                return;
+            }
+            Point3d findSp = LineEdges[0].Edge.StartPoint;
             var lightEdges = new List<ThLightEdge>();
             LineEdges.ForEach(o => lightEdges.Add(o)); //包括Dx和Fdx边界
-            var ports = new List<Point3d>();
-            Ports.ForEach(o => ports.Add(o));
             do
             {
                 if (lightEdges.Where(o => o.IsDX).Count() == 0)
                 {
                     break;
                 }
-                //对灯线边建图
-                var lightGraph = ThLightGraphService.Build(lightEdges, findSp);
+                if (Ports.Count > 0)
+                {
+                    findSp = Ports[0];
+                }
+                else 
+                {
+                    findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
+                }                
+
+                //对灯线边建图,创建从findSp开始可以连通的图
+                var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
+                lightGraph.Build();
+
                 //找到从ports中的点出发拥有最长边的图
                 var centerEdges = new List<ThLightEdge>();
                 lightGraph.Links.ForEach(o => o.Path.ForEach(p => centerEdges.Add(new ThLightEdge(p.Edge))));
                 var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
                 centerEdges.ForEach(o => o.IsTraversed = false);
-                lightGraph = ThLightGraphService.Build(centerEdges, centerStart);
-                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter, QueryLightBlockService);
+
+                lightGraph = new ThCdzmLightGraphService(centerEdges, centerStart);
+                lightGraph.Build();
+
+                var distributeService = new ThSingleRowDistributeService(
+                    lightGraph, ArrangeParameter, QueryLightBlockService);
+                distributeService.Distribute();                
                 UpdateLoopNumber(lightGraph);
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));
                 lightEdges = LineEdges.Where(o => o.IsTraversed == false).ToList();
-                ports = ports.PtOnLines(lightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
-                if (ports.Count > 0)
-                {
-                    findSp = ports.First();
-                }
-                else if (lightEdges.Where(o => o.IsDX).Count() > 0)
-                {
-                    findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
-                }
-                else
-                {
-                    break;
-                }
+                Ports = Ports.PtOnLines(lightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());  //更新端口点             
             } while (lightEdges.Count > 0);
             //指定为中心线
             DxLightEdges.ForEach(o => o.Pattern = EdgePattern.Center);

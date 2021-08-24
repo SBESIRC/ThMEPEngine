@@ -2,13 +2,13 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Common;
+using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Garage.Model;
+using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -36,8 +36,9 @@ namespace ThMEPLighting.Garage.Engine
             var results = ThCADCoreNTSGeometryClipper.Clip(regionBorder, lines.ToCollection());
             return ThLaneLineEngine.Explode(results).Cast<Line>().ToList();
         }
-        protected void Preprocess(ThRegionBorder regionBorder)
+        protected void TrimAndShort(ThRegionBorder regionBorder)
         {
+            //裁剪 和 缩短
             DxLines = new List<Line>();
             FdxLines = new List<Line>();
             // 裁剪并获取框内的车道线
@@ -62,9 +63,17 @@ namespace ThMEPLighting.Garage.Engine
             {
                 return;
             }            
+            
+            // 保持车道线和非车道线
+            DxLines.AddRange(dxLines);
+            FdxLines.AddRange(fdxLines);
+        }
+
+        protected void CleanAndFilter()
+        {
             // 将车道线规整
-            dxLines = ThPreprocessLineService.Preprocess(dxLines);
-            if (dxLines.Count == 0)
+            DxLines = ThPreprocessLineService.Preprocess(DxLines);
+            if (DxLines.Count == 0)
             {
                 return;
             }
@@ -72,18 +81,39 @@ namespace ThMEPLighting.Garage.Engine
             // 过滤车道线
             if (!ArrangeParameter.IsSingleRow)
             {
-                dxLines = ThFilterTTypeCenterLineService.Filter(dxLines, ArrangeParameter.MinimumEdgeLength);
-                dxLines = ThFilterMainCenterLineService.Filter(dxLines, ArrangeParameter.RacywaySpace / 2.0);
-                dxLines = ThFilterElbowCenterLineService.Filter(dxLines, ArrangeParameter.MinimumEdgeLength);
+                DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
+                DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace / 2.0);
+                DxLines = ThFilterElbowCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
             }
-            if (dxLines.Count == 0)
-            {
-                return;
-            }
+        }
 
-            // 保持车道线和非车道线
-            DxLines.AddRange(dxLines);
-            FdxLines.AddRange(fdxLines);
+        protected virtual List<Curve> MergeDxLine(Polyline border, List<Line> dxLines)
+        {
+            //单位化、修正方向
+            var dxNomalLines = new List<Line>();
+            dxLines.ForEach(o => dxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
+            //从小汤车道线合并服务中获取合并的主道线，辅道线            
+            return ThMergeLightCenterLines.Merge(border, dxNomalLines, ThGarageLightCommon.LaneMergeRange);
+        }
+        protected List<Line> Explode(List<Curve> curves)
+        {
+            var results = new List<Line>();
+            curves.ForEach(c =>
+            {
+                if(c is Line line)
+                {
+                    results.Add(line.Clone() as Line);
+                }
+                else if(c is Polyline poly)
+                {
+                    results.AddRange(poly.ToLines());
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            });
+            return results;
         }
     }
 }

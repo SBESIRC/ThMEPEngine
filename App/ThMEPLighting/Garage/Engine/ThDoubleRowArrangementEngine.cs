@@ -24,8 +24,15 @@ namespace ThMEPLighting.Garage.Engine
         }
         private void Arrange(ThRegionBorder regionBorder)
         {
-            // 预处理
-            Preprocess(regionBorder);
+            // 裁剪和缩短
+            TrimAndShort(regionBorder);
+
+            // 合并车道线
+            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines);
+            DxLines = Explode(mergeDxLines); //把合并的车道线重新设成
+
+            // 清洗和过滤短线
+            CleanAndFilter(); //对DxLines操作
 
             //识别内外圈
             var innerOuterCircles = new List<ThWireOffsetData>();
@@ -33,6 +40,7 @@ namespace ThMEPLighting.Garage.Engine
             {
                 //需求变化2020.12.23,非灯线不参与编号传递
                 //创建1、2号线，车道线merge，配对1、2号线
+                innerOuterEngine.MergeCurves = mergeDxLines;
                 innerOuterEngine.Width = ArrangeParameter.Width;
                 innerOuterEngine.Reconize(DxLines, new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
                 innerOuterCircles = innerOuterEngine.WireOffsetDatas;

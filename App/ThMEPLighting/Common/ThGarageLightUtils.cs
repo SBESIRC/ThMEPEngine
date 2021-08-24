@@ -28,7 +28,7 @@ namespace ThMEPLighting.Common
             Vector3d spVec = sp.GetVectorTo(spNext).GetNormal();
             var startExendPt = sp - spVec.MultiplyBy(length);
 
-            var ep = poly.GetPoint3dAt(poly.NumberOfVertices-1);
+            var ep = poly.GetPoint3dAt(poly.NumberOfVertices - 1);
             var epPrev = poly.GetPoint3dAt(poly.NumberOfVertices - 2);
 
             Vector3d epVec = ep.GetVectorTo(epPrev).GetNormal();
@@ -43,7 +43,7 @@ namespace ThMEPLighting.Common
             newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
 
             return newPoly;
-        }        
+        }
         public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
         {
             var pts = border.Vertices();
@@ -56,15 +56,15 @@ namespace ThMEPLighting.Common
             lines.ForEach(o => objs.Add(o));
             return new ThCADCoreNTSSpatialIndex(objs);
         }
-        public static bool IsLink(this Line line, Point3d pt,double tolerance=1.0)
+        public static bool IsLink(this Line line, Point3d pt, double tolerance = 1.0)
         {
             return line.StartPoint.DistanceTo(pt) <= tolerance ||
                     line.EndPoint.DistanceTo(pt) <= tolerance;
         }
-        public static bool IsLink(this Line first, Line second,double tolerance=1.0)
-        {            
-            if (ThGeometryTool.IsCollinearEx(first.StartPoint, 
-                first.EndPoint,second.StartPoint,second.EndPoint))
+        public static bool IsLink(this Line first, Line second, double tolerance = 1.0)
+        {
+            if (ThGeometryTool.IsCollinearEx(first.StartPoint,
+                first.EndPoint, second.StartPoint, second.EndPoint))
             {
                 double sum = first.Length + second.Length;
                 var pairPts = new List<Tuple<Point3d, Point3d>>();
@@ -82,28 +82,28 @@ namespace ThMEPLighting.Common
                  IsLink(first, second.EndPoint, tolerance);
             }
         }
-        public static bool IsCoincide(this Line first,Line second,double tolerance= 1e-4)
+        public static bool IsCoincide(this Line first, Line second, double tolerance = 1e-4)
         {
-            return IsCoincide(first.StartPoint,first.EndPoint,
-                second.StartPoint,second.EndPoint, tolerance);
+            return IsCoincide(first.StartPoint, first.EndPoint,
+                second.StartPoint, second.EndPoint, tolerance);
         }
-        public static bool IsCoincide(Point3d firstSp,Point3d firstEp,
-            Point3d secondSp,Point3d secondEp,double tolerance=1e-4)
+        public static bool IsCoincide(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp, double tolerance = 1e-4)
         {
-            return 
+            return
                 (firstSp.DistanceTo(secondSp) <= tolerance &&
                 firstEp.DistanceTo(secondEp) <= tolerance) ||
                 (firstSp.DistanceTo(secondEp) <= tolerance &&
                 firstEp.DistanceTo(secondSp) <= tolerance);
         }
-        public static List<Point3d> PtOnLines(this List<Point3d> pts,List<Line> lines,double tolerance=1.0)
+        public static List<Point3d> PtOnLines(this List<Point3d> pts, List<Line> lines, double tolerance = 1.0)
         {
             var results = new List<Point3d>();
             foreach (var pt in pts)
             {
-                foreach(var line in lines)
+                foreach (var line in lines)
                 {
-                    if(line.IsLink(pt, tolerance))
+                    if (line.IsLink(pt, tolerance))
                     {
                         results.Add(pt);
                         break;
@@ -122,17 +122,17 @@ namespace ThMEPLighting.Common
             });
             return pts.GetCollinearMaxPts();
         }
-        public static bool IsContains(this List<Line> lines, Line line,double tolerance=1.0)
+        public static bool IsContains(this List<Line> lines, Line line, double tolerance = 1.0)
         {
             return lines.Where(o => line.IsCoincide(o, tolerance)).Any();
-        }    
-        public static bool IsContains(this List<Point3d> pts,Point3d pt ,double tolerance=1.0)
-        {
-            return pts.Where(o => pt.DistanceTo(o)<=tolerance).Any();
         }
-        public static bool HasCommon(this Line first,Line second,double tolerance=1.0)
+        public static bool IsContains(this List<Point3d> pts, Point3d pt, double tolerance = 1.0)
         {
-            if(first.Length==0.0 || second.Length==0.0)
+            return pts.Where(o => pt.DistanceTo(o) <= tolerance).Any();
+        }
+        public static bool HasCommon(this Line first, Line second, double tolerance = 1.0)
+        {
+            if (first.Length == 0.0 || second.Length == 0.0)
             {
                 return false;
             }
@@ -144,12 +144,12 @@ namespace ThMEPLighting.Common
                 var newEp = ThGeometryTool.GetProjectPtOnLine(first.EndPoint, second.StartPoint, second.EndPoint);
                 var pts = new List<Point3d>() { newSp, newEp, second.StartPoint, second.EndPoint };
                 var maxItem = pts.GetCollinearMaxPts();
-                var sum = first.Length + second.Length;           
-                if (Math.Abs(maxItem.Item1.DistanceTo(maxItem.Item2)- sum)<= tolerance)
+                var sum = first.Length + second.Length;
+                if (Math.Abs(maxItem.Item1.DistanceTo(maxItem.Item2) - sum) <= tolerance)
                 {
                     return false;
                 }
-                else if(maxItem.Item1.DistanceTo(maxItem.Item2)< sum)
+                else if (maxItem.Item1.DistanceTo(maxItem.Item2) < sum)
                 {
                     return true;
                 }
@@ -170,15 +170,15 @@ namespace ThMEPLighting.Common
         /// <returns></returns>
         public static double LightNumberAngle(double lightEdgeAngle)
         {
-            if(lightEdgeAngle==0.0 || lightEdgeAngle == 180.0)
+            if (lightEdgeAngle == 0.0 || lightEdgeAngle == 180.0)
             {
                 return 0.0;
             }
-            if(lightEdgeAngle == 90.0 || lightEdgeAngle == 270.0)
+            if (lightEdgeAngle == 90.0 || lightEdgeAngle == 270.0)
             {
                 return 90;
             }
-            if(lightEdgeAngle>0.0 && lightEdgeAngle < 90.0)
+            if (lightEdgeAngle > 0.0 && lightEdgeAngle < 90.0)
             {
                 return lightEdgeAngle;
             }
@@ -203,12 +203,12 @@ namespace ThMEPLighting.Common
         /// <param name="second"></param>
         /// <param name="tolerance"></param>
         /// <returns></returns>
-        public static bool IsCollinearLinkAndNotOverlap(this Line first,Line second, double tolerance = 1.0)
+        public static bool IsCollinearLinkAndNotOverlap(this Line first, Line second, double tolerance = 1.0)
         {
             return first.IsLink(second, tolerance) &&
                 ThGeometryTool.IsCollinearEx(
-                    first.StartPoint,first.EndPoint,
-                    second.StartPoint, second.EndPoint) && 
+                    first.StartPoint, first.EndPoint,
+                    second.StartPoint, second.EndPoint) &&
                 !ThGeometryTool.IsOverlapEx(
                     first.StartPoint, first.EndPoint,
                     second.StartPoint, second.EndPoint);
@@ -264,7 +264,7 @@ namespace ThMEPLighting.Common
             {
                 return true;
             }
-            return false;   
+            return false;
         }
         public static Line NormalizeLaneLine(Line line, double tolerance = 1.0)
         {
@@ -281,7 +281,7 @@ namespace ThMEPLighting.Common
                     newLine = new Line(line.EndPoint, line.StartPoint);
                 }
             }
-            else if(Math.Abs(line.StartPoint.X - line.EndPoint.X) <= tolerance)
+            else if (Math.Abs(line.StartPoint.X - line.EndPoint.X) <= tolerance)
             {
                 //此线是近似沿Y轴
                 if (line.StartPoint.Y < line.EndPoint.Y)
@@ -305,7 +305,7 @@ namespace ThMEPLighting.Common
             var sb = new StringBuilder();
             sb.Append('^');
             var str = ThGarageLightCommon.LightNumberPrefix;
-            for (int i=0;i< str.Length;i++)
+            for (int i = 0; i < str.Length; i++)
             {
                 sb.Append('[');
                 sb.Append(str[i]);
@@ -327,7 +327,7 @@ namespace ThMEPLighting.Common
         {
             return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.FdxCenterLineLayerName);
         }
-        public static List<Line> FilterDistributedEdges(List<Line> edges,List<Line> dxLines)
+        public static List<Line> FilterDistributedEdges(List<Line> edges, List<Line> dxLines)
         {
             var results = new List<Line>();
             var spatialIndex = BuildSpatialIndex(edges);
@@ -337,13 +337,13 @@ namespace ThMEPLighting.Common
                 var dxVec = shortenLine.StartPoint.GetVectorTo(shortenLine.EndPoint);
                 var rec = ThDrawTool.ToRectangle(shortenLine.StartPoint, shortenLine.EndPoint, 1.0);
                 var objs = spatialIndex.SelectCrossingPolygon(rec);
-                foreach(Line edge in objs)
+                foreach (Line edge in objs)
                 {
                     var edgeVec = edge.StartPoint.GetVectorTo(edge.EndPoint);
-                    if (ThGeometryTool.IsParallelToEx(dxVec, edgeVec) && 
+                    if (ThGeometryTool.IsParallelToEx(dxVec, edgeVec) &&
                         HasCommon(shortenLine, edge))
                     {
-                        if(results.IndexOf(edge)<0)
+                        if (results.IndexOf(edge) < 0)
                         {
                             results.Add(edge);
                         }

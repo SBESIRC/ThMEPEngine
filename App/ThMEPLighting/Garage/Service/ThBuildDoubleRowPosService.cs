@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
@@ -12,17 +11,17 @@ namespace ThMEPLighting.Garage.Service
     public abstract class ThBuildLightPosService
     {
         protected List<ThLightEdge> Edges { get; set; }
-        protected List<Tuple<Point3d, Point3d>> SplitPts { get; set; }
+        protected List<List<Point3d>> Segments { get; set; }
         protected ThLightArrangeParameter ArrangeParameter { get; set; }
         protected ThQueryLightBlockService QueryLightBlockService { get; set; }
         public ThBuildLightPosService(
             List<ThLightEdge> edges,
-            List<Tuple<Point3d, Point3d>> splitPts,
+            List<List<Point3d>> segments,
             ThLightArrangeParameter arrangeParameter,
             ThQueryLightBlockService queryLightBlockService)
         {
             Edges = edges;
-            SplitPts = splitPts;
+            Segments = segments;
             ArrangeParameter = arrangeParameter;
             QueryLightBlockService = queryLightBlockService;
         }
@@ -34,10 +33,13 @@ namespace ThMEPLighting.Garage.Service
         }
         protected virtual void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
         {
-            var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
-            var points = QueryLightBlockService.Query(line);
-            points = points.OrderBy(o => o.DistanceTo(splitParameter.LineSp)).ToList();
-            DistributePoints(points);
+            for (int i = 0; i < splitParameter.Segment.Count-1; i++)
+            {
+                var line = new Line(splitParameter.Segment[i], splitParameter.Segment[i+1]);
+                var points = QueryLightBlockService.Query(line);
+                points = points.OrderBy(o => o.DistanceTo(line.StartPoint)).ToList();
+                DistributePoints(points);
+            }
         }
         protected virtual void DistributePoints(List<Point3d> installPoints)
         {
@@ -58,20 +60,19 @@ namespace ThMEPLighting.Garage.Service
     {
         public ThBuildDoubleRowPosService(
             List<ThLightEdge> edges,
-            List<Tuple<Point3d, Point3d>> splitPts,
+            List<List<Point3d>> segments,
             ThLightArrangeParameter arrangeParameter,
             ThQueryLightBlockService queryLightBlockService) 
-            : base(edges, splitPts, arrangeParameter, queryLightBlockService)
+            : base(edges, segments, arrangeParameter, queryLightBlockService)
         {
         }
         public override void Build()
         {
-            SplitPts.ForEach(o =>
+            Segments.ForEach(o =>
             {
                 var splitParameter = new ThLineSplitParameter
                 {
-                    LineSp = o.Item1,
-                    LineEp = o.Item2,
+                    Segment= o,
                     Margin = ArrangeParameter.Margin,
                     Interval = ArrangeParameter.Interval,
                 };
