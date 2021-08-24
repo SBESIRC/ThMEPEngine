@@ -420,6 +420,19 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static bool IsValidSinglePlace(Polyline poly, Point3d pt, double rLength)
+        {
+            for (int i = 0; i < poly.NumberOfVertices; i++)
+            {
+                if (poly.GetPoint3dAt(i).DistanceTo(pt) > rLength)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static bool IsIntersect(Polyline firstPly, Polyline secPly)
         {
             if (GeomUtils.IsIntersectValid(firstPly, secPly))
@@ -559,11 +572,13 @@ namespace ThMEPElectrical.Geometry
 
             if (ptLst.Count < 1)
             {
-                var centerPt = GetCenterPt(postPoly);
-                if (centerPt.HasValue)
-                    ptLst.Add(centerPt.Value);
-                else
-                    return ptLst;
+                var centerPt = postPoly.MinimumBoundingCircle().Center;
+                ptLst.Add(centerPt);
+                //var centerPt = GetCenterPt(postPoly);
+                //if (centerPt.HasValue)
+                //    ptLst.Add(centerPt.Value);
+                //else
+                //    return ptLst;
             }
 
             // 距离500的边界调整

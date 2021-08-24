@@ -24,6 +24,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected double radiusLength = 1800;
         //protected readonly double moveLength = 200;
         protected readonly double spacing = 100;  //布置线间距为100的倍数
+        readonly double minColArea = 350 * 350; 
         
         public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
         {
@@ -38,8 +39,9 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             #endregion
 
             //获取柱轴网
+            var gridCols = colums.Where(x => x.Area > minColArea).ToList();
             GridService gridService = new GridService();
-            var allGrids = gridService.CreateGrid(polyline, colums, matrix, 4000);
+            var allGrids = gridService.CreateGrid(polyline, gridCols, matrix, 4000);
 
             //计算布置网格线
             CalLayoutGrid(polyline, allGrids, out List<List<Line>> tLines, out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir);
