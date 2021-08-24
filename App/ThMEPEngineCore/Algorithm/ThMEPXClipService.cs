@@ -1,7 +1,8 @@
 ﻿using System;
 using DotNetARX;
 using Linq2Acad;
-using Autodesk.AutoCAD.Geometry;
+using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.DatabaseServices.Filters;
 
@@ -75,7 +76,10 @@ namespace ThMEPEngineCore.Algorithm
             }
             poly.TransformBy(filter.ClipSpaceToWorldCoordinateSystemTransform);
             poly.TransformBy(filter.OriginalInverseBlockTransform);
-            return poly;
+            // Fix TAPD ID1000809：
+            //  XClip剪裁区域可能会和区域内的对象贴合，导致对象被裁剪掉了
+            //  解决方案：把XClip裁剪区域稍微扩大一点（100mm）
+            return poly.Buffer(100).OfType<Polyline>().OrderByDescending(x => x.Area).First();
         }
     }
 }
