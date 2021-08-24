@@ -138,7 +138,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     {
                         ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, range);
                     }
-
+                    
                     var brLines = new List<ThHydrantBranchLine>();
                     foreach (var hydrant in hydrants)
                     {
