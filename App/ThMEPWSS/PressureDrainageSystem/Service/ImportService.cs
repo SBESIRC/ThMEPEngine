@@ -27,7 +27,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     //导入不存在的图层并确认图层unlocked
                     List<string> layerNames = new() { "W-RAIN-PIPE", "W-NOTE", "W-RAIN-Y-PIPE", "W-BUSH", "W-DRAI-DOME-PIPE" };
-                    List<short> layerColorIndex = new() { 255, 255, 210, 255 };
+                    List<short> layerColorIndex = new() { 255, 255, 210, 255, 255 };
                     for (int i = 0; i < layerNames.Count; i++)
                     {
                         if (!adb.Layers.Contains(layerNames[i]))
