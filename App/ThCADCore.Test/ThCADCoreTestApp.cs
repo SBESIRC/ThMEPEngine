@@ -31,21 +31,6 @@ namespace ThCADCore.Test
             //
         }
 
-        [CommandMethod("TIANHUACAD", "ThMBB", CommandFlags.Modal)]
-        public void ThMBB()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                acadDatabase.ModelSpace.Add(pline.MinimumBoundingBox());
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "ThMBC", CommandFlags.Modal)]
         public void ThMBC()

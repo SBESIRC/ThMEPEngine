@@ -25,27 +25,6 @@ namespace ThCADCore.NTS
             return new Circle(mbc.GetCentre().ToAcGePoint3d(), Vector3d.ZAxis, mbc.GetRadius());
         }
 
-        public static Polyline MinimumBoundingBox(this Polyline polyline)
-        {
-            var geometry = polyline.ToNTSLineString().Envelope;
-            if (geometry is LineString lineString)
-            {
-                return lineString.ToDbPolyline();
-            }
-            else if (geometry is LinearRing linearRing)
-            {
-                return linearRing.ToDbPolyline();
-            }
-            else if (geometry is Polygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
         public static Polyline GetMinimumRectangle(this Polyline polyline)
         {
             // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
