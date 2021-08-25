@@ -316,6 +316,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         case StatisticType.Attributes:
                             {
                                 BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
+                                if (o.HasAlias)
+                                {
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Count(x => o.AliasList.Contains((x.Outline as BlockReference).Name));
+                                }
                                 break;
                             }
                         case StatisticType.RelyOthers:

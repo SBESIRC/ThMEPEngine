@@ -83,6 +83,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         }
                     case StatisticType.Attributes:
                         {
+                            if(o.HasAlias && o.AliasList.Contains(blkref.Name))
+                            {
+                                IsRequired = true;
+                                return;
+                            }
                             dic.ForEach(keyvaluepair =>
                             {
                                 if (o.StatisticAttNameValues.ContainsKey(keyvaluepair.Key) && o.StatisticAttNameValues[keyvaluepair.Key].Contains(keyvaluepair.Value))
