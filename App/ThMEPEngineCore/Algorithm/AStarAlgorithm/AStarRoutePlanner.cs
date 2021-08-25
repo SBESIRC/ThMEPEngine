@@ -6,6 +6,7 @@ using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
 using Dreambuild.AutoCAD;
+using System.Linq;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 {
@@ -79,7 +80,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 
             //获取路径点位
             var resPt = GetPath(lastNode);
-            
+
             //int index = 0;
             //var pl = new Polyline();
             //pl.ColorIndex = 6;
@@ -95,6 +96,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //调整路径
             //AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
             resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
+
             var path = map.CreatePath(resPt);
             return path;
         }
