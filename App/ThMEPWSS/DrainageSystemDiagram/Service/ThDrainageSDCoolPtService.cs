@@ -10,9 +10,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDCoolPtService
     {
+        /// <summary>
+        /// 找最近的墙面。
+        /// 同时校核厕所块方向。如果方向放反会转过来。更改toilet. supportPt， Dir 属性
+        /// </summary>
+        /// <param name="roomList"></param>
+        /// <param name="toiletList"></param>
+        /// <param name="aloneToilet"></param>
         public static void findCoolSupplyPt(List<ThToiletRoom> roomList, List<ThTerminalToilet> toiletList, out List<ThTerminalToilet> aloneToilet)
         {
             aloneToilet = new List<ThTerminalToilet>();
+            var islandToilet = new List<ThTerminalToilet>();
 
             foreach (var terminal in toiletList)
             {
@@ -24,108 +32,368 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 else
                 {
                     var wallList = room.First().wallList;
-                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToiletToWall, false);
+                    List<Point3d> ptOnWall = findPtOnWall(wallList, terminal, ThDrainageSDCommon.TolToiletToWall, islandToilet);
                     terminal.SupplyCoolOnWall = ptOnWall;
                 }
             }
+            checkIslandDirection(islandToilet);
         }
 
-        public static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall, bool toiletFaceSide)
+        private static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall, List<ThTerminalToilet> islandToilet)
         {
+            List<string> noPriority = new List<string> { "A-Toilet-3", "A-Toilet-7", "给水角阀平面" };
             List<Point3d> ptOnWall = new List<Point3d>();
-            var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
-            var parallelWall = findParallelWall(closeWall, terminal, toiletFaceSide);
 
-            Line closestWall = null;
-            if (parallelWall.Count > 0)
+            var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
+
+            var sideWallDict = findNearestParallelWall(closeWall);
+
+            KeyValuePair<int, Line> turnCloseWallSet;
+            if (noPriority.Contains(terminal.Type))
             {
-                var parallelWallDistDict = parallelWall.ToDictionary(x => x, x => x.GetDistToPoint(terminal.Boundary.GetPoint3dAt(1), false));
-                parallelWallDistDict = parallelWallDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-                closestWall = parallelWallDistDict.First().Key;
+                turnCloseWallSet = findNesrestWall(sideWallDict, false);
             }
-         
+            else
+            {
+                turnCloseWallSet = findNesrestWall(sideWallDict, true);
+            }
+
+            //turn boundary
+            if (turnCloseWallSet.Key > 0)
+            {
+                //不是岛的情况
+                //岛也有可能反但是没有处理
+                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, turnCloseWallSet.Key);
+                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.setInfo();
+
+            }
+
+            //find point on wall
+            Line closestWall = turnCloseWallSet.Value;
             if (closestWall != null)
             {
                 //靠墙
                 terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
             }
             else
-            {   //岛
+            {   //岛，有可能反的
                 terminal.SupplyCool.ForEach(x => ptOnWall.Add(x));
+                islandToilet.Add(terminal);
             }
 
             return ptOnWall;
         }
 
-        private static List<Line> findParallelWall(List<Line> wallList, ThTerminalToilet terminal, bool toiletFaceSide)
+        /// <summary>
+        /// 返回boundary边中心点 对应的平行的最近的墙。如果没有就是null
+        /// </summary>
+        /// <param name="closeWallList"></param>
+        /// <returns></returns>
+        private static Dictionary<Point3d, Line> findNearestParallelWall(Dictionary<Point3d, List<Line>> closeWallList)
         {
-            List<Line> parallelWall = new List<Line>();
-            if (wallList.Count > 0)
-            {
-                parallelWall = wallList.Where(wall =>
-                {
-                    var ptOnWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
-                    var ptToWallDir = (terminal.SupplyCool[0] - ptOnWall).GetNormal();
-                    var angle = ptToWallDir.GetAngleTo(terminal.Dir);
+            var tol = new Tolerance(10, 10);
+            var sideWallDict = new Dictionary<Point3d, Line>();
 
-                    var bReturn = false;
-                    if (toiletFaceSide == false)
+            for (int i = 0; i < closeWallList.Count; i++)
+            {
+                var wallList = closeWallList.ElementAt(i).Value;
+                var midP = closeWallList.ElementAt(i).Key;
+                var sideDir = (closeWallList.ElementAt((i + 2) % 4).Key - closeWallList.ElementAt((i) % 4).Key).GetNormal();
+                sideWallDict.Add(midP, null);
+                var parallelWall = new List<Line>();
+
+                if (wallList.Count > 0)
+                {
+                    foreach (var wall in wallList)
                     {
+                        var ptOnWall = wall.GetClosestPointTo(midP, true);
+                        var ptToWallDir = (midP - ptOnWall).GetNormal();
+                        var angle = ptToWallDir.GetAngleTo(sideDir);
+
                         if (Math.Abs(Math.Cos(angle)) >= Math.Cos(10 * Math.PI / 180))
                         {
-                            bReturn = true;
+                            parallelWall.Add(wall);
                         }
+                    }
+                }
+
+                if (parallelWall.Count > 0)
+                {
+                    var parallelWallDistDict = parallelWall.ToDictionary(x => x, x => x.GetDistToPoint(midP, false));
+                    parallelWallDistDict = parallelWallDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+                    sideWallDict[midP] = parallelWallDistDict.First().Key;
+                }
+            }
+
+            return sideWallDict;
+        }
+
+        /// <summary>
+        /// 根究两边优先或者四边优先找到boundary中心点和对应的最近的墙。
+        /// key int：boundary中心点的index，同时也是boundary顺时针转点数
+        /// 如果返回 int = -1， 则找不到最近墙。判定为岛。
+        /// </summary>
+        /// <param name="sideWallDict"></param>
+        /// <returns></returns>
+        private static KeyValuePair<int, Line> findNesrestWall(Dictionary<Point3d, Line> sideWallDict, bool topBottomPriority)
+        {
+            Dictionary<int, double> distDict = new Dictionary<int, double>();
+            var re = new KeyValuePair<int, Line>(-1, null);
+            int turnIndex = -1;
+
+            for (int i = 0; i < sideWallDict.Count; i++)
+            {
+                var item = sideWallDict.ElementAt(i);
+                distDict.Add(i, -1);
+                if (item.Value != null)
+                {
+                    distDict[i] = item.Value.GetDistToPoint(item.Key, false);
+                }
+            }
+
+            var distDictNoIsland = distDict.Where(x => x.Value != -1).ToDictionary(x => x.Key, x => x.Value);
+
+            if (distDictNoIsland.Count > 0)
+            {
+                if (topBottomPriority == false)
+                {
+                    turnIndex = distDictNoIsland.OrderBy(x => x.Value).First().Key;
+                }
+                else
+                {
+                    var topBottom = distDictNoIsland.Where(x => x.Key == 0 || x.Key == 2).ToDictionary(x => x.Key, x => x.Value);
+                    if (topBottom.Count > 0)
+                    {
+                        turnIndex = topBottom.OrderBy(x => x.Value).First().Key;
                     }
                     else
                     {
-                        if (Math.Cos(angle) >= Math.Cos(10 * Math.PI / 180))
+                        var leftRight = distDictNoIsland.Where(x => x.Key == 1 || x.Key == 3).ToDictionary(x => x.Key, x => x.Value);
+                        if (leftRight.Count > 0)
                         {
-                            bReturn = true;
+                            turnIndex = leftRight.OrderBy(x => x.Value).First().Key;
                         }
                     }
-                    return bReturn;
-
-                }).ToList();
+                }
             }
-            return parallelWall;
+
+            if (turnIndex != -1)
+            {
+                re = new KeyValuePair<int, Line>(turnIndex, sideWallDict.ElementAt(turnIndex).Value);
+            }
+
+            return re;
         }
 
-
-        private static List<Line> findNearbyWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall)
+        /// <summary>
+        /// dictionary顺序：boundary边中心： 上，右，下，左, value：boundary边800内的墙（有可能不平行）
+        /// </summary>
+        /// <param name="wallList"></param>
+        /// <param name="terminal"></param>
+        /// <param name="TolClosedWall"></param>
+        /// <returns></returns>
+        private static Dictionary<Point3d, List<Line>> findNearbyWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall)
         {
-            List<Line> closeWall = new List<Line>();
+            Dictionary<Point3d, List<Line>> closeWall = new Dictionary<Point3d, List<Line>>();
+
             if (wallList.Count > 0)
             {
                 var ptLeftTop = terminal.Boundary.GetPoint3dAt(1);
                 var ptRightTop = terminal.Boundary.GetPoint3dAt(2);
+                var ptLeftBottom = terminal.Boundary.GetPoint3dAt(0);
+                var ptRightBottom = terminal.Boundary.GetPoint3dAt(3);
+
+                var ptTop = midPoint(ptLeftTop, ptRightTop);
+                var ptRight = midPoint(ptRightTop, ptRightBottom);
+                var ptBottom = midPoint(ptLeftBottom, ptRightBottom);
+                var ptLeft = midPoint(ptLeftTop, ptLeftBottom);
+
+                closeWall.Add(ptTop, new List<Line> { });
+                closeWall.Add(ptRight, new List<Line> { });
+                closeWall.Add(ptBottom, new List<Line> { });
+                closeWall.Add(ptLeft, new List<Line> { });
+
                 var tol = new Tolerance(10, 10);
 
-                closeWall = wallList.Where(wall =>
-               {
-                   var bReturn = false;
+                foreach (var wall in wallList)
+                {
+                    var ptLeftWall = wall.GetClosestPointTo(ptLeft, true);
+                    var ptRightWall = wall.GetClosestPointTo(ptRight, true);
+                    var ptTopWall = wall.GetClosestPointTo(ptTop, true);
+                    var ptBottomWall = wall.GetClosestPointTo(ptBottom, true);
 
-                   var ptLeftWall = wall.GetClosestPointTo(ptLeftTop, true);
-                   var ptRightWall = wall.GetClosestPointTo(ptRightTop, true);
-
-                   if (ptLeftTop.DistanceTo(ptLeftWall) <= TolClosedWall ||
-                       ptRightTop.DistanceTo(ptRightWall) <= TolClosedWall)
-                   {
-
-                       var ptSupplyWall = wall.GetClosestPointTo(terminal.SupplyCool[0], true);
-                       if (wall.ToCurve3d().IsOn(ptSupplyWall, tol))
-                       {
-                           bReturn = true;
-                       }
-                   }
-
-                   return bReturn;
-
-               }).ToList();
+                    if (ptLeft.DistanceTo(ptLeftWall) <= TolClosedWall && wall.ToCurve3d().IsOn(ptLeftWall, tol))
+                    {
+                        closeWall[ptLeft].Add(wall);
+                    }
+                    if (ptRight.DistanceTo(ptRightWall) <= TolClosedWall && wall.ToCurve3d().IsOn(ptRightWall, tol))
+                    {
+                        closeWall[ptRight].Add(wall);
+                    }
+                    if (ptTop.DistanceTo(ptTopWall) <= TolClosedWall && wall.ToCurve3d().IsOn(ptTopWall, tol))
+                    {
+                        closeWall[ptTop].Add(wall);
+                    }
+                    if (ptBottom.DistanceTo(ptBottomWall) <= TolClosedWall && wall.ToCurve3d().IsOn(ptBottomWall, tol))
+                    {
+                        closeWall[ptBottom].Add(wall);
+                    }
+                }
             }
 
             return closeWall;
         }
 
+        private static void checkIslandDirection(List<ThTerminalToilet> islandToi)
+        {
+            groupIslandDirection(islandToi, out var islandGroup, out var islandGroupPair);
+
+            var needTurn = new List<ThTerminalToilet>();
+            foreach (var pair in islandGroupPair)
+            {
+                var i1 = islandGroup.TryGetValue(pair.Key, out var group1);
+                var i2 = islandGroup.TryGetValue(pair.Value, out var group2);
+
+                if (i1 && i2 && group1.Count > 0 && group2.Count > 0)
+                {
+                    var item1 = group1.First();
+                    var item2 = group2.OrderBy(x => x.Boundary.GetCenter().DistanceTo(item1.Boundary.GetCenter())).First();
+
+                    var top1 = midPoint(item1.Boundary.GetPoint3dAt(1), item1.Boundary.GetPoint3dAt(2));
+                    var bottom1 = midPoint(item1.Boundary.GetPoint3dAt(0), item1.Boundary.GetPoint3dAt(3));
+                    var top2 = midPoint(item2.Boundary.GetPoint3dAt(1), item2.Boundary.GetPoint3dAt(2));
+                    var bottom2 = midPoint(item2.Boundary.GetPoint3dAt(0), item2.Boundary.GetPoint3dAt(3));
+
+                    var distDict = new Dictionary<int, double>();
+                    distDict.Add(0, top1.DistanceTo(top2));
+                    distDict.Add(1, top1.DistanceTo(bottom2));
+                    distDict.Add(2, bottom1.DistanceTo(top2));
+                    distDict.Add(3, bottom1.DistanceTo(bottom2));
+
+                    var close = distDict.OrderBy(x => x.Value).First();
+                    if (close.Key == 0)
+                    {
+                        findNotDirInGroup(item1, group1, needTurn);
+                        findNotDirInGroup(item2, group2, needTurn);
+                    }
+                    if (close.Key == 1)
+                    {
+                        //item1方向对 item2方向错
+                        findDirInGroup(item2, group2, needTurn);
+                        findNotDirInGroup(item1, group1, needTurn);
+                    }
+                    if (close.Key == 2)
+                    {
+                        //item1方向错 item2方向对
+                        findDirInGroup(item1, group1, needTurn);
+                        findNotDirInGroup(item2, group2, needTurn);
+                    }
+                    if (close.Key == 3)
+                    {
+                        findDirInGroup(item2, group2, needTurn);
+                        findDirInGroup(item1, group1, needTurn);
+                    }
+                }
+            }
+
+            //转island boundary
+            foreach (var terminal in needTurn)
+            {
+                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, 2);
+                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.setInfo();
+                terminal.SupplyCoolOnWall = terminal.SupplyCool;
+            }
+        }
+
+        private static void findDirInGroup(ThTerminalToilet item, List<ThTerminalToilet> group, List<ThTerminalToilet> needTurn)
+        {
+            needTurn.Add(item);
+            var sameDirInGroup = group.Where(x =>
+            {
+                var bReturn = false;
+                var angle = x.Dir.GetAngleTo(item.Dir);
+                if (Math.Cos(angle) >= Math.Cos(5 * Math.PI / 180) && x != item)
+                {
+                    bReturn = true;
+                }
+                return bReturn;
+
+            });
+            needTurn.AddRange(sameDirInGroup);
+        }
+
+        private static void findNotDirInGroup(ThTerminalToilet item, List<ThTerminalToilet> group, List<ThTerminalToilet> needTurn)
+        {
+            var notSameDirInGroup = group.Where(x =>
+            {
+                var bReturn = false;
+                var angle = x.Dir.GetAngleTo(item.Dir);
+                if (Math.Cos(angle) < Math.Cos(5 * Math.PI / 180) && x != item)
+                {
+                    bReturn = true;
+                }
+                return bReturn;
+
+            });
+            needTurn.AddRange(notSameDirInGroup);
+        }
+
+        /// <summary>
+        /// UCS不是xy时可能有bug
+        /// </summary>
+        /// <param name="islandToi"></param>
+        /// <param name="islandGroup"></param>
+        /// <param name="islandGroupPair"></param>
+        private static void groupIslandDirection(List<ThTerminalToilet> islandToi, out Dictionary<int, List<ThTerminalToilet>> islandGroup, out Dictionary<int, int> islandGroupPair)
+        {
+            var islandTol = 2500;
+            islandGroup = new Dictionary<int, List<ThTerminalToilet>>();
+            islandGroupPair = new Dictionary<int, int>();
+            islandToi = islandToi.OrderBy(x => x.Boundary.GetCenter().X).ToList();
+
+            for (int i = 0; i < islandToi.Count; i++)
+            {
+                var island = islandGroup.Where(x => x.Value.Where(y => y.Boundary.GetCenter().DistanceTo(islandToi[i].Boundary.GetCenter()) <= islandTol).Count() > 0);
+                
+                if (island.Count() > 0)
+                {
+                    var islandSameDir = island.Where(x => x.Value.Where(y =>
+                    {
+                        var bReturn = false;
+                        var angle = y.Dir.GetAngleTo(islandToi[i].Dir);
+                        if (Math.Cos(angle) >= Math.Cos(5 * Math.PI / 180))
+                        {
+                            bReturn = true;
+                        }
+                        return bReturn;
+                    }).Count() > 0);
+
+                    if (islandSameDir.Count() > 0)
+                    {
+                        islandGroup[islandSameDir.First().Key].Add(islandToi[i]);
+                    }
+                    else
+                    {
+                        var index = islandGroup.Count == 0 ? 0 : islandGroup.Last().Key + 1;
+                        islandGroup.Add(index, new List<ThTerminalToilet> { islandToi[i] });
+                        islandGroupPair.Add(island.First().Key, index);
+                    }
+                }
+                else
+                {
+                    var index = islandGroup.Count == 0 ? 0 : islandGroup.Last().Key + 1;
+                    islandGroup.Add(index, new List<ThTerminalToilet> { islandToi[i] });
+                }
+            }
+        }
+
+        private static Point3d midPoint(Point3d pt1, Point3d pt2)
+        {
+            var midPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+            return midPt;
+        }
     }
 }
 

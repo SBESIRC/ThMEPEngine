@@ -6,6 +6,7 @@ using System.Linq;
 using CLI;
 
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
 
@@ -31,12 +32,36 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 return allLink;
             }
 
+            //确定每个厕所在墙上的给水点位,调整厕所方向
+            ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
+
+            //foreach (var terminal in toiletList )
+            //{
+            //   terminal.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C"));
+
+            //    Point3d leftBPt = terminal.Boundary.GetPoint3dAt(0);
+            //    Point3d leftPt = terminal.Boundary.GetPoint3dAt(1);
+            //    Point3d rightPt = terminal.Boundary.GetPoint3dAt(2);
+            //    Point3d rightPt2 = terminal.Boundary.GetPoint3dAt(3);
+
+            //    DrawUtils.ShowGeometry(leftBPt, "0", "l1bounary", 70, 25, 20);
+            //    DrawUtils.ShowGeometry(leftPt, "1", "l1bounary", 30, 25, 20);
+            //    DrawUtils.ShowGeometry(rightPt, "2", "l1bounary", 213, 25, 20);
+            //    DrawUtils.ShowGeometry(rightPt2, "3", "l1bounary", 152, 25, 20);
+
+            //    DrawUtils.ShowGeometry(leftBPt, "l1bounary", 70, 25, 20);
+            //    DrawUtils.ShowGeometry(leftPt, "l1bounary", 30, 25, 20);
+            //    DrawUtils.ShowGeometry(rightPt, "l1bounary", 213, 25, 20);
+            //    DrawUtils.ShowGeometry(rightPt2, "l1bounary", 152, 25, 20);
+
+            //    terminal.SupplyCool.ForEach(x => DrawUtils.ShowGeometry(x, "l1coolPt", 150, 30, 20, "X"));
+            //}
+
+            ////debug
+            //return allLink;
+
             var supplyStart = dataSet.SupplyStart.Pt;
             toiletList.ForEach(x => x.AreaId = dataSet.AreaID);
-
-            //确定每个厕所在墙上的给水点位
-            ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
-            //toiletList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
 
             ///////////收缩外框
             //ThDrainageSDRoomService.shrinkRoom(archiExtractor);
