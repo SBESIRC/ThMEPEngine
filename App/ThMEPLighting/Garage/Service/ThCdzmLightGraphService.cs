@@ -32,7 +32,7 @@ namespace ThMEPLighting.Common
             {
                 // 对于多个分支，优先选择夹角最小的通道
                 var minAngle = double.MaxValue;
-                var neighbourEdge = new ThLightEdge();
+                ThLightEdge neighbourEdge = null;
                 foreach (var edge in unCollinearEdges)
                 {
                     if(ThGarageUtils.IsLessThan45Degree(currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint,
