@@ -16,7 +16,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     /// </summary>
     class BalconyCorridorEquPlatform
     {
-        double _balconyMopPoolRadius = 50;//阳台拖把池排水点半径
+        double _balconyMopPoolRadius = 25;//阳台拖把池排水点半径
         double _floorDrainBalconyPipeNearDistance = 600;// 地漏找阳台立管范围
         double _floorDrainEqumPipeNearDistance = 2500;//地漏找设备平台立管范围
         double _pipeCasingLength = 100;//套管长度
@@ -91,8 +91,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
         }
 
-        public void LayoutConnect(List<CreateBlockInfo> balconyDrainCoverter) 
+        public void LayoutConnect(List<CreateBlockInfo> balconyDrainCoverter,out List<string> changeToFLY1Ids,out List<string> changeToFDrainIds) 
         {
+            changeToFLY1Ids = new List<string>();
+            changeToFDrainIds = new List<string>();
             if (null != balconyDrainCoverter && balconyDrainCoverter.Count > 0) 
             {
                 foreach (var item in balconyDrainCoverter) 
@@ -113,12 +115,33 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 balcCorridRooms.AddRange(_balconyRooms);
             if (null != _corridorRooms && _corridorRooms.Count > 0)
                 balcCorridRooms.AddRange(_corridorRooms);
+            
             //阳台设备、立管连线
             BalconyCorridorConnect(balcCorridRooms);
             //根据连接设备判断连线图层
             PipeRelationToLayoutLine();
             //立管转换、需要根据立管类型
             //RaiseConvert();
+            foreach (var item in _pipeConnectRelations)
+            {
+                if (item.isWasteWaterPipe) 
+                {
+                    var pipeRaise = _riserPipe.Where(c => c.uid == item.pipeBlockUid).First();
+                    if (pipeRaise.enumEquipmentType != EnumEquipmentType.wastewaterRiser)
+                        changeToFLY1Ids.Add(item.pipeBlockUid);
+                    if (null == _balconyDrains || _balconyDrains.Count < 1)
+                        continue;
+                    foreach (var connectId in item.connectBlockIds) 
+                    {
+                        if (null != _mopPools && _mopPools.Count > 0 && _mopPools.Any(c => c.uid.Equals(connectId)))
+                            continue;
+                        if (_balconyDrains.Any(c => c.belongBlockId.Equals(connectId) &&!(c.layerName.Equals(ThWSSCommon.Layout_FloorDrainBlockWastLayerName))))
+                        {
+                            changeToFDrainIds.Add(connectId);
+                        }
+                    }
+                }
+            }
         }
         void BalconyMopPool() 
         {
@@ -692,7 +715,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     continue;
                 //判断是否有废水地漏，雨水管/冷凝水管 W-RAIN-PIPE 废水 W-DRAI-WAST-PIPE
                 //洗衣机地漏-废水地漏-拖把池 ----->废水
-                item.isWasteWaterPipe = IsWasteWaterPipe(item.connectBlockIds);
+                item.isWasteWaterPipe = IsWasteWaterPipe(item.pipeBlockUid,item.connectBlockIds);
                 string layerName = item.isWasteWaterPipe ? ThWSSCommon.Layout_PipeWastDrainConnectLayerName : ThWSSCommon.Layout_PipeRainDrainConnectLayerName;
                 foreach (var line in item.pipeEquipmentConnectLines) 
                 {
@@ -700,11 +723,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
             }
         }
-        bool IsWasteWaterPipe(List<string> connectIds) 
+        bool IsWasteWaterPipe(string pipeId,List<string> connectIds) 
         {
             if (connectIds == null || connectIds.Count < 1)
                 return false;
-            bool isWasteWater = false;
+            bool isWasteWater = _riserPipe.Where(c=>c.uid == pipeId).First().enumEquipmentType == EnumEquipmentType.wastewaterRiser;
             foreach (var id in connectIds) 
             {
                 if (isWasteWater)

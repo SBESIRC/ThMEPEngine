@@ -59,7 +59,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (string.IsNullOrEmpty(dn))
                     continue;
 
-                var block = new CreateBlockInfo(floorId, blockName, layerName, item.blockCenterPoint, item.enumEquipmentType);
+                var block = new CreateBlockInfo(floorId, blockName, layerName, item.blockCenterPoint, item.enumEquipmentType,item.uid);
                 block.spaceId = item.roomSpaceId;
                 block.tag = tag;
                 block.dymBlockAttr.Add("可见性1", dn);
