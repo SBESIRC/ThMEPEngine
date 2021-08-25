@@ -31,8 +31,37 @@ namespace ThMEPWSS.Hydrant.Service
             AiLayerManager = ThHydrantExtractLayerManager.Config();
         }
 
-        public void Check(Database db, Point3dCollection pts)
+        public void Check(Database db, Point3dCollection pts, string mode)
         {
+            if (mode == "P")
+            {
+                ThStopWatchService.Start();
+                var firstRoomExtrarctor = new ThRoomExtractor()
+                {
+                    UseDb3Engine = true,
+                    FilterMode = FilterMode.Cross,
+                };
+                firstRoomExtrarctor.Extract(db, pts);
+                var rooms = firstRoomExtrarctor.Rooms;
+
+                if (rooms.Count > 0)
+                {
+                    var extent = new Extents3d(rooms[0].Boundary.Bounds.Value.MinPoint, rooms[0].Boundary.Bounds.Value.MaxPoint);
+                    for (int i = 1; i < rooms.Count; i++)
+                    {
+                        var extentTidal = new Extents3d(rooms[i].Boundary.Bounds.Value.MinPoint, rooms[i].Boundary.Bounds.Value.MaxPoint);
+                        extent.AddExtents(extentTidal);
+                    }
+                    pts = new Point3dCollection
+                    {
+                        extent.MinPoint,
+                        new Point3d(extent.MaxPoint.X, extent.MinPoint.Y, extent.MaxPoint.Z),
+                        extent.MaxPoint,
+                        new Point3d(extent.MinPoint.X, extent.MaxPoint.Y, extent.MaxPoint.Z)
+                    };
+                }
+            }
+
             ThStopWatchService.Start();
             var extractors = Extract(db, pts); //获取数据
             ThStopWatchService.Stop();
@@ -169,6 +198,11 @@ namespace ThMEPWSS.Hydrant.Service
                     ents.CreateGroup(acadDb.Database, (colorIndex++)%256);
                 });
             }
+        }
+
+        public void Check(Database db, Point3dCollection pts)
+        {
+            //
         }
     }
 }

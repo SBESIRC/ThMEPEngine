@@ -180,6 +180,11 @@ namespace ThMEPWSS.Hydrant.Service
                 });
             }
         }
+
+        public void Check(Database db, Point3dCollection pts, string mode)
+        {
+            //
+        }
     }
 #endif
 }
