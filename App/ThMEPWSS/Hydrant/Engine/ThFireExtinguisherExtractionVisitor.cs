@@ -119,7 +119,7 @@ namespace ThMEPWSS.Hydrant.Engine
         {
             return true;
         }
-        private bool CheckBlockReferenceVisibility(BlockReference br)
+        public bool CheckBlockReferenceVisibility(BlockReference br)
         {
             if (br.GetEffectiveName().Contains("消火栓"))
             {

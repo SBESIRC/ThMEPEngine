@@ -27,10 +27,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _pipeXAxisGroupDistance = 10;//Y轴分组是X轴方向上允许的误差范围
 
         private double _pipeLabelNearDistance = 500;//文字距离立管最短距离
-        private double _pipeLabelMaxDistance = 2000;//文字距离立管最大距离
-        private double _pipeLavelDirectionMoveStep = 200;//文字沿着线方向移动步长
+        private double _pipeLabelMaxDistance = 3500;//文字距离立管最大距离
+        private double _pipeLavelDirectionMoveStep = 300;//文字沿着线方向移动步长
         private double _pipeLabelXDirectionMaxDistance = 200;//文字X轴方向距离主线的最大距离
-        private double _pipeLalelXDirectionMoveStep = 100;//文字沿着X轴方向移动的步长
+        private double _pipeLalelXDirectionMoveStep = 200;//文字沿着X轴方向移动的步长
 
         private double _labelTextYSpace = 150;
         private double _labelTextXSpace = 100;

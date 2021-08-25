@@ -39,9 +39,9 @@ namespace ThMEPWSS.Hydrant.Data
             //后期再做远距离移动
             var hydrantExtractor = new ThFireHydrantRecognitionEngine(vistor);
             hydrantExtractor.Recognize(database, pts);
-            vistor.Results = new List<ThRawIfcDistributionElementData>();
-            hydrantExtractor.RecognizeMS(database, pts);
-            vistor.Results = new List<ThRawIfcDistributionElementData>();
+            //vistor.Results = new List<ThRawIfcDistributionElementData>();
+            //hydrantExtractor.RecognizeMS(database, pts);
+            //vistor.Results = new List<ThRawIfcDistributionElementData>();
 
             hydrantExtractor.Elements.ForEach(o =>
             {
