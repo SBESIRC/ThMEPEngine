@@ -82,7 +82,7 @@ namespace ThMEPWSS.Hydrant.Service
                         ElementLayer=AiLayerManager.ShearWallLayer,
                     },
                     new ThHydrantDoorOpeningExtractor()
-                    { 
+                    {
                         UseDb3Engine=false,
                         FilterMode = FilterMode.Cross,
                         ElementLayer = "AI-Door,AI-门,门",
@@ -92,7 +92,7 @@ namespace ThMEPWSS.Hydrant.Service
                         UseDb3Engine=false,
                         FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.OuterBoundaryLayer,
-                    }, 
+                    },
                     new ThFireHydrantExtractor()
                     {
                         FilterMode = FilterMode.Cross,

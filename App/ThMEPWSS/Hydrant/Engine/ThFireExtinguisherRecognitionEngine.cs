@@ -6,6 +6,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
@@ -47,9 +48,11 @@ namespace ThMEPWSS.Hydrant.Engine
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var extractEngine = new ThFireExtinguisherExtractionEngine(Visitor);
-            extractEngine.Extract(database);
-            Recognize(extractEngine.Results, polygon);
+            var extroctor = new ThExtractFireExtinguisher(Visitor.BlkNames[0],Visitor);
+            extroctor.Extract(database, polygon);
+            //var extractEngine = new ThFireExtinguisherExtractionEngine(Visitor);
+            //extractEngine.Extract(database);
+            Recognize(extroctor.DBobjs, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
@@ -69,6 +72,18 @@ namespace ThMEPWSS.Hydrant.Engine
                 originDatas = originDatas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
             }
             Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
+        }
+        public void Recognize(DBObjectCollection datas, Point3dCollection polygon)
+        {
+            var originDatas = new List<Entity>();
+            if (polygon.Count > 0)
+            {
+                var dbObjs = datas;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                originDatas = dbObjs.Cast<Entity>().ToList();
+            }
+            Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.GeometricExtents.ToRectangle() }));
         }
     }
 }
