@@ -19,6 +19,8 @@ panels:
           attributes: { "IsVisible": false, "IsEnabled": false }
         - text: "提车道中心线"
           attributes: { "IsVisible": false, "IsEnabled": false }
+        - text: "图块配置"
+          attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "提取空间"
           attributes: { "IsVisible": false, "IsEnabled": false }
         - text: "空间拾取"

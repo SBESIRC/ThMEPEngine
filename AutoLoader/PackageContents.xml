@@ -393,6 +393,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
+				<Command Local="THWTKSB" Global="THWTKSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -413,6 +414,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
+				<Command Local="THWTKSB" Global="THWTKSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -433,6 +435,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
+				<Command Local="THWTKSB" Global="THWTKSB" />
             </Commands>
         </ComponentEntry>
     </Components>
