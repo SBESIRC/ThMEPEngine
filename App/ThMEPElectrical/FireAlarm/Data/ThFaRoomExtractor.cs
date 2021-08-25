@@ -112,6 +112,7 @@ namespace FireAlarm.Data
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Name);
                 string privacyContent = "";
+                string LayoutContent = "";
                 if (o.Tags.Count > 0)
                 {
                     var labels = service.GetLabels(o);
@@ -123,7 +124,12 @@ namespace FireAlarm.Data
                             privacyContent = "私有";
                     }
                 }
+                if (service.MustLayoutArea(o))
+                    LayoutContent = "必布区域";
+                else if(service.CannotLayoutArea(o))
+                    LayoutContent = "不可布区域";
                 geometry.Properties.Add(ThExtractorPropertyNameManager.PrivacyPropertyName, privacyContent);
+                geometry.Properties.Add(ThExtractorPropertyNameManager.PlacementPropertyName, LayoutContent);
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
