@@ -35,7 +35,8 @@ namespace ThMEPLighting.Common
                 var neighbourEdge = new ThLightEdge();
                 foreach (var edge in unCollinearEdges)
                 {
-                    if(ThGarageUtils.IsLessThan45Degree(currentEdge.Direction, edge.Direction))
+                    if(ThGarageUtils.IsLessThan45Degree(currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint,
+                                                        edge.Edge.StartPoint, edge.Edge.EndPoint))
                     {
                         var angle = currentEdge.Direction.GetAngleTo(edge.Direction);
                         if (angle < minAngle)
