@@ -52,15 +52,8 @@ namespace ThMEPWSS.Hydrant.Service
                 ptsList.Add(pts);
             }
 
-            var frame = new Point3dCollection
-            {
-                new Point3d(double.MinValue, double.MinValue, 0),
-                new Point3d(double.MaxValue, double.MinValue, 0),
-                new Point3d(double.MaxValue, double.MaxValue, 0),
-                new Point3d(double.MinValue, double.MaxValue, 0),
-            };
+            var frame = new Point3dCollection();            
             SecondExtract(db, extractors, ptsList, pts, frame);
-            //Clear(extractors, frame);
 
             ThStopWatchService.Stop();
             ThStopWatchService.Print("提取数据耗时：");
@@ -103,9 +96,7 @@ namespace ThMEPWSS.Hydrant.Service
                         FilterMode = FilterMode.Cross,
                     }
                 };
-            extractors.ForEach(o => o.Extract(db, pts));
-            //调整不在房间内的消火栓的点位
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            extractors.ForEach(o => o.Extract(db, pts));            
             return extractors;
         }
 
