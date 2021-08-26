@@ -32,7 +32,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         public const string WaterTap = "水龙头1";
         public const string Elevation = "标高";
         public const string PipeDiameter = "给水管径100";
-        public const string PRValveDetail = "减压阀详图-AI";
+        public const string PRValveDetail = "减压阀详图-AI-2";
         public const string FloorFraming = "楼层框定";
         public const string Casing = "套管系统";
         public const string ButterflyValve = "蝶阀";
@@ -422,6 +422,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     {
                         continue;
                     }
+                    
                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
                     index += 1;
                 }
@@ -515,27 +516,34 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         }
 
         //统计分区数
-        public static int CountAreaNums(List<List<Point3dCollection>> FloorAreaList, ThCADCoreNTSSpatialIndex kitchenIndex)
+        public static int CountAreaNums(List<List<Point3dCollection>> FloorAreaList, ThCADCoreNTSSpatialIndex kitchenIndex,
+            ref int StartNum)
         {
+            StartNum = 100;
             int AreaNums = 0;
             var households = new int[FloorAreaList.Count, FloorAreaList[0].Count];
             for (int i = 0; i < FloorAreaList.Count; i++)
             {
                 var areaNums = 0;
-                for (int j = 0; j < FloorAreaList[i].Count; j++)
+                for (int j = 1; j < FloorAreaList[i].Count; j++)
                 {
                     households[i, j] = Convert.ToInt32(kitchenIndex.SelectCrossingPolygon(FloorAreaList[i][j]).Count > 0);
                     if (households[i, j] > 0)
                     {
-                        ;
+                        areaNums += households[i, j];
+                        if(StartNum > j)
+                        {
+                            StartNum = j;
+                        }
                     }
-                    areaNums += households[i, j];
+                    
                 }
                 if (AreaNums < areaNums)
                 {
                     AreaNums = areaNums;
                 }
             }
+            
             return AreaNums;
         }
 

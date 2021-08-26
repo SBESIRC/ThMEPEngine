@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using AcHelper;
+using Autodesk.AutoCAD.EditorInput;
+using System.Windows;
 using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
@@ -49,7 +51,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel))
             {
-                cmd.Execute();
+                var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
+                var optRes = Active.Editor.GetPoint(insertOpt);
+                if(optRes.Status == PromptStatus.OK)
+                {
+                    viewModel.InsertPt = optRes.Value;
+                    cmd.Execute();
+                }
             }
         }
 

@@ -13,7 +13,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         {
             if (i+1==5)
             {
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", "减压阀详图-AI",
+                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", "减压阀详图-AI-2",
                             BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
                 var ptls = new Point3d[3];
                 ptls[0] = BranchPipe[i - 1].GetPressureReducingValveSite();
