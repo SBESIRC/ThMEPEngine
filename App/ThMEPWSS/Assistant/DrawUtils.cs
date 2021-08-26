@@ -1040,13 +1040,13 @@ namespace ThMEPWSS.Assistant
                 {
                     var jo = serializer.Deserialize<JObject>(reader);
                     var ja = (JArray)jo["values"];
-                    return new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+                    return new Vector2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
                 }
                 if (typeof(Vector3d) == objectType)
                 {
                     var jo = serializer.Deserialize<JObject>(reader);
                     var ja = (JArray)jo["values"];
-                    return new Point3d(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>());
+                    return new Vector3d(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>());
                 }
                 if (typeof(System.Drawing.Color) == objectType)
                 {
