@@ -20,7 +20,7 @@ namespace ThMEPWSS.Hydrant.Data
         /// <summary>
         /// 点距离房间边线的最远距离
         /// </summary>
-        private double MaxDistanceToRoom = 200.0;
+        private double MaxDistanceToRoom = 150.0;
         public List<DBPoint> FireHydrants { get; set; }
         private List<ThIfcRoom> Rooms { get; set; }
         private Dictionary<DBPoint, Polyline> HydrantOutline { get; set; }
@@ -51,9 +51,9 @@ namespace ThMEPWSS.Hydrant.Data
                 HydrantOutline.Add(new DBPoint(center), obb);
             });
             //设置测试图层
-            LayerTools.AddLayer(AcHelper.Active.Database, "111111");
-            AcHelper.Active.Database.SetCurrentLayer("111111");
-            hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
+            //LayerTools.AddLayer(AcHelper.Active.Database, "111111");
+            //AcHelper.Active.Database.SetCurrentLayer("111111");
+            //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
 
             FireHydrants = HydrantOutline.Select(o => o.Key).ToList();
             if (FilterMode == FilterMode.Window)
