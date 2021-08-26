@@ -129,6 +129,8 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 }
                 group += 1;
             }
+            if (_floorGroup.floorGroups.Count < 2)
+                width *= 2;
             return width;
         }
         /// <summary>

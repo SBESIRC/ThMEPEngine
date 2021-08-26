@@ -22,12 +22,14 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Models
     {
         public List<int> refugeFloors { get; }
         public Dictionary<int, int> floorGroups { get; }
+        public Dictionary<int, string> floorGroupDN { get; }
         public int minFloor { get; }
         public int maxFloor { get; }
         public FloorGroupData(int minFloor,int maxFloor) 
         {
             this.refugeFloors = new List<int>();
             this.floorGroups = new Dictionary<int, int>();
+            this.floorGroupDN = new Dictionary<int, string>();
             this.minFloor = minFloor;
             this.maxFloor = maxFloor;
         }

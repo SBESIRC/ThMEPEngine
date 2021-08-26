@@ -16,6 +16,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             int maxFloor = int.MinValue;
             var refugeFloors = new List<int>();
             var floorInts = new Dictionary<int, int>();
+            var floorDNs = new Dictionary<int, string>();
             var listFloor = _vm.ZoneConfigs.ToList();
             for (int i = 0; i < listFloor.Count; i++)
             {
@@ -25,6 +26,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 int startFloor = floor.GetIntStartFloor().Value;
                 int endFloor = floor.GetIntEndFloor().Value;
                 floorInts.Add(startFloor, endFloor);
+                floorDNs.Add(i, floor.DNSelectItem.ToString());
                 minFloor = Math.Min(startFloor, minFloor);
                 maxFloor = Math.Max(endFloor, maxFloor);
                 bool isRefugeFloor = false;
@@ -40,6 +42,9 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             if (null != floorInts && floorInts.Count > 0)
                 foreach (var keyValue in floorInts)
                     groupData.floorGroups.Add(keyValue.Key, keyValue.Value);
+            if (null != floorDNs && floorDNs.Count > 0)
+                foreach (var keyValue in floorDNs)
+                    groupData.floorGroupDN.Add(keyValue.Key,keyValue.Value);
             if (null != refugeFloors && refugeFloors.Count > 0)
                 groupData.refugeFloors.AddRange(refugeFloors);
             return groupData;

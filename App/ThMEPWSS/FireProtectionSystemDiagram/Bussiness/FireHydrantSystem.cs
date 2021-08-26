@@ -66,10 +66,22 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 bool endIsRefugeFloor = isLast ? false : _floorDatas.Where(c => c.floorNum == endFloor).FirstOrDefault().isRefugeFloor;
                 var topPoint = _GetVerticalFloorRaiseTopPoint(pipeStartPoint, endFloor, 0);
                 var floorBottomPoint = pipeStartPoint + _yAxis.MultiplyBy((startFloor - _minFloor) * _floorSpace);
+                string dnStr = _mainFirePipeDN;
+                string loopDNStr = _mainFirePipeDN;
+                if (null != _floorGroup.floorGroupDN)
+                {
+                    foreach (var item in _floorGroup.floorGroupDN)
+                    {
+                        if (item.Key == group && !string.IsNullOrEmpty(item.Value))
+                            dnStr = item.Value;
+                        else if (endIsRefugeFloor && item.Key == (group + 1) && !string.IsNullOrEmpty(item.Value))
+                            loopDNStr = item.Value;
+                    }
+                }
                 if (!isFirst && !firstIsRefugeFloor)
                 {
                     //处理底部非避难层成环的问题
-                    _BottomFloorCreateRing(floorBottomPoint,startFloor, group);
+                    _BottomFloorCreateRing(floorBottomPoint,startFloor, group, dnStr);
                 }
                 //顶部的连线、蝶阀、连线等处理
                 if (!isLast)
@@ -78,18 +90,18 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                     {
                         //这里处理后下一分组就不需要处理避难层
                         var topFloorBottmPoint  = _GetVerticalFloorRaiseBottomPoint(pipeStartPoint, endFloor, 0);
-                        _TopFloorRefugeRingFloor(topPoint, topFloorBottmPoint, endFloor,group+1);
+                        _TopFloorRefugeRingFloor(topPoint, topFloorBottmPoint, endFloor,group+1, loopDNStr);
                     }
                     else
                     {
                         //非最后分组，非避难层
-                        _TopFloorNotRefugeFloor(topPoint,true,true);
+                        _TopFloorNotRefugeFloor(topPoint,true, dnStr,true);
                     }
                 }
                 else
                 {
                     //顶层顶部处理
-                    _RoofFloorRingInFloor(pipeStartPoint,topPoint);
+                    _RoofFloorRingInFloor(pipeStartPoint,topPoint, dnStr);
                 }
                 //创建该分区的立管线 添加文字X{i}，管径标注
                 int floorCount = endFloor - startFloor;
@@ -112,13 +124,13 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                     }
                     var lineSp = _GetVerticalFloorRaiseBottomPoint(pipeStartPoint, startFloor, i);
                     var lineEp = _GetVerticalFloorRaiseTopPoint(pipeStartPoint, endFloor, i);
-                    _RasieLineCreateAndDimGroup(levelPoint, lineSp, lineEp, startFloor, endFloor,i,group,false,true);
+                    _RasieLineCreateAndDimGroup(levelPoint, lineSp, lineEp, startFloor, endFloor,i,group,false,true, dnStr);
                 }
                 group += 1;
             }
         }
         #region 非顶层楼层的环处理
-        private void _TopFloorNotRefugeFloor(Point3d topStartPoint,bool refugeMidAddValve,bool createDim=true) 
+        private void _TopFloorNotRefugeFloor(Point3d topStartPoint,bool refugeMidAddValve,string DNStr,bool createDim=true) 
         {
             //分组顶层，非避难层，非屋面层连线
             //放置排气阀
@@ -128,20 +140,20 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var startPoint = topStartPoint;
             if (createDim) 
             {
-                var text = _AddTextToCreateElems(_mainFirePipeDN,startPoint,0,false);
+                var text = _AddTextToCreateElems(DNStr, startPoint,0,false);
                 FireProtectionSysCommon.GetTextHeightWidth(new List<DBText> { text }, out double textHeight, out double textWidth);
                 var textCreatePoint = startPoint + _xAxis.MultiplyBy(_raisePipeSpace);
                 textCreatePoint += _yAxis.MultiplyBy(50) - _xAxis.MultiplyBy(textWidth / 2);
-                _AddTextToCreateElems(_mainFirePipeDN, textCreatePoint, 0);
+                _AddTextToCreateElems(DNStr, textCreatePoint, 0);
             }
             _RaisePipeConnectRingLineTwoSide(startPoint,true, false, false);
             _FloorRaiseButterflyValve(startPoint, 0, 0, refugeMidAddValve);
         }
-        private void _TopFloorRefugeRingFloor(Point3d bottomFloorTopPoint, Point3d topFloorBottomPoint,int endFloor,int groupNum)
+        private void _TopFloorRefugeRingFloor(Point3d bottomFloorTopPoint, Point3d topFloorBottomPoint,int endFloor,int groupNum,string DNStr)
         {
-            //楼层顶部成环
+            //楼层顶部成环(避难层成环)
             bool refugeMidAddValve = false;
-            _TopFloorNotRefugeFloor(bottomFloorTopPoint, refugeMidAddValve, false);
+            _TopFloorNotRefugeFloor(bottomFloorTopPoint, refugeMidAddValve, DNStr, false);
             var vlaveStartPoint = topFloorBottomPoint - _yAxis.MultiplyBy(_GetButterflyValveDistanceToLine());
             _ringPoint -= _xAxis.MultiplyBy(_ringPipeSpace);
             _ringCount += 1;
@@ -152,17 +164,17 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var ringEndPoint = new Point3d(ringTopEndPoint.X, _ringPoint.Y, _ringPoint.Z);//环的结束立管的点
             //添加DN标注
             var textCreatePoint = ringTopStartPoint + _xAxis.MultiplyBy(ringTopStartPoint.DistanceTo(topPoint1) / 2);
-            FireProtectionSysCommon.GetTextHeightWidth(new List<string> { _mainFirePipeDN }, _textHeight, ThWSSCommon.Layout_TextStyle, out double textHeight, out double textWidth);
+            FireProtectionSysCommon.GetTextHeightWidth(new List<string> { DNStr }, _textHeight, ThWSSCommon.Layout_TextStyle, out double textHeight, out double textWidth);
             textCreatePoint = textCreatePoint - _xAxis.MultiplyBy(textWidth / 2) + _yAxis.MultiplyBy(50);
-            _AddTextToCreateElems(_mainFirePipeDN, textCreatePoint, 0);
+            _AddTextToCreateElems(DNStr, textCreatePoint, 0);
             //如果避难层数量多与普通层中间再加DN标注
             if (_fireHCount < _refugeFireHCount) 
             {
                 var midPoint = topPoint1 + _xAxis.MultiplyBy((topPoint2 - topPoint1).Length / 2) - _xAxis.MultiplyBy(textWidth / 2) + _yAxis.MultiplyBy(50);
-                _AddTextToCreateElems(_mainFirePipeDN, midPoint, 0);
+                _AddTextToCreateElems(DNStr, midPoint, 0);
             }
-            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, ringTopStartPoint, _minFloor, endFloor, -1, groupNum, true,true);
-            _RasieLineCreateAndDimGroup(ringEndPoint, ringEndPoint, ringTopEndPoint, _minFloor, endFloor, _raisePipeCount+1, groupNum, true,true);
+            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, ringTopStartPoint, _minFloor, endFloor, -1, groupNum, true,true, DNStr);
+            _RasieLineCreateAndDimGroup(ringEndPoint, ringEndPoint, ringTopEndPoint, _minFloor, endFloor, _raisePipeCount+1, groupNum, true,true, DNStr);
             _FloorRaiseButterflyValve(topPoint1, _lineOffSetDefault, ringTopEndPoint.DistanceTo(topPoint2), false);
             _RaisePipeConnectRingLine(topPoint1, true, true, true);
             var lineElements = new List<LineElementCreate>();
@@ -180,7 +192,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var innerRingLinePoint =new Point3d(_ringPoint.X, topPoint1.Y, topPoint1.Z);
             _ringPoint -= _xAxis.MultiplyBy(_ringPipeMaxSpace);
             ringTopStartPoint = new Point3d(_ringPoint.X, topPoint1.Y, topPoint1.Z);
-            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, ringTopStartPoint, _minFloor, endFloor, -1, -1,true,true);
+            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, ringTopStartPoint, _minFloor, endFloor, -1, -1,true,true, DNStr);
             //添加连接回路的竖线横线
             var connectInnerRingPoint = new Point3d(innerRingTopPoint.X, topPoint1.Y, topPoint1.Z);
             _AddPipeLineToCreateElems(innerRingTopPoint, connectInnerRingPoint);
@@ -209,7 +221,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             _maxRingCount += 1;
         }
         
-        private void _BottomFloorCreateRing(Point3d floorBottomPoint,int startFloor,int groupNum) 
+        private void _BottomFloorCreateRing(Point3d floorBottomPoint,int startFloor,int groupNum,string DNStr) 
         {
             //非避难层底部环生成
             _ringPoint -= _xAxis.MultiplyBy(_ringPipeSpace);
@@ -220,14 +232,14 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var topEndPoint = topPoint2 + _xAxis.MultiplyBy(_ringCount * _ringPipeSpace);
             var ringEndPoint = new Point3d(topEndPoint.X, _ringPoint.Y, _ringPoint.Z);
             //添加回线，添加标注
-            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, topStartPoint,_minFloor,startFloor,-1,groupNum,true,true);
-            _RasieLineCreateAndDimGroup(ringEndPoint, ringEndPoint, topEndPoint, _minFloor, startFloor, _raisePipeCount+1, groupNum,true,true);
+            _RasieLineCreateAndDimGroup(_ringPoint, _ringPoint, topStartPoint,_minFloor,startFloor,-1,groupNum,true,true, DNStr);
+            _RasieLineCreateAndDimGroup(ringEndPoint, ringEndPoint, topEndPoint, _minFloor, startFloor, _raisePipeCount+1, groupNum,true,true, DNStr);
             _StartEndPointCreateLineValve(topStartPoint, 0, topPoint1, -_lineOffSetDefault, false, true, false);
             _StartEndPointCreateLineValve(topPoint2, _lineOffSetDefault, topEndPoint, 0, false, false, false);
             _RaisePipeConnectRingLineTwoSide(topPoint1, true, true, false);
             //添加DN标注
             var textCreatePoint = topPoint1 - _xAxis.MultiplyBy(_ringPipeSpace - _textOffSet * 2) + _yAxis.MultiplyBy(_textOffSet);
-            _AddTextToCreateElems(_mainFirePipeDN, textCreatePoint, 0);
+            _AddTextToCreateElems(DNStr, textCreatePoint, 0);
             var startPoint = topPoint1;
             for (int i = 1; i < _raisePipeCount; i++)
             {
@@ -241,7 +253,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         #endregion
 
         #region 最顶层的环处理
-        private void _RoofFloorRingInFloor(Point3d firstLevelPipePoint,Point3d topStartPoint) 
+        private void _RoofFloorRingInFloor(Point3d firstLevelPipePoint,Point3d topStartPoint,string DNStr) 
         {
             var realLength = _GetButterflyValveScaleWidth();
             var startPoint = topStartPoint;
@@ -308,7 +320,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                     _AddPipeLineToCreateElems(bottomInnerPoint, currentInnerPoint);
                 }
                 var dnDimPoint = topStartPoint + _xAxis.MultiplyBy(_raisePipeSpace);
-                _AddTextToCreateElems(_mainFirePipeDN, dnDimPoint+_yAxis.MultiplyBy(_textOffSet), 0);
+                _AddTextToCreateElems(DNStr, dnDimPoint+_yAxis.MultiplyBy(_textOffSet), 0);
             }
         }
         #endregion
@@ -378,10 +390,10 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 _RingBranchRaisePipe(addPoint, inPointRight, isUpLine);
             }
         }
-        private void _RasieLineCreateAndDimGroup(Point3d pipeFirstLevelPoint,Point3d lineSPoint,Point3d lineEndPoint,int startFloor,int endFloor,int pipeNum,int gourpNum,bool bottomCreate,bool addAreaDim) 
+        private void _RasieLineCreateAndDimGroup(Point3d pipeFirstLevelPoint,Point3d lineSPoint,Point3d lineEndPoint,int startFloor,int endFloor,int pipeNum,int gourpNum,bool bottomCreate,bool addAreaDim,string DNStr) 
         {
             bool isLeft = _FireInRaisePipeRight(pipeNum);
-            _RasiePipeAddDNDim(pipeFirstLevelPoint, startFloor, endFloor, !bottomCreate? gourpNum == 0:true, isLeft);
+            _RasiePipeAddDNDim(pipeFirstLevelPoint, startFloor, endFloor, !bottomCreate? gourpNum == 0:true, isLeft, DNStr);
             string xStr = string.Format("X{0}", gourpNum + 1);
             var bottomPoint = lineSPoint;
             if (startFloor == _minFloor) 
@@ -543,26 +555,26 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         /// <param name="endFloor">该立管的结束楼层</param>
         /// <param name="bottomAdd">底部是否添加管径表示</param>
         /// <param name="isLeft">管径标注是否在线的左侧</param>
-        void _RasiePipeAddDNDim(Point3d raiseBottomBasePoint,int startFloor, int endFloor,bool bottomAdd,bool isLeft) 
+        void _RasiePipeAddDNDim(Point3d raiseBottomBasePoint,int startFloor, int endFloor,bool bottomAdd,bool isLeft,string DNStr) 
         {
             //立管线添加管径标注，添加环路标注
             int floorCount = endFloor - startFloor;
             var startPoint = raiseBottomBasePoint + _yAxis.MultiplyBy((startFloor - _minFloor) *_floorSpace);
-            var text = _AddTextToCreateElems(_mainFirePipeDN, startPoint, 0, false);
+            var text = _AddTextToCreateElems(DNStr, startPoint, 0, false);
             FireProtectionSysCommon.GetTextHeightWidth(new List<DBText> { text }, out double textHeight, out double textWidth);
             if (bottomAdd)
             {
                 var btCreatePoint = startPoint + _yAxis.MultiplyBy(_floorSpace / 2);
                 btCreatePoint -= _yAxis.MultiplyBy(textWidth / 2);
                 btCreatePoint = isLeft ? (btCreatePoint - _xAxis.MultiplyBy(_textOffSet)) : (btCreatePoint + _xAxis.MultiplyBy(_textOffSet + textHeight));
-                _AddTextToCreateElems(_mainFirePipeDN, btCreatePoint, Math.PI / 2);
+                _AddTextToCreateElems(DNStr, btCreatePoint, Math.PI / 2);
             }
             else if (floorCount <= 7)
             {
                 var btCreatePoint = startPoint + _yAxis.MultiplyBy((floorCount / 2 -1) * _floorSpace + _floorSpace / 2);
                 btCreatePoint -= _yAxis.MultiplyBy(textWidth / 2);
                 btCreatePoint = isLeft ? btCreatePoint - _xAxis.MultiplyBy(_textOffSet) : btCreatePoint + _xAxis.MultiplyBy(_textOffSet + textHeight);
-                _AddTextToCreateElems(_mainFirePipeDN, btCreatePoint, Math.PI / 2);
+                _AddTextToCreateElems(DNStr, btCreatePoint, Math.PI / 2);
             }
             if(floorCount>7)
             {
@@ -571,12 +583,12 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                     var btCreatePoint1 = startPoint + _yAxis.MultiplyBy(3 * _floorSpace + _floorSpace / 2);
                     btCreatePoint1 -= _yAxis.MultiplyBy(textWidth / 2);
                     btCreatePoint1 = isLeft ? (btCreatePoint1 - _xAxis.MultiplyBy(_textOffSet)) : (btCreatePoint1 + _xAxis.MultiplyBy(_textOffSet + textHeight));
-                    _AddTextToCreateElems(_mainFirePipeDN, btCreatePoint1, Math.PI / 2);
+                    _AddTextToCreateElems(DNStr, btCreatePoint1, Math.PI / 2);
                 }
                 var btCreatePoint2 = startPoint + _yAxis.MultiplyBy((floorCount - 3) * _floorSpace + _floorSpace / 2);
                 btCreatePoint2 -= _yAxis.MultiplyBy(textWidth / 2);
                 btCreatePoint2 = isLeft ? (btCreatePoint2 - _xAxis.MultiplyBy(_textOffSet)) : (btCreatePoint2 + _xAxis.MultiplyBy(_textOffSet + textHeight));
-                _AddTextToCreateElems(_mainFirePipeDN, btCreatePoint2, Math.PI / 2);
+                _AddTextToCreateElems(DNStr, btCreatePoint2, Math.PI / 2);
             }
         }
     }

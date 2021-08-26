@@ -5,11 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPWSS.Model;
 
 namespace ThMEPWSS.ViewModel
 {
     public class ZoneSetupViewModel : NotifyPropertyChangedBase
     {
+        public ZoneSetupViewModel() 
+        {
+            var dnValues = new List<int>
+            {
+                (int)EnumPipeDiameter.DN100,
+                (int)EnumPipeDiameter.DN150,
+                (int)EnumPipeDiameter.DN200,
+            };
+            var corrRaise = CommonUtil.EnumDescriptionToList(typeof(EnumPipeDiameter), dnValues);
+            corrRaise.ForEach(c => DNListItems.Add(c));
+            DNSelectItem = DNListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
+        }
         private int _zoneID;
 
         public int ZoneID
@@ -95,6 +108,36 @@ namespace ThMEPWSS.ViewModel
             }
             return null;
         }
+
+        /// <summary>
+        /// 分区管径
+        /// </summary>
+        private ObservableCollection<UListItemData> _DNListItems = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> DNListItems
+        {
+            get
+            {
+                return _DNListItems;
+            }
+            set
+            {
+                _DNListItems = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        /// <summary>
+        /// 管径选择项
+        /// </summary>
+        private UListItemData _dnSelectItem { get; set; }
+        public UListItemData DNSelectItem
+        {
+            get { return _dnSelectItem; }
+            set
+            {
+                _dnSelectItem = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
     public class FireControlSystemDiagramViewModel : NotifyPropertyChangedBase
     {
@@ -111,7 +154,8 @@ namespace ThMEPWSS.ViewModel
             FireTypes.Add(new UListItemData("单栓带卷盘", 2));
             ComBoxFireTypeSelectItem = FireTypes.FirstOrDefault();
 
-            HaveHandPumpConnection = true;
+            HaveHandPumpConnection = false;
+            HaveTestFireHydrant = true;
         }
 
         private double _FaucetFloor = 1800; //mm

@@ -45,18 +45,25 @@
             <Label Content="分区设置(从低到高)" Width="Auto" Margin="0,5,0,5"></Label>
             <DataGrid BorderThickness="0" ItemsSource="{Binding ZoneConfigs,Mode=TwoWay}" MaxHeight="200" RowHeight="24" AllowDrop="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="区号" Width="50" CanUserSort="False" IsReadOnly="True" CanUserResize="False" Binding="{Binding ZoneID ,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                    <DataGridTemplateColumn Header="起始层" Width="60" CanUserSort="False" CanUserResize="False">
+                    <DataGridTextColumn Header="区号" Width="34" CanUserSort="False" IsReadOnly="True" CanUserResize="False" Binding="{Binding ZoneID ,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                    <DataGridTemplateColumn Header="起始层" Width="46" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <cus:InputTextBox Height="20" TextBoxInputType="InputInteger" Text="{Binding StartFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0"></cus:InputTextBox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="结束层" Width="60" CanUserSort="False" CanUserResize="False">
+                    <DataGridTemplateColumn Header="结束层" Width="46" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <cus:InputTextBox Height="20" TextBoxInputType="InputInteger" Text="{Binding EndFloor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0"></cus:InputTextBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="管径" Width="60" CanUserSort="False" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox Height="20" ItemsSource="{Binding DNListItems,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding DNSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -81,17 +88,18 @@
                 <Label Grid.Row="1" Grid.Column="0" Content="普通层消火栓："></Label>
                 <cus:InputTextBox Grid.Row="1" Grid.Column="1"  Height="22" HintText="" NumCanMinus="False" TextBoxInputType="InputInteger"
                                    Text="{Binding CountsGeneral,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
-                <Label Grid.Row="1"  Grid.Column="2" Content="个" Margin="5,0,0,0"></Label>
+                <Label Grid.Row="1"  Grid.Column="2" Content="个" Margin="5,0,0,0" HorizontalAlignment="Left"></Label>
 
                 <Label Grid.Row="2" Grid.Column="0" Content="消火栓类型"></Label>
-                <ComboBox Grid.Row="2"  Grid.Column="1" Grid.ColumnSpan="2" Height="22"  Width="80"
+                <ComboBox Grid.Row="2"  Grid.Column="1" Grid.ColumnSpan="2" Height="22" 
+                           HorizontalAlignment="Stretch"
                           ItemsSource="{Binding FireTypes,Mode=OneWay,NotifyOnSourceUpdated=True}"
                           SelectedItem="{Binding ComBoxFireTypeSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Label Grid.Row="3" Grid.Column="0" Content="避难层消火栓："></Label>
                 <cus:InputTextBox Grid.Row="3" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Grid.Row="3" Grid.Column="2"  Content="个" Margin="5,0,0,0" Width="Auto"></Label>
-                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="存在手台泵接驳口" VerticalAlignment="Center" 
+                <Label Grid.Row="3" Grid.Column="2"  Content="个" Margin="5,0,0,0"></Label>
+                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="存在手台泵接驳口" VerticalAlignment="Center"
                           VerticalContentAlignment="Center" IsChecked="{Binding HaveHandPumpConnection,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <Label Content="最高成环楼层:" Width="Auto" FontWeight="Black" Height="25"></Label>
