@@ -11,6 +11,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
+using ThMEPEngineCore.GeojsonExtractor;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageADConvertEngine
@@ -25,6 +27,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.noPipe);
                 return;
             }
+
+            turnToilet(dataset.toiletList, dataset.archiExtractor);
 
             //处理连阀管线：加入阀的中心线
             //处理连立管管线：管线延长到立管中点，返回只有在管线中间的立管
@@ -97,6 +101,26 @@ namespace ThMEPWSS.DrainageSystemDiagram
             valveOutputAll.AddRange(nodeDiaDimOutput);
             valveOutputAll.AddRange(nodeDiaDimEndOutput);
 
+        }
+
+        private static void turnToilet(List<ThTerminalToilet > allToiletList, List<ThExtractorBase> archiExtractor)
+        {
+            var toiletList = allToiletList.Where(x => x.SupplyCool.Count > 0).ToList();
+
+            //所有空间建model 包括没有厕所的空间（后续建图需要）
+            var roomPolyList = ThDrainageSDRoomService.getRoomList(archiExtractor);
+            var roomList = ThDrainageSDRoomService.buildRoomModel(roomPolyList, toiletList);
+            var filteredRoom = ThDrainageSDRoomService.filtRoomList(roomList);
+
+            if (filteredRoom == null || toiletList == null || filteredRoom.Count == 0 || toiletList.Count == 0)
+            {
+                ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.noRoomToilet);
+                return;
+            }
+
+            //确定每个厕所在墙上的给水点位,调整厕所方向
+            ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
+            //toiletList.ForEach(x => x.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C")));
         }
 
         private static void toADLine(ThDrainageSDTreeNode root, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertDict, List<Line> newTreeLine)

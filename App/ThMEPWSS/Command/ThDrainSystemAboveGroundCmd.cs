@@ -202,7 +202,25 @@ namespace ThMEPWSS.Command
                     otherRooms.Add(room);
                 }
                 var balconyCorridorEqu = new BalconyCorridorEquPlatform(livingHighestFloor.floorUid, balconyRooms, corridorRooms, otherRooms, equpBlocks, _allWalls, _allColumns);
-                balconyCorridorEqu.LayoutConnect(createBlockInfos);
+                balconyCorridorEqu.LayoutConnect(createBlockInfos,out List<string> changeY1ToFLIds,out List<string> changeDrainToFDrainIds);
+                if ((null != changeY1ToFLIds && changeY1ToFLIds.Count > 0) || (null != changeDrainToFDrainIds && changeDrainToFDrainIds.Count > 0)) 
+                {
+                    foreach (var item in createBlockInfos)
+                    {
+                        if (item.equipmentType != EnumEquipmentType.balconyRiser && item.equipmentType != EnumEquipmentType.floorDrain)
+                            continue;
+                        if (item.equipmentType == EnumEquipmentType.floorDrain && null != changeDrainToFDrainIds && changeDrainToFDrainIds.Any(c => c == item.belongBlockId))
+                        {
+                            item.dymBlockAttr.Clear();
+                            item.dymBlockAttr.Add("可见性", FloorDrainConvert.FloorDrainWMachineBlockDynName);
+                        }
+                        else if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
+                        {
+                            //item.equipmentType = EnumEquipmentType.wastewaterRiser;
+                            item.tag = "FL";
+                        }
+                    }
+                }
                 if (balconyCorridorEqu.createBasicElements != null && balconyCorridorEqu.createBasicElements.Count > 0)
                     createBasicElems.AddRange(balconyCorridorEqu.createBasicElements);
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)

@@ -37,6 +37,8 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
+    <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
     <Compile Include="ThSystemDiagramCmds.THWTKSB.cs" />
     <Compile Include="Command\ThPipeDrawCmd.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />

@@ -446,6 +446,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 UniqueName = "弱电间总线控制模块",
                 BlockName = "E-BFAS520",
                 BlockNameRemark = "弱电间弱电系统消防联动",
+                HasAlias = true,
+                AliasList = new List<string>() { "E-BACS01", "E-BACS41" },
                 Index = 12,
                 Position = new Point3d(1500, 1500, 0),
                 ShowQuantity = true,
@@ -554,15 +556,15 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockName = "E-BFAS730",
                 BlockNameRemark = "电动防火阀",
                 Index = 15,
-                Position = new Point3d(1500, 1200, 0),
+                Position = new Point3d(750, 1200, 0),
                 ShowQuantity = true,
-                QuantityPosition = new Point3d(1850, 1150, 0),
+                QuantityPosition = new Point3d(1100, 1150, 0),
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "E" } },
                 StatisticMode = StatisticType.BlockName,
                 CanHidden = true,
                 ShowText = true,
-                TextPosition = new Point3d(1500, 450, 0),
+                TextPosition = new Point3d(750, 450, 0),
                 HasMultipleBlocks = true,
                 AssociatedBlocks = new List<ThBlockModel>()
                 {
@@ -572,7 +574,37 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         BlockName = "E-BFAS520",
                         BlockNameRemark = "电动防火阀_1",
                         Index = 15,
-                        Position = new Point3d(1500, 1500, 0),
+                        Position = new Point3d(750, 1500, 0),
+                        ShowAtt=true,
+                        attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
+                    }
+                }
+            });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "70度电动防火阀",
+                BlockName = "E-BFAS731",
+                BlockNameRemark = "70度电动防火阀",
+                Index = 15,
+                Position = new Point3d(2250, 1200, 0),
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(2750, 1150, 0),
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "E" }, { "T", "70℃" } },
+                StatisticMode = StatisticType.BlockName,
+                CanHidden = true,
+                ShowText = true,
+                TextPosition = new Point3d(2250, 450, 0),
+                HasMultipleBlocks = true,
+                AssociatedBlocks = new List<ThBlockModel>()
+                {
+                    new ThBlockModel()
+                    {
+                        UniqueName = "电动防火阀_1",
+                        BlockName = "E-BFAS520",
+                        BlockNameRemark = "电动防火阀_1",
+                        Index = 15,
+                        Position = new Point3d(2250, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
                     }

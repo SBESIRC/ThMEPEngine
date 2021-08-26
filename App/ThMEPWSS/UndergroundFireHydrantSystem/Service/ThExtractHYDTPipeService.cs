@@ -832,7 +832,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 DBobjs = new DBObjectCollection();
                 foreach (var db in dbObjs)
                 {
-                    if (db is BlockReference)
+                    if (db is BlockReference && (db as BlockReference).Visible)
                     {
                         if (IsFireHydrant((db as BlockReference).GetEffectiveName()))
                         {

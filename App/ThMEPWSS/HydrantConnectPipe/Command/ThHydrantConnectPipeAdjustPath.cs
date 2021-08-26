@@ -34,6 +34,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             List<Point> path = new List<Point>();
             if(inflectionPoints.Count == 3)
             {
+                inflectionPoints.Reverse();
                 return inflectionPoints;
             }
             
@@ -78,13 +79,40 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     }
                 }
             }
+            
             foreach (var pt in inflectionPoints)
             {
                 path.Add(pt);
             }
+            path = path.Distinct().ToList();
 
             var tmpPath = new List<Point>();
             //去除拐点
+            while (path.Count >= 3)
+            {
+                var firPt = path.First();
+                path.Remove(firPt);
+                tmpPath.Add(firPt);
+                var midPt = path.First();
+                path.Remove(midPt);
+                var lasPt = path.First();
+                if (IsPointCollinear(firPt, midPt, lasPt))
+                {
+                    path.Insert(0, firPt);
+                    continue;
+                }
+                else
+                {
+                    path.Insert(0, midPt);
+                }
+            }
+            foreach (var pt in path)
+            {
+                tmpPath.Add(pt);
+            }
+            tmpPath = tmpPath.Distinct().ToList();
+            tmpPath.Reverse();
+            /*
             while (path.Count >= 3)
             {
                 var firPt = path.First();
@@ -107,44 +135,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             {
                 tmpPath.Add(pt);
             }
-
-            /*
-            List<Point> path = new List<Point>();
-            Point lastPt = inflectionPoints.Last();
-
-            while (inflectionPoints.Count >= 3)
-            {
-                var firPt = inflectionPoints.First();
-                inflectionPoints.Remove(firPt);
-                path.Add(firPt);
-                var midPt = inflectionPoints.First();
-                inflectionPoints.Remove(midPt);
-
-                List<Point> midPts = new List<Point>() { midPt };
-                if (AdjustInflectionPoint<T>(inflectionPoints, firPt, map, midPts, out Point nextPt))
-                {
-                    int xValue = midPts.Where(x => x.X == firPt.X).Count() == 0 ? firPt.X : nextPt.X;
-                    int yValue = midPts.Where(x => x.Y == firPt.Y).Count() == 0 ? firPt.Y : nextPt.Y;
-                    var adjustPt = new Point(xValue, yValue);
-                    midPts.Add(nextPt);
-                    inflectionPoints = inflectionPoints.Except(midPts).ToList();
-                    inflectionPoints.Insert(0, adjustPt);
-                    inflectionPoints.Insert(0, firPt);
-                }
-                else
-                {
-                    inflectionPoints.Insert(0, midPt);
-                }
-            }
-
-            inflectionPoints.Add(lastPt);
-            foreach (var pt in inflectionPoints)
-            {
-                path.Add(pt);
-            }
-            path.Reverse();
             */
-            tmpPath.Reverse();
+            //            tmpPath.Reverse();
             return tmpPath;
         }
 

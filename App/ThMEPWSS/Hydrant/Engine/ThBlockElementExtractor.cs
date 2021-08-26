@@ -4,6 +4,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
@@ -70,7 +71,7 @@ namespace ThMEPWSS.Hydrant.Engine
                         {
                             var blockTableRecord = acadDatabase.Blocks.Element(e.BlockTableRecord);
                             if (!blockTableRecord.IsFromExternalReference)
-                            {
+                            { 
                                 Visitors.ForEach(v =>
                                 {
                                     if (v.CheckLayerValid(e) && v.IsDistributionElement(e))
@@ -90,13 +91,16 @@ namespace ThMEPWSS.Hydrant.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                if (visitor.IsBuildElementBlockReference(blockReference))
+                if (visitor.IsBuildElementBlockReference(blockReference) && blockReference.Visible)
                 {                    
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
                     {
+                        //支持动态块
+                        var data = new ThBlockReferenceData(blockReference.ObjectId);
+                        var objs = data.VisibleEntities();//仅拿动态块中可见的部分
                         // 提取图元信息                        
-                        foreach (var objId in blockTableRecord)
+                        foreach (ObjectId objId in objs)
                         {
                             var dbObj = acadDatabase.Element<Entity>(objId);
                             if (dbObj is BlockReference blockObj)

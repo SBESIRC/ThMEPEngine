@@ -106,12 +106,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public static void ShowGeometry(Point3d pt, string LayerName, int colorIndex = 3, int lineWeightNum = 25, int r = 200, string symbol = "C")
         {
-            if (pt == null || pt == Point3d.Origin )
+            if (pt == null || pt == Point3d.Origin)
             {
                 return;
             }
 
             Entity clone = null;
+            Entity clone2 = null;
 
             if (symbol == "C")
             {
@@ -127,9 +128,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 sq.Closed = true;
                 clone = sq;
             }
-            else if (symbol == "T")
+            else if (symbol == "X")
             {
+                var x1 = new Line(new Point3d (pt.X - r, pt.Y + r,0), new Point3d(pt.X + r, pt.Y - r, 0));
+                var x2 = new Line(new Point3d(pt.X + r, pt.Y + r, 0), new Point3d(pt.X - r, pt.Y - r, 0));
 
+                clone = x1;
+                clone2 = x2;
             }
             else
             {
@@ -137,6 +142,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
 
             DrawUtils.ShowGeometry(clone, LayerName, colorIndex, lineWeightNum);
+            if (clone2 != null)
+            {
+                DrawUtils.ShowGeometry(clone2, LayerName, colorIndex, lineWeightNum);
+            }
         }
 
         public static void ShowGeometry(Point3d pt, string s, string LayerName, int colorIndex = 3, int lineWeightNum = 25, double hight = 1000)
@@ -194,7 +203,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var line = new Line(pt, ptE);
 
             var ptA1 = ptE + dir.RotateBy(150 * Math.PI / 180, -Vector3d.ZAxis) * l / 5;
-            var Arrow1 = new Line(ptE, ptA1 );
+            var Arrow1 = new Line(ptE, ptA1);
 
             var ptA2 = ptE + dir.RotateBy(150 * Math.PI / 180, Vector3d.ZAxis) * l / 5;
             var Arrow2 = new Line(ptE, ptA2);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
 {
-    public class Point : AStarEntity
+    public class Point : AStarEntity , IEquatable<Point>
     {
         public Point(int xValue, int yValue)
         {
@@ -44,6 +44,15 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
         public bool IsInflectionPoint
         {
             get; set;
+        }
+
+        public bool Equals(Point other)
+        {
+            if((x == other.x) && (y == other.y))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

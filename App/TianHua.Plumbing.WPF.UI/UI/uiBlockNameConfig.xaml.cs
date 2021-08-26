@@ -11,29 +11,28 @@ namespace TianHua.Plumbing.WPF.UI.UI
 {
     public partial class uiBlockNameConfig : ThCustomWindow
     {
-        private static BlockConfigViewModel viewModel;
+        private BlockConfigViewModel viewModel;
         public static uiBlockNameConfig staticUIBlockName =new uiBlockNameConfig();
 
         private uiBlockNameConfig()
         {
             InitializeComponent();
-            if (null == viewModel)
-            {
-                viewModel = new BlockConfigViewModel();
-            }
-
+            viewModel = new BlockConfigViewModel();
             DataContext = viewModel;
             staticUIBlockName = this;
-            
         }
 
         public Dictionary<string, List<string>> GetBlockNameList()
         {
             var dic = new Dictionary<string, List<string>>();
-            foreach (var key in viewModel.BlockNameConfigList.Keys)
+            foreach (var key in this.viewModel.BlockNameConfigList.Keys)
             {
                 dic.Add(key, viewModel.BlockNameConfigList[key].First());
                 dic[key].AddRange(viewModel.BlockNameConfigList[key].Last());
+            }
+            foreach(var key in this.viewModel.BlockNameList.Keys)
+            {
+                dic[key].AddRange(viewModel.BlockNameList[key].Select(e=>e.layerName).ToList());
             }
             return dic;
         }

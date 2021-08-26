@@ -38,7 +38,7 @@ namespace ThMEPWSS.Hydrant.Service
         }
         public void Check()
         {
-            if (Covers.Count == 0 || Rooms.Count == 0)
+            if (Rooms.Count == 0)
             {
                 return;
             }

@@ -29,7 +29,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public ThTerminalToilet(Entity geometry, string blkName)
         {
             var geom = geometry as BlockReference;
-            blk = geom.Clone () as BlockReference;
+            blk = geom.Clone() as BlockReference;
             Boundary = geom.ToOBB(geom.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
 
             Type = blkName;
@@ -38,22 +38,39 @@ namespace ThMEPWSS.DrainageSystemDiagram
             SupplyCoolOnBranch = new List<Point3d>();
             GroupId = "";
             AreaId = "";
+
+            Uuid = Guid.NewGuid().ToString();
+
+            Boundary = turnBoundary(Boundary, Type);
+            if (blk.ScaleFactors.X * blk.ScaleFactors.Y < 0)
+            {
+                Boundary.ReverseCurve();
+            }
+            Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
+
             setInfo();
 
+            //Point3d leftBPt = Boundary.GetPoint3dAt(0);
             //Point3d leftPt = Boundary.GetPoint3dAt(1);
             //Point3d rightPt = Boundary.GetPoint3dAt(2);
             //Point3d rightPt2 = Boundary.GetPoint3dAt(3);
-            //DrawUtils.ShowGeometry(leftPt, "l0leftpt", 30, 25, 20);
-            //DrawUtils.ShowGeometry(rightPt, "l0rightpt", 213, 25, 20);
-            //DrawUtils.ShowGeometry(rightPt2, "l0rightpt2", 152, 25, 20);
+
+            //DrawUtils.ShowGeometry(leftBPt, "0", "l0bounary", 70, 25, 20);
+            //DrawUtils.ShowGeometry(leftPt, "1", "l0bounary", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "2", "l0bounary", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "3", "l0bounary", 152, 25, 20);
+
+            //DrawUtils.ShowGeometry(leftBPt, "l0bounary", 70, 25, 20);
+            //DrawUtils.ShowGeometry(leftPt, "l0bounary", 30, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt, "l0bounary", 213, 25, 20);
+            //DrawUtils.ShowGeometry(rightPt2, "l0bounary", 152, 25, 20);
+
+            //SupplyCool.ForEach(x => DrawUtils.ShowGeometry(x, "l0coolPt", 130, 30, 20, "X"));
         }
 
         public void setInfo()
         {
-            Uuid = Guid.NewGuid().ToString();
-      
-            Boundary = turnBoundary(Boundary);
-            Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
+            SupplyCool.Clear();
 
             SupplyCool.AddRange(CalculateSupplyCoolPoint());
             SupplyCool.AddRange(CalculateSupplyCoolSecPoint());
@@ -201,12 +218,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-        private Polyline turnBoundary(Polyline boundary)
+        private static Polyline turnBoundary(Polyline boundary, string type)
         {
-            Polyline boundaryNew = boundary.Clone() as Polyline;
             int turn = 0;
             //Boundary
-            switch (Type)
+            switch (type)
             {
                 case "A-Toilet-5":
                 case "A-Toilet-9":
@@ -221,6 +237,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 default:
                     break;
             }
+
+            Polyline boundaryNew = turnBoundary(boundary, turn);
+
+            return boundaryNew;
+
+        }
+
+        public static Polyline turnBoundary(Polyline boundary, int turn)
+        {
+            //
+            Polyline boundaryNew = boundary.Clone() as Polyline;
             if (turn != 0)
             {
                 for (int i = 0; i < boundary.NumberOfVertices; i++)
@@ -228,9 +255,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     boundaryNew.SetPointAt(i, boundary.GetPoint3dAt((i + turn) % boundary.NumberOfVertices).ToPoint2D());
                 }
             }
-
             return boundaryNew;
-
         }
 
         private Point3d CalculateSupplyWarmPoint()
