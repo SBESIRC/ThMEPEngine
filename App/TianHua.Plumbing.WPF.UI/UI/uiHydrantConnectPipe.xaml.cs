@@ -27,5 +27,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var cmd = new ThHydrantConnectPipeCmd(ViewModel.GetConfigInfo());
             cmd.Execute();
         }
+
+        private void btnMarkLoop_Click(object sender, RoutedEventArgs e)
+        {
+            FireHydrantSystemViewModel.InsertLoopMark();
+        }
     }
 }
