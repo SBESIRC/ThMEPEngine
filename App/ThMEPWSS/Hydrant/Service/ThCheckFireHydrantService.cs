@@ -21,7 +21,7 @@ namespace ThMEPWSS.Hydrant.Service
         public List<ThIfcRoom> Rooms { get; set; }
         public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         private ThFireHydrantVM FireHydrantVM { get; set; }
-        private ThAILayerManager AiLayerManager { get; set; }        
+        private ThAILayerManager AiLayerManager { get; set; }
 
         public ThCheckFireHydrantService(ThFireHydrantVM fireHydrantVM)
         {
@@ -33,44 +33,26 @@ namespace ThMEPWSS.Hydrant.Service
 
         public void Check(Database db, Point3dCollection pts, string mode)
         {
+            ThStopWatchService.Start();
+            var extractors = FirstExtract(db, pts); //获取数据
+            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            Rooms = roomExtractor.Rooms; //获取房间
+
+            var ptsList = new List<Point3dCollection> { };
             if (mode == "P")
             {
-                ThStopWatchService.Start();
-                var firstRoomExtrarctor = new ThRoomExtractor()
-                {
-                    UseDb3Engine = true,
-                    FilterMode = FilterMode.Cross,
-                };
-                firstRoomExtrarctor.Extract(db, pts);
-                var rooms = firstRoomExtrarctor.Rooms;
-
-                if (rooms.Count > 0)
-                {
-                    var extent = new Extents3d(rooms[0].Boundary.Bounds.Value.MinPoint, rooms[0].Boundary.Bounds.Value.MaxPoint);
-                    for (int i = 1; i < rooms.Count; i++)
-                    {
-                        var extentTidal = new Extents3d(rooms[i].Boundary.Bounds.Value.MinPoint, rooms[i].Boundary.Bounds.Value.MaxPoint);
-                        extent.AddExtents(extentTidal);
-                    }
-                    pts = new Point3dCollection
-                    {
-                        extent.MinPoint,
-                        new Point3d(extent.MaxPoint.X, extent.MinPoint.Y, extent.MaxPoint.Z),
-                        extent.MaxPoint,
-                        new Point3d(extent.MinPoint.X, extent.MaxPoint.Y, extent.MaxPoint.Z)
-                    };
-                }
+                Rooms.ForEach(r => ptsList.Add(GetRoomBounds(r)));
+            }
+            else
+            {
+                ptsList.Add(pts);
             }
 
-            ThStopWatchService.Start();
-            var extractors = Extract(db, pts); //获取数据
+            SecondExtract(db, ptsList, extractors);
             ThStopWatchService.Stop();
             ThStopWatchService.Print("提取数据耗时：");
 
             ThStopWatchService.ReStart();
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
-            Rooms = roomExtractor.Rooms; //获取房间
-
             //过滤只连接一个房间框线的门
             var doorOpeningExtractor = extractors
                 .Where(o => o is ThHydrantDoorOpeningExtractor)
@@ -91,19 +73,42 @@ namespace ThMEPWSS.Hydrant.Service
             ThStopWatchService.Print("保护区域计算耗时：");
         }
 
-        private List<ThExtractorBase> Extract(Database db, Point3dCollection pts)
+        private List<ThExtractorBase> FirstExtract(Database db, Point3dCollection pts)
         {
-            //提取
+            //提取房间和外部空间
             var extractors = new List<ThExtractorBase>()
                 {
-                    new ThArchitectureExtractor()
+                    new ThExternalSpaceExtractor()
+                    {
+                        UseDb3Engine=false,
+                        FilterMode = FilterMode.Cross,
+                        ElementLayer=AiLayerManager.OuterBoundaryLayer,
+                    },
+                    new ThRoomExtractor()
+                    {
+                        UseDb3Engine=true,
+                        FilterMode = FilterMode.Cross,
+                    }
+                };
+            extractors.ForEach(o => o.Extract(db, pts));
+            //调整不在房间内的消火栓的点位
+            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            return extractors;
+        }
+
+        private void SecondExtract(Database db, List<Point3dCollection> ptsList, List<ThExtractorBase> extractors)
+        {
+            //提取其余建筑元素
+            var extractorsContainer = new List<ThExtractorBase>()
+                {
+                    new ThHydrantArchitectureWallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
                         FilterMode = FilterMode.Cross,
                         ElementLayer=AiLayerManager.ArchitectureWallLayer,
                     },
-                    new ThShearwallExtractor()
+                    new ThHydrantShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
@@ -116,25 +121,14 @@ namespace ThMEPWSS.Hydrant.Service
                         FilterMode = FilterMode.Cross,
                         ElementLayer = "AI-Door,AI-门,门",
                     },
-                    new ThExternalSpaceExtractor()
-                    {
-                        UseDb3Engine=false,
-                        FilterMode = FilterMode.Cross,
-                        ElementLayer=AiLayerManager.OuterBoundaryLayer,
-                    },
                     new ThFireHydrantExtractor()
                     {
                         FilterMode = FilterMode.Cross,
-                    },
-                    new ThRoomExtractor()
-                    {
-                        UseDb3Engine=true,
-                        FilterMode = FilterMode.Cross,
-                    },
+                    }
                 };
-            if(FireHydrantVM.Parameter.IsThinkIsolatedColumn)
+            if (FireHydrantVM.Parameter.IsThinkIsolatedColumn)
             {
-                extractors.Add(new ThColumnExtractor()
+                extractorsContainer.Add(new ThColumnExtractor()
                 {
                     UseDb3Engine = true,
                     IsolateSwitch = true,
@@ -142,12 +136,16 @@ namespace ThMEPWSS.Hydrant.Service
                     ElementLayer = AiLayerManager.ColumnLayer,
                 });
             }
-            extractors.ForEach(o => o.Extract(db, pts));
+            ptsList.ForEach(p =>
+            {
+                extractorsContainer.ForEach(e => e.Extract(db, p));
+            });
+
             //调整不在房间内的消火栓的点位
+            extractors.AddRange(extractorsContainer);
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
             var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
             hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
-            return extractors;
         }
 
         private string OutPutGeojson(List<ThExtractorBase> extractors)
@@ -177,9 +175,9 @@ namespace ThMEPWSS.Hydrant.Service
                 HydrantClearanceRadius = FireHydrantVM.Parameter.SprayWaterColumnRange
             };
         }
-        private List<Point3d> ContainsPts(Entity polygon,List<Point3d> pts)
+        private List<Point3d> ContainsPts(Entity polygon, List<Point3d> pts)
         {
-            return pts.Where(p=>polygon.IsContains(p)).ToList();
+            return pts.Where(p => polygon.IsContains(p)).ToList();
         }
         public void Print(Database db)
         {
@@ -195,14 +193,22 @@ namespace ThMEPWSS.Hydrant.Service
                     var circle = new Circle(o.Item2, Vector3d.ZAxis, 200.0);
                     circle.Layer = ThCheckExpressionControlService.CheckExpressionLayer;
                     ents.Add(circle);
-                    ents.CreateGroup(acadDb.Database, (colorIndex++)%256);
+                    ents.CreateGroup(acadDb.Database, (colorIndex++) % 256);
                 });
             }
         }
 
-        public void Check(Database db, Point3dCollection pts)
+        private Point3dCollection GetRoomBounds(ThIfcRoom room)
         {
-            //
+            var extent = new Extents3d(room.Boundary.Bounds.Value.MinPoint, room.Boundary.Bounds.Value.MaxPoint);
+            return new Point3dCollection
+                    {
+                        new Point3d(extent.MinPoint.X + 10,extent.MinPoint.Y + 10,extent.MinPoint.Z),
+                        new Point3d(extent.MaxPoint.X + 10, extent.MinPoint.Y + 10, extent.MinPoint.Z),
+                        new Point3d(extent.MaxPoint.X + 10,extent.MaxPoint.Y + 10,extent.MaxPoint.Z),
+                        new Point3d(extent.MinPoint.X, extent.MaxPoint.Y, extent.MaxPoint.Z),
+                        new Point3d(extent.MinPoint.X + 10,extent.MinPoint.Y + 10,extent.MinPoint.Z)
+                    };
         }
     }
 }
