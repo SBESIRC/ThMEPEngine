@@ -38,7 +38,7 @@ namespace ThMEPWSS.Hydrant.Service
             FireExtinguisherBlkNames = new List<string>() { "手提式灭火器", "推车式灭火器" };
         }
 
-        public void Check(Database db, Point3dCollection pts)
+        public void Check(Database db, Point3dCollection pts, string mode)
         {
             ThStopWatchService.Start();
             var extractors = Extract(db, pts); //获取数据
@@ -179,11 +179,6 @@ namespace ThMEPWSS.Hydrant.Service
                     ents.CreateGroup(acadDb.Database, colorIndex++);
                 });
             }
-        }
-
-        public void Check(Database db, Point3dCollection pts, string mode)
-        {
-            //
         }
     }
 #endif
