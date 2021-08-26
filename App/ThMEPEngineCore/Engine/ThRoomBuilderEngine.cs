@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -43,9 +44,18 @@ namespace ThMEPEngineCore.Engine
         {
             if(rooms.Count>0)
             {
-                var objs = rooms.Select(o => o.Boundary).ToCollection();                
+                var objs = rooms.Select(o => o.Boundary).ToCollection();
+                var bufferService = new ThNTSBufferService();
+                for(int i = 0; i < objs.Count; i++)
+                {
+                    objs[i] = bufferService.Buffer(objs[i] as Entity, -1);
+                }
                 objs = objs.BuildArea();
                 objs = objs.FilterSmallArea(1.0);
+                for (int i = 0; i < objs.Count; i++)
+                {
+                    objs[i] = bufferService.Buffer(objs[i] as Entity, 1);
+                }
                 rooms.Clear();
                 objs.Cast<Entity>().ForEach(o => rooms.Add(ThIfcRoom.Create(o)));
             }
