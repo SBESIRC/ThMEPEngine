@@ -11,6 +11,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     class EmgLaneLineMark
     {
+        double _firstAndLastLineMinLength = 3000;
+        double _innerBufferLineLength = 1000;
+        double _firstOrLastLineMinLenght = 1100;
+        double _outLineDistance = 1000;//灯可能偏离线，如果偏离基本是800；
         List<Curve> _laneLineCurves;
         List<Curve> _hostLineCurves;
         List<Line> _laneLines;
@@ -53,7 +57,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             
         }
-        public List<Polyline>  MarkLines(double bufferDis)
+        public List<Polyline> MarkLines(double bufferDis,List<Point3d> hostLightPoints)
         {
             var pLines = new List<Polyline>();
             var objs = new DBObjectCollection();
@@ -83,7 +87,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 else
                     laneLines.Add(line);
             }
-            
             
             List<Line> tempLines = new List<Line>();
             while (breakHostLines.Count > 0)
@@ -142,6 +145,9 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 }
                 if (EmgPilotLampUtil.PointInLines(endPoint, laneLines, 5, dis)) 
                 {
+                    bool haveLight = CheckLinesHaveHostingLight(tempLines, hostLightPoints);
+                    if (!haveLight)
+                        continue;
                     var pline = LinesToPolyline(tempLines,bufferDis);
                     if (null == pline)
                         continue;
@@ -174,6 +180,56 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             objs.Add(polyline);
             var pline = objs.Buffer(bufferDis).ToNTSMultiPolygon().ToDbPolylines().FirstOrDefault();
             return pline;
+        }
+
+        bool CheckLinesHaveHostingLight(List<Line> lines,List<Point3d> hostLightPoints) 
+        {
+            if (null == hostLightPoints || hostLightPoints.Count < 1)
+                return false;
+            bool haveHostingLight = false;
+            for (int i = 0; i < lines.Count; i++) 
+            {
+                if (haveHostingLight)
+                    break;
+                var tempLine = lines[i];
+                var lineSp = tempLine.StartPoint;
+                var lineEp = tempLine.EndPoint;
+                var lineDir = (lineEp - lineSp).GetNormal();
+                if (i == 0 && i == lines.Count - 1)
+                {
+                    if (tempLine.Length < _firstAndLastLineMinLength)
+                        continue;
+                    lineSp = lineSp + lineDir.MultiplyBy(_innerBufferLineLength);
+                    lineEp = lineEp - lineDir.MultiplyBy(_innerBufferLineLength);
+                }
+                else if (i == 0)
+                {
+                    if (tempLine.Length < _firstOrLastLineMinLenght)
+                        continue;
+                    lineSp = lineSp + lineDir.MultiplyBy(_innerBufferLineLength);
+                }
+                else if (i == lines.Count - 1)
+                {
+                    if (tempLine.Length < _firstOrLastLineMinLenght)
+                        continue;
+                    lineEp = lineEp - lineDir.MultiplyBy(_innerBufferLineLength);
+                }
+                haveHostingLight = CheckLineHaveLight(new Line(lineSp, lineEp), hostLightPoints, _outLineDistance);
+            }
+            return haveHostingLight;
+        }
+        bool CheckLineHaveLight(Line line, List<Point3d> hostLightPoints,double outLineDis) 
+        {
+            if (null == hostLightPoints || hostLightPoints.Count < 1)
+                return false;
+            bool haveLight = false;
+            foreach (var point in hostLightPoints) 
+            {
+                if (haveLight)
+                    break;
+                haveLight = EmgPilotLampUtil.PointInLine(point, line, 5, outLineDis);
+            }
+            return haveLight;
         }
     }
 }

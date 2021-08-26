@@ -30,6 +30,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public List<ObjectId> AddPolyLineIds;
         private ThMEPOriginTransformer _originTransformer;
         private Dictionary<Polyline, List<Polyline>> _holeInfo;
+        private double _cloudLineBufferDis = 800;
 
         public void InitData(ThMEPOriginTransformer originTransformer, Dictionary<Polyline, List<Polyline>> outPolylines) 
         {
@@ -68,29 +69,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     //获取次要疏散路径（Ⅲ类线-壁装）
                     var assitHostLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
 
-                    var tempHostLines = new List<Curve>();
-                    exitLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
-                    assitHostLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
-                    var tempLaneLines = new List<Curve>();
-                    mainLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
-                    assitLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
-                    var emgLaneLineMark = new EmgLaneLineMark(tempLaneLines,tempHostLines);
-                    var markLines = emgLaneLineMark.MarkLines(800);
-                    var objs = new DBObjectCollection();
-                    tempHostLines.ForEach(x => objs.Add(x));
-                    tempLaneLines.ForEach(x => objs.Add(x));
-
-                    foreach (var item in markLines) 
-                    {
-                        var pl = (Curve)item.Clone();
-                        pl.Layer = ThMEPLightingCommon.REVCLOUD_LAYER;
-                        pl.ColorIndex =ThMEPLightingCommon.EMGPILOTREVCLOUD_CORLOR_INDEX;
-                        _originTransformer.Reset(pl);
-                        var plId = acdb.ModelSpace.Add(pl);
-                        if (null != plId && plId.IsValid)
-                            AddPolyLineIds.Add(plId);
-                    }
-
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
 
@@ -116,9 +94,34 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     mainLines.ForEach(c => indicator.mainLines.Add(c));
                     assitHostLines.ForEach(c => indicator.assistHostLines.Add(c));
                     EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,columns, walls, indicator);
+                    var res = emgLampIndicator.CalcLayout(this._isHostFirst);
+
+                    //计算车道线中间的吊装云线表达
+                    var tempHostLines = new List<Curve>();
+                    exitLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
+                    assitHostLines.ForEach(c => tempHostLines.Add((Curve)c.Clone()));
+                    var tempLaneLines = new List<Curve>();
+                    mainLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
+                    assitLines.ForEach(c => tempLaneLines.Add((Curve)c.Clone()));
+                    var emgLaneLineMark = new EmgLaneLineMark(tempLaneLines, tempHostLines);
+                    var markLines = emgLaneLineMark.MarkLines(_cloudLineBufferDis, res.Where(c=>c.isHoisting).Select(c=>c.linePoint).ToList());
+                    var objs = new DBObjectCollection();
+                    tempHostLines.ForEach(x => objs.Add(x));
+                    tempLaneLines.ForEach(x => objs.Add(x));
+
+                    foreach (var item in markLines)
+                    {
+                        var pl = (Curve)item.Clone();
+                        pl.Layer = ThMEPLightingCommon.REVCLOUD_LAYER;
+                        pl.ColorIndex = ThMEPLightingCommon.EMGPILOTREVCLOUD_CORLOR_INDEX;
+                        _originTransformer.Reset(pl);
+                        var plId = acdb.ModelSpace.Add(pl);
+                        if (null != plId && plId.IsValid)
+                            AddPolyLineIds.Add(plId);
+                    }
 
                     //根据计算出的灯具信息，在相应的位置放置相应的灯具
-                    var res = emgLampIndicator.CalcLayout(this._isHostFirst);
+                    
                     foreach (var item in res)
                     {
                         if (item == null)

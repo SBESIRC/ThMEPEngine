@@ -27,6 +27,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private double _lightDeleteMaxAngle = 30;
         private double _wallLightMergeAngle = 45;
         private double _pointInLineDistance = 1500;
+        private double _delLightDirAngleToHostLight = 30;
         //删除对向指示灯的最大间距
         private double _delOpSideHostLightMaxDis = 2500;
         public List<LineGraphNode> _wallGraphNodes;//壁装的在线的那一侧
@@ -273,7 +274,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         routePts.Reverse();
                         var exitDir = (routePts[1] - routePts[0]).GetNormal();
                         var dot = exitDir.DotProduct(node.outDirection);
-                        if (Math.Abs(dot) > 0.3)
+                        if (dot > 0.3)
                             continue;
                         var interPoints = new List<Point3d>();
                         for (int i = 0; i < routePts.Count - 1; i++)
@@ -596,18 +597,35 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         //因为考虑精度，会将线附近的其它点获取到，这里需要将不符合要求的点过滤掉
                         var exitDir = (route.nextRoute.node.nodePoint - route.node.nodePoint).GetNormal();
                         double angle = exitDir.GetAngleTo(dir);
-                        angle %= Math.PI;
-                        if (angle > Math.PI / 18 && angle < (Math.PI - Math.PI / 18))
+                        var routePoint = route.node.nodePoint;
+                        if (routePoint.DistanceTo(sp) < 10)
                         {
-                            unLineDirNodes.Add(node);
-                            continue;
+                            var dot = exitDir.DotProduct(dir);
+                            if (dot < 0.9)
+                            {
+                                unLineDirNodes.Add(node);
+                                continue;
+                            }
                         }
-                        //var dot = exitDir.DotProduct(dir);
-                        //if (dot < 0.7) 
-                        //{
-                        //    unLineDirNodes.Add(node);
-                        //    continue;
-                        //}
+                        else if (routePoint.DistanceTo(line.EndPoint) < 10) 
+                        {
+                            var dot = exitDir.DotProduct(dir.Negate());
+                            if (dot < 0.9)
+                            {
+                                //var newNode = new NodeDirection(node.nodePointInLine, null, 0, dir.Negate(), node.graphNode);
+                                unLineDirNodes.Add(node);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            angle %= Math.PI;
+                            if (angle > Math.PI / 18 && angle < (Math.PI - Math.PI / 18))
+                            {
+                                unLineDirNodes.Add(node);
+                                continue;
+                            }
+                        }
                         var nodeInfo = new NodeDirection(node.nodePointInLine, null, GraphUtils.GetRouteDisToEnd(route), node.outDirection, node.graphNode);
                         nodeInfo.inDirection.AddRange(node.inDirection);
                         liNodes.Add(nodeInfo);
@@ -805,13 +823,14 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     //同方向的指示灯不需要删除
                     var checkDir = checkLight.direction;
                     var dot = checkDir.DotProduct(dir);
-                    if (Math.Abs(dot) > angleCos)
+                    if (Math.Abs(dot) > Math.Abs(Math.Cos(Math.PI*(90.0-_delLightDirAngleToHostLight)/180)))
                         continue;
                     if (!EmgPilotLampUtil.PointInLines(checkLight.linePoint, hostLines, 10, 1000))
                         continue;
                     Vector3d hostToCheckDir = (checkLight.pointInOutSide - light.pointInOutSide).GetNormal();
                     dot = dir.DotProduct(hostToCheckDir);
                     double angle = dir.GetAngleTo(hostToCheckDir, _normal);
+                    double lightAngle = dir.GetAngleTo(checkDir,_normal);
                     angle = angle % Math.PI;
                     if (angle < inAngle || angle > (Math.PI - inAngle))
                     {
@@ -1620,12 +1639,20 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 if (hisNodes.Any(c => c.nodePoint.IsEqualTo(newRoute.node.nodePoint, new Tolerance(1, 1))))
                     break;
-                //hisNodes.Add(newRoute.node);
-                //获取线,出口方向
                 var sNode = newRoute.node;
                 var eNode = newRoute.nextRoute.node;
                 var dir = (eNode.nodePoint - sNode.nodePoint).GetNormal();
                 Line line = new Line(sNode.nodePoint, eNode.nodePoint);
+                if (isFirst && !FirstIsCreate(sNode.nodePoint, line.Length, dir, 5, 100))
+                {
+                    newRoute = newRoute.nextRoute;
+                    pLine = new Line(sNode.nodePoint, eNode.nodePoint);
+                    pPoint = sNode.nodePoint;
+                    isFirst = false;
+                    continue;
+                } 
+                //hisNodes.Add(newRoute.node);
+                //获取线,出口方向
                 newRoute = newRoute.nextRoute;
                 var addLights = LineAddHostLight(line, pLine, pPoint, sNode, newRoute, true, isFirst, ref tempNotCreate, false, isFirst?2500:1200);
                 MoveLightToRealNode(addLights, lines, routeNodes);
@@ -1700,6 +1727,22 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     return true;
             }
             return false;
+        }
+        bool FirstIsCreate(Point3d startPoint,double length,Vector3d nodeDir, double outDis, double extDis = 5) 
+        {
+            return true;
+            //这里是为了判断如果吊装疏散路径和壁装路线平行不进行放置灯具
+            if (length > _lightSpace)
+                return true;
+            foreach (var line in _mainLines) 
+            {
+                if (!EmgPilotLampUtil.PointInLine(startPoint, line, extDis, outDis))
+                    continue;
+                var lineDir = line.LineDirection();
+                if (Math.Abs(lineDir.DotProduct(nodeDir)) > 0.99)
+                    return false;
+            }
+            return true;
         }
     }
 }
