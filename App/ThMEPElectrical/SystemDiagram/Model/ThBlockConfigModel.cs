@@ -712,6 +712,32 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(2600, 1150, 0),
             });
+            BlockConfig.Add(new ThBlockModel()
+            {
+                UniqueName = "低压压力开关",
+                BlockName = "E-BFAS620",
+                BlockNameRemark = "低压压力开关",
+                Index = 17,
+                Position = new Point3d(2400, 1500, 0),
+                CanHidden = true,
+                ShowAtt = true,
+                attNameValues = new Dictionary<string, string>() { { "F", "P" } },
+                ShowQuantity = true,
+                QuantityPosition = new Point3d(2600, 1150, 0),
+                HasMultipleBlocks = true,
+                CoefficientOfExpansion = 2,
+                AssociatedBlocks = new List<ThBlockModel>()
+                {
+                    new ThBlockModel()
+                    {
+                        UniqueName = "低压压力开关_信号阀",
+                        BlockName = "E-BFAS621-2",
+                        BlockNameRemark = "低压压力开关_信号阀",
+                        Index = 17,
+                        Position = new Point3d(2100, 1500, 0),
+                    },
+                }
+            });
             #endregion
             #region #18
             BlockConfig.Add(new ThBlockModel()

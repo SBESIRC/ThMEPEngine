@@ -121,6 +121,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
                 BlockDataReturn.BlockStatistics[o.UniqueName] = (int)Math.Ceiling((double)FindCount / o.DependentStatisticalRule);//向上缺省
             });
+            BlockDataReturn.BlockStatistics["低压压力开关"] = 0;
             //与读取到的[消防水箱],[灭火系统压力开关]同一分区，默认数量为2
             if (BlockDataReturn.BlockStatistics["消防水池"] > 0 && BlockDataReturn.BlockStatistics["灭火系统压力开关"] > 0)
             {
@@ -131,6 +132,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
             if (BlockDataReturn.BlockStatistics["消火栓泵"] > 0 || BlockDataReturn.BlockStatistics["喷淋泵"] > 0)
             {
                 BlockDataReturn.BlockStatistics["灭火系统压力开关"] = Math.Max(BlockDataReturn.BlockStatistics["灭火系统压力开关"], 1);
+                //新增需求：新增加了一个[低压压力开关]块，他的数量不通过统计来计算，数量与[消火栓泵]数量保持一致，且与[灭火系统流量开关]互斥，不会同时存在，假如同时存在，按[灭火系统流量开关]为0处理。
+                if (BlockDataReturn.BlockStatistics["消火栓泵"] > 0)
+                {
+                    BlockDataReturn.BlockStatistics["灭火系统流量开关"] = 0;
+                    BlockDataReturn.BlockStatistics["低压压力开关"] = BlockDataReturn.BlockStatistics["消火栓泵"];
+                }
             }
             //回路的短路隔离器模块需要按照真实数量计数，不可再按照逻辑去划分,但是业务需求，每个回路短路隔离器至少一个
             BlockDataReturn.BlockStatistics["短路隔离器"] = Math.Max(1, VerticesData.Count(x => x.Name == "E-BFAS540"));

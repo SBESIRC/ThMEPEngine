@@ -544,7 +544,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             List<Entity> result = new List<Entity>();
             bool HasFireHydrant = this.fireDistrict.Data.BlockData.BlockStatistics["消火栓按钮"] > 0;
             bool HasFireExtinguishingSystem = this.fireDistrict.Data.BlockData.BlockStatistics["灭火系统流量开关"] > 0;
-            if (!HasFireHydrant && !HasFireExtinguishingSystem)
+            bool HasPressureSwitch = this.fireDistrict.Data.BlockData.BlockStatistics["低压压力开关"] > 0;
+            if (!HasFireHydrant && !HasFireExtinguishingSystem && !HasPressureSwitch)
             {
                 result.Add(DrawStraightLine(currentIndex));
             }
@@ -565,13 +566,30 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         result.Add(Midline2);
                         RightmostPosition = BlockPosition + 300;
                     }
+                    else if(HasPressureSwitch)
+                    {
+                        BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "低压压力开关").Position.X - 450;
+                        Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                        result.Add(Midline2);
+                        RightmostPosition = BlockPosition + 600;
+                    }
                 }
                 else
                 {
-                    BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "灭火系统流量开关").Position.X - 150;
-                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-                    result.Add(Midline1);
-                    RightmostPosition = BlockPosition + 300;
+                    if (HasFireExtinguishingSystem)
+                    {
+                        BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "灭火系统流量开关").Position.X - 150;
+                        Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                        result.Add(Midline1);
+                        RightmostPosition = BlockPosition + 300;
+                    }
+                    else
+                    {
+                        BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "低压压力开关").Position.X - 450;
+                        Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                        result.Add(Midline1);
+                        RightmostPosition = BlockPosition + 600;
+                    }
                 }
                 Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 result.Add(Midline3);
