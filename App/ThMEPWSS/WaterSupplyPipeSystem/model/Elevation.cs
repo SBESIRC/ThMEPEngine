@@ -25,7 +25,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     {
                         var ptLs = new Point3d[4];
                         ptLs[0] = BranchPipe[i].GetWaterPipeInterrupted()[j];
-                            //new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
 
                         if (j == 0)
                         {
@@ -47,7 +46,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                         acadDatabase.CurrentSpace.Add(lineNote);
 
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                        ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0, new Dictionary<string, string> { { "标高", "X.XX" } });
+                        ptLs[2], new Scale3d(0.8, 0.8, 0.8), 0, new Dictionary<string, string> { { "标高", "X.XX" } });
                     }
                 }
             }
