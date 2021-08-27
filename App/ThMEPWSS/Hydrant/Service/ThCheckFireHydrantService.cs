@@ -53,7 +53,7 @@ namespace ThMEPWSS.Hydrant.Service
             }
 
             var frame = new Point3dCollection();            
-            SecondExtract(db, extractors, ptsList, pts, frame);
+            SecondExtract(db, extractors, ptsList, pts, frame, mode);
 
             ThStopWatchService.Stop();
             ThStopWatchService.Print("提取数据耗时：");
@@ -100,7 +100,7 @@ namespace ThMEPWSS.Hydrant.Service
             return extractors;
         }
 
-        private void SecondExtract(Database db, List<ThExtractorBase> extractors, List<Point3dCollection> ptsList, Point3dCollection pts, Point3dCollection frame)
+        private void SecondExtract(Database db, List<ThExtractorBase> extractors, List<Point3dCollection> ptsList, Point3dCollection pts, Point3dCollection frame, string mode)
         {
             //提取其余建筑元素
             var extractorsContainer = new List<ThExtractorBase>()
@@ -180,10 +180,13 @@ namespace ThMEPWSS.Hydrant.Service
                     }
                     temp3.FireHydrants = temp;
 
-                    var container = new List<DBPoint>();
-                    temp3.Extract(db, pts);
-                    Filter(temp3, container, pts);
-                    temp3.FireHydrants = temp;
+                    if (mode == "P")
+                    {
+                        var container = new List<DBPoint>();
+                        temp3.Extract(db, pts);
+                        Filter(temp3, container, pts);
+                        temp3.FireHydrants = container;
+                    }
                 }
             }
 

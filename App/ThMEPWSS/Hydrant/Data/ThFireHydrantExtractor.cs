@@ -27,11 +27,12 @@ namespace ThMEPWSS.Hydrant.Data
         {
             FireHydrants = new List<DBPoint>();
             Rooms = new List<ThIfcRoom>();
-            Category = BuiltInCategory.Equipment.ToString();
+            Category = BuiltInCategory.Equipment.ToString(); 
             HydrantOutline = new Dictionary<DBPoint, Polyline>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
+            
             var vistor = new ThFireHydrantExtractionVisitor()
             {
                 BlkNames = new List<string>() { "室内消火栓平面" },
@@ -50,8 +51,9 @@ namespace ThMEPWSS.Hydrant.Data
                 HydrantOutline.Add(new DBPoint(center), obb);
             });
 
-            hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
-            FireHydrants.AddRange(HydrantOutline.Select(o => o.Key).ToList());
+            //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
+            var newHydrantPoints =  HydrantOutline.Select(o => o.Key).Where(o=> !FireHydrants.Contains(o)).ToList();
+            FireHydrants.AddRange(newHydrantPoints);
             if (FilterMode == FilterMode.Window)
             {
                 FireHydrants.AddRange(FilterWindowPolygon(pts, FireHydrants.Cast<Entity>().ToList()).Cast<DBPoint>().ToList());
