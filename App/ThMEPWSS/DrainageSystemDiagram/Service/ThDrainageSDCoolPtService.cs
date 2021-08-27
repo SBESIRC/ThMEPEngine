@@ -46,7 +46,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             var closeWall = findNearbyWall(wallList, terminal, TolClosedWall);
 
-            var sideWallDict = findNearestParallelWall(closeWall);
+            var sideWallDict = findNearestParallelWall(closeWall, terminal);
 
             KeyValuePair<int, Line> turnCloseWallSet;
             if (noPriority.Contains(terminal.Type))
@@ -90,7 +90,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         /// </summary>
         /// <param name="closeWallList"></param>
         /// <returns></returns>
-        private static Dictionary<Point3d, Line> findNearestParallelWall(Dictionary<Point3d, List<Line>> closeWallList)
+        private static Dictionary<Point3d, Line> findNearestParallelWall(Dictionary<Point3d, List<Line>> closeWallList, ThTerminalToilet terminal)
         {
             var tol = new Tolerance(10, 10);
             var sideWallDict = new Dictionary<Point3d, Line>();
@@ -99,7 +99,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 var wallList = closeWallList.ElementAt(i).Value;
                 var midP = closeWallList.ElementAt(i).Key;
-                var sideDir = (closeWallList.ElementAt((i + 2) % 4).Key - closeWallList.ElementAt((i) % 4).Key).GetNormal();
+                //var sideDir = (closeWallList.ElementAt((i + 2) % 4).Key - closeWallList.ElementAt((i) % 4).Key).GetNormal();
+                var sideDir = (terminal.Boundary.GetPoint3dAt((i) % 4) - terminal.Boundary.GetPoint3dAt((i + 1) % 4)).GetNormal();
                 sideWallDict.Add(midP, null);
                 var parallelWall = new List<Line>();
 
@@ -199,15 +200,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             if (wallList.Count > 0)
             {
-                var ptLeftTop = terminal.Boundary.GetPoint3dAt(1);
-                var ptRightTop = terminal.Boundary.GetPoint3dAt(2);
-                var ptLeftBottom = terminal.Boundary.GetPoint3dAt(0);
-                var ptRightBottom = terminal.Boundary.GetPoint3dAt(3);
-
-                var ptTop = midPoint(ptLeftTop, ptRightTop);
-                var ptRight = midPoint(ptRightTop, ptRightBottom);
-                var ptBottom = midPoint(ptLeftBottom, ptRightBottom);
-                var ptLeft = midPoint(ptLeftTop, ptLeftBottom);
+                var ptTop = virtualSupplyPt(terminal.Boundary, 0, terminal.Type);
+                var ptRight = virtualSupplyPt(terminal.Boundary, 1, terminal.Type);
+                var ptBottom = virtualSupplyPt(terminal.Boundary, 2, terminal.Type);
+                var ptLeft = virtualSupplyPt(terminal.Boundary, 3, terminal.Type);
 
                 closeWall.Add(ptTop, new List<Line> { });
                 closeWall.Add(ptRight, new List<Line> { });
@@ -250,12 +246,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             groupIslandDirection(islandToi, out var islandGroup, out var islandGroupPair);
 
             var needTurn = new List<ThTerminalToilet>();
+            var passed = new List<int>();
             foreach (var pair in islandGroupPair)
             {
                 var i1 = islandGroup.TryGetValue(pair.Key, out var group1);
                 var i2 = islandGroup.TryGetValue(pair.Value, out var group2);
 
-                if (i1 && i2 && group1.Count > 0 && group2.Count > 0)
+                if (passed.Contains(pair.Key) == false && i1 && i2 && group1.Count > 0 && group2.Count > 0)
                 {
                     var item1 = group1.First();
                     var item2 = group2.OrderBy(x => x.Boundary.GetCenter().DistanceTo(item1.Boundary.GetCenter())).First();
@@ -294,6 +291,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         findDirInGroup(item2, group2, needTurn);
                         findDirInGroup(item1, group1, needTurn);
                     }
+                    passed.Add(pair.Key);
+                    passed.Add(pair.Value);
                 }
             }
 
@@ -356,29 +355,40 @@ namespace ThMEPWSS.DrainageSystemDiagram
             for (int i = 0; i < islandToi.Count; i++)
             {
                 var island = islandGroup.Where(x => x.Value.Where(y => y.Boundary.GetCenter().DistanceTo(islandToi[i].Boundary.GetCenter()) <= islandTol).Count() > 0);
-                
+
                 if (island.Count() > 0)
                 {
-                    var islandSameDir = island.Where(x => x.Value.Where(y =>
-                    {
-                        var bReturn = false;
-                        var angle = y.Dir.GetAngleTo(islandToi[i].Dir);
-                        if (Math.Cos(angle) >= Math.Cos(5 * Math.PI / 180))
-                        {
-                            bReturn = true;
-                        }
-                        return bReturn;
-                    }).Count() > 0);
+                    var closeIsland = island.SelectMany(x => x.Value).OrderBy(y => y.Boundary.GetCenter().DistanceTo(islandToi[i].Boundary.GetCenter())).First();
 
-                    if (islandSameDir.Count() > 0)
+                    var isSameGroup = checkTwoIslandInSameGroup(islandToi[i], closeIsland);
+
+                    if (isSameGroup == true)
                     {
-                        islandGroup[islandSameDir.First().Key].Add(islandToi[i]);
+                        var index = island.Where(x => x.Value.Contains(closeIsland)).First().Key;
+                        islandGroup[index].Add(islandToi[i]);
                     }
                     else
                     {
-                        var index = islandGroup.Count == 0 ? 0 : islandGroup.Last().Key + 1;
-                        islandGroup.Add(index, new List<ThTerminalToilet> { islandToi[i] });
-                        islandGroupPair.Add(island.First().Key, index);
+                        var index = -1;
+                        var oppoSide = island.Where(x => x.Value.Contains(closeIsland));
+
+                        if (oppoSide.Count() > 0)
+                        {
+                            if (islandGroupPair.ContainsKey(oppoSide.First().Key))
+                            {
+                                index = islandGroupPair[oppoSide.First().Key];
+                            }
+                        }
+
+                        if (index == -1)
+                        {
+                            index = islandGroup.Count == 0 ? 0 : islandGroup.Last().Key + 1;
+                            islandGroupPair.Add(island.First().Key, index);
+                            islandGroupPair.Add(index, island.First().Key);
+                            islandGroup.Add(index, new List<ThTerminalToilet> { });
+                        }
+
+                        islandGroup[index].Add(islandToi[i]);
                     }
                 }
                 else
@@ -387,6 +397,50 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     islandGroup.Add(index, new List<ThTerminalToilet> { islandToi[i] });
                 }
             }
+        }
+
+
+        private static bool checkTwoIslandInSameGroup(ThTerminalToilet item1, ThTerminalToilet item2)
+        {
+            var bReturn = false;
+
+            var top1 = midPoint(item1.Boundary.GetPoint3dAt(1), item1.Boundary.GetPoint3dAt(2));
+            var bottom1 = midPoint(item1.Boundary.GetPoint3dAt(0), item1.Boundary.GetPoint3dAt(3));
+            var left1 = midPoint(item1.Boundary.GetPoint3dAt(0), item1.Boundary.GetPoint3dAt(1));
+            var right1 = midPoint(item1.Boundary.GetPoint3dAt(2), item1.Boundary.GetPoint3dAt(3));
+
+            var top2 = midPoint(item2.Boundary.GetPoint3dAt(1), item2.Boundary.GetPoint3dAt(2));
+            var bottom2 = midPoint(item2.Boundary.GetPoint3dAt(0), item2.Boundary.GetPoint3dAt(3));
+            var left2 = midPoint(item2.Boundary.GetPoint3dAt(0), item2.Boundary.GetPoint3dAt(1));
+            var right2 = midPoint(item2.Boundary.GetPoint3dAt(2), item2.Boundary.GetPoint3dAt(3));
+
+            var distDict = new Dictionary<int, double>();
+            distDict.Add(0, top1.DistanceTo(top2));
+            distDict.Add(1, top1.DistanceTo(bottom2));
+            distDict.Add(2, bottom1.DistanceTo(top2));
+            distDict.Add(3, bottom1.DistanceTo(bottom2));
+            distDict.Add(4, left1.DistanceTo(left2));
+            distDict.Add(5, left1.DistanceTo(right2));
+            distDict.Add(6, right1.DistanceTo(left2));
+            distDict.Add(7, right1.DistanceTo(right2));
+
+            var sortIdx = distDict.OrderBy(x => x.Value).First().Key;
+
+            if (sortIdx >= 4)
+            {
+                bReturn = true;
+            }
+
+            return bReturn;
+        }
+
+        private static Point3d virtualSupplyPt(Polyline boundary, int turn, string type)
+        {
+
+            var pl = ThTerminalToilet.turnBoundary(boundary, turn);
+            var pt = ThTerminalToilet.CalculateSupplyCoolPoint(type, pl);
+
+            return pt.First();
         }
 
         private static Point3d midPoint(Point3d pt1, Point3d pt2)
