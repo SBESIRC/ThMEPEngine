@@ -32,10 +32,12 @@ namespace ThMEPWSS.Hydrant.Engine
                    .ModelSpace
                    .OfType<Entity>()
                    .ToList();
-
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-
+                var dbObjs = Results.ToCollection();
+                if (polygon.Count > 2)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                }
                 foreach (var db in dbObjs)
                 {
                     if (db is BlockReference && (db as BlockReference).Visible)

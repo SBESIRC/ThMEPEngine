@@ -31,8 +31,9 @@ namespace ThMEPWSS.Hydrant.Data
             //fireExtinguisherExtractor.RecognizeMS(database, pts);
             //Vistor.Results = new List<ThRawIfcDistributionElementData>();
 
-            var centerPoints = fireExtinguisherExtractor.Elements.Select(o => GetCenter(o.Outline as Polyline)).ToList();
-            FireExtinguishers = centerPoints.Select(o => new DBPoint(o)).ToList();
+            var newCenterPoints = fireExtinguisherExtractor.Elements.Select(o => GetCenter(o.Outline as Polyline))
+                                                           .Where(o => !FireExtinguishers.Contains(new DBPoint(o))).ToList();
+            FireExtinguishers.AddRange(newCenterPoints.Select(o => new DBPoint(o)).ToList());
         }
         public override List<ThGeometry> BuildGeometries()
         {

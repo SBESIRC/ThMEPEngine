@@ -33,8 +33,9 @@ namespace ThMEPWSS.Hydrant.Data
             }
             var objs = doors.UnionPolygons();
             objs = objs.FilterSmallArea(100.0);
-            Doors = objs.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList();
+            Doors.AddRange(objs.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList());
         }        
+
         public void FilterOuterDoors(List<Entity> rooms)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
@@ -44,6 +45,7 @@ namespace ThMEPWSS.Hydrant.Data
                 return neighbors.Count > 1;                
             }).ToList();
         }
+
         private Polyline Buffer(Polyline door)
         {
             var objs = door.Buffer(EnlargeTolerance);
