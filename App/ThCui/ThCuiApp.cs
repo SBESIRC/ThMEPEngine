@@ -89,7 +89,7 @@ namespace TianHua.AutoCAD.ThCui
             //}
 
             //反注册DocumentCollection事件
-            //dApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
+            //AcadApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
             ////反注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged -= SystemVariableChangedHandler;
         }
