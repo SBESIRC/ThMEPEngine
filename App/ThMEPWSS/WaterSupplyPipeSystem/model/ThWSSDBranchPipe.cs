@@ -94,7 +94,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.175) * FloorHeight, 0);
             var pt2 = new Point3d(pt1.X + 400, pt1.Y, 0);
             var pt231 = new Point3d(pt2.X, pt2.Y - 0.05 * FloorHeight, 0);
-            Point3d pt232;
+            Point3d pt232, pt3;
 
             if (NoValve)
             {
@@ -104,12 +104,19 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 pt232 = new Point3d(pt2.X, pt231.Y - 0.7 * BlockSize[0][0], 0);
             }
-            var pt3 = new Point3d(pt2.X, pt232.Y - 0.05 * FloorHeight, 0);
+
+            var h = FloorHeight *(((Households[AreaIndex] -1 ) * 0.14 + 0.1)) + FloorHeight * (FloorNumber - 1) + IndexStartY;
+            if (HasFlushFaucet)
+            {
+                h += FloorHeight * 0.14;
+            }
+            //pt3 = new Point3d(pt2.X, pt232.Y - 0.05 * FloorHeight, 0);
+            pt3 = new Point3d(pt2.X, h, 0);
             TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
             var pt371 = new Point3d(pt3.X + 225, pt3.Y, 0);
-            var pt372 = new Point3d(pt371.X + 0.5 * BlockSize[1][0], pt3.Y, 0);
+            var pt372 = new Point3d(pt371.X + 1 * BlockSize[1][0], pt3.Y, 0);
             var pt373 = new Point3d(pt372.X + 75, pt3.Y, 0);
-            var pt374 = new Point3d(pt373.X + 0.5 * BlockSize[2][0], pt3.Y, 0);
+            var pt374 = new Point3d(pt373.X + 0.8 * BlockSize[2][0], pt3.Y, 0);
             Point3d pt7;
             Point3d pt11;
 
@@ -171,7 +178,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
             for (int i = 1; i < Households[AreaIndex]; i++)
             {
-                var pt4 = new Point3d(pt2.X, pt3.Y - i * 0.075 * FloorHeight, 0);
+                var pt4 = new Point3d(pt2.X, pt3.Y - i * 0.14 * FloorHeight, 0);
                 var pt481 = new Point3d(pt371.X, pt4.Y, 0);
                 var pt482 = new Point3d(pt372.X, pt4.Y, 0);
                 var pt483 = new Point3d(pt373.X, pt4.Y, 0);

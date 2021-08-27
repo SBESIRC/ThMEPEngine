@@ -35,10 +35,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 //绘制截止阀
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                BranchPipe[i].GetCheckValveSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
+                BranchPipe[i].GetCheckValveSite()[j], new Scale3d(1, 1, 1), 0);
                 //绘制水表
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.WaterMeter,
-                BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
+                BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.8, 0.8, 0.8), 0);
                 //绘制水管中断
                 if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
                 {
@@ -56,7 +56,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 //绘制截止阀
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.5, 0.5, 0.5), Math.PI * 3 / 2);
+                BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
 
             }
 
