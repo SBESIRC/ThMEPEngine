@@ -1,9 +1,10 @@
-﻿using ThCADCore.NTS;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
-using ThMEPEngineCore.CAD;
-using System.Linq;
 
 namespace ThMEPElectrical.FireAlarm.Service
 {
@@ -12,12 +13,20 @@ namespace ThMEPElectrical.FireAlarm.Service
         private List<Entity> HandleElements { get; set; }
         private List<Entity> FirstKeepElements { get; set; }
         public List<Entity> Results { get; private set; }
+        public ThHandleConflictService()
+        {
+            Results = new List<Entity>();
+            HandleElements = new List<Entity>();
+            FirstKeepElements = new List<Entity>();
+        }
+
         public ThHandleConflictService(List<Entity> firstKeepElements,List<Entity> handleElements)
         {
             FirstKeepElements = firstKeepElements.ToCollection().FilterSmallArea(1.0).Cast<Entity>().ToList();
             HandleElements = handleElements.ToCollection().FilterSmallArea(1.0).Cast<Entity>().ToList();
             Results = new List<Entity>();
         }
+
         public void Handle()
         {
             Results.AddRange(FirstKeepElements);
@@ -36,11 +45,59 @@ namespace ThMEPElectrical.FireAlarm.Service
                 }
             }
         }
+        public List<ThIfcDoor> Union(List<ThIfcDoor> db3Doors,List<ThIfcDoor> localDoors)
+        {
+            var results = new List<ThIfcDoor>();
+            results.AddRange(db3Doors);
+            results.AddRange(localDoors);
+            foreach(ThIfcDoor first in localDoors) 
+            {
+                foreach(ThIfcDoor second in db3Doors) 
+                {
+                    if (IsOverlap(first.Outline, second.Outline))
+                    {
+                        var temp = new DBObjectCollection
+                        {
+                            first.Outline,
+                            second.Outline
+                        };
+                        var mergeObjs = temp.UnionPolygons();
+                        if (mergeObjs.Count > 0)
+                        {
+                            results.Remove(first);
+                            results.Remove(second);
+                            var result = new ThIfcDoor
+                            {
+                                Spec = second.Spec,
+                                Switch = second.Switch,
+                                OpenAngle = second.OpenAngle,
+                                Height = second.Height,
+                            };
+                            var firstPoly = mergeObjs
+                                .Cast<Polyline>()
+                                .OrderByDescending(p => p.Area).First();
+                            result.Outline = firstPoly.GetMinimumRectangle();
+                            results.Add(result);
+                        }
+                        break;
+                    }
+                }
+            }
+            return results;
+        }
         private bool IsOverlap(Entity first,Entity second)
         {
             //规则待定
             var relateMatrix = new ThCADCoreNTSRelate(first.ToNTSPolygon(), second.ToNTSPolygon());
-            return relateMatrix.IsOverlaps;
+            if (relateMatrix.IsOverlaps)
+                return true;
+            else if (relateMatrix.IsContains)
+                return true;
+            else if (relateMatrix.IsCovers)
+                return true;
+            else if (relateMatrix.IsIntersects)
+                return true;
+            return false;
         }
     }
 }

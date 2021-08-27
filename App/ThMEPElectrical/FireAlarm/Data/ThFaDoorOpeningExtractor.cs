@@ -26,6 +26,7 @@ namespace FireAlarm.Data
     public class ThFaDoorOpeningExtractor : ThExtractorBase,IPrint,IGroup, ISetStorey, ITransformer
     {
         private List<ThIfcRoom> Rooms { get; set; }
+        private List<Polyline> Holes { get; set; }
         public List<ThIfcDoor> Doors { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
@@ -50,19 +51,16 @@ namespace FireAlarm.Data
             }
 
             //处理重叠
-            var conflictService = new ThHandleConflictService(
-                db3Doors.Select(o => o.Outline).ToList(),
-                localDoors.Select(o => o.Outline).ToList());
-            conflictService.Handle();
-            Doors.AddRange(db3Doors.Where(o => conflictService.Results.Contains(o.Outline)).ToList());
-            var originDoorEntites = Doors.Select(o => o.Outline).ToList();
-            Doors.AddRange(conflictService.Results
-                .Where(o => !originDoorEntites.Contains(o))
-                .Select(o=> new ThIfcDoor { Outline = o })
-                .ToList());
+            var conflictService = new ThHandleConflictService();
+            Doors = conflictService.Union(db3Doors,localDoors);
 
             var objs = Doors.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Doors = Doors.Where(o => objs.Contains(o.Outline)).ToList();
+            var bufferService = new ThNTSBufferService();
+            for(int i = 0; i < Doors.Count; i++)
+            {
+                Doors[i].Outline = bufferService.Buffer(Doors[i].Outline, 15);
+            }
         }
         private List<ThIfcDoor> ExtractDb3Door(Database database, Point3dCollection pts)
         {
@@ -120,7 +118,7 @@ namespace FireAlarm.Data
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            var exteriorDoorService = new ThIsExteriorDoorService(this.Rooms.Select(o=>o.Boundary).ToList());
+            var exteriorDoorService = new ThIsExteriorDoorService(this.Rooms.Select(o=>o.Boundary).ToList(), this.Holes);
 
             Doors.ForEach(o =>
             {
@@ -138,7 +136,7 @@ namespace FireAlarm.Data
                     geometry.Properties.Add(ThExtractorPropertyNameManager.NeibourFireApartIdsPropertyName, string.Join(",", FireDoorNeibourIds[o.Outline]));
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.UseagePropertyName, IsFireDoor(o) ? "防火门" : "");
-                if(exteriorDoorService.IsExteriorDoor(o.Outline as Polyline))
+                if (exteriorDoorService.IsExteriorDoor(o.Outline as Polyline))
                 {
                     geometry.Properties.Add(ThExtractorPropertyNameManager.TagPropertyName, "外门");
                 }
@@ -218,7 +216,10 @@ namespace FireAlarm.Data
         {
             this.Rooms = rooms;
         }
-
+        public void SetHoles(List<Polyline> holes)
+        {
+            this.Holes = holes;
+        }
         public void Transform()
         {
             Doors.ForEach(o => Transformer.Transform(o.Outline));

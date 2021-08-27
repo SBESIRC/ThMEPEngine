@@ -135,13 +135,16 @@ namespace FireAlarm.Data
             var roomExtractor = extractors.Where(o => o is ThFaRoomExtractor).First() as ThFaRoomExtractor;
             faDoorExtractor.SetRooms(roomExtractor.Rooms);
 
+            //把洞传给门提取器
+            var holeExtractor = extractors.Where(o => o is ThHoleExtractor).First() as ThHoleExtractor;
+            faDoorExtractor.SetHoles(holeExtractor.HoleDic.Keys.ToList());
+
             //最后将楼层框线和防火分区提取器加入，生成Geometries
             extractors.Add(storeyExtractor);
             extractors.Add(fireApartExtractor);
-            
+            /*Print(database, extractors);*/
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
-
             // 移回原位
             storeyExtractor.Reset();
             fireApartExtractor.Reset();
