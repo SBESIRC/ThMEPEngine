@@ -4,6 +4,10 @@
     {
         UnNone,
         /// <summary>
+        /// A part of room,building or particular space that is used for special purpose
+        /// </summary>
+        Area,
+        /// <summary>
         /// 建筑墙
         /// </summary>
         ArchitectureWall,
