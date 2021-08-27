@@ -112,7 +112,16 @@ namespace ThCADCore.NTS
 
         public static Point3d GetCentroidPoint(this AcPolygon polygon)
         {
-            return Centroid.GetCentroid(polygon.ToNTSPolygon()).ToAcGePoint3d();
+            // GetCentroid()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
+            var clone = polygon.Clone() as AcPolygon;
+            var vertex = clone.GetPoint3dAt(0);
+            var vector = vertex.GetVectorTo(Point3d.Origin);
+            var matrix = Matrix3d.Displacement(vector);
+            clone.TransformBy(matrix);
+            var centroid = Centroid.GetCentroid(polygon.ToNTSPolygon());
+            return centroid.ToAcGePoint3d().TransformBy(matrix.Inverse());
         }
 
         public static Point3d GetMaximumInscribedCircleCenter(this AcPolygon shell)
