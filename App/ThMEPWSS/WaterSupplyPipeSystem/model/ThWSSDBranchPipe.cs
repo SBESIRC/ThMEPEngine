@@ -113,7 +113,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             Point3d pt7;
             Point3d pt11;
 
-            PRValveDetailSite = new Point3d(pt1.X + 7000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
+            PRValveDetailSite = new Point3d(pt1.X - 5000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
             BranchPipes = new List<Line>();//支管列表
             WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
             CheckValveSite = new List<Point3d>();//截止阀位置列表
@@ -152,8 +152,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             else
             {
                 pt7 = new Point3d(pt374.X + 150 * Households[AreaIndex], pt3.Y, 0);
-
-                pt11 = new Point3d(pt7.X, pt7.Y - gap * (Households[AreaIndex] + 1) * FloorHeight, 0);
+                pt11 = new Point3d(pt7.X, IndexStartY + FloorHeight * (FloorNumber - 1 + 0.05), 0);
+                //pt11 = new Point3d(pt7.X, pt7.Y - gap * 0.5 * (Households[AreaIndex] + 1) * FloorHeight, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
             }
 

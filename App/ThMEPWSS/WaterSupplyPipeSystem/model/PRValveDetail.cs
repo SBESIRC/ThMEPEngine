@@ -4,6 +4,7 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System.Collections.Generic;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.model
 {
@@ -17,8 +18,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                             BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
                 var ptls = new Point3d[3];
                 ptls[0] = BranchPipe[i - 1].GetPressureReducingValveSite();
-                ptls[1] = new Point3d(BranchPipe[i - 1].GetPressureReducingValveSite().X + 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
-                ptls[2] = BranchPipe[i].GetPRValveDetailSite();
+                ptls[1] = new Point3d(BranchPipe[i - 1].GetPressureReducingValveSite().X - 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
+                ptls[2] = BranchPipe[i].GetPRValveDetailSite().OffsetX(1778);
                 var polyline = new Polyline3d(0, new Point3dCollection(ptls), false);
                 polyline.LayerId = DbHelper.GetLayerId("W-NOTE");
                 acadDatabase.CurrentSpace.Add(polyline);
