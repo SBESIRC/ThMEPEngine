@@ -83,6 +83,10 @@ namespace ThMEPWSS.Hydrant.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                 originDatas = dbObjs.Cast<Entity>().ToList();
             }
+            else
+            {
+                originDatas = datas.Cast<Entity>().ToList();
+            }
             Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.GeometricExtents.ToRectangle() }));
         }
     }

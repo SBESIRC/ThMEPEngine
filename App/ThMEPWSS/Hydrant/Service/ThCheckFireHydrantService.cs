@@ -151,7 +151,12 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         Filter(temp0, temp, points);
                     }
-                    temp0.Walls = temp;
+                    var container = new List<Entity>();
+                    foreach (Entity e in RemoveRepeatedGeometry(temp.ToCollection()))
+                    {
+                        container.Add(e);
+                    }
+                    temp0.Walls = container;
                 }
                 else if (i == 1 && extractorsContainer[i] is ThHydrantShearwallExtractor temp1)
                 {
@@ -160,7 +165,12 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         Filter(temp1, temp, points);
                     }
-                    temp1.Walls = temp;
+                    var container = new List<Entity>();
+                    foreach (Entity e in RemoveRepeatedGeometry(temp.ToCollection()))
+                    {
+                        container.Add(e);
+                    }
+                    temp1.Walls = container;
                 }
                 else if (i == 2 && extractorsContainer[i] is ThHydrantDoorOpeningExtractor temp2)
                 {
@@ -169,7 +179,12 @@ namespace ThMEPWSS.Hydrant.Service
                     {
                         Filter(temp2, temp, points);
                     }
-                    temp2.Doors = temp;
+                    var container = new List<Polyline>();
+                    foreach (Polyline e in RemoveRepeatedGeometry(temp.ToCollection()))
+                    {
+                        container.Add(e);
+                    }
+                    temp2.Doors = container;
                 }
                 else if (i == 3 && extractorsContainer[i] is ThFireHydrantExtractor temp3)
                 {
@@ -182,9 +197,12 @@ namespace ThMEPWSS.Hydrant.Service
 
                     if (mode == "P")
                     {
-                        var container = new List<DBPoint>();
                         temp3.Extract(db, pts);
-                        Filter(temp3, container, pts);
+                        var container = new List<DBPoint>();
+                        foreach (DBPoint e in RemoveRepeatedGeometry(temp3.FireHydrants.ToCollection()))
+                        {
+                            container.Add(e);
+                        }
                         temp3.FireHydrants = container;
                     }
                 }
@@ -225,11 +243,6 @@ namespace ThMEPWSS.Hydrant.Service
             };
         }
 
-        private List<Point3d> ContainsPts(Entity polygon, List<Point3d> pts)
-        {
-            return pts.Where(p => polygon.IsContains(p)).ToList();
-        }
-
         public void Print(Database db)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
@@ -267,6 +280,7 @@ namespace ThMEPWSS.Hydrant.Service
             }
         }
 
+        // 过滤
         private void Filter(ThHydrantArchitectureWallExtractor extractor, List<Entity> temp, Point3dCollection pts)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(extractor.Walls.ToCollection());
@@ -305,6 +319,13 @@ namespace ThMEPWSS.Hydrant.Service
             {
                 temp.Add(e);
             }
+        }
+
+        // 去重
+        private DBObjectCollection RemoveRepeatedGeometry(DBObjectCollection objs)
+        {
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            return spatialIndex.Geometries.Values.ToCollection();
         }
     }
 }

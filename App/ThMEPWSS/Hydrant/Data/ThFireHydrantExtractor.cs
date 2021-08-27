@@ -52,7 +52,7 @@ namespace ThMEPWSS.Hydrant.Data
             });
 
             //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
-            var newHydrantPoints =  HydrantOutline.Select(o => o.Key).Where(o=> !FireHydrants.Contains(o)).ToList();
+            var newHydrantPoints = HydrantOutline.Select(o => o.Key).Where(o=> !FireHydrants.Contains(o)).ToList();
             FireHydrants.AddRange(newHydrantPoints);
             if (FilterMode == FilterMode.Window)
             {
