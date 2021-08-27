@@ -5162,7 +5162,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 {
                     var flsf = F(FLs);
-                    var fdsf = F(item.FloorDrains);
+                    var filtedFds = item.FloorDrains.Where(fd => toilets.All(toilet => !toilet.Intersects(fd))).ToList();
+                    var fdsf = F(filtedFds);
                     foreach (var lineEx in GeoFac.GroupGeometries(item.FloorDrains.OfType<Polygon>().Select(x => x.Shell)
                         .Concat(FLs.OfType<Polygon>().Select(x => x.Shell))
                         .Concat(dlinesGeos).Distinct().ToList()).Select(x => GeoFac.CreateGeometry(x)))
@@ -5239,14 +5240,15 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                         }
                                                         return THESAURUSABDOMINAL;
                                                     }
-                                                }else if (yyy.Count == THESAURUSACCIDENT)
+                                                }
+                                                else if (yyy.Count == THESAURUSACCIDENT)
                                                 {
                                                     var dl1 = yyy[QUOTATIONSHAKES];
                                                     var dl2 = yyy[THESAURUSACCESSION];
                                                     var fd1 = fds[QUOTATIONSHAKES].Buffer(THESAURUSACCUSE);
                                                     var fd2 = fds[THESAURUSACCESSION].Buffer(THESAURUSACCUSE);
                                                     var vp = fl.Buffer(THESAURUSACCUSE);
-                                                    var geos = new List<Geometry>() { fd1,fd2,vp };
+                                                    var geos = new List<Geometry>() { fd1, fd2, vp };
                                                     var f = F(geos);
                                                     var l1 = f(dl1);
                                                     var l2 = f(dl2);
@@ -5276,20 +5278,24 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             }
                         }
                     }
-                    foreach (var wp in item.WaterPorts.Select(x => x.ToGRect().Expand(INATTENTIVENESS).ToPolygon().Shell))
                     {
-                        var dls = dlinesGeosf(wp);
-                        var dlgeo = GeoFac.CreateGeometry(dls);
-                        var fds = fdsf(dlgeo);
-                        var c = fds.Count;
+                        var supterDLineGeos = GeoFac.GroupGeometries(dlinesGeos.Concat(filtedFds.OfType<Polygon>().Select(x => x.Shell)).ToList()).Select(x=>x.Count==THESAURUSACCESSION?x[QUOTATIONSHAKES]:GeoFac.CreateGeometry(x)).ToList();
+                        var f = F(supterDLineGeos);
+                        foreach (var wp in item.WaterPorts.Select(x => x.ToGRect().Expand(INATTENTIVENESS).ToPolygon().Shell))
                         {
-                            var _fls = flsf(dlgeo).Where(fl => toilets.All(toilet => !toilet.Intersects(fl))).ToList();
-                            foreach (var fl in _fls)
+                            var dls = f(wp);
+                            var dlgeo = GeoFac.CreateGeometry(dls);
+                            var fds = fdsf(dlgeo);
+                            var c = fds.Count;
                             {
-                                var label = lbDict[fl];
-                                drData.SingleOutletFloorDrains.TryGetValue(label, out int v);
-                                v = Math.Max(v, c);
-                                drData.SingleOutletFloorDrains[label] = v;
+                                var _fls = flsf(dlgeo).Where(fl => toilets.All(toilet => !toilet.Intersects(fl))).ToList();
+                                foreach (var fl in _fls)
+                                {
+                                    var label = lbDict[fl];
+                                    drData.SingleOutletFloorDrains.TryGetValue(label, out int v);
+                                    v = Math.Max(v, c);
+                                    drData.SingleOutletFloorDrains[label] = v;
+                                }
                             }
                         }
                     }
