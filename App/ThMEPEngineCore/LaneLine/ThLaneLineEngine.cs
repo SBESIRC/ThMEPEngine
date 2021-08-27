@@ -36,23 +36,23 @@ namespace ThMEPEngineCore.LaneLine
         protected static List<Curve> ExplodeCurves(DBObjectCollection curves)
         {
             var objs = new List<Curve>();
-            foreach (Curve curve in curves)
+            curves.OfType<Curve>().ForEach(o =>
             {
-                if (curve is Line line)
+                if (o is Line line)
                 {
                     if (line.Length > ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH)
                     {
                         objs.Add(line.WashClone() as Line);
                     }
                 }
-                else if (curve is Arc arc)
+                else if (o is Arc arc)
                 {
                     if (arc.Length > ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH)
                     {
                         objs.Add(arc.WashClone() as Arc);
                     }
                 }
-                else if (curve is Polyline polyline)
+                else if (o is Polyline polyline)
                 {
                     var entitySet = new DBObjectCollection();
                     polyline.Explode(entitySet);
@@ -62,7 +62,7 @@ namespace ThMEPEngineCore.LaneLine
                 {
                     throw new NotSupportedException();
                 }
-            }
+            });
             return objs;
         }
 
