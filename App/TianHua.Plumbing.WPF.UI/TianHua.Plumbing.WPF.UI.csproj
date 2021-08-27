@@ -102,6 +102,12 @@
     <Compile Include="UI\ThTipDialog.xaml.cs">
       <DependentUpon>ThTipDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiBlockNameConfig.xaml.cs">
+      <DependentUpon>uiBlockNameConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiBlockNameConfigSet.xaml.cs">
+      <DependentUpon>uiBlockNameConfigSet.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
     </Compile>
@@ -199,6 +205,14 @@
     <Page Include="UI\ThTipDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiBlockNameConfig.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiBlockNameConfigSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
       <Generator>MSBuild:Compile</Generator>

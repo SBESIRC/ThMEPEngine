@@ -207,6 +207,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 result.Add(Midline1);
             }
             result.Add(DrawStraightLine(currentIndex));
+
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["70度电动防火阀"] > 0)
+            {
+                var BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "70度电动防火阀").AssociatedBlocks[0].Position;
+                result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset)));
+                Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + BlockPosition.Y + 150, 0));
+                result.Add(Midline1);
+            }
+            result.Add(DrawStraightLine(currentIndex));
             return result;
         }
 

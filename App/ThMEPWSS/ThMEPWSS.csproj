@@ -22,6 +22,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -35,12 +36,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
+    <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
+    <Compile Include="ThSystemDiagramCmds.THWTKSB.cs" />
     <Compile Include="Command\ThPipeDrawCmd.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
     <Compile Include="Common\LevelFloorUtil.cs" />
     <Compile Include="DrainageSystemAD\Engine\ThDrainageADConvertEngine.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADDiameterDim.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\RaisePipeConvert.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDADBlkOutput.cs" />
     <Compile Include="DrainageSystemAD\Model\ThDrainageSDADDataExchange.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertLineService.cs" />
@@ -130,7 +137,6 @@
     <Compile Include="DrainageSystemAG\Bussiness\FloorDrainConvert.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeDrainConnect.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLineLabelLayout.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RoomKitchenToiletLayout.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementVisitor.cs" />
@@ -434,6 +440,8 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
+    <Compile Include="ViewModel\BlockConfigSetViewModel.cs" />
+    <Compile Include="ViewModel\BlockConfigViewModel.cs" />
     <Compile Include="ViewModel\HydrantConnectPipeViewModel.cs" />
     <Compile Include="ViewModel\FireHydrantSystemSetViewModel.cs" />
     <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />

@@ -16,7 +16,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 {
     public class ThRequiredElementVisitor : ThDistributionElementExtractionVisitor
     {
-        private List<string> BlockNameSet = new List<string>() { "E-BFAS011", "E-BFAS010", "E-BFAS520", "E-BDB004", "E-BFAS630-3", "E-BFAS540", "E-BFAS621-2", "E-BFAS550", "E-BFAS510", "E-BFAS510-3", "E-BFAS520-3", "E-BFAS621-3", "E-BFAS731", "E-BFAS732", "E-BFAS522" };
+        private List<string> BlockNameSet = new List<string>() { "E-BFAS011", "E-BFAS010", "E-BFAS520", "E-BDB004", "E-BFAS630-3", "E-BFAS540", "E-BFAS621-2", "E-BFAS550", "E-BFAS510", "E-BFAS510-3", "E-BFAS520-3", "E-BFAS621-3" , "E-BFAS732", "E-BFAS522" };
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference blkref)

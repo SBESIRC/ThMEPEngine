@@ -42,7 +42,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (null == _thisFloorBlocks || _thisFloorBlocks.Count < 1)
                 return copyBlocks;
             foreach (var item in _thisFloorBlocks) 
+            {
+                if (!string.IsNullOrEmpty(item.tag) && item.tag.ToUpper() == DrainSysAGCommon.NOTCOPYTAG)
+                    continue;
                 copyBlocks.Add(DrainSysAGCommon.CopyOneBlock(item, _thisFloorBasePoint, floor.datumPoint, floor.floorUid));
+            } 
+                
             return copyBlocks;
         }
         public List<CreateBasicElement> CopyBasicElementToFloor(FloorFramed floor) 
@@ -52,6 +57,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 return copyElems;
             foreach (var item in _thisFloorBasicElems) 
             {
+                if (!string.IsNullOrEmpty(item.curveTag) && item.curveTag.ToUpper() == DrainSysAGCommon.NOTCOPYTAG)
+                    continue;
                 var copy = DrainSysAGCommon.CopyBaseElement(item, _thisFloorBasePoint, floor.datumPoint, floor.floorUid);
                 if (null == copy)
                     continue;

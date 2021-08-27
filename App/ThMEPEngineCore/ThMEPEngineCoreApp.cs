@@ -823,6 +823,15 @@ namespace ThMEPEngineCore
                 breakService.Break(objs);
                 breakService.DrainageDitches.CreateGroup(acadDb.Database, 1);
                 breakService.CollectingWells.CreateGroup(acadDb.Database, 2);
+
+                foreach(Entity e in breakService.DrainageDitches)
+                {
+                    transformer.Reset(e);
+                }
+                foreach (Entity e in breakService.CollectingWells)
+                {
+                    transformer.Reset(e);
+                }
             }
         }
 

@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
@@ -14,21 +13,78 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
     class BlockReferenceDataEngine
     {
         List<EquipmentBlcokVisitorModel> equipmentBlcokVisitors { get; }
+        List<EquipmentBlcokVisitorModel> equipmentBlcokVisitorsModelSpace { get; }
+        Dictionary<string, List<string>> _layerNameConfig;
         /// <summary>
         /// 获取本图纸中所有的设备信息
         /// </summary>
-        public BlockReferenceDataEngine() 
+        public BlockReferenceDataEngine(Dictionary<string,List<string>> configLayers) 
         {
+            _layerNameConfig = new Dictionary<string, List<string>>();
             equipmentBlcokVisitors = new List<EquipmentBlcokVisitorModel>();
+            equipmentBlcokVisitorsModelSpace = new List<EquipmentBlcokVisitorModel>();
+
+            if (null != configLayers && configLayers.Count > 0)
+            {
+                foreach (var keyValue in configLayers)
+                {
+                    if (string.IsNullOrEmpty(keyValue.Key) || keyValue.Value == null || keyValue.Value.Count < 1)
+                        continue;
+                    var tempListNames = new List<string>();
+                    foreach (var str in keyValue.Value)
+                    {
+                        if (string.IsNullOrEmpty(str) || tempListNames.Any(c => c.Equals(str)))
+                            continue;
+                        tempListNames.Add(str);
+                    }
+                    if (tempListNames.Count < 1)
+                        continue;
+                    _layerNameConfig.Add(keyValue.Key, tempListNames);
+                }
+            }
+
             InitBlockNames();
+            InitModelSapaceBlock();
+            
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                ThDistributionElementExtractor thDistribution = new ThDistributionElementExtractor();
-                foreach (var item in this.equipmentBlcokVisitors)
+                if (null != this.equipmentBlcokVisitorsModelSpace && this.equipmentBlcokVisitorsModelSpace.Count > 0)
                 {
-                    thDistribution.Accept(item.equipmentDataVisitor);
+                    ThDistributionElementExtractor thDistributionMS = new ThDistributionElementExtractor();
+                    foreach (var item in this.equipmentBlcokVisitorsModelSpace)
+                    {
+                        thDistributionMS.Accept(item.equipmentDataVisitor);
+                    }
+                    thDistributionMS.Extract(acdb.Database);
+
+                    var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                    var test = blocks.Where(c => c.GetEffectiveName().Contains("AI")).ToList();
+                    foreach (var block in blocks)
+                    {
+                        foreach (var visitor in equipmentBlcokVisitorsModelSpace) 
+                        {
+                            var elems = new List<ThRawIfcDistributionElementData>();
+                            if (visitor.equipmentDataVisitor.IsBuildElementBlockReference(block))
+                            {
+                                if (visitor.equipmentDataVisitor.CheckLayerValid(block) && visitor.equipmentDataVisitor.IsDistributionElement(block))
+                                {
+                                    visitor.equipmentDataVisitor.DoExtract(elems, block,Matrix3d.Identity);
+                                }
+                            }
+                            if(null != elems && elems.Count>0)
+                                visitor.equipmentDataVisitor.Results.AddRange(elems);
+                        }
+                    }
                 }
-                thDistribution.Extract(acdb.Database);
+                if (null != this.equipmentBlcokVisitors && this.equipmentBlcokVisitors.Count > 0)
+                {
+                    ThDistributionElementExtractor thDistribution = new ThDistributionElementExtractor();
+                    foreach (var item in this.equipmentBlcokVisitors)
+                    {
+                        thDistribution.Accept(item.equipmentDataVisitor);
+                    }
+                    thDistribution.Extract(acdb.Database);
+                }
             }
 
         }
@@ -39,9 +95,20 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         public List<EquipmentBlcokModel> GetPolylineEquipmentBlocks(Polyline polyline) 
         {
             var equipments = new List<EquipmentBlcokModel>();
+            var tempModel = GetModelSpaceEquipmentBlocks(polyline);
+            if (null != tempModel && tempModel.Count > 0)
+                equipments.AddRange(tempModel);
+            var tempExts = GetExtractEquipmentBlocks(polyline);
+            if (null != tempExts && tempExts.Count > 0)
+                equipments.AddRange(tempExts);
+            return equipments;
+        }
+        public List<EquipmentBlcokModel> GetModelSpaceEquipmentBlocks(Polyline polyline) 
+        {
+            var equipments = new List<EquipmentBlcokModel>();
             if (null == polyline || this.equipmentBlcokVisitors == null || this.equipmentBlcokVisitors.Count < 1)
                 return equipments;
-            foreach (var item in this.equipmentBlcokVisitors) 
+            foreach (var item in this.equipmentBlcokVisitors)
             {
                 if (item.equipmentDataVisitor == null || item.equipmentDataVisitor.Results == null || item.equipmentDataVisitor.Results.Count < 1)
                     continue;
@@ -51,7 +118,36 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     if (null == obj)
                         continue;
                     BlockReference block = obj.Geometry as BlockReference;
-                    
+
+                    if (null == block)
+                        continue;
+                    var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block,true);
+                    if (polyline.Contains(centerPoint))
+                    {
+                        blcokModel.blockReferences.Add(block);
+                    }
+                }
+                if (blcokModel.blockReferences.Count > 0)
+                    equipments.Add(blcokModel);
+            }
+            return equipments;
+        }
+        public List<EquipmentBlcokModel> GetExtractEquipmentBlocks(Polyline polyline) 
+        {
+            var equipments = new List<EquipmentBlcokModel>();
+            if (null == polyline || this.equipmentBlcokVisitors == null || this.equipmentBlcokVisitors.Count < 1)
+                return equipments;
+            foreach (var item in this.equipmentBlcokVisitorsModelSpace)
+            {
+                if (item.equipmentDataVisitor == null || item.equipmentDataVisitor.Results == null || item.equipmentDataVisitor.Results.Count < 1)
+                    continue;
+                var blcokModel = new EquipmentBlcokModel(item.enumEquipmentType);
+                foreach (var obj in item.equipmentDataVisitor.Results)
+                {
+                    if (null == obj)
+                        continue;
+                    BlockReference block = obj.Geometry as BlockReference;
+
                     if (null == block)
                         continue;
                     var centerPoint = block.GeometricExtents.CenterPoint();
@@ -61,7 +157,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                         blcokModel.blockReferences.Add(block);
                     }
                 }
-                if(blcokModel.blockReferences.Count>0)
+                if (blcokModel.blockReferences.Count > 0)
                     equipments.Add(blcokModel);
             }
             return equipments;
@@ -71,35 +167,14 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             //拖把池 - 块名称过滤
             Dictionary<string, int> mopPoolNames = new Dictionary<string, int>();
             mopPoolNames.Add(ThWSSCommon.MopPoolBlockName, 2);
+            GetVisitorDictionary(EnumEquipmentType.mopPool, ref mopPoolNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
 
             //洗衣机 - 块名称过滤
             Dictionary<string, int> washingMachineNames = new Dictionary<string, int>();
             washingMachineNames.Add(ThWSSCommon.WashingMachineBlockName, 2);
+            GetVisitorDictionary(EnumEquipmentType.washingMachine, ref washingMachineNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.washingMachine, washingMachineNames));
-
-            //厨房台盆 - 块名称过滤
-            Dictionary<string, int> kitchenBasinNames = new Dictionary<string, int>();
-            kitchenBasinNames.Add(ThWSSCommon.KitchenBasinBlockName, 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenBasinNames));
-
-            //地漏 - 块名称过滤
-            Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
-            //floorDrainNames.Add("地漏", 1);
-            floorDrainNames.Add("W-drain", 2);
-            floorDrainNames.Add("地漏平面", 2);
-            floorDrainNames.Add("地漏-阳台、空调", 2);
-            floorDrainNames.Add("地漏-卫", 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_1, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_2, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_3, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_4, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_5, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_6, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_7, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_8, 2);
-            floorDrainNames.Add(ThWSSCommon.FloorDrainBlockName_9, 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames));
 
             //重力流雨水斗 - 块名称过滤
             Dictionary<string, int> gravityRainBucketNames = new Dictionary<string, int>();
@@ -107,6 +182,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             gravityRainBucketNames.Add(ThWSSCommon.GravityFlowRainBucketBlockName, 2);
             gravityRainBucketNames.Add("ffdsf", 2);
             gravityRainBucketNames.Add("W-drain-51", 2);
+            GetVisitorDictionary(EnumEquipmentType.gravityRainBucket, ref gravityRainBucketNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.gravityRainBucket, gravityRainBucketNames));
 
             //侧入式雨水斗 - 块名称过滤
@@ -114,43 +190,13 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             sideRainBucketNames.Add(ThWSSCommon.SideRainBucketBlockName_1, 2);
             sideRainBucketNames.Add(ThWSSCommon.SideRainBucketBlockName_2, 2);
             sideRainBucketNames.Add("W-drain-21", 2);
+            GetVisitorDictionary(EnumEquipmentType.sideRainBucket, ref sideRainBucketNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel( EnumEquipmentType.sideRainBucket, sideRainBucketNames));
-
-            //阳台立管 - 块名称过滤
-            Dictionary<string, int> balconyRiserNames = new Dictionary<string, int>();
-            balconyRiserNames.Add(ThWSSCommon.BalconyRiserBlockName, 2);
-            balconyRiserNames.Add("阳台立管", 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.balconyRiser, balconyRiserNames));
-
-            //屋面雨水立管 - 块名称过滤
-            Dictionary<string, int> roofRiserNames = new Dictionary<string, int>();
-            roofRiserNames.Add(ThWSSCommon.RoofRainwaterRiserBlockName, 2);
-            roofRiserNames.Add("屋面雨水", 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.roofRainRiser, roofRiserNames));
-
-            //冷凝水立管 - 块名称过滤
-            Dictionary<string, int> condensateRiserNames = new Dictionary<string, int>();
-            condensateRiserNames.Add(ThWSSCommon.CondensateRiserBlockName_1, 2);
-            condensateRiserNames.Add(ThWSSCommon.CondensateRiserBlockName_2, 2);
-            condensateRiserNames.Add("冷凝", 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.condensateRiser, condensateRiserNames));
-
-            //水管井留洞 - 块名称过滤
-            Dictionary<string, int> waterTWellNames = new Dictionary<string, int>();
-            waterTWellNames.Add(ThWSSCommon.WaterPipeWellBlockName, 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.waterTubeWell, waterTWellNames));
-
-            //烟道留洞 - 块名称过滤
-            Dictionary<string, int> chimneyNames = new Dictionary<string, int>();
-            chimneyNames.Add(ThWSSCommon.FlueShaftBlockName, 2);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.flueWell, chimneyNames));
-
 
             //获取设备图块
             Dictionary<string, int> equipmentNames = new Dictionary<string, int>();
             equipmentNames.Add("AE-EQPM", 1);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.equipment, equipmentNames, true));
-
 
             //获取建筑标高图块
             Dictionary<string, int> buildingElevationNames = new Dictionary<string, int>();
@@ -176,5 +222,104 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             */
         }
 
+        private void InitModelSapaceBlock() 
+        {
+            //立管地漏改为从本地获取
+
+            //地漏 - 块名称过滤
+            Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
+            floorDrainNames.Add("地漏-AI", 2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames,false,true));
+
+            //冷凝水立管 - 块名称过滤
+            Dictionary<string, int> condensateRiserNames = new Dictionary<string, int>();
+            condensateRiserNames.Add("冷凝水立管-AI", 2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.condensateRiser, condensateRiserNames, false, true));
+
+            //屋面雨水立管 - 块名称过滤
+            var roofRiserNames = new Dictionary<string, int>();
+            roofRiserNames.Add("屋面雨水立管-AI", 2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.roofRainRiser, roofRiserNames, false, true));
+
+            //阳台立管 - 块名称过滤
+            var balconyRiserNames = new Dictionary<string, int>();
+            balconyRiserNames.Add("阳台立管-AI", 2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.balconyRiser, balconyRiserNames, false, true));
+
+            //污废合流立管
+            var swRaiserNames = new Dictionary<string, int>();
+            swRaiserNames.Add("污废合流立管-AI",2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.sewageWasteRiser,swRaiserNames, false, true));
+
+            //通气立管
+            var tlRaiseNames = new Dictionary<string, int>();
+            tlRaiseNames.Add("通气立管-AI",2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.ventRiser,tlRaiseNames, false, true));
+
+            //沉箱立管
+            var corRaiseNames = new Dictionary<string, int>();
+            corRaiseNames.Add("沉箱立管-AI",2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.caissonRiser, corRaiseNames, false, true));
+
+            //废水立管
+            var fRaiseNames = new Dictionary<string, int>();
+            fRaiseNames.Add("废水立管-AI",2);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.wastewaterRiser,fRaiseNames, false, true));
+
+            //拖把池 - 块名称过滤
+            var mopPoolNames = new Dictionary<string, int>();
+            GetVisitorDictionary(EnumEquipmentType.mopPool, ref mopPoolNames);
+            if(mopPoolNames.Count>0)
+                this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
+
+            //洗衣机 - 块名称过滤
+            Dictionary<string, int> washingMachineNames = new Dictionary<string, int>();
+            GetVisitorDictionary(EnumEquipmentType.washingMachine, ref washingMachineNames);
+            if (washingMachineNames.Count > 0)
+                this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.washingMachine, washingMachineNames));
+
+            //重力流雨水斗 - 块名称过滤
+            Dictionary<string, int> gravityRainBucketNames = new Dictionary<string, int>();
+            GetVisitorDictionary(EnumEquipmentType.gravityRainBucket, ref gravityRainBucketNames);
+            if (gravityRainBucketNames.Count > 0)
+                this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.gravityRainBucket, gravityRainBucketNames));
+
+            //侧入式雨水斗 - 块名称过滤
+            Dictionary<string, int> sideRainBucketNames = new Dictionary<string, int>();
+            GetVisitorDictionary(EnumEquipmentType.sideRainBucket, ref sideRainBucketNames);
+            if (sideRainBucketNames.Count > 0)
+                this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.sideRainBucket, sideRainBucketNames));
+        }
+
+        private void GetVisitorDictionary(EnumEquipmentType type,ref Dictionary<string,int> visirorDict) 
+        {
+            foreach (var keyValue in _layerNameConfig)
+            {
+                var thisType = -1;
+                switch (keyValue.Key) 
+                {
+                    case "侧入式雨水斗":
+                        thisType = (int)EnumEquipmentType.sideRainBucket;
+                        break;
+                    case "重力流雨水斗":
+                        thisType = (int)EnumEquipmentType.gravityRainBucket;
+                        break;
+                    case "拖把池":
+                        thisType = (int)EnumEquipmentType.mopPool;
+                        break;
+                    case "洗衣机":
+                        thisType = (int)EnumEquipmentType.washingMachine;
+                        break;
+                }
+                if (thisType != (int)type)
+                    continue;
+                foreach (var name in keyValue.Value) 
+                {
+                    if (visirorDict.Any(c => c.Key.ToUpper().Equals(name.ToUpper())))
+                        continue;
+                    visirorDict.Add(name,4);
+                }
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
         {
             if (entity is BlockReference reference)
             {                
-                if (reference.GetEffectiveName() == "室内消火栓平面")
+                if (reference.GetEffectiveName().Contains("室内消火栓平面"))
                 {
                     return true;
                 }

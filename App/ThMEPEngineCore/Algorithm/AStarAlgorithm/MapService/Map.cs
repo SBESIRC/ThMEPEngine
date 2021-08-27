@@ -268,8 +268,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             xValue = xValue <= 10 ? step : xValue;
             double yValue = Math.Abs(maxPt.Y - minPt.Y);
             yValue = yValue <= 10 ? step : yValue;
-            int _columns = Convert.ToInt32(Math.Ceiling(xValue / step)) + 2;
-            int _rows = Convert.ToInt32(Math.Ceiling(yValue / step)) + 2;
+            int _columns = Convert.ToInt32(Math.Ceiling(xValue / step)) + 3;
+            int _rows = Convert.ToInt32(Math.Ceiling(yValue / step)) + 3;
             columns = _columns;
             rows = _rows;
 

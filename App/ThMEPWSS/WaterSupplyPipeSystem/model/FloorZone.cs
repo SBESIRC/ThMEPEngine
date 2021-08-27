@@ -29,6 +29,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         public List<Point3dCollection> CreateRectList()
         {
             var rectls = new List<Point3dCollection>();
+
             if (LineXList.Count == 0)
             {
                 Point3d[] rect;
@@ -36,6 +37,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 rectls.Add(new Point3dCollection(rect));
                 return rectls;
             }
+            rectls.Add(new Point3dCollection(CreatePolyLine(StartPt.X, EndPt.X, StartPt.Y, EndPt.Y)));
             for (int i = 0; i < LineXList.Count + 1; i++)
             {
                 Point3d[] rect;

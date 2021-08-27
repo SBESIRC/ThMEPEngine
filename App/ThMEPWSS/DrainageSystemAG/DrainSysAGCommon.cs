@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPWSS.DrainageSystemAG.DataEngine;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
 
@@ -15,6 +14,7 @@ namespace ThMEPWSS.DrainageSystemAG
     class DrainSysAGCommon
     {
         public static readonly string BLOCKNAMEPREFIX = "TH-AGDRAIN-BLOCK";
+        public static readonly string NOTCOPYTAG = "NOTCOPY";
         public static List<Line> PolyLineToLines(Polyline polyline)
         {
             List<Line> lines = new List<Line>();
@@ -85,6 +85,23 @@ namespace ThMEPWSS.DrainageSystemAG
                 }
             }
             return dynBlockWidthLengths;
+        }
+        public static Point3d GetBlockGeometricCenter(BlockReference block,bool pointTo2d) 
+        {
+            if (null == block)
+                return Point3d.Origin;
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                //这里的块都是正方形，不用考虑朝向问题
+                var entities = new DBObjectCollection();
+                block.ExplodeWithVisible(entities);
+                var entitys = entities.Cast<Entity>().ToList();
+                var extents = entitys[0].GeometricExtents;
+                var centerPoint = entities.GeometricExtents().CenterPoint();
+                if (pointTo2d)
+                    centerPoint = new Point3d(centerPoint.X,centerPoint.Y,0);
+                return centerPoint;
+            }
         }
         public static List<TubeWellsRoomModel> GetTubeWellRoomRelation(List<RoomModel> allToilteKitchenRooms, List<RoomModel> tubeWellRooms)
         {
@@ -183,18 +200,15 @@ namespace ThMEPWSS.DrainageSystemAG
         }
 
 
-        public static List<EquipmentBlcokModel> GetFloorBlocks(FloorFramed floor, BlockReferenceDataEngine equipmentData, BasicElementEngine basicElementEngine)
+        public static List<EquipmentBlcokModel> GetFloorBlocks(List<EquipmentBlcokModel> tempBlocks, List<Entity> axisEntitys)
         {
             var resList = new List<EquipmentBlcokModel>();
-            if (null == equipmentData)
-                return resList;
             //根据轴网过滤元素
-            var tempBlocks = equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
-            if (null == tempBlocks || tempBlocks.Count < 1 || basicElementEngine == null)
+            //var tempBlocks = equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
+            if (null == tempBlocks || tempBlocks.Count < 1 || null == axisEntitys || axisEntitys.Count < 2)
                 return tempBlocks;
-            var axisEntitys = basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });
-            if (null == axisEntitys || axisEntitys.Count < 2)
-                return tempBlocks;
+            //var axisEntitys = basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });
+            
             var xAxisPoints = new List<Point3d>();
             var yAxisPoints = new List<Point3d>();
             foreach (var axis in axisEntitys)

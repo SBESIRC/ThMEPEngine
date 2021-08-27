@@ -37,7 +37,8 @@ namespace ThMEPLighting.Garage.Service
                 {
                     var preEdge = edges.Last();
                     var nextEdge = singleLinkPath.Path[j];
-                    if (ThGarageUtils.IsLessThan45Degree(preEdge.Edge.LineDirection(), nextEdge.Edge.LineDirection()))
+                    if (ThGarageUtils.IsLessThan45Degree(preEdge.Edge.StartPoint, preEdge.Edge.EndPoint,
+                                                         nextEdge.Edge.StartPoint, nextEdge.Edge.EndPoint))
                     {
                         edges.Add(nextEdge);
                     }

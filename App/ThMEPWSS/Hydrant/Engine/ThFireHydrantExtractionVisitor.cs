@@ -49,8 +49,6 @@ namespace ThMEPWSS.Engine
             {
                 var rec = blkref.GeometricExtents.ToRectangle();
                 rec.TransformBy(matrix);
-                var center = rec.GetPoint3dAt(0).GetMidPt(rec.GetPoint3dAt(2));
-                ThDrawTool.CreateSquare(center, 0.5);
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = blkref.GetEffectiveName(),
@@ -107,7 +105,7 @@ namespace ThMEPWSS.Engine
         {
             return true;
         }
-        private bool CheckBlockReferenceVisibility(BlockReference br)
+        public bool CheckBlockReferenceVisibility(BlockReference br)
         {
             if(br.GetEffectiveName().Contains("消火栓"))
             {
@@ -122,6 +120,22 @@ namespace ThMEPWSS.Engine
                 }
             }            
             return false;
+        }
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

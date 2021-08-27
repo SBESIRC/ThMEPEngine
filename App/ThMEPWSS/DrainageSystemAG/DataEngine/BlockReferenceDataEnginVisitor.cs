@@ -12,7 +12,8 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
     {
         protected Dictionary<string, int> blockNames;
         protected bool isLayerName;
-        public BlockReferenceDataEnginVisitor(Dictionary<string, int> bNames,bool isLayerName) 
+        protected bool isModelSpace;
+        public BlockReferenceDataEnginVisitor(Dictionary<string, int> bNames,bool isLayerName,bool modelSpace) 
         {
             blockNames = new Dictionary<string, int>();
             this.isLayerName = isLayerName;
@@ -25,6 +26,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                     this.blockNames.Add(name.Key, name.Value);
                 }
             }
+            this.isModelSpace = modelSpace;
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -85,9 +87,17 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                             //包含
                             isAdd = name.Contains(checkName);
                         }
-                        else
+                        else if (keyValue.Value == 2)
                         {
                             isAdd = name.Equals(checkName);
+                        }
+                        else if (keyValue.Value == 3)
+                        {
+                            isAdd = name.StartsWith(checkName);
+                        } 
+                        else if (keyValue.Value ==4) 
+                        {
+                            isAdd = name.EndsWith(checkName);
                         }
                     }
                 }
@@ -129,6 +139,19 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
             {
                 throw new NotSupportedException();
             }
+        }
+
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            if (!isModelSpace)
+                return base.IsBuildElementBlock(blockTableRecord);
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+                return false;
+            if (isModelSpace && blockTableRecord.IsFromExternalReference)
+                return false;
+            
+            return true;
         }
     }
 }

@@ -47,6 +47,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
+        /// 图块名称配置
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THWTKSB", CommandFlags.Modal)]
+        public void ThBlockNameConfigWithUI()
+        {
+            if(!uiBlockNameConfig.staticUIBlockName.IsVisible)
+                AcadApp.ShowModelessWindow(uiBlockNameConfig.staticUIBlockName);
+        }
+
+        /// <summary>
         /// 潜水泵布置
         /// </summary>
         [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]

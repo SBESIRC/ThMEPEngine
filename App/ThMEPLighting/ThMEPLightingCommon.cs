@@ -89,5 +89,9 @@ namespace ThMEPLighting
         public const string ROOM_TEXT_NAME_LAYER = "房间名称";                      //房间名称图层
         public const string DOOR_LAYER = "门窗框线";                                //门框线图层
         public const string CENTER_LINE_LAYER = "中心线";                           //中心线图层
+
+        //辅助、标识
+        public const string REVCLOUD_LAYER = "AI-圈注";           //圈注图层，云线使用图层
+        public static int EMGPILOTREVCLOUD_CORLOR_INDEX = 11;
     }
 }

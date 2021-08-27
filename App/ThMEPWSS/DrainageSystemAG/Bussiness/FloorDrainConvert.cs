@@ -1,13 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
 using ThMEPWSS.DrainageSystemAG.Models;
-using ThMEPWSS.DrainageSystemAG.Services;
 using ThMEPWSS.Model;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
@@ -18,6 +12,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     class FloorDrainConvert
     {
         static double _balconyWMachineFloorDrainDistance = 1000;//阳台洗衣机找地漏范围
+        public static string FloorDrainBlockDynName = "普通地漏";
+        public static string FloorDrainWMachineBlockDynName = "多通道地漏";
         public static List<CreateBlockInfo> FloorDrainConvertToBlock(string floorId,List<EquipmentBlockSpace> floorDrainBlcoks,List<EquipmentBlockSpace> balconyWMachine) 
         {
             var createBlocks = new List<CreateBlockInfo>();
@@ -34,7 +30,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     case EnumRoomType.Toilet:
                         //厨房,卫生间地漏 图层：W - DRAI - FLDR，图块：地漏平面，可见性：普通地漏
                         var tDrain = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockWastLayerName, item.blockPosition,item.enumEquipmentType,item.uid);
-                        tDrain.dymBlockAttr.Add("可见性", "普通地漏");
+                        tDrain.dymBlockAttr.Add("可见性", FloorDrainBlockDynName);
                         tDrain.spaceId = item.roomSpaceId;
                         createBlocks.Add(tDrain);
                         break;
@@ -42,7 +38,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //连廊地漏转换
                         //图层：雨水/冷凝水地漏 W-RAIN-EQPM，图块：地漏平面，可见性：普通地漏
                         var cDrain = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, item.blockPosition, item.enumEquipmentType, item.uid);
-                        cDrain.dymBlockAttr.Add("可见性", "普通地漏");
+                        cDrain.dymBlockAttr.Add("可见性", FloorDrainBlockDynName);
                         cDrain.spaceId = item.roomSpaceId;
                         createBlocks.Add(cDrain);
                         break;
@@ -55,7 +51,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //设备平台上的地漏有可能不生成，要进一步根据是否可以找到立管
                         var eqDrain = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, item.blockPosition, item.enumEquipmentType, item.uid);
                         eqDrain.spaceId = "";
-                        eqDrain.dymBlockAttr.Add("可见性", "普通地漏");
+                        eqDrain.dymBlockAttr.Add("可见性", FloorDrainBlockDynName);
                         createBlocks.Add(eqDrain);
                         break;
                 }
@@ -78,7 +74,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (first.blockPosition.DistanceTo(item.blockPosition) < _balconyWMachineFloorDrainDistance)
                     {
                         var block = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName,ThWSSCommon.Layout_FloorDrainBlockWastLayerName, first.blockPosition, first.enumEquipmentType, first.uid);
-                        block.dymBlockAttr.Add("可见性", "普通地漏");
+                        block.dymBlockAttr.Add("可见性", FloorDrainWMachineBlockDynName);
                         block.spaceId = first.roomSpaceId;
                         createBlocks.Add(block);
                         hisIds.Add(first.uid);
@@ -90,7 +86,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (hisIds.Any(c => c.Equals(item.uid)))
                     continue;
                 var block = new CreateBlockInfo(floorId,ThWSSCommon.Layout_FloorDrainBlockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, item.blockPosition, item.enumEquipmentType, item.uid);
-                block.dymBlockAttr.Add("可见性", "普通地漏");
+                block.dymBlockAttr.Add("可见性", FloorDrainBlockDynName);
                 block.spaceId = item.roomSpaceId;
                 createBlocks.Add(block);
             }

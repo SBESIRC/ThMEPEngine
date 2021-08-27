@@ -10,6 +10,8 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Engine;
+using DotNetARX;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -18,7 +20,7 @@ namespace ThMEPWSS.Hydrant.Data
         /// <summary>
         /// 点距离房间边线的最远距离
         /// </summary>
-        private double MaxDistanceToRoom = 200.0;
+        private double MaxDistanceToRoom = 150.0;
         public List<DBPoint> FireHydrants { get; set; }
         private List<ThIfcRoom> Rooms { get; set; }
         private Dictionary<DBPoint, Polyline> HydrantOutline { get; set; }
@@ -38,13 +40,21 @@ namespace ThMEPWSS.Hydrant.Data
             //后期再做远距离移动
             var hydrantExtractor = new ThFireHydrantRecognitionEngine(vistor);
             hydrantExtractor.Recognize(database, pts);
-            hydrantExtractor.RecognizeMS(database, pts);
+            //vistor.Results = new List<ThRawIfcDistributionElementData>();
+            //hydrantExtractor.RecognizeMS(database, pts);
+            //vistor.Results = new List<ThRawIfcDistributionElementData>();
+
             hydrantExtractor.Elements.ForEach(o =>
             {
                 var obb = o.Outline as Polyline;
                 var center = GetCenter(obb);
                 HydrantOutline.Add(new DBPoint(center), obb);
             });
+            //设置测试图层
+            //LayerTools.AddLayer(AcHelper.Active.Database, "111111");
+            //AcHelper.Active.Database.SetCurrentLayer("111111");
+            //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
+
             FireHydrants = HydrantOutline.Select(o => o.Key).ToList();
             if (FilterMode == FilterMode.Window)
             {
@@ -81,6 +91,8 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var roomInnerPts = PointInRoom(rooms); //获取在房间内的点           
             var isoldatedHydrants = FireHydrants.Where(o => !roomInnerPts.Contains(o)).ToList(); // 获取不在房间内的点
+            //DEBUG
+            var temp = new List<DBPoint>();
             isoldatedHydrants.ForEach(o =>
             {
                 var obb = HydrantOutline[o];
@@ -90,9 +102,10 @@ namespace ThMEPWSS.Hydrant.Data
                 {
                     var closestRoom = disDic.OrderBy(m => m.Value).First().Key;
                     var newPt = MovePtToRoom(o.Position, closestRoom);
-                    roomInnerPts.Add(new DBPoint(newPt));
+                    temp.Add(new DBPoint(newPt));
                 }
             });
+            roomInnerPts.AddRange(temp);
             FireHydrants = roomInnerPts; //更新消火栓点位
         }
         private List<DBPoint> PointInRoom(List<ThIfcRoom> rooms)

@@ -89,6 +89,13 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 foreach (var BlockInfo in dicBlockPoints)
                 {
                     string BlockName = BlockInfo.Value.BlockName;
+
+                    //特殊处理：旧块存在同属性Key值对应不同Value值情况出现，替换成张皓做的新块
+                    if (BlockName == "E-BFAS731")
+                    {
+                        BlockName = "E-BFAS731-1";
+                    }
+
                     if (!ImportBlockSet.Contains(BlockName))
                     {
                         acadDatabase.Database.ImportBlock(BlockName);

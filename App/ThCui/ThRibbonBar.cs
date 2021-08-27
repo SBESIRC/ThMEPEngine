@@ -429,6 +429,15 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THTCD_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
+            // 图块配置
+            row.AddNewButton("图块配置",
+                "天华图块配置",
+                "THWTKSB",
+                "天华图块配置",
+                "IDI_THCAD_THWTKSB_SMALL",
+                "IDI_THCAD_THWTKSB_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
             // 提取空间
             row.AddNewButton("提取空间",
                 "天华提取空间",

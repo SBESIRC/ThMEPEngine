@@ -446,6 +446,57 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THPPARTITION", CommandFlags.Modal)]
+        public void THPPARTITION()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetDistance("\n请输入距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                var engine = new ThPolygonPartitionMgd();
+                var serializer = GeoJsonSerializer.Create();
+                objs.Cast<Polyline>().ForEach(o =>
+                {
+                    var geos = new List<ThGeometry>();
+                    geos.Add(new ThGeometry()
+                    {
+                        Boundary = o,
+                    });
+                    var results = engine.Partition(ThGeoOutput.Output(geos), result2.Value);
+                    using (var stringReader = new StringReader(results))
+                    using (var jsonReader = new JsonTextReader(stringReader))
+                    {
+                        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                        foreach (var f in features)
+                        {
+                            if (f.Geometry is Polygon polygon)
+                            {
+                                acadDatabase.ModelSpace.Add(polygon.ToDbMPolygon());
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
         [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]
         public void TH2DVisiblityTest()
         {

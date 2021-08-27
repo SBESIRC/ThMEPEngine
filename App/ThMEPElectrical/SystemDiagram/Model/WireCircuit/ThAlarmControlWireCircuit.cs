@@ -464,19 +464,39 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         private List<Entity> DrawSpecialBlock15(int currentIndex)
         {
             List<Entity> result = new List<Entity>();
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["电动防火阀"] == 0)
+            bool HasFireDamper = this.fireDistrict.Data.BlockData.BlockStatistics["电动防火阀"] > 0;
+            bool Has70FireDamper = this.fireDistrict.Data.BlockData.BlockStatistics["70度电动防火阀"] > 0;
+            if (!HasFireDamper && !Has70FireDamper)
             {
                 result.Add(DrawStraightLine(currentIndex));
             }
             else
             {
                 double RightmostPosition = 0;
-                double BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "电动防火阀").AssociatedBlocks[0].Position.X - 150;
-                Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-                result.Add(Midline1);
-                RightmostPosition = BlockPosition + 300;
-                Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-                result.Add(Midline2);
+                double BlockPosition = 0;
+                if (HasFireDamper)
+                {
+                    BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "电动防火阀").Position.X - 150;
+                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline1);
+                    RightmostPosition = BlockPosition + 300;
+                    if (Has70FireDamper)
+                    {
+                        BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "70度电动防火阀").Position.X - 150;
+                        Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                        result.Add(Midline2);
+                        RightmostPosition = BlockPosition + 300;
+                    }
+                }
+                else
+                {
+                    BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "70度电动防火阀").Position.X - 150;
+                    Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                    result.Add(Midline1);
+                    RightmostPosition = BlockPosition + 300;
+                }
+                Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                result.Add(Midline3);
             }
             return result;
         }

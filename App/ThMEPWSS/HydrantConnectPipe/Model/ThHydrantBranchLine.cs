@@ -61,6 +61,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
             }
         }
+
         public void InsertPipeMark(AcadDatabase acadDatabase, string strMapScale)
         {
             string riserName = "";
@@ -75,10 +76,32 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 default:
                     break;
             }
-            var lines = BranchPolyline.ToLines();
+
+            List<Line> lines = BranchPolyline.ToLines();
+
+            while (!InsertPipeMart(acadDatabase, riserName, lines))
+            {
+                if (lines.Count != 0)
+                {
+                    lines.RemoveAt(lines.Count - 1);
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
+        private bool InsertPipeMart(AcadDatabase acadDatabase, string riserName, List<Line> lines)
+        {
             if (lines.Count != 0)
             {
                 var line = lines.Last();
+                if (line.Length < 560)
+                {
+                    return false;
+                }
+
                 var position = line.GetCenter();
                 var vector = line.EndPoint.GetVectorTo(line.StartPoint).GetNormal();
                 var refVector = new Vector3d(0, 0, 1);
@@ -114,7 +137,13 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                         }
                     }
                 }
+                return true;
             }
+            else
+            {
+                return false;
+            }
+
         }
         private bool InsertValve(AcadDatabase acadDatabase, List<Line> lines)
         {

@@ -110,7 +110,34 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 ClearPolylineInnerBlock(polyline, originTransformer, ThMEPLightingCommon.EmgLightLayerName, item);
             }
         }
+        public static void ClearExtractRevCloud(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer,int colorId)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line = acadDatabase.ModelSpace
+                      .OfType<Polyline>()
+                      .Where(o => o.Layer == LayerName);
 
+                List<Polyline> lineList = line.Select(x => x.WashClone()).Cast<Polyline>().ToList();
+                var delPlines = new List<Polyline>();
+                foreach (Polyline pl in line)
+                {
+                    if (pl.ColorIndex != colorId)
+                        continue;
+                    var plTrans = pl.WashClone() as Polyline;
+                    transformer.Transform(plTrans);
+                    if (bufferFrame.Contains(plTrans))
+                        delPlines.Add(pl);
+                }
+                delPlines.ForEachDbObject(c => objs.Add(c));
+                foreach (Entity spray in objs)
+                {
+                    spray.UpgradeOpen();
+                    spray.Erase();
+                }
+            }
+        }
         public static void ClearEFIExitPilotLamp(this Polyline polyline, ThMEPOriginTransformer originTransformer) 
         {
             

@@ -19,7 +19,6 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
 
             InitModelSpaceLayerFilters();
             InitExternalFilters();
-
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 ThBasicElementExtractor modelSpaceExtor = new ThBasicElementExtractor(EnumLoadDataSource.ModelSapce);

@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,15 @@ using System.Text.RegularExpressions;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using ThMEPWSS.Uitl;
+using ThMEPWSS.WaterSupplyPipeSystem;
+
 namespace ThMEPWSS.PressureDrainageSystem.Utils
 {
     public class PressureDrainageUtils
@@ -729,6 +734,33 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 if (cond_found == 0) return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// 创建楼层边界点集
+        /// </summary>
+        /// <param name="elements"></param>
+        /// <returns></returns>
+        public static List<List<Point3dCollection>> CreateFloorAreaList(List<ThIfcSpatialElement> elements)//创建所有楼层的分区列表
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            var FloorAreaList = new List<List<Point3dCollection>>();
+            foreach (var obj in elements)//遍历楼层
+            {
+                if (obj is ThStoreys)
+                {
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (!br.IsDynamicBlock) continue;
+                    if (sobj.StoreyNumber.Trim().StartsWith("B"))
+                    {
+                        var rectList = ThWCompute.CreateRectList(sobj);
+                        FloorAreaList.Add(rectList);//分区的多段线添加
+                    }
+                }
+            }
+
+            return FloorAreaList;
         }
     }
 }

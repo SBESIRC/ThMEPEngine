@@ -61,10 +61,10 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30"></RowDefinition>
-                    <RowDefinition Height="30"></RowDefinition>
+                    <!--<RowDefinition Height="30"></RowDefinition>-->
                 </Grid.RowDefinitions>
-                <CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>
-                <CheckBox Grid.Row="1" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
+                <!--<CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>-->
+                <CheckBox Grid.Row="0" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
             </Grid>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">

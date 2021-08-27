@@ -48,7 +48,13 @@ namespace ThMEPWSS.Command
                 MessageBox.Show("不存在有效分组，请重新读取");
                 return;
             }
-            var areaIndex = Convert.ToInt32(tmpUiConfigs.SelectRadionButton.Content.Split('组')[1]) - 1;//读取分区
+            var insertPt = tmpUiConfigs.InsertPt;
+            int areaIndex = 0;
+            if (tmpUiConfigs.SelectRadionButton.Content.Contains("组"))
+            {
+                areaIndex = Convert.ToInt32(tmpUiConfigs.SelectRadionButton.Content.Split('组')[1]) + tmpUiConfigs.StartNum - 1;//读取分区
+            }
+             
             var setViewModel = tmpUiConfigs.SetViewModel;
 
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
@@ -152,8 +158,7 @@ namespace ThMEPWSS.Command
             using (Active.Document.LockDocument())//非模态框不能直接操作CAD，需要加锁
             using (var acadDatabase = AcadDatabase.Active()) 
             {
-                var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
-                var insertPt = Active.Editor.GetPoint(insertOpt).Value;
+                
 
                 var notExistFloor = new List<int>();//不存在的楼层号列表
                 for (int i = 0; i < floorNumbers; i++)

@@ -23,19 +23,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var cost = ThDrainageSDShortestPathService.createGraphForArea(roomList, out var allPtGraph);
 
             ////debug drawing
-            //int inf = 1000000;
-            //for (int i = 0; i < cost.GetLength(0); i++)
-            //{
-            //    for (int j = i; j < cost.GetLength(0); j++)
-            //    {
-            //        if (cost[i, j] > 0 && cost[i, j] < inf)
-            //        {
-            //            var l = new Line(allPtGraph[i], allPtGraph[j]);
-            //            DrawUtils.ShowGeometry(l, "l2graph");
-            //        }
-            //    }
-            //}
-            ///////
+            int inf = 1000000;
+            for (int i = 0; i < cost.GetLength(0); i++)
+            {
+                for (int j = i; j < cost.GetLength(0); j++)
+                {
+                    if (cost[i, j] > 0 && cost[i, j] < inf)
+                    {
+                        var l = new Line(allPtGraph[i], allPtGraph[j]);
+                        DrawUtils.ShowGeometry(l, "l2graph");
+                    }
+                }
+            }
+            /////
 
             //每一个点 找最短路径
             var ptDistDict = shortestPathForEachPt(roomList, allPtGraph, cost, startPt);
@@ -88,8 +88,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
                                 dist = dist + cost[path[p - 1], path[p]];
                                 l.AddVertexAt(l.NumberOfVertices, allPtGraph[path[p]].ToPoint2d(), 0, 0, 0);
                             }
+
                             ////debug drawing
-                            //DrawUtils.ShowGeometry(l, "l3shortPath", 20);
+                            DrawUtils.ShowGeometry(l, "l3shortPath", 20);
 
                             ptDistDict.Add(room.toilet[i].SupplyCoolOnBranch[j], dist);
                         }

@@ -25,6 +25,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         //壁装的在线的那一侧
         public EmgWallLight(Polyline outPolyline,IndicatorLight targetInfo, List<Polyline> columns, List<Polyline> walls, double lineMergAngle,double maxSpace) 
         {
+            _lightSpace = maxSpace;
             _targetInfo = targetInfo;
             _wallLightMergeAngle = lineMergAngle;
             _maxPolyline = outPolyline;
@@ -117,7 +118,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 }
                 var leftUnConform = leftLights == null || leftLights.Count < 1 || LineWallLightOverSpaceCount(lineInfo.line, leftLights) > 0;
                 var rightUnConform = rightLights == null || rightLights.Count < 1 || LineWallLightOverSpaceCount(lineInfo.line, rightLights) > 0;
-
                 var realSideDir = leftDir;
                 if (lineInfo.layoutLineSide == null || lineInfo.layoutLineSide.IsEqualTo(zero))
                 {
@@ -178,19 +178,19 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="lineInfo"></param>
         /// <param name="inWalls"></param>
         /// <param name="inColumns"></param>
-        public List<LightLayout> GetLightLayoutPlan(LineGraphNode lineInfo, List<Polyline> inWalls, List<Polyline> inColumns)
+        public List<LightLayout> GetLightLayoutPlan(LineGraphNode lineInfo,Line checkLine, List<Polyline> inWalls, List<Polyline> inColumns)
         {
             List<LightLayout> lightLayouts = new List<LightLayout>();
             if ((null == inColumns || inColumns.Count < 1) && (null == inWalls || inWalls.Count < 1))
                 return lightLayouts;
-            Point3d sp = lineInfo.line.StartPoint;
+            Point3d sp = checkLine.StartPoint;
             var sideDir = lineInfo.layoutLineSide;
-            var lineLength = lineInfo.line.Length;
+            var lineLength = checkLine.Length;
             LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _lineSideSpaceExt);
             int count = (int)Math.Ceiling(lineLength / _lightSpace);
             double step = lineLength / count;
             step = _lightSpace;
-            var startPt = WallLineStartPoint(lineInfo, inWalls, inColumns);
+            var startPt = WallLineStartPoint(lineInfo,checkLine, inWalls, inColumns);
             var endPoint = startPt + lineInfo.lineDir.MultiplyBy(step);
 
             var pointDirs = new Dictionary<Point3d, Vector3d>();
@@ -204,8 +204,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 bool beBreak = false;
                 if (startPt.DistanceTo(sp) >= lineLength - 100)
                 {
-                    startPt = lineInfo.line.EndPoint - lineInfo.lineDir.MultiplyBy(100);
-                    endPoint = lineInfo.line.EndPoint;
+                    startPt = checkLine.EndPoint - lineInfo.lineDir.MultiplyBy(100);
+                    endPoint = checkLine.EndPoint;
                     beBreak = true;
                 }
                 pts.Add(startPt);
@@ -223,7 +223,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     foreach (var item in temp)
                     {
                         double dis = (item.Key - sp).DotProduct(sideDir);
-                        Point3d pointInLine = EmgPilotLampUtil.PointToLine(item.Key, lineInfo.line);
+                        Point3d pointInLine = EmgPilotLampUtil.PointToLine(item.Key, checkLine);
                         dis = pointInLine.DistanceTo(startPt);
                         if (dis > 10 && dis < step + 100 && dis > maxDis)
                             maxDis = dis;
@@ -233,7 +233,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         //终点优化判断，防止终点处过近
                         if (beBreak && pointDirs.Any(c => c.Key.DistanceTo(item.Key) < 3500))
                             continue;
-                        if ((pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(lineInfo.line.EndPoint)) > lineLength + 500 * 2 / 3)
+                        if ((pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(checkLine.EndPoint)) > lineLength + 500 * 2 / 3)
                             continue;
                         if (isAdd)
                         {
@@ -250,7 +250,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (startPt.DistanceTo(sp) >= lineLength)
                     startPt = endPoint;
                 if (endPoint.DistanceTo(sp) >= lineLength)
-                    endPoint = lineInfo.line.EndPoint + lineInfo.lineDir.MultiplyBy(100);
+                    endPoint = checkLine.EndPoint + lineInfo.lineDir.MultiplyBy(100);
                 if (beBreak)
                     break;
             }
@@ -267,16 +267,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             return lightLayouts;
         }
-        private Point3d WallLineStartPoint(LineGraphNode lineInfo, List<Polyline> inWalls, List<Polyline> inColumns)
+        private Point3d WallLineStartPoint(LineGraphNode lineInfo,Line checkLine, List<Polyline> inWalls, List<Polyline> inColumns)
         {
-            Point3d sp = lineInfo.line.StartPoint;
+            Point3d sp = checkLine.StartPoint;
             var sideDir = lineInfo.layoutLineSide;
-            var lineLength = lineInfo.line.Length;
+            var lineLength = checkLine.Length;
             LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _lineSideSpaceExt);
             var startPt = sp - lineInfo.lineDir.MultiplyBy(500);
             var endPoint = startPt + lineInfo.lineDir.MultiplyBy(_lightSpace / 2);
             //起点优化，中间按间距计算，起点根据剩余距离计算
-            double startSpace = (lineInfo.line.Length % _lightSpace) / 2;
+            double startSpace = (checkLine.Length % _lightSpace) / 2;
             var pts = new List<Point3d>();
             Line tempLine = new Line(startPt, endPoint);
             GetSideWallColumns(tempLine, sideDir, _lineSideSpaceExt, inColumns, inWalls, out List<Polyline> newInWalls, out List<Polyline> newInColumns);
@@ -540,16 +540,18 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var inputLineInfo = new LineGraphNode(lineNode.line);
                 inputLineInfo.layoutLineSide = leftDir;
                 inputLineInfo.nodeDirections.AddRange(lineNode.nodeDirections);
-                GetSideWallColumns(inputLineInfo.line, leftDir, _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
-                inColumns = ReomveColumns(inputLineInfo.line, leftDir, inColumns, inWalls);
-                var leftLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
+                var leftLine = LineExtend(inputLineInfo.line, lines, leftDir);
+                GetSideWallColumns(leftLine, leftDir, _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
+                inColumns = ReomveColumns(leftLine, leftDir, inColumns, inWalls);
+                var leftLights = GetLightLayoutPlan(inputLineInfo,leftLine, inWalls, inColumns);
                 if (null != leftLights && leftLights.Count > 0)
                     lineNode.leftWallLayouLight.AddRange(leftLights);
 
                 inputLineInfo.layoutLineSide = leftDir.Negate();
-                GetSideWallColumns(inputLineInfo.line, leftDir.Negate(), _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
-                inColumns = ReomveColumns(inputLineInfo.line, leftDir.Negate(), inColumns, inWalls);
-                var rightLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
+                var rightLine = LineExtend(inputLineInfo.line, lines, leftDir.Negate());
+                GetSideWallColumns(rightLine, leftDir.Negate(), _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
+                inColumns = ReomveColumns(rightLine, leftDir.Negate(), inColumns, inWalls);
+                var rightLights = GetLightLayoutPlan(inputLineInfo,rightLine, inWalls, inColumns);
                 if (null != rightLights && rightLights.Count > 0)
                     lineNode.rightWallLayoutLight.AddRange(rightLights);
             }
@@ -634,22 +636,75 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             return otherNodes;
         }
 
-        int LineWallLightOverSpaceCount(Line line,List<LightLayout> lightLayouts) 
+        int LineWallLightOverSpaceCount(Line line,List<LightLayout> lightLayouts,bool isRealPoint=false) 
         {
-            var linePoints = LigthPoint(line, lightLayouts) ;
+            var linePoints = LigthPoint(line, lightLayouts, isRealPoint) ;
             int overSpaceCount = 0;
             for (int i = 0; i < linePoints.Count - 1; i++)
             {
                 var sp = linePoints[i];
                 var ep = linePoints[i + 1];
-                if (sp.DistanceTo(ep) < _lightSpace + 50)
+                if (sp.DistanceTo(ep) < _lightSpace + 100)
                     continue;
                 overSpaceCount += 1;
             }
             return overSpaceCount;
         }
 
-
+        Line LineExtend(Line line,List<Line> targetLines,Vector3d sideDir) 
+        {
+            var lineSp = line.StartPoint;
+            var lineEp = line.EndPoint;
+            var lineDir = (lineEp - lineSp).GetNormal();
+            bool isEnd = false;
+            Line connectLine = null;
+            foreach (var li in targetLines) 
+            {
+                var liSp = li.StartPoint;
+                var liEp = li.EndPoint;
+                if ((liSp.DistanceTo(lineSp) < 1 && liEp.DistanceTo(lineEp) < 1) || (liEp.DistanceTo(lineSp) < 1 && liSp.DistanceTo(lineEp) < 1))
+                    continue;
+                if (liSp.DistanceTo(lineSp) < 1)
+                {
+                    connectLine = li;
+                    break;
+                }
+                else if (liEp.DistanceTo(lineSp) < 1)
+                {
+                    connectLine = new Line(liEp, liSp);
+                    break;
+                }
+                else if (liSp.DistanceTo(lineEp) < 1)
+                {
+                    connectLine = li;
+                    isEnd = true;
+                    break;
+                }
+                else if (liEp.DistanceTo(lineEp) < 1) 
+                {
+                    connectLine  = new Line(liEp, liSp);
+                    isEnd = true;
+                    break;
+                }
+            }
+            if (connectLine == null)
+                return line;
+            var connectLineDir = connectLine.LineDirection();
+            var dot = connectLineDir.DotProduct(sideDir);
+            if (dot > -Math.Cos(Math.PI * 70.0 / 180.0))
+                return line;
+            if (dot < -Math.Cos(Math.PI * 20.0 / 180.0))
+                return line;
+            if (isEnd)
+            {
+                lineEp = lineEp + lineDir.MultiplyBy(2000);
+            }
+            else
+            {
+                lineSp = lineSp - lineDir.MultiplyBy(2000);
+            }
+            return new Line(lineSp,lineEp);
+        }
         Vector3d GetLineSideToLayoutLight(LineGraphNode lineInfo, List<LightLayout> leftLights,List<LightLayout> rightLights) 
         {
             var dir = lineInfo.lineDir;
@@ -738,9 +793,9 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             return realDir;
         }
-        List<Point3d> LigthPoint(Line line, List<LightLayout> lightLayouts) 
+        List<Point3d> LigthPoint(Line line, List<LightLayout> lightLayouts,bool isRealPoint=false) 
         {
-            List<Point3d> linePoints = lightLayouts.Select(c => c.linePoint).ToList();
+            List<Point3d> linePoints = isRealPoint? lightLayouts.Select(c=>c.pointInOutSide).ToList() :lightLayouts.Select(c => c.linePoint).ToList() ;
             Point3d lineSp = line.StartPoint;
             Point3d lineEp = line.EndPoint;
             bool spAdd = true, epAdd = true;

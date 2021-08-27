@@ -22,12 +22,16 @@ namespace ThMEPWSS.Diagram.ViewModel
 {
     public class DrainageViewModel : NotifyPropertyChangedBase
     {
+        public Point3d InsertPt;//插入点
+        public int StartNum;
         public Point3dCollection SelectedArea;//框定区域
         public List<List<Point3dCollection>> FloorAreaList;//楼层区域
         public List<List<int>> FloorNumList;//楼层列表
 
         public DrainageViewModel()
         {
+            InsertPt = new Point3d();
+            StartNum = 1;
         }
 
         public void CreateFloorFraming()
@@ -74,7 +78,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 if (rooms.Count != 0)
                 {
                     var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.Select(o => o.Boundary).ToCollection());
-                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);
                 }
                 else
                 {
@@ -82,7 +86,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     roomMarkEngine.Recognize(acadDatabase.Database, SelectedArea); //来源于参照
                     var newRooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
                     var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());
-                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                    AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);
                 }
 
                 DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();
@@ -90,6 +94,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 {
                     DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true });
                 }
+                DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "整层", GroupName = "group", IsChecked = true });
             }
         }
 
@@ -187,7 +192,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     if (rooms.Count != 0)
                     {
                         var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.Select(o => o.Boundary).ToCollection());
-                        AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                        AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);
 
                     }
                     else
@@ -197,7 +202,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                         roomMarkEngine.Recognize(acadDatabase.Database, SelectedArea); //来源于参照
                         var newRooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
                         var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());
-                        AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex);
+                        AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);
                     }
 
                     DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();

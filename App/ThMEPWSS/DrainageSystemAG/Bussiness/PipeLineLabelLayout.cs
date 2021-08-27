@@ -27,10 +27,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _pipeXAxisGroupDistance = 10;//Y轴分组是X轴方向上允许的误差范围
 
         private double _pipeLabelNearDistance = 500;//文字距离立管最短距离
-        private double _pipeLabelMaxDistance = 2000;//文字距离立管最大距离
-        private double _pipeLavelDirectionMoveStep = 200;//文字沿着线方向移动步长
+        private double _pipeLabelMaxDistance = 3500;//文字距离立管最大距离
+        private double _pipeLavelDirectionMoveStep = 300;//文字沿着线方向移动步长
         private double _pipeLabelXDirectionMaxDistance = 200;//文字X轴方向距离主线的最大距离
-        private double _pipeLalelXDirectionMoveStep = 100;//文字沿着X轴方向移动的步长
+        private double _pipeLalelXDirectionMoveStep = 200;//文字沿着X轴方向移动的步长
 
         private double _labelTextYSpace = 150;
         private double _labelTextXSpace = 100;
@@ -68,27 +68,33 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             ClearObstacle();
             _thisFloorPipes.Clear();
             createBasicElements.Clear();
+            var pipeTags = new List<string>
+            {
+                "Y1L","Y2L", "NL","FL","PL","TL","DL"
+            };
             foreach (var cBlock in thisFloorBlocks)
             {
                 if (!cBlock.floorId.Equals(layerFloor.floorUid))
                     continue;
-                if (cBlock.equipmentType != EnumEquipmentType.floorDrain &&
-                    cBlock.equipmentType != EnumEquipmentType.riser &&
-                    cBlock.equipmentType != EnumEquipmentType.balconyRiser &&
-                    cBlock.equipmentType != EnumEquipmentType.condensateRiser &&
-                    cBlock.equipmentType != EnumEquipmentType.roofRainRiser)
-                    continue;
+                bool isAddToObstacle = false;
                 //将地漏，立管加入到避让信息中,这里认为是矩形，这个时候没有在图纸中生成，没有拿到具体的大小
-                var point = cBlock.createPoint;
-                point = point - Vector3d.XAxis.MultiplyBy(150);
-                point = point - Vector3d.YAxis.MultiplyBy(150);
-                var pline = TextOutPolyLine(point, Vector3d.XAxis, 300, Vector3d.YAxis, 300);
-                _obstacleEntities.Add(pline);
-                if (string.IsNullOrEmpty(cBlock.tag))
-                    continue;
-                if (cBlock.tag.ToUpper().Equals("Y1L") || cBlock.tag.ToUpper().Equals("Y2L") || cBlock.tag.ToUpper().Equals("NL")
-                    || cBlock.tag.ToUpper().Equals("FL") || cBlock.tag.ToUpper().Equals("PL") || cBlock.tag.ToUpper().Equals("TL") || cBlock.tag.ToUpper().Equals("DL"))
+                if (cBlock.equipmentType == EnumEquipmentType.floorDrain) 
+                {
+                    isAddToObstacle = true;
+                }
+                if (!string.IsNullOrEmpty(cBlock.tag) && pipeTags.Any(c => c.Equals(cBlock.tag)))
+                {
+                    isAddToObstacle = true;
                     _thisFloorPipes.Add(cBlock);
+                }
+                if (isAddToObstacle) 
+                {
+                    var point = new Point3d(cBlock.createPoint.X, cBlock.createPoint.Y, cBlock.createPoint.Z);
+                    point = point - Vector3d.XAxis.MultiplyBy(150);
+                    point = point - Vector3d.YAxis.MultiplyBy(150);
+                    var pline = TextOutPolyLine(point, Vector3d.XAxis, 300, Vector3d.YAxis, 300);
+                    _obstacleEntities.Add(pline);
+                }
             }
             if (null != thisBasicElement && thisBasicElement.Count > 0) 
             {
@@ -746,7 +752,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         {
             this.createBlockUid = blockInfo.uid;
             this.pipeAttrTag = blockInfo.tag;
-            this.pipeCenterPoint = blockInfo.createPoint;
+            this.pipeCenterPoint = new Point3d(blockInfo.createPoint.X, blockInfo.createPoint.Y, blockInfo.createPoint.Z);
             this.pipeNumText = numText;
         }
     }

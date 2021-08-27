@@ -5,10 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.DrainageSystemAG.DataEngineVisitor;
 using ThMEPWSS.Model;
 
@@ -21,18 +17,18 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     {
         /// <summary>
         /// 块名称包含或=字符串的
-        /// 1包含，2等于
+        /// 1包含，2等于,3 startWith,4 Endwith;
         /// </summary>
         public Dictionary<string, int> blockNames { get; }
         public EnumEquipmentType enumEquipmentType { get; }
         public BlockReferenceDataEnginVisitor equipmentDataVisitor { get; }
         public bool isLayerName { get; }
-        public EquipmentBlcokVisitorModel(EnumEquipmentType type, Dictionary<string, int> bNames = null,bool islayerName=false)
+        public EquipmentBlcokVisitorModel(EnumEquipmentType type, Dictionary<string, int> bNames = null,bool islayerName=false,bool isModelSpace=false)
         {
             this.blockNames = new Dictionary<string, int>();
             this.enumEquipmentType = type;
             this.isLayerName = isLayerName;
-            this.equipmentDataVisitor = new BlockReferenceDataEnginVisitor(bNames,islayerName)
+            this.equipmentDataVisitor = new BlockReferenceDataEnginVisitor(bNames,islayerName, isModelSpace)
             {
                 LayerFilter = new HashSet<string>(CurveXrefLayers()),
             };
@@ -95,8 +91,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         {
             this.equmBlockReference = block;
             this.enumEquipmentType = equipmentType;
-            this.blockPosition = new Point3d(block.Position.X, block.Position.Y, 0);
-            this.blockCenterPoint = block.GeometricExtents.ToNTSPolygon().EnvelopeInternal.Centre.ToAcGePoint3d();
+            //var centerPoint = block.GeometricExtents.ToNTSPolygon().EnvelopeInternal.Centre.ToAcGePoint3d();
+            var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block, true);
+            centerPoint = new Point3d(centerPoint.X, centerPoint.Y, 0);
+            this.blockPosition = centerPoint; //new Point3d(block.Position.X, block.Position.Y, 0);
+            this.blockCenterPoint = centerPoint;
             this.roomSpaceId = spaceId;
             this.enumRoomType = EnumRoomType.Other;
             this.uid = Guid.NewGuid().ToString();
@@ -185,6 +184,26 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// </summary>
         [Description("拖把池")]
         mopPool =9,
+        /// <summary>
+        /// 通气立管
+        /// </summary>
+        [Description("通气立管")]
+        ventRiser = 10,
+        /// <summary>
+        /// 废水立管
+        /// </summary>
+        [Description("废水立管")]
+        wastewaterRiser =11,
+        /// <summary>
+        /// 沉箱立管
+        /// </summary>
+        [Description("沉箱立管")]
+        caissonRiser =12,
+        /// <summary>
+        /// 污废合流立管
+        /// </summary>
+        [Description("污废合流立管")]
+        sewageWasteRiser =13,
         /// <summary>
         /// 水管井
         /// </summary>

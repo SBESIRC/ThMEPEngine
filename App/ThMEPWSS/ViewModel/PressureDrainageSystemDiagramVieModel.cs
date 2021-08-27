@@ -9,10 +9,9 @@ using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Command;
-using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
-using Dreambuild.AutoCAD;
 using ThMEPWSS.WaterSupplyPipeSystem;
+using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
@@ -97,7 +96,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     return;
                 }
                 FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
-                FloorAreaList = ThWCompute.CreateFloorAreaList(storeysRecEngine.Elements);
+                FloorAreaList = CreateFloorAreaList(storeysRecEngine.Elements);
                 undpdsfloorListDatas.Reverse();
                 return;
             }
