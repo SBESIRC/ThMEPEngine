@@ -18,6 +18,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
         readonly double moveLineDis = 150;
         public List<Polyline> CreatePipe(List<Polyline> connectPolys, List<BlockReference> broadcasts)
         {
+            //return connectPolys;
             //计算小支管信息
             Dictionary<Polyline, List<Polyline>> connectPtInfo = new Dictionary<Polyline, List<Polyline>>();
             List<BroadcastModel> broadcastModel = broadcasts.Select(x => new BroadcastModel(x)).ToList();
@@ -112,8 +113,11 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 }
                 else
                 {
+                    var resPt = ConenctAnglePt(new Line(pts.First(), pts.Last()), connectPt, Math.Cos(Math.PI * (20.0 / 180)));
                     resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
-                    resPoly.AddVertexAt(1, pts.First().ToPoint2D(), 0, 0, 0);
+                    resPoly.AddVertexAt(1, resPt.ToPoint2D(), 0, 0, 0);
+                    //resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
+                    //resPoly.AddVertexAt(1, pts.First().ToPoint2D(), 0, 0, 0);
                 }
             }
             else
@@ -151,8 +155,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
         private Point3d CalConenctPt(Line line, BroadcastModel broadcast)
         {
             List<Point3d> connectPts = new List<Point3d>() { broadcast.RightConnectPt, broadcast.LeftConnectPt };
-            var rightDis = line.GetClosestPointTo(broadcast.RightConnectPt, true).DistanceTo(broadcast.RightConnectPt);
-            var leftDis = line.GetClosestPointTo(broadcast.LeftConnectPt, true).DistanceTo(broadcast.LeftConnectPt);
+            var rightDis = line.GetClosestPointTo(broadcast.RightConnectPt, false).DistanceTo(broadcast.RightConnectPt);
+            var leftDis = line.GetClosestPointTo(broadcast.LeftConnectPt, false).DistanceTo(broadcast.LeftConnectPt);
             var connectPt = rightDis > leftDis ? broadcast.LeftConnectPt : broadcast.RightConnectPt;
             var minDis = rightDis > leftDis ? leftDis : rightDis;
             if (Math.Abs(rightDis - leftDis) < 10)
@@ -381,6 +385,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         private Polyline CreateNewConnectLine(Polyline poly, Line longetLine, Point3d pt, Point3d connectPt, bool isMove)
         {
+            if (poly.Length - longetLine.Length < 10)
+            {
+                pt = connectPt;
+            }
             Point3d movePt = longetLine.StartPoint.DistanceTo(pt) < longetLine.EndPoint.DistanceTo(pt) ? longetLine.StartPoint : longetLine.EndPoint;
             Point3d moveConnectPt = poly.StartPoint.DistanceTo(connectPt) < poly.EndPoint.DistanceTo(connectPt) ? poly.StartPoint : poly.EndPoint;
 
@@ -391,16 +399,19 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 pt = pt + moveDir * 100;
             }
             List<Point3d> pts = new List<Point3d>();
-            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+            for (int i = 0; i < poly.NumberOfVertices; i++)
             {
                 var polyPt = poly.GetPoint3dAt(i);
                 if (polyPt.IsEqualTo(movePt, new Tolerance(5, 5)))
                 {
                     polyPt = pt;
                 }
+                if (polyPt.IsEqualTo(moveConnectPt, new Tolerance(5, 5)))
+                {
+                    polyPt = connectPt;
+                }
                 pts.Add(polyPt);
             }
-            pts.Add(connectPt);
 
             Polyline polyline = new Polyline();
             for (int i = 0; i < pts.Count; i++)
