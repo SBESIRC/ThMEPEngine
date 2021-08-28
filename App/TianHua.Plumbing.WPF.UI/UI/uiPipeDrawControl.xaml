@@ -46,7 +46,7 @@
                 <Button x:Name="btnBalconyCondensateFloorDrain" Content="阳台+冷凝+地漏" Click="btnBalconyCondensateFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnRoomBalconyFloorDrain" Content="屋雨+阳台+地漏" Click="btnRoomBalconyFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnBalconyFloorDrain" Content="阳台+地漏" Click="btnBalconyFloorDrain_Click" Margin="0,0,0,5"/>
-                <Button x:Name="btnSewageWasteFloorDrain" Content="污废+地漏" Click="btnSewageWasteFloorDrain_Click" Margin="0,0,0,5"/>
+                <Button x:Name="btnSewageWasteFloorDrain" Content="污废+通气" Click="btnSewageWasteFloorDrain_Click" Margin="0,0,0,5"/>
                 <Button x:Name="btnWasteVentilateSewageWaste" Content="废水+通气+污废" Click="btnWasteVentilateSewageWaste_Click" Margin="0,0,0,5"/>
             </StackPanel>
         </StackPanel>
