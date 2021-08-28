@@ -92,8 +92,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
             this.equmBlockReference = block;
             this.enumEquipmentType = equipmentType;
             //var centerPoint = block.GeometricExtents.ToNTSPolygon().EnvelopeInternal.Centre.ToAcGePoint3d();
-            var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block, true);
-            centerPoint = new Point3d(centerPoint.X, centerPoint.Y, 0);
+            var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block);
             this.blockPosition = centerPoint; //new Point3d(block.Position.X, block.Position.Y, 0);
             this.blockCenterPoint = centerPoint;
             this.roomSpaceId = spaceId;
