@@ -23,7 +23,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 {
                     case EnumEquipmentType.caissonRiser:
                         //沉箱立管
-                        dn = SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString();
+                        dn = SetServicesModel.Instance.caissonRiserPipeDiameter.ToString();
                         tag = "DL";
                         layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
                         break;
