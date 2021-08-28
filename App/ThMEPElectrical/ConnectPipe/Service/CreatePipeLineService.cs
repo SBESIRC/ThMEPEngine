@@ -276,18 +276,25 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     }
                     foreach (var polyInfo in intersectPolys)
                     {
+                        pts.Clear();
                         circle.IntersectWith(polyInfo.Key, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                         if (pts.Count > 0)
                         {
                             var secPoly = CreateNewConnectLine(polyInfo.Key, longestLine[polyInfo.Key], pts[0], connectPt, false);
                             polylines.Add(secPoly);
-                        }
-                        else
-                        {
-                            resPolys.Add(polyInfo.Key);
+                            polylines.Remove(polyInfo.Key);
+                            //resPolys.Add(secPoly);
                         }
                     }
                     polylines.Add(firPoly);
+                    //resPolys.Add(firPoly);
+                    //using (AcadDatabase db = AcadDatabase.Active())
+                    //{
+                    //    for (int i = 8; i < polylines.Count; i++)
+                    //    {
+                    //        db.ModelSpace.Add(polylines[i]);
+                    //    }
+                    //}
                 }
                 else
                 {
@@ -393,20 +400,16 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 pt = pt + moveDir * 100;
             }
             List<Point3d> pts = new List<Point3d>();
-            for (int i = 0; i < poly.NumberOfVertices; i++)
+            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
             {
                 var polyPt = poly.GetPoint3dAt(i);
-                if (polyPt.IsEqualTo(movePt))
+                if (polyPt.IsEqualTo(movePt, new Tolerance(5, 5)))
                 {
                     polyPt = pt;
                 }
-
-                if (polyPt.IsEqualTo(moveConnectPt))
-                {
-                    polyPt = connectPt;
-                }
                 pts.Add(polyPt);
             }
+            pts.Add(connectPt);
 
             Polyline polyline = new Polyline();
             for (int i = 0; i < pts.Count; i++)
