@@ -1,23 +1,22 @@
 ﻿#if (ACAD2016 || ACAD2018)
-using CLI;
 using System;
+using NFox.Cad;
 using System.Linq;
-using ThMEPWSS.ViewModel;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Diagnostics;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPWSS.ViewModel;
 using ThMEPWSS.Hydrant.Data;
 using ThMEPWSS.Hydrant.Engine;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Diagnostics;
-using ThCADCore.NTS;
-using ThCADExtension;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
+using CLI;
 #endif
 
 namespace ThMEPWSS.Hydrant.Service
@@ -141,7 +140,7 @@ namespace ThMEPWSS.Hydrant.Service
             };
             return context;
         }
-        
+
         public void Print(Database db)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
@@ -340,6 +339,6 @@ namespace ThMEPWSS.Hydrant.Service
                 .Select(k => new DBPoint(k.Coordinate.ToAcGePoint3d()))
                 .ToList();
         }
-#endif
     }
+#endif
 }
