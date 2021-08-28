@@ -283,18 +283,9 @@ namespace ThMEPElectrical.ConnectPipe.Service
                             var secPoly = CreateNewConnectLine(polyInfo.Key, longestLine[polyInfo.Key], pts[0], connectPt, false);
                             polylines.Add(secPoly);
                             polylines.Remove(polyInfo.Key);
-                            //resPolys.Add(secPoly);
                         }
                     }
                     polylines.Add(firPoly);
-                    //resPolys.Add(firPoly);
-                    //using (AcadDatabase db = AcadDatabase.Active())
-                    //{
-                    //    for (int i = 8; i < polylines.Count; i++)
-                    //    {
-                    //        db.ModelSpace.Add(polylines[i]);
-                    //    }
-                    //}
                 }
                 else
                 {
