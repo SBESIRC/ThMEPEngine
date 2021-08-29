@@ -3,7 +3,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
@@ -11,20 +10,16 @@ namespace ThMEPEngineCore.Algorithm
     public class ThMEPFrameService
     {
         private static double OFFSET_DISTANCE = 30.0;
-        public ThMEPFrameService(ThBeamConnectRecogitionEngine thBeamConnectRecogition)
-        {
-
-        }
 
         public static Polyline Normalize(Polyline frame)
         {
             // 创建封闭多段线
             var obj = frame.WashClone();
-            if(obj == null || obj is Line)
+            var clone = obj as Polyline;
+            if (clone == null)
             {
                 return new Polyline();
             }
-            var clone = obj as Polyline;
             clone.Closed = true;
 
             // 剔除尖状物
