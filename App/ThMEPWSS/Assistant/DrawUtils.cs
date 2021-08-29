@@ -75,6 +75,145 @@ namespace ThMEPWSS.Assistant
                 return 0;
             }
         }
+        public static List<T> ToGeoList<T>(JArray ja) where T : Geometry
+        {
+            return ja.Select(o => (T)ToGeometry(o)).ToList();
+        }
+        public static JArray ToJArray(IEnumerable<Geometry> geos) => new JArray(geos.Select(x => GeoFac.ToJToken(x)).ToArray());
+        public static JToken ToJToken(Geometry geo)
+        {
+            if (geo is null) return new JValue((object)null);
+            if (geo is Point pt) return ToJToken(pt);
+            if (geo is LinearRing lr) return ToJToken(lr);
+            if (geo is LineString ls) return ToJToken(ls);
+            if (geo is Polygon pl) return ToJToken(pl);
+            if (geo is MultiPoint mpt) return ToJToken(mpt);
+            if (geo is MultiLineString mls) return ToJToken(mls);
+            if (geo is MultiPolygon mpl) return ToJToken(mpl);
+            if (geo is GeometryCollection gc) return ToJToken(gc);
+            throw new NotSupportedException();
+        }
+        public static Point2d ToPoint2d(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+        }
+        public static Coordinate ToCoordinate(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new Coordinate(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+        }
+        public static LineString ToLineString(JToken jo)
+        {
+            var ja = (JArray)jo["points"];
+            return new LineString(ja.Select(jtk => ToCoordinate((JObject)jtk)).ToArray());
+        }
+        public static LinearRing ToLinearRing(JToken jo)
+        {
+            var ja = (JArray)jo["points"];
+            return new LinearRing(ja.Select(jtk => ToCoordinate((JObject)jtk)).ToArray());
+        }
+        public static Polygon ToPolygon(JToken jo)
+        {
+            return new Polygon(ToLinearRing(jo["shell"]));
+        }
+        public static Point ToPoint(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new Point(ja[0].ToObject<double>(), ja[1].ToObject<double>());
+        }
+        public static MultiPoint ToMultiPoint(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new MultiPoint(ja.Select(o => ToPoint(o)).ToArray());
+        }
+        public static MultiLineString ToMultiLineString(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new MultiLineString(ja.Select(o => ToLineString(o)).ToArray());
+        }
+        public static MultiPolygon ToMultiPolygon(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new MultiPolygon(ja.Select(o => ToPolygon(o)).ToArray());
+        }
+        public static GeometryCollection ToGeometryCollection(JToken jo)
+        {
+            var ja = (JArray)jo["values"];
+            return new GeometryCollection(ja.Select(o => ToGeometry(o)).ToArray());
+        }
+        public static Geometry ToGeometry(JToken jo)
+        {
+            switch ((string)jo["type"])
+            {
+                case "Point2d":
+                case "Point3d":
+                case "Point":
+                case "Pt":
+                    return ToPoint(jo);
+                case "LineString":
+                    return ToLineString(jo);
+                case "LinearRing":
+                    return ToLinearRing(jo);
+                case "Polygon":
+                    return ToPolygon(jo);
+                case "MultiPoint":
+                    return ToMultiPoint(jo);
+                case "MultiLineString":
+                    return ToMultiLineString(jo);
+                case "MultiPolygon":
+                    return ToMultiPolygon(jo);
+                case "GeometryCollection":
+                    return ToGeometryCollection(jo);
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        public static JToken ToJToken(Point3d o)
+        {
+            return new JObject() { ["type"] = "Point3d", ["values"] = new JArray() { o.X, o.Y, o.Z } };
+        }
+        public static JToken ToJToken(Point2d o)
+        {
+            return new JObject() { ["type"] = "Point2d", ["values"] = new JArray() { o.X, o.Y, } };
+        }
+        public static JToken ToJToken(Coordinate o)
+        {
+            return new JObject() { ["type"] = "Pt", ["values"] = new JArray() { o.X, o.Y, } };
+        }
+        public static JToken ToJToken(Point o)
+        {
+            return new JObject() { ["type"] = "Point", ["values"] = new JArray() { o.X, o.Y, } };
+        }
+        public static JToken ToJToken(LinearRing o)
+        {
+            return new JObject() { ["type"] = "LinearRing", ["points"] = new JArray(o.Coordinates.Select(x => ToJToken(x)).ToArray()) };
+        }
+        public static JToken ToJToken(LineString o)
+        {
+            if (o is LinearRing r) return ToJToken(r);
+            return new JObject() { ["type"] = "LineString", ["points"] = new JArray(o.Coordinates.Select(x => ToJToken(x)).ToArray()) };
+        }
+        public static JToken ToJToken(Polygon o)
+        {
+            return new JObject() { ["type"] = "Polygon", ["shell"] = ToJToken(o.Shell) };
+        }
+        public static JToken ToJToken(MultiPoint l)
+        {
+            return new JObject() { ["type"] = "MultiPoint", ["values"] = new JArray(l.Geometries.Select(x => ToJToken(x)).ToArray()) };
+        }
+        public static JToken ToJToken(MultiLineString l)
+        {
+            return new JObject() { ["type"] = "MultiLineString", ["values"] = new JArray(l.Geometries.Select(x => ToJToken(x)).ToArray()) };
+        }
+        public static JToken ToJToken(MultiPolygon l)
+        {
+            return new JObject() { ["type"] = "MultiPolygon", ["values"] = new JArray(l.Geometries.Select(x => ToJToken(x)).ToArray()) };
+        }
+        public static JToken ToJToken(GeometryCollection l)
+        {
+            return new JObject() { ["type"] = "GeometryCollection", ["values"] = new JArray(l.Geometries.Select(x => ToJToken(x)).ToArray()) };
+        }
         public static List<List<GLineSegment>> GroupParallelLines(List<GLineSegment> lines, double extend_distance, double collinear_gap_distance, double angle_tollerence = 1)
         {
             lines = lines.Where(x => x.IsValid).Distinct().ToList();
@@ -978,6 +1117,52 @@ namespace ThMEPWSS.Assistant
     }
     public static class CadJsonExtension
     {
+        public class JsonConverter5 : JsonConverter
+        {
+            static readonly HashSet<Type> types;
+            static JsonConverter5()
+            {
+                types = new HashSet<Type>()
+            {
+                typeof(Geometry),
+                typeof(Coordinate),
+                typeof(Point),
+                typeof(LineString),
+                typeof(LinearRing),
+                typeof(Polygon),
+                typeof(MultiPoint),
+                typeof(MultiLineString),
+                typeof(MultiPolygon),
+            };
+            }
+            public override bool CanConvert(Type objectType)
+            {
+                return types.Contains(objectType);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (objectType == typeof(Geometry)) return GeoFac.ToGeometry(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(Coordinate)) return GeoFac.ToCoordinate(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(Point)) return GeoFac.ToPoint(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(LineString)) return GeoFac.ToLineString(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(LinearRing)) return GeoFac.ToLinearRing(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(Polygon)) return GeoFac.ToPolygon(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(MultiLineString)) return GeoFac.ToMultiLineString(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(MultiPolygon)) return GeoFac.ToMultiPolygon(serializer.Deserialize<JObject>(reader));
+                throw new NotSupportedException();
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                if (value is Geometry geo)
+                {
+                    serializer.Serialize(writer, GeoFac.ToJToken(geo));
+                    return;
+                }
+                throw new NotSupportedException();
+            }
+        }
         public class JsonConverter4 : JsonConverter
         {
             public override bool CanRead => true;
@@ -1183,6 +1368,7 @@ namespace ThMEPWSS.Assistant
             }
         }
         public static readonly JsonConverter4 cvt4 = new JsonConverter4();
+        public static readonly JsonConverter5 cvt5 = new JsonConverter5();
         public class JsonConverter3 : JsonConverter
         {
             public override bool CanRead => false;
@@ -1215,11 +1401,11 @@ namespace ThMEPWSS.Assistant
 
         public static string ToJson(object obj)
         {
-            return JsonConvert.SerializeObject(obj, cvt3, cvt4);
+            return JsonConvert.SerializeObject(obj, cvt3, cvt4, cvt5);
         }
         public static T FromJson<T>(string json)
         {
-            return JsonConvert.DeserializeObject<T>(json, cvt4);
+            return JsonConvert.DeserializeObject<T>(json, cvt4, cvt5);
         }
 
     }
