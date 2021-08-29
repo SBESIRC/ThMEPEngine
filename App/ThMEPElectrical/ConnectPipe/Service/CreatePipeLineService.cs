@@ -18,7 +18,6 @@ namespace ThMEPElectrical.ConnectPipe.Service
         readonly double moveLineDis = 150;
         public List<Polyline> CreatePipe(List<Polyline> connectPolys, List<BlockReference> broadcasts)
         {
-            //return connectPolys;
             //计算小支管信息
             Dictionary<Polyline, List<Polyline>> connectPtInfo = new Dictionary<Polyline, List<Polyline>>();
             List<BroadcastModel> broadcastModel = broadcasts.Select(x => new BroadcastModel(x)).ToList();
@@ -116,8 +115,6 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     var resPt = ConenctAnglePt(new Line(pts.First(), pts.Last()), connectPt, Math.Cos(Math.PI * (20.0 / 180)));
                     resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
                     resPoly.AddVertexAt(1, resPt.ToPoint2D(), 0, 0, 0);
-                    //resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
-                    //resPoly.AddVertexAt(1, pts.First().ToPoint2D(), 0, 0, 0);
                 }
             }
             else
