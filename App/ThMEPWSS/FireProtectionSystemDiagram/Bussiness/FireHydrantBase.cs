@@ -44,8 +44,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         double _scaleTopFloorInnerTopLine = 7.0 / 10.0;//顶部楼层成环，内部立管突出比例
         double _scaleRefugeFloorTopLine = 3.0 / 5.0;//避难层，顶部线突出楼层比例 1200/2000
         double _scaleRefugeFloorTopInnerLine = 9.0 / 20.0; //普通层，内部立管线突出楼层线比例900/2000
-        double _scaleVerticalFloorTopLine = 4.0 / 5.0;//普通层，顶部线突出楼层比例
-        double _scaleVerticalFloorInnerTopLine = 13.0 / 20.0; //普通层，内部立管线突出楼层线比例1300/2000
+        double _scaleVerticalFloorTopLine = 3.0 / 4.0;//普通层，顶部线突出楼层比例
         double _scaleRefugeFloorBottomLine = 1.0 / 8.0;//避难层，底部线下沉比例
         protected double _butterflyValveWidth = 240;//蝶阀宽度
         protected double _raiseDistanceToStartDefault = 5000;//竖直立管距离起点距离
@@ -80,12 +79,16 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             _refugeFireHCount = vm.CountsRefuge;
             _floorSpace = vm.FaucetFloor;
             _refugeLineInts = new List<int>();
-            _raisePipeCount = Math.Max(_fireHCount, _refugeFireHCount);
+            _raisePipeCount = _fireHCount;
             var mid = (int)_fireHCount / 2;
             mid = mid >= 1 ? mid : 1;
             _raisePipeCount += _fireHCount == 1 ? 1 : 0;
-            for (int i = 0; i < _refugeFireHCount - _fireHCount; i++)
-                _refugeLineInts.Add(mid + i);
+            if (_floorDatas.Any(c => c.isRefugeFloor)) 
+            {
+                _raisePipeCount = Math.Max(_fireHCount, _refugeFireHCount);
+                for(int i = 0; i < _refugeFireHCount - _fireHCount; i++)
+                    _refugeLineInts.Add(mid + i);
+            }
             _topRingInRoof = vm.IsRoofRing;
             _haveTestFireHydrant = vm.HaveTestFireHydrant;
             _areaAttr = vm.Serialnumber;
@@ -180,9 +183,18 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                 }
                 else
                 {
-                    pointDisLine = _floorSpace * _scaleTopFloorTopLine;
-                    if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
-                        pointDisLine = _floorSpace * _scaleTopFloorInnerTopLine;
+                    if (_haveTestFireHydrant)
+                    {
+                        pointDisLine = _floorSpace * _scaleTopFloorTopLine;
+                        if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
+                            pointDisLine = _floorSpace * _scaleTopFloorInnerTopLine;
+                    }
+                    else 
+                    {
+                        pointDisLine = _floorSpace * _scaleVerticalFloorTopLine;
+                        if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
+                            pointDisLine -= _GetButterflyValveDistanceToLine();
+                    }
                 }
             }
             else
@@ -201,7 +213,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
                     //非避难层
                     pointDisLine = _floorSpace * _scaleVerticalFloorTopLine;
                     if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
-                        pointDisLine = _floorSpace * _scaleVerticalFloorInnerTopLine;
+                        pointDisLine -= _GetButterflyValveDistanceToLine();
                 }
             }
             topPoint += Vector3d.YAxis.MultiplyBy(pointDisLine);

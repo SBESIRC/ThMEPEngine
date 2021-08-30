@@ -255,6 +255,12 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         #region 最顶层的环处理
         private void _RoofFloorRingInFloor(Point3d firstLevelPipePoint,Point3d topStartPoint,string DNStr) 
         {
+            if (!_haveTestFireHydrant) 
+            {
+                var exhaustValve = new CreateBlockInfo(ThWSSCommon.Layout_ExhaustValveSystemBlockName, ThWSSCommon.Layout_FireHydrantPipeLineLayerName, topStartPoint);
+                exhaustValve.scaleNum = 0.5;
+                _createBlocks.Add(exhaustValve);
+            }
             var realLength = _GetButterflyValveScaleWidth();
             var startPoint = topStartPoint;
             var endPoint = startPoint + _xAxis.MultiplyBy((_raisePipeCount-1)*_raisePipeSpace);
