@@ -166,5 +166,10 @@ namespace ThCADCore.NTS
         {
             return mPolygon.ToNTSPolygon().Difference(objs.UnionGeometries()).ToDbCollection();
         }
+
+        public static DBObjectCollection DifferenceMP(this MPolygon mPolygon, DBObjectCollection objs)
+        {
+            return mPolygon.ToNTSPolygon().Difference(objs.UnionGeometries()).ToDbCollection(true);
+        }
     }
 }

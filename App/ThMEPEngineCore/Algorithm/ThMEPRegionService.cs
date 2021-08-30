@@ -93,11 +93,11 @@ namespace ThMEPEngineCore.Algorithm
         {
             if (e is AcPolygon polygon)
             {
-                return polygon.Difference(objs);
+                return polygon.DifferenceMP(objs);
             }
             else if (e is MPolygon mPolygon)
             {
-                return mPolygon.Difference(objs);
+                return mPolygon.DifferenceMP(objs);
             }
             else
             {

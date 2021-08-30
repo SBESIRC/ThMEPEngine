@@ -13,8 +13,10 @@ namespace ThMEPElectrical.AFASRegion.Model
     /// </summary>
     public class AFASBeamContour
     {
+        public static double WallThickness { get; set; } = 100;
         public double Height { get; set; }
         public double Width { get; set; }
+        public double BottomElevation { get; set; } //梁底标高，包含楼板高度
         public Point3d StartPoint { get; set; }
         public Point3d EndPoint { get; set; }
         public Polyline BeamBoundary { get; set; }
@@ -23,7 +25,7 @@ namespace ThMEPElectrical.AFASRegion.Model
         {
             get
             {
-                double height = this.Height;
+                double height = this.BottomElevation - WallThickness;
                 if (height > 600)
                     return BeamType.HighBeam;
                 else if (height < 200)
@@ -39,6 +41,7 @@ namespace ThMEPElectrical.AFASRegion.Model
             {
                 Height = this.Height,
                 Width = this.Width,
+                BottomElevation = this.BottomElevation,
                 StartPoint = this.StartPoint,
                 EndPoint = this.EndPoint,
                 BeamBoundary = this.BeamBoundary,

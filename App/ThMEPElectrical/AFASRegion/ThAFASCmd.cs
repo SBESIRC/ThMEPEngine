@@ -88,9 +88,9 @@ namespace ThMEPElectrical.AFASRegion
                         Polyline pline = GetBlockOBB(acadDatabase.Database, blk, blk.BlockTransform);
 
                         var cmd = new AFASRegion();
-
+                        AFASBeamContour.WallThickness = 100;
                         //获取探测范围
-                        var Detectionspace = cmd.DivideRoomWithDetectionRegion(pline, AFASDetector.TemperatureDetectorLow);
+                        var Detectionspace = cmd.DivideRoomWithDetectionRegion(pline, AFASDetector.SmokeDetectorLow);
                         foreach (var polygon in Detectionspace)
                         {
                             polygon.ColorIndex = 2;
