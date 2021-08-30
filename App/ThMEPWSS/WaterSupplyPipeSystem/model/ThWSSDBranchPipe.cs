@@ -98,7 +98,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
             if (NoValve)
             {
-                pt232 = new Point3d(pt2.X, pt231.Y - 0.5 * BlockSize[1][0], 0);
+                pt232 = new Point3d(pt2.X, pt231.Y - BlockSize[1][0], 0);
             }
             else
             {
