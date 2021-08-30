@@ -1,18 +1,12 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using ThMEPWSS.Diagram.ViewModel;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.WaterSupplyPipeSystem;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 using ThMEPWSS.WaterSupplyPipeSystem.tool;
@@ -56,15 +50,12 @@ namespace ThMEPWSS.Command
             }
              
             var setViewModel = tmpUiConfigs.SetViewModel;
-
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
             if (setViewModel.DynamicRadios[1].IsChecked)
             {
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
-
             var FloorHeight = setViewModel.FloorLineSpace;  //楼层线间距 mm
-            
             var FlushFaucet = new List<int>();//冲洗龙头层
             if(setViewModel.FaucetFloor != "")
             {

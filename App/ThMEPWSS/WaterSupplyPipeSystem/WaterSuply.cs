@@ -213,7 +213,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         {
             using var acadDatabase = AcadDatabase.Active();
             //统计卫生洁具数
-
             var toiletNums = CountToiletNums(floorAreaList, selectArea, floorList, FloorNumbers);
             var engine = new ThWCleanToolsRecongnitionEngine();
             engine.Recognize(acadDatabase.Database, selectArea);

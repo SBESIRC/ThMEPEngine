@@ -39,7 +39,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         {
             var lineList = new List<Line>();
             var pt1 = insertPt.OffsetXY(PipeOffset_X, -300); //new Point3d(indexStartX + PipeOffset_X, indexStartY - 300, 0);
-            var pt2 = insertPt.OffsetXY(PipeOffset_X, Higheststorey * FloorHeight - 0.175 * FloorHeight);
+            var pt2 = insertPt.OffsetXY(PipeOffset_X, Higheststorey * FloorHeight - 0.3 * FloorHeight);
             if (Higheststorey == 1)
             {
                 var pt121 = new Point3d(pt1.X, pt1.Y + 140 + 300, 0);
