@@ -18,7 +18,7 @@ namespace TianHua.Hvac.UI
         public fmDuctSpec()
         {
             InitializeComponent();
-        }
+        } 
 
         private void fmDuctSpec_Load(object sender, EventArgs e)
         {
@@ -103,6 +103,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
 
                 this.Size = new Size(170, 390);
+
             }
         }
 
