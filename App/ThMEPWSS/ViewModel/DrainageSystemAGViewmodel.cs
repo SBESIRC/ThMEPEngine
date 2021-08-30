@@ -30,16 +30,18 @@ namespace ThMEPWSS.ViewModel
                 (int)EnumPipeDiameter.DN200,
             };
             var raiseDim = CommonUtil.EnumDescriptionToList(typeof(EnumPipeDiameter), values);
-            WSVPipeDiameterListItems.Add(new UListItemData("无",-1));
+            //WSVPipeDiameterListItems.Add(new UListItemData("无",-1));
             foreach (var raise in raiseDim) 
             {
                 WSWPipeDiameterListItems.Add(raise);
                 WSVPipeDiameterListItems.Add(raise);
                 BWWPipeDiameterListItems.Add(raise);
+                CaissonRiserListItems.Add(raise);
             }
             WSWPipeDiameterSelectItem = WSWPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
             WSVPipeDiameterSelectItem = WSVPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
             BWWPipeDiameterSelectItem = BWWPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
+            CaissonRiseSelectItem = CaissonRiserListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
 
             //卫生间沉箱初始不勾选。
             ToiletIsCaisson = false;
@@ -210,6 +212,27 @@ namespace ThMEPWSS.ViewModel
             set
             {
                 _wsvPipeDiameterSelectItem = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<UListItemData> _caissonRiserListItems = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> CaissonRiserListItems 
+        {
+            get { return _caissonRiserListItems; }
+            set 
+            {
+                _caissonRiserListItems = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private UListItemData _caissonRiseSelectItem { get; set; }
+        public UListItemData CaissonRiseSelectItem 
+        {
+            get { return _caissonRiseSelectItem; }
+            set 
+            {
+                _caissonRiseSelectItem = value;
                 this.RaisePropertyChanged();
             }
         }

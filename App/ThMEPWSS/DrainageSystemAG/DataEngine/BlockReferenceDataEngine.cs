@@ -121,7 +121,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
 
                     if (null == block)
                         continue;
-                    var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block,true);
+                    if (!block.Bounds.HasValue)
+                        continue;
+                    var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block);
                     if (polyline.Contains(centerPoint))
                     {
                         blcokModel.blockReferences.Add(block);

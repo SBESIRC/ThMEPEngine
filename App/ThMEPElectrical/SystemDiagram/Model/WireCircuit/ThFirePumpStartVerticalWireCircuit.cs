@@ -70,13 +70,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                             Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
                             ResultDic[floorNum].Add(Endline);
                         }
-                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                        Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 150, 0));
                         ResultDic[PressureSwitchMaxFloor].Add(Endline2);
                     }
 
                     if (PressureSwitchMinFloor < FireHydrantPumpMinFloor)
                     {
-                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 250, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor, 0));
+                        Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor - 150, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMinFloor, 0));
                         ResultDic[PressureSwitchMinFloor].Add(Endline1);
                         for (int floorNum = PressureSwitchMinFloor + 1; floorNum < FireHydrantPumpMinFloor; floorNum++)
                         {
@@ -94,7 +94,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         Entity Endline = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum - 3000, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * floorNum, 0));
                         ResultDic[floorNum].Add(Endline);
                     }
-                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (PressureSwitchMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 250, 0));
+                    Line Endline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * (PressureSwitchMaxFloor - 1), 0), new Point3d(OuterFrameLength * (currentIndex - 1) + Offset, OuterFrameLength * PressureSwitchMaxFloor - 150, 0));
                     ResultDic[PressureSwitchMaxFloor].Add(Endline1);
                 }
             }
@@ -161,11 +161,20 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             Line Endline4 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1750, OuterFrameLength * floorNum + 1200, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2600, OuterFrameLength * floorNum + 1200, 0));
             result.Add(Endline4);
 
-            Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
+            Line Endline5 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 1300, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2750, 0));
             result.Add(Endline5);
 
             Line Endline6 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset -100, OuterFrameLength * floorNum + 2650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2550, 0));
             result.Add(Endline6);
+
+            Line Endline7 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset - 100, OuterFrameLength * floorNum + 2850, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2750, 0));
+            result.Add(Endline7);
+
+            Line Endline8 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2850, 0));
+            result.Add(Endline8);
+
+            Line Endline9 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2400, OuterFrameLength * floorNum + 2850, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset - 100, OuterFrameLength * floorNum + 2850, 0));
+            result.Add(Endline9);
             return result;
         }
 
@@ -177,10 +186,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         private List<Entity> DrawFirePumpStartLine(int CurrentIndex, int floorNum)
         {
             List<Entity> result = new List<Entity>();
-            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 2750, 0));
+            Line Endline2 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 1650, 0), new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 2850, 0));
             result.Add(Endline2);
 
-            Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 2750, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2750, 0));
+            Line Endline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 3) + 2250, OuterFrameLength * floorNum + 2850, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + Offset, OuterFrameLength * floorNum + 2850, 0));
             result.Add(Endline3);
             return result;
         }

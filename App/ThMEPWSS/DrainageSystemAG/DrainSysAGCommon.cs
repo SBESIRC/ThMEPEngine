@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -86,22 +87,16 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             return dynBlockWidthLengths;
         }
-        public static Point3d GetBlockGeometricCenter(BlockReference block,bool pointTo2d) 
+        public static Point3d GetBlockGeometricCenter(BlockReference block) 
         {
             if (null == block)
                 return Point3d.Origin;
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                //这里的块都是正方形，不用考虑朝向问题
-                var entities = new DBObjectCollection();
-                block.ExplodeWithVisible(entities);
-                var entitys = entities.Cast<Entity>().ToList();
-                var extents = entitys[0].GeometricExtents;
-                var centerPoint = entities.GeometricExtents().CenterPoint();
-                if (pointTo2d)
-                    centerPoint = new Point3d(centerPoint.X,centerPoint.Y,0);
-                return centerPoint;
-            }
+            var entities = new DBObjectCollection();
+            block.ExplodeWithVisible(entities);
+            if (entities.Count == 0)
+                return Point3d.Origin;
+            //取AABB并投影到XY平面
+            return entities.GeometricExtents().Flatten().CenterPoint();
         }
         public static List<TubeWellsRoomModel> GetTubeWellRoomRelation(List<RoomModel> allToilteKitchenRooms, List<RoomModel> tubeWellRooms)
         {
@@ -132,8 +127,6 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             return retRooms;
         }
-    
-    
         public static CreateBlockInfo CopyOneBlock(CreateBlockInfo cBlock, Point3d oldBasePoint, Point3d newBasePoint, string floorId)
         {
             var moveVector = cBlock.createPoint - oldBasePoint;
@@ -177,7 +170,6 @@ namespace ThMEPWSS.DrainageSystemAG
             }
             return basicElement;
         }
-
         public static CreateDBTextElement CopyTextElement(CreateDBTextElement cText, Point3d oldBasePoint, Point3d newBasePoint, string floorId)
         {
             var oldPoint = cText.dbText.Position;
@@ -198,8 +190,6 @@ namespace ThMEPWSS.DrainageSystemAG
             var copyText = new CreateDBTextElement(floorId, newPoint, text, cText.belongBlockId, cText.layerName,cText.textStyle, cText.uid);
             return copyText;
         }
-
-
         public static List<EquipmentBlcokModel> GetFloorBlocks(List<EquipmentBlcokModel> tempBlocks, List<Entity> axisEntitys)
         {
             var resList = new List<EquipmentBlcokModel>();

@@ -72,8 +72,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             SupplyCool.Clear();
 
-            SupplyCool.AddRange(CalculateSupplyCoolPoint());
-            SupplyCool.AddRange(CalculateSupplyCoolSecPoint());
+            SupplyCool.AddRange(CalculateSupplyCoolPoint(Type, Boundary));
+            SupplyCool.AddRange(CalculateSupplyCoolSecPoint(Type, Boundary));
 
             SupplyWarm = CalculateSupplyWarmPoint();
             SupplyWarmSec = CalculateSupplyWarmSecPoint();
@@ -82,12 +82,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private List<Point3d> CalculateSupplyCoolPoint()
+        public static List<Point3d> CalculateSupplyCoolPoint(string type, Polyline boundary)
         {
             List<Point3d> returnPt = new List<Point3d>();
             Point3d pt = new Point3d();
 
-            switch (Type)
+            switch (type)
             {
                 case "A-Toilet-1":
                 case "A-Toilet-4":
@@ -95,44 +95,44 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 case "A-Toilet-8":
                 case "A-Kitchen-3":
                 case "A-Kitchen-4":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta75);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta75);
                     break;
 
                 case "A-Toilet-2":
-                    pt = getSupplyPtDoubleSinkLeft();
+                    pt = getSupplyPtDoubleSinkLeft(boundary);
                     break;
                 case "A-Toilet-3":
-                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta308);
+                    pt = getSupplyPtByLeftTop(boundary, ThDrainageSDCommon.supplyCoolDalta308);
                     break;
 
                 case "小便器":
                 case "A-Kitchen-9":
                 case "儿童小便器":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta0);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta0);
                     break;
 
                 case "A-Toilet-5":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta200);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta200);
                     break;
 
                 case "儿童坐便器":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta250);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta250);
                     break;
 
                 case "儿童洗脸盆":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta150);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta150);
                     break;
 
                 case "蹲便器":
-                    pt = getSupplyPtByCenter(ThDrainageSDCommon.supplyCoolDalta120);
+                    pt = getSupplyPtByCenter(boundary, ThDrainageSDCommon.supplyCoolDalta120);
                     break;
 
                 case "A-Toilet-7":
-                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta350);
+                    pt = getSupplyPtByLeftTop(boundary, ThDrainageSDCommon.supplyCoolDalta350);
                     break;
 
                 case "A-Toilet-9":
-                    pt = getSupplyPtByLeftTop(ThDrainageSDCommon.supplyCoolDalta150);
+                    pt = getSupplyPtByLeftTop(boundary, ThDrainageSDCommon.supplyCoolDalta150);
                     break;
 
                 default:
@@ -150,10 +150,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private Point3d getSupplyPtByCenter(double dalta)
+        private static Point3d getSupplyPtByCenter(Polyline boundary, double dalta)
         {
-            Point3d leftPt = Boundary.GetPoint3dAt(1);
-            Point3d rightPt = Boundary.GetPoint3dAt(2);
+            Point3d leftPt = boundary.GetPoint3dAt(1);
+            Point3d rightPt = boundary.GetPoint3dAt(2);
 
             Point3d cenPt = new Point3d((leftPt.X + rightPt.X) / 2, (leftPt.Y + rightPt.Y) / 2, 0);
 
@@ -167,10 +167,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-        private Point3d getSupplyPtByLeftTop(double dalta)
+        private static Point3d getSupplyPtByLeftTop(Polyline boundary, double dalta)
         {
-            Point3d leftPt = Boundary.GetPoint3dAt(1);
-            Point3d rightPt = Boundary.GetPoint3dAt(2);
+            Point3d leftPt = boundary.GetPoint3dAt(1);
+            Point3d rightPt = boundary.GetPoint3dAt(2);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -182,10 +182,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-        private Point3d getSupplyPtDoubleSinkLeft()
+        private static Point3d getSupplyPtDoubleSinkLeft(Polyline boundary)
         {
-            Point3d leftPt = Boundary.GetPoint3dAt(1);
-            Point3d rightPt = Boundary.GetPoint3dAt(2);
+            Point3d leftPt = boundary.GetPoint3dAt(1);
+            Point3d rightPt = boundary.GetPoint3dAt(2);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -200,10 +200,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-        private Point3d getSupplyPtDoubleSinkRight()
+        private static Point3d getSupplyPtDoubleSinkRight(Polyline boundary)
         {
-            Point3d leftPt = Boundary.GetPoint3dAt(1);
-            Point3d rightPt = Boundary.GetPoint3dAt(2);
+            Point3d leftPt = boundary.GetPoint3dAt(1);
+            Point3d rightPt = boundary.GetPoint3dAt(2);
 
             var dir = (rightPt - leftPt).GetNormal();
 
@@ -258,7 +258,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return boundaryNew;
         }
 
-        private Point3d CalculateSupplyWarmPoint()
+        private static Point3d CalculateSupplyWarmPoint()
         {
             Point3d pt = new Point3d();
             // "给水角阀平面"
@@ -266,15 +266,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private List<Point3d> CalculateSupplyCoolSecPoint()
+        private static List<Point3d> CalculateSupplyCoolSecPoint(string type, Polyline boundary)
         {
             List<Point3d> returnPt = new List<Point3d>();
             Point3d pt = new Point3d();
 
-            switch (Type)
+            switch (type)
             {
                 case "A-Toilet-2":
-                    pt = getSupplyPtDoubleSinkRight();
+                    pt = getSupplyPtDoubleSinkRight(boundary);
 
                     break;
                 default:
@@ -291,7 +291,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private Point3d CalculateSupplyWarmSecPoint()
+        private static Point3d CalculateSupplyWarmSecPoint()
         {
             Point3d pt = new Point3d();
 
@@ -301,14 +301,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return pt;
 
         }
-        private Point3d CalculateSewagePoint()
+        private static Point3d CalculateSewagePoint()
         {
             Point3d pt = new Point3d();
 
             return pt;
 
         }
-        private Point3d CalculateSewageSecPoint()
+        private static Point3d CalculateSewageSecPoint()
         {
             Point3d pt = new Point3d();
 

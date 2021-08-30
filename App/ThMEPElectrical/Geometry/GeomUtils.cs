@@ -542,43 +542,14 @@ namespace ThMEPElectrical.Geometry
                 return ptLst;
 
             postPoly = postPoly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
-
-#if ACAD_ABOVE_2012
-            // 基于CAD API，存在多种方式根据Region获取质心的方式
-            //  1. Region.AreaProperties() （AutoCAD >= 2013)
-            //  2. Solid3d.Extrude(Region) -> Solid3d .MassProperties()
-            // https://www.keanw.com/2015/08/getting-the-centroid-of-an-autocad-region-using-net.html
-            // https://adndevblog.typepad.com/autocad/2019/03/detecting-geometric-center-for-lwpolyline-3dpoly-and-2dpoly.html
-            foreach (var region in RegionTools.CreateRegion(new Curve[] { postPoly }))
-            {
-                Point3d o = Point3d.Origin;
-                Vector3d x = Vector3d.XAxis;
-                Vector3d y = Vector3d.YAxis;
-                var properties = region.AreaProperties(ref o, ref x, ref y);
-                var centroid = properties.Centroid.ToPoint3d();
-                if (GeomUtils.PtInLoop(postPoly, centroid))
-                    ptLst.Add(centroid);
-            }
-#else
-            // 在AutoCAD 2012下, Region.CreateFromCurves()很不稳定，容易抛异常
-            // 更糟糕的事，由于无法事先预判是否可以形成Region，使用这个API就存在很大风险
-            // 所以这里抛弃用Region取质心的方式，而采用纯几何计算的方式来获取质心
             var centriod = postPoly.GetCentroidPoint();
             if (GeomUtils.PtInLoop(postPoly, centriod))
             {
                 ptLst.Add(centriod);
             }
-#endif
-
             if (ptLst.Count < 1)
             {
-                var centerPt = postPoly.MinimumBoundingCircle().Center;
-                ptLst.Add(centerPt);
-                //var centerPt = GetCenterPt(postPoly);
-                //if (centerPt.HasValue)
-                //    ptLst.Add(centerPt.Value);
-                //else
-                //    return ptLst;
+                ptLst.Add(postPoly.MinimumBoundingCircle().Center);
             }
 
             // 距离500的边界调整

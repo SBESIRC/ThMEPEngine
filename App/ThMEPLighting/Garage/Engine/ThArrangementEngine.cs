@@ -33,8 +33,10 @@ namespace ThMEPLighting.Garage.Engine
         public abstract void Arrange(List<ThRegionBorder> regionBorders);
         protected List<Line> Trim(List<Line> lines, Polyline regionBorder)
         {
+            // Clip的结果中可能有点（DBPoint)，这里可以忽略点
             var results = ThCADCoreNTSGeometryClipper.Clip(regionBorder, lines.ToCollection());
-            return ThLaneLineEngine.Explode(results).Cast<Line>().ToList();
+            var curves = results.OfType<Curve>().ToCollection();
+            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
         }
         protected void TrimAndShort(ThRegionBorder regionBorder)
         {

@@ -33,5 +33,13 @@ namespace ThCADExtension
         {
             return Math.Abs(extents.MaxPoint.Y - extents.MinPoint.Y);
         }
+
+        public static Extents3d Flatten(this Extents3d extents)
+        {
+            // 投影到XY平面
+            Plane XYPlane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+            Matrix3d matrix = Matrix3d.Projection(XYPlane, XYPlane.Normal);
+            return new Extents3d(extents.MinPoint.TransformBy(matrix), extents.MaxPoint.TransformBy(matrix));
+        }
     }
 }

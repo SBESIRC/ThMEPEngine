@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThArchitectureExtractor : ThExtractorBase, IPrint
     {
-        public List<Entity> Walls { get; protected set; }
+        public List<Entity> Walls { get; set; }
         protected List<ThIfcRoom> Rooms { get; set; }
         public ThArchitectureExtractor()
         {
@@ -73,6 +73,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 Walls = FilterWindowPolygon(pts, Walls);
             }
         }
+
         public override void SetRooms(List<ThIfcRoom> rooms)
         {
             this.Rooms = rooms;

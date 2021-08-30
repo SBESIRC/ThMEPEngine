@@ -154,6 +154,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
             if (DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"] > 0 || DataSummaryReturn.BlockData.BlockStatistics["喷淋泵"] > 0)
             {
                 DataSummaryReturn.BlockData.BlockStatistics["灭火系统压力开关"] = Math.Max(DataSummaryReturn.BlockData.BlockStatistics["灭火系统压力开关"], 1);
+                //新增需求：新增加了一个[低压压力开关]块，他的数量不通过统计来计算，数量与[消火栓泵]数量保持一致，且与[灭火系统流量开关]互斥，不会同时存在，假如同时存在，按[灭火系统流量开关]为0处理。
+                if (DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"] > 0)
+                {
+                    DataSummaryReturn.BlockData.BlockStatistics["灭火系统流量开关"] = 0;
+                    DataSummaryReturn.BlockData.BlockStatistics["低压压力开关"] = DataSummaryReturn.BlockData.BlockStatistics["消火栓泵"];
+                }
             }
             //设置默认值
             ThBlockConfigModel.BlockConfig.Where(b => b.DefaultQuantity != 0).ForEach(o =>

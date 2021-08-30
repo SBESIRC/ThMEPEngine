@@ -35,9 +35,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //确定每个厕所在墙上的给水点位,调整厕所方向
             ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
 
-            //foreach (var terminal in toiletList )
+            //foreach (var terminal in toiletList)
             //{
-            //   terminal.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C"));
+            //    terminal.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C"));
 
             //    Point3d leftBPt = terminal.Boundary.GetPoint3dAt(0);
             //    Point3d leftPt = terminal.Boundary.GetPoint3dAt(1);
@@ -59,6 +59,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             ////debug
             //return allLink;
+
+
+
 
             var supplyStart = dataSet.SupplyStart.Pt;
             toiletList.ForEach(x => x.AreaId = dataSet.AreaID);

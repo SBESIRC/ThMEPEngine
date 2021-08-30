@@ -373,7 +373,7 @@
                 return geoData;
             }
         }
-   
+
         public static void DrawDrainageSystemDiagram2(Dictionary<string, object> ctx)
         {
             if (commandContext != null) return;
@@ -2979,6 +2979,7 @@
             });
         }
         public static CommandContext commandContext { get => ThDrainageService.commandContext; set => ThDrainageService.commandContext = value; }
+        
         public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
         {
             FocusMainWindow();

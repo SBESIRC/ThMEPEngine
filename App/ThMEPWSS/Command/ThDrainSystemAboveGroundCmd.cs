@@ -74,6 +74,7 @@ namespace ThMEPWSS.Command
                     SetServicesModel.Instance.haveSewageVentilation = true;
                     SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter = (EnumPipeDiameter)viewmodel.WSVPipeDiameterSelectItem.Value;
                 }
+                SetServicesModel.Instance.caissonRiserPipeDiameter = (EnumPipeDiameter)viewmodel.CaissonRiseSelectItem.Value;
                 SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter = (EnumPipeDiameter)viewmodel.WSWPipeDiameterSelectItem.Value;
                 SetServicesModel.Instance.toiletIsCaisson = viewmodel.ToiletIsCaisson;
                 

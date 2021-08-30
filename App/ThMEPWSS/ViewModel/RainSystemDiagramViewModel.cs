@@ -193,6 +193,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
         private string _DirtyWaterWellDN = "DN50";
+        //这个指的是FL0的
         public string DirtyWaterWellDN
         {
             get

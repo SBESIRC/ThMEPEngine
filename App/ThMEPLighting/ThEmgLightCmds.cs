@@ -287,8 +287,8 @@ namespace ThMEPLighting
 
             //0.000001行 但0.00001找不到
             var b = new Polyline();
-            b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 100.00001), 0, 0, 0);
-            b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 100.00000001), 0, 0, 0);
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 100), 0, 0, 0);
+            b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 100), 0, 0, 0);
             b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 150), 0, 0, 0);
             b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 150), 0, 0, 0);
             b.Closed = true;

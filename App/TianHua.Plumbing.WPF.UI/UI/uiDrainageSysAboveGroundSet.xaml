@@ -34,7 +34,11 @@
                 <Label Content="通气立管："></Label>
                 <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding WSVPipeDiameterListItems}" SelectedItem="{Binding WSVPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
             </StackPanel>
-            <CheckBox Content="卫生间沉箱" Margin="5,5,0,0" VerticalContentAlignment="Center" IsChecked="{Binding ToiletIsCaisson,Mode=TwoWay,NotifyOnSourceUpdated=True}"></CheckBox>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="沉箱立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding CaissonRiserListItems}" SelectedItem="{Binding CaissonRiseSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <CheckBox Content="卫生间沉箱" Margin="5,5,0,0" Visibility="Collapsed" VerticalContentAlignment="Center" IsChecked="{Binding ToiletIsCaisson,Mode=TwoWay,NotifyOnSourceUpdated=True}"></CheckBox>
             <StackPanel Orientation="Horizontal">
                 <Label Content="阳台废水："></Label>
                 <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding BWWPipeDiameterListItems}" SelectedItem="{Binding BWWPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>

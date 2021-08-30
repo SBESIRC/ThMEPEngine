@@ -51,39 +51,6 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THANGLE", CommandFlags.Modal)]
-        public void THANGLE()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var entityId = ThPickTool.PickEntity("select");
-                var circle = acadDatabase.Element<Circle>(entityId);
-                var vec = (circle.Center - Point3d.Origin).GetNormal();
-                var plane = new Plane(new Point3d(10e6, 10e6, 0), Vector3d.ZAxis);
-                var angle = vec.AngleOnPlane(plane);
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THCenter", CommandFlags.Modal)]
-        public void THCenter()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var entityId = ThPickTool.PickEntity("select");
-                var poly = acadDatabase.Element<Polyline>(entityId);
-                var regions = RegionTools.CreateRegion(new Curve[] { poly });
-                var curves = new List<Curve>();
-                foreach (var region in regions)
-                {
-                    var circle = new Circle(region.GetCentroid().Point3D(), Vector3d.ZAxis, 10);
-                    curves.Add(circle);
-                }
-
-                //DrawUtils.DrawProfile(curves, "curves");
-            }
-        }
-
-
         [CommandMethod("TIANHUACAD", "THABBPlace", CommandFlags.Modal)]
         public void ThProfilesPlace()
         {

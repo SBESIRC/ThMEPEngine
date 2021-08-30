@@ -55,10 +55,11 @@ namespace ThMEPWSS.Hydrant.Data
             //AcHelper.Active.Database.SetCurrentLayer("111111");
             //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
 
-            FireHydrants = HydrantOutline.Select(o => o.Key).ToList();
+            var newHydrantPoints = HydrantOutline.Select(o => o.Key).Where(o => !FireHydrants.Contains(o)).ToList();
+            FireHydrants.AddRange(newHydrantPoints);
             if (FilterMode == FilterMode.Window)
             {
-                FireHydrants = FilterWindowPolygon(pts, FireHydrants.Cast<Entity>().ToList()).Cast<DBPoint>().ToList();
+                FireHydrants.AddRange(FilterWindowPolygon(pts, FireHydrants.Cast<Entity>().ToList()).Cast<DBPoint>().ToList());
             }
         }
         public override List<ThGeometry> BuildGeometries()

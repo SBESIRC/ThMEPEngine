@@ -133,7 +133,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     var sibling = node.getSibling();
                     var other = sibling.Sum(x => getLeafCountWithCondition(x, cutList));
 
-                    if (length < moveLength * 2 && other < leafNum)
+                    if (length < moveLength * 2 && other < leafNum && currNode.Parent.Parent  != null)
                     {
                         currNode = currNode.Parent;
                     }

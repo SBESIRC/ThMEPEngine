@@ -291,13 +291,15 @@ namespace ThMEPWSS.Pipe.Model
             int index1 = 0;
             int index2 = 0;
             int index3 = 0;
+
+            double minDistance = 99999.0;
             for (int i = 0; i < 4; i++)
             {
                 double distance = postion.DistanceTo(vertex[i]);
-                if (distance < 0.0001)
+                if (distance < minDistance)
                 {
                     index0 = i;
-                    break;
+                    minDistance = distance;
                 }
             }
 
@@ -324,11 +326,12 @@ namespace ThMEPWSS.Pipe.Model
                     Vector3d vector1 = vertex[index0].GetVectorTo(vertex[i]);
                     Vector3d vector2 = vector0.CrossProduct(vector1);
                     vector2 = vector2.GetNormal();
-                    if(vector2 == vectorz1)
+
+                    if(vector2.IsEqualTo(vectorz1,new Tolerance(1e-5,1e-5)))
                     {
                         index1 = i;
                     }
-                    if (vector2 == vectorz2)
+                    if (vector2.IsEqualTo(vectorz2, new Tolerance(1e-5, 1e-5)))
                     {
                         index3 = i;
                     }

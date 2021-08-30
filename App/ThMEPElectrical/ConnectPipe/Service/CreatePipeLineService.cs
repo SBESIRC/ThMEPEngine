@@ -112,8 +112,9 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 }
                 else
                 {
+                    var resPt = ConenctAnglePt(new Line(pts.First(), pts.Last()), connectPt, Math.Cos(Math.PI * (20.0 / 180)));
                     resPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
-                    resPoly.AddVertexAt(1, pts.First().ToPoint2D(), 0, 0, 0);
+                    resPoly.AddVertexAt(1, resPt.ToPoint2D(), 0, 0, 0);
                 }
             }
             else
@@ -151,8 +152,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
         private Point3d CalConenctPt(Line line, BroadcastModel broadcast)
         {
             List<Point3d> connectPts = new List<Point3d>() { broadcast.RightConnectPt, broadcast.LeftConnectPt };
-            var rightDis = line.GetClosestPointTo(broadcast.RightConnectPt, true).DistanceTo(broadcast.RightConnectPt);
-            var leftDis = line.GetClosestPointTo(broadcast.LeftConnectPt, true).DistanceTo(broadcast.LeftConnectPt);
+            var rightDis = line.GetClosestPointTo(broadcast.RightConnectPt, false).DistanceTo(broadcast.RightConnectPt);
+            var leftDis = line.GetClosestPointTo(broadcast.LeftConnectPt, false).DistanceTo(broadcast.LeftConnectPt);
             var connectPt = rightDis > leftDis ? broadcast.LeftConnectPt : broadcast.RightConnectPt;
             var minDis = rightDis > leftDis ? leftDis : rightDis;
             if (Math.Abs(rightDis - leftDis) < 10)
@@ -276,15 +277,13 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     }
                     foreach (var polyInfo in intersectPolys)
                     {
+                        pts.Clear();
                         circle.IntersectWith(polyInfo.Key, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                         if (pts.Count > 0)
                         {
                             var secPoly = CreateNewConnectLine(polyInfo.Key, longestLine[polyInfo.Key], pts[0], connectPt, false);
                             polylines.Add(secPoly);
-                        }
-                        else
-                        {
-                            resPolys.Add(polyInfo.Key);
+                            polylines.Remove(polyInfo.Key);
                         }
                     }
                     polylines.Add(firPoly);
@@ -383,6 +382,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         private Polyline CreateNewConnectLine(Polyline poly, Line longetLine, Point3d pt, Point3d connectPt, bool isMove)
         {
+            if (poly.Length - longetLine.Length < 10)
+            {
+                pt = connectPt;
+            }
             Point3d movePt = longetLine.StartPoint.DistanceTo(pt) < longetLine.EndPoint.DistanceTo(pt) ? longetLine.StartPoint : longetLine.EndPoint;
             Point3d moveConnectPt = poly.StartPoint.DistanceTo(connectPt) < poly.EndPoint.DistanceTo(connectPt) ? poly.StartPoint : poly.EndPoint;
 
@@ -396,12 +399,11 @@ namespace ThMEPElectrical.ConnectPipe.Service
             for (int i = 0; i < poly.NumberOfVertices; i++)
             {
                 var polyPt = poly.GetPoint3dAt(i);
-                if (polyPt.IsEqualTo(movePt))
+                if (polyPt.IsEqualTo(movePt, new Tolerance(5, 5)))
                 {
                     polyPt = pt;
                 }
-
-                if (polyPt.IsEqualTo(moveConnectPt))
+                if (polyPt.IsEqualTo(moveConnectPt, new Tolerance(5, 5)))
                 {
                     polyPt = connectPt;
                 }

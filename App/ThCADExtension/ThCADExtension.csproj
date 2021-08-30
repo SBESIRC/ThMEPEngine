@@ -43,7 +43,6 @@
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />
-    <Compile Include="ThCurveCollectionExtension.cs" />
     <Compile Include="ThDbObjectCollectionExtension.cs" />
     <Compile Include="ThDbWorkingDatabaseSwitch.cs" />
     <Compile Include="ThDynamicBlockUtils.cs" />
@@ -55,7 +54,6 @@
     <Compile Include="ThLinqExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />
-    <Compile Include="ThPickTool.cs" />
     <Compile Include="ThPoint3dCollectionExtensions.cs" />
     <Compile Include="ThMPolygonExtension.cs" />
     <Compile Include="ThPolylineExtension.cs" />

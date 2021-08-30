@@ -31,8 +31,9 @@ namespace ThMEPWSS.Command
         {
             using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
-            {              
-                var frame = SelectFrame(acadDb);
+            {
+                var mode = "";
+                var frame = SelectFrame(acadDb, ref mode);
                 if (frame.Area <= 1e-4)
                 {
                     return;
@@ -46,7 +47,7 @@ namespace ThMEPWSS.Command
                 printService.Erase(pts);
 
                 ICheck checkService = null;
-                if (FireHydrantVM.Parameter.CheckObjectOption== CheckObjectOps.FireHydrant)
+                if (FireHydrantVM.Parameter.CheckObjectOption == CheckObjectOps.FireHydrant)
                 {
                     checkService = new ThCheckFireHydrantService(FireHydrantVM);
                 }
@@ -54,18 +55,18 @@ namespace ThMEPWSS.Command
                 {
                     checkService = new ThCheckFireExtinguisherService(FireHydrantVM);
                 }
-                checkService.Check(acadDb.Database, pts);
+                checkService.Check(acadDb.Database, pts, mode);
                 checkService.Print(acadDb.Database); //仅供测试用，后续删除
 
                 // 校核
                 ThStopWatchService.Start();
                 var regionCheckService = new ThCheckRegionService()
                 {
-                    Covers = checkService.Covers.SelectMany(o=>o.Item3).ToList(),
+                    Covers = checkService.Covers.SelectMany(o => o.Item3).ToList(),
                     Rooms = checkService.Rooms,
                     IsSingleStrands = FireHydrantVM.Parameter.GetProtectStrength,
                 };
-                regionCheckService.Check(); 
+                regionCheckService.Check();
 
                 //输出                
                 printService.Print(regionCheckService.CheckResults);
@@ -73,7 +74,7 @@ namespace ThMEPWSS.Command
                 ThStopWatchService.Print("校核耗时：");
             }
         }
-        private Polyline SelectFrame(AcadDatabase acadDb)
+        private Polyline SelectFrame(AcadDatabase acadDb, ref string mode)
         {
             var frame = new Polyline();
             var options = new PromptKeywordOptions("\n选择区域");
@@ -89,6 +90,7 @@ namespace ThMEPWSS.Command
             {
                 frame = ThWindowInteraction.GetPolyline(
                     PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                mode = "K";
             }
             else
             {
@@ -98,9 +100,10 @@ namespace ThMEPWSS.Command
                     return frame;
                 }
                 var entity = acadDb.Element<Entity>(per.ObjectId);
-                if(entity is Polyline)
+                if (entity is Polyline)
                 {
                     frame = entity as Polyline;
+                    mode = "P";
                 }
             }
             return frame;

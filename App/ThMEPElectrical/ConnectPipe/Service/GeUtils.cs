@@ -17,6 +17,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <param name="distance"></param>
         public static Polyline BufferPoly(this Polyline polyline, double distance)
         {
+            if (polyline.EndPoint.DistanceTo(polyline.StartPoint) < distance)
+            {
+                return polyline;
+            }
             List<Point2d> pts = new List<Point2d>();
             var newPoly = polyline.ExtendPolyline(150);
             //newPoly.ReverseCurve();
@@ -25,7 +29,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
             {
                 pts.Add(polyUp.GetPoint2dAt(i));
             }
-
+           
             var polyDown = newPoly.GetOffsetCurves(-distance)[0] as Polyline;
             for (int i = polyDown.NumberOfVertices - 1; i >= 0; i--)
             {
