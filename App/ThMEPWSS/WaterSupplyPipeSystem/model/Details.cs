@@ -56,7 +56,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 //绘制截止阀
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
+                BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.8, 0.8, 0.8), Math.PI * 3 / 2);
 
             }
 
