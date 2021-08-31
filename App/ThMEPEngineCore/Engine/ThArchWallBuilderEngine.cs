@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
             var archwalllist = Recognize(rawelement, newPts);
             var archwallcollection = archwalllist.Select(o => o.Outline).ToCollection();
             transformer.Reset(archwallcollection);
-            return archwallcollection.Cast<Polyline>().Select(e => ThIfcWall.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            return archwallcollection.Cast<Entity>().Select(e => ThIfcWall.Create(e)).Cast<ThIfcBuildingElement>().ToList();
         }
     }
 }
