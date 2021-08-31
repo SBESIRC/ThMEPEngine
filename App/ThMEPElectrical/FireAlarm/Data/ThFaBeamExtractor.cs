@@ -29,7 +29,7 @@ namespace FireAlarm.Data
         private const string UsePropertyName = "Use";
         private const string DistanceToFlorPropertyName = "BottomDistanceToFloor";
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaBeamExtractor()
@@ -39,6 +39,7 @@ namespace FireAlarm.Data
             ElementLayer = "AI-梁";
             UseDb3Engine = true;
             StoreyInfos = new List<ThStoreyInfo>();
+            Db3ExtractResults = new List<ThRawIfcBuildingElementData>();
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -93,30 +94,29 @@ namespace FireAlarm.Data
         }
         private List<ThIfcBeam> ExtractDb3Beam(Database database, Point3dCollection pts)
         {
-            var beams = new List<ThIfcBeam>();
-            var engine = new ThDB3BeamExtractionEngine();
-            engine.Extract(database);
-            engine.Results.ForEach(o => beams.Add(ThIfcLineBeam.Create(o.Data as ThIfcBeamAnnotation)));
-            beams.ForEach(o => transformer.Transform(o.Outline));
-            if (pts.Count > 0)
+            Db3ExtractResults.ForEach(o => transformer.Transform(o.Geometry));
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(o =>
             {
-                var newPts = new Point3dCollection();
-                pts.Cast<Point3d>().ForEach(o =>
-                {
-                    var pt = new Point3d(o.X, o.Y, o.Z);
-                    transformer.Transform(ref pt);
-                    newPts.Add(pt);
-                });
-                var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(beams.Select(o=>o.Outline).ToCollection());
+                var pt = new Point3d(o.X, o.Y, o.Z);
+                transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            if (newPts.Count > 0)
+            {
+                var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(
+                    Db3ExtractResults.Select(o=>o.Geometry).ToCollection());
                 var pline = new Polyline()
                 {
                     Closed = true,
                 };
                 pline.CreatePolyline(newPts);
                 var queryObjs = beamSpatialIndex.SelectCrossingPolygon(pline);
-                beams = beams.Where(o => queryObjs.Contains(o.Outline)).ToList();
+                Db3ExtractResults = Db3ExtractResults.Where(o => queryObjs.Contains(o.Geometry)).ToList();
             }
-            return beams;
+            var db3BeamEngine = new ThDB3BeamRecognitionEngine();
+            db3BeamEngine.Recognize(Db3ExtractResults, newPts);
+            return db3BeamEngine.Elements.Cast<ThIfcBeam>().ToList();
         }
         private List<ThIfcBeam> ExtractMsBeam(Database database, Point3dCollection pts)
         {

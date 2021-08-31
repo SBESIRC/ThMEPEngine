@@ -1,5 +1,4 @@
-﻿using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
+﻿using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -12,7 +11,7 @@ namespace ThMEPEngineCore.Engine
         public ThDB3ShearWallExtractionVisitor DB3ShearWallVisitor { get; private set; }
         public ThDB3ColumnExtractionVisitor DB3ColumnVisitor { get;private set; }
         public ThDB3WindowExtractionVisitor DB3WindowVisitor { get; private set; }
-        public ThBeamExtractionVisitor BeamVisitor { get; private set; }
+        public ThDB3BeamExtractionVisitor DB3BeamVisitor { get; private set; }
         public ThDB3DoorMarkExtractionVisitor DB3DoorMarkVisitor { get; private set; }
         public ThDB3DoorStoneExtractionVisitor DB3DoorStoneVisitor { get; private set; }
         public ThDB3RailingExtractionVisitor DB3RailingVisitor { get; private set; }
@@ -35,7 +34,7 @@ namespace ThMEPEngineCore.Engine
             {
                 LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
             };
-            BeamVisitor = new ThBeamExtractionVisitor()
+            DB3BeamVisitor = new ThDB3BeamExtractionVisitor()
             {
                 LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
             };

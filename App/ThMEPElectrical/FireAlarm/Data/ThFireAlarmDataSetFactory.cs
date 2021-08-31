@@ -84,7 +84,7 @@ namespace FireAlarm.Data
                     {
                         ElementLayer = "AI-梁",
                         Transformer = Transformer,
-                        Db3ExtractResults = vm.BeamVisitor.Results,
+                        Db3ExtractResults = vm.DB3BeamVisitor.Results,
                     },
                     new ThFaDoorOpeningExtractor()
                     {
@@ -174,7 +174,7 @@ namespace FireAlarm.Data
             extractor.Accept(visitors.DB3ShearWallVisitor);
             extractor.Accept(visitors.DB3ColumnVisitor);
             extractor.Accept(visitors.DB3WindowVisitor);
-            extractor.Accept(visitors.BeamVisitor);
+            extractor.Accept(visitors.DB3BeamVisitor);
             extractor.Accept(visitors.DB3RailingVisitor);
             extractor.Extract(database);
             return visitors;
