@@ -20,6 +20,7 @@ namespace FireAlarm.Data
 {
     public class ThFaShearWallExtractor : ThShearwallExtractor, IGroup, ISetStorey, ITransformer
     {
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThFaShearWallExtractor()
         {
         }
@@ -27,7 +28,7 @@ namespace FireAlarm.Data
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Walls = ExtractDb3Wall(database, pts);
+            var db3Walls = ExtractDb3Wall(pts);
             var localWalls = ExtractMsWall(database, pts);
 
             ThCleanEntityService clean = new ThCleanEntityService();
@@ -49,12 +50,10 @@ namespace FireAlarm.Data
             handleObjs = handlecontain.Handle(handleObjs.Cast<Entity>().ToList()).ToCollection();
             Walls = handleObjs.Cast<Entity>().ToList();
         }
-        private DBObjectCollection ExtractDb3Wall(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
         {
             var db3Walls = new DBObjectCollection();
-            var db3ShearWallExtractionEngine = new ThDB3ShearWallExtractionEngine();
-            db3ShearWallExtractionEngine.Extract(database); //提取跟NTS算法没有关系
-            db3ShearWallExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var wallEngine = new ThDB3ShearWallRecognitionEngine();
             var newPts = new Point3dCollection();
             pts.Cast<Point3d>().ForEach(p =>
@@ -63,7 +62,7 @@ namespace FireAlarm.Data
                 Transformer.Transform(ref pt);
                 newPts.Add(pt);
             });
-            wallEngine.Recognize(db3ShearWallExtractionEngine.Results, newPts);
+            wallEngine.Recognize(Db3ExtractResults, newPts);
             db3Walls = wallEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
 
             return db3Walls;

@@ -19,6 +19,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using System.Text.RegularExpressions;
 using System.Linq;
+using DotNetARX;
+using GeometryExtensions;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPEngineCore.Test
 {
@@ -425,6 +428,111 @@ namespace ThMEPEngineCore.Test
                 }
             }
             return results;
+        }
+
+        [CommandMethod("TIANHUACAD", "THTestOldBuildingExtractor", CommandFlags.Modal)]
+        public void THTestOldBuildingExtractor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                ThStopWatchService.Start();
+                //建筑墙
+                var db3ArchWallEngine = new ThDB3ArchWallExtractionEngine();
+                var shearWallEngine = new ThShearWallExtractionEngine();
+                var db3ShearWallEngine = new ThDB3ShearWallExtractionEngine();
+                var columnEngine = new ThColumnExtractionEngine();
+                var db3ColumnEngine = new ThDB3ColumnExtractionEngine();
+
+
+                db3ArchWallEngine.Extract(acadDatabase.Database);
+                shearWallEngine.Extract(acadDatabase.Database);
+                db3ShearWallEngine.Extract(acadDatabase.Database);
+                columnEngine.Extract(acadDatabase.Database);
+                db3ColumnEngine.Extract(acadDatabase.Database);
+                ThStopWatchService.Stop();
+                var shearWallCount = shearWallEngine.Results.Count + db3ShearWallEngine.Results.Count;
+                var columnCount = columnEngine.Results.Count + db3ColumnEngine.Results.Count;
+                Active.Editor.WriteMessage("\n建筑墙数量：" + db3ArchWallEngine.Results.Count + "个");
+                Active.Editor.WriteMessage("\n剪力墙数量：" + shearWallCount + "个");
+                Active.Editor.WriteMessage("\n柱子数量：" + columnCount + "个");
+                Active.Editor.WriteMessage("\n耗时："+ ThStopWatchService.TimeSpan()+"秒");
+                //results.Cast<Entity>().ForEach(o =>
+                //{
+                //    acadDatabase.ModelSpace.Add(o);
+                //    o.SetDatabaseDefaults();
+                //});
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THTestNewBuildingExtractor", CommandFlags.Modal)]
+        public void THTestNewBuildingExtractor()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                ThStopWatchService.Start();
+                var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
+                {
+                    LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                };
+                var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
+                {
+                    LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                };
+                var shearWallVisitor = new ThShearWallExtractionVisitor()
+                {
+                    LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(acdb.Database),
+                };
+                var db3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor();
+                var columnVisitor = new ThColumnExtractionVisitor()
+                {
+                    LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(acdb.Database),
+                };
+                var db3ColumnVisitor = new ThDB3ColumnExtractionVisitor();
+                var extractor = new ThBuildingElementExtractor();
+                extractor.Accept(archWallVisitor);
+                extractor.Accept(pcArchWallVisitor);
+                extractor.Accept(shearWallVisitor);
+                extractor.Accept(db3ShearWallVisitor);
+                extractor.Accept(columnVisitor);
+                extractor.Accept(db3ColumnVisitor);
+                extractor.Extract(acdb.Database);
+
+                ThStopWatchService.Stop();
+                Active.Editor.WriteMessage("\n建筑墙数量：" + 
+                    (archWallVisitor.Results.Count+ pcArchWallVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n剪力墙数量：" +
+                    (shearWallVisitor.Results.Count + db3ShearWallVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n柱子数量：" +
+                    (columnVisitor.Results.Count + db3ColumnVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
+                Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
+            }
         }
     }
 }

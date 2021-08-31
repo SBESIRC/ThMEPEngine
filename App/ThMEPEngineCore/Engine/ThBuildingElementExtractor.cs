@@ -8,7 +8,7 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThBuildingElementExtractor
     {
-        private List<ThBuildingElementExtractionVisitor> Visitors { get; set; }
+        protected List<ThBuildingElementExtractionVisitor> Visitors { get; set; }
 
         public ThBuildingElementExtractor()
         {
@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Engine
             Visitors.Add(visitor);
         }
 
-        public void Extract(Database database)
+        public virtual void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public void ExtractFromMS(Database database)
+        public virtual void ExtractFromMS(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private List<ThRawIfcBuildingElementData> DoExtract(Entity e, ThBuildingElementExtractionVisitor visitor)
+        protected List<ThRawIfcBuildingElementData> DoExtract(Entity e, ThBuildingElementExtractionVisitor visitor)
         {
             var results = new List<ThRawIfcBuildingElementData>();
             if (visitor.IsBuildElement(e) && visitor.CheckLayerValid(e))

@@ -9,6 +9,8 @@ using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using NFox.Cad;
 
 namespace FireAlarm.Data
 {
@@ -24,6 +26,7 @@ namespace FireAlarm.Data
             // ArchitectureWall、Shearwall、Column、Window、Room
             // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
             UpdateTransformer(collection);
+            var vm = Extract(database); // visitor manager,提取的是原始数据
 
             //先提取楼层框线
             var storeyExtractor = new ThFaEStoreyExtractor()
@@ -52,21 +55,25 @@ namespace FireAlarm.Data
                     {
                         ElementLayer = "AI-墙",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3ArchWallVisitor.Results,
                     },
                     new ThFaShearWallExtractor()
                     {
                         ElementLayer = "AI-剪力墙",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3ShearWallVisitor.Results,
                     },
                     new ThFaColumnExtractor()
                     {
                         ElementLayer = "AI-柱",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3ColumnVisitor.Results,
                     },
                     new ThFaWindowExtractor()
                     {
                         ElementLayer="AI-窗",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3WindowVisitor.Results,
                     },
                     new ThFaRoomExtractor()
                     {
@@ -77,6 +84,7 @@ namespace FireAlarm.Data
                     {
                         ElementLayer = "AI-梁",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.BeamVisitor.Results,
                     },
                     new ThFaDoorOpeningExtractor()
                     {
@@ -87,6 +95,7 @@ namespace FireAlarm.Data
                     {
                         ElementLayer = "AI-栏杆",
                         Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3RailingVisitor.Results,
                     },
                     new ThFaFireproofshutterExtractor()
                     {
@@ -155,6 +164,20 @@ namespace FireAlarm.Data
                     iTransformer.Reset();
                 }
             });
+        }
+
+        private ThBuildingElementVisitorManager Extract(Database database)
+        {
+            var visitors = new ThBuildingElementVisitorManager(database);
+            var extractor = new ThBuildingElementExtractorEx();
+            extractor.Accept(visitors.DB3ArchWallVisitor);
+            extractor.Accept(visitors.DB3ShearWallVisitor);
+            extractor.Accept(visitors.DB3ColumnVisitor);
+            extractor.Accept(visitors.DB3WindowVisitor);
+            extractor.Accept(visitors.BeamVisitor);
+            extractor.Accept(visitors.DB3RailingVisitor);
+            extractor.Extract(database);
+            return visitors;
         }
         protected override ThMEPDataSet BuildDataSet()
         {

@@ -68,14 +68,20 @@ namespace ThMEPEngineCore.Engine
 
             // 后处理
             var buildingElements = Recognize(columns, newPts);
+            var handleColumns = Union(buildingElements);
+
+            // 回复到原位置
+            handleColumns.ForEach(c => transformer.Reset(c.Outline));
+
+            return handleColumns.Cast<ThIfcBuildingElement>().ToList();
+        }
+        public List<ThIfcColumn> Union(List<ThIfcBuildingElement> buildingElements)
+        {
             var handleColumns = buildingElements.Select(o => o.Outline).ToCollection();
             handleColumns = Buffer(handleColumns, -BUFFERTOLERANCE);
             handleColumns = Preprocess(handleColumns);
             handleColumns = Buffer(handleColumns, BUFFERTOLERANCE);
-
-            // 回复到原位置
-            transformer.Reset(handleColumns);
-            return handleColumns.Cast<Polyline>().Select(e => ThIfcColumn.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            return handleColumns.Cast<Polyline>().Select(o => ThIfcColumn.Create(o)).ToList();
         }
         private DBObjectCollection Preprocess(DBObjectCollection columns)
         {

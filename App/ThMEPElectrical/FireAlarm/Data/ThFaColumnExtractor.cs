@@ -21,6 +21,7 @@ namespace FireAlarm.Data
     public class ThFaColumnExtractor :ThColumnExtractor, IGroup, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaColumnExtractor()
@@ -29,7 +30,7 @@ namespace FireAlarm.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Columns = ExtractDb3Column(database, pts);
+            var db3Columns = ExtractDb3Column(pts);
             var localColumns = ExtractMsColumn(database, pts);
 
             ThCleanEntityService clean = new ThCleanEntityService();
@@ -51,12 +52,10 @@ namespace FireAlarm.Data
             handleObjs = handlecontain.Handle(handleObjs.Cast<Entity>().ToList()).ToCollection();
             Columns = handleObjs.Cast<Polyline>().ToList();
         }
-        private DBObjectCollection ExtractDb3Column(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
         {
             var db3Columns = new DBObjectCollection();
-            var db3ColumnExtractionEngine = new ThDB3ColumnExtractionEngine();
-            db3ColumnExtractionEngine.Extract(database);;
-            db3ColumnExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var columnEngine = new ThDB3ColumnRecognitionEngine();
             var newPts = new Point3dCollection();
             pts.Cast<Point3d>().ForEach(p =>
@@ -65,7 +64,7 @@ namespace FireAlarm.Data
                 Transformer.Transform(ref pt);
                 newPts.Add(pt);
             });
-            columnEngine.Recognize(db3ColumnExtractionEngine.Results, newPts);
+            columnEngine.Recognize(Db3ExtractResults, newPts);
             db3Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
             return db3Columns;
         }

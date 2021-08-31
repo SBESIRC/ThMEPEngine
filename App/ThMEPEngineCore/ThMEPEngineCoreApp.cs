@@ -159,7 +159,10 @@ namespace ThMEPEngineCore
                     }
                     else if (result3.StringResult == "平台")
                     {
-                        var db3Engine = new ThDB3ColumnExtractionEngine();
+                        var db3Engine = new ThDB3ColumnExtractionEngine()
+                        {
+                            RangePts = frame.Vertices(),
+                        };
                         db3Engine.Extract(acadDatabase.Database, frame);
                         db3Engine.Results.Select(o => o.Geometry).ForEach(o =>
                         {

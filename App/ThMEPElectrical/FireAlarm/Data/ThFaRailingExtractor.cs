@@ -21,7 +21,7 @@ namespace FireAlarm.Data
     public class ThFaRailingExtractor :ThRailingExtractor, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaRailingExtractor()
@@ -30,7 +30,7 @@ namespace FireAlarm.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Railings = ExtractDb3Railing(database, pts);
+            var db3Railings = ExtractDb3Railing(pts);
             var localRailings = ExtractMsRailing(database, pts);
 
             //对Clean的结果进一步过虑
@@ -44,12 +44,10 @@ namespace FireAlarm.Data
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             Railing = handleObjs.Cast<Polyline>().ToList();
         }
-        private DBObjectCollection ExtractDb3Railing(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Railing(Point3dCollection pts)
         {
             var db3Railings = new DBObjectCollection();
-            var db3RailingExtractionEngine = new ThDB3RailingExtractionEngine();
-            db3RailingExtractionEngine.Extract(database);
-            db3RailingExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
 
             var railingEngine = new ThDB3RailingRecognitionEngine();
             var newPts = new Point3dCollection();
@@ -59,7 +57,7 @@ namespace FireAlarm.Data
                 Transformer.Transform(ref pt);
                 newPts.Add(pt);
             });
-            railingEngine.Recognize(db3RailingExtractionEngine.Results, newPts);
+            railingEngine.Recognize(Db3ExtractResults, newPts);
             db3Railings = railingEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
 
             return db3Railings;

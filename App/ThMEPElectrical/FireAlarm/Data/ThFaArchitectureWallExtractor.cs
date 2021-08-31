@@ -22,6 +22,11 @@ namespace FireAlarm.Data
     public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IGroup, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
+        /// <summary>
+        /// 从图纸中获取的原始建筑墙元素
+        /// 没有偏移过的
+        /// </summary>
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
 
         public ThFaArchitectureWallExtractor()
         {
@@ -30,7 +35,8 @@ namespace FireAlarm.Data
         public override void Extract(Database database, Point3dCollection pts)
         {
             //提取,并移动到原点
-            var db3Walls = ExtractDb3Wall(database, pts);
+            var db3Walls = ExtractDb3Wall(pts);
+
             var localWalls = ExtractMsWall(database, pts);
 
             //清洗
@@ -51,13 +57,11 @@ namespace FireAlarm.Data
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             Walls = handleObjs.Cast<Entity>().ToList();
         }
-        private DBObjectCollection ExtractDb3Wall(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
             var db3Walls = new DBObjectCollection();
-            var db3ArchWallExtractionEngine = new ThDB3ArchWallExtractionEngine();
-            db3ArchWallExtractionEngine.Extract(database); //提取跟NTS算法没有关系
-            db3ArchWallExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var newPts = new Point3dCollection();
             pts.Cast<Point3d>().ForEach(p =>
             {
@@ -66,7 +70,7 @@ namespace FireAlarm.Data
                 newPts.Add(pt);
             });
             var wallEngine = new ThDB3ArchWallRecognitionEngine();
-            wallEngine.Recognize(db3ArchWallExtractionEngine.Results, newPts);
+            wallEngine.Recognize(Db3ExtractResults, newPts);
             db3Walls = wallEngine.Elements.Select(o => o.Outline).ToCollection();
 
             return db3Walls;
