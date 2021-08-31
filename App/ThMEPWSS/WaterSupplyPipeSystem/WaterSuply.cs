@@ -406,12 +406,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             var eptX = spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("宽度"));
             var eptY = spt.Y - Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("高度"));
             var LineXList = new List<double>();
-            var index = 1;
             for (int i = 0; i < sobj.ObjectId.GetDynProperties().Count; i++)
             {
                 if (sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains("分割") &&
                     sobj.ObjectId.GetDynProperties()[i].PropertyName.Contains(" X"))
                 {
+                    var index = int.Parse(sobj.ObjectId.GetDynProperties()[i].PropertyName[2].ToString());
                     var SplitX = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X"));
                     if (SplitX < 0)
                     {
@@ -423,7 +423,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     }
                     
                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
-                    index += 1;
+                    
                 }
             }
 
@@ -520,7 +520,15 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         {
             StartNum = 100;
             int AreaNums = 0;
-            var households = new int[FloorAreaList.Count, FloorAreaList[0].Count];
+            var areaNum = 1;
+            for(int i = 0; i < FloorAreaList.Count; i++)
+            {
+                if(FloorAreaList[i].Count()> areaNum)
+                {
+                    areaNum = FloorAreaList[i].Count();
+                }
+            }
+            var households = new int[FloorAreaList.Count, areaNum];
             for (int i = 0; i < FloorAreaList.Count; i++)
             {
                 var areaNums = 0;

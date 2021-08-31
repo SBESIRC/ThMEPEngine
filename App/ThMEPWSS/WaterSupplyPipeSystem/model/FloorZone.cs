@@ -14,6 +14,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             StartPt = startPt;
             EndPt = endPt;
             LineXList = lineXList;
+            LineXList.Sort();
         }
         public Point3d[] CreatePolyLine(double X1, double X2, double Y1, double Y2)
         {

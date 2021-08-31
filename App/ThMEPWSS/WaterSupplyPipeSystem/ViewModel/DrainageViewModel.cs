@@ -48,7 +48,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             using (var acadDatabase = AcadDatabase.Active())
             {
                 SelectedArea = Common.Utils.SelectAreas();
-                //var frames = FramedReadUtil.ReadAllFloorFramed();//赵工的提取方法
                 var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎
                 storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
                 if (storeysRecEngine.Elements.Count == 0)
