@@ -1,7 +1,9 @@
 ﻿using System;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -21,6 +23,8 @@ namespace ThMEPElectrical.BlockConvert
         /// 位置变换
         /// </summary>
         public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+
+        public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThRawIfcDistributionElementData> list, Scale3d scale);
 
         /// <summary>
         /// 旋转角度

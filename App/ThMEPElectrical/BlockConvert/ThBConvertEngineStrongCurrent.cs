@@ -1,16 +1,16 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -32,18 +32,23 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void MatchProperties(ObjectId blkRef, ThBlockReferenceData source)
         {
-            var target = new ThBlockReferenceData(blkRef);
-            FillProperties(target, source);
-            if (source.EffectiveName.Contains("风机") ||
-                source.EffectiveName.Contains("组合式空调器") ||
-                source.EffectiveName.Contains("暖通其他设备标注") ||
-                source.EffectiveName.Contains("风冷热泵") ||
-                source.EffectiveName.Contains("冷水机组") ||
-                source.EffectiveName.Contains("冷却塔"))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
-                AdjustLoadLabel(target);
+                var target = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetData = new ThBlockReferenceData(blkRef);
+                FillProperties(targetData, source);
+                blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(targetData.Attributes));
+                if (source.EffectiveName.Contains("风机") ||
+                    source.EffectiveName.Contains("组合式空调器") ||
+                    source.EffectiveName.Contains("暖通其他设备标注") ||
+                    source.EffectiveName.Contains("风冷热泵") ||
+                    source.EffectiveName.Contains("冷水机组") ||
+                    source.EffectiveName.Contains("冷却塔"))
+                {
+                    ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(target);
+                }
             }
-            blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(target.Attributes));
+                
         }
 
         public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
@@ -93,6 +98,73 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        {
+            // 先做泵的常规处理
+            TransformByPosition(blkRef, srcBlockData);
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
+                var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
+                var number = srcBlockData.Attributes["编号"];
+                foreach (var block in list)
+                {
+                    var blockAttributes = (block.Data as ThBlockReferenceData).Attributes;
+                    var blockProperties = (block.Data as ThBlockReferenceData).CustomProperties;
+                    if (blockAttributes.ContainsKey("集水井编号") && (string)blockAttributes["集水井编号"] == number)
+                    {
+                        var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                                    "0",
+                                    "水泵标注",
+                                    srcBlockDataPosition,
+                                    scale,
+                                    0.0,
+                                    new Dictionary<string, string>(srcBlockData.Attributes));
+                        var pumpLabel = acadDatabase.Element<BlockReference>(objId, true);
+                        var pumpLabelData = new ThBlockReferenceData(objId);
+                        var pumpAttributes = pumpLabelData.Attributes;
+                        if (pumpAttributes.ContainsKey("水泵用途"))
+                        {
+                            pumpAttributes["水泵用途"] = ("潜水泵");
+                        }
+                        if (blockAttributes.ContainsKey("电量") && blockAttributes.ContainsKey("井内水泵台数") && pumpAttributes.ContainsKey("水泵电量"))
+                        {
+                            pumpAttributes["水泵电量"] = blockAttributes["井内水泵台数"] + "x" + blockAttributes["电量"] + "kW";
+                        }
+                        if (blockProperties.Contains("水泵配置") && pumpAttributes.ContainsKey("主备关系"))
+                        {
+                            pumpAttributes["主备关系"] = (string)blockProperties.GetValue("水泵配置");
+                        }
+                        
+                        objId.UpdateAttributesInBlock(new Dictionary<string, string>(pumpAttributes));
+                        ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(pumpLabel);
+                        if (blockAttributes.ContainsKey("井内水泵台数") && blockProperties.Contains("水泵配置"))
+                        {
+                            var quantity = blockAttributes["井内水泵台数"];
+                            var configuration = (string)blockProperties.GetValue("水泵配置");
+                            var sum = 0;
+                            foreach (var c in configuration)
+                            {
+                                var num = ThStringTools.ChineseToNumber(c.ToString());
+                                if (num > -1)
+                                {
+                                    sum += num;
+                                }
+                            }
+                            if (quantity != sum.ToString())
+                            {
+                                var obb = pumpLabel.GetBlockOBB();
+                                ThBConvertUtils.InsertRevcloud(obb);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+        }
+        
         /// <summary>
         /// 过滤图层后，按几何中心调整位置，并设置标注位置
         /// </summary>
@@ -252,7 +324,7 @@ namespace ThMEPElectrical.BlockConvert
                 var srcScale = srcBlockData.ScaleFactors;
                 var scale = new Scale3d(targetScale.X * srcScale.X, targetScale.Y * srcScale.Y, targetScale.Z * srcScale.Z);
                 var mirror = Matrix3d.Identity;
-                if (scale.X < 0) 
+                if (scale.X < 0)
                 {
                     if (scale.Y < 0)
                     {
@@ -325,56 +397,6 @@ namespace ThMEPElectrical.BlockConvert
             {
                 target.Attributes[ThBConvertCommon.PROPERTY_LOAD_USAGE] = ThBConvertUtils.LoadUsage(source);
             }
-
-            // 
-        }
-
-        private void AdjustLoadLabel(ThBlockReferenceData targetBlockData)
-        {
-            var entitiesClone = new DBObjectCollection();
-            double textMaxWidth = double.MinValue;
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(targetBlockData.Database))
-            {
-                var entities = new DBObjectCollection();
-                var blkref = acadDatabase.Element<BlockReference>(targetBlockData.ObjId);
-                blkref.Explode(entities);
-                entities = entities.Cast<Entity>()
-                        .Where(e => e.Layer == "E-UNIV-NOTE")
-                        .Where(e => e is DBText)
-                        .ToCollection();
-                var stringList = targetBlockData.Attributes.Values;
-                for (int i = 0; i < entities.Count; i++) 
-                {
-                    foreach (string str in stringList)
-                    {
-                        var mText = new MText();
-                        mText.Contents = str;
-                        mText.TextStyleId = (entities[i] as DBText).TextStyleId;
-                        mText.TextHeight = (entities[i] as DBText).Height;
-
-                        var pt1 = new Point2d((entities[i] as DBText).Position.X, (entities[i] as DBText).Position.Y);
-                        var pt2 = new Point2d(pt1.X + mText.ActualWidth, pt1.Y);
-                        var pt3 = new Point2d(pt2.X, pt2.Y + mText.ActualHeight);
-                        var pt4 = new Point2d(pt1.X, pt1.Y + mText.ActualHeight);
-                        var pts = new Point2dCollection() { pt1, pt2, pt3, pt4 };
-                        var obb = ThDrawTool.CreatePolyline(pts);
-                        var mt = Matrix3d.Rotation((entities[i] as DBText).Rotation, (entities[i] as DBText).Normal, (entities[i] as DBText).Position);
-                        obb.TransformBy(mt);
-                        var width = GetWidth(obb);
-                        if (width > textMaxWidth)
-                        {
-                            textMaxWidth = width;
-                        }
-                    }
-                }
-            }
-            textMaxWidth = textMaxWidth > 1600 ? (textMaxWidth + 500) : 2100;
-            targetBlockData.CustomProperties.SetValue("标注表格宽度", textMaxWidth);
-        }
-
-        private double GetWidth(Polyline textObb)
-        {
-            return textObb.ToLines().OrderByDescending(o => o.Length).First().Length;
         }
     }
 }
