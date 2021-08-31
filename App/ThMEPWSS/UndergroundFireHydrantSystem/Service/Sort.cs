@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class Sort
+    public static class Sort
     {
-        public static void PointsSort(ref List<Point3d> ptls)
+        public static void PointsSort(this List<Point3d> ptls)
         {
             if(ptls.Count >= 2)
             {
@@ -25,7 +25,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void LinesSort(ref List<Line> lineList)
+        public static void LinesSort(this List<Line> lineList)
         {
             if(lineList.Count >= 2)
             {

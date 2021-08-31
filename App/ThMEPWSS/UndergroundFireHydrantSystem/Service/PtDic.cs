@@ -11,7 +11,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class PtDic
+    public static class PtDic
     {
         public static void CreatePtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
         {
@@ -21,6 +21,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
+                if(pt1._pt.DistanceTo(new Point3d(38403008301.5102, 2490168002.18198,0)) < 5)
+                {
+                    ;
+                }
+                if (pt2._pt.DistanceTo(new Point3d(38403008301.5102, 2490168002.18198, 0)) < 5)
+                {
+                    ;
+                }
                 if (pt1.Equals(new Point3dEx(0, 0, 0)) || pt2.Equals(new Point3dEx(0, 0, 0)))
                 {
                     continue;
@@ -69,27 +77,64 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             double tolerance = 30;
             //管线添加
             fireHydrantSysIn.LeadLineDic = new Dictionary<Line, List<Line>>();//清空  当前点和邻接点字典对
-            foreach (var l1 in lineList)
+            Line l1, l2;
+
+            for(int i = 0; i < lineList.Count - 1; i++)
             {
-                var l1Adjs = new List<Line>();
-                foreach (var l2 in lineList)
+                l1 = lineList[i];
+                for(int j = i + 1; j < lineList.Count; j++)
                 {
-                    if (l2.Equals(l1)) continue;
-                    if(l2.StartPoint.DistanceTo(l1.StartPoint) < tolerance ||
+                    l2 = lineList[j];
+                    if (l2.StartPoint.DistanceTo(l1.StartPoint) < tolerance ||
                        l2.EndPoint.DistanceTo(l1.StartPoint) < tolerance ||
                        l2.StartPoint.DistanceTo(l1.EndPoint) < tolerance ||
                        l2.EndPoint.DistanceTo(l1.EndPoint) < tolerance)
                     {
-                        l1Adjs.Add(l2);
+                        fireHydrantSysIn.AddAdjsDic(l1, l2);
+                        fireHydrantSysIn.AddAdjsDic(l2, l1);
                         continue;
                     }
-                    if(l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.StartPoint) < 10 ||
+                    if (l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.StartPoint) < 10 ||
                        l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.EndPoint) < 10)
                     {
-                        l1Adjs.Add(l2);
+                        fireHydrantSysIn.AddAdjsDic(l1, l2);
+                        fireHydrantSysIn.AddAdjsDic(l2, l1);
                     }
                 }
-                fireHydrantSysIn.LeadLineDic.Add(l1, l1Adjs);
+            }
+            //foreach (var l1 in lineList)
+            //{
+            //    var l1Adjs = new List<Line>();
+            //    foreach (var l2 in lineList)
+            //    {
+            //        if (l2.Equals(l1)) continue;
+            //        if(l2.StartPoint.DistanceTo(l1.StartPoint) < tolerance ||
+            //           l2.EndPoint.DistanceTo(l1.StartPoint) < tolerance ||
+            //           l2.StartPoint.DistanceTo(l1.EndPoint) < tolerance ||
+            //           l2.EndPoint.DistanceTo(l1.EndPoint) < tolerance)
+            //        {
+            //            l1Adjs.Add(l2);
+            //            continue;
+            //        }
+            //        if(l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.StartPoint) < 10 ||
+            //           l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.EndPoint) < 10)
+            //        {
+            //            l1Adjs.Add(l2);
+            //        }
+            //    }
+            //    fireHydrantSysIn.LeadLineDic.Add(l1, l1Adjs);
+            //}
+        }
+
+        private static void AddAdjsDic(this FireHydrantSystemIn fireHydrantSysIn, Line l1, Line l2)
+        {
+            if(fireHydrantSysIn.LeadLineDic.ContainsKey(l1))
+            {
+                fireHydrantSysIn.LeadLineDic[l1].Add(l2);
+            }
+            else
+            {
+                fireHydrantSysIn.LeadLineDic.Add(l1, new List<Line>() { l2 });
             }
         }
 
@@ -108,7 +153,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 foreach (var line in lineList)
                 {
                     var ang = line.Angle;
-                    if (PointAngle.IsParallelLine(ang, dbtext.Rotation) &&
+                    if (ang.IsParallelTo(dbtext.Rotation) &&
                        line.GetClosestPointTo(dbtext.Position, false).DistanceTo(checkPt) < 400)
                     {
                         if (!fireHydrantSysIn.PtDNDic.ContainsKey(new LineSegEx(line)))
@@ -124,8 +169,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
+            int indxx = 0;
             foreach (var pt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
             {
+                ;
+                if(indxx > 600)
+                {
+                    ;
+                }
+                indxx += 1;
                 var tpt = new Point3dEx(new Point3d());
                 if(!pt.GetNearestPt(ref tpt, pointList))
                 {
@@ -505,7 +557,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 else//进行排序
                 {
                     var ptList = labelPtDic[l];
-                    Sort.PointsSort(ref ptList);
+                    ptList.PointsSort();
                     labelPtDic.Remove(l);
                     labelPtDic.Add(l, ptList);
                 }
@@ -531,7 +583,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
 
                 }
-                Sort.LinesSort(ref listLine);
+                listLine.LinesSort();
                 labelLineDic.Add(lk, listLine);
             }
             return labelLineDic;
@@ -670,7 +722,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
-
 
         public static void CreateBranchDNDic(ref FireHydrantSystemIn fireHydrantSysIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {

@@ -1,16 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.CADExtensionsNs;
+using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 { 
-    class PointCompute
+    public static class PointCompute
     {
         public static Line PointInLine(Point3d pt, List<Line> lineList, double toleranceForPointIsLineTerm = 10, double toleranceForPointOnLine = 1.0)
         {
@@ -30,34 +27,51 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     }
                 }
             }
-            
             return new Line();
         }
 
-        public static Line PointOnLine(Point3d pt, List<Line> lineList, double Tolerance = 10.0)
+        public static Point3dEx PointOnLine(this Point3d pt, List<Line> lineList, double angle, double Tolerance = 10.0)
         {
             double disTorlerance = 100;
             foreach (var line in lineList)
             {
-                var isOnLine = line.PointOnLine(pt, true, Tolerance);//判断点是否在延长线上
-                if (isOnLine)//点在延长线上
+                if (!angle.IsParallelTo(line.Angle, 0.35))//判断是否平行
                 {
-                    if(line.PointOnLine(pt, false, Tolerance))//点在线上
+                    continue;
+                }
+                var isOnLine = line.PointOnLine(pt, true, Tolerance);//判断点是否在延长线上
+                if (isOnLine)//点在线上
+                {
+                    if(line.PointOnLine(pt, false, Tolerance))//点在线内部上
                     {
-                        return line;//直接返回
+                        if(pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint))
+                        {
+                            return new Point3dEx(line.StartPoint);
+                        }
+                        else
+                        {
+                            return new Point3dEx(line.EndPoint);
+                        }
                     }
-                    else//点不在线上
+                    else//点在延长线上
                     {
                         if(pt.DistanceTo(line.StartPoint) < disTorlerance || pt.DistanceTo(line.EndPoint) < disTorlerance)
                         {
+                            if (pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint))
+                            {
+                                return new Point3dEx(line.StartPoint);
+                            }
+                            else
+                            {
+                                return new Point3dEx(line.EndPoint);
+                            }
                             //距离小于100返回
-                            return line;
                         }
                     }
                 }
             }
 
-            return new Line();
+            return new Point3dEx();
         }
 
         public static bool PointIsLineTerm(Point3d pt1, Line line, double tolerance = 10.0)
@@ -95,10 +109,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public static bool IsSecondLoop(Point3dEx pt1, Point3dEx pt2, double angle)
         {
-            double Tolerance = 0.035;//弧度制
             double ang = PointAngle.ComputeAngle(pt1._pt, pt2._pt);
-            var flag = Math.Abs(angle - ang) < Tolerance || Math.Abs(Math.Abs(angle - ang) - 2 * Math.PI) < Tolerance;
-            return flag;
+            return angle.IsParallelTo(ang);
         }
     }
 }

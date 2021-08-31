@@ -200,8 +200,38 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var textMark1 = ThTextSet.ThText(new Point3d(ptStart.X - 340, ptStart.Y - 180, 0), markList[rstPath.First()]);
-                var textMark2 = ThTextSet.ThText(new Point3d(stPt.X + 120, stPt.Y - 180, 0), markList[rstPath.Last()]);
+                string str1 = "";
+                string str2 = "";
+                if(!markList.ContainsKey(rstPath.First()))
+                {
+                    foreach(var pt in markList.Keys)
+                    {
+                        if(pt._pt.DistanceTo(rstPath.First()._pt) < 5)
+                        {
+                            str1 = markList[pt];
+                        }
+                    }
+                }
+                else
+                {
+                    str1 = markList[rstPath.First()];
+                }
+                if (!markList.ContainsKey(rstPath.Last()))
+                {
+                    foreach (var pt in markList.Keys)
+                    {
+                        if (pt._pt.DistanceTo(rstPath.Last()._pt) < 5)
+                        {
+                            str2 = markList[pt];
+                        }
+                    }
+                }
+                else
+                {
+                    str2 = markList[rstPath.Last()];
+                }
+                var textMark1 = ThTextSet.ThText(new Point3d(ptStart.X - 340, ptStart.Y - 180, 0), str1);
+                var textMark2 = ThTextSet.ThText(new Point3d(stPt.X + 120, stPt.Y - 180, 0), str2);
 
                 fireHydrantSysOut.TextList.Add(textMark1);
                 fireHydrantSysOut.TextList.Add(textMark2);

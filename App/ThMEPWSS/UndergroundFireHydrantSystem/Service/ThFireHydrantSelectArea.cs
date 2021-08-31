@@ -21,20 +21,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return ptCollect;
         }
 
-        public static Point3dCollection CreateArea(List<Point3d> PtList)
-        {
-            var ptNum = new Point3d[5];
-            ptNum[0] = PtList[0];
-            ptNum[2] = PtList[2];
-            ptNum[4] = PtList[0];
-            ptNum[1] = PtList[1];
-            ptNum[3] = PtList[3];
-
-            var ptCollect = new Point3dCollection(ptNum);
-
-            return ptCollect;
-        }
-
         public static Point3dCollection CreateArea(Line line)
         {
             var pt1 = new Point3d();

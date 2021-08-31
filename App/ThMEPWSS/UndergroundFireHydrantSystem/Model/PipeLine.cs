@@ -53,7 +53,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
         }
-        public static void AddPipeLine(DBObjectCollection dbObjs, ref FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList, ref List<Line> lineList)
+        public static void AddPipeLine(DBObjectCollection dbObjs, ref FireHydrantSystemIn fireHydrantSysIn, 
+            ref List<Point3dEx> pointList, ref List<Line> lineList)
         {
             foreach (var f in dbObjs)
             {
@@ -181,7 +182,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             PipeLineSplit(ref lineList, valveList);
         }
 
-
         public static Point3dCollection GetRect(Point3d pt1, Point3d pt2)
         {
             double gap = 300;
@@ -229,7 +229,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     continue;
                 }
                 LineOnLine.LineSplit(valve, pipeLine, ref pipeLineList);
-
             }
         }
     }

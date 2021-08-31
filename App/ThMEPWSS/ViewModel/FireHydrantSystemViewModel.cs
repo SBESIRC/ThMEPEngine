@@ -3,9 +3,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
-using static ThMEPWSS.UndergroundFireHydrantSystem.Model.Block;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -32,7 +30,7 @@ namespace ThMEPWSS.ViewModel
                     }
                     using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
                     {
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", WaterSuplyBlockNames.LoopMark,
+                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管标记",
                                     pt.Value, new Scale3d(1, 1, 1), 0);
                     }
                 }
@@ -58,13 +56,11 @@ namespace ThMEPWSS.ViewModel
                         var valueDic = new Dictionary<string, string>();
                         valueDic.Add("节点1", "A");
                         valueDic.Add("节点2", "A'");
-                        var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", WaterSuplyBlockNames.LoopNodeMark,
+                        var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记",
                                     pt.Value, new Scale3d(1, 1, 1), 0, valueDic);
                     }
                 }
             }
         }
-
-        
     }
 }
