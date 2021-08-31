@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 
@@ -118,6 +119,11 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
             {
                 bool moveRes = true;
                 Point3d newPosition = spray.Position + dir * length;
+                Line checkLine = new Line(newPosition, spray.Position);
+                if (holes.Any(x => x.Intersects(checkLine)))
+                {
+                    return false;
+                }
 
                 CheckService checkService = new CheckService();
                 var aroundSprays = spray.GetAroundSprays(allSprays);
