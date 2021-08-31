@@ -17,6 +17,13 @@ namespace ThCADCore.NTS
             return voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory);
         }
 
+        public static GeometryCollection VoronoiDiagram(this Polygon polygon, double distanceTolerance)
+        {
+            var voronoiDiagram = new VoronoiDiagramBuilder();
+            voronoiDiagram.SetSites(Densifier.Densify(polygon, distanceTolerance));
+            return voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory);
+        }
+
         public static DBObjectCollection VoronoiTriangulation(this Polyline polyline, double distanceTolerance)
         {
             var objs = new DBObjectCollection();

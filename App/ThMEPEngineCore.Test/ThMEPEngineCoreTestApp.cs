@@ -417,10 +417,10 @@ namespace ThMEPEngineCore.Test
             {
                 string line = "";
                 while ((line = sr.ReadLine()) != null)
-                {                    
+                {
                     List<double> values = new List<double>();
                     Regex reg = new Regex(@"\d+[.]?\d+");
-                    foreach(Match item in reg.Matches(line))
+                    foreach (Match item in reg.Matches(line))
                     {
                         values.Add(Convert.ToDouble(item.Value));
                     }
@@ -534,5 +534,83 @@ namespace ThMEPEngineCore.Test
                 Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygon", CommandFlags.Modal)]
+        public void ThBuildMPolygon()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var shellPER = Active.Editor.GetEntity("\n选择洞的外壳");
+                if (shellPER.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var prompOptions = new PromptSelectionOptions();
+                prompOptions.MessageForAdding = "\n选择洞";
+                var holesPsr = Active.Editor.GetSelection(prompOptions);
+                if (holesPsr.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acdb.Element<Polyline>(shellPER.ObjectId);
+
+                //获取洞
+                var holes = new List<Curve>();
+                foreach (ObjectId obj in holesPsr.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    holes.Add(frame.Clone() as Polyline);
+                }
+                var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes);
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygonCenterLine", CommandFlags.Modal)]
+        public void ThBuildMPolygonCenterLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = getMpolygon();
+
+                PromptDoubleResult result2 = Active.Editor.GetDistance("\n请输入差值距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), result2.Value);
+                //删除之前生成的带动多边形，以防影响之后操作
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+
+                // 生成、显示中线
+                centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
+            }
+        }
+
+        public static MPolygon getMpolygon()
+        {
+            MPolygon mPolygon;
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return null;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acdb.Element<Entity>(obj));
+                }
+                mPolygon = objs.BuildMPolygon();
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+            return mPolygon;
+        }
+
     }
 }
