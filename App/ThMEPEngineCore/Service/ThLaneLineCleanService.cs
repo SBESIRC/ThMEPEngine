@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.Service
             ExtendDistance = 20.0;
         }
 
-        public DBObjectCollection Clean(DBObjectCollection curves)
+        public DBObjectCollection Clean(DBObjectCollection curves, bool merge = true)
         {
             // 配置参数
             ThLaneLineEngine.extend_distance = ExtendDistance;
@@ -31,6 +31,10 @@ namespace ThMEPEngineCore.Service
             extendedLines = ThLaneLineMergeExtension.Merge(extendedLines);
             extendedLines = ThLaneLineEngine.Noding(extendedLines);
             extendedLines = ThLaneLineEngine.CleanZeroCurves(extendedLines);
+            if (!merge)
+            {
+                return extendedLines;
+            }
 
             // 合并处理
             return ThLaneLineMergeExtension.Merge(mergedLines, extendedLines);
