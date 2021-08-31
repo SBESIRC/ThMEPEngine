@@ -156,8 +156,7 @@ namespace ThMEPLighting.Garage
             // 自定义
             arrangeParameter.Margin = 800.0;
             arrangeParameter.PaperRatio = 100;
-            arrangeParameter.MinimumEdgeLength = 5000;
-
+            arrangeParameter.MinimumEdgeLength = 2500;
             return arrangeParameter;
         }
 

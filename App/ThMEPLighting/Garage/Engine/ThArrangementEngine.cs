@@ -2,13 +2,13 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -79,14 +79,15 @@ namespace ThMEPLighting.Garage.Engine
             {
                 return;
             }
-
+            double tTypeBranchFilterLength = Math.Max(ArrangeParameter.MinimumEdgeLength,
+                ArrangeParameter.Margin*2.0+ ArrangeParameter.Interval / 2.0);
+            DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, tTypeBranchFilterLength);
             // 过滤车道线
             if (!ArrangeParameter.IsSingleRow)
-            {
-                DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
+            {                
                 DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace / 2.0);
                 DxLines = ThFilterElbowCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
-            }
+            }            
         }
 
         protected virtual List<Curve> MergeDxLine(Polyline border, List<Line> dxLines)

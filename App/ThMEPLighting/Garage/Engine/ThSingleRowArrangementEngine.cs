@@ -3,8 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using ThMEPEngineCore.CAD;
+using ThMEPLighting.Garage.Service;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -24,14 +23,13 @@ namespace ThMEPLighting.Garage.Engine
         {
             // 预处理
             TrimAndShort(regionBorder);
+            CleanAndFilter(); //对DxLines操作 
 
             // 合并车道线
             var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines);
             DxLines = Explode(mergeDxLines); //把合并的车道线重新设成
+            DxLines = ThPreprocessLineService.Preprocess(DxLines);
 
-            // 清洗和过滤短线
-            CleanAndFilter(); //对DxLines操作 
-            DxLines.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database,1);
 
             // 根据桥架中心线建立线槽
             var ports = new List<Point3d>();
