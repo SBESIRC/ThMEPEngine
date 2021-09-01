@@ -31,6 +31,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = vm.Clone();
             this.vm = vm;
             this.DataContext = _vm;
+            this.阳台地漏.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
@@ -47,7 +48,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-          
+
         }
 
         private void CheckBox_Checked_1(object sender, RoutedEventArgs e)

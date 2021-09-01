@@ -38,7 +38,7 @@
             </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="阳台地漏："></Label>
-                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                <ComboBox x:Name="阳台地漏" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="冷凝横管："></Label>
