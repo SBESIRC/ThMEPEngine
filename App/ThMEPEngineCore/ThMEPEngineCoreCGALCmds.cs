@@ -423,12 +423,13 @@ namespace ThMEPEngineCore
 
                 var engine = new ThPolygonCenterLineMgd();
                 var serializer = GeoJsonSerializer.Create();
-                objs.Cast<Polyline>().ForEach(o =>
+                objs = objs.BuildArea();
+                foreach(Entity obj in objs)
                 {
                     var geos = new List<ThGeometry>();
                     geos.Add(new ThGeometry()
                     {
-                        Boundary = o,
+                        Boundary = obj,
                     });
                     var results = engine.Generate(ThGeoOutput.Output(geos));
                     using (var stringReader = new StringReader(results))
@@ -443,7 +444,7 @@ namespace ThMEPEngineCore
                             }
                         }
                     }
-                });
+                }
             }
         }
 
@@ -472,12 +473,13 @@ namespace ThMEPEngineCore
 
                 var engine = new ThPolygonPartitionMgd();
                 var serializer = GeoJsonSerializer.Create();
-                objs.Cast<Polyline>().ForEach(o =>
+                objs = objs.BuildArea();
+                foreach(Entity obj in objs)
                 {
                     var geos = new List<ThGeometry>();
                     geos.Add(new ThGeometry()
                     {
-                        Boundary = o,
+                        Boundary = obj,
                     });
                     var results = engine.Partition(ThGeoOutput.Output(geos), result2.Value);
                     using (var stringReader = new StringReader(results))
@@ -492,7 +494,7 @@ namespace ThMEPEngineCore
                             }
                         }
                     }
-                });
+                }                
             }
         }
 
