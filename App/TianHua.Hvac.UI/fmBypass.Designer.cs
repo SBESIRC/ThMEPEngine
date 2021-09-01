@@ -40,17 +40,18 @@ namespace TianHua.Hvac.UI
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.RadType2 = new System.Windows.Forms.RadioButton();
             this.RadType1 = new System.Windows.Forms.RadioButton();
-            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.buttonOK = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -61,10 +62,6 @@ namespace TianHua.Hvac.UI
             this.splitContainer4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
-            this.splitContainer3.Panel1.SuspendLayout();
-            this.splitContainer3.Panel2.SuspendLayout();
-            this.splitContainer3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
@@ -86,8 +83,9 @@ namespace TianHua.Hvac.UI
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer1.Size = new System.Drawing.Size(174, 351);
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
+            this.splitContainer1.Panel2.Controls.Add(this.buttonOK);
+            this.splitContainer1.Size = new System.Drawing.Size(168, 336);
             this.splitContainer1.SplitterDistance = 186;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -106,7 +104,7 @@ namespace TianHua.Hvac.UI
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.groupBox2);
-            this.splitContainer4.Size = new System.Drawing.Size(174, 186);
+            this.splitContainer4.Size = new System.Drawing.Size(168, 186);
             this.splitContainer4.SplitterDistance = 128;
             this.splitContainer4.TabIndex = 0;
             // 
@@ -120,7 +118,7 @@ namespace TianHua.Hvac.UI
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(174, 128);
+            this.groupBox1.Size = new System.Drawing.Size(168, 128);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "形式：";
@@ -214,73 +212,56 @@ namespace TianHua.Hvac.UI
             this.RadType1.UseVisualStyleBackColor = true;
             this.RadType1.CheckedChanged += new System.EventHandler(this.RadType1_CheckedChanged);
             // 
-            // splitContainer3
-            // 
-            this.splitContainer3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.splitContainer3.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer3.Name = "splitContainer3";
-            this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer3.Panel1
-            // 
-            this.splitContainer3.Panel1.Controls.Add(this.splitContainer2);
-            // 
-            // splitContainer3.Panel2
-            // 
-            this.splitContainer3.Panel2.Controls.Add(this.buttonOK);
-            this.splitContainer3.Size = new System.Drawing.Size(182, 163);
-            this.splitContainer3.SplitterDistance = 115;
-            this.splitContainer3.TabIndex = 12;
-            // 
             // splitContainer2
             // 
-            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Location = new System.Drawing.Point(3, 6);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.Controls.Add(this.label3);
-            this.splitContainer2.Panel1.Controls.Add(this.label4);
             this.splitContainer2.Panel1.Controls.Add(this.textBox1);
+            this.splitContainer2.Panel1.Controls.Add(this.label4);
             this.splitContainer2.Panel1.Controls.Add(this.listBox1);
+            this.splitContainer2.Panel1Collapsed = true;
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.label2);
+            this.splitContainer2.Panel2.Controls.Add(this.label6);
+            this.splitContainer2.Panel2.Controls.Add(this.label5);
             this.splitContainer2.Panel2.Controls.Add(this.textBox2);
-            this.splitContainer2.Panel2.Controls.Add(this.textBox3);
             this.splitContainer2.Panel2.Controls.Add(this.label1);
-            this.splitContainer2.Size = new System.Drawing.Size(180, 113);
-            this.splitContainer2.SplitterDistance = 84;
+            this.splitContainer2.Panel2.Controls.Add(this.textBox3);
+            this.splitContainer2.Panel2.Controls.Add(this.label2);
+            this.splitContainer2.Size = new System.Drawing.Size(165, 102);
+            this.splitContainer2.SplitterDistance = 111;
             this.splitContainer2.TabIndex = 0;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(3, 19);
+            this.label3.Location = new System.Drawing.Point(4, 13);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(41, 17);
             this.label3.TabIndex = 8;
             this.label3.Text = "风速：";
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(45, 10);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(85, 21);
+            this.textBox1.TabIndex = 9;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(148, 20);
+            this.label4.Location = new System.Drawing.Point(137, 14);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(32, 17);
             this.label4.TabIndex = 10;
             this.label4.Text = "m/s";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(44, 16);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 21);
-            this.textBox1.TabIndex = 9;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // listBox1
             // 
@@ -290,25 +271,16 @@ namespace TianHua.Hvac.UI
             "1250x800",
             "1000x1000",
             "1000x630"});
-            this.listBox1.Location = new System.Drawing.Point(5, 45);
+            this.listBox1.Location = new System.Drawing.Point(6, 37);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(165, 56);
+            this.listBox1.Size = new System.Drawing.Size(147, 56);
             this.listBox1.TabIndex = 12;
             this.listBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseClick);
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
-            // label2
-            // 
-            this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label2.Location = new System.Drawing.Point(15, 53);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(142, 30);
-            this.label2.TabIndex = 16;
-            this.label2.Text = "计算风速    12  m/s";
-            // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(15, 19);
+            this.textBox2.Location = new System.Drawing.Point(23, 8);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(45, 21);
             this.textBox2.TabIndex = 13;
@@ -316,9 +288,18 @@ namespace TianHua.Hvac.UI
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(74, 17);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(11, 12);
+            this.label1.TabIndex = 15;
+            this.label1.Text = "x";
+            // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(83, 21);
+            this.textBox3.Location = new System.Drawing.Point(91, 10);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(45, 21);
             this.textBox3.TabIndex = 14;
@@ -326,19 +307,19 @@ namespace TianHua.Hvac.UI
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             this.textBox3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox3_KeyPress);
             // 
-            // label1
+            // label2
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(66, 28);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(11, 12);
-            this.label1.TabIndex = 15;
-            this.label1.Text = "x";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(69, 45);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(29, 12);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "0.00";
             // 
             // buttonOK
             // 
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(8, 10);
+            this.buttonOK.Location = new System.Drawing.Point(8, 117);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(148, 23);
             this.buttonOK.TabIndex = 11;
@@ -346,16 +327,35 @@ namespace TianHua.Hvac.UI
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(11, 46);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(59, 12);
+            this.label5.TabIndex = 17;
+            this.label5.Text = "计算风速:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(117, 47);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(23, 12);
+            this.label6.TabIndex = 18;
+            this.label6.Text = "m/s";
+            // 
             // fmBypass
             // 
             this.AcceptButton = this.buttonOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(174, 351);
+            this.ClientSize = new System.Drawing.Size(168, 336);
             this.Controls.Add(this.splitContainer1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "fmBypass";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "旁通设置";
             this.Load += new System.EventHandler(this.fmBypass_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -370,10 +370,6 @@ namespace TianHua.Hvac.UI
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.splitContainer3.Panel1.ResumeLayout(false);
-            this.splitContainer3.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
-            this.splitContainer3.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel1.PerformLayout();
             this.splitContainer2.Panel2.ResumeLayout(false);
@@ -395,7 +391,6 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.RadioButton RadType2;
         private System.Windows.Forms.RadioButton RadType1;
-        private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ListBox listBox1;
@@ -406,7 +401,9 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.SplitContainer splitContainer4;
+        private System.Windows.Forms.Button buttonOK;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
     }
 }

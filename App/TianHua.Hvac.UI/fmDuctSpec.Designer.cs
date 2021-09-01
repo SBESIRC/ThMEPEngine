@@ -28,7 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DevExpress.XtraEditors.Controls.RadioGroupItem radioGroupItem5 = new DevExpress.XtraEditors.Controls.RadioGroupItem();
+            DevExpress.XtraEditors.Controls.RadioGroupItem radioGroupItem6 = new DevExpress.XtraEditors.Controls.RadioGroupItem();
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.TxtAirVolume = new DevExpress.XtraEditors.TextEdit();
+            this.label10 = new System.Windows.Forms.Label();
+            this.TxtHeight2 = new DevExpress.XtraEditors.TextEdit();
             this.label7 = new System.Windows.Forms.Label();
             this.TxtHeight = new DevExpress.XtraEditors.TextEdit();
             this.ComBoxDrawingRatio = new DevExpress.XtraEditors.ComboBoxEdit();
@@ -75,14 +80,13 @@
             this.layoutControlItem11 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem22 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem23 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.TxtHeight1 = new DevExpress.XtraEditors.TextEdit();
             this.layoutControlItem24 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.label10 = new System.Windows.Forms.Label();
             this.layoutControlItem25 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.TxtAirVolume = new DevExpress.XtraEditors.TextEdit();
             this.layoutControlItem27 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtAirVolume.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight2.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).BeginInit();
@@ -117,10 +121,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem22)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem23)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem24)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem25)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtAirVolume.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem27)).BeginInit();
             this.SuspendLayout();
             // 
@@ -128,7 +130,7 @@
             // 
             this.layoutControl1.Controls.Add(this.TxtAirVolume);
             this.layoutControl1.Controls.Add(this.label10);
-            this.layoutControl1.Controls.Add(this.TxtHeight1);
+            this.layoutControl1.Controls.Add(this.TxtHeight2);
             this.layoutControl1.Controls.Add(this.label7);
             this.layoutControl1.Controls.Add(this.TxtHeight);
             this.layoutControl1.Controls.Add(this.ComBoxDrawingRatio);
@@ -160,6 +162,47 @@
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
             // 
+            // TxtAirVolume
+            // 
+            this.TxtAirVolume.Enabled = false;
+            this.TxtAirVolume.Location = new System.Drawing.Point(41, 40);
+            this.TxtAirVolume.Name = "TxtAirVolume";
+            // 
+            // 
+            // 
+            this.TxtAirVolume.Properties.Mask.EditMask = "\\d[0-9]*/\\d[0-9]*";
+            this.TxtAirVolume.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtAirVolume.Size = new System.Drawing.Size(68, 20);
+            this.TxtAirVolume.StyleController = this.layoutControl1;
+            this.TxtAirVolume.TabIndex = 31;
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(114, 302);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(48, 26);
+            this.label10.TabIndex = 29;
+            this.label10.Text = "m";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // TxtHeight2
+            // 
+            this.TxtHeight2.EditValue = "3.00";
+            this.TxtHeight2.Location = new System.Drawing.Point(41, 305);
+            this.TxtHeight2.Name = "TxtHeight1";
+            // 
+            // 
+            // 
+            this.TxtHeight2.Properties.Appearance.Options.UseTextOptions = true;
+            this.TxtHeight2.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
+            this.TxtHeight2.Properties.DisplayFormat.FormatString = "\"#.00\"";
+            this.TxtHeight2.Properties.Mask.EditMask = "[0-9][0-9]*(\\.[0-9]{1,2})?";
+            this.TxtHeight2.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtHeight2.Size = new System.Drawing.Size(66, 20);
+            this.TxtHeight2.StyleController = this.layoutControl1;
+            this.TxtHeight2.TabIndex = 28;
+            this.TxtHeight2.EditValueChanged += new System.EventHandler(this.TxtHeight2_EditValueChanged);
+            // 
             // label7
             // 
             this.label7.Location = new System.Drawing.Point(114, 160);
@@ -174,6 +217,9 @@
             this.TxtHeight.EditValue = "3.00";
             this.TxtHeight.Location = new System.Drawing.Point(41, 163);
             this.TxtHeight.Name = "TxtHeight";
+            // 
+            // 
+            // 
             this.TxtHeight.Properties.Appearance.Options.UseTextOptions = true;
             this.TxtHeight.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
             this.TxtHeight.Properties.DisplayFormat.FormatString = "#.00";
@@ -186,11 +232,14 @@
             // 
             // ComBoxDrawingRatio
             // 
-            this.ComBoxDrawingRatio.EditValue = "1:150";
+            this.ComBoxDrawingRatio.EditValue = "1:100";
             this.ComBoxDrawingRatio.Location = new System.Drawing.Point(65, 10);
             this.ComBoxDrawingRatio.Name = "ComBoxDrawingRatio";
+            // 
+            // 
+            // 
             this.ComBoxDrawingRatio.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            new DevExpress.XtraEditors.Controls.EditorButton()});
             this.ComBoxDrawingRatio.Properties.Items.AddRange(new object[] {
             "1:150",
             "1:100",
@@ -204,6 +253,9 @@
             // 
             this.TxtOuterTube1.Location = new System.Drawing.Point(10, 443);
             this.TxtOuterTube1.Name = "TxtOuterTube1";
+            // 
+            // 
+            // 
             this.TxtOuterTube1.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtOuterTube1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
             this.TxtOuterTube1.Properties.EditValueChanged += new System.EventHandler(this.TxtOuterTube1_Properties_EditValueChanged);
@@ -236,6 +288,9 @@
             // 
             this.TxtInnerTube2.Location = new System.Drawing.Point(104, 557);
             this.TxtInnerTube2.Name = "TxtInnerTube2";
+            // 
+            // 
+            // 
             this.TxtInnerTube2.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtInnerTube2.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
             this.TxtInnerTube2.Properties.EditValueChanged += new System.EventHandler(this.TxtInnerTube2_Properties_EditValueChanged);
@@ -257,6 +312,9 @@
             // 
             this.TxtInnerTube1.Location = new System.Drawing.Point(10, 557);
             this.TxtInnerTube1.Name = "TxtInnerTube1";
+            // 
+            // 
+            // 
             this.TxtInnerTube1.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtInnerTube1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
             this.TxtInnerTube1.Properties.EditValueChanged += new System.EventHandler(this.TxtInnerTube1_Properties_EditValueChanged);
@@ -271,7 +329,7 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(149, 20);
             this.label8.TabIndex = 18;
-            this.label8.Text = "机房内管段";
+            this.label8.Text = "出口侧管段";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // LabAirSpeedOuter
@@ -287,6 +345,9 @@
             // 
             this.TxtOuterTube2.Location = new System.Drawing.Point(104, 443);
             this.TxtOuterTube2.Name = "TxtOuterTube2";
+            // 
+            // 
+            // 
             this.TxtOuterTube2.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtOuterTube2.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
             this.TxtOuterTube2.Properties.EditValueChanged += new System.EventHandler(this.TxtOuterTube2_Properties_EditValueChanged);
@@ -310,7 +371,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(149, 20);
             this.label5.TabIndex = 13;
-            this.label5.Text = "机房外管段";
+            this.label5.Text = "入口侧管段";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // ListBoxInnerTube
@@ -333,7 +394,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(149, 20);
             this.label4.TabIndex = 11;
-            this.label4.Text = "机房内管段";
+            this.label4.Text = "出口侧管段";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label3
@@ -342,7 +403,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(149, 20);
             this.label3.TabIndex = 10;
-            this.label3.Text = "机房外管段";
+            this.label3.Text = "入口侧管段";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label2
@@ -359,6 +420,9 @@
             this.TxtAirSpeed.EnterMoveNextControl = true;
             this.TxtAirSpeed.Location = new System.Drawing.Point(43, 103);
             this.TxtAirSpeed.Name = "TxtAirSpeed";
+            // 
+            // 
+            // 
             this.TxtAirSpeed.Properties.AllowFocused = false;
             this.TxtAirSpeed.Properties.Mask.EditMask = "\\d*\\.{0,1}\\d{0,1}";
             this.TxtAirSpeed.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
@@ -387,13 +451,20 @@
             this.Rad.EditValue = "推荐";
             this.Rad.Location = new System.Drawing.Point(10, 70);
             this.Rad.Name = "Rad";
+            // 
+            // 
+            // 
             this.Rad.Properties.AllowFocused = false;
             this.Rad.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
             this.Rad.Properties.Appearance.Options.UseBackColor = true;
             this.Rad.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            radioGroupItem5.Description = "推荐";
+            radioGroupItem5.Value = "推荐";
+            radioGroupItem6.Description = "自定";
+            radioGroupItem6.Value = "自定";
             this.Rad.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
-            new DevExpress.XtraEditors.Controls.RadioGroupItem("推荐", "推荐"),
-            new DevExpress.XtraEditors.Controls.RadioGroupItem("自定", "自定")});
+            radioGroupItem5,
+            radioGroupItem6});
             this.Rad.Properties.SelectedIndexChanged += new System.EventHandler(this.Rad_Properties_SelectedIndexChanged);
             this.Rad.Size = new System.Drawing.Size(149, 23);
             this.Rad.StyleController = this.layoutControl1;
@@ -730,38 +801,15 @@
             this.layoutControlItem23.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem23.TextVisible = false;
             // 
-            // TxtHeight1
-            // 
-            this.TxtHeight1.EditValue = "3.00";
-            this.TxtHeight1.Location = new System.Drawing.Point(41, 305);
-            this.TxtHeight1.Name = "TxtHeight1";
-            this.TxtHeight1.Properties.Appearance.Options.UseTextOptions = true;
-            this.TxtHeight1.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
-            this.TxtHeight1.Properties.DisplayFormat.FormatString = "\"#.00\"";
-            this.TxtHeight1.Properties.Mask.EditMask = "[0-9][0-9]*(\\.[0-9]{1,2})?";
-            this.TxtHeight1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
-            this.TxtHeight1.Size = new System.Drawing.Size(66, 20);
-            this.TxtHeight1.StyleController = this.layoutControl1;
-            this.TxtHeight1.TabIndex = 28;
-            // 
             // layoutControlItem24
             // 
-            this.layoutControlItem24.Control = this.TxtHeight1;
+            this.layoutControlItem24.Control = this.TxtHeight2;
             this.layoutControlItem24.Location = new System.Drawing.Point(0, 295);
             this.layoutControlItem24.Name = "layoutControlItem24";
             this.layoutControlItem24.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
             this.layoutControlItem24.Size = new System.Drawing.Size(107, 30);
             this.layoutControlItem24.Text = "标高";
             this.layoutControlItem24.TextSize = new System.Drawing.Size(28, 14);
-            // 
-            // label10
-            // 
-            this.label10.Location = new System.Drawing.Point(114, 302);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(48, 26);
-            this.label10.TabIndex = 29;
-            this.label10.Text = "m";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // layoutControlItem25
             // 
@@ -772,19 +820,10 @@
             this.layoutControlItem25.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem25.TextVisible = false;
             // 
-            // TxtAirVolume
-            // 
-            this.TxtAirVolume.Location = new System.Drawing.Point(41, 40);
-            this.TxtAirVolume.Name = "TxtAirVolume";
-            this.TxtAirVolume.Properties.Mask.EditMask = "\\d[0-9]*/\\d[0-9]*";
-            this.TxtAirVolume.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
-            this.TxtAirVolume.Size = new System.Drawing.Size(68, 20);
-            this.TxtAirVolume.StyleController = this.layoutControl1;
-            this.TxtAirVolume.TabIndex = 31;
-            // 
             // layoutControlItem27
             // 
             this.layoutControlItem27.Control = this.TxtAirVolume;
+            this.layoutControlItem27.Enabled = false;
             this.layoutControlItem27.Location = new System.Drawing.Point(0, 30);
             this.layoutControlItem27.Name = "layoutControlItem27";
             this.layoutControlItem27.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
@@ -809,6 +848,8 @@
             this.Load += new System.EventHandler(this.fmDuctSpec_Load);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.TxtAirVolume.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight2.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtHeight.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ComBoxDrawingRatio.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).EndInit();
@@ -843,10 +884,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem11)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem22)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem23)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtHeight1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem24)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem25)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtAirVolume.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem27)).EndInit();
             this.ResumeLayout(false);
 
@@ -902,7 +941,7 @@
         private System.Windows.Forms.Label label7;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem23;
         private System.Windows.Forms.Label label10;
-        private DevExpress.XtraEditors.TextEdit TxtHeight1;
+        private DevExpress.XtraEditors.TextEdit TxtHeight2;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem24;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem25;
         private DevExpress.XtraEditors.TextEdit TxtAirVolume;

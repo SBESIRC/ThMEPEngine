@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {
@@ -84,7 +85,7 @@ namespace ThMEPHVAC.CAD
                                              double ductangle, 
                                              bool islongestduct, 
                                              string elevation,
-                                             string textSize)
+                                             string scale)
         {
             if (!islongestduct)
             {
@@ -106,14 +107,7 @@ namespace ThMEPHVAC.CAD
                         str = $"{parameters.Width}x{parameters.Height} (h"+ num.ToString("0.00") + "m)";
 
                 }
-                double h = 450;
-                if (textSize != null)
-                { 
-                    if (textSize == "1:100")
-                        h = 300;
-                    else if (textSize == "1:50")
-                        h = 150;
-                }
+                double h = ThMEPHVACService.Get_text_height(scale);
                 DBText infortext = new DBText()
                 {
                     TextString = str,

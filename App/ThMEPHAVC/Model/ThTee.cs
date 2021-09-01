@@ -33,76 +33,60 @@ namespace ThMEPHVAC.Model
         }
         public void RunTeeDrawEngine(ThDbModelFan fanmodel, Matrix3d mat)
         {
-            List<ThIfcDistributionElement> TeeSegments = new List<ThIfcDistributionElement>();
-            DBObjectCollection Flg = CreateTeeFlangeline();
-            DBObjectCollection Rep = CreateTeeGeometries(Flg);
-            ThIfcDistributionElement a = new ThIfcDistributionElement
+            var flg = CreateTeeFlangeline();
+            var geo = CreateTeeGeometries(flg);
+            var branchEndLine = flg[0] as Line;
+            var mainBigEndLine = flg[1] as Line;
+            var mainSmallEndLine = flg[2] as Line;
+            var center_line = new DBObjectCollection() {new Line(Point3d.Origin, ThMEPHVACService.Get_mid_point(branchEndLine)),
+                                                        new Line(Point3d.Origin, ThMEPHVACService.Get_mid_point(mainBigEndLine)),
+                                                        new Line(Point3d.Origin, ThMEPHVACService.Get_mid_point(mainSmallEndLine))};
+            var a = new ThIfcDistributionElement
             {
-                FlangeLine = Flg,
-                Representation = Rep,
+                FlangeLine = flg,
+                Representation = geo,
+                Centerline = center_line,
                 Matrix = mat
             };
-            TeeSegments.Add(a);
+            var TeeSegments = new List<ThIfcDistributionElement>() { a };
             string modelLayer = fanmodel.Data.BlockLayer;
-            string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
-            string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
+            string geo_layer = ThDuctUtils.DuctLayerName(modelLayer);
+            string flg_layer = ThDuctUtils.FlangeLayerName(modelLayer);
+            string centerline_layer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
 
-            DrawTeeDWG(TeeSegments, ductLayer, flangeLinerLayer);
+            DrawTeeDWG(TeeSegments, geo_layer, flg_layer, centerline_layer);
         }
-
-        private ObjectId CreateTeelinetype(string linetype)
+        private void DrawTeeDWG( List<ThIfcDistributionElement> tees, 
+                                 string geo_layer, 
+                                 string flg_layer,
+                                 string centerline_layer)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
-                acadDatabase.Database.ImportLinetype(linetype, true);
-                return acadDatabase.Linetypes.ElementOrDefault(linetype).ObjectId;
-            }
-        }
-        private ObjectId CreateLayer(string name)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                acadDatabase.Database.ImportLayer(name);
-                acadDatabase.Database.UnOffLayer(name);
-                acadDatabase.Database.UnLockLayer(name);
-                acadDatabase.Database.UnPrintLayer(name);
-                acadDatabase.Database.UnFrozenLayer(name);
-                return acadDatabase.Layers.ElementOrDefault(name).ObjectId;
-            }
-        }
-        private void DrawTeeDWG(List<ThIfcDistributionElement> DuctSegments, 
-                             string ductlayer, 
-                             string flangelayer)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var linetypeId = CreateTeelinetype("CONTINUOUS");
-                foreach (var Segment in DuctSegments)
+                foreach (var tee in tees)
                 {
-                    // 绘制风管
-                    var layerId = CreateLayer(ductlayer);
-                    foreach (Curve dbobj in Segment.Representation)
-                    {
-                        dbobj.ColorIndex = 256;
-                        dbobj.LayerId = layerId;
-                        dbobj.LinetypeId = linetypeId;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
-                        dbobj.SetDatabaseDefaults();
-                    }
-
-                    // 绘制法兰线
-                    layerId = CreateLayer(flangelayer);
-                    foreach (Curve dbobj in Segment.FlangeLine)
-                    {
-                        dbobj.ColorIndex = 256;
-                        dbobj.LayerId = layerId;
-                        dbobj.LinetypeId = linetypeId;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
-                        dbobj.SetDatabaseDefaults();
-                    }
+                    var mat = tee.Matrix;
+                    ThDuctPortsDrawService.Draw_lines(tee.Representation, mat, geo_layer, out ObjectIdList geo_ids);
+                    ThDuctPortsDrawService.Draw_lines(tee.FlangeLine, mat, flg_layer, out ObjectIdList flg_ids);
+                    ThDuctPortsDrawService.Draw_lines(tee.Centerline, mat, centerline_layer, out ObjectIdList center_ids);
+                    GetPort(tee.Centerline, out List<Point3d> pos, out List<Point3d> pos_ext);
+                    ThDuctPortsDrawService.Draw_ports(pos, pos_ext, mat, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                    var param = ThMEPHVACService.Create_special_modify_param("Tee", mat, ObjectId.Null.Handle, tee.FlangeLine, tee.Centerline);
+                    ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
                 }  
+            }
+        }
+        private void GetPort(DBObjectCollection center_line, 
+                             out List<Point3d> pos,
+                             out List<Point3d> pos_ext)
+        {
+            pos = new List<Point3d>();
+            pos_ext = new List<Point3d>();
+            foreach (Line l in center_line)
+            {
+                pos.Add(l.EndPoint);
+                var dir_vec = l.EndPoint.GetAsVector().GetNormal();
+                pos_ext.Add(l.EndPoint - dir_vec);
             }
         }
         private DBObjectCollection CreateTeeFlangeline()
@@ -145,14 +129,14 @@ namespace ThMEPHVAC.Model
         {
             double ext = 45;
             Line branchEndLine = endLines[0].Clone() as Line;
-            branchEndLine.StartPoint = branchEndLine.StartPoint + new Vector3d(0, -ext, 0);
-            branchEndLine.EndPoint = branchEndLine.EndPoint + new Vector3d(0, ext, 0);
+            branchEndLine.StartPoint += new Vector3d(0, -ext, 0);
+            branchEndLine.EndPoint += new Vector3d(0, ext, 0);
             Line mainBigEndLine = endLines[1].Clone() as Line;
-            mainBigEndLine.StartPoint = mainBigEndLine.StartPoint + new Vector3d(-ext, 0, 0);
-            mainBigEndLine.EndPoint = mainBigEndLine.EndPoint + new Vector3d(ext, 0, 0);
+            mainBigEndLine.StartPoint += new Vector3d(-ext, 0, 0);
+            mainBigEndLine.EndPoint += new Vector3d(ext, 0, 0);
             Line mainSmallEndLine = endLines[2].Clone() as Line;
-            mainSmallEndLine.StartPoint = mainSmallEndLine.StartPoint + new Vector3d(-ext, 0, 0);
-            mainSmallEndLine.EndPoint = mainSmallEndLine.EndPoint + new Vector3d(ext, 0, 0);
+            mainSmallEndLine.StartPoint += new Vector3d(-ext, 0, 0);
+            mainSmallEndLine.EndPoint += new Vector3d(ext, 0, 0);
 
             //创建支路50mm直管段
             Line branchUpStraightLine = new Line()

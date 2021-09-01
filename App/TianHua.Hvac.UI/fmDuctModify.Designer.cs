@@ -122,7 +122,7 @@ namespace TianHua.Hvac.UI
             // label17
             // 
             this.label17.Font = new System.Drawing.Font("宋体", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label17.Location = new System.Drawing.Point(98, 106);
+            this.label17.Location = new System.Drawing.Point(107, 106);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(37, 14);
             this.label17.TabIndex = 33;
@@ -131,7 +131,7 @@ namespace TianHua.Hvac.UI
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(12, 108);
+            this.label18.Location = new System.Drawing.Point(1, 108);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(53, 12);
             this.label18.TabIndex = 31;
@@ -139,9 +139,9 @@ namespace TianHua.Hvac.UI
             // 
             // label22
             // 
-            this.label22.Location = new System.Drawing.Point(69, 108);
+            this.label22.Location = new System.Drawing.Point(61, 108);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(23, 12);
+            this.label22.Size = new System.Drawing.Size(40, 12);
             this.label22.TabIndex = 32;
             this.label22.Text = "0";
             // 

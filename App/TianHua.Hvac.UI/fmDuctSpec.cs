@@ -12,7 +12,14 @@ namespace TianHua.Hvac.UI
         public string SelectedInnerDuctSize { get; set; }
         public string SelectedOuterDuctSize { get; set; }
         public string AirVolume { get; set; }
+        /// <summary>
+        /// 机房外标高
+        /// </summary>
         public string Elevation { get; set; }
+        /// <summary>
+        /// 机房内标高
+        /// </summary>
+        public string Elevation2 { get; set; }
         public string TextSize { get; set; }
         public DuctSpecModel Model { get; set; }
         public fmDuctSpec()
@@ -25,11 +32,11 @@ namespace TianHua.Hvac.UI
             Rad_SelectedIndexChanged(null, null);
         }
 
-        public void InitForm(DuctSpecModel _DuctSpecModel)
+        public void InitForm(DuctSpecModel _DuctSpecModel, bool is_exhaust)
         {
             Model = _DuctSpecModel;
 
-            TxtAirVolume.Text = FuncStr.NullToStr(_DuctSpecModel.AirVolume);
+            TxtAirVolume.Text = _DuctSpecModel.StrAirVolume;
 
             TxtAirSpeed.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
 
@@ -37,10 +44,10 @@ namespace TianHua.Hvac.UI
 
             ListBoxInnerTube.DataSource = _DuctSpecModel.ListInnerTube;
 
-            ListBoxOuterTube.SelectedItem = _DuctSpecModel.OuterTube;
+            ListBoxOuterTube.SelectedItem = is_exhaust ? _DuctSpecModel.OuterTube : _DuctSpecModel.InnerTube;
 
-            ListBoxInnerTube.SelectedItem = _DuctSpecModel.InnerTube;
-
+            ListBoxInnerTube.SelectedItem = is_exhaust ? _DuctSpecModel.InnerTube : _DuctSpecModel.OuterTube;
+            AcceptButton = BtnOK;
             //if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
             //{
             //    ListBoxInnerTube.Enabled = false;
@@ -80,7 +87,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
 
-                this.Size = new Size(170, 460);
+                this.Size = new Size(170, 500);
             }
             else
             {
@@ -102,7 +109,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
 
-                this.Size = new Size(170, 390);
+                this.Size = new Size(170, 430);
 
             }
         }
@@ -110,6 +117,7 @@ namespace TianHua.Hvac.UI
         private void BtnOK_Click(object sender, EventArgs e)
         {
             Elevation = TxtHeight.Text;
+            Elevation2 = TxtHeight2.Text;
             AirVolume = TxtAirVolume.Text;
             TextSize = ComBoxDrawingRatio.Text;
         }
@@ -242,6 +250,12 @@ namespace TianHua.Hvac.UI
         {
             if (TxtHeight.Text == string.Empty || FuncStr.NullToDouble(TxtHeight.Text) == 0) { return; }
             TxtHeight.Text = FuncStr.NullToDouble(TxtHeight.Text).ToString("#.00");
+        }
+
+        private void TxtHeight2_EditValueChanged(object sender, EventArgs e)
+        {
+            if (TxtHeight2.Text == string.Empty || FuncStr.NullToDouble(TxtHeight2.Text) == 0) { return; }
+            TxtHeight2.Text = FuncStr.NullToDouble(TxtHeight2.Text).ToString("#.00");
         }
     }
 }

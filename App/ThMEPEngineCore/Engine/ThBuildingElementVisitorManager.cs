@@ -33,11 +33,7 @@ namespace ThMEPEngineCore.Engine
             ShearWallVisitor = new ThShearWallExtractionVisitor()
             {
                 LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
-            };
-            DB3BeamVisitor = new ThDB3BeamExtractionVisitor()
-            {
-                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
-            };
+            };            
             AXISLineVisitor = new ThAXISLineExtractionVisitor();
             DrainageWellVisitor = new ThDrainageWellExtractionVisitor()
             {
@@ -53,9 +49,19 @@ namespace ThMEPEngineCore.Engine
             DB3PcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
                 LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database),
-            };            
-            DB3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor();
-            DB3ColumnVisitor = new ThDB3ColumnExtractionVisitor();
+            };
+            DB3BeamVisitor = new ThDB3BeamExtractionVisitor()
+            {
+                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
+            };
+            DB3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
+            DB3ColumnVisitor = new ThDB3ColumnExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
             DB3WindowVisitor = new ThDB3WindowExtractionVisitor()
             {
                 LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),

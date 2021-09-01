@@ -21,10 +21,11 @@ namespace TianHua.Hvac.UI
         public string port_range;
         private double air_speed_max;
         private double air_speed_min;
-        private DuctPortsParam param;
-        public fmDuctPorts(DuctPortsParam param)
+        private ThMEPHVACParam param;
+        public fmDuctPorts(ThMEPHVACParam param)
         {
             InitializeComponent();
+            AcceptButton = button1;
             this.param = param;
             checkBox1.Enabled = param.is_redraw;
             if (Math.Abs(param.air_volume) > 1e-3)
@@ -46,7 +47,7 @@ namespace TianHua.Hvac.UI
             is_redraw = checkBox1.Checked;
         }
 
-        private void Component_init(DuctPortsParam param)
+        private void Component_init(ThMEPHVACParam param)
         {
             textBox2.Text = param.air_volume.ToString();
             textBox3.Text = param.air_speed.ToString();
@@ -87,7 +88,7 @@ namespace TianHua.Hvac.UI
         }
         private void Combobox_init()
         {
-            comboBox1.Text = "1:150";
+            comboBox1.Text = "1:100";
             comboBox2.Text = "消防排烟兼平时排风";
         }
 

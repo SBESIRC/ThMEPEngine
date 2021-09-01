@@ -1,21 +1,20 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPElectrical.FireAlarm.Service;
-using NFox.Cad;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.IO;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPEngineCore.Algorithm;
-using Dreambuild.AutoCAD;
-using System;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace FireAlarm.Data
 {
@@ -57,10 +56,10 @@ namespace FireAlarm.Data
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             Walls = handleObjs.Cast<Entity>().ToList();
         }
+
         private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
-            var db3Walls = new DBObjectCollection();
             Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var newPts = new Point3dCollection();
             pts.Cast<Point3d>().ForEach(p =>
@@ -71,23 +70,19 @@ namespace FireAlarm.Data
             });
             var wallEngine = new ThDB3ArchWallRecognitionEngine();
             wallEngine.Recognize(Db3ExtractResults, newPts);
-            db3Walls = wallEngine.Elements.Select(o => o.Outline).ToCollection();
-
-            return db3Walls;
+            return wallEngine.Elements.Select(o => o.Outline).ToCollection();
         }
 
         private DBObjectCollection ExtractMsWall(Database database, Point3dCollection pts)
         {
             //提取了本地图纸中的墙，并移动到原点
-            var localWalls = new DBObjectCollection();
             var instance = new ThExtractPolylineService()
             {
                 ElementLayer = this.ElementLayer,
             };
             instance.Extract(database, pts);
             instance.Polys.ForEach(o => Transformer.Transform(o));
-            localWalls = instance.Polys.ToCollection();
-            return localWalls;
+            return instance.Polys.ToCollection();
         }
 
         public override List<ThGeometry> BuildGeometries()

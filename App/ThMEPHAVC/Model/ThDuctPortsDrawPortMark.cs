@@ -8,7 +8,7 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPortMark
     {
-        public static void Insert_mark( DuctPortsParam param,
+        public static void Insert_mark( ThMEPHVACParam param,
                                         double port_width,
                                         double port_height,
                                         string port_mark_name,
@@ -16,7 +16,7 @@ namespace ThMEPHVAC.Model
                                         Point3d p)
         {
             string port_size = port_width.ToString() + 'x' + port_height.ToString();
-            double h = ThDuctPortsService.Get_text_height(param.scale);
+            double h = ThMEPHVACService.Get_text_height(param.scale);
             double scale_h = h * 2 / 3;
             int port_num = param.port_num;
             if (param.port_range.Contains("侧"))

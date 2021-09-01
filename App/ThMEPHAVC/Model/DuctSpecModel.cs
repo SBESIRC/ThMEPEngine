@@ -5,6 +5,10 @@ namespace ThMEPHVAC.Model
     public class DuctSpecModel
     {
         /// <summary>
+        /// 风量（双速风机）
+        /// </summary>
+        public string StrAirVolume { get; set; }
+        /// <summary>
         /// 风量
         /// </summary>
         public double AirVolume { get; set; }

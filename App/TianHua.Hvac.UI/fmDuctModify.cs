@@ -11,6 +11,7 @@ namespace TianHua.Hvac.UI
         public fmDuctModify(double air_volume_, string duct_size_)
         {
             InitializeComponent();
+            AcceptButton = button1;
             label5.Text = air_volume_.ToString("0.");
             duct_size = duct_size_;
             air_volume = air_volume_;

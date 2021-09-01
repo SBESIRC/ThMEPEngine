@@ -62,12 +62,14 @@ namespace FireAlarm.Data
                         ElementLayer = "AI-剪力墙",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3ShearWallVisitor.Results,
+                        NonDb3ExtractResults = vm.ShearWallVisitor.Results,
                     },
                     new ThFaColumnExtractor()
                     {
                         ElementLayer = "AI-柱",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3ColumnVisitor.Results,
+                        NonDb3ExtractResults = vm.ColumnVisitor.Results,
                     },
                     new ThFaWindowExtractor()
                     {
@@ -176,6 +178,8 @@ namespace FireAlarm.Data
             extractor.Accept(visitors.DB3WindowVisitor);
             extractor.Accept(visitors.DB3BeamVisitor);
             extractor.Accept(visitors.DB3RailingVisitor);
+            extractor.Accept(visitors.ColumnVisitor);
+            extractor.Accept(visitors.ShearWallVisitor);            
             extractor.Extract(database);
             return visitors;
         }
