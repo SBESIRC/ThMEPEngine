@@ -21,16 +21,24 @@ namespace FireAlarm.Data
     public class ThFaColumnExtractor :ThColumnExtractor, IGroup, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }  //From Db3
+        public List<ThRawIfcBuildingElementData> NonDb3ExtractResults { get; set; } // From Non-Db3
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaColumnExtractor()
         {
             StoreyInfos = new List<ThStoreyInfo>();
+            Db3ExtractResults = new List<ThRawIfcBuildingElementData>();
+            NonDb3ExtractResults = new List<ThRawIfcBuildingElementData>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
             var db3Columns = ExtractDb3Column(pts);
+            var nonDb3Columns = ExtractNonDb3Column(pts);
+            var xRefColumns = new DBObjectCollection();
+            db3Columns.Cast<Entity>().ForEach(e => xRefColumns.Add(e));
+            nonDb3Columns.Cast<Entity>().ForEach(e => xRefColumns.Add(e));
+
             var localColumns = ExtractMsColumn(database, pts);
 
             ThCleanEntityService clean = new ThCleanEntityService();
@@ -45,7 +53,7 @@ namespace FireAlarm.Data
             //处理重叠
             var conflictService = new ThHandleConflictService(
                 localColumns.Cast<Entity>().ToList(),
-                db3Columns.Cast<Entity>().ToList());
+                xRefColumns.Cast<Entity>().ToList());
             conflictService.Handle();
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             ThHandleContainsService handlecontain = new ThHandleContainsService();
@@ -54,7 +62,6 @@ namespace FireAlarm.Data
         }
         private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
         {
-            var db3Columns = new DBObjectCollection();
             Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var columnEngine = new ThDB3ColumnRecognitionEngine();
             var newPts = new Point3dCollection();
@@ -65,8 +72,23 @@ namespace FireAlarm.Data
                 newPts.Add(pt);
             });
             columnEngine.Recognize(Db3ExtractResults, newPts);
-            db3Columns = columnEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
-            return db3Columns;
+            return columnEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
+        }
+        private DBObjectCollection ExtractNonDb3Column(Point3dCollection pts)
+        {
+            NonDb3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
+            var columnEngine = new ThColumnRecognitionEngine();
+            var newPts = new Point3dCollection();
+            pts.Cast<Point3d>().ForEach(p =>
+            {
+                var pt = new Point3d(p.X, p.Y, p.Z);
+                Transformer.Transform(ref pt);
+                newPts.Add(pt);
+            });
+            columnEngine.Recognize(NonDb3ExtractResults, newPts);
+            return columnEngine.Elements
+                .Select(o => o.Outline as Polyline)
+                .ToCollection();
         }
         private DBObjectCollection ExtractMsColumn(Database database, Point3dCollection pts)
         {

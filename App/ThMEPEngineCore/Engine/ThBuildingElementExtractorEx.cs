@@ -57,13 +57,12 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDb = AcadDatabase.Use(blockReference.Database))
             {
-                if (!blockReference.BlockTableRecord.IsValid ||
-                    blockReference.Bounds == null)
+                if (!blockReference.BlockTableRecord.IsValid)
                 {
                     return;
                 }
                 var blockTableRecord = acadDb.Blocks.Element(blockReference.BlockTableRecord);
-                if (RangePts.Count > 2)
+                if (RangePts.Count > 2 && blockReference.Bounds!=null)
                 {
                     var rec = blockTableRecord.GeometricExtents().ToRectangle();
                     rec.TransformBy(matrix);
@@ -84,6 +83,7 @@ namespace ThMEPEngineCore.Engine
                     v.Results.ForEach(i => items.Add(i));
                     var elements = new HashSet<ThRawIfcBuildingElementData>(items);
                     recordPreElements.Add(v, elements);
+                    v.Results = new List<ThRawIfcBuildingElementData>();
                 });
                 // 提取图元信息
                 foreach (var objId in blockTableRecord)
@@ -112,12 +112,6 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
                 // 过滤XClip外的图元信息
-                // 把之前保存的元素扣除掉
-                executableVisitors.ForEach(v =>
-                {
-                    var elements = recordPreElements[v];
-                    v.Results = v.Results.Where(r => !elements.Contains(r)).ToList();
-                });
                 executableVisitors.ForEach(v => v.DoXClip(v.Results, blockReference, matrix));
                 executableVisitors.ForEach(v =>
                 {

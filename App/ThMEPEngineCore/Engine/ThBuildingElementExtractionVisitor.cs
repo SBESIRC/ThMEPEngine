@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.Engine
 
         public ThBuildingElementExtractionVisitor()
         {
+            LayerFilter = new List<string>();
             Results = new List<ThRawIfcBuildingElementData>();
         }
 
