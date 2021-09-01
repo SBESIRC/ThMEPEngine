@@ -19,6 +19,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using System.Text.RegularExpressions;
 using System.Linq;
+using DotNetARX;
+using GeometryExtensions;
+using ThMEPEngineCore.Diagnostics;
+using NetTopologySuite.Geometries;
+using NFox.Cad;
+
 
 namespace ThMEPEngineCore.Test
 {
@@ -414,15 +420,239 @@ namespace ThMEPEngineCore.Test
             {
                 string line = "";
                 while ((line = sr.ReadLine()) != null)
-                {                    
+                {
                     List<double> values = new List<double>();
                     Regex reg = new Regex(@"\d+[.]?\d+");
-                    foreach(Match item in reg.Matches(line))
+                    foreach (Match item in reg.Matches(line))
                     {
                         values.Add(Convert.ToDouble(item.Value));
                     }
                     results.Add(new Point3d(values[0], values[1], 0.0));
                 }
+            }
+            return results;
+        }
+
+        [CommandMethod("TIANHUACAD", "THTestOldBuildingExtractor", CommandFlags.Modal)]
+        public void THTestOldBuildingExtractor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                ThStopWatchService.Start();
+                //建筑墙
+                var db3ArchWallEngine = new ThDB3ArchWallExtractionEngine();
+                var shearWallEngine = new ThShearWallExtractionEngine();
+                var db3ShearWallEngine = new ThDB3ShearWallExtractionEngine();
+                var columnEngine = new ThColumnExtractionEngine();
+                var db3ColumnEngine = new ThDB3ColumnExtractionEngine();
+
+
+                db3ArchWallEngine.Extract(acadDatabase.Database);
+                shearWallEngine.Extract(acadDatabase.Database);
+                db3ShearWallEngine.Extract(acadDatabase.Database);
+                columnEngine.Extract(acadDatabase.Database);
+                db3ColumnEngine.Extract(acadDatabase.Database);
+                ThStopWatchService.Stop();
+                var shearWallCount = shearWallEngine.Results.Count + db3ShearWallEngine.Results.Count;
+                var columnCount = columnEngine.Results.Count + db3ColumnEngine.Results.Count;
+                Active.Editor.WriteMessage("\n建筑墙数量：" + db3ArchWallEngine.Results.Count + "个");
+                Active.Editor.WriteMessage("\n剪力墙数量：" + shearWallCount + "个");
+                Active.Editor.WriteMessage("\n柱子数量：" + columnCount + "个");
+                Active.Editor.WriteMessage("\n耗时："+ ThStopWatchService.TimeSpan()+"秒");
+                //results.Cast<Entity>().ForEach(o =>
+                //{
+                //    acadDatabase.ModelSpace.Add(o);
+                //    o.SetDatabaseDefaults();
+                //});
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THTestNewBuildingExtractor", CommandFlags.Modal)]
+        public void THTestNewBuildingExtractor()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                ThStopWatchService.Start();
+                var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
+                {
+                    LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                };
+                var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
+                {
+                    LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                };
+                var shearWallVisitor = new ThShearWallExtractionVisitor()
+                {
+                    LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(acdb.Database),
+                };
+                var db3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor();
+                var columnVisitor = new ThColumnExtractionVisitor()
+                {
+                    LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(acdb.Database),
+                };
+                var db3ColumnVisitor = new ThDB3ColumnExtractionVisitor();
+                var extractor = new ThBuildingElementExtractor();
+                extractor.Accept(archWallVisitor);
+                extractor.Accept(pcArchWallVisitor);
+                extractor.Accept(shearWallVisitor);
+                extractor.Accept(db3ShearWallVisitor);
+                extractor.Accept(columnVisitor);
+                extractor.Accept(db3ColumnVisitor);
+                extractor.Extract(acdb.Database);
+
+                ThStopWatchService.Stop();
+                Active.Editor.WriteMessage("\n建筑墙数量：" + 
+                    (archWallVisitor.Results.Count+ pcArchWallVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n剪力墙数量：" +
+                    (shearWallVisitor.Results.Count + db3ShearWallVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n柱子数量：" +
+                    (columnVisitor.Results.Count + db3ColumnVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
+                Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygon", CommandFlags.Modal)]
+        public void ThBuildMPolygon()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var shellPER = Active.Editor.GetEntity("\n选择洞的外壳");
+                if (shellPER.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var prompOptions = new PromptSelectionOptions();
+                prompOptions.MessageForAdding = "\n选择洞";
+                var holesPsr = Active.Editor.GetSelection(prompOptions);
+                if (holesPsr.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acdb.Element<Polyline>(shellPER.ObjectId);
+
+                //获取洞
+                var holes = new List<Curve>();
+                foreach (ObjectId obj in holesPsr.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    holes.Add(frame.Clone() as Polyline);
+                }
+                var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes);
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygonCenterLine", CommandFlags.Modal)]
+        public void ThBuildMPolygonCenterLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = getMpolygon();
+
+                PromptDoubleResult result2 = Active.Editor.GetDistance("\n请输入差值距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), result2.Value);
+                //删除之前生成的带动多边形，以防影响之后操作
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+
+                // 生成、显示中线
+                centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
+            }
+        }
+
+        public static MPolygon getMpolygon()
+        {
+            MPolygon mPolygon;
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return null;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acdb.Element<Entity>(obj));
+                }
+                mPolygon = objs.BuildMPolygon();
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+            return mPolygon;
+        }
+
+        [CommandMethod("TIANHUACAD", "THNodingTest", CommandFlags.Modal)]
+        public void THNodingTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                //认为输出结果是线段的集合
+                var objs = new List<Line>();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Line>(obj));
+                }
+
+                var res = NodingLines(objs.ToCollection());
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(
+                res.Cast<Entity>().Select(o => o.Clone() as Entity).ToList(),
+                AcHelper.Active.Database, 1);
+            }
+        }
+        private List<Line> NodingLines(DBObjectCollection curves)
+        {
+            var results = new List<Line>();
+            var geometry = curves.ToNTSNodedLineStrings();
+            if (geometry is LineString line)
+            {
+                results.Add(line.ToDbline());
+            }
+            else if (geometry is MultiLineString lines)
+            {
+                results.AddRange(lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
             return results;
         }

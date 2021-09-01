@@ -15,6 +15,7 @@ using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {

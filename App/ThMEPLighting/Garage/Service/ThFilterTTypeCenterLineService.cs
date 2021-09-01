@@ -1,7 +1,6 @@
 ﻿using ThMEPLighting.Common;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -39,7 +38,7 @@ namespace ThMEPLighting.Garage.Service
                     {      
                         //起始端未连接任何线，末端有连接
                         //末端连接的线中有一对相连，共线，且不重叠
-                        if(JudgeLinksHasCollinearUnoverlapLines(endLinks))
+                        if(JudgeLinksIsValid(endLinks))
                         {
                             //丢弃
                         }
@@ -52,7 +51,7 @@ namespace ThMEPLighting.Garage.Service
                     {
                         //末端未连接任何线，起始端有连接
                         //起始端连接的线中有一对相连，共线，且不重叠
-                        if (JudgeLinksHasCollinearUnoverlapLines(startLinks))
+                        if (JudgeLinksIsValid(startLinks))
                         {
                             //丢弃
                         }
@@ -68,13 +67,17 @@ namespace ThMEPLighting.Garage.Service
                 }
             });
         }
-        private bool JudgeLinksHasCollinearUnoverlapLines(List<Line> lines)
+        private bool JudgeLinksIsValid(List<Line> lines)
         {
+            //灯线一段连接的线多余两根，且其中有两根灯线相连且外角在一定范围之内
+            //符合T型的样式
             for (int i = 0; i < lines.Count - 1; i++)
             {
                 for (int j = i + 1; j < lines.Count; j++)
                 {
-                    if (ThGarageLightUtils.IsCollinearLinkAndNotOverlap(lines[i], lines[j]))
+                    if (ThGarageLightUtils.IsLink(lines[i], lines[j]) && 
+                        ThGarageUtils.IsLessThan45Degree(lines[i].StartPoint, 
+                        lines[i].EndPoint, lines[j].StartPoint,lines[j].EndPoint))
                     {
                         return true;
                     }

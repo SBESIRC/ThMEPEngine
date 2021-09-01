@@ -30,9 +30,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AFASRegion\AFASRegion.cs" />
+    <Compile Include="AFASRegion\Expand\DetectorExtend.cs" />
     <Compile Include="AFASRegion\Model\AFASBeamContour.cs" />
     <Compile Include="AFASRegion\Model\AFASDetector.cs" />
     <Compile Include="AFASRegion\AFASBeamExtendFactory.cs" />
+    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\DetectionRegionGraphModel.cs" />
+    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\LineCompare.cs" />
+    <Compile Include="AFASRegion\Model\ScoringModel.cs" />
+    <Compile Include="AFASRegion\Service\AFASRegionService.cs" />
+    <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
@@ -351,7 +357,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AFASRegion\Engion\" />
-    <Folder Include="AFASRegion\Service\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
     <Folder Include="FireAlarm\Model\" />

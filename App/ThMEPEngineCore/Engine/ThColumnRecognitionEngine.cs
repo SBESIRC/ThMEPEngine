@@ -31,7 +31,10 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThColumnExtractionEngine();
+            var engine = new ThColumnExtractionEngine()
+            {
+                RangePts = polygon,
+            };
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

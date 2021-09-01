@@ -3,9 +3,6 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.model
 {
@@ -15,6 +12,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             List<List<CleaningToolsSystem>> floorCleanToolList, int areaIndex, int layingMethod, List<int> NoPRValve, List<int> highestStorey, 
             int floorNumbers, List<int> FlushFaucet)
         {
+            var scale08 = new Scale3d(0.8, 0.8, 0.8);
             PRValveDetail.Add(i, acadDatabase, BranchPipe);
             if (i + 1 >= 3) //第三层放置敷设方式说明
             {
@@ -38,7 +36,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 BranchPipe[i].GetCheckValveSite()[j], new Scale3d(1, 1, 1), 0);
                 //绘制水表
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.WaterMeter,
-                BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.8, 0.8, 0.8), 0);
+                BranchPipe[i].GetWaterMeterSite()[j], scale08, 0);
                 //绘制水管中断
                 if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
                 {
@@ -56,7 +54,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 //绘制截止阀
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
+                BranchPipe[i].GetPressureReducingValveSite(), scale08, Math.PI * 3 / 2);
 
             }
 
@@ -64,7 +62,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             if (highestStorey.Contains(i + 1))
             {
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-COOL-PIPE", WaterSuplyBlockNames.AutoExhaustValve,
-                BranchPipe[i].GetAutoExhaustValveSite(), new Scale3d(0.5, 0.5, 0.5), 0);
+                BranchPipe[i].GetAutoExhaustValveSite(), scale08, 0);
                 if (i + 1 == floorNumbers)//最高层放置自动排气阀说明
                 {
                     BranchPipe[i].DrawAutoExhaustValveNote();

@@ -29,7 +29,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 {
                     fireHydrantSysOut.TextLine.Add(textLine);
                 }
-                
 
                 var text = ThTextSet.ThText(textPt1, pipeNumber1.Trim());
                 fireHydrantSysOut.TextList.Add(text);

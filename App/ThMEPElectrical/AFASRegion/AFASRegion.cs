@@ -37,7 +37,7 @@ namespace ThMEPElectrical.AFASRegion
         /// <param name="Roomdata">房间框线</param>
         /// <param name="detectorType">探测器类型</param>
         /// <returns></returns>
-        public List<Entity> DivideRoomWithDetectionRegion(Polyline storyPL, AFASDetector detectorType)
+        public List<Entity> DivideRoomWithDetectionRegion(Polyline storyPL, AFASDetector detectorType = AFASDetector.SmokeDetectorLow)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -52,11 +52,13 @@ namespace ThMEPElectrical.AFASRegion
                 }
 
                 var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acadDatabase.Database, pts);
+       
                 //建筑墙
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(acadDatabase.Database, pts);
 
                 AFASBeamExtendFactory beamExtendFactory = new AFASBeamExtendFactory(allStructure, archWallEngine);
+                beamExtendFactory.detectorType = detectorType;
                 beamExtendFactory.ExtendBeamCenterLine();
 
                 //计算每个房间可布置区域
@@ -94,13 +96,13 @@ namespace ThMEPElectrical.AFASRegion
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(acadDatabase.Database, pts);
 
-                ThMEPRegionService regionService = new ThMEPRegionService();
+                AFASRegionService regionService = new AFASRegionService();
                 regionService.BufferDistance = BufferDistance;
                 regionService.Initialize(allStructure, archWallEngine);
                 //计算每个房间可布置区域
                 Rooms.ForEach(room =>
                 {
-                    ArrangeableSpace.AddRange(regionService.PlacementRegions(room.Boundary).Cast<Polyline>());
+                    ArrangeableSpace.AddRange(regionService.PlacementRegions(room.Boundary).Cast<Entity>());
                 });
                 return ArrangeableSpace;
             }

@@ -91,6 +91,8 @@
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementBuilder.cs" />
+    <Compile Include="Engine\ThBuildingElementExtractor.cs" />
+    <Compile Include="Engine\ThBuildingElementVisitorManager.cs" />
     <Compile Include="Engine\ThColumnBuilderEngine.cs" />
     <Compile Include="Engine\ThCornicesBuilderEngine.cs" />
     <Compile Include="Engine\ThDB3BeamExtractionVisitor.cs" />
@@ -182,6 +184,7 @@
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
+    <Compile Include="Service\ThLineUnionService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
@@ -233,7 +236,7 @@
     <Compile Include="Engine\ThDB3ArchWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
-    <Compile Include="Engine\ThBuildingElementExtractor.cs" />
+    <Compile Include="Engine\ThBuildingElementExtractorEx.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3CurtainWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3CurtainWallRecognitionEngine.cs" />

@@ -31,6 +31,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _pipeLavelDirectionMoveStep = 300;//文字沿着线方向移动步长
         private double _pipeLabelXDirectionMaxDistance = 200;//文字X轴方向距离主线的最大距离
         private double _pipeLalelXDirectionMoveStep = 200;//文字沿着X轴方向移动的步长
+        private double _checkNearPipeDistance = 1000;//布置检查附近是否有立管的范围，用于确定排布方向的先后顺序
 
         private double _labelTextYSpace = 150;
         private double _labelTextXSpace = 100;
@@ -265,6 +266,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var retText = new List<CreateDBTextElement>();
             if (areaAllPipe ==null || areaAllPipe.Count < 1)
                 return retText;
+            var pipeLayoutDir = new PipeLabelLayoutDirection(areaAllPipe, minX, maxX, _createFloorSpliteY);
+            pipeLayoutDir.InitData(_pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep);
             List<string> hisPipes = new List<string>();
             var yAxis = Vector3d.YAxis;
             //标注线的方向沿Y轴，
@@ -293,7 +296,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 bool canCreate = false;
                 var createPoint = new Point3d();
                 var outXLength = 0.0;
-                var layoutDiections = GetLayoutDirections(thisLinePipes, centerPoint, minX, maxX, textWidth, textHeight);
+                var layoutDiections = pipeLayoutDir.GetLayoutDirections(thisLinePipes, centerPoint, textWidth, textHeight, _checkNearPipeDistance);
                 CheckDirection layoutDir = null;
                 foreach (var item in layoutDiections)
                 {
@@ -355,91 +358,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 _obstacleLines.Add(mainLine);
             }
             return retText;
-        }
-        List<CheckDirection> GetLayoutDirections(List<LablePipe> thisLinePipes,Point3d centerPoint, double minX,double maxX,double textWidth,double textHeight) 
-        {
-            var layoutDirs = new List<CheckDirection>();
-            var xAxis = Vector3d.XAxis;
-            var yAxis = Vector3d.YAxis;
-            var xy13 = (xAxis + yAxis).GetNormal();
-            var xy24 = (xAxis.Negate() + yAxis).GetNormal();
-            var startHeight = _pipeLabelNearDistance + textHeight;
-            if (thisLinePipes.Count > 1)
-            {
-                //多个时只能与垂直方向的可布置区域
-                if (centerPoint.Y >= _createFloorSpliteY)
-                {
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth >= minX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth >= minX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                }
-                else 
-                {
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth >= minX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth >= minX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                }
-                
-            }
-            else
-            {
-                //有多个区域可以布置
-                if (centerPoint.Y >= _createFloorSpliteY)
-                {
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth > minX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth > minX)
-                    {
-                        layoutDirs.Add(new CheckDirection(xy13, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                        layoutDirs.Add(new CheckDirection(xy24, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    }
-
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth > minX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    
-                    if (centerPoint.X + textWidth < maxX)
-                    {
-                        layoutDirs.Add(new CheckDirection(xy24.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                        layoutDirs.Add(new CheckDirection(xy13.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    }
-                }
-                else 
-                {
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth > minX)
-                        layoutDirs.Add(new CheckDirection(yAxis.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X + textWidth < maxX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X - textWidth > minX)
-                        layoutDirs.Add(new CheckDirection(yAxis, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    if (centerPoint.X + textWidth < maxX)
-                    {
-                        layoutDirs.Add(new CheckDirection(xy24.Negate(), xAxis, startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                        layoutDirs.Add(new CheckDirection(xy13.Negate(), xAxis.Negate(), startHeight, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    }
-                    if (centerPoint.X - textWidth > minX)
-                    {
-                        layoutDirs.Add(new CheckDirection(xy13, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                        layoutDirs.Add(new CheckDirection(xy24, xAxis.Negate(), _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
-                    }
-                }
-            }
-            return layoutDirs;
         }
         void GetTextHeightWidth(List<LablePipe> lablePipes,out double height,out double width) 
         {

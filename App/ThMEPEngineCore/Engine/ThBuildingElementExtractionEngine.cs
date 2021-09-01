@@ -3,6 +3,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -21,9 +22,11 @@ namespace ThMEPEngineCore.Engine
     public abstract class ThBuildingElementExtractionEngine
     {
         public List<ThRawIfcBuildingElementData> Results { get; protected set; }
+        public Point3dCollection RangePts { get; set; }
 
         public ThBuildingElementExtractionEngine()
         {
+            RangePts = new Point3dCollection();
             Results = new List<ThRawIfcBuildingElementData>();
         }
 

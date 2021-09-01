@@ -22,13 +22,14 @@ namespace FireAlarm.Data
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThFaWindowExtractor()
         {
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Windows = ExtractDb3Window(database, pts);
+            var db3Windows = ExtractDb3Window(pts);
             var localWindows = ExtractMsWindow(database, pts);
 
             ThCleanEntityService clean = new ThCleanEntityService();
@@ -48,12 +49,10 @@ namespace FireAlarm.Data
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             Windows = handleObjs.Cast<Polyline>().ToList();
         }
-        private DBObjectCollection ExtractDb3Window(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Window(Point3dCollection pts)
         {
             var db3Windows = new DBObjectCollection();
-            var db3WindowExtractionEngine = new ThDB3WindowExtractionEngine();
-            db3WindowExtractionEngine.Extract(database);
-            db3WindowExtractionEngine.Results.ForEach(o => Transformer.Transform(o.Geometry));
+            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
 
             var windowEngine = new ThDB3WindowRecognitionEngine();
             var newPts = new Point3dCollection();
@@ -63,7 +62,7 @@ namespace FireAlarm.Data
                 Transformer.Transform(ref pt);
                 newPts.Add(pt);
             });
-            windowEngine.Recognize(db3WindowExtractionEngine.Results, newPts);
+            windowEngine.Recognize(Db3ExtractResults, newPts);
             db3Windows = windowEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
             return db3Windows;
         }

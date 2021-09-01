@@ -3,6 +3,7 @@ using Linq2Acad;
 using DotNetARX;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -191,6 +192,11 @@ namespace ThMEPElectrical.BlockConvert
                 }
                 blockReference.TransformBy(mirror);
             }
+        }
+
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        {
+            //
         }
     }
 }

@@ -120,7 +120,7 @@ namespace ThCADCore.NTS
             var vector = vertex.GetVectorTo(Point3d.Origin);
             var matrix = Matrix3d.Displacement(vector);
             clone.TransformBy(matrix);
-            var centroid = Centroid.GetCentroid(polygon.ToNTSPolygon());
+            var centroid = Centroid.GetCentroid(clone.ToNTSPolygon());
             return centroid.ToAcGePoint3d().TransformBy(matrix.Inverse());
         }
 

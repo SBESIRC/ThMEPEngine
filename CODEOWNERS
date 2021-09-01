@@ -1,0 +1,8 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners
+
+/App/ThCADCore/ @shichongdong
+/App/DotNetARX/ @shichongdong
+/App/CADExtension/ @shichongdong
+/App/ThCADExtension/ @shichongdong

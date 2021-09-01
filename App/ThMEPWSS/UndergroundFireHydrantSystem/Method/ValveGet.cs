@@ -1,10 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.Command;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -49,7 +45,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 {
                     valveSize = 300;
                 }
-
                 var pt3 = new Point3d(pt2.X + valveSize, pt2.Y, 0);
                 lineList.Add(new Line(pt1, pt2));
                 lineList.Add(new Line(pt3, pt4));
@@ -67,7 +62,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
             {
                 lineList.Add(new Line(pt1, pt4));
             }
-
         }
         private static void ValveCheck(ref FireHydrantSystemOut fireHydrantSysOut, Point3d valve, Point3d stPt,
             FireHydrantSystemIn fireHydrantSysIn, ref bool flag)

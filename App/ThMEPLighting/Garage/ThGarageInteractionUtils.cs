@@ -104,7 +104,7 @@ namespace ThMEPLighting.Garage
                     result.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.NormalizeEx(border);
+                        var newBorder = ThMEPFrameService.NormalizeEx(border,1000);
                         if (newBorder.Area > 0)
                         {
                             var dbOBjs = acdb.ModelSpace
@@ -156,8 +156,7 @@ namespace ThMEPLighting.Garage
             // 自定义
             arrangeParameter.Margin = 800.0;
             arrangeParameter.PaperRatio = 100;
-            arrangeParameter.MinimumEdgeLength = 5000;
-
+            arrangeParameter.MinimumEdgeLength = 2500;
             return arrangeParameter;
         }
 

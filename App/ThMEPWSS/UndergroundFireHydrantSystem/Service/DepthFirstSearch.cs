@@ -49,14 +49,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void dfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
              FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
-            if(cur.Equals(new Point3dEx(0,0,0)))
-            {
-                return;
-            }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
                 var flag = true;
+                if(rstPath.Count < 5)
+                {
+                    return;
+                }
                 if(rstPaths.Count == 0)//主环数为0
                 {
                     rstPaths.Add(rstPath);//把当前路径加入
@@ -142,9 +142,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
             FireHydrantSystemIn fireHydrantSysIn)
         {
-            if (cur.Equals(target))
+            if (cur._pt.DistanceTo(target._pt) < 5)
             {
-                if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.AngleList[cur]))
+                if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.AngleList[target]))
                 {
                     var rstPath = new List<Point3dEx>(tempPath);
                     var flag = true;

@@ -1,19 +1,15 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
+using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -24,46 +20,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
+            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
-
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 1);//打断部分 自动连接
-            foreach (var l in GLineConnectList)
-            {
-                GLineSegList.Add(l);
-            }
-            lineList = new List<Line>();//GLineSegment 转 line
-            foreach (var gl in GLineSegList)
+            foreach (var gl in GLineConnectList)
             {
                 var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                if (pt1.Equals(new Point3dEx(0, 0, 0)) || pt2.Equals(new Point3dEx(0, 0, 0)))
-                {
-                    ;
-                }
-                var line = new Line(pt1._pt, pt2._pt);
-                if(line.Length<1)
+                if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
                 {
                     continue;
                 }
+                if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                {
+                    continue;
+                }
+                var line = new Line(pt1._pt, pt2._pt);
                 lineList.Add(line);
-                if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
-                {
-                    fireHydrantSysIn.PtDic[pt1].Add(pt2);
-                }
-                if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
-                {
-                    fireHydrantSysIn.PtDic[pt2].Add(pt1);
-                }
             }
             lineList = CleanLaneLines3(lineList);
         }
 
          public static void PipeLineAutoConnect(ref List<Line> lineList)
-        {
+         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
             foreach (var l in lineList)
@@ -89,7 +72,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             lineList = CleanLaneLines3(tmpLines);
         }
-
 
         public static void RemoveFalsePipe(ref List<Line> lineList, List<Point3dEx> hydrantPosition)
         {
@@ -159,7 +141,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
                             if (pts.Count > 0)
                             {
-                                if (pts[0].DistanceTo(pt2._pt) < 150)
+                                if (pts[0].DistanceTo(pt2._pt) < 150 && pts[0].DistanceTo(pt2._pt) > 1)
                                 {
                                     connectLine.Add(new Line(pts[0], pt2._pt));
                                 }
@@ -171,78 +153,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             foreach(var l in connectLine)
             {
-                if(l.Length > 1)
-                {
-                    lineList.Add(l);
-                    var pt1 = new Point3dEx(l.StartPoint);
-                    var pt2 = new Point3dEx(l.EndPoint);
-                    if (pt1.Equals(new Point3dEx(0, 0, 0)) || pt2.Equals(new Point3dEx(0, 0, 0)))
-                    {
-                        ;
-                    }
-                    if (!pointList.Contains(pt1))
-                    {
-                        pointList.Add(pt1);
-                    }
-                    if (!pointList.Contains(pt2))
-                    {
-                        pointList.Add(pt2);
-                    }
-
-                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1))
-                    {
-                        if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
-                        {
-                            fireHydrantSysIn.PtDic[pt1].Add(pt2);
-                        }
-                    }
-                    else
-                    {
-                        var ptls = new List<Point3dEx>(){ pt2 };
-                        fireHydrantSysIn.PtDic.Add(pt1, ptls);
-                    }
-                    if (fireHydrantSysIn.PtDic.ContainsKey(pt2))
-                    {
-                        if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
-                        {
-                            fireHydrantSysIn.PtDic[pt2].Add(pt1);
-                        }
-                    }
-                    else
-                    {
-                        var ptls = new List<Point3dEx>() { pt1 };
-                        fireHydrantSysIn.PtDic.Add(pt2, ptls);
-                    }
-                }
+                lineList.Add(l);
             }
-
-            foreach(var pt1 in pointList)
+            foreach (var pt1 in pointList)
             {
-                foreach(var pt2  in pointList)
+                foreach(var pt2 in pointList)
                 {
-
-                    if(!pt1.Equals(pt2))
+                    double dist = pt1.DistanceToEx(pt2);
+                    if (dist < 10 && dist >1)
                     {
                         var line = new Line(pt1._pt, pt2._pt);
-                        if(line.Length < 10)
+                        if(!lineList.Contains(line))
                         {
-                            if(!lineList.Contains(line))
-                            {
-                                lineList.Add(new Line(pt1._pt, pt2._pt));
-                            }
-                            if(!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
-                            {
-                                fireHydrantSysIn.PtDic[pt1].Add(pt2);
-                            }
-                            if(!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
-                            {
-                                fireHydrantSysIn.PtDic[pt2].Add(pt1);
-                            }
+                            lineList.Add(new Line(pt1._pt, pt2._pt));
                         }
                     }
                 }
             }
-
+            lineList = CleanLaneLines3(lineList);
+            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
         }
 
         public static List<Line> CleanLaneLines2(List<Line> lines)

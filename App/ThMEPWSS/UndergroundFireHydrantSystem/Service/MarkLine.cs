@@ -1,38 +1,48 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class MarkLine
+    public static class MarkLine
     {
-        public static void GetMarkLineList(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3d>> pipeMarkSite, List<Line> lineList)
+        public static void GetPipeMark(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3d>> pipeMarkSite, Point3d startPt, double tor = 30)
         {
-            foreach (var pms in pipeMarkSite)
+            foreach(var pts in pipeMarkSite)
             {
-                var markL = new List<Line>();
-                var nullMark = false;//手抖多画了一对环管标记
-                foreach (var v in pms)
+                var sptEx = new Point3dEx(pts[0]);
+                var eptEx = new Point3dEx(pts[1]);
+                if (pts[0].DistanceTo(startPt) < tor)
                 {
-                    var line = PointCompute.PointOnLine(v, lineList, 30);
-                    if (line.StartPoint.Equals(new Point3d(0, 0, 0)))
-                    {
-                        nullMark = true;
-                        break;
-                    }
-                    markL.Add(PointCompute.PointOnLine(v, lineList, 30));
+                    fireHydrantSysIn.StartEndPts.Add(sptEx);
+                    fireHydrantSysIn.StartEndPts.Add(eptEx);
+                    return;
                 }
-                if (!nullMark)
+                if (pts[1].DistanceTo(startPt) < tor)
                 {
-                    fireHydrantSysIn.MarkLineList.Add(markL);
+                    fireHydrantSysIn.StartEndPts.Add(eptEx);
+                    fireHydrantSysIn.StartEndPts.Add(sptEx);
+                    return;
                 }
-
             }
+        }
+        public static bool GetMarkLineList(this FireHydrantSystemIn fireHydrantSysIn, 
+            List<Line> lineList, Dictionary<Point3d, double> markAngleDic)
+        {
+            var spt = fireHydrantSysIn.StartEndPts[0];
+            var ept = fireHydrantSysIn.StartEndPts[1];
+            var sPt = PointCompute.PointOnLine(spt._pt, lineList, markAngleDic[spt._pt], 30);
+            var ePt = PointCompute.PointOnLine(ept._pt, lineList, markAngleDic[ept._pt], 30);
+            if(sPt.Equals(new Point3dEx()) || ePt.Equals(new Point3dEx()))
+            {
+                return false;
+            }
+
+            fireHydrantSysIn.StartEndPts.Clear();
+            fireHydrantSysIn.StartEndPts.Add(sPt);
+            fireHydrantSysIn.StartEndPts.Add(ePt);
+            return true;
         }
     }
 }

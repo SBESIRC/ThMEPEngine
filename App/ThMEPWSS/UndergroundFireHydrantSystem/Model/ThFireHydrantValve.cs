@@ -1,12 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -71,23 +65,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     pt2 = new Point3d(pt1.X, pt1.Y - Valve.ScaleFactors.X * Height, 0);
                 }
             }
-            else
-            {
-
-            }
             return new Line(pt1, pt2);
-        }
-    }
-
-    class ThTZFireHydrantValve
-    {
-        private BlockReference Valve { get; set; }
-
-        public Point3dEx CenterPt { get; set; }
-
-        public ThTZFireHydrantValve(object valve)
-        {
-
         }
     }
 }

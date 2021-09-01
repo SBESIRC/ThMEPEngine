@@ -24,15 +24,15 @@ namespace ThMEPLighting.Garage.Engine
         }
         private void Arrange(ThRegionBorder regionBorder)
         {
-            // 裁剪和缩短
-            TrimAndShort(regionBorder);
+            #region ----------处理灯线----------
+            TrimAndShort(regionBorder); //裁剪和缩短
+            CleanAndFilter(); // 过滤短线
 
             // 合并车道线
-            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines);
+            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines); //用处理后的灯线来建线槽
             DxLines = Explode(mergeDxLines); //把合并的车道线重新设成
-
-            // 清洗和过滤短线
-            CleanAndFilter(); //对DxLines操作
+            DxLines = ThPreprocessLineService.Preprocess(DxLines);            
+            #endregion
 
             //识别内外圈
             var innerOuterCircles = new List<ThWireOffsetData>();

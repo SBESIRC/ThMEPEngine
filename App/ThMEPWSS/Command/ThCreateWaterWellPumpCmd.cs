@@ -34,32 +34,20 @@ namespace ThMEPWSS.Command
             _vm = vm;
             configInfo = vm.GetConfigInfo();
         }
-        public List<ThWWaterWell> GetWaterWellEntityList(Tuple<Point3d, Point3d> input)
+        public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
         {
             List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
             using (var database = AcadDatabase.Active())
             using (var waterwellEngine = new ThWWaterWellRecognitionEngine(configInfo.WaterWellInfo.identifyInfo))
             {
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                waterwellEngine.Recognize(database.Database, range);
+                waterwellEngine.Recognize(database.Database, input);
                 var objIds = new ObjectIdCollection(); // Print
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
-                    //var clone = waterWell.OBB.Clone() as Entity;
-                    //objIds.Add(database.ModelSpace.Add(clone));
-                    //clone.ColorIndex = 7;
                     waterWell.Init();
                     waterWellList.Add(waterWell);
-                }
-                //if(objIds.Count>0)
-                //{
-                //    GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
-                //}                
+                }              
             }
             return waterWellList;
         }
@@ -103,33 +91,22 @@ namespace ThMEPWSS.Command
                 return resLine;
             }
         }
-        public List<Line> GetWallColumnEdgesInRange(Tuple<Point3d, Point3d> input)
+        public List<Line> GetWallColumnEdgesInRange(Point3dCollection input)
         {
-            var range = new Point3dCollection();
-            range.Add(input.Item1);
-            range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-            range.Add(input.Item2);
-            range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
             IWallEdgeData wallData = new ThDB3WallEdgeService();
             List<Line> resLine = new List<Line>();
-            resLine.AddRange(GetRoomLine(range));
-            resLine.AddRange(wallData.GetWallEdges(Active.Database, range));
+            resLine.AddRange(GetRoomLine(input));
+            resLine.AddRange(wallData.GetWallEdges(Active.Database, input));
             return resLine;
         }
-        public List<Point3d> GetParkSpacePointInRange(Tuple<Point3d, Point3d> input)
+        public List<Point3d> GetParkSpacePointInRange(Point3dCollection input)
         {
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-
                 var partSpace = acadDb.ModelSpace.OfType<BlockReference>().Where(o => o.Layer == "AE-EQPM-CARS").ToList();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
-                var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+                var dbObjects = spatialIndex.SelectCrossingPolygon(input);
 
                 var rst = new List<Point3d>();
                 foreach (var obj in dbObjects)
@@ -143,21 +120,15 @@ namespace ThMEPWSS.Command
                 return rst;
             }
         }
-        public List<BlockReference> GetPipeInRange(Tuple<Point3d, Point3d> input)
+        public List<BlockReference> GetPipeInRange(Point3dCollection input)
         {
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-
                 var partSpace = acadDb.ModelSpace.OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull && (o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150")).ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection()); 
-                var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+                var dbObjects = spatialIndex.SelectCrossingPolygon(input);
 
                 var rst = new List<BlockReference>();
                 foreach (var obj in dbObjects)
@@ -189,23 +160,23 @@ namespace ThMEPWSS.Command
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                if(!acadDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump) && blockDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump))
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.DeepWaterPump))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.DeepWaterPump));
                 }
-                if (!acadDb.Blocks.Contains(WaterWellBlockNames.LocationRiser) && blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser))
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser));
                 }
-                if (!acadDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150) && blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150))
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.LocationRiser150))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.LocationRiser150));
                 }
-                if(!acadDb.Layers.Contains("W-EQPM") && blockDb.Layers.Contains("W-EQPM"))
+                if (blockDb.Layers.Contains("W-EQPM"))
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
                 }
-                if (!acadDb.Layers.Contains("W-DRAI-EQPM") && blockDb.Layers.Contains("W-DRAI-EQPM"))
+                if (blockDb.Layers.Contains("W-DRAI-EQPM"))
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
                 }
@@ -229,12 +200,7 @@ namespace ThMEPWSS.Command
                     }
                     else if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.BOXCHOICE)
                     {
-                        var input = ThWGeUtils.SelectPoints();
-                        if(input.Item1.IsEqualTo(input.Item2))
-                        {
-                            return;
-                        }
-
+                        var input = Common.Utils.SelectAreas();
                         //获取集水井
                         var water_well_list = GetWaterWellEntityList(input);
                         if (water_well_list.Count == 0)
@@ -245,19 +211,6 @@ namespace ThMEPWSS.Command
                         }
                         //获取墙
                         List<Line> wallLine = GetWallColumnEdgesInRange(input);
-
-                        //var objIds = new ObjectIdCollection();
-                        //wallLine.ForEach(o =>
-                        //{
-                        //    var clone = o.Clone() as Line;
-                        //    objIds.Add(database.ModelSpace.Add(clone));
-                        //    clone.ColorIndex = 3;
-                        //});
-                        //if(objIds.Count>0)
-                        //{
-                        //    GroupTools.CreateGroup(database.Database, Guid.NewGuid().ToString(), objIds);
-                        //}
-
                         //获取车位
                         List<Point3d> parkPoint = GetParkSpacePointInRange(input);
                         //获取潜水泵
@@ -322,7 +275,7 @@ namespace ThMEPWSS.Command
             }
             catch (Exception ex)
             {
-                Active.Editor.WriteMessage(ex.Message);                
+                Active.Editor.WriteMessage(ex.Message);
             }
         }
     }

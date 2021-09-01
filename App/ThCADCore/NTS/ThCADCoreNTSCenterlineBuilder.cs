@@ -34,6 +34,32 @@ namespace ThCADCore.NTS
             return centerlines;
         }
 
+        public static DBObjectCollection Centerline(Polygon geometry, double interpolationDistance)
+        {
+            var lineStrings = new List<Geometry>();
+            foreach (Polygon polygon in geometry.VoronoiDiagram(interpolationDistance).Geometries)
+            {
+                var iterator = new LinearIterator(polygon.Shell);
+                for (; iterator.HasNext(); iterator.Next())
+                {
+                    if (!iterator.IsEndOfLine)
+                    {
+                        var line = CreateLineString(iterator);
+                        if (line.Within(geometry))
+                        {
+                            lineStrings.Add(line);
+                        }
+                    }
+                }
+            }
+            var centerlines = new DBObjectCollection();
+            foreach (LineString lineString in lineStrings)
+            {
+                centerlines.Add(lineString.ToDbPolyline());
+            }
+            return centerlines;
+        }
+
         private static Geometry CreateLineString(LinearIterator iterator)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(new Coordinate[]

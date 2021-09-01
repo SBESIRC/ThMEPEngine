@@ -90,33 +90,29 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
         public void Init()
         {
-            //支管 point 初始化
-            var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.175) * FloorHeight, 0);
-            var pt2 = new Point3d(pt1.X + 400, pt1.Y, 0);
-            var pt231 = new Point3d(pt2.X, pt2.Y - 0.05 * FloorHeight, 0);
-            Point3d pt232, pt3;
-
+            var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.3) * FloorHeight, 0);
+            var pt2 = pt1.OffsetX(400);
+            var pt231 = pt2.OffsetY(-0.05 * FloorHeight);
+            Point3d pt232;
             if (NoValve)
             {
-                pt232 = new Point3d(pt2.X, pt231.Y - 0.5 * BlockSize[1][0], 0);
+                pt232 = pt231.OffsetY(-0.8 * BlockSize[1][0]); 
             }
             else
             {
-                pt232 = new Point3d(pt2.X, pt231.Y - 0.7 * BlockSize[0][0], 0);
+                pt232 = pt231.OffsetY(-0.7 * BlockSize[0][0]); 
             }
-
-            var h = FloorHeight *(((Households[AreaIndex] -1 ) * 0.14 + 0.1)) + FloorHeight * (FloorNumber - 1) + IndexStartY;
+            var h = FloorHeight *((Households[AreaIndex] -1 ) * 0.14 + 0.1) + FloorHeight * (FloorNumber - 1) + IndexStartY;
             if (HasFlushFaucet)
             {
                 h += FloorHeight * 0.14;
             }
-            //pt3 = new Point3d(pt2.X, pt232.Y - 0.05 * FloorHeight, 0);
-            pt3 = new Point3d(pt2.X, h, 0);
+            var pt3 = new Point3d(pt2.X, h, 0);
             TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
-            var pt371 = new Point3d(pt3.X + 225, pt3.Y, 0);
-            var pt372 = new Point3d(pt371.X + 1 * BlockSize[1][0], pt3.Y, 0);
-            var pt373 = new Point3d(pt372.X + 75, pt3.Y, 0);
-            var pt374 = new Point3d(pt373.X + 0.8 * BlockSize[2][0], pt3.Y, 0);
+            var pt371 = pt3.OffsetX(225);
+            var pt372 = pt371.OffsetX(BlockSize[1][0]);
+            var pt373 = pt372.OffsetX(75);
+            var pt374 = pt373.OffsetX(0.8 * BlockSize[2][0]);
             Point3d pt7;
             Point3d pt11;
 
@@ -134,8 +130,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 PressureReducingValveSite = pt231;//减压阀位置
             }
-
-            AutoExhaustValveSite = pt1;
+            AutoExhaustValveSite = pt1.OffsetY(-60);
 
             double gap = 0.064;
             if (Households[AreaIndex] > 2 && Households[AreaIndex] < 6)
@@ -146,24 +141,20 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 gap = 0.1;
             }
-
             if (LayingMethod == 0)//穿梁敷设
             {
-                pt7 = new Point3d(pt374.X + 300, pt3.Y, 0);
+                pt7 = pt374.OffsetX(300);
                 pt11 = new Point3d(pt7.X, IndexStartY + (FloorNumber - 0.075) * FloorHeight, 0);
-                var pt15 = new Point3d(pt11.X + 0.5 * FloorHeight, pt11.Y, 0);
+                var pt15 = pt11.OffsetX(0.5 * FloorHeight);
                 BranchPipes.Add(new Line(pt11, pt15));
-
                 WaterPipeInterrupted.Add(pt15);//第1个水管截断位置
             }
             else
             {
-                pt7 = new Point3d(pt374.X + 150 * Households[AreaIndex], pt3.Y, 0);
+                pt7 = pt374.OffsetX(150 * Households[AreaIndex]);
                 pt11 = new Point3d(pt7.X, IndexStartY + FloorHeight * (FloorNumber - 1 + 0.05), 0);
-                //pt11 = new Point3d(pt7.X, pt7.Y - gap * 0.5 * (Households[AreaIndex] + 1) * FloorHeight, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
             }
-
             BranchPipes.Add(new Line(pt1, pt2));
             BranchPipes.Add(new Line(pt2, pt231));
             BranchPipes.Add(new Line(pt232, pt3));
@@ -171,8 +162,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             BranchPipes.Add(new Line(pt372, pt373));
             BranchPipes.Add(new Line(pt374, pt7));
             BranchPipes.Add(new Line(pt7, pt11));
-
-
             CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置                      
             WaterMeterSite.Add(new Point3d((pt373.X + pt374.X) / 2, pt3.Y, 0));//第一个水表位置
 
@@ -218,10 +207,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 }
             }
 
-
             if (HasFlushFaucet) //有冲洗龙头
             {
-                double pt19Y = 0;
+                double pt19Y;
                 if (Households[AreaIndex] > 6)
                 {
                     pt19Y = IndexStartY + (gap * 0.5 + FloorNumber - 1) * FloorHeight;
@@ -235,7 +223,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
                 var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
                 var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-                var pt20 = new Point3d();
+                Point3d pt20;
                 if (LayingMethod == 0)
                 {
                     pt20 = new Point3d(pt7.X + 150 * (Households[AreaIndex] + 4), pt19.Y, 0);
@@ -349,7 +337,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var text1 = ThText.NoteText(pt3.OffsetXY(50, 50), "自动排气阀DN20，余同");
             acadDatabase.CurrentSpace.Add(text1);
 
-            
             var text2 = ThText.NoteText(pt3.OffsetXY(50, -350), "排气阀贴板底敷设");
             acadDatabase.CurrentSpace.Add(text2);
         }
@@ -375,7 +362,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             acadDatabase.CurrentSpace.Add(line12);
             acadDatabase.CurrentSpace.Add(line23);
 
-            
             var text1 = ThText.NoteText(pt2.OffsetXY(50, 50), "DNXX×X+DNXX×X（余同）");
 
             acadDatabase.CurrentSpace.Add(text1);

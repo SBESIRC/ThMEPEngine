@@ -119,6 +119,13 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
+                    // 从图纸中提取集水井提资表表身
+                    var collectingWellEngine = new ThBConvertElementExtractionEngine()
+                    {
+                        NameFilter = new List<string>{ "集水井提资表表身"},
+                    };
+                    collectingWellEngine.Extract(currentDb.Database);
+
                     var mapping = new Dictionary<ThBlockReferenceData, bool>();
                     srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
                     XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
@@ -199,6 +206,7 @@ namespace ThMEPElectrical.Command
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
                                     currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                     currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+                                    
 
                                     // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                                     // 修正插入动态块的图层顺序
@@ -220,7 +228,16 @@ namespace ThMEPElectrical.Command
                                     engine.Rotate(objId, o);
 
                                     // 设置新插入的块引用位置
-                                    engine.Displacement(objId, o);
+                                    if (o.EffectiveName.Contains("潜水泵-AI"))
+                                    {
+                                        currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("水泵标注"), false);
+                                        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("0"), false);
+                                        engine.Displacement(objId, o, collectingWellEngine.Results, scale);
+                                    }
+                                    else
+                                    {
+                                        engine.Displacement(objId, o);
+                                    }
 
                                     // 设置动态块可见性
                                     engine.SetVisibilityState(objId, o);
