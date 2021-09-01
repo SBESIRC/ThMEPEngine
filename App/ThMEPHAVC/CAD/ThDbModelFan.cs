@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
 using TianHua.FanSelection;
@@ -20,9 +18,10 @@ namespace ThMEPHVAC.CAD
     }
     public class ThDbModelFan
     {
+        public string Name { get; set; }
         public ObjectId Model { get; set; }
         public ThBlockReferenceData Data { get; set; }
-
+        
         public string IntakeForm
         {
             get
@@ -30,31 +29,17 @@ namespace ThMEPHVAC.CAD
                 return GetIntakeForm();
             }
         }
-
-        public double FanVolume
-        {
-            get
-            {
-                return GetFanVolume();
-            }
-        }
-
-        public double LowFanVolume 
-        {
-            get
-            {
-                return GetLowFanVolume();
-            }
-        }
-
+        public double air_volume;
+        public string str_air_volume;
+        public double low_air_volume;
         public FanOpening FanInlet
         {
             get
             {
                 return GetFanInlet();
+
             }
         }
-
         public Point3d FanInletBasePoint
         {
             get
@@ -62,7 +47,6 @@ namespace ThMEPHVAC.CAD
                 return GetFanInletBasePoint();
             }
         }
-
         public Point3d FanOutletBasePoint
         {
             get
@@ -70,7 +54,6 @@ namespace ThMEPHVAC.CAD
                 return GetFanOutletBasePoint();
             }
         }
-
         public FanOpening FanOutlet
         {
             get
@@ -78,25 +61,25 @@ namespace ThMEPHVAC.CAD
                 return GetFanOutlet();
             }
         }
-
-        public DBObjectCollection InAndOutLines { get; set; }
-
-        public string FanScenario
+        public string scenario
         {
             get
             {
                 return GetFanScenario();
             }
         }
-
-
-        public ThDbModelFan(ObjectId FanObjectId, DBObjectCollection inandoutlines)
+        public bool is_exhaust;
+        public ThDbModelFan(ObjectId FanObjectId)
         {
             Model = FanObjectId;
-            InAndOutLines = inandoutlines;
             Data = new ThBlockReferenceData(FanObjectId);
+            air_volume = GetFanVolume();
+            low_air_volume = GetLowFanVolume();
+            var obj = FanObjectId.GetDBObject();
+            if (obj is BlockReference reference)
+                Name = reference.GetEffectiveName();
+            is_exhaust = !(scenario.Contains("补") || scenario.Contains("送"));
         }
-
         private string GetIntakeForm()
         {
             if (Model.IsRawHTFCModel())
@@ -109,13 +92,17 @@ namespace ThMEPHVAC.CAD
                 return "直进直出";
             }
         }
-
         private double GetFanVolume()
         {
             var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
-            return fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "").NullToDouble();
+            str_air_volume = fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "");
+            if (str_air_volume.Contains("/"))
+            {
+                string []str = str_air_volume.Split('/');
+                return Double.Parse(str[1]);
+            }
+            return str_air_volume.NullToDouble();
         }
-
         private double GetLowFanVolume()
         {
             var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
@@ -129,8 +116,6 @@ namespace ThMEPHVAC.CAD
                 return volumegroup.Min(s=>s.NullToDouble());
             }
         }
-
-
         private FanOpening GetFanInlet()
         {
             double angle2Property = Convert.ToDouble(Data.CustomProperties
@@ -265,7 +250,6 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-
         private Point3d GetFanInletBasePoint()
         {
             string blockname = Data.EffectiveName;

@@ -13,7 +13,7 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacPortModifyCmd : IAcadCommand, IDisposable
     {
-        private static DuctPortsParam in_param = new DuctPortsParam();
+        private static ThMEPHVACParam in_param = new ThMEPHVACParam();
         public void Dispose() { }
         public void Execute()
         {
@@ -34,7 +34,7 @@ namespace TianHua.Hvac.UI.Command
             graph_res.Do_anay(in_param.port_num, modifyer, modifyer.center_line);
             if (graph_res.merged_endlines.Count == 0)
             {
-                ThDuctPortsService.Prompt_msg("选择错误起始点");
+                ThMEPHVACService.Prompt_msg("选择错误起始点");
                 return;
             }
             var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
@@ -54,13 +54,13 @@ namespace TianHua.Hvac.UI.Command
             switch (status)
             {
                 case ModifyerStatus.NO_PORT:
-                    ThDuctPortsService.Prompt_msg("没有与中心管道相交的风口");
+                    ThMEPHVACService.Prompt_msg("没有与中心管道相交的风口");
                     break;
                 case ModifyerStatus.MULTI_PORT_RANGE:
-                    ThDuctPortsService.Prompt_msg("有多种类型的风口与中心管道相交");
+                    ThMEPHVACService.Prompt_msg("有多种类型的风口与中心管道相交");
                     break;
                 case ModifyerStatus.PORT_CROSS_MULTI_ENTITY:
-                    ThDuctPortsService.Prompt_msg("风口与多个组相交(风口处于弯头三通四通附近)");
+                    ThMEPHVACService.Prompt_msg("风口与多个组相交(风口处于弯头三通四通附近)");
                     break;
             }
         }
@@ -82,7 +82,7 @@ namespace TianHua.Hvac.UI.Command
                 var id = result.Value.GetObjectIds();
                 if (id.Length > 1)
                 {
-                    ThDuctPortsService.Prompt_msg("请选择AI-风管起点");
+                    ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
                     return null;
                 }
                 if (id[0].GetEntity() is BlockReference)
@@ -90,13 +90,13 @@ namespace TianHua.Hvac.UI.Command
                     var blk = id[0].GetEntity() as BlockReference;
                     if (blk.Name != "AI-风管起点")
                     {
-                        ThDuctPortsService.Prompt_msg("请选择AI-风管起点");
+                        ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
                         return null;
                     }
                 }
                 else
                 {
-                    ThDuctPortsService.Prompt_msg("请选择AI-风管起点");
+                    ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
                     return null;
                 }
                 return (result.Status == PromptStatus.OK) ? result.Value.GetObjectIds() : null;

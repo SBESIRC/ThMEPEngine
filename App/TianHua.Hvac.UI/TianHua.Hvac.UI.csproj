@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
-    <Compile Include="Command\THHvacFjfCmd.cs" />
+    <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="fmBypass.cs">
