@@ -250,5 +250,40 @@ namespace ThMEPLighting
                 }
             }
         }
+        [CommandMethod("TIANHUACAD", "THTestExendLine", CommandFlags.Modal)]
+        public void THTestExendLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())            
+            {
+                var datas = new List<Tuple<Curve, Curve, Curve>>();
+               while(true)
+                {
+                    var centerPER = AcHelper.Active.Editor.GetEntity("\n选择中心线");
+                    if(centerPER.Status!=PromptStatus.OK)
+                    {
+                        break;
+                    }
+                    var firstPER = AcHelper.Active.Editor.GetEntity("\n选择中心线对应的1号线");
+                    if (firstPER.Status != PromptStatus.OK)
+                    {
+                        break;
+                    }
+                    var secondPER = AcHelper.Active.Editor.GetEntity("\n选择中心线对应的2号线");
+                    if (secondPER.Status != PromptStatus.OK)
+                    {
+                        break;
+                    }
+                    var centerCurve = acdb.Element<Curve>(centerPER.ObjectId);
+                    var firstCurve = acdb.Element<Curve>(firstPER.ObjectId);
+                    var secondCurve = acdb.Element<Curve>(secondPER.ObjectId);
+                    datas.Add(Tuple.Create(centerCurve, firstCurve, secondCurve));
+                }
+                var results = ThExtendService.Extend(datas, 5);
+
+                results.Select(o => o.Item1.Clone() as Entity).ToList().CreateGroup(acdb.Database, 2);
+                results.Select(o => o.Item2.Clone() as Entity).ToList().CreateGroup(acdb.Database, 1);
+                results.Select(o => o.Item3.Clone() as Entity).ToList().CreateGroup(acdb.Database, 3);
+            }
+        }
     }
 }

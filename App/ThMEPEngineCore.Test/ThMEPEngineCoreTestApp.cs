@@ -22,6 +22,9 @@ using System.Linq;
 using DotNetARX;
 using GeometryExtensions;
 using ThMEPEngineCore.Diagnostics;
+using NetTopologySuite.Geometries;
+using NFox.Cad;
+
 
 namespace ThMEPEngineCore.Test
 {
@@ -612,5 +615,46 @@ namespace ThMEPEngineCore.Test
             return mPolygon;
         }
 
+        [CommandMethod("TIANHUACAD", "THNodingTest", CommandFlags.Modal)]
+        public void THNodingTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                //认为输出结果是线段的集合
+                var objs = new List<Line>();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Line>(obj));
+                }
+
+                var res = NodingLines(objs.ToCollection());
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(
+                res.Cast<Entity>().Select(o => o.Clone() as Entity).ToList(),
+                AcHelper.Active.Database, 1);
+            }
+        }
+        private List<Line> NodingLines(DBObjectCollection curves)
+        {
+            var results = new List<Line>();
+            var geometry = curves.ToNTSNodedLineStrings();
+            if (geometry is LineString line)
+            {
+                results.Add(line.ToDbline());
+            }
+            else if (geometry is MultiLineString lines)
+            {
+                results.AddRange(lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return results;
+        }
     }
 }
