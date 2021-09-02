@@ -204,6 +204,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         [Description("污废合流立管")]
         sewageWasteRiser =13,
         /// <summary>
+        /// 马桶
+        /// </summary>
+        [Description("马桶")]
+        toilet =14,
+        /// <summary>
         /// 水管井
         /// </summary>
         [Description("水管井")]

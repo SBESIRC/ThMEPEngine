@@ -227,6 +227,14 @@ namespace ThMEPWSS.Command
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
                     createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
 
+                //卫生间PL添加清扫口
+                List<string> pipeTags = new List<string> { "PL", "FL", "TL", "DL" };
+                var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
+                ToiletRoomCleanout roomCleanout = new ToiletRoomCleanout(livingHighestFloor.floorUid, toiletRooms, pipes);
+                var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
+                if (null != addClean && addClean.Count > 0)
+                    createBlockInfos.AddRange(addClean);
+
                 var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
                 RoofPipeLabelLayout(midY, _classifyResult.Where(c=>c.enumEquipmentType == EnumEquipmentType.roofRainRiser).ToList());
                 
