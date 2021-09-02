@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Pipe.Model;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -47,9 +48,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnFixDeepWaterPump_Click(object sender, RoutedEventArgs e)
         {
+            WaterWellIdentifyConfigInfo identifyConfigInfo = new WaterWellIdentifyConfigInfo();
+            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            identifyConfigInfo.WhiteList = config["集水井"];
+            ViewModel.SetIdentfyConfigInfo(identifyConfigInfo);
             ThCreateWaterWellPumpCmd cmd = new ThCreateWaterWellPumpCmd(ViewModel);
             cmd.Execute();
-
         }
 
         private void btnGenerTable_Click(object sender, RoutedEventArgs e)
