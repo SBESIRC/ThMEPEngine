@@ -79,8 +79,8 @@ namespace ThMEPLighting
                 }
 
                 //清除选择的框线内之前布置的结果
-                var clearService = new ThClearPreviouResultService();
-                clearService.Clear(acadDatabase.Database, regionBorders.Select(o => o.RegionBorder).ToList());
+                //var clearService = new ThClearPreviouResultService();
+                //clearService.Clear(acadDatabase.Database, regionBorders.Select(o => o.RegionBorder).ToList());
                 
                 regionBorders.ForEach(o =>
                 {
