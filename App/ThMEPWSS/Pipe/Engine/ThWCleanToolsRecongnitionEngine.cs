@@ -17,6 +17,11 @@ namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWCleanToolsVisitor : ThDistributionElementExtractionVisitor
     {
+        public List<string> BlockNames { get; set; }
+        public ThWCleanToolsVisitor(List<string> blockNames)
+        {
+            BlockNames = blockNames;
+        }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference blkref)
@@ -39,8 +44,18 @@ namespace ThMEPWSS.Pipe.Engine
         {
             if (entity is BlockReference reference)
             {
-                var name = reference.GetEffectiveName();
-                return ThCleanToolsManager.IsCleanToolBlockName(name);
+                var name = reference.Name;
+                if(name.ToUpper().Contains("TOILET") || name.ToUpper().Contains("KITCHEN"))
+                {
+                    ;
+                }
+                foreach(var block in BlockNames)
+                {
+                    if(name.ToUpper().Contains(block.ToUpper()))
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -76,14 +91,21 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWCleanToolsRecongnitionEngine : ThDistributionElementRecognitionEngine
     {
         public List<ThRawIfcDistributionElementData> Datas { get; set; }
-        public ThWCleanToolsRecongnitionEngine()
+        public List<string> BlockNames { get; set; }
+        public ThWCleanToolsRecongnitionEngine(Dictionary<string, List<string>> blockConfig)
         {
             Datas = new List<ThRawIfcDistributionElementData>();
+            BlockNames = new List<string>();
+            foreach (var key in blockConfig.Keys)
+            {
+                BlockNames.AddRange(blockConfig[key]);
+            }
+            
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             var engine = new ThDistributionElementExtractor();
-            var cleanToolVisitor = new ThWCleanToolsVisitor();
+            var cleanToolVisitor = new ThWCleanToolsVisitor(BlockNames);
             engine.Accept(cleanToolVisitor);
 
             engine.Extract(database);

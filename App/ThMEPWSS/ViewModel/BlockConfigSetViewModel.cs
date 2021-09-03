@@ -50,5 +50,4 @@ namespace ThMEPWSS.ViewModel
             this.layerName = layerName;
         }
     }
-
 }

@@ -22,6 +22,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 ptls[2] = BranchPipe[i].GetPRValveDetailSite().OffsetX(1778);
                 var polyline = new Polyline3d(0, new Point3dCollection(ptls), false);
                 polyline.LayerId = DbHelper.GetLayerId("W-NOTE");
+                polyline.ColorIndex = (int)ColorIndex.BYLAYER;
                 acadDatabase.CurrentSpace.Add(polyline);
             }  
         }

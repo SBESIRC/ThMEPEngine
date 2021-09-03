@@ -32,11 +32,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.tool
                     alphaC = (U0ToAlphaC[key] - U0ToAlphaC[key1]) * (U0 - key1) / (key - key1) + U0ToAlphaC[key1];
                 }
             }
-
             double U = (1 + alphaC * Math.Pow((Ng - 1), 0.49)) / (Math.Sqrt(Ng));
-
             double qg = 0.2 * U * Ng;  //管段的设计秒流量
-
             //管径列表
             Dictionary<string, double> pipeDList = new Dictionary<string, double>
             { {"DN20",0.0213 }, {"DN25",0.0273 },  {"DN32",0.0354 }, {"DN40",0.0413 },
@@ -48,7 +45,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.tool
                 double d = pipeDList[key];
                 double FlowRate = qg * 4 / (Math.PI * Math.Pow(d, 2) * 1000);  // 不同管径下的流速
                 switch (key)
-
                 {
                     case "DN20":
                         if (FlowRate <= 0.8)
@@ -79,7 +75,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.tool
                         break;
                 }
             }
-            return "";
+            return "DN15";
         }
     }
 }

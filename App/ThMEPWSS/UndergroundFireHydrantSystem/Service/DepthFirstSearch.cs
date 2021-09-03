@@ -9,6 +9,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void dfsMainLoop(Point3dEx cur, Point3dEx target, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
             ref List<List<Point3dEx>> rstPaths, FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
+            if(cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1497661.8, 413291.9, 0)) < 10)
+            {
+                ;
+            }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
@@ -86,7 +90,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 tempPath.Add(p);
                 visited.Add(p);
-               
+               if(tempPath.Count > 93)
+                {
+                    ;
+                }
                 //递归搜索
                 dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
 

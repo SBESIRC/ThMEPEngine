@@ -76,7 +76,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)//光标丢失时，楼层线间距输入值判断
         {
             TextBox txtBox = sender as TextBox;
-
             string strText = txtBox.Text;
             if(strText.Length >= 5)
                 (sender as TextBox).Text = Convert.ToString(9999);
@@ -93,7 +92,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     e.Handled = false;
             }
         }
-
 
         private void FlushFaucet_KeyPress(object sender, KeyEventArgs e)
         {
@@ -193,7 +191,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             ((TextBox)e.Source).Text = newStr;
         }
 
- 
         private void LostFocus_MaxDayQuota(object sender, RoutedEventArgs e)
         {
             TextBox txtBox = sender as TextBox;
@@ -296,15 +293,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     newStr += item;
                 }
-                if (item == '.')
+                if (item == '.' && !newStr.Contains('.'))
                 {
                     newStr += item;
                 }
             }
             ((TextBox)e.Source).Text = newStr;
         }
-
-
 
         private void LostFocus_NumberOfHouseholds(object sender, RoutedEventArgs e)
         {
@@ -357,7 +352,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     newStr += item;
                 }
-                if(item == '.')
+                if(item == '.' && !newStr.Contains('.'))
                 {
                     newStr += item;
                 }

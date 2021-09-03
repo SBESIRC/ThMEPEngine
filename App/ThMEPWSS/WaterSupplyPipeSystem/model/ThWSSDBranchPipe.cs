@@ -316,6 +316,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 for (int j = 0; j < BPipeLines.Count; j++)
                 {
                     BPipeLines[j].LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+                    BPipeLines[j].ColorIndex = (int)ColorIndex.BYLAYER;
                     acadDatabase.CurrentSpace.Add(BPipeLines[j]);
                 }
             }
@@ -330,7 +331,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var line1 = new Line(pt1, pt2);
             var line2 = new Line(pt2, pt3);
             line1.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+            line1.ColorIndex = (int)ColorIndex.BYLAYER;
             line2.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+            line2.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(line1);
             acadDatabase.CurrentSpace.Add(line2);
 
@@ -350,6 +353,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 var pti2 = new Point3d(GetWaterPipeInterrupted()[j].X + 106 - 150, GetWaterPipeInterrupted()[j].Y + 106, 0);
                 var line1 = new Line(pti1, pti2);
                 line1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+                line1.ColorIndex = (int)ColorIndex.BYLAYER;
                 acadDatabase.CurrentSpace.Add(line1);
             }
             var pt1 = new Point3d(GetWaterPipeInterrupted()[0].X - 150, GetWaterPipeInterrupted()[GetWaterPipeInterrupted().Count - 1].Y, 0);
@@ -359,11 +363,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var line23 = new Line(pt2, pt3);
             line12.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
             line23.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+            line12.ColorIndex = (int)ColorIndex.BYLAYER;
+            line23.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(line12);
             acadDatabase.CurrentSpace.Add(line23);
 
             var text1 = ThText.NoteText(pt2.OffsetXY(50, 50), "DNXX×X+DNXX×X（余同）");
-
             acadDatabase.CurrentSpace.Add(text1);
 
             if (LayingMethod == 0)

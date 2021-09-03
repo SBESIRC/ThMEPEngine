@@ -36,10 +36,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     .ForEach(o => bkrCollection.Add(o));
                 foreach (var bkr in bkrCollection)
                 {
-                    if (bkr is Entity ent)
+                    try
                     {
-                        ExplodeText(ent, dbTextCollection, ref textWidth, ref textModel);
+                        if (bkr is Entity ent)
+                        {
+                            ExplodeText(ent, dbTextCollection, ref textWidth, ref textModel);
+                        }
                     }
+                    catch
+                    {
+                        ;
+                    }
+                    
                 }
                 return dbTextCollection;
             }

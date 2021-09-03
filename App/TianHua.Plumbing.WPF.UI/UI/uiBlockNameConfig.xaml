@@ -33,6 +33,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel  Grid.Row="0">
@@ -163,7 +164,15 @@
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="集水井" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
+
         <Grid   Grid.Row="19">
+            <WrapPanel Orientation="Vertical">
+                <Label Content="车位"></Label>
+            </WrapPanel>
+            <cus:ImageButton Content="->" Tag="车位" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+        </Grid>
+        
+        <Grid   Grid.Row="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="66*"/>

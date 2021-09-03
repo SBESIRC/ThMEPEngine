@@ -35,29 +35,29 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel.SetViewModel = oldViewModel;
                 return;
             }
-
-            //用户确认，进行后续的业务逻辑
-            //step1 保存用户的输入信息
-            //foreach (var item in viewModel.DynamicRadioButtons) 
-            //{
-            //    if (item == null || !item.IsChecked)
-            //        continue;
-            //    item.SetViewModel = systemSet.setViewModel;
-            //}
         }
 
         //run
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel))
+            try
             {
-                var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
-                var optRes = Active.Editor.GetPoint(insertOpt);
-                if(optRes.Status == PromptStatus.OK)
+                using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel))
                 {
-                    viewModel.InsertPt = optRes.Value;
-                    cmd.Execute();
+                    var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
+                    var optRes = Active.Editor.GetPoint(insertOpt);
+                    if (optRes.Status == PromptStatus.OK)
+                    {
+                        var blockConfig = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+
+                        viewModel.InsertPt = optRes.Value;
+                        cmd.Execute(blockConfig);
+                    }
                 }
+            }
+            catch
+            {
+
             }
         }
 
@@ -67,12 +67,26 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.CreateFloorFraming();
+            try
+            {
+                viewModel.CreateFloorFraming();
+            }
+            catch
+            {
+
+            }
         }
 
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.InitListDatas2();            
+            try
+            {
+                viewModel.InitListDatas();
+            }
+            catch
+            {
+
+            }
         }
     }
 }

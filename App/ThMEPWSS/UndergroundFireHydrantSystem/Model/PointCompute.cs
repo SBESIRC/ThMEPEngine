@@ -110,7 +110,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static bool IsSecondLoop(Point3dEx pt1, Point3dEx pt2, double angle)
         {
             double ang = PointAngle.ComputeAngle(pt1._pt, pt2._pt);
-            return angle.IsParallelTo(ang);
+            return angle.IsSameDirection(ang);
         }
     }
 }

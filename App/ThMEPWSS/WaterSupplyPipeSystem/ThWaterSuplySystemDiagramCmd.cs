@@ -16,6 +16,7 @@ namespace ThMEPWSS.Command
     public class ThWaterSuplySystemDiagramCmd : IAcadCommand, IDisposable
     {
         readonly DrainageViewModel _UiConfigs;
+
         public ThWaterSuplySystemDiagramCmd(DrainageViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
@@ -23,18 +24,18 @@ namespace ThMEPWSS.Command
         public void Dispose()
         {
         }
-        public void Execute()
+        public void Execute(Dictionary<string, List<string>> blockConfig)
         {
             try
             {
-                Execute(_UiConfigs);
+                Execute(_UiConfigs, blockConfig);
             }
             catch (Exception ex)
             {
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public void Execute(DrainageViewModel uiConfigs)
+        public void Execute(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
             var tmpUiConfigs = uiConfigs;
             if (tmpUiConfigs.SelectRadionButton.Content is null)
@@ -56,8 +57,8 @@ namespace ThMEPWSS.Command
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
             var FloorHeight = setViewModel.FloorLineSpace;  //楼层线间距 mm
-            var FlushFaucet = new List<int>();//冲洗龙头层
-            if(setViewModel.FaucetFloor != "")
+            var FlushFaucet = ThWCompute.ExtractData(setViewModel.FaucetFloor, "冲洗龙头");//冲洗龙头层
+            if (setViewModel.FaucetFloor != "")
             {
                 var dataName = "冲洗龙头";
                 FlushFaucet = ThWCompute.ExtractData(setViewModel.FaucetFloor, dataName);
@@ -67,7 +68,7 @@ namespace ThMEPWSS.Command
                 }
             }
 
-            var NoPRValve = new List<int>();
+            var NoPRValve = ThWCompute.ExtractData(setViewModel.NoCheckValve, "无减压阀");
             if (setViewModel.NoCheckValve != "")
             {
                 var dataName = "无减压阀";
@@ -77,7 +78,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
             }
-           
+
             var selectedArea = tmpUiConfigs.SelectedArea;
             var floorAreaList = tmpUiConfigs.FloorAreaList;
             var floorNumList = tmpUiConfigs.FloorNumList;
@@ -149,8 +150,6 @@ namespace ThMEPWSS.Command
             using (Active.Document.LockDocument())//非模态框不能直接操作CAD，需要加锁
             using (var acadDatabase = AcadDatabase.Active()) 
             {
-                
-
                 var notExistFloor = new List<int>();//不存在的楼层号列表
                 for (int i = 0; i < floorNumbers; i++)
                 {
@@ -173,7 +172,7 @@ namespace ThMEPWSS.Command
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
                 //统计卫生洁具数
                 var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea, 
-                    notExistFloor, floorNumbers);
+                    notExistFloor, blockConfig);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
@@ -227,7 +226,6 @@ namespace ThMEPWSS.Command
                         }
                     }
                 }
-
                 //创建支管对象
                 var BranchPipe = new List<ThWSSDBranchPipe>();
                         
@@ -254,7 +252,6 @@ namespace ThMEPWSS.Command
                    
                     BranchPipe.Add(new ThWSSDBranchPipe(DN, StoreyList[i], insertPt.Y, PipeOffsetX[i], BlockSize, layingMethod, areaIndex));
                 }
-
                 //支管绘制
                 for (int i = 0; i < BranchPipe.Count; i++)
                 {
@@ -275,6 +272,11 @@ namespace ThMEPWSS.Command
                     }   
                 }
             }  
+        }
+
+        public void Execute()
+        {
+            throw new NotImplementedException();
         }
     }
 }

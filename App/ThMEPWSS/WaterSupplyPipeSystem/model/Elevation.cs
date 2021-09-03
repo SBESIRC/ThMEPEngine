@@ -38,8 +38,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
                         var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false)
                         {
-                            LayerId = DbHelper.GetLayerId("W-WSUP-NOTE")
-                        };
+                            LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
+                            ColorIndex = (int)ColorIndex.BYLAYER
+                    };
                         acadDatabase.CurrentSpace.Add(lineNote);
 
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,

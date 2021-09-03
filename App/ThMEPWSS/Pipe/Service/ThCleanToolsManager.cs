@@ -1,72 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThCleanToolsManager
     {
-        public static bool IsCleanToolBlockName(string name)
-        {
-            /*
-             A-Toilet-5  ->  座便器
-             A-Toilet-1  ->  洗手台
-             A-Kitchen-4 ->  洗涤盆
-             A-Toilet-6  ->  淋浴器
-             A-Toilet-9  ->  洗衣机
-             A-Kitchen-9  ->  阳台洗手盆
-             */
+        private Dictionary<string, List<string>> BlockConfig { set; get; }
+        private Dictionary<string, int> BlockIndexDic { set; get; }
 
-            return name.ToLower().Contains("A-Toilet-5".ToLower())
-                || name.ToLower().Contains("A-Toilet-1".ToLower())
-                || name.ToLower().Contains("A-Kitchen-4".ToLower())
-                || name.ToLower().Contains("A-Toilet-6".ToLower())
-                || name.ToLower().Contains("A-Toilet-9".ToLower())
-                || name.ToLower().Contains("A-Kitchen-9".ToLower());
+        public ThCleanToolsManager()
+        {
+            BlockConfig = new Dictionary<string, List<string>>();
+            //BlockConfig.Add("拖把池", new List<string>() { "A-Kitchen-9" });
+            //BlockConfig.Add("洗衣机", new List<string>() { "A-Toilet-9" });
+            //BlockConfig.Add("厨房洗涤盆", new List<string>() { "A-Kitchen-4" });
+            //BlockConfig.Add("坐便器", new List<string>() { "A-Toilet-5" });
+            //BlockConfig.Add("单盆洗手台", new List<string>() { "A-Toilet-1", "A-Toilet-3", "A-Toilet-4" });
+            //BlockConfig.Add("厨房洗涤盆", new List<string>() { "A-Kitchen-4" });
+            //BlockConfig.Add("双盆洗手台", new List<string>() { "A-Toilet-2" });
+            //BlockConfig.Add("淋浴器", new List<string>() { "A-Toilet-6", "A-Toilet-7" });
+            //BlockConfig.Add("浴缸", new List<string>() { "A-Toilet-8" });
+        }
+        public ThCleanToolsManager(Dictionary<string, List<string>> blockConfig)
+        {
+            BlockConfig = blockConfig;
+            BlockIndexDic = new Dictionary<string, int>();
+            BlockIndexDic.Add("坐便器", 0);
+            BlockIndexDic.Add("单盆洗手台", 1);
+            BlockIndexDic.Add("双盆洗手台", 2);
+            BlockIndexDic.Add("厨房洗涤盆", 3);
+            BlockIndexDic.Add("淋浴器", 4);
+            BlockIndexDic.Add("洗衣机", 5);
+            BlockIndexDic.Add("阳台洗手盆", 6);
+            BlockIndexDic.Add("浴缸", 7);
+        }
+        public bool IsCleanToolBlockName(string name)
+        {
+            if(BlockConfig.Count == 0)
+            {
+                return true;
+            }
+            foreach(var key in BlockConfig.Keys)
+            {
+                foreach(var block in BlockConfig[key])
+                {
+                    if(name.ToLower().Contains(block.ToLower()))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false; 
         }
 
-        public static int CleanToolIndex(string name)
+        public int CleanToolIndex(string name)
         {
-            return Convert.ToInt32(name.ToLower().Contains("A-Toilet-5".ToLower())) * 0
-                 + Convert.ToInt32(name.ToLower().Contains("A-Toilet-1".ToLower())) * 1
-                 + Convert.ToInt32(name.ToLower().Contains("A-Kitchen-4".ToLower())) * 2
-                 + Convert.ToInt32(name.ToLower().Contains("A-Toilet-6".ToLower())) * 3
-                 + Convert.ToInt32(name.ToLower().Contains("A-Toilet-9".ToLower())) * 4
-                 + Convert.ToInt32(name.ToLower().Contains("A-Kitchen-9".ToLower())) * 5
-                 + Convert.ToInt32(name.ToLower().Contains("拖把池".ToLower())) * 6
-                 + Convert.ToInt32(name.ToLower().Contains("浴缸".ToLower())) * 7;
+            foreach (var key in BlockConfig.Keys)
+            {
+                foreach (var block in BlockConfig[key])
+                {
+                    if (name.ToLower().Contains(block.ToLower()))
+                    {
+                        if(BlockIndexDic.ContainsKey(key))
+                        {
+                            return BlockIndexDic[key];
+                        }
+                    }
+                }
+            }
+            return -1;
         }
-
-        //public static bool IsToilet(string name) //坐便器
-        //{
-        //    return name.ToLower().Contains("A-Toilet-5".ToLower());
-        //}
-
-        //public static bool IsWashBasin(string name)//洗手台
-        //{
-        //    return name.ToLower().Contains("A-Toilet-1".ToLower());
-        //}
-
-        //public static bool IsSink(string name)//洗涤盆
-        //{
-        //    return name.ToLower().Contains("A-Kitchen-4".ToLower());
-        //}
-
-        //public static bool IsShower(string name)//沐浴器
-        //{
-        //    return name.ToLower().Contains("A-Toilet-6".ToLower());
-        //}
-
-        //public static bool IsWashingMachine(string name)//洗衣机
-        //{
-        //    return name.ToLower().Contains("A-Toilet-9".ToLower());
-        //}
-
-        //public static bool IsBalconyWashBasin(string name)//阳台洗手盆
-        //{
-        //    return name.ToLower().Contains("A-Kitchen-9".ToLower());
-        //}
     }
 }

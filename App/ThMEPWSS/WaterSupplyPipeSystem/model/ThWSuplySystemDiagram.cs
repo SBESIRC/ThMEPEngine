@@ -67,6 +67,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             foreach (var line1 in lineList)
             {
                 line1.LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+                line1.ColorIndex = (int)ColorIndex.BYLAYER;
             }
             PipeX = pt1.X;
             PipeY = pt2.Y;

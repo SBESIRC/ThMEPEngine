@@ -12,7 +12,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     public partial class uiBlockNameConfig : ThCustomWindow
     {
         private BlockConfigViewModel viewModel;
-        public static uiBlockNameConfig staticUIBlockName =new uiBlockNameConfig();
+        public static uiBlockNameConfig staticUIBlockName = new uiBlockNameConfig();
 
         private uiBlockNameConfig()
         {
