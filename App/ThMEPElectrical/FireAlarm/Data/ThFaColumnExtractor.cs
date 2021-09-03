@@ -62,29 +62,15 @@ namespace FireAlarm.Data
         }
         private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
         {
-            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var columnEngine = new ThDB3ColumnRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);
             columnEngine.Recognize(Db3ExtractResults, newPts);
             return columnEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
         }
         private DBObjectCollection ExtractNonDb3Column(Point3dCollection pts)
         {
-            NonDb3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var columnEngine = new ThColumnRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);
             columnEngine.Recognize(NonDb3ExtractResults, newPts);
             return columnEngine.Elements
                 .Select(o => o.Outline as Polyline)
@@ -98,11 +84,8 @@ namespace FireAlarm.Data
                 ElementLayer = this.ElementLayer,
             };
             instance.Extract(database, pts);
-
             instance.Polys.ForEach(o => Transformer.Transform(o));
-            localColumns = instance.Polys.ToCollection();
-
-            return localColumns;
+            return instance.Polys.ToCollection(); 
         }
         public override List<ThGeometry> BuildGeometries()
         {

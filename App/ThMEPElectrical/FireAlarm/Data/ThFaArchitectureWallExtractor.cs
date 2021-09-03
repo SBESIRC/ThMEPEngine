@@ -23,9 +23,9 @@ namespace FireAlarm.Data
         private List<ThStoreyInfo> StoreyInfos { get; set; }
         /// <summary>
         /// 从图纸中获取的原始建筑墙元素
-        /// 没有偏移过的
+        /// 已经移动到原点处
         /// </summary>
-        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; } 
 
         public ThFaArchitectureWallExtractor()
         {
@@ -60,14 +60,7 @@ namespace FireAlarm.Data
         private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
-            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);            
             var wallEngine = new ThDB3ArchWallRecognitionEngine();
             wallEngine.Recognize(Db3ExtractResults, newPts);
             return wallEngine.Elements.Select(o => o.Outline).ToCollection();

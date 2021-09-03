@@ -18,20 +18,21 @@ using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using ThMEPElectrical.Command;
 
 namespace ThMEPElectrical
 {
     public class ThFireAlarmCmds
     {
-        //[CommandMethod("TIANHUACAD", "THFireAlarmData", CommandFlags.Modal)]
-        //public void THFireAlarmData()
-        //{
-        //    //把Cad图纸数据写出到Geojson File中
-        //    using (var cmd = new ThFireAlarmCommand())
-        //    {
-        //        cmd.Execute();
-        //    }
-        //}
+        [CommandMethod("TIANHUACAD", "THFireAlarmData", CommandFlags.Modal)]
+        public void THFireAlarmData()
+        {
+            //把Cad图纸数据写出到Geojson File中
+            using (var cmd = new ThFireAlarmCommand())
+            {
+                cmd.Execute();
+            }
+        }
 
         [CommandMethod("TIANHUACAD", "ThDisplayDevice", CommandFlags.Modal)]
         public void ThDisplayDeviceLayout()

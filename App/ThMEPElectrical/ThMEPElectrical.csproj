@@ -136,7 +136,9 @@
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
     <Compile Include="FireAlarm\Data\BuildingType.cs" />
+    <Compile Include="FireAlarm\Data\ThFaPlaceCoverageExtractor.cs" />
     <Compile Include="FireAlarm\Data\ThFireAlarmDataSetFactory.cs" />
+    <Compile Include="FireAlarm\Data\ThFireAlarmSimpleDataSetFactory.cs" />
     <Compile Include="FireAlarm\Logic\ThDataQueryService.cs" />
     <Compile Include="FireAlarm\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarm\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />

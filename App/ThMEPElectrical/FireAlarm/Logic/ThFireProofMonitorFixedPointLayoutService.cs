@@ -36,6 +36,8 @@ namespace ThMEPElectrical.FireAlarm.Logic
             SetConfigTableForMonitor();
 
 
+
+
             //取与防火门相邻房间
             var fireDoorSet = DataQueryWorker.GetFireDoors().Select(x => x.Boundary).ToCollection();
             var roomSet = DataQueryWorker.Rooms.Select(x=>x.Boundary).ToCollection();

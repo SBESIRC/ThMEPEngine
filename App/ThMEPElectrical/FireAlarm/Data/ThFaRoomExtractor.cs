@@ -22,12 +22,14 @@ namespace FireAlarm.Data
 {
     public class ThFaRoomExtractor : ThRoomExtractor, IGroup, ISetStorey,ITransformer
     {
+        public bool IsWithHole { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThFaRoomExtractor()
         {
+            IsWithHole = true;
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
@@ -43,13 +45,7 @@ namespace FireAlarm.Data
             roomOutlineExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
             roomMarkExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
 
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);
             var roomEngine = new ThRoomOutlineRecognitionEngine();
             roomEngine.Recognize(roomOutlineExtraction.Results, newPts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
@@ -67,7 +63,7 @@ namespace FireAlarm.Data
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
-            roomBuilder.Build(rooms, marks);
+            roomBuilder.Build(rooms, marks, IsWithHole);
             Rooms = rooms;
             //把弧线转成直线
             Clean();
@@ -81,17 +77,6 @@ namespace FireAlarm.Data
                 }
                 o.Name = string.Join(";", o.Tags.ToArray());
             });
-        }
-
-        private string GetName(List<string> tags)
-        {
-            var group = tags.GroupBy(o => o);
-            var first = group.OrderByDescending(o => o.Count()).First();
-            if (first.Count() > 1)
-            {
-                return first.Key;
-            }
-            return string.Join(";", tags.ToArray());
         }
 
         public override List<ThGeometry> BuildGeometries()

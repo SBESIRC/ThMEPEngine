@@ -20,14 +20,15 @@ namespace FireAlarm.Data
 {
     public class ThFaShearWallExtractor : ThShearwallExtractor, IGroup, ISetStorey, ITransformer
     {
+        private List<ThStoreyInfo> StoreyInfos { get; set; }
         public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public List<ThRawIfcBuildingElementData> NonDb3ExtractResults { get; set; }
         public ThFaShearWallExtractor()
         {
+            StoreyInfos = new List<ThStoreyInfo>();
             Db3ExtractResults = new List<ThRawIfcBuildingElementData>();
             NonDb3ExtractResults = new List<ThRawIfcBuildingElementData>();
-        }
-        private List<ThStoreyInfo> StoreyInfos { get; set; }
+        }        
 
         public override void Extract(Database database, Point3dCollection pts)
         {
@@ -60,29 +61,15 @@ namespace FireAlarm.Data
         }
         private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
         {
-            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var wallEngine = new ThDB3ShearWallRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);            
             wallEngine.Recognize(Db3ExtractResults, newPts);
             return wallEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
         }
         private DBObjectCollection ExtractNonDb3Wall(Point3dCollection pts)
         {
-            NonDb3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
             var wallEngine = new ThShearWallRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);            
             wallEngine.Recognize(NonDb3ExtractResults, newPts);
             return wallEngine.Elements
                 .Select(o => o.Outline as Polyline)
@@ -111,7 +98,10 @@ namespace FireAlarm.Data
                 if (string.IsNullOrEmpty(parentId))
                 {
                     var storeyInfo = Query(o);
-                    parentId = storeyInfo.Id;
+                    if(storeyInfo!=null)
+                    {
+                        parentId = storeyInfo.Id;
+                    }
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Boundary = o;

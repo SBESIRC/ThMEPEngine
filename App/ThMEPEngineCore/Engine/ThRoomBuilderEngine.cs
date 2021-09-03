@@ -34,9 +34,12 @@ namespace ThMEPEngineCore.Engine
             return rooms;
         }
 
-        public virtual void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
+        public virtual void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks,bool isWithHole=true)
         {
-            BuildArea(rooms);
+            if(isWithHole)
+            {
+                BuildArea(rooms);
+            }            
             SpaceMatchText(BuildTextContainers(marks, rooms));
         }
 

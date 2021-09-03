@@ -232,6 +232,10 @@ namespace ThCADCore.NTS
 
         public static Polygon ToNTSPolygon(this Polyline polyLine)
         {
+            if(polyLine.Area<1e-6)
+            {
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+            }
             var geometry = polyLine.ToNTSLineString();
             if (geometry is LinearRing ring)
             {
