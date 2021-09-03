@@ -1,194 +1,270 @@
-﻿using AcHelper;
-using Linq2Acad;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using ThCADExtension;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Temp;
-using ThMEPElectrical.Command;
+using System.Collections.Generic;
+
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using AcHelper;
+using Linq2Acad;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using FireAlarm.Data;
+
+using ThCADExtension;
+using ThMEPElectrical.FireAlarm.Logic;
+using ThMEPEngineCore.IO.GeoJSON;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPElectrical
 {
     public class ThFireAlarmCmds
     {
-        [CommandMethod("TIANHUACAD", "THFireAlarmData", CommandFlags.Modal)]
-        public void THFireAlarmData()
-        {
-            using (var cmd = new ThFireAlarmCommand())
-            {
-                cmd.Execute();
-            }
-        }
+        //[CommandMethod("TIANHUACAD", "THFireAlarmData", CommandFlags.Modal)]
+        //public void THFireAlarmData()
+        //{
+        //    //把Cad图纸数据写出到Geojson File中
+        //    using (var cmd = new ThFireAlarmCommand())
+        //    {
+        //        cmd.Execute();
+        //    }
+        //}
 
-        [CommandMethod("TIANHUACAD", "THFireAlarmTestDataExtract", CommandFlags.Modal)]
-        public void THFireAlarmTestDataExtract()
+        [CommandMethod("TIANHUACAD", "ThDisplayDevice", CommandFlags.Modal)]
+        public void ThDisplayDeviceLayout()
         {
-
-            using (var acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
+            //选择Geojson File,获取数据
+            //测试布置逻辑
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                else
+
+                //{
+                //    var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
+                //        PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                //    if (frame.Area < 1e-4)
+                //    {
+                //        return;
+                //    }
+                //    var pts = frame.Vertices();
+                //    var datasetFactory = new ThFireAlarmDataSetFactory();
+                //    var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+
+                //    //var psr = Active.Editor.GetFileNameForOpen("\n选择要打开的Geojson文件");
+                //    //if(psr.Status!=PromptStatus.OK)
+                //    //{
+                //    //    return;
+                //    //}
+                //    //var geos = ThGeometryJsonReader.ReadFromFile(psr.StringResult);                
+                //    var geos = dataset.Container;
+                //    //var geosTemp = dataset.Container;
+                //    //var geosJsonString = ThGeoOutput.Output(geosTemp);
+                //    //var geos = ThGeometryJsonReader.ReadFromContent(geosJsonString);
+                //    var objs = geos.Where(o => o.Boundary != null).Select(o => o.Boundary).ToCollection();
+                //    var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+                //    var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+
+                //    var transformer = new ThMEPOriginTransformer(objs);
+                //    geos.Where(o=>o.Boundary!=null).ForEach(o =>
+                //    {
+                //        transformer.Transform(o.Boundary);
+                //    });
+                //    datasetFactory.MoveToXYPlane(geos);
+
+                //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
+                //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
+
+                getData(out var transformer, out var geos);
+                if (geos.Count == 0)
                 {
                     return;
                 }
-                // ArchitectureWall、Shearwall、Column、Window、Room
-                // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
 
-                //先提取楼层框线
-                var storeyExtractor = new ThEStoreyExtractor()
+                ThFixedPointLayoutService layoutService = null;
+           
+
+                //显示器需要判断图纸类型（公建，住宅），后期接入
+                ///!!!!!!!!!!!!!!!!!
+                var buildingType = FireAlarm.Data.BuildingType.Public;
+                //var buildingType = FireAlarm.Data.BuildingType.Resident;
+
+                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos)
                 {
-                    ElementLayer = "AI-楼层框定E",
-                    ColorIndex = 12,
-                    GroupSwitch = false,
-                    UseDb3Engine = true,
-                    IsolateSwitch = false,
+                    BuildingType = buildingType,
                 };
-                storeyExtractor.Extract(acadDatabase.Database, pts);
 
-                //再提取防火分区，接着用楼层框线对防火分区分组
-                var storeyInfos = storeyExtractor.Storeys.Cast<StoreyInfo>().ToList();
-                var fireApartExtractor = new ThFireApartExtractor()
-                {
-                    ElementLayer = "AI-防火分区,AD-AREA-DIVD",
-                    ColorIndex = 11,
-                    GroupSwitch = true,
-                    UseDb3Engine = false,
-                    IsolateSwitch = false,
-                    StoreyInfos = storeyInfos, //用于创建防火分区
-                };
-                fireApartExtractor.Extract(acadDatabase.Database, pts);
-                fireApartExtractor.Group(storeyExtractor.StoreyIds); //判断防火分区属于哪个楼层框线
-                fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
+                var results = layoutService.Layout();
 
-                var extractors = new List<ThExtractorBase>()
-                {
-                    new ThFaArchitectureWallExtractor()
-                    {
-                        ElementLayer = "AI-墙",
-                        ColorIndex=1,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaShearWallExtractor()
-                    {
-                        ElementLayer = "AI-剪力墙",
-                        ColorIndex=2,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaColumnExtractor()
-                    {
-                        ElementLayer = "AI-柱",
-                        ColorIndex=3,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaWindowExtractor()
-                    {
-                        ElementLayer="AI-窗",
-                        ColorIndex=4,
-                        GroupSwitch=true,
-                        UseDb3Engine=true,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaRoomExtractor()
-                    {
-                        ColorIndex=5,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaBeamExtractor()
-                    {
-                        ElementLayer = "AI-梁",
-                        ColorIndex=6,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaDoorOpeningExtractor()
-                    {
-                        ElementLayer = "AI-门",
-                        ColorIndex=7,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaRailingExtractor()
-                    {
-                        ElementLayer = "AI-栏杆",
-                        ColorIndex=8,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThFaFireproofshutterExtractor()
-                    {
-                        ElementLayer = "AI-防火卷帘",
-                        ColorIndex=9,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                    new ThHoleExtractor()
-                    {
-                        ElementLayer = "AI-洞",
-                        ColorIndex=10,
-                        GroupSwitch=true,
-                        UseDb3Engine=false,
-                        IsolateSwitch=false,
-                    },
-                };
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                //用防火分区对墙、柱...分组
-                extractEngine.Group(fireApartExtractor.FireApartIds);
-                //找到防火门、防火卷帘邻接的防火分区
-                var faDoorExtractor = extractors.Where(o => o is ThFaDoorOpeningExtractor).First() as ThFaDoorOpeningExtractor;
-                faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
-                var fireProofShutter = extractors.Where(o => o is ThFaFireproofshutterExtractor).First() as ThFaFireproofshutterExtractor;
-                fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
 
-                //最后将楼层框线和防火分区提取器加入，生成Geometries
-                extractEngine.Accept(storeyExtractor);
-                extractEngine.Accept(fireApartExtractor);
-                //把楼层框线传给列表中的提取器
-                extractors.ForEach(o =>
+                // 对结果的重设
+                var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
+                results.ForEach(p =>
                 {
-                    if (o is ISetStorey iSetStory)
+                    var pt = p.Key;
+                    transformer.Reset(ref pt);
+                    pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
+                });
+
+                //Print
+                pairs.ForEach(p =>
+                {
+                    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
+                    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
+                    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
+                    var ents1 = new List<Entity>() { circlePoint, line };
+                    var ents2 = new List<Entity>() { circleArea };
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
+                });
+                //pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
+            }
+        }
+
+
+        [CommandMethod("TIANHUACAD", "ThFireProofMonitor", CommandFlags.Modal)]
+        public void ThFireProofMonitorLayout()
+        {
+            //选择Geojson File,获取数据
+            //测试布置逻辑
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                getData(out var transformer, out var geos);
+                if (geos.Count == 0)
+                {
+                    return;
+                }
+
+                ThFixedPointLayoutService layoutService = null;
+                layoutService = new ThFireProofMonitorFixedPointLayoutService(geos);
+              
+                var results = layoutService.Layout();
+
+                // 对结果的重设
+                var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
+                results.ForEach(p =>
+                {
+                    var pt = p.Key;
+                    transformer.Reset(ref pt);
+                    pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
+                });
+
+                //Print
+                pairs.ForEach(p =>
+                {
+                    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
+                    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
+                    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
+                    var ents1 = new List<Entity>() { circlePoint, line };
+                    var ents2 = new List<Entity>() { circleArea };
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
+                });
+                //pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
+            }
+
+        }
+
+        [CommandMethod("TIANHUACAD", "ThFireTel", CommandFlags.Modal)]
+        public void ThFireTelLayout()
+        {
+            //选择Geojson File,获取数据
+            //测试布置逻辑
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                getData(out var transformer, out var geos);
+                if (geos.Count == 0)
+                {
+                    return;
+                }
+
+                ThFixedPointLayoutService layoutService = null;
+               
+                layoutService = new ThFireTelFixedPointLayoutService(geos);
+                
+                var results = layoutService.Layout();
+
+
+                // 对结果的重设
+                var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
+                results.ForEach(p =>
+                {
+                    var pt = p.Key;
+                    transformer.Reset(ref pt);
+                    pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
+                });
+
+                //Print
+                pairs.ForEach(p =>
+                {
+                    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
+                    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
+                    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
+                    var ents1 = new List<Entity>() { circlePoint, line };
+                    var ents2 = new List<Entity>() { circleArea };
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
+                });
+                //pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
+            }
+
+        }
+
+
+        private static void getData(out ThMEPOriginTransformer transformer, out List<ThGeometry> geos)
+        {
+            geos = new List<ThGeometry>();
+            transformer = null;
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
+                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                if (frame.Area < 1e-4)
+                {
+                    return;
+                }
+                var pts = frame.Vertices();
+                var datasetFactory = new ThFireAlarmDataSetFactory();
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                //var psr = Active.Editor.GetFileNameForOpen("\n选择要打开的Geojson文件");
+                //if(psr.Status!=PromptStatus.OK)
+                //{
+                //{
+                //    return;
+                //}
+                //var geos = ThGeometryJsonReader.ReadFromFile(psr.StringResult);                
+                geos = dataset.Container;
+                //var geosTemp = dataset.Container;
+                //var geosJsonString = ThGeoOutput.Output(geosTemp);
+                //var geos = ThGeometryJsonReader.ReadFromContent(geosJsonString);
+
+                var objs = geos.Where(o => o.Boundary != null).Select(o => o.Boundary).ToCollection();
+                //var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+                //var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+
+                transformer = new ThMEPOriginTransformer(objs);
+                //geos.Where(o => o.Boundary != null).ForEach(o =>
+                //{
+                //    transformer.Transform(o.Boundary);
+                //});
+                foreach (var o in geos)
+                {
+                    if (o.Boundary != null)
                     {
-                        iSetStory.Set(storeyExtractor.Storeys.Cast<StoreyInfo>().ToList());
+                        transformer.Transform(o.Boundary);
                     }
-                });
-                var geos = extractEngine.BuildGeometries();
+                }
 
-                var fileInfo = new FileInfo(Active.Document.Name);
-                var path = fileInfo.Directory.FullName;
-                string fileName = fileInfo.Name;
-                string newFileName = "";
-                storeyExtractor.Storeys.ForEach(o =>
-                {
-                    newFileName = fileName + o.StoreyType + o.StoreyNumber;
-                });
-                ThGeoOutput.Output(geos, path, newFileName);
-                extractEngine.Print(acadDatabase.Database);
+                datasetFactory.MoveToXYPlane(geos);
+
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
             }
         }
     }

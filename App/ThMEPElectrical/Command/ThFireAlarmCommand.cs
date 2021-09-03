@@ -1,13 +1,12 @@
 ﻿using System;
-using AcHelper;
-using System.IO;
 using Linq2Acad;
 using ThCADExtension;
 using FireAlarm.Data;
 using AcHelper.Commands;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
+using ThMEPEngineCore.IO;
+using System.IO;
+using AcHelper;
 
 namespace ThMEPElectrical.Command
 {
@@ -28,13 +27,12 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
-                var nFrame = ThMEPFrameService.Normalize(frame);
+                var pts = frame.Vertices();
                 var datasetFactory = new ThFireAlarmDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, nFrame.Vertices());
-                //输出
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
-                ThGeoOutput.Output(dataset.Container, path, fileInfo.Name+DateTime.Now.ToString("hh-mm-ss"));
+                ThGeoOutput.Output(dataset.Container, path, fileInfo.Name+DateTime.Now.ToShortTimeString().Replace(':','-'));
             }
         }
     }

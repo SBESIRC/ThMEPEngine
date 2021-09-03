@@ -162,6 +162,7 @@
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
+    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="IO\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
@@ -177,12 +178,12 @@
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
-    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="Service\ThDclResultParseService.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThEntityContainerBuilder.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThLineUnionService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />

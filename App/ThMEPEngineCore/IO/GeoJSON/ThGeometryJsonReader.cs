@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Text.RegularExpressions;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.IO.GeoJSON
 {
@@ -40,6 +41,14 @@ namespace ThMEPEngineCore.IO.GeoJSON
                         else if (f.Geometry is Polygon polygon)
                         {
                             geo.Boundary = polygon.ToDbMPolygon();
+                            if(geo.Boundary!=null)
+                            {
+                                var mPolygon = geo.Boundary as MPolygon;
+                                if(mPolygon.Holes().Count==0)
+                                {
+                                    geo.Boundary = mPolygon.Shell();
+                                }
+                            }        
                         }
                         else if(f.Geometry is LineString lineString)
                         {
@@ -48,6 +57,10 @@ namespace ThMEPEngineCore.IO.GeoJSON
                         else if(f.Geometry is MultiPolygon multiPolygon)
                         {
                             geo.Boundary = multiPolygon.ToDbMPolygon();
+                        }
+                        else if(f.Geometry is GeometryCollection gc)
+                        {
+                            geo.Boundary = null;
                         }
                         else
                         {

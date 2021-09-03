@@ -135,7 +135,14 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarm\Data\BuildingType.cs" />
     <Compile Include="FireAlarm\Data\ThFireAlarmDataSetFactory.cs" />
+    <Compile Include="FireAlarm\Logic\ThDataQueryService.cs" />
+    <Compile Include="FireAlarm\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarm\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarm\Logic\ThFireTelFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarm\Logic\ThFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarm\Service\DrawUtils.cs" />
     <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
@@ -360,6 +367,7 @@
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
     <Folder Include="FireAlarm\Model\" />
+    <Folder Include="FireTelephone\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
