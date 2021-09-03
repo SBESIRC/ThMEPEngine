@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -58,32 +59,27 @@ namespace ThMEPWSS.Command
             using(var locked = Active.Document.LockDocument())
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                if (!acadDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableHeader) && blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableHeader))
+                if (!blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableHeader))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableHeader));
                 }
-                if (!acadDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableBody) && blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableBody))
+                if (blockDb.Blocks.Contains(WaterWellBlockNames.WaterWellTableBody))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterWellBlockNames.WaterWellTableBody));
                 }
-                if(!acadDb.Layers.Contains("W-NOTE") && blockDb.Layers.Contains("W-NOTE"))
+                if(blockDb.Layers.Contains("W-NOTE"))
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-NOTE"));
                 }
             }
         }
-        public List<ThWWaterWell> GetWaterWellEntityList(Tuple<Point3d, Point3d> input)
+        public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
         {
             List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
             using (var database = AcadDatabase.Active())
             using (var waterwellEngine = new ThWWaterWellRecognitionEngine(configInfo.WaterWellInfo.identifyInfo))
             {
-                var range = new Point3dCollection();
-                range.Add(input.Item1);
-                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-                range.Add(input.Item2);
-                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                waterwellEngine.Recognize(database.Database, range);
+                waterwellEngine.Recognize(database.Database, input);
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
@@ -116,11 +112,7 @@ namespace ThMEPWSS.Command
                 ThMEPWSS.Common.Utils.FocusMainWindow();
                 ImportBlockFile();
                 //获取选择区域
-                var input = ThWGeUtils.SelectPoints();
-                if (input.Item1.IsEqualTo(input.Item2))
-                {
-                    return;
-                }
+                var input = Common.Utils.SelectAreas();
                 //获取集水井
                 var water_well_entity_list = GetWaterWellEntityList(input);
                 if (water_well_entity_list.Count == 0)
@@ -195,7 +187,7 @@ namespace ThMEPWSS.Command
                         return;
                     }
                     //插入表头
-                    Point3d position = point.Value;
+                    Point3d position = point.Value.TransformBy(Active.Editor.UCS2WCS());
                     acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), 0);
                     //插入表身
                     Vector3d vector = new Vector3d(0, -1, 0);
