@@ -6,6 +6,11 @@ namespace ThMEPEngineCore
 {
     public static class ThMEPEngineCoreLayerUtils
     {
+        public static ObjectId CreateBeamLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-梁", 6);
+        }
+
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)
         {
             using (var acadDatabase = AcadDatabase.Use(database))

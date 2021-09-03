@@ -500,11 +500,13 @@ namespace ThMEPEngineCore
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
 
+                var layerId = acadDatabase.Database.CreateBeamLayer();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
                 {
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_PRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -512,6 +514,7 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_HALFPRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -519,6 +522,7 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_OVERHANGINGPRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -526,13 +530,38 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_SECONDARY;
                 }));
 
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
 
                 List<ThIfcBeam> allBeams = new List<ThIfcBeam>();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
