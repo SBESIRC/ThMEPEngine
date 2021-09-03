@@ -30,6 +30,7 @@ namespace ThMEPWSS.Command
         public string StrParameter;//参数
         public string StrPumpCount;//井内泵台数
         public string StrPumpSum;//泵总数
+        public string StrPumpConfig;//水泵配置
     }
     public class ThCreateWithdrawalFormCmd : IAcadCommand, IDisposable
     {
@@ -115,12 +116,12 @@ namespace ThMEPWSS.Command
                 var input = Common.Utils.SelectAreas();
                 //获取集水井
                 var water_well_entity_list = GetWaterWellEntityList(input);
-                if (water_well_entity_list.Count == 0)
-                {
-                    //命令栏提示“未选中集水井”
-                    //退出本次布置动作
-                    return;
-                }
+                //if (water_well_entity_list.Count == 0)
+                //{
+                //    //命令栏提示“未选中集水井”
+                //    //退出本次布置动作
+                //    return;
+                //}
                 //获取潜水泵
                 List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
 
@@ -172,6 +173,24 @@ namespace ThMEPWSS.Command
                         {
                             tmpItem.StrFloor = "B4F";
                         }
+
+                        if (g.Key == 1)
+                        {
+                            tmpItem.StrPumpConfig = "一用";
+                        }
+                        else if (g.Key == 2)
+                        {
+                            tmpItem.StrPumpConfig = "一用一备";
+                        }
+                        else if (g.Key == 3)
+                        {
+                            tmpItem.StrPumpConfig = "两用一备";
+                        }
+                        else if (g.Key == 4)
+                        {
+                            tmpItem.StrPumpConfig = "三用一备";
+                        }
+
                         tmpItem.StrPumpCount = g.Key.ToString();
                         tmpItem.StrPumpSum = g.ToList<int>().Count().ToString();
                         formItmes.Add(tmpItem);
@@ -205,6 +224,7 @@ namespace ThMEPWSS.Command
                         dic.Add("井内水泵台数", item.StrPumpCount);
                         dic.Add("数量统计", item.StrPumpSum);
                         var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), 0, dic);
+                        bodyId.SetDynBlockValue("水泵配置", item.StrPumpConfig);
                         position += vector * 1000;
                     }
                 }
