@@ -20,6 +20,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //普通组，小房间细分组，单各组
             var wall = ThDrainageSDCoolPtProcessService.findToiletToWall(toiletInGroup[0], roomList);
+
             if (wall != null)
             {
                 baseLine = getDimAreaBaseLine(orderPts, wall);
@@ -222,7 +223,57 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return dist;
         }
 
-        public static Polyline getDimOptimalArea(Dictionary<Polyline, Line> dimAreas, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
+        //public static Polyline getDimOptimalArea(Dictionary<Polyline, Line> dimAreas, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
+        //{
+        //    var alreadyDimAreaLine = new List<Line>();
+
+        //    if (alreadyDimArea.Count > 0)
+        //    {
+        //        alreadyDimAreaLine = ThDrainageSDCommonService.GetLines(alreadyDimArea.Last());
+        //    }
+
+        //    allIsolateLine.AddRange(alreadyDimAreaLine);
+
+        //    var allIsoObjs = allIsolateLine.ToCollection();
+        //    var allIsoSpatialIndex = new ThCADCoreNTSSpatialIndex(allIsoObjs);
+
+        //    var dimAreaDict = new Dictionary<Polyline, double>();
+        //    foreach (var area in dimAreas)
+        //    {
+        //        var result = allIsoSpatialIndex.SelectCrossingPolygon(area.Key);
+        //        double distIso = 0;
+
+        //        if (result != null && result.Count > 0)
+        //        {
+        //            var resultList = result.Cast<Line>().ToList();
+        //            var isoInArea = new List<Curve>();
+
+        //            resultList.ForEach(re =>
+        //            {
+        //                foreach (var entity in area.Key.Trim(re))
+        //                {
+        //                    if (entity is Curve pl)
+        //                    {
+        //                        isoInArea.Add(pl);
+        //                    }
+        //                }
+        //            });
+
+        //            distIso = isoInArea.Sum(x => x.GetLength());
+        //        }
+        //        dimAreaDict.Add(area.Key, distIso);
+
+        //    }
+
+        //    dimAreaDict = dimAreaDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+        //    var optimalAreaList = dimAreaDict.Where(x => Math.Abs(x.Value - dimAreaDict.First().Value) <= ThDrainageSDCommon.DimWidth).ToDictionary(x => x.Key, x => x.Value);
+
+        //    var optimal = optimalAreaList.OrderBy(x => x.Value).ThenBy(x => x.Key.Area).First();
+
+        //    return optimal.Key;
+        //}
+
+        public static Polyline getDimOptimalArea(List<Polyline> dimAreaList, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
         {
             var alreadyDimAreaLine = new List<Line>();
 
@@ -237,9 +288,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             var allIsoSpatialIndex = new ThCADCoreNTSSpatialIndex(allIsoObjs);
 
             var dimAreaDict = new Dictionary<Polyline, double>();
-            foreach (var area in dimAreas)
+            foreach (var area in dimAreaList)
             {
-                var result = allIsoSpatialIndex.SelectCrossingPolygon(area.Key);
+                var result = allIsoSpatialIndex.SelectCrossingPolygon(area);
                 double distIso = 0;
 
                 if (result != null && result.Count > 0)
@@ -249,7 +300,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     resultList.ForEach(re =>
                     {
-                        foreach (var entity in area.Key.Trim(re))
+                        foreach (var entity in area.Trim(re))
                         {
                             if (entity is Curve pl)
                             {
@@ -260,11 +311,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     distIso = isoInArea.Sum(x => x.GetLength());
                 }
-                dimAreaDict.Add(area.Key, distIso);
-
+                dimAreaDict.Add(area, distIso);
             }
 
             dimAreaDict = dimAreaDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            //只在大样图定位标注有用。找area小的（距离墙近的)。轴测图这行其实area都一样。
             var optimalAreaList = dimAreaDict.Where(x => Math.Abs(x.Value - dimAreaDict.First().Value) <= ThDrainageSDCommon.DimWidth).ToDictionary(x => x.Key, x => x.Value);
 
             var optimal = optimalAreaList.OrderBy(x => x.Value).ThenBy(x => x.Key.Area).First();
@@ -272,9 +323,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return optimal.Key;
         }
 
+
         public static Line dimAreaCenterLine(Polyline pl)
         {
-
             var pt1 = new Point3d((pl.GetPoint3dAt(0).X + pl.GetPoint3dAt(3).X) / 2, (pl.GetPoint3dAt(0).Y + pl.GetPoint3dAt(3).Y) / 2, 0);
             var pt2 = new Point3d((pl.GetPoint3dAt(1).X + pl.GetPoint3dAt(2).X) / 2, (pl.GetPoint3dAt(1).Y + pl.GetPoint3dAt(2).Y) / 2, 0);
             return new Line(pt1, pt2);

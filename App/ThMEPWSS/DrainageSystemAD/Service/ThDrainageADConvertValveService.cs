@@ -97,10 +97,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return toiDict;
         }
 
-        public static List<ThDrainageSDADBlkOutput> convertEndValve(Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode)
+        public static List<ThDrainageSDADBlkOutput> convertEndValve(Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode )
         {
             var valveEndCon = new List<ThDrainageSDADBlkOutput>();
-
+         
             foreach (var end in endStackPipe)
             {
                 var endValveOutput = new ThDrainageSDADBlkOutput(end.Value.Last().EndPoint);
@@ -111,7 +111,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (hasToi == true)
                 {
                     endValveOutput.name = ThDrainageADCommon.toi_end_name[toi.Type];
-                    var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode);
+                    var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode,out var visiInx);
                     endValveOutput.visibility.Add(ThDrainageADCommon.visiName_valve, visi);
                     endValveOutput.scale = ThDrainageADCommon.blk_scale_end;
                     valveEndCon.Add(endValveOutput);
@@ -121,13 +121,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return valveEndCon;
         }
 
-        private static string getEndVisivility(ThDrainageSDTreeNode node, string name, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode)
+        private static string getEndVisivility(ThDrainageSDTreeNode node, string name, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode,out int visiInx)
         {
             var nodeP = node.Parent;
             var dir = (convertNode[nodeP].Node - convertNode[node].Node).GetNormal();
 
             var angle = dir.GetAngleTo(Vector3d.XAxis, -Vector3d.ZAxis);
-            var dirInx = -1;
+            var dirInx = 0;
             var visibility = ThDrainageADCommon.endValve_dir_name[name][0];
 
             if (359 * Math.PI / 180 <= angle || angle <= 1 * Math.PI / 180)
@@ -151,6 +151,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 visibility = ThDrainageADCommon.endValve_dir_name[name][dirInx];
             }
+
+            visiInx = dirInx;
 
             return visibility;
         }

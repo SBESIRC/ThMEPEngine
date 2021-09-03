@@ -9,18 +9,19 @@ namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageADDiameterDim
     {
-        public static void calculateTreeDiameter(ThDrainageSDTreeNode node, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict)
+        public static void calculateTreeDiameter(ThDrainageSDTreeNode node, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict, double alpha)
         {
-            calculateEachDiameter(node, toiDict, allNodeDiaDict);
+            calculateEachDiameter(node, toiDict, allNodeDiaDict, alpha);
 
             foreach (var c in node.Child)
             {
-                calculateTreeDiameter(c, toiDict, allNodeDiaDict);
+                calculateTreeDiameter(c, toiDict, allNodeDiaDict, alpha);
             }
         }
-        private static void calculateEachDiameter(ThDrainageSDTreeNode node, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict)
+
+        private static void calculateEachDiameter(ThDrainageSDTreeNode node, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict, double alpha)
         {
-            var alpha = 1.5;
+            //var alpha = 1.5;
             var specialToi = "蹲便器";
             var specialToiFlow = 1.2;
 
@@ -37,7 +38,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //计算流量
             double q = 0;
-            if (leafType.Count > 0)
+            if (leafType.Count == 1)
+            {
+                //支管。直接读数据
+                var subPipe = ThDrainageADCommon.cool_supply_leafPipeDiam[leafType[0].Type];
+                allNodeDiaDict.Add(node, subPipe);
+            }
+            else if (leafType.Count > 1)
             {
                 //var sum = leaf.Select(x =>  ThDrainageADCommon.cool_supply_equivalent[toiDict[x].Type]).Sum();
                 var sum = leafType.Select(x => ThDrainageADCommon.cool_supply_equivalent[x.Type]).Sum();
@@ -131,14 +138,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
         }
 
-        public static List<ThDrainageSDADBlkOutput> calculatePositionDiaDim(Dictionary<ThDrainageSDTreeNode, int> nodeDia, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNodeDict)
+        public static List<ThDrainageSDADBlkOutput> calculatePositionDiaDim(Dictionary<ThDrainageSDTreeNode, int> nodeDia, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNodeDict, List<Line> allIsolateLine)
         {
             var sDN = ThDrainageADCommon.diameterDN_visi_pre;
-            var moveX = ThDrainageADCommon.diameterDim_move_x;
-            var moveY = ThDrainageADCommon.diameterDim_move_y;
+            var dimBlkX = ThDrainageADCommon.diameterDim_blk_x;
+            var dimBlkY = ThDrainageADCommon.diameterDim_blk_y;
             var blk_name = ThDrainageADCommon.blkName_dim;
             var visiPropertyName = ThDrainageADCommon.visiName_valve;
 
+            var alreadyDimArea = new List<Polyline>();
             var output = new List<ThDrainageSDADBlkOutput>();
 
             foreach (var node in nodeDia)
@@ -149,18 +157,21 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     var e = convertNodeDict[node.Key.Parent].Node;
 
                     var dir = (e - s).GetNormal();
-                    //var pt = new Point3d((s.X + e.X) / 2, (s.Y + e.Y) / 2, 0);
+
                     var angle = dir.GetAngleTo(Vector3d.XAxis, -Vector3d.ZAxis);
                     if (179 * Math.PI / 180 <= angle && angle <= 359 * Math.PI / 180)
                     {
                         var tempPt = e;
                         e = s;
                         s = tempPt;
+                        dir = (e - s).GetNormal();
                     }
-                    dir = (e - s).GetNormal();
-                    var pt = s;
 
-                    var dimPt = pt + (dir * moveX) + moveY * dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis);
+                    var dimPtsTemp = possiblePosition(s, e);
+                    var dimOutlineList = dimPtsTemp.Select(x => toDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
+                    var dimOutline = ThDrainageSDDimService.getDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
+                    alreadyDimArea.Add(dimOutline);
+                    var dimPt = dimOutline.StartPoint;
 
                     var thModel = new ThDrainageSDADBlkOutput(dimPt);
                     thModel.name = blk_name;
@@ -176,14 +187,14 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        public static List<ThDrainageSDADBlkOutput> calculatePositionDiaDimEnd(Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict, Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe)
+        public static List<ThDrainageSDADBlkOutput> calculatePositionDiaDimEnd(Dictionary<ThDrainageSDTreeNode, int> allNodeDiaDict, Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe, List<Line> allIsolateLine)
         {
             var sDN = ThDrainageADCommon.diameterDN_visi_pre;
-            var moveX = ThDrainageADCommon.diameterDim_move_x;
-            var moveY = ThDrainageADCommon.diameterDim_move_y;
+            var dimBlkX = ThDrainageADCommon.diameterDim_blk_x;
+            var dimBlkY = ThDrainageADCommon.diameterDim_blk_y;
             var blk_name = ThDrainageADCommon.blkName_dim;
             var visiPropertyName = ThDrainageADCommon.visiName_valve;
-
+            var alreadyDimArea = new List<Polyline>();
             var output = new List<ThDrainageSDADBlkOutput>();
 
             foreach (var end in endStackPipe)
@@ -192,9 +203,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 var e = end.Value.First().StartPoint;
 
                 var dir = (e - s).GetNormal();
-                var pt = s;
 
-                var dimPt = pt + (dir * moveX) + moveY * dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis);
+                var dimPtsTemp = possiblePosition(s, e);
+                var dimOutlineList = dimPtsTemp.Select(x => toDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
+                DrawUtils.ShowGeometry(dimOutlineList, "l0dimOutline", 95);
+                var dimOutline = ThDrainageSDDimService.getDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
+                alreadyDimArea.Add(dimOutline);
+                var dimPt = dimOutline.StartPoint;
 
                 var thModel = new ThDrainageSDADBlkOutput(dimPt);
                 thModel.name = blk_name;
@@ -206,6 +221,108 @@ namespace ThMEPWSS.DrainageSystemDiagram
             }
 
             return output;
+        }
+
+        /// <summary>
+        ///根据给定线和位置返回直径标记块的插入点
+        ///0:线左，中点
+        ///1:线左，起点
+        ///2:线右，中点
+        ///3:线右，起点
+        ///4:线左，终点
+        ///5：线右，终点
+        /// </summary>
+        /// <param name="baseLineS"></param>
+        /// <param name="baseLineE"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        private static Point3d calculatePositionDia(Point3d baseLineS, Point3d baseLineE, int position)
+        {
+            var dir = (baseLineE - baseLineS).GetNormal();
+            var pt = new Point3d();
+            double allMoveX = 0;
+            double allMoveY = 0;
+            var moveX = ThDrainageADCommon.diameterDim_move_x;
+            var moveY = ThDrainageADCommon.diameterDim_move_y;
+            var dimBlkX = ThDrainageADCommon.diameterDim_blk_x;
+            var dimBlkY = ThDrainageADCommon.diameterDim_blk_y;
+
+            if (position == 0)
+            {
+                pt = new Point3d((baseLineS.X + baseLineE.X) / 2, (baseLineS.Y + baseLineE.Y) / 2, 0);
+                allMoveX = -dimBlkX / 2;
+                allMoveY = moveY;
+            }
+            if (position == 1)
+            {
+                pt = baseLineS;
+                allMoveX = moveX;
+                allMoveY = moveY;
+            }
+            if (position == 2)
+            {
+                pt = new Point3d((baseLineS.X + baseLineE.X) / 2, (baseLineS.Y + baseLineE.Y) / 2, 0);
+                allMoveX = -dimBlkX / 2;
+                allMoveY = -dimBlkY - moveY;
+            }
+            if (position == 3)
+            {
+                pt = baseLineS;
+                allMoveX = moveX;
+                allMoveY = -dimBlkY - moveY;
+            }
+            if (position == 4)
+            {
+                pt = baseLineS;
+                allMoveX = (baseLineE - baseLineS).Length - moveX - dimBlkX;
+                allMoveY = moveY;
+            }
+            if (position == 5)
+            {
+                pt = baseLineS;
+                allMoveX = (baseLineE - baseLineS).Length - moveX - dimBlkX;
+                allMoveY = -dimBlkY - moveY;
+            }
+
+            var dimPt = pt + dir * allMoveX + allMoveY * dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis);
+            return dimPt;
+        }
+
+        private static Polyline toDimOutline(Point3d pt, Vector3d dir, double x, double y)
+        {
+            var outline = new Polyline();
+            var pt0 = pt;
+            var pt1 = pt + dir * x;
+            var pt2 = pt1 + dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis).GetNormal() * y;
+            var pt3 = pt2 - dir * x;
+
+            outline.AddVertexAt(outline.NumberOfVertices, pt0.ToPoint2D(), 0, 0, 0);
+            outline.AddVertexAt(outline.NumberOfVertices, pt1.ToPoint2D(), 0, 0, 0);
+            outline.AddVertexAt(outline.NumberOfVertices, pt2.ToPoint2D(), 0, 0, 0);
+            outline.AddVertexAt(outline.NumberOfVertices, pt3.ToPoint2D(), 0, 0, 0);
+            outline.Closed = true;
+
+            return outline;
+        }
+
+        private static List<Point3d> possiblePosition(Point3d baseLineS, Point3d baseLineE)
+        {
+            var dimPts = new List<Point3d>();
+
+            //左边中点位
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 0));
+            //右边中点位
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 3));
+            //左边起点位
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 1));
+            //右边起点位
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 2));
+            //左边终点
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 4));
+            //右边终点
+            dimPts.Add(calculatePositionDia(baseLineS, baseLineE, 5));
+
+            return dimPts;
         }
     }
 }

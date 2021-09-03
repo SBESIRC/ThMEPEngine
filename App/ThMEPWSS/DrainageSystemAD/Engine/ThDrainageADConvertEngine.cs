@@ -77,22 +77,26 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             //插入管径标注
             var allNodeDiaDict = new Dictionary<ThDrainageSDTreeNode, int>();
-            ThDrainageADDiameterDim.calculateTreeDiameter(root, endToiDict, allNodeDiaDict);
+            double alpha = dataset.alpha;
+            ThDrainageADDiameterDim.calculateTreeDiameter(root, endToiDict, allNodeDiaDict, alpha);
             allNodeDiaDict.ForEach(x => DrawUtils.ShowGeometry(x.Key.Node, "DN" + x.Value, "l0diamDim", 3, 25, 50));
 
             var nodeDia = new Dictionary<ThDrainageSDTreeNode, int>();
             ThDrainageADDiameterDim.selectChangeNode(root, allNodeDiaDict, nodeDia);
             nodeDia.ForEach(x => DrawUtils.ShowGeometry(x.Key.Node, "DN" + x.Value, "l1diamDim", 191, 30, 50));
 
+            //设置躲避的线
+            var allIsolateLine = new List<Line>();
+            allIsolateLine.AddRange(convertedPipe);
+
             //计算管径标注位置，主管支管 
-            var nodeDiaDimOutput = ThDrainageADDiameterDim.calculatePositionDiaDim(nodeDia, convertNodeDict);
+            var nodeDiaDimOutput = ThDrainageADDiameterDim.calculatePositionDiaDim(nodeDia, convertNodeDict, allIsolateLine);
             nodeDiaDimOutput.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l1dim", 191, 30, 500));
             //计算管径标注位置，末端立管 
-            var nodeDiaDimEndOutput = ThDrainageADDiameterDim.calculatePositionDiaDimEnd(allNodeDiaDict, endStackPipe);
+            var nodeDiaDimEndOutput = ThDrainageADDiameterDim.calculatePositionDiaDimEnd(allNodeDiaDict, endStackPipe, allIsolateLine);
             nodeDiaDimEndOutput.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l1dimEnd", 191, 30, 500));
 
             //for all final output data
-
             convertedAllPipe.AddRange(convertedPipe);
             convertedAllPipe.AddRange(endStackPipe.SelectMany(x => x.Value).ToList());
 
@@ -103,7 +107,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-        private static void turnToilet(List<ThTerminalToilet > allToiletList, List<ThExtractorBase> archiExtractor)
+        private static void turnToilet(List<ThTerminalToilet> allToiletList, List<ThExtractorBase> archiExtractor)
         {
             var toiletList = allToiletList.Where(x => x.SupplyCool.Count > 0).ToList();
 

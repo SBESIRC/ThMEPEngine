@@ -20,7 +20,7 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        [CommandMethod("TIANHUACAD", "THJSZC", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THJSZC", CommandFlags.Modal)]
         public void ThDStoAxonometricDrawing()
         {
             try
@@ -100,6 +100,8 @@ namespace ThMEPWSS
                     archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
                 }
 
+                //传参数
+                var alpha = THDrainageADUISetting.Instance.alpha;
                 var dataset = new ThDrainageSDADDataExchange();
                 dataset.pipes = pipes;
                 dataset.valveList = valveList;
@@ -107,6 +109,7 @@ namespace ThMEPWSS
                 dataset.stackList = stackList;
                 dataset.startPt = startPt;
                 dataset.archiExtractor = archiExtractor;
+                dataset.alpha = alpha;
 
                 ThDrainageADConvertEngine.convertDiagram(dataset, out var convertedPipes, out var convertedValve);
 
@@ -125,50 +128,5 @@ namespace ThMEPWSS
                 Active.Editor.WriteLine(ex.Message);
             }
         }
-
-        //private static Polyline toFrame(Tuple<Point3d, Point3d> leftRight)
-        //{
-        //    var pl = new Polyline();
-        //    var ptRT = new Point2d(leftRight.Item2.X, leftRight.Item1.Y);
-        //    var ptLB = new Point2d(leftRight.Item1.X, leftRight.Item2.Y);
-
-        //    pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item1.ToPoint2D(), 0, 0, 0);
-        //    pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
-        //    pl.AddVertexAt(pl.NumberOfVertices, leftRight.Item2.ToPoint2D(), 0, 0, 0);
-        //    pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
-
-        //    pl.Closed = true;
-
-        //    return pl;
-
-        //}
-
-
-        [CommandMethod("TIANHUACAD", "ThCleanZCFinalDraw", CommandFlags.Modal)]
-        public void ThCleanZCFinalDraw()
-        {
-
-            //Polyline frame = selectFrame();
-            Polyline transFrame = new Polyline();
-            ThMEPOriginTransformer transformer = null;
-            //if (frame != null && frame.NumberOfVertices > 0)
-            //{
-            //    transFrame = transPoly(frame, ref transformer);
-            //}
-
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                var sLayerName = new List<string>();
-                sLayerName.Add(ThDrainageSDCommon.Layer_CoolPipe);
-                sLayerName.Add(ThDrainageSDCommon.Layer_Stack);
-                sLayerName.Add(ThDrainageSDCommon.Layer_Valves);
-
-                CleanDebugDrawings.ClearFinalDrawing(sLayerName, transFrame, transformer);
-            }
-
-        }
-
     }
 }

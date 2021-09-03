@@ -20,5 +20,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         public List<ThExtractorBase> archiExtractor { get; set; }
 
+        public double alpha { get; set; }
+
     }
 }

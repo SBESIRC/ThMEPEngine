@@ -41,6 +41,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         private static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall, List<ThTerminalToilet> islandToilet)
         {
+            var moveTol = 0.01;
             List<string> noPriority = new List<string> { "A-Toilet-3", "A-Toilet-7", "给水角阀平面" };
             List<Point3d> ptOnWall = new List<Point3d>();
 
@@ -74,7 +75,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (closestWall != null)
             {
                 //靠墙
-                terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
+                foreach (var pt in terminal.SupplyCool)
+                {
+                    var ptOnWallTemp = closestWall.GetClosestPointTo(pt, false);
+                    ptOnWallTemp = ptOnWallTemp + terminal.Dir * moveTol;
+                    ptOnWall.Add(ptOnWallTemp);
+                }
+                //terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
             }
             else
             {   //岛，有可能反的
