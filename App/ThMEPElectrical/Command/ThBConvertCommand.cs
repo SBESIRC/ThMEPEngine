@@ -317,7 +317,8 @@ namespace ThMEPElectrical.Command
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var result = spatialIndex.SelectCrossingPolygon(frame.Vertices());
             var filters = blocks.Where(o => result.Contains(o.Geometry)).ToList();
-            filters.ForEach(o => transformer.Reset(o.Geometry));
+            transformer.Reset(objs);
+            transformer.Reset(frame);
             return filters;
         }
     }
