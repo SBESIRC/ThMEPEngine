@@ -76,6 +76,8 @@
                 <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THPPARTITION" Global="THPPARTITION" />
+                <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
                 <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractSlab" Global="THExtractSlab" />
@@ -97,6 +99,8 @@
                 <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THPPARTITION" Global="THPPARTITION" />
+                <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
                 <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractSlab" Global="THExtractSlab" />
