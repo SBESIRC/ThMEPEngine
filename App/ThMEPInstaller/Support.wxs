@@ -33,6 +33,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{929F2B38-CF52-47B0-B4CE-209121205824}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\提电气块转换配置表.dwg" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" Guid="{FA3F8351-30BA-4B0A-A0CC-B3D9B066BE8A}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion_Table" Source="$(var.AutoloaderContentsPath)\Support\提资转换配置表.xlsx" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" Guid="{937CF1FE-CCA4-4BDA-9F34-C15721D7411D}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_AFAS" Source="$(var.AutoloaderContentsPath)\Support\火灾自动报警系统图例.dwg" KeyPath="yes" />
             </Component>
@@ -143,6 +146,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" />
         </ComponentGroup>
     </Fragment>
 </Wix>
