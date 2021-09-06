@@ -9,7 +9,7 @@ namespace ThMEPWSS.Engine
         public ThRoomBuilderEngineWSS() 
             :base()
         { }
-        public override void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
+        public override void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks, bool isWithHole = true)
         {
             base.SpaceMatchText(BuildTextContainers(marks, rooms));
         }
