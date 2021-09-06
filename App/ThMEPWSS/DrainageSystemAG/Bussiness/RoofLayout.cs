@@ -127,9 +127,15 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 //位置偏差大需要连线
                 copyBlock.tag = DrainSysAGCommon.NOTCOPYTAG;
                 retRes.Add(copyBlock);
-                addLines.Add(new CreateBasicElement(copyBlock.floorId, new Line(item.createPoint, copyBlock.createPoint), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+                var lineDir = (copyBlock.createPoint - item.createPoint).GetNormal();
+                var lineSp = item.createPoint;
+                var lineEp = copyBlock.createPoint - lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(copyBlock, "可见性1"));
+                if (lineSp.DistanceTo(lineEp) < 10)
+                    continue;
+                if (lineSp.DistanceTo(lineEp) > item.createPoint.DistanceTo(copyBlock.createPoint))
+                    continue;
+                addLines.Add(new CreateBasicElement(copyBlock.floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
             }
-
             return retRes;
         }
         List<CreateBlockInfo> MaxRoofPipeConvert() 

@@ -82,7 +82,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     {
         public EnumEquipmentType enumEquipmentType { get; }
         public Point3d blockPosition { get; }
-        public Point3d blockCenterPoint { get; }
+        public Point3d blockCenterPoint { get; set; }
         public BlockReference equmBlockReference { get; }
         public EnumRoomType enumRoomType { get; set; }
         public string roomSpaceId { get; set; }

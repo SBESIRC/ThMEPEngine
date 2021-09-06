@@ -20,11 +20,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         double _floorDrainBalconyPipeNearDistance = 600;// 地漏找阳台立管范围
         double _floorDrainEqumPipeNearDistance = 2500;//地漏找设备平台立管范围
         double _pipeCasingLength = 100;//套管长度
-        double _balconyRoomFindNearRoomDistance = 600;//阳台外扩找靠近房间距离
-        double _balconyAddPipeFindNearWallDistance = 100;//阳台添加立管时获取添加点外扩找墙距离
-        double _balconyAddPipeCenterNearWallDistance = 100;//阳台添加立管中心距墙距离
-        double _balconyPipeMaxRadius = 150;//阳台添加立管最大半径
-        double _balconyAddPipeMinWallSpace = 200;//阳台添加立管墙最短要求
+        double _pipeCenterCheckDistance = 10;//线调整，点在圆心的判断范围
+        double _mopPoolAdjustRange = 150;//拖把根据立管，地漏池调整中心点范围
 
         List<RoomModel> _balconyRooms = new List<RoomModel>();
         List<RoomModel> _corridorRooms = new List<RoomModel>();
@@ -36,6 +33,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         List<PipeConnectRelation> _pipeConnectRelations = new List<PipeConnectRelation>();
         List<Polyline> _wallPolylines = new List<Polyline>();
         List<Polyline> _columnPolylines = new List<Polyline>();
+        List<CreateBlockInfo> _pipeConverters = new List<CreateBlockInfo>();
+        List<CreateBlockInfo> _allDrains = new List<CreateBlockInfo>();
+        List<Circle> _pipeDrainCircles = new List<Circle>();
 
         public List<CreateBasicElement> createBasicElements = new List<CreateBasicElement>();
         public List<CreateBlockInfo> createBlockInfos = new List<CreateBlockInfo>();
@@ -95,10 +95,18 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         {
             changeToFLY1Ids = new List<string>();
             changeToFDrainIds = new List<string>();
+            _balconyDrains.Clear();
+            _pipeConverters.Clear();
+            _allDrains.Clear();
             if (null != balconyDrainCoverter && balconyDrainCoverter.Count > 0) 
             {
+                List<string> pipeTags = new List<string> { "FL", "Y2", "NL" };
                 foreach (var item in balconyDrainCoverter) 
                 {
+                    if (!string.IsNullOrEmpty(item.tag) && pipeTags.Any(c => item.tag.Contains(c)))
+                        _pipeConverters.Add(item);
+                    if (item.equipmentType == EnumEquipmentType.floorDrain)
+                        _allDrains.Add(item);
                     if (string.IsNullOrEmpty(item.spaceId) || !_balconyRooms.Any(c => c.thIFCRoom.Uuid.Equals(item.spaceId)))
                         continue;
                     if (item.equipmentType != EnumEquipmentType.floorDrain)
@@ -115,13 +123,12 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 balcCorridRooms.AddRange(_balconyRooms);
             if (null != _corridorRooms && _corridorRooms.Count > 0)
                 balcCorridRooms.AddRange(_corridorRooms);
-            
+
+            _pipeDrainCircles = GetCheckCircles();
             //阳台设备、立管连线
             BalconyCorridorConnect(balcCorridRooms);
             //根据连接设备判断连线图层
             PipeRelationToLayoutLine();
-            //立管转换、需要根据立管类型
-            //RaiseConvert();
             foreach (var item in _pipeConnectRelations)
             {
                 if (item.isWasteWaterPipe) 
@@ -152,8 +159,46 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 if (item == null || item.enumRoomType != EnumRoomType.Balcony)
                     continue;
+                //获取所属阳台的房间，获取X轴，Y轴，并获取该阳台中的立管，地漏对拖把池进行位置修正
+                var room = _balconyRooms.Where(c => c.thIFCRoom.Uuid == item.roomSpaceId).FirstOrDefault();
                 var centerPoint = item.blockCenterPoint;
-                var circle = new Circle(centerPoint, Vector3d.ZAxis, _balconyMopPoolRadius);
+                var createPoint = centerPoint;
+                if (null != room) 
+                {
+                    var points = new List<Point3d>();
+                    foreach (var pipe in _balconyDrains) 
+                    {
+                        if (room.outLine.Contains(pipe.createPoint))
+                            points.Add(pipe.createPoint);
+                    }
+                    if (points.Count > 0) 
+                    {
+                        //获取该空间内的地漏，立管，X轴Y轴
+                        var xPoints = new List<Point3d>();
+                        var yPoints = new List<Point3d>();
+                        var xAxis = RoomXAxis(room);
+                        var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
+                        foreach (var point in points) 
+                        {
+                            if (point.PointInLine(createPoint, xAxis, _mopPoolAdjustRange))
+                                xPoints.Add(point);
+                            if (point.PointInLine(createPoint, yAxis, _mopPoolAdjustRange))
+                                yPoints.Add(point);
+                        }
+                        if (xPoints.Count > 0)
+                        {
+                            var first = xPoints.OrderBy(c => c.DistanceTo(createPoint)).First();
+                            createPoint = createPoint.PointToLine(first, xAxis);
+                        }
+                        if (yPoints.Count > 0) 
+                        {
+                            var first = yPoints.OrderBy(c => c.DistanceTo(createPoint)).First();
+                            createPoint = createPoint.PointToLine(first, yAxis);
+                        }
+                    }
+                }
+                item.blockCenterPoint = createPoint;
+                var circle = new Circle(createPoint, Vector3d.ZAxis, _balconyMopPoolRadius);
                 createBasicElements.Add(new CreateBasicElement(_floorId,circle, ThWSSCommon.Layout_WastWaterPipeLayerName, item.uid,"YTTBC_PS"));
             }
         }
@@ -228,7 +273,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     createBasicElements.Add(new CreateBasicElement(_floorId,pline, "0", item.uid,"DLLG_LJX",color));
                 }
             }
-
         }
         void BalconyCorridorConnect(List<RoomModel> balcCorridRooms) 
         {
@@ -280,13 +324,31 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         roomRightBlocks.Add(equipment);
                     }
                 }
-                //BalconyCorridorSpaceConnect(room,roomLeftBlocks, centerPoint,lineDir);
-                //BalconyCorridorSpaceConnect(room,roomRightBlocks, centerPoint, lineDir);
                 NewBalconyCorridorSpaceConnect(room, roomLeftBlocks, centerPoint, lineDir);
                 NewBalconyCorridorSpaceConnect(room, roomRightBlocks, centerPoint, lineDir);
             }
         }
 
+        Vector3d RoomXAxis(RoomModel room) 
+        {
+            var centerPoint = room.GetRoomCenterPoint();
+            var lines = DrainSysAGCommon.PolyLineToLines(room.outLine);
+            Line nearLine = null;
+            var nearDis = double.MaxValue;
+            foreach (var line in lines)
+            {
+                var neraPoint = line.GetClosestPointTo(centerPoint, false);
+                var dis = neraPoint.DistanceTo(centerPoint);
+                if (dis < nearDis)
+                {
+                    nearLine = line;
+                    nearDis = dis;
+                }
+            }
+            var closePoint = nearLine.GetClosestPointTo(centerPoint, false);
+            var lineDir = (centerPoint - closePoint).GetNormal();
+            return lineDir;
+        }
         void NewBalconyCorridorSpaceConnect(RoomModel balcCorrRoom, List<EquipmentBlockSpace> connectSpaceEqum, Point3d centerPoint, Vector3d lineDir) 
         {
             //获取本阳台内的阳台立管、废水立管
@@ -316,7 +378,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 else
                 {
                     //以立管为中心，做lineDir为X轴，垂直方向为Y轴，将其它的点位根据 距离轴
-                    var connectPipe = new PipeDrainConnect(pipe.blockCenterPoint, otherBlocks.Select(c => c.blockCenterPoint).ToList());
+                    var connectPipe = new PipeDrainConnect(balcCorrRoom.outLine,pipe.blockCenterPoint,0, ConnectNoBayDistance(otherBlocks.Select(c => c.blockCenterPoint).ToList()));
                     var lines = connectPipe.PipeDrainConnectByMainAxis(lineDir);
                     if (null != lines && lines.Count > 0)
                         pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
@@ -326,136 +388,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             //阳台上没有可以连接的，找其他的进行连接
             NewBalconyCorridorSpaceConnectPlanB(balcCorrRoom, connectSpaceEqum, centerPoint, lineDir);
         }
-
-        void BalconyCorridorSpaceConnect(RoomModel balcCorrRoom,List<EquipmentBlockSpace> connectSpaceEqum,Point3d centerPoint,Vector3d lineDir) 
-        {
-            if (null == connectSpaceEqum || connectSpaceEqum.Count < 1)
-                return;
-            //step1 阳台内部处理   将和阳台立管同一部分的所有地漏和拖把池排水都接入此立管
-            var pipe = connectSpaceEqum.Where(c => c.enumEquipmentType == EnumEquipmentType.balconyRiser).FirstOrDefault();
-            var otherBlocks = connectSpaceEqum.Where(c => c.enumEquipmentType != EnumEquipmentType.balconyRiser).ToList();
-            if (otherBlocks.Count < 1)
-                return;
-            if (pipe != null)
-            {
-                //阳台连管侧有立管，将其它设备连接到立管上
-                var pipeRelation = _pipeConnectRelations.Where(c => c.pipeBlockUid.Equals(pipe.uid)).FirstOrDefault();
-                if (pipeRelation == null) 
-                {
-                    _pipeConnectRelations.Add(new PipeConnectRelation(pipe.uid, pipe.blockCenterPoint));
-                    pipeRelation = _pipeConnectRelations.Where(c => c.pipeBlockUid.Equals(pipe.uid)).FirstOrDefault();
-                }
-
-                otherBlocks = otherBlocks.OrderBy(c => c.blockCenterPoint.DistanceTo(pipe.blockCenterPoint)).ToList();
-                pipeRelation.connectBlockIds.AddRange(otherBlocks.Select(c=>c.uid).ToList());
-                if (otherBlocks.Count == 1)
-                {
-                    //只有一个点位，直接连接立管
-                    Line addLine = new Line(otherBlocks.FirstOrDefault().blockCenterPoint, pipe.blockCenterPoint);
-                    pipeRelation.pipeEquipmentConnectLines.Add(addLine);
-                }
-                else 
-                {
-                    //以立管为中心，做lineDir为X轴，垂直方向为Y轴，将其它的点位根据 距离轴
-                    var connectPipe = new PipeDrainConnect(pipe.blockCenterPoint, otherBlocks.Select(c => c.blockCenterPoint).ToList());
-                    var lines = connectPipe.PipeDrainConnectByMainAxis(lineDir);
-                    if (null != lines && lines.Count > 0)
-                        pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                }
-                return;
-            }
-            //阳台连管侧没有立管
-            if (BalconyCorridorSpaceConnectPlanB(balcCorrRoom,connectSpaceEqum,centerPoint,lineDir))
-                return;
-            //阳台侧没有立管，在一定范围内也没有设备平台立管
-            BalconyCorridorSpaceCoonectPlanC(balcCorrRoom,connectSpaceEqum, centerPoint, lineDir);
-        }
-        bool BalconyCorridorSpaceConnectPlanB(RoomModel balcCorrRoom, List<EquipmentBlockSpace> connectSpaceEqum, Point3d roomCenterPoint, Vector3d lineDir) 
-        {
-            //step2 阳台内没有找到立管，找设备平台的立管进行连接  中心为起点在2500范围内找设备平台的阳台立管，若存在多个则取最近的一个。
-            //连管需沿着阳台框线的方向走，尽量横平竖直（较复杂 看图详解）。
-            //lineDir 为短轴方向
-            var geo = connectSpaceEqum.FirstOrDefault().equmBlockReference.GeometricExtents;
-            for (int i =1;i<connectSpaceEqum.Count;i++) 
-            {
-                geo.AddExtents(connectSpaceEqum[i].equmBlockReference.GeometricExtents);
-            }
-            var centerPoint = geo.CenterPoint();
-            var targetPipes = new List<EquipmentBlockSpace>();
-            foreach (var pipe in _riserPipe) 
-            {
-                if (pipe.enumRoomType == EnumRoomType.Other || pipe.enumRoomType == EnumRoomType.EquipmentPlatform)
-                { 
-                    if(pipe.enumEquipmentType == EnumEquipmentType.balconyRiser)
-                        targetPipes.Add(pipe);
-                }
-            }
-            if (targetPipes == null || targetPipes.Count < 1)
-                return false;
-            var nearPipe = targetPipes.OrderBy(c => c.blockCenterPoint.DistanceTo(centerPoint)).FirstOrDefault();
-            if (nearPipe.blockCenterPoint.DistanceTo(centerPoint) >= _floorDrainEqumPipeNearDistance)
-                return false;
-
-            var pipeRelation = _pipeConnectRelations.Where(c => c.pipeBlockUid.Equals(nearPipe.uid)).FirstOrDefault();
-            if (pipeRelation == null)
-            {
-                _pipeConnectRelations.Add(new PipeConnectRelation(nearPipe.uid, nearPipe.blockCenterPoint));
-                pipeRelation = _pipeConnectRelations.Where(c => c.pipeBlockUid.Equals(nearPipe.uid)).FirstOrDefault();
-            }
-            pipeRelation.connectBlockIds.AddRange(connectSpaceEqum.Select(c=>c.uid).ToList());
-
-            //房间轮廓取obb
-            var obbPline = balcCorrRoom.outLine; //balcCorrRoom.GetRoomOBBPolyline();
-            var nearLine = NearRoomLine(obbPline, nearPipe.blockCenterPoint);
-            var points = connectSpaceEqum.Select(c => c.blockCenterPoint).ToList();
-            Point3d crossPoint = new Point3d();
-            Vector3d outDir = new Vector3d();
-            if (nearLine == null)
-            {
-                //不能直接穿过，根据点位信息，进一步计算弯折信息
-                obbPline = balcCorrRoom.GetRoomOBBPolyline();
-                var orderPts = PointVectorUtil.PointsOrderByDirection(points, lineDir, nearPipe.blockCenterPoint);
-                var nearPoint = orderPts.OrderBy(c => c.Value).FirstOrDefault().Key;
-                var roomNearLine = NearRoomLine(obbPline, nearPoint, lineDir);
-                crossPoint = nearPoint.PointToLine(roomNearLine);
-                outDir = (crossPoint - nearPoint).GetNormal();
-                var connectPipeInner = new PipeDrainConnect(crossPoint, points);
-                var lines = connectPipeInner.PipeDrainConnectByMainAxis(outDir);
-                if (null != lines && lines.Count > 0)
-                {
-                    pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                    var connectPipeOut = new PipeDrainConnect(crossPoint, new List<Point3d> { nearPipe.blockCenterPoint });
-                    var pipeLines = connectPipeOut.PipeDrainConnectByMainAxis(outDir);
-                    if (null != lines && lines.Count > 0)
-                        pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                }
-            }
-            else 
-            {
-                //可以直接穿过,根据穿过的线
-                crossPoint = nearPipe.blockCenterPoint.PointToLine(nearLine);
-                outDir = (nearPipe.blockCenterPoint -crossPoint).GetNormal();
-
-                var connectPipe = new PipeDrainConnect(crossPoint,points);
-                var lines = connectPipe.PipeDrainConnectByMainAxis(outDir);
-                //var lines = CenterConnect(crossPoint, lineDir, points,true);
-                if (null != lines && lines.Count > 0)
-                {
-                    pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                    var nLine = new Line(nearPipe.blockCenterPoint, crossPoint);
-                    pipeRelation.pipeEquipmentConnectLines.Add(nLine);
-                }
-            }
-            //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
-            var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
-            var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
-            addBlock.rotateAngle = angle%(Math.PI *2);
-            addBlock.dymBlockAttr.Add("可见性", "普通套管");
-            addBlock.dymBlockAttr.Add("距离", _pipeCasingLength);
-            createBlockInfos.Add(addBlock);
-            return true;
-        }
-
         bool NewBalconyCorridorSpaceConnectPlanB(RoomModel balcCorrRoom, List<EquipmentBlockSpace> connectSpaceEqum, Point3d roomCenterPoint, Vector3d lineDir)
         {
             //step2 阳台内没有找到立管，找设备平台的立管进行连接  中心为起点在2500范围内找设备平台的阳台立管，若存在多个则取最近的一个。
@@ -490,175 +422,100 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             pipeRelation.connectBlockIds.AddRange(connectSpaceEqum.Select(c => c.uid).ToList());
 
-            //房间轮廓取obb
-            var obbPline = balcCorrRoom.outLine; //balcCorrRoom.GetRoomOBBPolyline();
-            var nearLine = NearRoomLine(obbPline, nearPipe.blockCenterPoint);
-            var points = connectSpaceEqum.Select(c => c.blockCenterPoint).ToList();
-            Point3d crossPoint = new Point3d();
-            Vector3d outDir = new Vector3d();
-            if (nearLine == null)
+            var tempPoints = connectSpaceEqum.Select(c => c.blockCenterPoint).ToList();
+            while (tempPoints.Count > 0) 
             {
-                //不能直接穿过，根据点位信息，进一步计算弯折信息
-                obbPline = balcCorrRoom.GetRoomOBBPolyline();
-                var orderPts = PointVectorUtil.PointsOrderByDirection(points, lineDir, nearPipe.blockCenterPoint);
-                var nearPoint = orderPts.OrderBy(c => c.Value).FirstOrDefault().Key;
-                var roomNearLine = NearRoomLine(obbPline, nearPoint, lineDir);
-                crossPoint = nearPoint.PointToLine(roomNearLine);
-                outDir = (crossPoint - nearPoint).GetNormal();
-                var connectPipeInner = new PipeDrainConnect(crossPoint, points);
-                var lines = connectPipeInner.PipeDrainConnectByMainAxis(outDir);
-                if (null != lines && lines.Count > 0)
+                var points = new List<Point3d>();
+                tempPoints.ForEach(c => points.Add(c));
+                //房间轮廓取obb
+                var obbPline = balcCorrRoom.GetRoomOBBPolyline();
+                var pipePoint = nearPipe.blockCenterPoint;
+                Line nearLine = null;
+                if (obbPline.Contains(pipePoint))
+                    nearLine = NearRoomLine(balcCorrRoom.outLine, pipePoint, points);
+                else
                 {
-                    pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                    var connectPipeOut = new PipeDrainConnect(crossPoint, new List<Point3d> { nearPipe.blockCenterPoint });
-                    var pipeLines = connectPipeOut.PipeDrainConnectByMainAxis(outDir);
-                    if (null != lines && lines.Count > 0)
-                        pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
+                    var nearLine1 = NearRoomLine(obbPline, pipePoint);
+                    var nearPoint1 = pipePoint.PointToLine(nearLine1);
+                    var nearLine2 = NearRoomLine(balcCorrRoom.outLine, pipePoint);
+                    var nearPoint2 = pipePoint.PointToLine(nearLine2);
+                    if (PointVectorUtil.PointInLineSegment(nearPoint2, new Line(pipePoint, nearPoint1), 10, 10))
+                        nearLine = NearRoomLine(balcCorrRoom.outLine, pipePoint, points);
                 }
-            }
-            else
-            {
-                //可以直接穿过,根据穿过的线
-                crossPoint = nearPipe.blockCenterPoint.PointToLine(nearLine);
-                outDir = (nearPipe.blockCenterPoint - crossPoint).GetNormal();
 
-                var connectPipe = new PipeDrainConnect(crossPoint, points);
-                var lines = connectPipe.PipeDrainConnectByMainAxis(outDir);
-                //var lines = CenterConnect(crossPoint, lineDir, points,true);
-                if (null != lines && lines.Count > 0)
+                Point3d crossPoint = new Point3d();
+                Vector3d outDir = new Vector3d();
+                if (nearLine == null)
                 {
-                    pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-                    var nLine = new Line(nearPipe.blockCenterPoint, crossPoint);
-                    pipeRelation.pipeEquipmentConnectLines.Add(nLine);
+                    //不能直接穿过，根据点位信息，进一步计算弯折信息
+                    var roomNearLine = NearRoomLine(balcCorrRoom.outLine, pipePoint, lineDir, false);
+                    var tempPoint = pipePoint.PointToLine(roomNearLine);
+                    roomNearLine = NearRoomLine(balcCorrRoom.outLine, tempPoint, points);
+                    var orderPts = PointVectorUtil.PointsOrderByDirection(points, lineDir, tempPoint);
+                    var nearPoint = orderPts.First().Key;
+                    crossPoint = nearPoint.PointToLine(roomNearLine);
+                    points.Clear();
+                    outDir = (crossPoint - nearPoint).GetNormal();
+                    foreach (var point in tempPoints) 
+                    {
+                        var prjPoint = point.PointToLine(crossPoint, outDir);
+                        if (!balcCorrRoom.outLine.Contains(prjPoint))
+                            continue;
+                        var checkDir = (prjPoint - crossPoint).GetNormal();
+                        if (checkDir.DotProduct(outDir) > 0)
+                            continue;
+                        points.Add(point);
+                    }
+                    if (points.Count < 1)
+                        break;
+                    var connectPipeInner = new PipeDrainConnect(balcCorrRoom.outLine, crossPoint, 0, ConnectNoBayDistance(points));
+                    var lines = connectPipeInner.PipeDrainConnectByMainAxis(outDir);
+                    if (null != lines && lines.Count > 0)
+                    {
+                        pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
+                        var connectPipeOut = new PipeDrainConnect(null, crossPoint, _pipeCasingLength, ConnectNoBayDistance(new List<Point3d> { nearPipe.blockCenterPoint }));
+                        var pipeLines = connectPipeOut.PipeDrainConnectByMainAxis(outDir);
+                        if (null != pipeLines && pipeLines.Count > 0)
+                            pipeRelation.pipeEquipmentConnectLines.AddRange(pipeLines);
+                    }
                 }
-            }
-            //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
-            var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
-            var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
-            addBlock.rotateAngle = angle % (Math.PI * 2);
-            addBlock.dymBlockAttr.Add("可见性", "普通套管");
-            addBlock.dymBlockAttr.Add("距离", _pipeCasingLength);
-            createBlockInfos.Add(addBlock);
-            return true;
-        }
-        bool BalconyCorridorSpaceCoonectPlanC(RoomModel balcCorrRoom,List<EquipmentBlockSpace> connectSpaceEqum,Point3d roomCenterPoint, Vector3d roomXAxis) 
-        {
-            //step3 既没有内部，也没有设备平台的立管
-            //优先在超户型内部的方向的就近墙角设置立管。不能挡门或窗，只能放在墙厚大于200的墙角。管心距离墙的两边100。如果墙角的墙厚不满足要求，则朝阳台外层的就近墙角。
-            var yAxis = Vector3d.ZAxis.CrossProduct(roomXAxis);
-            var points = connectSpaceEqum.Select(c => c.blockCenterPoint).ToList();
-            var orderByDir = PointVectorUtil.PointsOrderByDirection(points, yAxis,false);
-            var nearPoint = orderByDir.FirstOrDefault();
-            //这里认为阳台墙是直墙，没有考虑斜墙，非正交的墙
-            //根据原始轮廓，找到相应的角落，判断是否可以放下立管
-            List<Line> roomLines = DrainSysAGCommon.PolyLineToLines(balcCorrRoom.outLine);
-            Dictionary<Line,Point3d> targetLines = new Dictionary<Line, Point3d>();
-            foreach (var line in roomLines) 
-            {
-                var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                var interRes = PointVectorUtil.LineIntersectionLine(nearPoint, roomXAxis, line.StartPoint, lineDir, out Point3d interPoint);
-                if (interRes != 1)
-                    continue;
-                if (!interPoint.PointInLineSegment(line))
-                    continue;
-                targetLines.Add(line, interPoint);
-            }
-            //获取阳台旁边的相交的面积最大的房间（客餐厅，或卧室）
-            RoomModel nearRoom = null;
-            double maxArea = double.MinValue;
-            var extendOutLine = balcCorrRoom.outLine.Buffer(_balconyRoomFindNearRoomDistance).ToNTSMultiPolygon();
-            foreach (var room in _otherRooms) 
-            {
-                if (!extendOutLine.Intersects(room.outLine.ToNTSGeometry()))
-                    continue;
-                if (maxArea < room.outLine.Area)
+                else
                 {
-                    nearRoom = room;
-                    maxArea = room.outLine.Area;
+                    //可以直接穿过,根据穿过的线
+                    crossPoint = nearPipe.blockCenterPoint.PointToLine(nearLine);
+                    outDir = (nearPipe.blockCenterPoint - crossPoint).GetNormal();
+                    points.Clear();
+                    foreach (var point in tempPoints)
+                    {
+                        var prjPoint = point.PointToLine(crossPoint, outDir);
+                        if (!balcCorrRoom.outLine.Contains(prjPoint))
+                            continue;
+                        var checkDir = (prjPoint - crossPoint).GetNormal();
+                        if (checkDir.DotProduct(outDir) > 0)
+                            continue;
+                        points.Add(point);
+                    }
+                    if (points.Count < 1)
+                        break;
+                    var connectPipe = new PipeDrainConnect(balcCorrRoom.outLine, crossPoint, 0, ConnectNoBayDistance(points));
+                    var lines = connectPipe.PipeDrainConnectByMainAxis(outDir);
+                    if (null != lines && lines.Count > 0)
+                    {
+                        pipeRelation.pipeEquipmentConnectLines.AddRange(lines);
+                        var nLine = new Line(nearPipe.blockCenterPoint, crossPoint);
+                        pipeRelation.pipeEquipmentConnectLines.Add(nLine);
+                    }
                 }
+                //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
+                var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
+                var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
+                addBlock.rotateAngle = angle % (Math.PI * 2);
+                addBlock.dymBlockAttr.Add("可见性", "普通套管");
+                addBlock.dymBlockAttr.Add("距离", _pipeCasingLength);
+                createBlockInfos.Add(addBlock);
+                tempPoints = tempPoints.Where(c => !points.Any(x => x.DistanceTo(c) < 5)).ToList();
             }
-            var orderPoints = PointVectorUtil.PointsOrderByDirection(targetLines.Select(c => c.Value).ToList(), roomXAxis,false, nearPoint);
-            if (orderPoints.Count < 1)
-                return false;
-            var firstPoint = orderPoints.FirstOrDefault();
-            var lastPoint = orderPoints.LastOrDefault();
-            if (null != nearRoom)
-            {
-                var firstNearPoint = nearRoom.outLine.GetClosestPointTo(firstPoint, false);
-                var lastNearPoint = nearRoom.outLine.GetClosestPointTo(lastPoint, false);
-                if (firstNearPoint.DistanceTo(firstPoint) > lastPoint.DistanceTo(lastNearPoint))
-                {
-                    roomXAxis = roomXAxis.Negate();
-                    var point = new Point3d(firstPoint.X, firstPoint.Y, 0);
-                    firstPoint = lastPoint;
-                    lastPoint = point;
-                }
-            }
-            Point3d centerPoint = new Point3d();
-            var firstDis = firstPoint.DistanceTo(nearPoint);
-            var lastDis = lastPoint.DistanceTo(nearPoint);
-            //两侧都不能放置,随便放置一侧
-            if (firstDis > _balconyPipeMaxRadius*2 && lastDis > _balconyPipeMaxRadius * 2)
-            {
-                if (CanAddPipe(firstPoint, roomXAxis, yAxis, out centerPoint)) {}
-                else if (CanAddPipe(lastPoint, roomXAxis.Negate(), yAxis, out centerPoint)) {}
-                else 
-                {
-                    if (firstDis < lastDis)
-                        centerPoint = firstPoint + roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-                    else 
-                        centerPoint = lastPoint - roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-                }
-            }
-            else if (firstDis > _balconyPipeMaxRadius*1.5)
-            {
-                centerPoint = firstPoint + roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-            }
-            else
-            {
-                centerPoint = lastPoint - roomXAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
-            }
-            //根据布置点，在进行连接
-            var addPipeRelation = new PipeConnectRelation(Guid.NewGuid().ToString(), centerPoint);
-            addPipeRelation.connectBlockIds.AddRange(connectSpaceEqum.Select(c => c.uid).ToList());
-            if (connectSpaceEqum.Count == 1)
-            {
-                //只有一个点位，直接连接立管
-                Line addLine = new Line(connectSpaceEqum.FirstOrDefault().blockCenterPoint, centerPoint);
-                addPipeRelation.pipeEquipmentConnectLines.Add(addLine);
-            }
-            else 
-            {
-                var connectPipeInner = new PipeDrainConnect(centerPoint, points);
-                //var lines = CenterConnect(centerPoint, roomXAxis, points);
-                var lines = connectPipeInner.PipeDrainConnectByMainAxis(roomXAxis);
-                if (null != lines && lines.Count > 0)
-                    addPipeRelation.pipeEquipmentConnectLines.AddRange(lines);
-            }
-            _pipeConnectRelations.Add(addPipeRelation);
-            return false;
-        }
-        bool CanAddPipe(Point3d point,Vector3d xAxis,Vector3d yAxis,out Point3d centerPoint) 
-        {
-            centerPoint = new Point3d();
-            var lineSp = point - yAxis.MultiplyBy(_balconyPipeMaxRadius);
-            var lineEp = point + yAxis.MultiplyBy(_balconyPipeMaxRadius);
-            var line = new Line(lineSp, lineEp);
-            var pline = line.Buffer(_balconyAddPipeFindNearWallDistance);
-            //获取相交墙
-            List<Polyline> walls = new List<Polyline>();
-            foreach (var wall in _wallPolylines) 
-            {
-                if (pline.Intersects(wall))
-                    walls.Add(wall);
-            }
-            if (null == walls || walls.Count < 1)
-                return false;
-            var spColsePoint = walls.OrderBy(c => c.GetClosestPointTo(lineSp, false)).FirstOrDefault();
-            var epColsePoint = walls.OrderBy(c => c.GetClosestPointTo(lineEp, false)).FirstOrDefault();
-            if (spColsePoint.Distance(epColsePoint) < _balconyAddPipeMinWallSpace)
-                return false;
-            centerPoint = point + xAxis.MultiplyBy(_balconyAddPipeCenterNearWallDistance);
+            
             return true;
         }
         Line NearRoomLine(Polyline roomPLine,Point3d pipeCenterPoint) 
@@ -681,7 +538,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return nearLine;
         }
-        Line NearRoomLine(Polyline roomPLine, Point3d targetPoint,Vector3d targetLineDirection)
+        Line NearRoomLine(Polyline roomPLine, Point3d targetPoint, Vector3d targetLineDirection,bool pointInLine)
         {
             List<Line> roomLines = DrainSysAGCommon.PolyLineToLines(roomPLine);
             Line nearLine = null;
@@ -693,9 +550,44 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (Math.Abs(dot) < 0.5)
                     continue;
                 var prjPoint = targetPoint.PointToLine(line);
-                if (prjPoint.PointInLineSegment(line))
+                if (!pointInLine || (pointInLine && prjPoint.PointInLineSegment(line)))
                 {
                     var dis = prjPoint.DistanceTo(targetPoint);
+                    if (dis < nearDis)
+                    {
+                        nearDis = dis;
+                        nearLine = line;
+                    }
+                }
+            }
+            return nearLine;
+        }
+        Line NearRoomLine(Polyline roomPLine, Point3d pipeCenterPoint,List<Point3d> connectPoints)
+        {
+            List<Line> roomLines = DrainSysAGCommon.PolyLineToLines(roomPLine);
+            List<Line> canConenctLines = new List<Line>();
+            foreach (var point in connectPoints) 
+            {
+                var line = new Line(point, pipeCenterPoint);
+                var dir = (pipeCenterPoint - point).GetNormal();
+                foreach (var checkLine in roomLines) 
+                {
+                    var checkDir = (checkLine.EndPoint - checkLine.StartPoint).GetNormal();
+                    int inter = PointVectorUtil.LineIntersectionLine(point, dir, checkLine.StartPoint, checkDir, out Point3d interPoint);
+                    if (inter != 1)
+                        continue;
+                    if (interPoint.PointInLineSegment(line) && interPoint.PointInLineSegment(checkLine))
+                        canConenctLines.Add(checkLine);
+                }
+            }
+            Line nearLine = null;
+            var nearDis = double.MaxValue;
+            foreach (var line in canConenctLines)
+            {
+                var prjPoint = pipeCenterPoint.PointToLine(line);
+                if (prjPoint.PointInLineSegment(line))
+                {
+                    var dis = prjPoint.DistanceTo(pipeCenterPoint);
                     if (dis < nearDis)
                     {
                         nearDis = dis;
@@ -719,9 +611,32 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 string layerName = item.isWasteWaterPipe ? ThWSSCommon.Layout_PipeWastDrainConnectLayerName : ThWSSCommon.Layout_PipeRainDrainConnectLayerName;
                 foreach (var line in item.pipeEquipmentConnectLines) 
                 {
-                    createBasicElements.Add(new CreateBasicElement(_floorId,line, layerName,item.pipeBlockUid,"DLLG_LJX"));
+                    var moveLine = MoveLineToCircleOut(line, _pipeDrainCircles);
+                    if (null == moveLine)
+                        continue;
+                    createBasicElements.Add(new CreateBasicElement(_floorId, moveLine, layerName,item.pipeBlockUid,"DLLG_LJX"));
                 }
             }
+        }
+        Line MoveLineToCircleOut(Line line, List<Circle> checkCircles)
+        {
+            var sp = line.StartPoint;
+            var ep = line.EndPoint;
+            var dir = (ep - sp).GetNormal();
+            foreach (var circle in checkCircles)
+            {
+                var spOffSet = 0.0;
+                var epOffSet = 0.0;
+                if (sp.DistanceTo(circle.Center) < _pipeCenterCheckDistance)
+                    spOffSet = circle.Radius;
+                else if (ep.DistanceTo(circle.Center) < _pipeCenterCheckDistance)
+                    epOffSet = circle.Radius;
+                if (spOffSet + epOffSet > (sp.DistanceTo(ep)))
+                    return null;
+                sp = sp + dir.MultiplyBy(spOffSet);
+                ep = ep - dir.MultiplyBy(epOffSet);
+            }
+            return new Line(sp, ep);
         }
         bool IsWasteWaterPipe(string pipeId,List<string> connectIds) 
         {
@@ -751,55 +666,43 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return isWasteWater;
         }
-
-        void RaiseConvert() 
+        List<Circle> GetCheckCircles()
         {
-            //1：50和1:100  带定位立管    1:150 带定位立管150   可见性就是管径来自于UI
-            string blockName = SetServicesModel.Instance.drawingScale == EnumDrawingScale.DrawingScale1_150 ? ThWSSCommon.Layout_PositionRiser150BlockName : ThWSSCommon.Layout_PositionRiserBlockName;
-            string flDim = SetServicesModel.Instance.balconyWasteWaterRiserPipeDiameter.ToString();
-            string rainDim = SetServicesModel.Instance.balconyRiserPipeDiameter.ToString();
-            string corrDim = SetServicesModel.Instance.condensingRiserPipeDiameter.ToString();
-            foreach (var item in _pipeConnectRelations)
+            var checkCircles = new List<Circle>();
+            foreach (var pipe in _pipeConverters)
             {
-                var pipeBlock = _riserPipe.Where(c => c.uid.Equals(item.pipeBlockUid)).FirstOrDefault();
-                var createPoint = item.pipeCenterPoint;
-                if (pipeBlock != null && pipeBlock.enumEquipmentType == EnumEquipmentType.condensateRiser)
+                var radius = DrainSysAGCommon.GetBlockCircleRadius(pipe, "可见性1");
+                var circle = new Circle(pipe.createPoint, Vector3d.ZAxis, radius);
+                checkCircles.Add(circle);
+            }
+            foreach (var drain in _allDrains)
+            {
+                var radius = DrainSysAGCommon.GetBlockCircleRadius(drain, "可见性");
+                var circle = new Circle(drain.createPoint, Vector3d.ZAxis, radius);
+                checkCircles.Add(circle);
+            }
+            foreach (var basicElement in createBasicElements)
+            {
+                if (basicElement.baseCurce is Circle circle1)
                 {
-                    //冷凝立管转换
-                    var block = new CreateBlockInfo(_floorId, blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, createPoint, EnumEquipmentType.condensateRiser);
-                    block.tag = "NL";
-                    block.dymBlockAttr.Add("可见性1", corrDim);
-                    createBlockInfos.Add(block);
-                }
-                else if (item.isWasteWaterPipe)
-                {
-                    //废水立管
-                    var block = new CreateBlockInfo(_floorId,blockName, ThWSSCommon.Layout_WastWaterPipeLayerName, createPoint,EnumEquipmentType.balconyRiser);
-                    block.tag = "FL";
-                    block.dymBlockAttr.Add("可见性1", flDim);
-                    createBlockInfos.Add(block);
-                }
-                else 
-                {
-                    //雨水立管
-                    var block = new CreateBlockInfo(_floorId,blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, createPoint, EnumEquipmentType.balconyRiser);
-                    block.tag = "Y2L";
-                    block.dymBlockAttr.Add("可见性1", rainDim);
-                    createBlockInfos.Add(block);
+                    var circle = new Circle(circle1.Center, circle1.Normal, circle1.Radius);
+                    checkCircles.Add(circle);
                 }
             }
-            //冷凝立管转换
-            foreach (var pipe in _riserPipe) 
+            return checkCircles;
+        }
+        Dictionary<Point3d, double> ConnectNoBayDistance(List<Point3d> points) 
+        {
+            var dicDis = new Dictionary<Point3d, double>();
+            foreach (var item in points) 
             {
-                if (pipe.enumEquipmentType != EnumEquipmentType.condensateRiser)
-                    continue;
-                if (_pipeConnectRelations.Any(c => c.pipeBlockUid.Equals(pipe.uid)))
-                    continue;
-                var block = new CreateBlockInfo(_floorId,blockName, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, pipe.blockCenterPoint, EnumEquipmentType.condensateRiser);
-                block.tag = "NL";
-                block.dymBlockAttr.Add("可见性1", corrDim);
-                createBlockInfos.Add(block);
+                double dis = 0.0;
+                var circle = _pipeDrainCircles.Where(c => c.Center.DistanceTo(item) < 1).FirstOrDefault();
+                if (circle != null)
+                    dis = circle.Radius+100;
+                dicDis.Add(item, dis);
             }
+            return dicDis;
         }
     }
     class PipeConnectRelation 

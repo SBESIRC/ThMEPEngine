@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -86,6 +85,43 @@ namespace ThMEPWSS.DrainageSystemAG
                 }
             }
             return dynBlockWidthLengths;
+        }
+        
+        public static double GetBlockCircleRadius(CreateBlockInfo targetCreateBlock, string dyName)
+        {
+            double radius = 0;
+            var itemCircles = GetDynBlockCircleArc(targetCreateBlock.blockName, targetCreateBlock.dymBlockAttr.Where(c => c.Key.Equals(dyName)).First().Value.ToString());
+            foreach (var circle in itemCircles)
+            {
+                if (circle is Circle circle1)
+                {
+                    radius = Math.Max(circle1.Radius, radius);
+                }
+                else if (circle is Arc arc)
+                {
+                    radius = Math.Max(arc.Radius, radius);
+                }
+            }
+            return radius;
+        }
+        public static List<Entity> GetDynBlockCircleArc(string blockName, string dnDynName)
+        {
+            var entitys = new List<Entity>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var objIds = ThDynamicBlockUtils.VisibleEntities(acdb.Database, blockName, dnDynName).Cast<ObjectId>().ToList();
+                if (null == objIds || objIds.Count < 1)
+                    return entitys;
+                foreach (ObjectId id in objIds)
+                {
+                    var ent = acdb.Element<Entity>(id);
+                    if (ent is Circle)
+                        entitys.Add(ent);
+                    else if (ent is Arc)
+                        entitys.Add(ent);
+                }
+            }
+            return entitys;
         }
         public static Point3d GetBlockGeometricCenter(BlockReference block) 
         {
@@ -242,7 +278,8 @@ namespace ThMEPWSS.DrainageSystemAG
                         var thisTypeBlocks = new List<BlockReference>();
                         foreach (var block in item.blockReferences)
                         {
-                            if (block.Position.Y < minY || block.Position.Y > maxY)
+                            var center = GetBlockGeometricCenter(block);
+                            if (center.Y < minY || center.Y > maxY)
                                 continue;
                             thisTypeBlocks.Add(block);
                         }
@@ -280,7 +317,8 @@ namespace ThMEPWSS.DrainageSystemAG
                         var thisTypeBlocks = new List<BlockReference>();
                         foreach (var block in item.blockReferences)
                         {
-                            if (block.Position.X < minX || block.Position.X > maxX)
+                            var center = GetBlockGeometricCenter(block);
+                            if (center.X < minX || center.X > maxX)
                                 continue;
                             thisTypeBlocks.Add(block);
                         }
