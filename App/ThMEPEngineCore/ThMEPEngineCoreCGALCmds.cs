@@ -435,14 +435,31 @@ namespace ThMEPEngineCore
                     using (var stringReader = new StringReader(results))
                     using (var jsonReader = new JsonTextReader(stringReader))
                     {
+                        var lines = new List<Line>();
                         var features = serializer.Deserialize<FeatureCollection>(jsonReader);
                         foreach (var f in features)
                         {
                             if (f.Geometry is LineString line)
                             {
-                                acadDatabase.ModelSpace.Add(line.ToDbPolyline());
+                                lines.Add(line.ToDbline());
                             }
                         }
+                        lines.ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = 1;
+                        });
+                        var merge = new ThListLineMerge(ThLineUnionService.UnionLineList(lines));
+                        while (merge.needtomerge(out Line refline, out Line moveline))
+                        {
+                            merge.domoveparallellines(refline, moveline);
+                        }
+                        merge.simplifierlines();
+                        merge.lines.ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = 2;
+                        });
                     }
                 }
             }
@@ -553,36 +570,6 @@ namespace ThMEPEngineCore
                         ThGeoOutput.Output(geos, path, fileInfo.Name+DateTime.Now.ToString("hh-mm-ss"));
                     }
                 }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THPolylineUnionTest", CommandFlags.Modal)]
-        public void THPolylineUnionTest()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                //认为输出结果是线段的集合
-                var objs = new List<Line>();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    var poly = acadDatabase.Element<Polyline>(obj);
-                    objs.Add(new Line(poly.StartPoint, poly.EndPoint));
-                }
-
-                var res = ThLineUnionService.UnionLineList(objs);
-                var merge = new ThListLineMerge(res);
-                while (merge.needtomerge(out Line refline, out Line moveline))
-                {
-                    merge.domoveparallellines(refline, moveline);
-                }
-                merge.simplifierlines();
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(
-                merge.lines.Cast<Entity>().Select(o => o.Clone() as Entity).ToList(),
-                AcHelper.Active.Database, 1);
             }
         }
     }
