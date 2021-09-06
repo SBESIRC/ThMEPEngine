@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
@@ -257,6 +258,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
+
+        
         /// <summary>
         /// 绘制向下的单分支
         /// </summary>
@@ -331,30 +334,38 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
             var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
             var p2Flag = false;
-            var text = ThTextSet.ThText(pt6, pipeNumber1.Trim());
-            if (!pipeNumber1.Trim().Equals(""))
+            if(pipeNumber1 is null)
             {
-                fireHydrantSysOut.TextLine.Add(textLine1);
-                fireHydrantSysOut.TextList.Add(text);
-                if (!pipeNumber12?.Equals("") == true)
+                ;
+            }
+            else
+            {
+                var text = ThTextSet.ThText(pt6, pipeNumber1.Trim());
+                if (!pipeNumber1.Trim().Equals(""))
                 {
-                    text = ThTextSet.ThText(new Point3d(pt6.X, pt6.Y - 400, 0), pipeNumber12.Trim());
-                    double textLength = text.GeometricExtents.MaxPoint.X - text.GeometricExtents.MinPoint.X;
-                    if (textLength > textWidth)
-                    {
-                        var textLine3 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textLength));
-                        fireHydrantSysOut.TextLine.Add(textLine3);
-                        p2Flag = true;
-
-                    }
-
+                    fireHydrantSysOut.TextLine.Add(textLine1);
                     fireHydrantSysOut.TextList.Add(text);
-                }
-                if (!p2Flag)
-                {
-                    fireHydrantSysOut.TextLine.Add(textLine2);
+                    if (!pipeNumber12?.Equals("") == true)
+                    {
+                        text = ThTextSet.ThText(new Point3d(pt6.X, pt6.Y - 400, 0), pipeNumber12.Trim());
+                        double textLength = text.GeometricExtents.MaxPoint.X - text.GeometricExtents.MinPoint.X;
+                        if (textLength > textWidth)
+                        {
+                            var textLine3 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textLength));
+                            fireHydrantSysOut.TextLine.Add(textLine3);
+                            p2Flag = true;
+
+                        }
+
+                        fireHydrantSysOut.TextList.Add(text);
+                    }
+                    if (!p2Flag)
+                    {
+                        fireHydrantSysOut.TextLine.Add(textLine2);
+                    }
                 }
             }
+            
             var strDN = "DN100";
             if (fireHydrantSysIn.TermDnDic.ContainsKey(tpt))
             {

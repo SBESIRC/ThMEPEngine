@@ -161,8 +161,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 catch
                 {
                     ;
-                }
-                
+                }   
             }
         }
 
@@ -178,6 +177,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var termPoint = new TermPoint(pt);
             termPoint.SetLines(fireHydrantSysIn, labelLine);
+            termPoint.SetType(fhSpatialIndex);
+            fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             if (termPoint.StartLine is null)
             {
                 if (!fireHydrantSysIn.PtDic.ContainsKey(pt))
@@ -241,7 +242,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             termPoint.SetType(fhSpatialIndex);
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
             {
-                return;
+                fireHydrantSysIn.TermPointDic.Remove(tpt);
+                fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             }
             else
             {

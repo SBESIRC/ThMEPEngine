@@ -6,7 +6,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     {
         public static bool IsCurrentFloor(this string floor)
         {
-            var f =  floor.Trim();
+            if(floor is null)
+            {
+                return true;
+            }
+            var f =  floor?.Trim();
             return f.StartsWith("X") || f.StartsWith("B") || f.StartsWith("D")||f.Count()==0;
         }
     }

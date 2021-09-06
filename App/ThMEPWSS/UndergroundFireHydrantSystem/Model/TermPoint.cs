@@ -151,7 +151,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//消火栓范围
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
-            if(PipeNumber.Contains("水泵接合器"))
+            if(PipeNumber?.Contains("水泵接合器") == true)
             {
                 Type = 4;
                 return;
