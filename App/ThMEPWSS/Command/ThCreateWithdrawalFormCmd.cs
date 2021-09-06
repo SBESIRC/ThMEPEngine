@@ -114,38 +114,28 @@ namespace ThMEPWSS.Command
                 ImportBlockFile();
                 //获取选择区域
                 var input = Common.Utils.SelectAreas();
-                //获取集水井
-                var water_well_entity_list = GetWaterWellEntityList(input);
-                //if (water_well_entity_list.Count == 0)
-                //{
-                //    //命令栏提示“未选中集水井”
-                //    //退出本次布置动作
-                //    return;
-                //}
+                var point = Active.Editor.GetPoint("\n选择要插入的基点位置");
+                if (point.Status != PromptStatus.OK)
+                {
+                    return;
+                }
                 //获取潜水泵
                 List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
 
                 var pumpDictionary = new Dictionary<string, List<ThWDeepWellPump>>();
-                foreach (ThWWaterWell waterWell in water_well_entity_list)
+
+                foreach (ThWDeepWellPump pump in pumpList)
                 {
-                    //计算集水井是否包含潜水泵
-                    foreach (ThWDeepWellPump pump in pumpList)
+                    string key = pump.GetName();
+                    if (pumpDictionary.ContainsKey(key))
                     {
-                        if (waterWell.ContainPump(pump))
-                        {
-                            string key = pump.GetName();
-                            if (pumpDictionary.ContainsKey(key))
-                            {
-                                pumpDictionary[key].Add(pump);
-                            }
-                            else
-                            {
-                                List<ThWDeepWellPump> tmpPump = new List<ThWDeepWellPump>();
-                                tmpPump.Add(pump);
-                                pumpDictionary.Add(key, tmpPump);
-                            }
-                            break;
-                        }
+                        pumpDictionary[key].Add(pump);
+                    }
+                    else
+                    {
+                        List<ThWDeepWellPump> tmpPump = new List<ThWDeepWellPump>();
+                        tmpPump.Add(pump);
+                        pumpDictionary.Add(key, tmpPump);
                     }
                 }
                 //整理数据，合并，统计等操作
@@ -200,11 +190,6 @@ namespace ThMEPWSS.Command
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (AcadDatabase acadDb = AcadDatabase.Active())
                 {
-                    var point = Active.Editor.GetPoint("\n选择要插入的基点位置");
-                    if (point.Status != PromptStatus.OK)
-                    {
-                        return;
-                    }
                     //插入表头
                     Point3d position = point.Value.TransformBy(Active.Editor.UCS2WCS());
                     acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), 0);
