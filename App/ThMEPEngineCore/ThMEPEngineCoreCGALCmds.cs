@@ -453,20 +453,33 @@ namespace ThMEPEngineCore
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
+                var psr = Active.Editor.GetSelection();
+                if (psr.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                var result2 = Active.Editor.GetDistance("\n请输入距离");
-                if (result2.Status != PromptStatus.OK)
+                var pko = new PromptKeywordOptions("\n请指定分割方式")
+                {
+                    AllowNone = true
+                };
+                pko.Keywords.Add("UCS", "UCS", "UCS(U)");
+                pko.Keywords.Add("RADIUS", "RADIUS", "RADIUS(R)");
+                pko.Keywords.Default = "RADIUS";
+                var pe = Active.Editor.GetKeywords(pko);
+                if (pe.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var pdr = Active.Editor.GetDistance("\n请输入参数");
+                if (pdr.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
                 var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
+                foreach (var obj in psr.Value.GetObjectIds())
                 {
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
@@ -474,14 +487,22 @@ namespace ThMEPEngineCore
                 var engine = new ThPolygonPartitionMgd();
                 var serializer = GeoJsonSerializer.Create();
                 objs = objs.BuildArea();
-                foreach(Entity obj in objs)
+                foreach (Entity obj in objs)
                 {
                     var geos = new List<ThGeometry>();
                     geos.Add(new ThGeometry()
                     {
                         Boundary = obj,
                     });
-                    var results = engine.Partition(ThGeoOutput.Output(geos), result2.Value);
+                    var results = "";
+                    if (pe.StringResult == "RADIUS")
+                    {
+                        results = engine.Partition(ThGeoOutput.Output(geos), pdr.Value);
+                    }
+                    else if (pe.StringResult == "UCS")
+                    {
+                        results = engine.PartitionUCS(ThGeoOutput.Output(geos), pdr.Value);
+                    }
                     using (var stringReader = new StringReader(results))
                     using (var jsonReader = new JsonTextReader(stringReader))
                     {
