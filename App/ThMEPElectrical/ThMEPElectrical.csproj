@@ -40,6 +40,16 @@
     <Compile Include="AFASRegion\Service\AFASRegionService.cs" />
     <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
+    <Compile Include="AlarmSensorLayout\AlarmSensorLayout.cs" />
+    <Compile Include="AlarmSensorLayout\Data\InputArea.cs" />
+    <Compile Include="AlarmSensorLayout\Data\EquipmentParameter.cs" />
+    <Compile Include="AlarmSensorLayout\Method\DetectCalculator.cs" />
+    <Compile Include="AlarmSensorLayout\Method\Methods.cs" />
+    <Compile Include="AlarmSensorLayout\Method\VisiblePolygon.cs" />
+    <Compile Include="AlarmSensorLayout\Sensorlayout\BeamSensorOpt.cs" />
+    <Compile Include="AlarmSensorLayout\Sensorlayout\GroupOpt.cs" />
+    <Compile Include="AlarmSensorLayout\Sensorlayout\UCSOpt.cs" />
+    <Compile Include="AlarmSensorLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />

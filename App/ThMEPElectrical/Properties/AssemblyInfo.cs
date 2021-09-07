@@ -41,6 +41,7 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThMEPElectricalApp))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAutoFireAlarmSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AFASRegion.ThAFASCmd))]
+[assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
