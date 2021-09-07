@@ -183,6 +183,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 }
             }
 
+            if (alreadyDimArea.Count > 0)
+            {
+                //add last one for end-dim 
+                var alreadyDimAreaLine = ThDrainageSDCommonService.GetLines(alreadyDimArea.Last());
+                allIsolateLine.AddRange(alreadyDimAreaLine);
+            }
+
+
+
             return output;
 
         }

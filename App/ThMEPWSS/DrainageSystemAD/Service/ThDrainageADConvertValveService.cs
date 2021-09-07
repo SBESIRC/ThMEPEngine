@@ -97,10 +97,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return toiDict;
         }
 
-        public static List<ThDrainageSDADBlkOutput> convertEndValve(Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode )
+        public static List<ThDrainageSDADBlkOutput> convertEndValve(Dictionary<ThDrainageSDTreeNode, List<Line>> endStackPipe, Dictionary<ThDrainageSDTreeNode, ThTerminalToilet> toiDict, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode)
         {
             var valveEndCon = new List<ThDrainageSDADBlkOutput>();
-         
+
             foreach (var end in endStackPipe)
             {
                 var endValveOutput = new ThDrainageSDADBlkOutput(end.Value.Last().EndPoint);
@@ -111,7 +111,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                 if (hasToi == true)
                 {
                     endValveOutput.name = ThDrainageADCommon.toi_end_name[toi.Type];
-                    var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode,out var visiInx);
+                    var visi = getEndVisivility(end.Key, endValveOutput.name, convertNode, out var visiInx);
                     endValveOutput.visibility.Add(ThDrainageADCommon.visiName_valve, visi);
                     endValveOutput.scale = ThDrainageADCommon.blk_scale_end;
                     valveEndCon.Add(endValveOutput);
@@ -121,7 +121,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return valveEndCon;
         }
 
-        private static string getEndVisivility(ThDrainageSDTreeNode node, string name, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode,out int visiInx)
+        private static string getEndVisivility(ThDrainageSDTreeNode node, string name, Dictionary<ThDrainageSDTreeNode, ThDrainageSDTreeNode> convertNode, out int visiInx)
         {
             var nodeP = node.Parent;
             var dir = (convertNode[nodeP].Node - convertNode[node].Node).GetNormal();
@@ -155,6 +155,65 @@ namespace ThMEPWSS.DrainageSystemDiagram
             visiInx = dirInx;
 
             return visibility;
+        }
+
+        public static List<Line> toAllIsolateLine(ThDrainageSDADBlkOutput endValve)
+        {
+            var visiIdx = ThDrainageADCommon.endValve_dir_name[endValve.name].IndexOf(endValve.visibility.ElementAt(0).Value);
+            var isolateLine = new List<Line>();
+            var yLeftRight = 200;
+            var xLeftRight = 400;
+            var yFrontBack = 210;
+            var xFrontBack = 210;
+
+            var pt0 = new Point3d();
+            var pt1 = new Point3d();
+            var pt2 = new Point3d();
+            var pt3 = new Point3d();
+
+            if (visiIdx == 0)
+            {
+                pt0 = new Point3d(endValve.position.X, endValve.position.Y + yLeftRight / 2, 0);
+                pt1 = new Point3d(endValve.position.X + xLeftRight, endValve.position.Y + yLeftRight / 2, 0);
+                pt2 = new Point3d(endValve.position.X + xLeftRight, endValve.position.Y - yLeftRight/2, 0);
+                pt3 = new Point3d(endValve.position.X, endValve.position.Y - yLeftRight/2, 0);
+                var pt4= new Point3d(endValve.position.X, endValve.position.Y, 0);
+                var pt5 = new Point3d(endValve.position.X + xLeftRight, endValve.position.Y, 0);
+                isolateLine.Add(new Line(pt4, pt5));
+            }
+            if (visiIdx == 2)
+            {
+                pt0 = new Point3d(endValve.position.X, endValve.position.Y + yLeftRight / 2, 0);
+                pt1 = new Point3d(endValve.position.X - xLeftRight, endValve.position.Y + yLeftRight / 2, 0);
+                pt2 = new Point3d(endValve.position.X - xLeftRight, endValve.position.Y - yLeftRight/2, 0);
+                pt3 = new Point3d(endValve.position.X, endValve.position.Y - yLeftRight/2, 0);
+                var pt4 = new Point3d(endValve.position.X, endValve.position.Y, 0);
+                var pt5 = new Point3d(endValve.position.X - xLeftRight, endValve.position.Y, 0);
+                isolateLine.Add(new Line(pt4, pt5));
+            }
+            if (visiIdx == 1)
+            {
+                pt0 = new Point3d(endValve.position.X, endValve.position.Y, 0);
+                pt1 = new Point3d(endValve.position.X, endValve.position.Y + yFrontBack, 0);
+                pt2 = new Point3d(endValve.position.X + xFrontBack, endValve.position.Y + yFrontBack, 0);
+                pt3 = new Point3d(endValve.position.X + xFrontBack, endValve.position.Y, 0);
+                isolateLine.Add(new Line(pt0, pt2));
+            }
+            if (visiIdx == 3)
+            {
+                pt0 = new Point3d(endValve.position.X, endValve.position.Y, 0);
+                pt1 = new Point3d(endValve.position.X - xFrontBack, endValve.position.Y, 0);
+                pt2 = new Point3d(endValve.position.X - xFrontBack, endValve.position.Y - yFrontBack, 0);
+                pt3 = new Point3d(endValve.position.X, endValve.position.Y - yFrontBack, 0);
+                isolateLine.Add(new Line(pt0, pt2));
+            }
+
+            isolateLine.Add(new Line(pt0, pt1));
+            isolateLine.Add(new Line(pt1, pt2));
+            isolateLine.Add(new Line(pt2, pt3));
+            isolateLine.Add(new Line(pt3, pt0));
+
+            return isolateLine;
         }
     }
 }

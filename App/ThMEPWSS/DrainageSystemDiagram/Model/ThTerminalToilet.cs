@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -13,6 +14,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public BlockReference blk { get; set; }
         public string Uuid { get; set; }
         public string Type { get; set; }
+        public Polyline Boundary { get; set; }
+        public Vector3d Dir { get; set; }
+
         public List<Point3d> SupplyCool { get; set; }
         public List<Point3d> SupplyCoolOnWall { get; set; }
         public List<Point3d> SupplyCoolOnBranch { get; set; }
@@ -21,8 +25,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public Point3d SupplyWarmSec { get; set; }
         public Point3d Sewage { get; set; }
         public Point3d SewageSec { get; set; }
-        public Polyline Boundary { get; set; }
-        public Vector3d Dir { get; set; }
+     
         public string GroupId { get; set; }
         public string AreaId { get; set; }
 
@@ -316,5 +319,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
-    }
+
+        public  void transformBy(Matrix3d matrix)
+        {
+            blk.TransformBy(matrix);
+            Boundary.TransformBy(matrix);
+            Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
+
+            SupplyCool = SupplyCool.Select(x => x.TransformBy(matrix)).ToList();
+            SupplyCoolOnWall = SupplyCoolOnWall.Select(x => x.TransformBy(matrix)).ToList();
+            SupplyCoolOnBranch = SupplyCoolOnBranch.Select(x => x.TransformBy(matrix)).ToList();
+
+            SupplyWarm = SupplyWarm.TransformBy(matrix);
+            SupplyWarmSec = SupplyWarmSec.TransformBy(matrix);
+            Sewage = Sewage.TransformBy(matrix);
+            SewageSec = SewageSec.TransformBy(matrix);
+
+        }
+}
 }

@@ -39,6 +39,13 @@ namespace ThMEPWSS
                     return;
                 }
 
+                //取x轴
+                var xPts = SelectLinePoints("\n请选x轴起点", "\n请选x轴终点");
+                if (xPts.Item1 == xPts.Item2)
+                {
+                    return;
+                }
+
                 //取绘制轴测图位置
                 var drawPlace = SelectPoint("\n请选择绘制轴测图位置");
                 if (drawPlace == Point3d.Origin)
@@ -57,6 +64,8 @@ namespace ThMEPWSS
                     ThDrainageSDMessageServie.WriteMessage(ThDrainageSDMessageCommon.startPtNoInFrame);
                     return;
                 }
+
+                var xVector = (xPts.Item2 - xPts.Item1).GetNormal();
 
                 //var frameCenter = new Point3d((regionPts.Item1.X + regionPts.Item2.X) / 2, (regionPts.Item1.Y + regionPts.Item2.Y) / 2, 0);
                 //var frameCenter = regionPts.Item1;
@@ -99,6 +108,17 @@ namespace ThMEPWSS
                     };
                     archiExtractor.ForEach(o => o.Extract(acadDb.Database, pts));
                 }
+
+                //旋转坐标系到横平竖直
+                var matrix = ThDrainageSDSpaceDirectionService.getMatrix(xVector, startPt);
+                pipes.ForEach(x => x.TransformBy(matrix.Inverse()));
+                valveList.ForEach(x => x.TransformBy(matrix.Inverse()));
+                toiletList.ForEach(x => x.transformBy(matrix.Inverse()));
+                stackList.ForEach(x => x.TransformBy(matrix.Inverse()));
+                startPt = startPt.TransformBy(matrix.Inverse());
+                var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToiletRoomExtractor)) as ThDrainageToiletRoomExtractor;
+                roomExtractor.Rooms.ForEach(x => x.Boundary.TransformBy(matrix.Inverse()));
+
 
                 //传参数
                 var alpha = THDrainageADUISetting.Instance.alpha;

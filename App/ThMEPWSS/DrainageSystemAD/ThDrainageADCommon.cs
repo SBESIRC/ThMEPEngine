@@ -13,7 +13,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static int length_pipe_end = 270;
         public static int length_stack_end_break = 70;
 
-        public static int diameterDim_move_x = 50;
+        public static int diameterDim_move_x = 25;
         public static int diameterDim_move_y = 30;
         public static int diameterDim_blk_x = 440;
         public static int diameterDim_blk_y = 180;

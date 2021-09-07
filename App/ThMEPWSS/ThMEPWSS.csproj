@@ -68,6 +68,7 @@
     <Compile Include="DrainageSystemAD\ThDrainageADCommon.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDMessageServie.cs" />
     <Compile Include="Engine\ThRoomBuilderEngineWSS.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDSpaceDirectionService.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />

@@ -223,56 +223,6 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return dist;
         }
 
-        //public static Polyline getDimOptimalArea(Dictionary<Polyline, Line> dimAreas, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
-        //{
-        //    var alreadyDimAreaLine = new List<Line>();
-
-        //    if (alreadyDimArea.Count > 0)
-        //    {
-        //        alreadyDimAreaLine = ThDrainageSDCommonService.GetLines(alreadyDimArea.Last());
-        //    }
-
-        //    allIsolateLine.AddRange(alreadyDimAreaLine);
-
-        //    var allIsoObjs = allIsolateLine.ToCollection();
-        //    var allIsoSpatialIndex = new ThCADCoreNTSSpatialIndex(allIsoObjs);
-
-        //    var dimAreaDict = new Dictionary<Polyline, double>();
-        //    foreach (var area in dimAreas)
-        //    {
-        //        var result = allIsoSpatialIndex.SelectCrossingPolygon(area.Key);
-        //        double distIso = 0;
-
-        //        if (result != null && result.Count > 0)
-        //        {
-        //            var resultList = result.Cast<Line>().ToList();
-        //            var isoInArea = new List<Curve>();
-
-        //            resultList.ForEach(re =>
-        //            {
-        //                foreach (var entity in area.Key.Trim(re))
-        //                {
-        //                    if (entity is Curve pl)
-        //                    {
-        //                        isoInArea.Add(pl);
-        //                    }
-        //                }
-        //            });
-
-        //            distIso = isoInArea.Sum(x => x.GetLength());
-        //        }
-        //        dimAreaDict.Add(area.Key, distIso);
-
-        //    }
-
-        //    dimAreaDict = dimAreaDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-        //    var optimalAreaList = dimAreaDict.Where(x => Math.Abs(x.Value - dimAreaDict.First().Value) <= ThDrainageSDCommon.DimWidth).ToDictionary(x => x.Key, x => x.Value);
-
-        //    var optimal = optimalAreaList.OrderBy(x => x.Value).ThenBy(x => x.Key.Area).First();
-
-        //    return optimal.Key;
-        //}
-
         public static Polyline getDimOptimalArea(List<Polyline> dimAreaList, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
         {
             var alreadyDimAreaLine = new List<Line>();
