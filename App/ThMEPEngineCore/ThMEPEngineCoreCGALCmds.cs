@@ -476,7 +476,7 @@ namespace ThMEPEngineCore
                 {
                     if (pe.StringResult == "RADIUS")
                     {
-                        ThMEPPolygonService.Partition(obj, pdr.Value).OfType<Polyline>().ForEach(o =>
+                        ThMEPPolygonService.Partition(obj, pdr.Value).Keys.OfType<Polyline>().ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
                             o.ColorIndex = 1;
@@ -485,7 +485,7 @@ namespace ThMEPEngineCore
                     }
                     else if (pe.StringResult == "UCS")
                     {
-                        ThMEPPolygonService.PartitionUCS(obj, pdr.Value).OfType<Polyline>().ForEach(o =>
+                        ThMEPPolygonService.PartitionUCS(obj, pdr.Value).Keys.OfType<Polyline>().ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
                             o.ColorIndex = 1;

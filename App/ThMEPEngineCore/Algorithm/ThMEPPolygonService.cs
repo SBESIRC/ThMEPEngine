@@ -12,6 +12,7 @@ using ThMEPEngineCore.IO;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Features;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -72,18 +73,40 @@ namespace ThMEPEngineCore.Algorithm
         /// <param name="polygon"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static DBObjectCollection Partition(Entity polygon, double radius)
+        public static Dictionary<Entity, bool> Partition(Entity polygon, double radius)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var engine = new ThPolygonPartitionMgd();
+                var serializer = GeoJsonSerializer.Create();
                 var geos = new List<ThGeometry>();
                 geos.Add(new ThGeometry()
                 {
                     Boundary = polygon,
                 });
                 var results = engine.Partition(ThGeoOutput.Output(geos), radius);
-                return Partition(results);
+                using (var stringReader = new StringReader(results))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var dictionary = new Dictionary<Entity, bool>();
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    features.Where(f => f.Geometry is Polygon).ForEach(f =>
+                    {
+                        var pline = f.Geometry.ToDbCollection()[0] as AcPolygon;
+                        var entity = MakeValid(pline);
+                        if (entity.Area > 0)
+                        {
+                            entity = Normalize(entity);
+                            entity = Simplify(entity);
+                            entity = Filter(entity);
+                        }
+                        if (entity.Area > 0)
+                        {
+                            dictionary.Add(entity, (bool)f.Attributes["is_centerline_covered"]);
+                        }
+                    });
+                    return dictionary;
+                }
             }
         }
 
@@ -93,69 +116,59 @@ namespace ThMEPEngineCore.Algorithm
         /// <param name="polygon"></param>
         /// <param name="radian"></param>
         /// <returns></returns>
-        public static DBObjectCollection PartitionUCS(Entity polygon, double radian)
+        public static Dictionary<Entity, Vector3d> PartitionUCS(Entity polygon, double radian)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var engine = new ThPolygonPartitionMgd();
+                var serializer = GeoJsonSerializer.Create();
                 var geos = new List<ThGeometry>();
                 geos.Add(new ThGeometry()
                 {
                     Boundary = polygon,
                 });
                 var results = engine.PartitionUCS(ThGeoOutput.Output(geos), radian);
-                return Partition(results);
-            }
-        }
-
-        private static DBObjectCollection Partition(string results)
-        {
-            using (var stringReader = new StringReader(results))
-            using (var jsonReader = new JsonTextReader(stringReader))
-            {
-                var serializer = GeoJsonSerializer.Create();
-                var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-
-
-                var objs = new DBObjectCollection();
-                foreach (var f in features)
+                using (var stringReader = new StringReader(results))
+                using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    if (f.Geometry is Polygon e)
+                    var dictionary = new Dictionary<Entity, Vector3d>();
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    features.Where(f => f.Geometry is Polygon).ForEach(f =>
                     {
-                        e.ToDbPolylines().ForEach(o => objs.Add(o));
-                    }
+                        var pline = f.Geometry.ToDbCollection()[0] as AcPolygon;
+                        var entity = MakeValid(pline);
+                        if (entity.Area > 0)
+                        {
+                            entity = Normalize(entity);
+                            entity = Simplify(entity);
+                            entity = Filter(entity);
+                        }
+                        if (entity.Area > 0)
+                        {
+                            var direction = f.Attributes["ucs_direction"] as List<object>;
+                            var vector = new Vector3d(Convert.ToDouble(direction[0]), Convert.ToDouble(direction[1]), 0.0);
+                            dictionary.Add(entity, vector);
+                        }
+                    });
+                    return dictionary;
                 }
-                var entities = MakeValid(objs);
-                if (entities.Count > 0)
-                {
-                    entities = Normalize(entities);
-                    entities = Simplify(entities);
-                    entities = Filter(entities);
-                }
-                return entities;
             }
         }
 
-        private static DBObjectCollection MakeValid(DBObjectCollection entities)
+        private static AcPolygon MakeValid(AcPolygon line)
         {
-            var objs = new DBObjectCollection();
-            entities.Cast<AcPolygon>().ForEach(o =>
+            var result = line.MakeValid().Cast<AcPolygon>();
+            if (result.Any())
             {
-                var results = o.MakeValid().Cast<AcPolygon>();
-                if (results.Any())
-                {
-                    objs.Add(results.OrderByDescending(p => p.Area).First());
-                }
-            });
-            return objs;
+                return result.OrderByDescending(p => p.Area).First();
+            }
+            return new AcPolygon();
         }
 
-        private static DBObjectCollection Normalize(DBObjectCollection entities)
+        private static AcPolygon Normalize(AcPolygon pline)
         {
-            var objs = new DBObjectCollection();
-            foreach (AcPolygon wall in entities)
-            {
-                wall.Buffer(-OFFSET_DISTANCE)
+            var objs = new List<AcPolygon>();
+            pline.Buffer(-OFFSET_DISTANCE)
                     .Cast<AcPolygon>()
                     .ForEach(o =>
                     {
@@ -163,39 +176,21 @@ namespace ThMEPEngineCore.Algorithm
                         .Cast<AcPolygon>()
                         .ForEach(e => objs.Add(e));
                     });
+            return objs.OrderBy(o => o.Area).First();
+        }
+
+        public static AcPolygon Simplify(AcPolygon pline)
+        {
+            return pline.DPSimplify(DISTANCE_TOLERANCE);
+        }
+
+        public static AcPolygon Filter(AcPolygon pline)
+        {
+            if(pline.Area > AREA_TOLERANCE)
+            {
+                return pline;
             }
-            return objs;
-        }
-
-        public static DBObjectCollection Simplify(DBObjectCollection entities)
-        {
-            var objs = new DBObjectCollection();
-            entities.Cast<AcPolygon>().ForEach(o =>
-            {
-                // 由于投影误差，DB3切出来的墙线中有非常短的线段（长度<1mm)
-                // 这里使用简化算法，剔除掉这些非常短的线段
-                objs.Add(o.DPSimplify(DISTANCE_TOLERANCE));
-            });
-            return objs;
-        }
-
-        public static DBObjectCollection Filter(DBObjectCollection entities)
-        {
-            return entities.Cast<Entity>().Where(o =>
-            {
-                if (o is AcPolygon polygon)
-                {
-                    return polygon.Area > AREA_TOLERANCE;
-                }
-                else if (o is MPolygon mPolygon)
-                {
-                    return mPolygon.Area > AREA_TOLERANCE;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }).ToCollection();
+            return new AcPolygon();
         }
     }
 }
