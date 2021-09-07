@@ -34,6 +34,11 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         private double bufferDist = 500;
         private double radius;
 
+        private double minX;
+        private double minY;
+        private double maxX;
+        private double maxY;
+
         public UCSOpt(Polyline boundary, double angle, Polygon room, List<Polygon> layouts,
             double min, double max, double radius, double adjust, double buffer)
         {
@@ -100,10 +105,10 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         private void InitLines()
         {
             var minRect = area.Envelope as Polygon;
-            double minX = minRect.Coordinates[0].X;
-            double minY = minRect.Coordinates[0].Y;
-            double maxX = minRect.Coordinates[2].X;
-            double maxY = minRect.Coordinates[2].Y;
+            minX = minRect.Coordinates[0].X;
+            minY = minRect.Coordinates[0].Y;
+            maxX = minRect.Coordinates[2].X;
+            maxY = minRect.Coordinates[2].Y;
             var xNum = Math.Ceiling((maxX - minX) / adjustGap);
             var yNum = Math.Ceiling((maxY - minY) / adjustGap);
             var dx = (maxX - minX) / xNum;
@@ -124,7 +129,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             if (hLines.Count == 1 && vLines.Count == 1)
             {
                 var currentPoint = hLines[0].Intersection(vLines[0]);
-                if (!Methods.PolygonContainPoint(area, currentPoint))
+                if (!FireAlarmUtils.PolygonContainPoint(area, currentPoint))
                 {
                     var center = Centroid.GetCentroid(layouts[0]);
                     hLines[0].P0.Y = hLines[0].P1.Y = center.Y;
@@ -144,7 +149,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 {
                     var currentPoint = hLines[i].Intersection(vLines[j]);
                     //var current = new Coordinate(currentPoint.X, currentPoint.Y);
-                    validPoints[i].Add(Methods.PolygonContainPoint(area, currentPoint));
+                    validPoints[i].Add(FireAlarmUtils.PolygonContainPoint(area, currentPoint));
                     Positions[i].Add(currentPoint);
                 }
             }
@@ -156,7 +161,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     continue;
                 var p0 = new Coordinate(Positions[0][i].X, Positions[0][i].Y + radius);
                 var line = new LineSegment(p0, Positions[0][i]);
-                var intersect = Methods.LineInteresectWithPolygon(line, area);
+                var intersect = FireAlarmUtils.LineInteresectWithPolygon(line, area);
                 if (intersect.Count == 0)
                     continue;
                 else
@@ -168,7 +173,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     for (int j = 0; j < vLines.Count; j++)
                     {
                         Positions[0].Add(hLines[0].Intersection(vLines[j]));
-                        validPoints[0].Add(Methods.PolygonContainPoint(area, Positions[0][j]));
+                        validPoints[0].Add(FireAlarmUtils.PolygonContainPoint(area, Positions[0][j]));
                     }
                     break;
                 }
@@ -180,7 +185,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     continue;
                 var p0 = new Coordinate(Positions[i][0].X - radius, Positions[i][0].Y);
                 var line = new LineSegment(p0, Positions[i][0]);
-                var intersect = Methods.LineInteresectWithPolygon(line, area);
+                var intersect = FireAlarmUtils.LineInteresectWithPolygon(line, area);
                 if (intersect.Count == 0)
                     continue;
                 else
@@ -190,7 +195,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     for (int j = 0; j < hLines.Count; j++)
                     {
                         Positions[j].Insert(0, vLines[0].Intersection(hLines[j]));
-                        validPoints[j].Insert(0, Methods.PolygonContainPoint(area, Positions[j][0]));
+                        validPoints[j].Insert(0, FireAlarmUtils.PolygonContainPoint(area, Positions[j][0]));
                     }
                     break;
                 }
@@ -207,9 +212,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     if (j < vLines.Count - 1)
                     {
                         if (!validPoints[i][j + 1])
-                            intersect = Methods.LineInteresectWithPolygon(new LineSegment(Positions[i][j], Positions[i][j + 1]), area);
+                            intersect = FireAlarmUtils.LineInteresectWithPolygon(new LineSegment(Positions[i][j], Positions[i][j + 1]), area);
                     }
-                    else intersect = Methods.LineInteresectWithPolygon(new LineSegment(Positions[i][j], new Coordinate(Positions[i][j].X + radius, Positions[i][j].Y)), area);
+                    else intersect = FireAlarmUtils.LineInteresectWithPolygon(new LineSegment(Positions[i][j], new Coordinate(Positions[i][j].X + radius, Positions[i][j].Y)), area);
                     if (intersect.Count > 1)
                     {
                         new_X = (intersect[0].X + intersect[1].X) / 2;
@@ -222,9 +227,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     if (i < hLines.Count - 1)
                     {
                         if (!validPoints[i + 1][j])
-                            intersect = Methods.LineInteresectWithPolygon(new LineSegment(Positions[i][j], Positions[i + 1][j]), area);
+                            intersect = FireAlarmUtils.LineInteresectWithPolygon(new LineSegment(Positions[i][j], Positions[i + 1][j]), area);
                     }
-                    else intersect = Methods.LineInteresectWithPolygon(new LineSegment(Positions[i][j], new Coordinate(Positions[i][j].X, Positions[i][j].Y - radius)), area);
+                    else intersect = FireAlarmUtils.LineInteresectWithPolygon(new LineSegment(Positions[i][j], new Coordinate(Positions[i][j].X, Positions[i][j].Y - radius)), area);
                     if (intersect.Count > 1)
                     {
                         new_Y = (intersect[0].Y + intersect[1].Y) / 2;
@@ -251,6 +256,22 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                         CutHLine(h_index, v_index, GetTopPoint(h_index, v_index).Y - adjustGap);
                     else if (!HasTop(h_index, v_index) && (hgap > adjustGap / 2))
                         CutHLine(h_index, v_index, GetTopPoint(h_index, v_index).Y - adjustGap / 2);
+                    //如果最后一条横线移动后距离底部太远，加一条横线
+                    if (h_index == hLines.Count - 1 && Positions[h_index][v_index].Y - minY > minGap)
+                    {
+                        hLines.Add(new LineSegment(new Coordinate(minX, Positions[h_index][v_index].Y - minGap), new Coordinate(maxX, Positions[h_index][v_index].Y - minGap)));
+                        Positions.Add(new List<Coordinate>());
+                        validPoints.Add(new List<bool>());
+                        for (int i = 0; i < vLines.Count; i++)
+                        {
+                            var tmpPoint = new Coordinate(Positions[h_index][i].X, Positions[h_index][v_index].Y - minGap);
+                            Positions[hLines.Count - 1].Add(tmpPoint);
+                            if (i < v_index)
+                                validPoints[hLines.Count - 1].Add(false);
+                            else
+                                validPoints[hLines.Count - 1].Add(FireAlarmUtils.PolygonContainPoint(area, tmpPoint));
+                        }
+                    }
                     //当前点不在房间内
                     if (!validPoints[h_index][v_index])
                         continue;
@@ -260,11 +281,25 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                         CutVLine(h_index, v_index, GetLeftPoint(h_index, v_index).X + adjustGap);
                     else if (!HasLeft(h_index, v_index) && (vgap > adjustGap / 2))
                         CutVLine(h_index, v_index, GetLeftPoint(h_index, v_index).X + adjustGap / 2);
+                    //如果最后一条竖线移动后距离右边太远，加一条竖线
+                    if (v_index == vLines.Count - 1 && maxX - Positions[h_index][v_index].X > minGap)
+                    {
+                        vLines.Add(new LineSegment(new Coordinate(Positions[h_index][v_index].X + minGap, minY), new Coordinate(Positions[h_index][v_index].X + minGap, maxY)));
+                        for (int i = 0; i < hLines.Count; i++)
+                        {
+                            var tmpPoint = new Coordinate(Positions[h_index][v_index].X + minGap, Positions[i][v_index].Y);
+                            Positions[i].Add(tmpPoint);
+                            if (i < h_index)
+                                validPoints[i].Add(false);
+                            else
+                                validPoints[i].Add(FireAlarmUtils.PolygonContainPoint(area, tmpPoint));
+                        }
+                    }
                     //当前点不在房间内
                     if (!validPoints[h_index][v_index])
                         continue;
                     //当前点在可布置区域内
-                    if (Methods.MultiPolygonContainPoint(layouts, Positions[h_index][v_index]))
+                    if (FireAlarmUtils.MultiPolygonContainPoint(layouts, Positions[h_index][v_index]))
                         continue;
                     //计算周围的可布置区域
                     var nearlayouts = GetNearLayouts(h_index, v_index);
@@ -347,7 +382,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             //作一条长为radius,右端点为Positions[i][j]的横线
             var p0 = new Coordinate(Positions[i][j].X - radius, Positions[i][j].Y);
             var line = new LineSegment(p0, Positions[i][j]);
-            var coods = Methods.LineInteresectWithPolygon(line, area);
+            var coods = FireAlarmUtils.LineInteresectWithPolygon(line, area);
             coods.Remove(Positions[i][j]);
             return coods.OrderBy(o => o.Distance(Positions[i][j])).First();
         }
@@ -359,7 +394,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             //作一条长为radius,左端点为Positions[i][j]的横线
             var p0 = new Coordinate(Positions[i][j].X + radius, Positions[i][j].Y);
             var line = new LineSegment(Positions[i][j], p0);
-            var coods = Methods.LineInteresectWithPolygon(line, area);
+            var coods = FireAlarmUtils.LineInteresectWithPolygon(line, area);
             coods.Remove(Positions[i][j]);
             return coods.OrderBy(o => o.Distance(Positions[i][j])).First();
         }
@@ -371,7 +406,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             //作一条长为radius,下端点为Positions[i][j]的横线
             var p0 = new Coordinate(Positions[i][j].X, Positions[i][j].Y + radius);
             var line = new LineSegment(Positions[i][j], p0);
-            var coods = Methods.LineInteresectWithPolygon(line, area);
+            var coods = FireAlarmUtils.LineInteresectWithPolygon(line, area);
             coods.Remove(Positions[i][j]);
             return coods.OrderBy(o => o.Distance(Positions[i][j])).First();
         }
@@ -383,7 +418,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             //作一条长为radius,上端点为Positions[i][j]的横线
             var p0 = new Coordinate(Positions[i][j].X, Positions[i][j].Y - radius);
             var line = new LineSegment(p0, Positions[i][j]);
-            var coods = Methods.LineInteresectWithPolygon(line, area);
+            var coods = FireAlarmUtils.LineInteresectWithPolygon(line, area);
             coods.Remove(Positions[i][j]);
             return coods.OrderBy(o => o.Distance(Positions[i][j])).First();
         }
@@ -414,6 +449,20 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 polygon_layouts.Add(layout.ToNTSPolygon());
             return polygon_layouts;
         }
+        private Coordinate GetTargetPoint(int i,int j)
+        {
+            bool hasLeft = HasLeft(i, j);
+            bool hasTop = HasTop(i, j);
+            var left = GetLeftPoint(i, j);
+            var top = GetTopPoint(i, j);
+            if (!hasLeft && !hasTop)
+                return new Coordinate(left.X + adjustGap / 2, top.Y - adjustGap / 2);
+            if (hasLeft && !hasTop)
+                return new Coordinate(left.X + adjustGap, left.Y);
+            if (!hasLeft && hasTop)
+                return new Coordinate(top.X, top.Y - adjustGap);
+            return new Coordinate(top.X, left.Y);
+        }
         //更新点所在竖线
         private bool UpdateVLine(int h_index, int v_index, double new_X)
         {
@@ -422,7 +471,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             for (int i = 0; i < hLines.Count; i++)
                 if (Positions[i][v_index].X == old_X)
                 {
-                    var newPointInRoom = Methods.PolygonContainPoint(area, new Coordinate(new_X, Positions[i][v_index].Y));
+                    var newPointInRoom = FireAlarmUtils.PolygonContainPoint(area, new Coordinate(new_X, Positions[i][v_index].Y));
                     //if (validPoints[i][v_index] == true && !newPointInRoom)
                     //    return count;
 
@@ -441,7 +490,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             for (int i = 0; i < vLines.Count; i++)
                 if (Positions[h_index][i].Y == old_Y)
                 {
-                    var newPointInRoom = Methods.PolygonContainPoint(area, new Coordinate(Positions[h_index][i].X, new_Y));
+                    var newPointInRoom = FireAlarmUtils.PolygonContainPoint(area, new Coordinate(Positions[h_index][i].X, new_Y));
                     //if (validPoints[h_index][i] == true && !newPointInRoom)
                     //    return count;
                     Positions[h_index][i].Y = new_Y;
@@ -460,7 +509,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             {
                 if (Positions[h_index][i].Y == old_Y)
                 {
-                    var newPointInRoom = Methods.PolygonContainPoint(area, new Coordinate(Positions[h_index][i].X, new_Y));
+                    var newPointInRoom = FireAlarmUtils.PolygonContainPoint(area, new Coordinate(Positions[h_index][i].X, new_Y));
                     //if (validPoints[h_index][i] == true && !newPointInRoom)
                     //    return;
                     Positions[h_index][i].Y = new_Y;
@@ -474,7 +523,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             var old_X = Positions[h_index][v_index].X;
             for (int i = h_index; i < hLines.Count; i++)
             {
-                var newPointInRoom = Methods.PolygonContainPoint(area, new Coordinate(new_X, Positions[i][v_index].Y));
+                var newPointInRoom = FireAlarmUtils.PolygonContainPoint(area, new Coordinate(new_X, Positions[i][v_index].Y));
                 //if (validPoints[i][v_index] == true && !newPointInRoom)
                 //    return;
                 Positions[i][v_index].X = new_X;
@@ -485,9 +534,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         private Coordinate FindNearestPointWithBuffer(int i, int j, List<Polygon> polygons, double buffer)
         {
             //var point = Positions[i][j];
-            double x = GetTopPoint(i, j).X;
-            double y = GetLeftPoint(i, j).Y;
-            var point = new Coordinate(x, y);
+            var point = GetTargetPoint(i, j);
             Coordinate target = new Coordinate(point.X + radius, point.Y + radius);
             Coordinate targetWithoutDist = new Coordinate(point.X + radius, point.Y + radius);
             bool hasTarget = false;
@@ -500,9 +547,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 if (bufferPoly.IsEmpty)
                     temp = Centroid.GetCentroid(polygon);
                 else if (bufferPoly is Polygon polygon1)
-                    temp = Methods.GetClosePointOnPolygon(polygon1, point);
+                    temp = FireAlarmUtils.GetClosePointOnPolygon(polygon1, point);
                 else if (bufferPoly is MultiPolygon multiPolygon)
-                    temp = Methods.GetClosePointOnMultiPolygon(multiPolygon, point);
+                    temp = FireAlarmUtils.GetClosePointOnMultiPolygon(multiPolygon, point);
 
                 if ((temp.X - GetLeftPoint(i, j).X < maxGap) && (GetTopPoint(i, j).Y - temp.Y < maxGap)
                     && temp.Distance(point) < target.Distance(point))
@@ -522,16 +569,14 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         private Coordinate FindNearestPointOnHLineWithBuffer(int i, int j, List<Polygon> polygons, double buffer)
         {
             //var point = Positions[i][j];
-            double x = GetTopPoint(i, j).X;
-            double y = GetLeftPoint(i, j).Y;
-            var point = new Coordinate(x, y);
+            var point = GetTargetPoint(i, j);
             List<Coordinate> possible_points = new List<Coordinate>();
             //点所在横线
             var left = new Coordinate(GetLeftPoint(i, j).X, Positions[i][j].Y);
             var right = new Coordinate(GetRightPoint(i, j).Y, Positions[i][j].Y);
             var hline = new LineSegment(left, right);
             //与可布置区域的交集
-            var intersectLine = Methods.LineIntersectWithMutiPolygon(hline, polygons);
+            var intersectLine = FireAlarmUtils.LineIntersectWithMutiPolygon(hline, polygons);
             //没有交集，返回失败
             if (intersectLine.Count == 0)
                 return null;
@@ -557,16 +602,14 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         private Coordinate FindNearestPointOnVLineWithBuffer(int i, int j, List<Polygon> polygons, double buffer)
         {
             //var point = Positions[i][j];
-            double x = GetTopPoint(i, j).X;
-            double y = GetLeftPoint(i, j).Y;
-            var point = new Coordinate(x, y);
+            var point = GetTargetPoint(i, j);
             List<Coordinate> possible_points = new List<Coordinate>();
             //点所在竖线
             var top = new Coordinate(Positions[i][j].X, GetTopPoint(i, j).Y);
             var bottom = new Coordinate(Positions[i][j].X, GetBottomPoint(i, j).Y);
             var vline = new LineSegment(bottom, top);
             //与可布置区域的交集
-            var intersectLine = Methods.LineIntersectWithMutiPolygon(vline, polygons);
+            var intersectLine = FireAlarmUtils.LineIntersectWithMutiPolygon(vline, polygons);
             //没有交集，返回失败
             if (intersectLine.Count == 0)
                 return null;
@@ -616,7 +659,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     //略过不在区域内的点和不共线的点
                     if (validPoints[h][j] == false || Positions[h][j].X != point.X)
                         continue;
-                    if (!Methods.MultiPolygonContainPoint(layouts, Positions[h][j]))
+                    if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, Positions[h][j]))
                         checkFalsePoints.Add(new KeyValuePair<int, int>(h, j));
                 }
                 if (checkFalsePoints.Count == 0)//没有点移出可布置区域
@@ -655,7 +698,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     if (validPoints[i][v] == false || Positions[i][v].Y != point.Y)
                         continue;
                     var adjustedPoint = new Coordinate(Positions[i][v].X, target_Y);
-                    if (!Methods.MultiPolygonContainPoint(layouts, adjustedPoint))
+                    if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, adjustedPoint))
                         checkFalsePoints.Add(adjustedPoint);
                 }
                 if (checkFalsePoints.Count == 0)//没有点移出可布置区域
@@ -693,7 +736,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 {
                     if (validPoints[i][v] == false || Positions[i][v].Y != point.Y)
                         continue;
-                    if (!Methods.MultiPolygonContainPoint(layouts, Positions[i][v]))
+                    if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, Positions[i][v]))
                         checkFalsePoints.Add(new KeyValuePair<int, int>(i, v));
                 }
                 if (checkFalsePoints.Count == 0)//没有点移出可布置区域
@@ -734,7 +777,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     if (validPoints[h][j] == false || Positions[h][j].Y != point.Y)
                         continue;
                     var adjustedPoint = new Coordinate(target_X, Positions[h][j].Y);
-                    if (!Methods.MultiPolygonContainPoint(layouts, adjustedPoint))
+                    if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, adjustedPoint))
                         checkFalsePoints.Add(adjustedPoint);
                 }
                 if (checkFalsePoints.Count == 0)//没有点移出可布置区域

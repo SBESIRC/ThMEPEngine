@@ -9,7 +9,7 @@ using NetTopologySuite.Algorithm.Distance;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Method
 {
-    public static class Methods
+    public static class FireAlarmUtils
     {
         //点在区域内
         public static bool PolygonRealContainPoint(Polygon polygon, Coordinate point)

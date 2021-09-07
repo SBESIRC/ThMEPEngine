@@ -21,16 +21,15 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         public List<UCSOpt> UCSs { get; set; } = new List<UCSOpt>();//UCS列表
         public List<Coordinate> Positions { get; set; } = new List<Coordinate>();//交点位置
         public List<Polygon> Detect { get; set; } = new List<Polygon>();//每个点的探测范围
-        public List<Coordinate> AddList { get; set; }  = new List<Coordinate>();//补盲区新增点位
-        public ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex;
-        public double bufferDist =500;
-        public double bufferArea = 500000;
-        public NetTopologySuite.Geometries.Geometry blind;
+        
+        private ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex;
+        private double bufferDist =500;
+        private double bufferArea = 500000;
+        private NetTopologySuite.Geometries.Geometry blind;
 
         public BeamSensorOpt(InputArea inputArea, EquipmentParameter parameter)
             : base(inputArea, parameter)
         {
-            IsLayoutByBeams = true;
             DBObjectCollection dBObjectCollection = new DBObjectCollection();
             foreach (var layout in layouts)
                 dBObjectCollection.Add(layout.ToDbMPolygon());
@@ -39,24 +38,33 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 UCSs.Add(new UCSOpt(record.Key, record.Value, room, layouts, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
         }
 
-        public override List<Point3d> CalculatePlace()
+        public override void Calculate()
         {
             if (layouts.Count==0)
-                return null;
-
+                return;
+            //每个UCS分别布点
             foreach(var UCS in UCSs)
             {
                 UCS.CalculatePlace();
                 foreach(var p in UCS.PlacePoints)
                     Positions.Add(p);
             }
+            //计算每个点的覆盖区域
             CalDetectArea();
+            //计算盲区
             CalBlindArea();
+            //加点
             AddPoints();
+            //删点
             DeletePoints();
+            //调整点位
             AdjustPoints();
+            //重新计算盲区
             CalBlindArea();
-            return PlacePoints;
+            //转化点位
+            ConvertPoints();
+            //转化盲区
+            ConvertBlind();
         }
         //计算探测范围
         public void CalDetectArea()
@@ -75,6 +83,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         {
             while (blind.Area > 100)
             {
+                var old_blind = blind.Area;
                 //先处理掉非polygon的元素
                 if (blind is GeometryCollection geom)
                 {
@@ -100,46 +109,6 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 }
                 else i++;
             }
-            //for (int h_index = 0; h_index < hLines.Count; h_index++)
-            //{
-            //    for (int v_index = 0; v_index < vLines.Count; v_index++)
-            //    {
-            //        if(IsMovable(h_index, v_index))
-            //        {
-            //            validPoints[h_index][v_index] = false;
-            //            for (int row = v_index; row >= 0; row -= 2) 
-            //            {
-            //                for (int column = h_index - 2; column >= 0; column -= 2)
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index + 2; column < hLines.Count; column += 2) 
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index - 1; column >= 0; column -= 2)
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index + 1; column < hLines.Count; column += 2) 
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //            }
-            //            for (int row = v_index + 2; row < vLines.Count; row += 2) 
-            //            {
-            //                for (int column = h_index - 2; column >= 0; column -= 2)
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index + 2; column < hLines.Count; column += 2) 
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index - 1; column >= 0; column -= 2)
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //                for (int column = h_index + 1; column < hLines.Count; column += 2) 
-            //                    if (IsMovable(column, row))
-            //                        validPoints[column][row] = false;
-            //            }
-            //        }
-            //    }
-            //}
         }
         //移点
         public void AdjustPoints()
@@ -161,7 +130,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 var smaller = layout.Buffer(-400);
                 if (smaller.IsEmpty)
                 {
-                    var adjustPoint = Methods.AdjustedCenterPoint(layout);
+                    var adjustPoint = FireAlarmUtils.AdjustedCenterPoint(layout);
                     if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
                     {
                         Positions[i] = adjustPoint;
@@ -178,22 +147,22 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 if (smaller.Contains(new Point(Positions[i]))) continue;
                 if (smaller is Polygon polygon)
                 {
-                    var adjustPoint = Methods.GetClosePointOnPolygon(polygon, Positions[i]);
-                    if (VisiblePolygon.ComputeWithRadius(adjustPoint, room, Radius).Contains(resp))
+                    var adjustPoint = FireAlarmUtils.GetClosePointOnPolygon(polygon, Positions[i]);
+                    if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
                         Positions[i] = adjustPoint;
                     continue;
                 }
                 else if (smaller is MultiPolygon multiPolygon)
                 {
-                    var adjustPoint = Methods.GetClosePointOnMultiPolygon(multiPolygon, Positions[i]);
-                    if (VisiblePolygon.ComputeWithRadius(adjustPoint, room, Radius).Contains(resp))
+                    var adjustPoint = FireAlarmUtils.GetClosePointOnMultiPolygon(multiPolygon, Positions[i]);
+                    if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
                         Positions[i] = adjustPoint;
                     continue;
                 }
             }
         }
         //寻找附近的点
-        public List<int> FindNearPoints(int index)
+        private List<int> FindNearPoints(int index)
         {
             var nears = new List<int>();
             for(int i=0;i<Positions.Count;i++)
@@ -204,8 +173,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             return nears;
         }
         //处理盲区
-        public void RemoveBlind(NetTopologySuite.Geometries.Geometry blind)
+        private void RemoveBlind(NetTopologySuite.Geometries.Geometry blind)
         {
+            var oldArea = blind.Area;
             Polygon targetToMove = null;
             if (blind is Polygon polygon)
                 targetToMove = polygon;
@@ -218,9 +188,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 return;
             }
             //需要去除的区域的中心点
-            var center = Methods.AdjustedCenterPoint(targetToMove);
+            var center = FireAlarmUtils.AdjustedCenterPoint(targetToMove);
             //能探测到中心点的布置区域
-            var vis = VisiblePolygon.ComputeWithRadius(center, room, 5800);
+            var vis = DetectCalculator.CalculateDetect(center, room, Radius, IsDetectVisible);
             //附近的可布置区域
             var minRect = vis.Envelope as Polygon;
             double minX = minRect.Coordinates[0].X;
@@ -240,15 +210,15 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 return;
             }
             //优先找可布置区域的中心点
-            var target = new Coordinate(center.X + 5800, center.Y + 5800);
+            var target = new Coordinate(center.X + Radius, center.Y + Radius);
             foreach (var poly in polygon_layouts)
             {
                 Coordinate temp = Centroid.GetCentroid(poly);
-                if (Methods.PolygonContainPoint(vis, temp) && temp.Distance(center) < target.Distance(center))
+                if (FireAlarmUtils.PolygonContainPoint(vis, temp) && temp.Distance(center) < target.Distance(center))
                     target = temp;
             }
             //找不到就找交集的中心点
-            if (target.Distance(center) > 5800)
+            if (target.Distance(center) > Radius)
             {
                 foreach (var poly in polygon_layouts)
                 {
@@ -256,20 +226,22 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     Coordinate inter_center = null;
                     if (intersect.Area == 0) continue;
                     if (intersect is Polygon polygon1)
-                        inter_center = Methods.AdjustedCenterPoint(polygon1);
+                        inter_center = FireAlarmUtils.AdjustedCenterPoint(polygon1);
                     else if (intersect is MultiPolygon multi)
-                        inter_center = Methods.AdjustedCenterPoint(multi.First() as Polygon);
+                        inter_center = FireAlarmUtils.AdjustedCenterPoint(multi.First() as Polygon);
                     if (inter_center.Distance(center) < target.Distance(center))
                         target = inter_center;
                 }
             }
             Positions.Add(target);
-            var det = VisiblePolygon.ComputeWithRadius(target, room, Radius);
+            var det = DetectCalculator.CalculateDetect(target, room, Radius, IsDetectVisible);
             Detect.Add(det);
             this.blind = this.blind.Difference(det);
+            //if (this.blind.Area == oldArea)
+            //    this.blind = this.blind.Difference(targetToMove);
         }
         //是否可以删除
-        public bool IsMovable(int index)
+        private bool IsMovable(int index)
         {
             var resp = Detect[index].Copy();
             var points = FindNearPoints(index);
@@ -284,6 +256,29 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             }
 
             return resp.Area < 100;
+        }
+        //转化布置点集
+        private void ConvertPoints()
+        {
+            foreach(var point in Positions)
+                m_placePoints.Add(new Point3d(point.X, point.Y, 0));
+        }
+        //转化盲区
+        private void ConvertBlind()
+        {
+            if (blind is Polygon polygon1)
+            {
+                m_blinds.Add(polygon1.Shell.ToDbPolyline());
+                return;
+            }
+                
+            if (blind is GeometryCollection geom)
+            {
+                var geometryCollection = new List<Polygon>();
+                foreach (var geo in geom)
+                    if (geo is Polygon polygon)
+                        m_blinds.Add(polygon.Shell.ToDbPolyline());
+            }
         }
     }
 }

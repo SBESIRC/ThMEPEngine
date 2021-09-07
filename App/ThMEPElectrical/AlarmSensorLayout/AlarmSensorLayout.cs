@@ -16,12 +16,13 @@ namespace ThMEPElectrical.AlarmSensorLayout
     public abstract class AlarmSensorLayout
     {
         protected List<Point3d> m_placePoints; //布置点集
+        protected List<Polyline> m_blinds; //盲区
 
         //输入区域参数
         public Polygon room { get; private set; }//房间区域
         protected List<Polygon> layouts { get; private set; } = new List<Polygon>();//可布置区域
         public List<Polyline> detects { get; private set; }//探测区域
-        protected Dictionary<Polyline, double> UCS { get; private set; } = new Dictionary<Polyline, double>();//UCS
+        protected Dictionary<Polyline, double> UCS { get; private set; } = new Dictionary<Polyline, double>();//UCS，弧度
         //输入设施参数
         protected double Radius;
         protected double MinGap;
@@ -29,17 +30,19 @@ namespace ThMEPElectrical.AlarmSensorLayout
         protected double AdjustGap;
         protected bool IsDetectVisible;
 
-        protected bool IsLayoutByBeams = true;//是否按梁布置
-
         public List<Point3d> PlacePoints
         {
             get { return m_placePoints; }
         }
-
-        public abstract List<Point3d> CalculatePlace();
+        public List<Polyline> Blinds
+        {
+            get { return m_blinds; }
+        }
+        public abstract void Calculate();
         public AlarmSensorLayout(InputArea inputArea, EquipmentParameter inputParameter)
         {
             m_placePoints = new List<Point3d>();
+            m_blinds = new List<Polyline>();
             //生成房间区域
             room = inputArea.room.ToNTSPolygon();
             foreach(var hole in inputArea.holes)
@@ -82,7 +85,7 @@ namespace ThMEPElectrical.AlarmSensorLayout
             MinGap = inputParameter.MinGap;
             MaxGap = inputParameter.MaxGap;
             AdjustGap = inputParameter.AdjustGap;
-            IsDetectVisible = inputParameter.equipmentType == EquipmentType.LIGHTING;
+            IsDetectVisible = inputParameter.blindType == BlindType.VisibleArea;
         }
     }
 }

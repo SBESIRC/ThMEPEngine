@@ -1,4 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +10,27 @@ using ThCADCore.NTS;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
 {
-    public class GroupOpt
+    /// <summary>
+    /// 计算UCS及其方向
+    /// input: 可布置区域轮廓,房间框线
+    /// output: 区域的ucs及其方向  
+    /// </summary>
+    public class SpaceDivider
     {
-        public List<Layout> layouts;
-        public Dictionary<Polyline, double> UCSs = new Dictionary<Polyline, double>();
-        //public Dictionary<double, DBObjectCollection> groups;
-        public GroupOpt(List<Polyline> polylines,Polyline frame)
+        private List<Layout> layouts; 
+        public Dictionary<Polyline, Vector3d> UCSs = new Dictionary<Polyline, Vector3d>();//UCS轮廓及其方向 
+        
+        public SpaceDivider()
+        {
+
+        }
+        
+        /// <summary>
+        /// 计算UCS
+        /// </summary>
+        /// <param name="polylines">可布置区域轮廓</param>
+        /// <param name="frame">房间框线</param>
+        public void Compute(Polyline frame, List<Polyline> polylines)
         {
             layouts = new List<Layout>();
             for(int i=0;i<polylines.Count;i++)
@@ -33,7 +50,6 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     group.insert(layout);
                     layout.GroupID=TmpGroups.FindIndex(o=>o==group);
                 }
-                    
             }
             //个数少的组合并到大组中
             var rest = TmpGroups.Where(o => 1.0 * o.layouts.Count / layouts.Count <= 0.25).ToList();
@@ -45,7 +61,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                     var nearLayouts = layouts.Where(o => o.ent.Intersects(buffer) && 1.0 * TmpGroups[o.GroupID].layouts.Count / layouts.Count > 0.25).ToList();
                     Dictionary<int, int> map = new Dictionary<int, int>();
                     int maxCount = -1;
-                    int NewGroupID = 0;
+                    int NewGroupID = layouts[index].GroupID;
                     foreach (var layout in nearLayouts)
                     {
                         if (map.ContainsKey(layout.GroupID) == false)
@@ -85,7 +101,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                         layout.GroupID = NewGroupID;
                 }
             }
-            //计算分组后的UCS
+            //计算分组后的UCS,record为（角度，可布置区域的组）
             var groups = new Dictionary<double, DBObjectCollection>();
             foreach(var layout in layouts)
             {
@@ -94,6 +110,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 else 
                     groups[TmpGroups[layout.GroupID].angle].Add(layout.ent.Buffer(1000).Cast<Polyline>().First());
             }
+            //转化为需要的UCS字典
             foreach(var group in groups)
             {
                 var UCSs = group.Value.UnionPolygons().Cast<Polyline>().ToList();
@@ -103,7 +120,13 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                         continue;
                     var regions = UCS.GeometryIntersection(frame).Cast<Polyline>().ToList();
                     foreach(var region in regions)
-                        this.UCSs.Add(region, group.Key);
+                    {
+
+                        var dbline = new Line(region.GetCentroidPoint(), region.GetCentroidPoint() + new Vector3d(3000, 0, 0));
+                        dbline.Rotate(dbline.StartPoint, group.Key / 180 * Math.PI);
+                        this.UCSs.Add(region, dbline.EndPoint-dbline.StartPoint);
+                    }
+
                 }
             }
         }
