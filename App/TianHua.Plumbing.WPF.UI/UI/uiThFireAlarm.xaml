@@ -1,0 +1,153 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiThFireAlarm"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
+             xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    Title="火灾报警" SizeToContent="Manual" Height="300" 
+                    Width="320" MaxWidth="320" MaxHeight="300"
+             mc:Ignorable="d">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:CheckObjectOpsBooleanConverter x:Key="checkObjectOpsConverter"/>
+            <converters:MaxProtectDisOpsBooleanConverter x:Key="maxProtectDisOpsConverter"/>
+            <converters:ProtectStrengthOpsBooleanConverter x:Key="protectStrengthOpsConverter"/>
+            <converters:WaterColumnLengthOpsBooleanConverter x:Key="waterColumnLengthOpsConverter"/>
+            <converters:ReductionFactorBooleanConverter x:Key="reductionFactorOpsConverter"/>
+            <converters:WaterColumnAngleBooleanConverter x:Key="waterColumnAngleOpsConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="3">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="15*"></RowDefinition>
+            <RowDefinition Height="45*"></RowDefinition>
+            <RowDefinition Height="30*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"></RowDefinition>
+                    <RowDefinition Height="50*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="1"  Margin="0,5" Orientation="Horizontal">
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="H:"/>
+                        <ComboBox Width="85" SelectedIndex="0" Height="25">
+                            <ComboBoxItem Content="h &lt;=12"/>
+                            <ComboBoxItem Content="6 &lt; h &lt;=12"></ComboBoxItem>
+                            <ComboBoxItem Content="h &lt;=6"></ComboBoxItem>
+                            <ComboBoxItem Content="h &lt;=8"></ComboBoxItem>
+                            <ComboBoxItem Content="h >=8"/>
+                        </ComboBox>
+                        <Label>m</Label>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label>D:</Label>
+                        <TextBox Width="20" VerticalAlignment="Center"></TextBox>
+                        <Label>mm</Label>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Label>θ</Label>
+                        <ComboBox SelectedIndex="0">
+                            <ComboBoxItem Content="θ &lt;=15°"/>
+                            <ComboBoxItem Content="15° &lt; θ &lt;=30°"></ComboBoxItem>
+                            <ComboBoxItem Content="θ > 30°"></ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" >
+            <Grid Margin="0,5,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                    <RowDefinition Height="15*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="6"  Content="手动报警按钮+声光报警器" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsThinkIsolatedColumn,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                </CheckBox>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" >
+                    <CheckBox Content="消防广播" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+                    <RadioButton GroupName="FireAlarmRBGroup" Margin="68,0,0,0" IsChecked ="True">优先吸顶</RadioButton>
+                    <RadioButton GroupName="FireAlarmRBGroup" >优先壁装</RadioButton>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                    <CheckBox  Content="楼层 / 回路显示盘" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+                    <RadioButton GroupName="LoopRBGroup" Margin="20,0,0,0" IsChecked ="True">FL</RadioButton>
+                    <RadioButton GroupName="LoopRBGroup" Margin="10,0,0,0" >D</RadioButton>
+                </StackPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal">
+                    <CheckBox Content="可燃气体探测器         保护半径(mm)" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+                    <TextBox Text="8000" Height="15" VerticalAlignment="Top"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="4" Orientation="Horizontal">
+                    <CheckBox  Content="防火监控模块" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+                </StackPanel>
+                <StackPanel Grid.Row="5"  Orientation="Horizontal" >
+                    <CheckBox Content="消防专用电话" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+                </StackPanel>
+                <StackPanel Grid.Row="0"  Orientation="Horizontal" >
+                    <CheckBox Content="烟感 / 温感" IsThreeState="False"
+                          IsChecked="{Binding Parameter.IsShowCheckResult,
+                        Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ></CheckBox>
+
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <StackPanel Orientation="Vertical" Grid.Row="2" HorizontalAlignment="Left" >
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton GroupName="RBGroup" Margin="5,0,0,0" IsChecked ="True" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="28">考虑梁</RadioButton>
+                    <RadioButton GroupName="RBGroup" Margin="5,0,0,0" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="28">不考虑梁</RadioButton>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label>比例:</Label>
+                    <ComboBox Width="80" Height="20" SelectedIndex="0">
+                        <ComboBoxItem>1:100</ComboBoxItem>
+                        <ComboBoxItem>1:150</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <Button  Margin="0,0,0,0"  x:Name="btnRegionCheck" HorizontalAlignment="Left"
+                        Width="65" Height="20" Content="布置" Command="{Binding RegionCheckCmd}"></Button>
+            </StackPanel>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Height="27">总线回路点位上限：</Label>
+                    <TextBox Width="20" VerticalAlignment="Center" Text="32"></TextBox>
+                </StackPanel>
+                <Label Height="25"></Label>
+                <Button  Margin="0,0,0,0" HorizontalAlignment="Right" x:Name="btnRegionCheck2" 
+                        Width="65" Height="20" Content="连线" Command="{Binding RegionCheckCmd}"></Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>
