@@ -47,7 +47,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         public List<BlockReference> drainwellbr = new();//用全局变量记录相同排水系统单元的排水井
         public List<List<Line>> lineIdspump = new();//用全局变量记录相同排水系统单元的潜水泵编号下划线
         public List<Line> lineIdpump = new();//用全局变量记录相同排水系统单元的潜水泵编号下划线
-
         const double spacing = 3500;//排水系统间距&参考值
         const double textHeight = 350;//文字高度
         public int TmpParLayer = -1;//系统图绘制递归中上一立管的层数
@@ -61,6 +60,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         public double real_pumpSpacing = 7500;//实际的排水系统图中并列潜水泵间距
         public bool IsSpecialParPump = false;//记录上一个潜水泵是否为特殊用途
         const double widthDisTofloorLineStartPt = 50000;//第一个排水系统单元到楼层线起点的距离
+        double diameter_horizontalpipe = 0;
+        List<double> total_diameter_horizontalpipe = new List<double>();
+        List<Point3d> ptloc_diameter_horizontalpipe = new List<Point3d>();
 
 
         /// <summary>
@@ -165,99 +167,104 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 int effectiveUnitsCount = 0;//有效的排水系统单元数
                 for (int i = 0; i < PipeLineSystemUnits.Count; i++)
                 {
-                    int indexCurPoint = FindIndexStartVerticalPipe(PipeLineSystemUnits[i]);//排水口立管在排水单元中的索引值
-                    int unitLayerCount = PipeLineSystemUnits[i].CrossLayerConnectedArrs.Count;
-                    indexCurPoint = indexCurPoint > -1 ? indexCurPoint : 0;
-                    if (PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes.Count > 1 && indexCurPoint == 0 && PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[0].Circle.Layer == "AdditonPipe")
+                    int mxx = FindIndexStartVerticalPipe(PipeLineSystemUnits[i]);
+                    if (true)
                     {
-                        indexCurPoint = 1;
-                    }
-                    someLayerPipeIndexes = new Dictionary<int, List<int>>();
-                    effectiveUnitsCount += 1;
-                    entities = new();
-                    lineIdpump = new();
-                    drainwellbr = new();
-                    ptlocidentifer = new();
-                    identifer = new();
-                    iDict = new();
-                    uniqueEntitys = new();
-                    comparedEntity = new();
-                    blocks = new();
-                    List<int> ids = new();
-                    List<Point3d> parPoints = new();
-                    List<int> parLayers = new();
-                    List<int> parIndexes = new();
-                    IsSpecialParPump = false;
-                    Incycles = new();
-                    ptloctotalQ = new Point3d(double.PositiveInfinity, 0, 0);
-                    for (int j = 0; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
-                    {
-                        someLayerPipeIndexes.Add(j, new List<int>());
-                    }
-                    if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
-                    {
-                        for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
+                        int indexCurPoint = FindIndexStartVerticalPipe(PipeLineSystemUnits[i]);//排水口立管在排水单元中的索引值
+                        int unitLayerCount = PipeLineSystemUnits[i].CrossLayerConnectedArrs.Count;
+                        indexCurPoint = indexCurPoint > -1 ? indexCurPoint : 0;
+                        if (PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes.Count > 1 && indexCurPoint == 0 && PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[0].Circle.Layer == "AdditonPipe")
                         {
-                            foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
+                            indexCurPoint = 1;
+                        }
+                        someLayerPipeIndexes = new Dictionary<int, List<int>>();
+                        effectiveUnitsCount += 1;
+                        entities = new();
+                        lineIdpump = new();
+                        drainwellbr = new();
+                        ptlocidentifer = new();
+                        identifer = new();
+                        iDict = new();
+                        uniqueEntitys = new();
+                        comparedEntity = new();
+                        blocks = new();
+                        List<int> ids = new();
+                        List<Point3d> parPoints = new();
+                        List<int> parLayers = new();
+                        List<int> parIndexes = new();
+                        IsSpecialParPump = false;
+                        Incycles = new();
+                        ptloctotalQ = new Point3d(double.PositiveInfinity, 0, 0);
+                        for (int j = 0; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
+                        {
+                            someLayerPipeIndexes.Add(j, new List<int>());
+                        }
+                        if (PipeLineSystemUnits[i].PipeLineUnits.Count > 1)
+                        {
+                            for (int j = 1; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
                             {
-                                Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
-                                line.Layer = "AI-辅助";
-                                line.Linetype = "DASH";
-                                line.ColorIndex = 123;//低饱和度蓝
-                                line.AddToCurrentSpace();
+                                foreach (var pipe in PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes)
+                                {
+                                    Line line = new Line(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Circle.Center, pipe.Circle.Center);
+                                    line.Layer = "AI-辅助";
+                                    line.Linetype = "DASH";
+                                    line.ColorIndex = 123;//低饱和度蓝
+                                    line.AddToCurrentSpace();
+                                }
                             }
                         }
-                    }
-                    PipeLineSystemUnits[i].verticalPipeId.ForEach(o => ids.Add(o));
-                    ids.Remove(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Id);
-                    parLayers.Add(-1);
-                    parIndexes.Add(-1);
-                    leftCoord = ptloc.X;
-                    DrawDrainWell(PipeLineSystemUnits[i], ptloc, indexCurPoint, heightDisTofloorLine, floorLines);
-                    drainwellbrs.Add(new List<BlockReference>());
-                    drainwellbr.ForEach(o => drainwellbrs[drainwellbrs.Count - 1].Add(o));
-                    drainwellbr.ForEach(o => o.Visible = false); ;
-                    drainwellbr.Clear();
-                    int curLayer = 0;
-                    int curIndex = indexCurPoint;
-                    totalQ = 0;
-                    for (int j = 0; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
-                    {
-                        if (j < PipeLineSystemUnits[i].PipeLineUnits.Count - 1)
+                        PipeLineSystemUnits[i].verticalPipeId.ForEach(o => ids.Add(o));
+                        ids.Remove(PipeLineSystemUnits[i].PipeLineUnits[0].VerticalPipes[indexCurPoint].Id);
+                        parLayers.Add(-1);
+                        parIndexes.Add(-1);
+                        leftCoord = ptloc.X;
+                        DrawDrainWell(PipeLineSystemUnits[i], ptloc, indexCurPoint, heightDisTofloorLine, floorLines);
+                        drainwellbrs.Add(new List<BlockReference>());
+                        drainwellbr.ForEach(o => drainwellbrs[drainwellbrs.Count - 1].Add(o));
+                        drainwellbr.ForEach(o => o.Visible = false); ;
+                        drainwellbr.Clear();
+                        int curLayer = 0;
+                        int curIndex = indexCurPoint;
+                        totalQ = 0;
+                        for (int j = 0; j < PipeLineSystemUnits[i].PipeLineUnits.Count; j++)
                         {
-                            for (int k = 0; k < PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes.Count; k++)
+                            if (j < PipeLineSystemUnits[i].PipeLineUnits.Count - 1)
                             {
-                                for (int p = 0; p < PipeLineSystemUnits[i].PipeLineUnits[j + 1].VerticalPipes.Count; p++)
+                                for (int k = 0; k < PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes.Count; k++)
                                 {
-                                    if (PipeLineSystemUnits[i].CrossLayerConnectedArrs[j + 1][k, p] == 1)
+                                    for (int p = 0; p < PipeLineSystemUnits[i].PipeLineUnits[j + 1].VerticalPipes.Count; p++)
                                     {
-                                        PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes[k].HasChildPipe = true;
-                                        break;
+                                        if (PipeLineSystemUnits[i].CrossLayerConnectedArrs[j + 1][k, p] == 1)
+                                        {
+                                            PipeLineSystemUnits[i].PipeLineUnits[j].VerticalPipes[k].HasChildPipe = true;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
+                        RecursivelyPlot(PipeLineSystemUnits[i], floorLines, ids, ref curLayer, curIndex, ptloc, parLayers, parIndexes, parPoints);
+                        lineIdspump.Add(lineIdpump);
+                        ptlocidentifers.Add(ptlocidentifer);
+                        identifiers.Add(identifer);
+                        identiferDict.Add(iDict);
+                        if (ptloctotalQ.X != double.PositiveInfinity)
+                        {
+                            ptloctotalQ = ptloctotalQ.TransformBy(Matrix3d.Displacement(new Vector3d(0, 100, 0)));
+                            var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
+                            brId1.SetDynBlockValue("可见性", "DN" + CalculateMergePipeDiameter(totalQ).ToString());
+                            var br1 = adb.Element<BlockReference>(brId1);
+                            DefinePropertiesOfCADObjects(br1, "W-NOTE");
+                            blocks.Add(br1);
+                        }
+                        entities.ForEach(o => comparedEntity.Add(o));
+                        blocks.ForEach(o => comparedEntity.Add(o));
+                        comparedEntitys.Add(comparedEntity);
+                        allEntities.Add(entities);
+                        allBlocks.Add(new List<BlockReference>());
+                        blocks.ForEach(o => allBlocks[allBlocks.Count - 1].Add(o));
+                        blocks.Clear();
                     }
-                    RecursivelyPlot(PipeLineSystemUnits[i], floorLines, ids, ref curLayer, curIndex, ptloc, parLayers, parIndexes, parPoints);
-                    lineIdspump.Add(lineIdpump);
-                    ptlocidentifers.Add(ptlocidentifer);
-                    identifiers.Add(identifer);
-                    identiferDict.Add(iDict);
-                    if (ptloctotalQ.X != double.PositiveInfinity)
-                    {
-                        var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloctotalQ, new Scale3d(1), 0);
-                        brId1.SetDynBlockValue("可见性", "DN" + CalculateMergePipeDiameter(totalQ).ToString());
-                        var br1 = adb.Element<BlockReference>(brId1);
-                        DefinePropertiesOfCADObjects(br1, "W-NOTE");
-                        blocks.Add(br1);
-                    }
-                    entities.ForEach(o => comparedEntity.Add(o));
-                    blocks.ForEach(o => comparedEntity.Add(o));
-                    comparedEntitys.Add(comparedEntity);
-                    allEntities.Add(entities);
-                    allBlocks.Add(new List<BlockReference>());
-                    blocks.ForEach(o => allBlocks[allBlocks.Count - 1].Add(o));
-                    blocks.Clear();
                 }
                 return;
             }
@@ -442,13 +449,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         k.Linetype = "DASH";
                         k.ColorIndex = 13;//低饱和度梅红
                         k.AddToCurrentSpace();
-
                     }
                     if (i < allEntities.Count - 1)
                     {
                         totalspacine += maxExts[i].MaxPoint.X - maxExts[i + 1].MinPoint.X + spacing;
                     }
-                    
+
                 }
                 for (int i = 0; i < floorLines.Count; i++)
                 {
@@ -490,6 +496,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
 
                     }
                 }
+                //
+                List<string> strs1 = new List<string>();
+                List<string> strs2 = new List<string>();
+                allBlocks[0].ForEach(o => strs1.Add(o.Name));
+                allBlocks[1].ForEach(o => strs2.Add(o.Name));
+                int aa = 1;
+                strs1.Clear();
+                strs2.Clear();
+                allBlocks[0].ForEach(o => strs1.Add(o.BlockName));
+                allBlocks[1].ForEach(o => strs2.Add(o.BlockName));
+                aa = 1;
+                //
                 MessageBox.Show("共有排水单元" + allEntities.Count.ToString() + "组");
             }
         }
@@ -638,7 +656,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var br9 = adb.Element<BlockReference>(brId1);
                     DefinePropertiesOfCADObjects(br9, "W-NOTE");
                     drainwellbr.Add(br9);
-                    Point3d ptlocbr2 = new Point3d(pt2.X - bushHeigthHalf_b, pt2.Y, 0);
+                    Point3d ptlocbr2 = new Point3d(pt2.X - bushHeigthHalf_b * 2, pt2.Y, 0);
                     var brId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", ptlocbr2, new Scale3d(0), 0);
                     tmpBlocksLayerBUSH.Add(adb.Element<BlockReference>(brId2));
                 }
@@ -1098,7 +1116,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             return true;
         }
-       
+
         /// <summary>
         /// 删除多余的线段
         /// </summary>
@@ -1191,7 +1209,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     int diameter = CalculateMergePipeDiameter(pipe.totalQ);
                     diameter = diameter > 50 ? diameter : 50;
-                    Point3d ptlocelv = new Line(point, curPoint).GetMidpoint();
+                    Point3d ptlocelv = new Line(point, curPoint).GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(-100, 0, 0)));
                     var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv, new Scale3d(1), Math.PI / 2);
                     brId1.SetDynBlockValue("可见性", "DN" + diameter.ToString());
                     var br1 = adb.Element<BlockReference>(brId1);
@@ -1203,22 +1221,31 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     bool cond_IsPumpPipe = pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].AppendedSubmergedPump != null ? true : false;
                     if (cond_IsPumpPipe)
                     {
+                        double dis_offset_elv = 1000;
                         var pump = pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].AppendedSubmergedPump;
+                        Point3d ptlocelv_pump = curPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-100, -dis_offset_elv, 0)));
+                        int diameter = CalculatePipeDiameter(pump.paraQ * CalculateUsedPump(pump.Allocation));
+                        diameter_horizontalpipe += pump.paraQ * CalculateUsedPump(pump.Allocation);
                         Point3d ptLocPumpRec = floorLines[curLayer + 1].GetClosestPointTo(curPoint, false);
                         double frameHeigth = pump.PumpCount >= 3 ? 2150 : 1650;
                         double frameWidth = 1500 + Math.Max(0, pump.PumpCount - 2) * 800;//水泵框宽度
                         ptLocPumpRec = ptLocPumpRec.TransformBy(Matrix3d.Displacement(new Vector3d(0, -frameHeigth / 2, 0)));
                         Polyline frameRec = ptLocPumpRec.CreateRectangle(frameWidth, frameHeigth);
                         //初步绘制潜水泵立管
-                        InitiallyPlotPumpVerticalPipe(pipeLineSystemUnit, pump, ptLocPumpRec, frameHeigth, frameWidth, frameRec, curPoint, parLayers, parIndexes);
+                        InitiallyPlotPumpVerticalPipe(pipeLineSystemUnit, pump, ptLocPumpRec, frameHeigth, frameWidth, frameRec, ref curPoint, parLayers, parIndexes);
                         //绘制潜水泵立管细节
                         PlotPumpVerticalPipe(ref pipeLineSystemUnit, pump, floorLines, ptLocPumpRec, frameHeigth, frameWidth, frameRec, curLayer, curIndex, curPoint, parLayers, parIndexes);
                         //完善具有特殊用途的潜水泵立管
-                        if (pump.Location == "消防电梯" || pump.Location == "电缆沟")
+                        if (pump.Location.Contains("梯") || pump.Location.Contains("电缆沟"))
                         {
                             CompletePumpVerticalPipeForSpecialUse(pump, ptLocPumpRec, frameRec, frameHeigth, frameWidth);
                         }
-                        IsSpecialParPump = pump.Location == "消防电梯" || pump.Location == "电缆沟" ? true : false;
+                        IsSpecialParPump = pump.Location.Contains("梯") || pump.Location.Contains("电缆沟") ? true : false;
+                        var brId_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv_pump, new Scale3d(1), Math.PI / 2);
+                        brId_elv.SetDynBlockValue("可见性", "DN" + diameter.ToString());
+                        var br_elv = adb.Element<BlockReference>(brId_elv);
+                        DefinePropertiesOfCADObjects(br_elv, "W-NOTE");
+                        blocks.Add(br_elv);
                     }
                     //如果不是潜水泵立管
                     {
@@ -1229,7 +1256,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         PreProcessForSameLayerPipeCondition(indexes, points, layers, pipeLineSystemUnit, ids, curLayer, curIndex, curPoint);
                         if (layers.Count > 0)
                         {
-
                             //继续绘图并递归到下一个立管
                             ProcessForSameLayerAndRecursionToNextPipe(indexes, points, layers, pipeLineSystemUnit, floorLines, ids, ref curLayer, ref curIndex, curPoint, parLayers, parIndexes, parPoints);
                         }
@@ -1399,8 +1425,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="parIndexes"></param>
         /// <param name="parPoints"></param>
         /// <returns></returns>
-        public SubmergedPumpClass InitiallyPlotPumpVerticalPipe(PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, Point3d curPoint, List<int> parLayers, List<int> parIndexes)
+        public SubmergedPumpClass InitiallyPlotPumpVerticalPipe(PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, ref Point3d curPoint, List<int> parLayers, List<int> parIndexes)
         {
+            double dim_offset_annot = 1200;
+            double dim_length = 0;
+            if (pump.Depth > 0)
+            {
+                dim_length = pump.Depth * 1000;
+            }
             if (crossLayerGuideLine.Length != 1)
             {
                 real_pumpSpacing = IsSpecialParPump ? pumpUnitSpecialSpacing : pumpUnitSpacing;
@@ -1435,23 +1467,23 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
                 else if (pump.Allocation == "一用" || pump.Allocation == "一用一备")
                 {
-                    para1 = Math.Round(pump.paraH - 0.10, 2).ToString("0.00") + "m";
-                    para2 = Math.Round(pump.paraH - 0.20, 2).ToString("0.00") + "m";
+                    para1 = Math.Round(0.10, 2).ToString("0.00") + "m";
+                    para2 = Math.Round(0.20, 2).ToString("0.00") + "m";
                     paraQ_real = pump.paraQ;
                 }
                 else if (pump.Allocation == "两用" || pump.Allocation == "两用一备")
                 {
-                    para1 = Math.Round(pump.paraH - 0.10, 2).ToString("0.00") + "m";
-                    para4 = Math.Round(pump.paraH - 0.20, 2).ToString("0.00") + "m";
-                    para5 = Math.Round(pump.paraH - 0.30, 2).ToString("0.00") + "m";
+                    para1 = Math.Round(0.10, 2).ToString("0.00") + "m";
+                    para4 = Math.Round(0.20, 2).ToString("0.00") + "m";
+                    para5 = Math.Round(0.30, 2).ToString("0.00") + "m";
                     paraQ_real = pump.paraQ * 2;
                 }
                 else
                 {
-                    para1 = Math.Round(pump.paraH - 0.10, 2).ToString("0.00") + "m";
-                    para3 = Math.Round(pump.paraH - 0.20, 2).ToString("0.00") + "m";
-                    para4 = Math.Round(pump.paraH - 0.30, 2).ToString("0.00") + "m";
-                    para5 = Math.Round(pump.paraH - 0.40, 2).ToString("0.00") + "m";
+                    para1 = Math.Round(0.10, 2).ToString("0.00") + "m";
+                    para3 = Math.Round(0.20, 2).ToString("0.00") + "m";
+                    para4 = Math.Round(0.30, 2).ToString("0.00") + "m";
+                    para5 = Math.Round(0.40, 2).ToString("0.00") + "m";
                     paraQ_real = pump.paraQ * 3;
                 }
             }
@@ -1459,15 +1491,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 if (paraQ_real <= 20)
                 {
-                    para6 = Math.Round(pump.paraH - pump.Depth + 0.30, 2).ToString("0.00") + "m";
+                    para6 = Math.Round(pump.Depth - 0.30, 2).ToString("0.00") + "m";
                 }
                 else if (paraQ_real <= 65)
                 {
-                    para6 = Math.Round(pump.paraH - pump.Depth + 0.35, 2).ToString("0.00") + "m";
+                    para6 = Math.Round(pump.Depth - 0.35, 2).ToString("0.00") + "m";
                 }
                 else
                 {
-                    para6 = Math.Round(pump.paraH - pump.Depth + 0.45, 2).ToString("0.00") + "m";
+                    para6 = Math.Round(pump.Depth - 0.45, 2).ToString("0.00") + "m";
                 }
             }
             Point3d ptloc_br_tmp_01;
@@ -1481,20 +1513,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             List<DBText> bTexts = new List<DBText>();
             DBText dB1 = new(), dB2 = new(), dB3 = new(), dB4 = new(), dB5 = new(), dB6 = new(), dB7 = new(), dB8 = new();
-            dB1.TextString = "报警液位:     " + para1;
-            dB8.TextString = "启泵液位:     " + para2;
-            dB7.TextString = "三泵启泵液位: " + para3;
-            dB2.TextString = "二泵启泵液位: " + para4;
-            dB3.TextString = "一泵启泵液位: " + para5;
-            dB4.TextString = "停泵液位:     " + para6;
+            dB1.TextString = "报警液位:     h-" + para1;
+            dB8.TextString = "启泵液位:     h-" + para2;
+            dB7.TextString = "三泵启泵液位: h-" + para3;
+            dB2.TextString = "二泵启泵液位: h-" + para4;
+            dB3.TextString = "一泵启泵液位: h-" + para5;
+            dB4.TextString = "停泵液位:     h-" + para6;
             dB1.Position = dB2.Position = dB3.Position = dB4.Position = dB7.Position = dB8.Position = ptloc_br_tmp_01;
-            if (pump.PumpCount == 1 || pump.Allocation == "一用一备")
+            if (pump.PumpCount == 1 || pump.Allocation.Contains("一用"))
             {
                 bTexts.Add(dB4);
                 bTexts.Add(dB8);
                 bTexts.Add(dB1);
             }
-            else if (pump.PumpCount == 2 || pump.Allocation == "两用一备")
+            else if (pump.PumpCount == 2 || pump.Allocation.Contains("两用"))
             {
                 bTexts.Add(dB4);
                 bTexts.Add(dB3);
@@ -1550,6 +1582,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             Point3d ptloc_ply_tmp03 = ply.GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(0, textHeight, 0)));
             DefinePropertiesOfCADDBTexts(db07, "W-NOTE", pump.Serial + "#集水井", ptloc_ply_tmp03, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextMid, TextVerticalMode.TextVerticalMid);
             entities.Add(db07);
+            DBText db_dim_annot = new();
+            Point3d ptloc_dim_annot = ptloc_ply_tmp01.TransformBy(Matrix3d.Displacement(new Vector3d(0, -dim_offset_annot, 0)));
+            string str_annot = "注：集水井尺寸x * x * x " + " mm(h)";
+            if (dim_length > 0)
+                str_annot = "注：集水井尺寸x * x * " + dim_length.ToString() + " mm(h)";
+            DefinePropertiesOfCADDBTexts(db_dim_annot, "W-NOTE", str_annot, ptloc_dim_annot, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid);
+            entities.Add(db_dim_annot);
             if (parLayers[parLayers.Count - 1] == 0)
             {
                 var j = pipeLineSystemUnit.PipeLineUnits[parLayers[parLayers.Count - 1]].VerticalPipes[parIndexes[parIndexes.Count - 1]].SameTypeIdentifiers;
@@ -1590,7 +1629,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="frameRec"></param>
         /// <param name="curLayer"></param>
         /// <param name="curPoint"></param>
-        public void PlotPumpVerticalPipe(ref PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, List<Line> floorLines, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, int curLayer, int curIndex, Point3d curPoint, List<int> parLayers, List<int> parIndexes)
+        private void PlotPumpVerticalPipe(ref PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, List<Line> floorLines, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, int curLayer, int curIndex, Point3d curPoint, List<int> parLayers, List<int> parIndexes)
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
@@ -1640,7 +1679,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 var blkId_pump = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "潜水泵系统", ptlocpump, new Scale3d(1), 0);
                 tmpBlocksCopied.Add(adb.Element<BlockReference>(blkId_pump));
                 adb.Element<BlockReference>(blkId_pump).Visible = false;
-                Point3d ptlocbr1 = line3.GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(0, -450, 0)));
+                Point3d ptlocbr1 = line3.GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(-100, -450, 0)));
                 var blkId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocbr1, new Scale3d(1), Math.PI / 2);
                 int diameter = CalculatePipeDiameter(pump.paraQ);
                 string allo = "DN" + diameter.ToString();
@@ -1775,7 +1814,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 Polyline rec = ptlocRec.CreateRectangle(2 * dis2, frameHeigth / 2);
                 tmpEntities.Add(rec);
                 DBText dBText1 = new DBText();
-                DefinePropertiesOfCADDBTexts(dBText1, "W-NOTE", pump.Location, ptlocRec, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextCenter);
+                string text = pump.Location.Contains("电缆沟") ? "电缆沟" : "";
+                if (pump.Location.Contains("梯"))
+                {
+                    int ind = pump.Location.IndexOf('梯');
+                    text = pump.Location.Substring(0, ind + 1);
+                }
+                DefinePropertiesOfCADDBTexts(dBText1, "W-NOTE", text, ptlocRec, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextCenter);
                 tmpBTexts.Add(dBText1);
                 Point3d ptmp4 = line1.GetMidpoint();
                 Point3d ptmp5 = ptmp4.TransformBy(Matrix3d.Displacement(new Vector3d(0, guideLineHeight, 0)));
@@ -1786,7 +1831,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 Point3d ptlocText2 = line2.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(0, dislocText2, 0)));
                 Point3d ptlocText3 = line2.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(0, -dislocText3, 0)));
                 DBText dBText2 = new DBText();
-                string str_tmp1 = pump.Location == "消防电梯" ? "电梯基坑" : "电缆沟";
+                string str_tmp1 = pump.Location.Contains("梯") ? "电梯基坑" : "电缆沟";
                 string str1 = str_tmp1 + "预埋镀锌钢管，管内底平基坑底";
                 DefinePropertiesOfCADDBTexts(dBText2, "W-NOTE", str1, ptlocText2, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
                 tmpBTexts.Add(dBText2);
@@ -1854,10 +1899,15 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             double dis6 = 2000;//参考值
             using (AcadDatabase adb = AcadDatabase.Active())
             {
+                double dis_offset_elv = -400;
                 ids.Remove(pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].Id);
                 int num = layers.Count;
+                total_diameter_horizontalpipe = new List<double>();
+                ptloc_diameter_horizontalpipe = new List<Point3d>();
                 for (int k = 0; k < num; k++)
                 {
+                    diameter_horizontalpipe = 0;
+                    Point3d ptloc_elv_hor = new Point3d(0, 0, 0);
                     real_pumpSpacing = IsSpecialParPump ? pumpUnitSpecialSpacing : pumpUnitSpacing;
                     dis5 = real_pumpSpacing;
                     Incycles.Add(true);
@@ -1879,6 +1929,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         DefinePropertiesOfCADObjects(lin2, "W-RAIN-PIPE", "CONTINOUS");
                         entities.Add(lin);
                         entities.Add(lin2);
+                        ptloc_elv_hor = lin.GetMidpoint();
                     }
                     else
                     {
@@ -1941,6 +1992,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             {
                                 entities.Add(lin);
                             }
+                            ptloc_elv_hor = lin.GetMidpoint();
                         }
                     }
                     Point3d nextpt = new Point3d(curPoint.X - real_pumpSpacing, curPoint.Y, 0);
@@ -1962,7 +2014,27 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     points.RemoveAt(points.Count - 1);
                     ids.Remove(pipeLineSystemUnit.PipeLineUnits[curLayer].VerticalPipes[curIndex].Id);
                     RecursivelyPlot(pipeLineSystemUnit, floorLines, ids, ref curLayer, curIndex, curPoint, parLayers, parIndexes, parPoints);
+                    if (ptloc_elv_hor.DistanceTo(Point3d.Origin) > 1)
+                    {
+                        ptloc_elv_hor = ptloc_elv_hor.TransformBy(Matrix3d.Displacement(new Vector3d(dis_offset_elv, 0, 0)));
+                        total_diameter_horizontalpipe.Add(diameter_horizontalpipe);
+                        ptloc_diameter_horizontalpipe.Add(new Point3d(ptloc_elv_hor.X, ptloc_elv_hor.Y + 100, 0));
+                    }
                 }
+                double totaldiameter = 0;
+                for (int i = total_diameter_horizontalpipe.Count - 1; i >= 0; i--)
+                {
+                    double tmpdiameter = total_diameter_horizontalpipe[i];
+                    total_diameter_horizontalpipe[i] += totaldiameter;
+                    totaldiameter += tmpdiameter;
+                    var br_hor_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptloc_diameter_horizontalpipe[i], new Scale3d(1), 0);
+                    br_hor_elv.SetDynBlockValue("可见性", "DN" + CalculateMergePipeDiameter(total_diameter_horizontalpipe[i]));
+                    var br_hor = adb.Element<BlockReference>(br_hor_elv);
+                    DefinePropertiesOfCADObjects(br_hor, "W-NOTE");
+                    blocks.Add(br_hor);
+                }
+                total_diameter_horizontalpipe.Clear();
+                ptloc_diameter_horizontalpipe.Clear();
                 if (Incycles.Count > 0) Incycles.RemoveAt(Incycles.Count - 1);
             }
         }
