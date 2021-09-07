@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.FireAlarm.Service;
 using ThCADExtension;
+using Linq2Acad;
 
 namespace ThMEPElectrical.FireAlarm.Logic
 {
@@ -37,12 +38,13 @@ namespace ThMEPElectrical.FireAlarm.Logic
 
             foreach (Polyline room in fireLinkageSet)  //遍历消防关联房间
             {
+                room.Closed = true;
                 if (room.IsCCW())
                     room.ReverseCurve(); //房间框线转为顺时针
                 var crossingDoor = spatialDoorIndex.SelectCrossingPolygon(room);
                 if (crossingDoor.Count == 0)
                     continue;
-                Polyline door = crossingDoor[0] as Polyline;
+                Polyline door = crossingDoor.Cast<Polyline>().OrderBy( o => o.Area).FirstOrDefault();
                 var avoidenceSet = spatialAvoidenceIndex.SelectCrossingPolygon(room);
                 var doorPt = DataQueryWorker.GetAvoidPoints(room, new List<Polyline> { door });
                 if (doorPt.Count == 0 )
@@ -63,15 +65,15 @@ namespace ThMEPElectrical.FireAlarm.Logic
                 {
                     if( doorPaired[i].Key - doorPaired[i-1].Key > 1 )
                     {
-                        rightIndex = i - 1;
-                        leftIndex = i;
+                        rightIndex = i;
+                        leftIndex = i-1;
                         break;
                     }
                 }
                 if (rightIndex == -1)
                 {
-                    rightIndex = doorPaired.Count - 1;
-                    leftIndex = 0;
+                    rightIndex = 0;
+                    leftIndex = doorPaired.Count - 1;
                 }
 
                 var rightHandWall = new Polyline();  //门两侧墙
@@ -79,9 +81,9 @@ namespace ThMEPElectrical.FireAlarm.Logic
                 var locatePt = new Point3d();
                 //使门两侧墙的点位存储顺序为由门开始
                 rightHandWall.AddVertexAt(0, doorPaired[rightIndex].Value.ToPoint2D(), 0, 0, 0);
-                rightHandWall.AddVertexAt(1, room.GetPoint3dAt((doorPaired[rightIndex].Key + 1) % num).ToPoint2D(), 0, 0, 0);
+                rightHandWall.AddVertexAt(1, room.GetPoint3dAt((doorPaired[rightIndex].Key+ 1) % (num-1)).ToPoint2D(), 0, 0, 0);
                 leftHandWall.AddVertexAt(0, doorPaired[leftIndex].Value.ToPoint2D(), 0, 0, 0);
-                leftHandWall.AddVertexAt(1, room.GetPoint3dAt(doorPaired[leftIndex].Key).ToPoint2D(), 0, 0, 0);
+                leftHandWall.AddVertexAt(1, room.GetPoint3dAt(doorPaired[leftIndex].Key ).ToPoint2D(), 0, 0, 0);
                 
 
                 Polyline walls = new Polyline();  //其他墙体顺时针存储，应为不闭合polyline
@@ -89,28 +91,38 @@ namespace ThMEPElectrical.FireAlarm.Logic
                 {
                     walls.AddVertexAt( i , room.GetPoint3dAt((i + doorPaired[rightIndex].Key  ) % num).ToPoint2D(), 0, 0, 0);
                 }
-
-                //布点优先级为先门右侧，再门左侧，其次剩下墙体顺时针遍历
-                locatePt = DataQueryWorker.WallsFindLocation(rightHandWall, avoidencePt, ReservedWidth);
-                if (!locatePt.IsPositiveInfinity())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
-                    ans.Add(DataQueryWorker.FindVector(locatePt,room));
-                }
-                else
-                {
-                    locatePt = DataQueryWorker.WallsFindLocation(leftHandWall, avoidencePt, ReservedWidth);
+                    //布点优先级为先门右侧，再门左侧，其次剩下墙体顺时针遍历
+                    locatePt = DataQueryWorker.WallsFindLocation(rightHandWall, avoidencePt, ReservedWidth);
+                    var temp = new List<Entity>();
                     if (!locatePt.IsPositiveInfinity())
                     {
-                        leftHandWall.ReverseCurve();
                         ans.Add(DataQueryWorker.FindVector(locatePt, room));
+                        temp.Add(rightHandWall);
+                        ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(temp, acadDatabase.Database, 5);
                     }
                     else
                     {
-                        locatePt = DataQueryWorker.WallsFindLocation(walls, avoidencePt, ReservedWidth);
+                        locatePt = DataQueryWorker.WallsFindLocation(leftHandWall, avoidencePt, ReservedWidth);
                         if (!locatePt.IsPositiveInfinity())
                         {
+                            leftHandWall.ReverseCurve();
                             ans.Add(DataQueryWorker.FindVector(locatePt, room));
+                            temp.Add(leftHandWall);
+                            ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(temp, acadDatabase.Database, 2);
 
+                        }
+                        else
+                        {
+                            locatePt = DataQueryWorker.WallsFindLocation(walls, avoidencePt, ReservedWidth);
+                            if (!locatePt.IsPositiveInfinity())
+                            {
+                                ans.Add(DataQueryWorker.FindVector(locatePt, room));
+                                temp.Add(walls);
+                                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(temp, acadDatabase.Database, 4);
+
+                            }
                         }
                     }
                 }

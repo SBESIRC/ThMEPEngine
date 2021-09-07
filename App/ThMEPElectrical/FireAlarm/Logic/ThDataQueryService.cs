@@ -64,9 +64,10 @@ namespace ThMEPElectrical.FireAlarm.Logic
             Windows = QueryC(BuiltInCategory.Window.ToString());
             Rooms = QueryC(BuiltInCategory.Room.ToString());
             Holes = QueryC(BuiltInCategory.Hole.ToString());
-            FireProofs = QueryC(BuiltInCategory.FireApart.ToString());
+            FireProofs = QueryC(BuiltInCategory.LaneLine.ToString());
             Avoidence.AddRange(DoorOpenings);
             Avoidence.AddRange(Windows);
+            Avoidence.AddRange(FireProofs);
             floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
             GetFireLinkageRooms();
         }

@@ -342,7 +342,8 @@ namespace ThMEPElectrical.FireAlarm.Logic
         {
             var stairwell = DataQueryWorker.Rooms
                 .Where(o => o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
-                .ToList().Select(x => x.Boundary).ToCollection();
+                .Select(o => o.Boundary is MPolygon ? (o.Boundary as MPolygon).Shell() : o.Boundary)
+                .Cast<Polyline>().ToList().ToCollection();
             var doorSet = DataQueryWorker.DoorOpenings.Select(x => x.Boundary).ToCollection();
             var rooms = DataQueryWorker.Rooms.Select(x => x.Boundary).ToCollection();
             var spatialCrossingDoorsIndex = new ThCADCoreNTSSpatialIndex(doorSet);
@@ -363,7 +364,7 @@ namespace ThMEPElectrical.FireAlarm.Logic
                 var crossingRooms = spatialRoomsIndex.SelectCrossingPolygon(door);
                 foreach (Entity room in crossingRooms)
                     if (!DataQueryWorker.Query(room).Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
-                        locateRoomSet.Add(room);
+                        locateRoomSet.Add(room is MPolygon ? (room as MPolygon).Shell() : room );
             }
             return locateRoomSet;
         }

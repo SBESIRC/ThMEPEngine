@@ -10,5 +10,7 @@
         /// 公共建筑
         /// </summary>
         Public,
+
+        None
     }
 }

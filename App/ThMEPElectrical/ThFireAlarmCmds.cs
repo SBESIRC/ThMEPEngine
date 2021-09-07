@@ -18,6 +18,7 @@ using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using Autodesk.AutoCAD.EditorInput;
 using ThMEPElectrical.Command;
 
 namespace ThMEPElectrical
@@ -77,6 +78,30 @@ namespace ThMEPElectrical
                 //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
                 //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
 
+                // select an option
+                string strResident = "住宅";
+                string strPublic = "公建";
+
+                var options = new PromptKeywordOptions("");
+                options.Message = "\nPlease select option:";
+                options.Keywords.Add(strResident, "R", "住宅(R)");
+                options.Keywords.Add(strPublic, "P", "公建(P)");
+
+                var rst = Active.Editor.GetKeywords(options);
+                if (rst.Status != PromptStatus.OK)
+                    return;
+
+                var buildingType = FireAlarm.Data.BuildingType.None;
+                if (rst.StringResult.Equals(strResident))
+                {
+                    buildingType = FireAlarm.Data.BuildingType.Resident;
+                }
+                else if (rst.StringResult.Equals(strPublic))
+                {
+                    buildingType = FireAlarm.Data.BuildingType.Public;
+                }
+                else return;
+
                 getData(out var transformer, out var geos);
                 if (geos.Count == 0)
                 {
@@ -84,20 +109,13 @@ namespace ThMEPElectrical
                 }
 
                 ThFixedPointLayoutService layoutService = null;
-           
-
-                //显示器需要判断图纸类型（公建，住宅），后期接入
-                ///!!!!!!!!!!!!!!!!!
-                var buildingType = FireAlarm.Data.BuildingType.Public;
-                //var buildingType = FireAlarm.Data.BuildingType.Resident;
-
+              
                 layoutService = new ThDisplayDeviceFixedPointLayoutService(geos)
                 {
                     BuildingType = buildingType,
                 };
 
                 var results = layoutService.Layout();
-
 
                 // 对结果的重设
                 var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
@@ -171,6 +189,7 @@ namespace ThMEPElectrical
 
         [CommandMethod("TIANHUACAD", "ThFireTel", CommandFlags.Modal)]
         public void ThFireTelLayout()
+        
         {
             //选择Geojson File,获取数据
             //测试布置逻辑
@@ -246,8 +265,8 @@ namespace ThMEPElectrical
                 //var geos = ThGeometryJsonReader.ReadFromContent(geosJsonString);
 
                 var objs = geos.Where(o => o.Boundary != null).Select(o => o.Boundary).ToCollection();
-                //var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
-                //var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+                var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
+                var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
 
                 transformer = new ThMEPOriginTransformer(objs);
                 //geos.Where(o => o.Boundary != null).ForEach(o =>
@@ -264,8 +283,8 @@ namespace ThMEPElectrical
 
                 datasetFactory.MoveToXYPlane(geos);
 
-                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
-                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
             }
         }
     }
