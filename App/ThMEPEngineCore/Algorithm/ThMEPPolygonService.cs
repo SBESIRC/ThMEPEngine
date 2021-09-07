@@ -1,4 +1,5 @@
-﻿using CLI;
+﻿#if (ACAD2016 || ACAD2018)
+using CLI;
 using System;
 using NFox.Cad;
 using Linq2Acad;
@@ -198,3 +199,4 @@ namespace ThMEPEngineCore.Algorithm
         }
     }
 }
+#endif
