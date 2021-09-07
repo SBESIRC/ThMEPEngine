@@ -236,7 +236,6 @@
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -258,7 +257,6 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
                 <Command Local="THJSDY" Global="THJSDY" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -280,7 +278,6 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
                 <Command Local="THJSDY" Global="THJSDY" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -398,6 +395,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -419,6 +417,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -440,6 +439,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>

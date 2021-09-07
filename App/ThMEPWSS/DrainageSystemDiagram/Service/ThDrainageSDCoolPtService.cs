@@ -64,8 +64,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 //不是岛的情况
                 //岛也有可能反但是没有处理
-                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, turnCloseWallSet.Key);
-                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.Boundary = ThDrainageSDCommonService.turnBoundary(terminal.Boundary, turnCloseWallSet.Key);
+                terminal.setDir();
                 terminal.setInfo();
 
             }
@@ -306,8 +306,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //转island boundary
             foreach (var terminal in needTurn)
             {
-                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, 2);
-                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.Boundary = ThDrainageSDCommonService.turnBoundary(terminal.Boundary, 2);
+                terminal.setDir();
                 terminal.setInfo();
                 terminal.SupplyCoolOnWall = terminal.SupplyCool;
             }
@@ -444,7 +444,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         private static Point3d virtualSupplyPt(Polyline boundary, int turn, string type)
         {
 
-            var pl = ThTerminalToilet.turnBoundary(boundary, turn);
+            var pl = ThDrainageSDCommonService.turnBoundary(boundary, turn);
             var pt = ThTerminalToilet.CalculateSupplyCoolPoint(type, pl);
 
             return pt.First();

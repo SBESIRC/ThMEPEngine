@@ -78,5 +78,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return lines;
 
         }
+
+        public static Polyline turnBoundary(Polyline boundary, int turn)
+        {
+            Polyline boundaryNew = boundary.Clone() as Polyline;
+            if (turn != 0)
+            {
+                for (int i = 0; i < boundary.NumberOfVertices; i++)
+                {
+                    boundaryNew.SetPointAt(i, boundary.GetPoint3dAt((i + turn) % boundary.NumberOfVertices).ToPoint2D());
+                }
+            }
+            return boundaryNew;
+        }
     }
 }
