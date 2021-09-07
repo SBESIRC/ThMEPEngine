@@ -134,50 +134,53 @@ namespace ThMEPEngineCore.Service
         private const double OverlapTolerance = 501.0; //两根平行线首尾间距
         private const double AngleTolerance = 3.0 * Math.PI / 180; //如果没有平行，则认为在夹角小于3度的算平行
         private const double ShortLineTolerance = 500.0; //分支线，且末端未连接任何线，小于此长度的丢弃
-        public List<Line> lines { get; set; }
+        public List<Line> Lines { get; set; }
         public ThListLineMerge(List<Line> linelist)
         {
-            lines = new List<Line>();
-            linelist.ForEach(o => lines.Add(ThLineUnionService.NormalizeLaneLine(o)));
+            Lines = new List<Line>();
+            linelist.ForEach(o => Lines.Add(ThLineUnionService.NormalizeLaneLine(o)));
         }
-        public bool needtomerge(out Line refline,out Line tomoveline)
+
+        public bool Needtomerge(out Line refline,out Line tomoveline)
         {
             refline = new Line();
             tomoveline = new Line();
             bool res = false;
-            for (int i = 0; i < lines.Count - 1; i++)
-                for (int j = i+1 ; j < lines.Count; j++)
+            for (int i = 0; i < Lines.Count - 1; i++)
+                for (int j = i+1 ; j < Lines.Count; j++)
                 {
-                    if (isparallel(lines[i], lines[j]) && paralledlinedistance(lines[i], lines[j]) < MergeTolerance 
-                        && parallellinesisoverlap(lines[i],lines[j])) 
+                    if (Isparallel(Lines[i], Lines[j]) && Paralledlinedistance(Lines[i], Lines[j]) < MergeTolerance 
+                        && Parallellinesisoverlap(Lines[i],Lines[j])) 
                     {
-                        if(lines[i].Length>lines[j].Length)
+                        if(Lines[i].Length>Lines[j].Length)
                         {
                             //移动规则：移动较短的平行线
-                            refline = lines[i];
-                            tomoveline = lines[j];
+                            refline = Lines[i];
+                            tomoveline = Lines[j];
                         }
                         else
                         {
-                            refline = lines[j];
-                            tomoveline = lines[i];
+                            refline = Lines[j];
+                            tomoveline = Lines[i];
                         }
                         return true;
                     }
                 }
             return res;
         }
-        private bool isparallel(Line l1,Line l2)
+        private bool Isparallel(Line l1,Line l2)
         {
             return l1.Delta.GetAngleTo(l2.Delta) < AngleTolerance;
         }
-        private double paralledlinedistance(Line l1,Line l2)
+
+        private double Paralledlinedistance(Line l1,Line l2)
         {
             Vector3d crossvec = l1.StartPoint.GetVectorTo(l2.StartPoint);
             Vector3d norm = l1.StartPoint.GetVectorTo(l1.EndPoint).GetNormal();
             return Math.Sqrt(Math.Pow(crossvec.Length, 2) - Math.Pow(crossvec.DotProduct(norm), 2));
         }
-        private bool parallellinesisoverlap(Line l1,Line l2)
+
+        private bool Parallellinesisoverlap(Line l1,Line l2)
         {
             if (ThGeometryTool.IsOverlap(l1.StartPoint, l1.EndPoint, l2.StartPoint, l2.EndPoint))
                 return true;
@@ -189,16 +192,18 @@ namespace ThMEPEngineCore.Service
                 return true;
             return false;
         }
+
         private Polyline CreateRectangle(Line line)
         {
             BufferParameters bufferpar = new BufferParameters() { EndCapStyle = EndCapStyle.Flat, JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre };
             var res = line.ToNTSLineString().Buffer((MergeTolerance - 1) / 2, bufferpar).ToDbCollection()[0] as Polyline;
             return res.Buffer(1.0)[0] as Polyline;
         }
-        public void domoveparallellines(Line refline,Line tomoveline)
+
+        public void Domoveparallellines(Line refline,Line tomoveline)
         {
             List<Tuple<Line, Point3d>> intersectpts = new List<Tuple<Line, Point3d>>();
-            lines.ForEach(o => 
+            Lines.ForEach(o => 
             {
                 var pts = new Point3dCollection();
                 tomoveline.IntersectWith(o, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
@@ -232,34 +237,37 @@ namespace ThMEPEngineCore.Service
                 o.Item1.IntersectWith(rec, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                 if(pts.Count<2)
                 {
-                    var linepoints = changenearestpoint(o.Item1, o.Item2);
+                    var linepoints = Changenearestpoint(o.Item1, o.Item2);
                     linepoints[0]= o.Item2.TransformBy(transform);
-                    lines.Remove(o.Item1);
-                    lines.Add(new Line(linepoints[0], linepoints[1]));
+                    Lines.Remove(o.Item1);
+                    Lines.Add(new Line(linepoints[0], linepoints[1]));
                 }
             });
-            lines.Remove(refline);
-            lines.Remove(tomoveline);
-            lines.Add(mergeline);
+            Lines.Remove(refline);
+            Lines.Remove(tomoveline);
+            Lines.Add(mergeline);
             CleanZeroLines();
-            lines = ThLineUnionService.UnionLineList(lines);
+            Lines = ThLineUnionService.UnionLineList(Lines);
         }
+
         /// <summary>
         /// 第一个为近点，第二个为远点
         /// </summary>
         /// <param name="line"></param>
         /// <param name="interscetpt"></param>
         /// <returns></returns>
-        private List<Point3d> changenearestpoint(Line line, Point3d interscetpt)
+        private List<Point3d> Changenearestpoint(Line line, Point3d interscetpt)
         {
             Point3d near = line.StartPoint.DistanceTo(interscetpt) > line.EndPoint.DistanceTo(interscetpt) ? line.EndPoint : line.StartPoint;
             Point3d far = ThLineUnionService.Point3dEuqal(near, line.StartPoint) ? line.EndPoint : line.StartPoint;
             return new List<Point3d>() { near, far };
         }
+
         private void CleanZeroLines()
         {
-            lines = lines.Where(o => o.Length > 1.0).ToList();
+            Lines = Lines.Where(o => o.Length > 1.0).ToList();
         }
+
         private List<Line> NodingLines(DBObjectCollection curves)
         {
             var results = new List<Line>();
@@ -268,9 +276,9 @@ namespace ThMEPEngineCore.Service
             {
                 results.Add(line.ToDbline());
             }
-            else if (geometry is MultiLineString lines)
+            else if (geometry is MultiLineString Lines)
             {
-                results.AddRange(lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
+                results.AddRange(Lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
             }
             else
             {
@@ -278,15 +286,16 @@ namespace ThMEPEngineCore.Service
             }
             return results;
         }
-        public void simplifierlines()
+
+        public void Simplifierlines()
         {
-            //首先去掉本来就存在的短线，然后再去掉过长的线头
-            lines = lines.Where(o => o.Length > ShortLineTolerance).ToList();
+            // 首先去掉本来就存在的短线，然后再去掉过长的线头
+            Lines = Lines.Where(o => o.Length > ShortLineTolerance).ToList();
             var extendline = new List<Line>();
-            lines.ForEach(o => extendline.Add(o.ExtendLine(0.5)));
-            lines = NodingLines(extendline.ToCollection());
-            lines = lines.Where(o => o.Length > ShortLineTolerance).ToList();
-            lines = ThLineUnionService.UnionLineList(lines);
+            Lines.ForEach(o => extendline.Add(o.ExtendLine(0.5)));
+            Lines = NodingLines(extendline.ToCollection());
+            Lines = Lines.Where(o => o.Length > ShortLineTolerance).ToList();
+            Lines = ThLineUnionService.UnionLineList(Lines);
         }
     }
 }

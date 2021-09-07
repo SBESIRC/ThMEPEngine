@@ -71,6 +71,7 @@
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
     <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
+    <Compile Include="Algorithm\ThMEPPolygonService.cs" />
     <Compile Include="Algorithm\ThMEPRegionService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />

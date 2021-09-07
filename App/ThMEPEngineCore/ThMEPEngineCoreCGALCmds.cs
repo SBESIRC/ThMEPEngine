@@ -47,7 +47,7 @@ namespace ThMEPEngineCore
                 }
                 var roomExtractor = new ThRoomExtractor { ColorIndex = 1 };
                 roomExtractor.Extract(acadDatabase.Database, pts);
-                var geos  = roomExtractor.BuildGeometries();
+                var geos = roomExtractor.BuildGeometries();
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
                 string fileName = fileInfo.Name;
@@ -191,7 +191,7 @@ namespace ThMEPEngineCore
                 }
                 var levelIndex = 3;
                 var ner = Active.Editor.GetInteger("\n输入防雷等级类别<三类>");
-                if(ner.Status == PromptStatus.OK)
+                if (ner.Status == PromptStatus.OK)
                 {
                     levelIndex = ner.Value;
                 }
@@ -245,7 +245,7 @@ namespace ThMEPEngineCore
                 extractEngine.Extract(acadDatabase.Database, pts);
                 extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
                 string geoContent = extractEngine.OutputGeo();
-                
+
                 extractEngine.OutputGeo(Active.Document.Name);
                 var dclLayoutEngine = new ThDCLayoutEngineMgd();
                 var data = new ThDCDataMgd();
@@ -421,47 +421,17 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
 
-                var engine = new ThPolygonCenterLineMgd();
-                var serializer = GeoJsonSerializer.Create();
                 objs = objs.BuildArea();
-                foreach(Entity obj in objs)
+                foreach (Entity obj in objs)
                 {
-                    var geos = new List<ThGeometry>();
-                    geos.Add(new ThGeometry()
+                    ThMEPPolygonService.CenterLine(obj).ForEach(o =>
                     {
-                        Boundary = obj,
+                        acadDatabase.ModelSpace.Add(o);
+                        o.ColorIndex = 1;
                     });
-                    var results = engine.Generate(ThGeoOutput.Output(geos));
-                    using (var stringReader = new StringReader(results))
-                    using (var jsonReader = new JsonTextReader(stringReader))
-                    {
-                        var lines = new List<Line>();
-                        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-                        foreach (var f in features)
-                        {
-                            if (f.Geometry is LineString line)
-                            {
-                                lines.Add(line.ToDbline());
-                            }
-                        }
-                        lines.ForEach(o =>
-                        {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.ColorIndex = 1;
-                        });
-                        var merge = new ThListLineMerge(ThLineUnionService.UnionLineList(lines));
-                        while (merge.needtomerge(out Line refline, out Line moveline))
-                        {
-                            merge.domoveparallellines(refline, moveline);
-                        }
-                        merge.simplifierlines();
-                        merge.lines.ForEach(o =>
-                        {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.ColorIndex = 2;
-                        });
-                    }
                 }
+
+
             }
         }
 
@@ -501,38 +471,27 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
 
-                var engine = new ThPolygonPartitionMgd();
-                var serializer = GeoJsonSerializer.Create();
                 objs = objs.BuildArea();
                 foreach (Entity obj in objs)
                 {
-                    var geos = new List<ThGeometry>();
-                    geos.Add(new ThGeometry()
-                    {
-                        Boundary = obj,
-                    });
-                    var results = "";
                     if (pe.StringResult == "RADIUS")
                     {
-                        results = engine.Partition(ThGeoOutput.Output(geos), pdr.Value);
+                        ThMEPPolygonService.Partition(obj, pdr.Value).OfType<Polyline>().ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = 1;
+                        });
+
                     }
                     else if (pe.StringResult == "UCS")
                     {
-                        results = engine.PartitionUCS(ThGeoOutput.Output(geos), pdr.Value);
-                    }
-                    using (var stringReader = new StringReader(results))
-                    using (var jsonReader = new JsonTextReader(stringReader))
-                    {
-                        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-                        foreach (var f in features)
+                        ThMEPPolygonService.PartitionUCS(obj, pdr.Value).OfType<Polyline>().ForEach(o =>
                         {
-                            if (f.Geometry is Polygon polygon)
-                            {
-                                acadDatabase.ModelSpace.Add(polygon.ToDbMPolygon());
-                            }
-                        }
+                            acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = 1;
+                        });
                     }
-                }                
+                }
             }
         }
 
@@ -542,7 +501,7 @@ namespace ThMEPEngineCore
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                while(true)
+                while (true)
                 {
                     var per = Active.Editor.GetSelection();
                     if (per.Status != PromptStatus.OK)
@@ -562,12 +521,12 @@ namespace ThMEPEngineCore
                     if (results.Count == 1)
                     {
                         var geos = new List<ThGeometry>();
-                        geos.Add(new ThGeometry { Boundary = results [0] as Entity});
-                        geos.Add(new ThGeometry { Boundary = new DBPoint(ptRes.Value)});
+                        geos.Add(new ThGeometry { Boundary = results[0] as Entity });
+                        geos.Add(new ThGeometry { Boundary = new DBPoint(ptRes.Value) });
                         var fileInfo = new FileInfo(Active.Document.Name);
                         var path = fileInfo.Directory.FullName;
                         string fileName = fileInfo.Name;
-                        ThGeoOutput.Output(geos, path, fileInfo.Name+DateTime.Now.ToString("hh-mm-ss"));
+                        ThGeoOutput.Output(geos, path, fileInfo.Name + DateTime.Now.ToString("hh-mm-ss"));
                     }
                 }
             }
