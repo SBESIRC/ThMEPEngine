@@ -299,11 +299,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 }
 
                 //开始进行业务逻辑,整合回路
-                newWireCircuitModel.FillingData(this.globleBlockAttInfoDic, IsJF);
+                newWireCircuitModel.FillingData(Database, this.globleBlockAttInfoDic, IsJF);
                 for (int i = 0; i < extendNewWireCircuits.Count; i++)
                 {
                     ThAlarmControlWireCircuitModel wireCircuitModel = extendNewWireCircuits[i][0];
-                    wireCircuitModel.FillingData(this.globleBlockAttInfoDic, IsJF);
+                    wireCircuitModel.FillingData(Database, this.globleBlockAttInfoDic, IsJF);
                     var extendBlockCount = wireCircuitModel.BlockCount;
 
                     var selfBlockCount = newWireCircuitModel.BlockCount;

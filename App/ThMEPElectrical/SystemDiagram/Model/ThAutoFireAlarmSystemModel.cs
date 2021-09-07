@@ -19,6 +19,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
     /// </summary>
     public abstract class ThAutoFireAlarmSystemModel
     {
+        public Database _database;
         public List<ThFloorModel> floors { get; set; }
         public List<ThDrawModel> DrawData { get; set; }
 

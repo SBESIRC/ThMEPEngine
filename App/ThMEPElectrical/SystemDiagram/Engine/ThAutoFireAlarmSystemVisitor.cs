@@ -107,6 +107,18 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             }
                             break;
                         }
+                    case StatisticType.NoStatisticsRequired:
+                        {
+                            dic.ForEach(keyvaluepair =>
+                            {
+                                if (o.StatisticAttNameValues.ContainsKey(keyvaluepair.Key) && o.StatisticAttNameValues[keyvaluepair.Key].Contains(keyvaluepair.Value))
+                                {
+                                    IsRequired = true;
+                                    return;
+                                }
+                            });
+                            break;
+                        }
                     default:
                         break;
                 }

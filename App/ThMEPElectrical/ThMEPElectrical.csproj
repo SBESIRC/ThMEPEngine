@@ -291,6 +291,8 @@
     <Compile Include="Staircase\ThStairCommon.cs" />
     <Compile Include="Staircase\ThStairEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
     <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
@@ -304,6 +306,7 @@
     <Compile Include="SystemDiagram\Extension\ThAFASGraphExtension.cs" />
     <Compile Include="SystemDiagram\Extension\ThDBObbExtension.cs" />
     <Compile Include="SystemDiagram\Extension\ThEStoreysExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThQuantityMarkExtension.cs" />
     <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromFireCompartment.cs" />

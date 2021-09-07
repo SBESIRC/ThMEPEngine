@@ -13,6 +13,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
+using ThMEPElectrical.SystemDiagram.Extension;
+using NFox.Cad;
 
 namespace ThMEPElectrical.Command
 {
@@ -82,7 +84,7 @@ namespace ThMEPElectrical.Command
                         Active.Editor.WriteLine("\n检测到有未正确命名的防火分区，请先手动命名");
                         return;
                     }
-                    if(builder.InvalidResults.Count>0)
+                    if (builder.InvalidResults.Count > 0)
                     {
                         foreach (var invalid in builder.InvalidResults)
                         {
@@ -93,6 +95,21 @@ namespace ThMEPElectrical.Command
 
                     //获取块引擎附加信息
                     var datas = BlockReferenceEngine.QueryAllOriginDatas();
+
+
+                    var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
+                    var labelDB = labelEngine.Extract(acadDatabase.Database, points);
+                    var labelLine = labelEngine.CreateLabelLineList();//----12s----
+
+                    var textEngine = new ThExtractLabelText();//提取文字
+                    var textCollection = textEngine.Extract(acadDatabase.Database, points);
+                    //var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
+
+                    ThQuantityMarkExtension.ReSet();
+                    ThQuantityMarkExtension.SetGlobalLineData(labelLine);
+                    ThQuantityMarkExtension.SetGlobalMarkData(textCollection);
+                    ThQuantityMarkExtension.SetGlobalBlockIOData(datas.Where(o => o.Value.Count == 1 && o.Value[0].Key == "F" && o.Value[0].Value == "I/O").Select(o => acadDatabase.Database.GetBlockReferenceOBB(o.Key as BlockReference)).ToCollection());
+
 
                     //火灾自动报警系统diagram实例化
                     ThAutoFireAlarmSystemModel diagram;

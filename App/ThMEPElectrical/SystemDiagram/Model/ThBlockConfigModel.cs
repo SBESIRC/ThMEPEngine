@@ -91,6 +91,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 1150, 0),
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "I/O"} } },
                 StatisticMode = StatisticType.NoStatisticsRequired,
                 DefaultQuantity = 1
             });

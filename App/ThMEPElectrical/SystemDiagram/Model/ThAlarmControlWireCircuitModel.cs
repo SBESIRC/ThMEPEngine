@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Engine;
+using ThMEPElectrical.SystemDiagram.Extension;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -47,7 +48,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public bool DrawWireCircuitText { get; set; } = false;
 
-        public void FillingData(Dictionary<Entity, List<KeyValuePair<string, string>>> GlobleBlockAttInfoDic, bool IsJF = false)
+        public void FillingData(Database database, Dictionary<Entity, List<KeyValuePair<string, string>>> GlobleBlockAttInfoDic, bool IsJF = false)
         {
             ThBlockNumStatistics BlockDataReturn = new ThBlockNumStatistics();
             var VerticesData = this.Graph.Vertices.Select(o => o.VertexElement).Where(o => o is BlockReference).Cast<BlockReference>().ToList();
@@ -63,20 +64,20 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             }
                             else
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => x.Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                                 if (o.HasAlias)
                                 {
-                                    BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Where (x => o.AliasList.Contains(x.Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                                 }
                             }
                             break;
                         }
                     case StatisticType.Attributes:
                         {
-                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => GlobleBlockAttInfoDic.ContainsKey(x) && (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
+                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => GlobleBlockAttInfoDic.ContainsKey(x) && (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                             if (o.HasAlias)
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Count(x => o.AliasList.Contains(x.Name));
+                                BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Where(x => o.AliasList.Contains(x.Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                             }
                             break;
                         }
@@ -97,12 +98,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             //如果是大屋面
                             if (IsJF && o.UniqueName == "消防水箱")
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => x.Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                             }
                             //其他正常楼层
                             else if (!IsJF && o.UniqueName == "消防水池")
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Count(x => x.Name == o.BlockName);
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => x.Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                             }
                             break;
                         }
