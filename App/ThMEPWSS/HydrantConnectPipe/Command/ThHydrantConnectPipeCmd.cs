@@ -40,27 +40,37 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             using (AcadDatabase blockDb = AcadDatabase.Open(BlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                if (!acadDb.Blocks.Contains("蝶阀") && blockDb.Blocks.Contains("蝶阀"))
+                if (blockDb.Blocks.Contains("蝶阀"))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("蝶阀"));
                 }
-                if (!acadDb.Blocks.Contains("消火栓管线管径") && blockDb.Blocks.Contains("消火栓管线管径"))
+                if (blockDb.Blocks.Contains("消火栓管线管径"))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管线管径"));
                 }
-                if (!acadDb.Blocks.Contains("消火栓管径150") && blockDb.Blocks.Contains("消火栓管径150"))
+                if (blockDb.Blocks.Contains("消火栓管径150"))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管径150"));
                 }
-                if (!acadDb.Layers.Contains("W-FRPT-HYDT-PIPE-AI") && blockDb.Layers.Contains("W-FRPT-HYDT-PIPE-AI"))
+                if (blockDb.Layers.Contains("W-FRPT-HYDT-PIPE-AI"))
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-PIPE-AI"));
-                    
                 }
+                if (blockDb.Layers.Contains("W-FRPT-HYDT-EQPM"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-EQPM"));
+                }
+                if (blockDb.Layers.Contains("W-FRPT-HYDT-DIMS"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-DIMS"));
+                }
+               
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 DbHelper.EnsureLayerOn("W-FRPT-HYDT-PIPE-AI");
+                DbHelper.EnsureLayerOn("W-FRPT-HYDT-EQPM");
+                DbHelper.EnsureLayerOn("W-FRPT-HYDT-DIMS");
             }
         }
         public void Dispose()
