@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -52,12 +54,19 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public override void Extract(Database database, Point3dCollection pts)
         {
             if (UseDb3Engine)
-            {
-                using (var engine = new ThDB3ArchWallRecognitionEngine())
-                {
-                    engine.Recognize(database, pts);
-                    engine.Elements.ForEach(o => Walls.Add(o.Outline));
-                }
+            {                
+                var extractEngine = new ThDB3ArchWallExtractionEngine();
+                extractEngine.Extract(database);
+
+                var center = pts.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(center);
+                var newPts = transformer.Transform(pts);
+                extractEngine.Results.ForEach(e=> transformer.Transform(e.Geometry));                
+
+                var recogEngine = new ThDB3ArchWallRecognitionEngine();
+                recogEngine.Recognize(extractEngine.Results, newPts);
+
+                recogEngine.Elements.ForEach(o => Walls.Add(o.Outline));
             }
             else
             {

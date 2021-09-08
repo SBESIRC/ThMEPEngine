@@ -1,18 +1,21 @@
 ﻿using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.FlushPoint.Model
 {
     public class ThFlushPointParameter : INotifyPropertyChanged
     {
+        public Dictionary<string, List<string>> BlockNameDict { get; set; }
         public ThFlushPointParameter()
         {
-            ArrangePosition = ArrangePositionOps.AreaFullLayout;
-            parkingAreaOfPT = true;
-            necessaryArrangeSpaceOfPT = true;
-            protectRadius = 30.0;
-            plotScale = "1:100";
             floorSign = "B1";
+            plotScale = "1:100";
+            protectRadius = 30.0;
+            parkingAreaOfPT = true;
             onlyLayoutOnColumn = true;
+            necessaryArrangeSpaceOfPT = true;
+            ArrangePosition = ArrangePositionOps.AreaFullLayout;
+            BlockNameDict = new Dictionary<string, List<string>>();
         }
         public event PropertyChangedEventHandler PropertyChanged;
         private bool onlyLayoutOnColumn;

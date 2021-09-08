@@ -1,10 +1,11 @@
 ﻿using NFox.Cad;
-using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -50,7 +51,11 @@ namespace ThMEPEngineCore.Engine
             Visitor = new ThParkingStallExtractionVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
-        {            
+        {
+            if (Visitor.LayerFilter.Count == 0)
+            {
+                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
+            }
             var engine = new ThParkingStallExtractionEngine()
             {
                 Visitor = this.Visitor,
@@ -72,6 +77,11 @@ namespace ThMEPEngineCore.Engine
             Recognize(Transfer(engine.Results), polygon);
         }
 
+        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new System.NotImplementedException();
+        }
+
         private List<ThRawIfcSpatialElementData> Transfer(List<ThRawIfcDistributionElementData> datas)
         {
             var results = new List<ThRawIfcSpatialElementData>();
@@ -90,33 +100,23 @@ namespace ThMEPEngineCore.Engine
         {
             var results = new List<ThRawIfcSpatialElementData>();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
+            var center = polygon.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            transformer.Transform(objs);
+            var newPts = transformer.Transform(polygon);
+            if (newPts.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var pline = new Polyline()
-                {
-                    Closed = true,
-                };
-                pline.CreatePolyline(polygon);
-                var filterObjs = spatialIndex.SelectCrossingPolygon(pline);
-                results = datas.Where(o => filterObjs.Contains(o.Geometry as Curve)).ToList();
+                objs = spatialIndex.SelectCrossingPolygon(newPts);                
             }
-            else
+            transformer.Reset(objs);
+            objs.Cast<Entity>().ForEach(o =>
             {
-                results = datas;
-            }
-            results.ForEach(o =>
-            {
-                if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
+                if (o is Polyline polyline && polyline.Area > 0.0)
                 {
                     Elements.Add(ThIfcParkingStall.Create(polyline));
                 }
             });
-        }
-
-        public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

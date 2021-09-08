@@ -1,14 +1,17 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -45,18 +48,53 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             if (UseDb3Engine)
             {
-                using (var roomEngine = new ThRoomBuilderEngine())
+                var outlineEngine = new ThRoomOutlineExtractionEngine();
+                outlineEngine.ExtractFromMS(database);
+
+                var markEngine = new ThRoomMarkExtractionEngine();
+                markEngine.ExtractFromMS(database);
+
+                var transformer = new ThMEPOriginTransformer();
+                if (pts.Count>0)
                 {
-                    Rooms = roomEngine.BuildFromMS(database, pts);
-                    Clean();
-                    Rooms.ForEach(o =>
-                    {
-                        if (string.IsNullOrEmpty(o.Name) && o.Tags.Count > 0)
-                        {
-                            o.Name = string.Join(";", o.Tags.ToArray());
-                        }
-                    });
+                   var center = pts.Envelope().CenterPoint();
+                    transformer = new ThMEPOriginTransformer(center);
                 }
+                else
+                {
+                    transformer = new ThMEPOriginTransformer(
+                        outlineEngine.Results.Select(o=>o.Geometry).ToCollection());
+                }
+
+                outlineEngine.Results.ForEach(o => transformer.Transform(o.Geometry));
+                markEngine.Results.ForEach(o => transformer.Transform(o.Geometry));
+                var newPts = transformer.Transform(pts);
+
+                var outlineRecogEngine = new ThRoomOutlineRecognitionEngine();
+                outlineRecogEngine.Recognize(outlineEngine.Results, newPts);
+
+                var markRecogEngine = new ThRoomMarkRecognitionEngine();
+                markRecogEngine.Recognize(markEngine.Results, newPts);
+
+                var rooms = outlineRecogEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var marks = markRecogEngine.Elements.Cast<ThIfcTextNote>().ToList();
+
+                var roomEngine = new ThRoomBuilderEngine();
+                roomEngine.Build(rooms, marks);
+
+                Rooms = rooms;
+
+                Clean();
+
+                Rooms.ForEach(o =>
+                {
+                    if (string.IsNullOrEmpty(o.Name) && o.Tags.Count > 0)
+                    {
+                        o.Name = string.Join(";", o.Tags.ToArray());
+                    }
+                });
+
+                Rooms.ForEach(r => transformer.Reset(r.Boundary)); //还原
             }
             else
             {

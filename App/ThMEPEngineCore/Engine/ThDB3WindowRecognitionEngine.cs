@@ -1,12 +1,13 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -31,7 +32,18 @@ namespace ThMEPEngineCore.Engine
         {
             var engine = new ThDB3WindowExtractionEngine();
             engine.Extract(database);
-            Recognize(engine.Results, polygon);
+
+            // 创建偏移矩阵
+            var transformer = new ThMEPOriginTransformer(
+                engine.Results.Select(o=>o.Geometry).ToCollection());
+
+            // 移动
+            var newPts = transformer.Transform(polygon);
+            engine.Results.ForEach(e => transformer.Transform(e.Geometry));
+            Recognize(engine.Results, newPts);
+
+            // 还原
+            Elements.ForEach(e => transformer.Reset(e.Outline));
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)

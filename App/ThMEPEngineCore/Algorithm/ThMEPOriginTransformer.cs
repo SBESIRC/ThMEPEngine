@@ -74,6 +74,12 @@ namespace ThMEPEngineCore.Algorithm
             TransformBy(ref point, matrix);
         }
 
+        public Point3d Reset(Point3d point)
+        {
+            var matrix = Displacement.Inverse();
+            return point.TransformBy(matrix);
+        }
+
         private void TransformBy(DBObjectCollection objs, Matrix3d matrix)
         {
             objs.Cast<Entity>().ForEachDbObject(e => e.TransformBy(matrix));

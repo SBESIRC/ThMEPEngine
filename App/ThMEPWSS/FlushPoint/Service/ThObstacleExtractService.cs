@@ -68,15 +68,18 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             if (pts.Count >= 3)
             {
-                var objs = BlkEntityDic.SelectMany(o => o.Value).ToCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(objs);
-                var filterObjs = spatialIndex.SelectCrossingPolygon(pts);
-
+                var center = pts.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(center);
+                var newPts = transformer.Transform(pts);
                 var keys = BlkEntityDic.Keys.ToList();
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    var values = BlkEntityDic[keys[i]].Where(e => filterObjs.Contains(e)).ToList();
-                    BlkEntityDic[keys[i]] = values;
+                    var objs = BlkEntityDic[keys[i]].ToCollection();
+                    transformer.Transform(objs);
+                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(objs);
+                    objs = spatialIndex.SelectCrossingPolygon(newPts);
+                    transformer.Reset(objs);
+                    BlkEntityDic[keys[i]] = objs.Cast<Curve>().ToList();
                 }
             }
         }

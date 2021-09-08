@@ -109,6 +109,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 return;
             }
+            THLayoutFlushPointCmd.FlushPointVM.Parameter.BlockNameDict= 
+                uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             uiFlushPoint = new FlushPointUI(THLayoutFlushPointCmd.FlushPointVM);
             AcadApp.ShowModelessWindow(uiFlushPoint);
         }

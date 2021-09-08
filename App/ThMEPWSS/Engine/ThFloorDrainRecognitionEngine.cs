@@ -1,12 +1,14 @@
-﻿using NFox.Cad;
-using System;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Engine
@@ -14,9 +16,11 @@ namespace ThMEPWSS.Engine
     public class ThFloorDrainExtractionEngine : ThDistributionElementExtractionEngine, IDisposable
     {
         public bool BlockObbSwitch { get; set; } // true->获取块的Obb,false->获取块
+        public HashSet<string> BlkNames { get; set; }
         public ThFloorDrainExtractionEngine()
         {
             BlockObbSwitch = true;
+            BlkNames = new HashSet<string>();
         }
         public void Dispose()
         {     
@@ -28,6 +32,7 @@ namespace ThMEPWSS.Engine
             var visitor = new ThFloorDrainExtractionVisitor()
             {
                 BlockObbSwitch = this.BlockObbSwitch,
+                BlkNames = BlkNames,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
@@ -49,39 +54,55 @@ namespace ThMEPWSS.Engine
     }
     public class ThFloorDrainRecognitionEngine : ThDistributionElementRecognitionEngine
     {
-        public bool FilterSwitch { get; set; }
         public double OffsetDis { get; set; }
+        public bool FilterSwitch { get; set; }
+        public HashSet<string> BlkNames { get; set; }
         public ThFloorDrainRecognitionEngine()
         {
-            FilterSwitch = false;
             OffsetDis = 300;
+            FilterSwitch = false;
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThFloorDrainExtractionEngine();
-            engine.Extract(database);
-            engine.ExtractFromMS(database);
-            var originDatas = engine.Results;
-            if (polygon.Count > 0)
+            var engine = new ThFloorDrainExtractionEngine()
             {
-                var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                originDatas = originDatas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+                BlkNames = BlkNames,
+            };
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
+        }
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThFloorDrainExtractionEngine()
+            {
+                BlkNames = BlkNames,
+            };
+            engine.ExtractFromMS(database);
+            Recognize(engine.Results, polygon);
+        }
+        public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
+        {
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            var center = polygon.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            transformer.Transform(objs);
+            var newPts = transformer.Transform(polygon);
+            if (newPts.Count > 0)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                objs = spatialIndex.SelectCrossingPolygon(polygon);                
             }
-
             if (FilterSwitch)
             {
-                var filters = Filter(originDatas.Select(o => o.Geometry).ToCollection());
-                originDatas = originDatas.Where(o => filters.Contains(o.Geometry)).ToList();
+                objs = Filter(objs);
             }
-
+            transformer.Reset(objs);
             // 通过获取的OriginData 分类
-            Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
+            Elements.AddRange(objs.Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x}));
         }
-
         private DBObjectCollection Filter(DBObjectCollection geometires)
         {
+            // 把地漏邻近范围的地漏过滤掉
             var results = new DBObjectCollection();
             while (geometires.Count > 0)
             {
@@ -105,11 +126,6 @@ namespace ThMEPWSS.Engine
                 searchObjs.Cast<Entity>().ForEach(o => geometires.Remove(o));
             }
             return results;
-        }
-
-        public override void RecognizeMS(Database database, Point3dCollection polygon)
-        {
-            throw new NotImplementedException();
-        }
+        } 
     }
 }

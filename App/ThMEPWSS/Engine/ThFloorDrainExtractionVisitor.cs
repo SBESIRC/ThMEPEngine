@@ -11,16 +11,14 @@ namespace ThMEPWSS.Engine
 {
     public class ThFloorDrainExtractionVisitor : ThDistributionElementExtractionVisitor
     {
-        public List<string> BlkNames { get; set; }
-        public Func<string, List<string>, bool> JudgeBlkNameExisted {get;set;}
+        public HashSet<string> BlkNames { get; set; }
+        public Func<string, HashSet<string>, bool> JudgeBlkNameExisted {get;set;}
         public bool BlockObbSwitch { get; set; }
         public ThFloorDrainExtractionVisitor()
         {
-            BlkNames = new List<string>() { "地漏", "W-drain-3", "W-drain-4", "$TwtSys$00000141", 
-                "$TwtSys$00000137", "$TwtSys$00000329", "$TwtSys$00000327", "$TwtSys$00000328", 
-                "$TwtSys$00000543", "$TwtSys$00000571"};
-            JudgeBlkNameExisted = IsExisted;
             BlockObbSwitch = true;
+            JudgeBlkNameExisted = IsExisted;
+            BlkNames = new HashSet<string>();
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -41,7 +39,7 @@ namespace ThMEPWSS.Engine
         }
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            if (IsDistributionElement(blkref))
+            if (IsDistributionElement(blkref) && CheckLayerValid(blkref))
             {
                 if(BlockObbSwitch)
                 {
@@ -77,7 +75,7 @@ namespace ThMEPWSS.Engine
         }
 
 
-        private bool IsExisted(string blkName,List<string> blkNames)
+        private bool IsExisted(string blkName,HashSet<string> blkNames)
         {
             return blkNames.Where(o => blkName.ToUpper().Contains(o.ToUpper())).Any();
         }
