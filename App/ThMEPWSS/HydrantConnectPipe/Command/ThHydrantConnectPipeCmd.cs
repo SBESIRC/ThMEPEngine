@@ -111,7 +111,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     List<Line> loopLines = new List<Line>();
                     List<Line> branchLines = new List<Line>();
                     ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
-                    var pathService = new ThCreateHydrantPathService(); 
+                    var pathService = new ThCreateHydrantPathService();
                     foreach (var shearWall in shearWalls)
                     {
                         pathService.SetObstacle(shearWall.Outline);
@@ -189,7 +189,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                         brLine.Draw(database);
                         if (ConfigInfo.isSetupValve)
                         {
-                            brLine.InsertValve(database);
+                            brLine.InsertValve(database, ConfigInfo.strMapScale);
                         }
 
                         if (ConfigInfo.isMarkSpecif)

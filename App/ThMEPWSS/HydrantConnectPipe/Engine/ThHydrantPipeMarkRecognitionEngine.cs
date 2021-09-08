@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -9,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.HydrantConnectPipe.Model;
 
 namespace ThMEPWSS.HydrantConnectPipe.Engine
@@ -20,10 +23,21 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var results = acadDatabase.ModelSpace.OfType<BlockReference>().Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName()));
+                var results = acadDatabase.ModelSpace.OfType<BlockReference>().Where(o => IsHYDTPipeLayer(o.Layer) && IsValve(o.GetEffectiveName())).ToCollection();
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
-                DBobj = spatialIndex.SelectCrossingPolygon(selectArea);
+                var map = new Dictionary<BlockReference, Polyline>();
+                results.Cast<BlockReference>().ForEach(b => map.Add(b, b.ToOBB(b.BlockTransform)));
+
+                var obbs = map.Values.ToCollection();
+                //var center = selectArea.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(obbs);
+                var newPts = transformer.Transform(selectArea);
+                transformer.Transform(obbs);
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(obbs);
+                var querys = spatialIndex.SelectCrossingPolygon(newPts);
+
+                DBobj = map.Where(o => querys.Contains(o.Value)).Select(o=>o.Key).ToCollection();
             }
         }
         public List<ThHydrantPipeMark> GetPipeMarks()
@@ -52,7 +66,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
 
         private bool IsValve(string valve)
         {
-            return valve.ToUpper() == "消火栓环管标记";
+            return valve.Contains("消火栓环管标记");
         }
     }
 }
