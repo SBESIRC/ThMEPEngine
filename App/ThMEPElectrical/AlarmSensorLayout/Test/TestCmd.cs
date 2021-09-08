@@ -1,32 +1,18 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Electrical;
-using NetTopologySuite.Geometries;
-using ThCADCore.NTS;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.AlarmSensorLayout.Data;
-using ThMEPElectrical.AlarmSensorLayout.Sensorlayout;
-using ThMEPElectrical.AlarmSensorLayout.Method;
-using DotNetARX;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO.GeoJSON;
-using CLI;
-using NetTopologySuite.Operation.OverlayNG;
-using System.Diagnostics;
-using NetTopologySuite.Algorithm.Locate;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
-using NetTopologySuite.Algorithm;
+using ThMEPElectrical.AlarmSensorLayout.Data;
 using ThMEPElectrical.AlarmSensorLayout.Command;
+using ThMEPElectrical.AlarmSensorLayout.Sensorlayout;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Test
 {
@@ -139,7 +125,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
         //            if(area.Contains(layoutNTS))
         //                layouts.Add(layoutNTS);
         //        }
-                    
+
         //        //输入区域
         //        var input_Area = new InputArea(area, layouts);
         //        //输入参数

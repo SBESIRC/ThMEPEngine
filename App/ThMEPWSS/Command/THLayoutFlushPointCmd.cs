@@ -2,9 +2,13 @@
 using NFox.Cad;
 using AcHelper;
 using AcHelper.Commands;
-using ThMEPWSS.ViewModel;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPWSS.ViewModel;
 
 #if (ACAD2016 || ACAD2018)
 using CLI;
@@ -13,12 +17,8 @@ using System.Linq;
 using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPWSS.FlushPoint;
-using ThMEPEngineCore.Model;
 using ThMEPWSS.FlushPoint.Data;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
 using ThMEPWSS.FlushPoint.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 #endif
 
 namespace ThMEPWSS.Command
