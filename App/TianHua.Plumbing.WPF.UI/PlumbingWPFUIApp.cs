@@ -1,8 +1,13 @@
-﻿using ThMEPWSS.Command;
+﻿using Linq2Acad;
+using ThMEPWSS.Command;
 using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.CAD;
+using ThMEPWSS.FlushPoint.Data;
 using Autodesk.AutoCAD.Runtime;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
+using Autodesk.AutoCAD.DatabaseServices;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -188,6 +193,39 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new DrainageSystemSupplyAxonometricUI();
             AcadApp .ShowModelessWindow(ui);
 
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractDrainageWell", CommandFlags.Modal)]
+        public void THExtractDrainageWell()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var per = AcHelper.Active.Editor.GetEntity("请框选一个范围");
+                if(per.Status!=Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var entity = acadDb.Element<Entity>(per.ObjectId);
+                if(entity is Polyline poly)
+                {
+                    var pts = poly.EntityVertices();
+                    var drainageWellBlkNames = new List<string>();
+                    var blkNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+                    if (blkNameDict.ContainsKey("集水井"))
+                    {
+                        drainageWellBlkNames = blkNameDict["集水井"];
+                    }
+                    var drainFacilityExtractor = new ThDrainFacilityExtractor()
+                    {
+                        ColorIndex = 1,
+                        DrainageBlkNames = drainageWellBlkNames
+                    };
+                    drainFacilityExtractor.Extract(acadDb.Database, pts);
+                    drainFacilityExtractor.CollectingWells.CreateGroup(acadDb.Database, 5);
+                    drainFacilityExtractor.DrainageDitches.CreateGroup(acadDb.Database, 6);
+                }
+            }
         }
     }
 }

@@ -159,6 +159,10 @@ namespace ThMEPWSS.FlushPoint.Data
             var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
             transformer.Transform(objs);
+            var newPts = transformer.Transform(pts);
+            var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(objs);
+            objs = spatialIndex.SelectCrossingPolygon(newPts);
+
             var breakService = new ThBreakDrainageFacilityService();
             breakService.Break(objs);
             CollectingWells = breakService.CollectingWells;
