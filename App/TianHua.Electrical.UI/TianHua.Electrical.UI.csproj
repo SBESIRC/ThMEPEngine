@@ -71,6 +71,9 @@
     <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
+    <Compile Include="FireAlarm\uiThFireAlarm.xaml.cs">
+      <DependentUpon>uiThFireAlarm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fmBasementLighting.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -246,6 +249,10 @@
   <ItemGroup />
   <ItemGroup>
     <Page Include="CapitalConverter\CapitalConverterUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FireAlarm\uiThFireAlarm.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

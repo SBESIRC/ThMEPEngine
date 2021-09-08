@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 
-namespace TianHua.Plumbing.WPF.UI.UI
+namespace TianHua.Electrical.UI
 {
     /// <summary>
     /// uiThFireAlarm.xaml 的交互逻辑
