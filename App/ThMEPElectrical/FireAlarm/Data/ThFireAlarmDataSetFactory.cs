@@ -1,16 +1,17 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using ThMEPEngineCore.Model;
+﻿using System;
+using System.Linq;
+using ThCADExtension;
 using ThMEPEngineCore.Data;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
-using NFox.Cad;
 
 namespace FireAlarm.Data
 {
@@ -27,6 +28,7 @@ namespace FireAlarm.Data
             // Beam、DoorOpening、Railing、FireproofShutter(防火卷帘)
             UpdateTransformer(collection);
             var vm = Extract(database); // visitor manager,提取的是原始数据
+            vm.MoveToOrigin(Transformer); // 移动到原点
 
             //先提取楼层框线
             var storeyExtractor = new ThFaEStoreyExtractor()
@@ -92,6 +94,7 @@ namespace FireAlarm.Data
                     {
                         ElementLayer = "AI-门",
                         Transformer = Transformer,
+                        VisitorManager = vm,
                     },
                     new ThFaRailingExtractor()
                     {
@@ -166,6 +169,33 @@ namespace FireAlarm.Data
                     iTransformer.Reset();
                 }
             });
+            MoveToXYPlane(Geos);
+        }
+
+        public void MoveToXYPlane(List<ThGeometry> geos)
+        {
+            geos.ForEach(g =>
+            {
+                if(g.Boundary!=null)
+                {
+                    if (g.Boundary is Polyline polyline)
+                    {
+                        var vec = new Vector3d(0, 0, -polyline.GetPoint3dAt(0).Z);
+                        var mt = Matrix3d.Displacement(vec);
+                        g.Boundary.TransformBy(mt);
+                    }
+                    else if (g.Boundary is MPolygon mPolygon)
+                    {
+                        var vec = new Vector3d(0, 0, -1.0 * mPolygon.Shell().GetPoint3dAt(0).Z);
+                        var mt = Matrix3d.Displacement(vec);
+                        g.Boundary.TransformBy(mt);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            });
         }
 
         private ThBuildingElementVisitorManager Extract(Database database)
@@ -179,10 +209,14 @@ namespace FireAlarm.Data
             extractor.Accept(visitors.DB3BeamVisitor);
             extractor.Accept(visitors.DB3RailingVisitor);
             extractor.Accept(visitors.ColumnVisitor);
-            extractor.Accept(visitors.ShearWallVisitor);            
+            extractor.Accept(visitors.ShearWallVisitor);
+            extractor.Accept(visitors.DB3CurtainWallVisitor);
+            extractor.Accept(visitors.DB3DoorMarkVisitor);
+            extractor.Accept(visitors.DB3DoorStoneVisitor);
             extractor.Extract(database);
             return visitors;
         }
+
         protected override ThMEPDataSet BuildDataSet()
         {
             return new ThMEPDataSet()

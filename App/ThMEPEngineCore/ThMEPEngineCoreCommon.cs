@@ -53,6 +53,7 @@ namespace ThMEPEngineCore
         public static string BEAM_GEOMETRY_DISTANCETOFLOOR = "Beam_Geometry_DistanceToFloor";
 
         // 颜色
+        public const int COLORINDEX_BEAM_TEXT = 7;
         public const int COLORINDEX_BEAM_PRIMARY = 1;
         public const int COLORINDEX_BEAM_HALFPRIMARY = 2;
         public const int COLORINDEX_BEAM_OVERHANGINGPRIMARY = 3;

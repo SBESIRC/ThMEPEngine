@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 using CLI;
 
@@ -35,33 +36,31 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //确定每个厕所在墙上的给水点位,调整厕所方向
             ThDrainageSDCoolPtService.findCoolSupplyPt(roomList, toiletList, out var aloneToilet);
 
-            //foreach (var terminal in toiletList)
-            //{
-            //    terminal.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C"));
+            foreach (var terminal in toiletList)
+            {
+                terminal.SupplyCoolOnWall.ForEach(pt => DrawUtils.ShowGeometry(pt, "l0SupplyOnWall", 50, 35, 20, "C"));
 
-            //    Point3d leftBPt = terminal.Boundary.GetPoint3dAt(0);
-            //    Point3d leftPt = terminal.Boundary.GetPoint3dAt(1);
-            //    Point3d rightPt = terminal.Boundary.GetPoint3dAt(2);
-            //    Point3d rightPt2 = terminal.Boundary.GetPoint3dAt(3);
+                Point3d leftBPt = terminal.Boundary.GetPoint3dAt(0);
+                Point3d leftPt = terminal.Boundary.GetPoint3dAt(1);
+                Point3d rightPt = terminal.Boundary.GetPoint3dAt(2);
+                Point3d rightPt2 = terminal.Boundary.GetPoint3dAt(3);
 
-            //    DrawUtils.ShowGeometry(leftBPt, "0", "l1bounary", 70, 25, 20);
-            //    DrawUtils.ShowGeometry(leftPt, "1", "l1bounary", 30, 25, 20);
-            //    DrawUtils.ShowGeometry(rightPt, "2", "l1bounary", 213, 25, 20);
-            //    DrawUtils.ShowGeometry(rightPt2, "3", "l1bounary", 152, 25, 20);
+                DrawUtils.ShowGeometry(leftBPt, "0", "l1bounary", 70, 25, 20);
+                DrawUtils.ShowGeometry(leftPt, "1", "l1bounary", 30, 25, 20);
+                DrawUtils.ShowGeometry(rightPt, "2", "l1bounary", 213, 25, 20);
+                DrawUtils.ShowGeometry(rightPt2, "3", "l1bounary", 152, 25, 20);
 
-            //    DrawUtils.ShowGeometry(leftBPt, "l1bounary", 70, 25, 20);
-            //    DrawUtils.ShowGeometry(leftPt, "l1bounary", 30, 25, 20);
-            //    DrawUtils.ShowGeometry(rightPt, "l1bounary", 213, 25, 20);
-            //    DrawUtils.ShowGeometry(rightPt2, "l1bounary", 152, 25, 20);
+                DrawUtils.ShowGeometry(leftBPt, "l1bounary", 70, 25, 20);
+                DrawUtils.ShowGeometry(leftPt, "l1bounary", 30, 25, 20);
+                DrawUtils.ShowGeometry(rightPt, "l1bounary", 213, 25, 20);
+                DrawUtils.ShowGeometry(rightPt2, "l1bounary", 152, 25, 20);
 
-            //    terminal.SupplyCool.ForEach(x => DrawUtils.ShowGeometry(x, "l1coolPt", 150, 30, 20, "X"));
-            //}
+                terminal.SupplyCool.ForEach(x => DrawUtils.ShowGeometry(x, "l1coolPt", 150, 30, 20, "X"));
+            }
+            roomList.ForEach(x => DrawUtils.ShowGeometry(x.outline, "l0room", 21));
 
             ////debug
             //return allLink;
-
-
-
 
             var supplyStart = dataSet.SupplyStart.Pt;
             toiletList.ForEach(x => x.AreaId = dataSet.AreaID);

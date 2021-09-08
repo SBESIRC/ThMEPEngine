@@ -52,16 +52,8 @@ namespace FireAlarm.Data
         private DBObjectCollection ExtractDb3Window(Point3dCollection pts)
         {
             var db3Windows = new DBObjectCollection();
-            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
-
             var windowEngine = new ThDB3WindowRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);
             windowEngine.Recognize(Db3ExtractResults, newPts);
             db3Windows = windowEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
             return db3Windows;
@@ -73,7 +65,6 @@ namespace FireAlarm.Data
                 ElementLayer = this.ElementLayer,
             };
             instance.Extract(database, pts);
-
             instance.Polys.ForEach(o => Transformer.Transform(o));
             return instance.Polys.ToCollection();
         }

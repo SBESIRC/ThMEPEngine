@@ -1,11 +1,12 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -34,6 +35,16 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
+            // 提取
+            var engine = new ThDB3DoorExtractionEngine();
+            engine.Extract(database);
+
+            // 创建偏移矩阵
+            var transformer = new ThMEPOriginTransformer(
+                engine.Results
+                .Where(o=>o is ThRawDoorStone)
+                .Select(o=>o.Geometry).ToCollection());
+
             // 构件索引服务
             ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
             {
@@ -43,12 +54,28 @@ namespace ThMEPEngineCore.Engine
                 BuiltInCategory.ShearWall,
                 BuiltInCategory.Window
             });
+            ThSpatialIndexCacheService.Instance.Transformer = transformer;
             ThSpatialIndexCacheService.Instance.Build(database, polygon);
 
-            // 识别门
-            var engine = new ThDB3DoorExtractionEngine();
-            engine.Extract(database);
-            Recognize(engine.Results, polygon);
+            // 移动
+            var newPts = transformer.Transform(polygon);
+            engine.Results.ForEach(e =>
+            {
+                if(e is ThRawDoorStone doorStone)
+                {
+                    transformer.Transform(doorStone.Geometry);
+                }
+                else if(e is ThRawDoorMark doorMark)
+                {
+                    transformer.Transform(doorMark.Data as Entity);
+                }
+            });
+
+            // 识别
+            Recognize(engine.Results, newPts);
+
+            // 还原
+            Elements.ForEach(e => transformer.Reset(e.Outline));
         }
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {

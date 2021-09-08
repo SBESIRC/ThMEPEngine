@@ -14,13 +14,13 @@ namespace ThMEPEngineCore.Service
             {
                 return acadDatabase.Layers
                     .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsRailingLayer(o.Name))
+                    .Where(o => IsDrainageWellLLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
         }
 
-        private static bool IsRailingLayer(string name)
+        private static bool IsDrainageWellLLayer(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)

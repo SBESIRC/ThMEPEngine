@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
 using GeometryExtensions;
 
 using ThCADCore.NTS;
@@ -42,6 +43,13 @@ namespace ThMEPWSS
                     return;
                 }
 
+                //取x轴
+                var xPts = SelectLinePoints("\n请选x轴起点", "\n请选x轴终点");
+                if (xPts.Item1 == xPts.Item2)
+                {
+                    return;
+                }
+
                 var frame = toFrame(regionPts);
                 if (frame == null || frame.NumberOfVertices == 0)
                 {
@@ -55,6 +63,9 @@ namespace ThMEPWSS
                     return;
                 }
 
+                var xVector = (xPts.Item2 - xPts.Item1).GetNormal();
+
+                var dataSet = new ThDrainageSDDataExchange();
                 var areaId = Guid.NewGuid().ToString();
                 var supplyPt = new ThDrainageSDCoolSupplyStart(startPt, areaId);
                 var region = new ThDrainageSDRegion(frame, areaId);
@@ -68,7 +79,7 @@ namespace ThMEPWSS
                 //}
                 //var pts = transFrame.VerticesEx(100.0);
 
-                var dataSet = new ThDrainageSDDataExchange();
+
                 dataSet.AreaID = areaId;
                 dataSet.SupplyStart = supplyPt;
                 dataSet.Region = region;
@@ -106,6 +117,19 @@ namespace ThMEPWSS
                     });
                 }
 
+                var matrix = ThDrainageSDSpaceDirectionService.getMatrix(xVector, startPt);
+
+                allToiletList.ForEach(x => x.transformBy(matrix.Inverse()));
+                var columnExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThColumnExtractor)) as ThColumnExtractor;
+                columnExtractor.Columns.ForEach(x => x.TransformBy(matrix.Inverse()));
+                var shearwallExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThShearwallExtractor)) as ThShearwallExtractor;
+                shearwallExtractor.Walls.ForEach(x => x.TransformBy(matrix.Inverse()));
+                var ArchitectureExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThArchitectureExtractor)) as ThArchitectureExtractor;
+                ArchitectureExtractor.Walls.ForEach(x => x.TransformBy(matrix.Inverse()));
+                var roomExtractor = ThDrainageSDCommonService.getExtruactor(archiExtractor, typeof(ThDrainageToiletRoomExtractor)) as ThDrainageToiletRoomExtractor;
+                roomExtractor.Rooms.ForEach(x => x.Boundary.TransformBy(matrix.Inverse()));
+
+
                 var allLink = ThDrainageSDConnectCoolSupplyEngine.ThConnectCoolSupplyEngine(archiExtractor, allToiletList, dataSet);
                 DrawUtils.ShowGeometry(allLink, "l07finalLink", 142, 30);
 
@@ -125,6 +149,13 @@ namespace ThMEPWSS
                 allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));
 
                 var finalLink = ThDrainageSDShutValveEngine.cutPipe(allShutValve, allLink);
+
+                //turn result back
+                finalLink.ForEach(x => x.TransformBy(matrix));
+                allStack = allStack.Select(x => x.TransformBy(matrix)).ToList();
+                allAngleValves.ForEach(x => x.TransformBy(matrix));
+                allShutValve.ForEach(x => x.TransformBy(matrix));
+                allDims.ForEach(x => x.TransformBy(matrix));
 
                 //final print
                 ThDrainageSDInsertService.InsertConnectPipe(finalLink);
@@ -199,6 +230,34 @@ namespace ThMEPWSS
                 return Tuple.Create(leftDownPt, leftDownPt);
             }
         }
+
+        private Tuple<Point3d, Point3d> SelectLinePoints(string commandSuggestStrLeft, string commandSuggestStrRight)
+        {
+            var ptLeftRes = Active.Editor.GetPoint(commandSuggestStrLeft);
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+
+            var ptRightRes = Interaction.GetLineEndPoint(commandSuggestStrRight, leftDownPt);
+            if (ptRightRes != Point3d.Origin)
+            {
+                var rightTopPt = ptRightRes;
+                leftDownPt = leftDownPt.TransformBy(Active.Editor.UCS2WCS());
+                rightTopPt = rightTopPt.TransformBy(Active.Editor.UCS2WCS());
+                return Tuple.Create(leftDownPt, rightTopPt);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+
 
         private Point3d SelectPoint(string commandSuggestStr)
         {

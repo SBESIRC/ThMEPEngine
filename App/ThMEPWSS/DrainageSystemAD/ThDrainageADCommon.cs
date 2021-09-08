@@ -13,8 +13,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public static int length_pipe_end = 270;
         public static int length_stack_end_break = 70;
 
-        public static int diameterDim_move_x = 50;
+        public static int diameterDim_move_x = 25;
         public static int diameterDim_move_y = 30;
+        public static int diameterDim_blk_x = 440;
+        public static int diameterDim_blk_y = 180;
         public static string diameterDN_visi_pre = "DN";
 
         public static int tol_diaDim = 350;
@@ -181,6 +183,27 @@ namespace ThMEPWSS.DrainageSystemDiagram
                                                             {125,(0,1.5)},
                                                             {150,(0,1.5)},
                                                             {200,(0,1.5)}
+                                                        };
+
+        public static Dictionary<string, int> cool_supply_leafPipeDiam = new Dictionary<string, int>
+                                                        {
+                                                            {"A-Toilet-1",15 },
+                                                            {"A-Toilet-2",15 },
+                                                            {"A-Toilet-3",15 },
+                                                            {"A-Toilet-4",15},
+                                                            {"A-Kitchen-3",15},
+                                                            {"A-Kitchen-4",15},
+                                                            {"小便器",15},
+                                                            {"A-Toilet-5",15},
+                                                            {"蹲便器",25 },
+                                                            {"A-Kitchen-9",15 },
+                                                            {"A-Toilet-6",15 },
+                                                            {"A-Toilet-7",15 },
+                                                            {"A-Toilet-8",15 },
+                                                            {"A-Toilet-9",15 },
+                                                            {"儿童坐便器",15 },
+                                                            {"儿童洗脸盆",15 },
+                                                            {"儿童小便器",15 },
                                                         };
     }
 }

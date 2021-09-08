@@ -68,7 +68,5 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 }
             }
         }
-
-        
     }
 }

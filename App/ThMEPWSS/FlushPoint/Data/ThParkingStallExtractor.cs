@@ -8,13 +8,16 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
+using NFox.Cad;
 
 namespace ThMEPWSS.FlushPoint.Data
 {
     public class ThParkingStallExtractor : ThExtractorBase, IPrint
     {
         public List<Curve> ParkingStalls { get; set; }
-        private List<string> BlockNames { get; set; }
+        public List<string> BlockNames { get; set; }
         private List<string> LayerNames { get; set; }
         public ThParkingStallExtractor()
         {
@@ -43,10 +46,19 @@ namespace ThMEPWSS.FlushPoint.Data
                 var visitor = new ThParkingStallExtractionVisitor();
                 visitor.CheckQualifiedLayer = CheckLayerNameQualified;
                 visitor.CheckQualifiedBlockName = (Entity e) => true;
+                engine.Visitor = visitor;
                 engine.Recognize(database, pts);
                 engine.RecognizeMS(database, pts);
                 ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
             }
+            DuplicatedRemove();
+        }
+
+        private void DuplicatedRemove()
+        {
+            ParkingStalls = ParkingStalls.Distinct().ToList();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(ParkingStalls.ToCollection());
+            ParkingStalls = spatialIndex.Geometries.Values.ToCollection().Cast<Curve>().ToList();
         }
 
         public override List<ThGeometry> BuildGeometries()

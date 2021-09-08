@@ -198,9 +198,9 @@ namespace ThMEPWSS.Common
             var sqrKross = kross * kross;
             var sqrLen0 = D0.X * D0.X + D0.Y * D0.Y;
             var sqrLen1 = D1.X * D1.X + D1.Y * D1.Y;
-            var sqlEpsilon = 1;
+            var sqlEpsilon = 0.00001;
             //有一个交点
-            if (sqrKross >= sqlEpsilon * sqrLen0 * sqrLen1)
+            if (sqrKross > sqlEpsilon * sqrLen0 * sqrLen1)
             {
                 var s = (E.X * D1.Y - E.Y * D1.X) / kross;
                 intersectionPoint = P0 + s * D0;

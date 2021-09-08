@@ -15,9 +15,12 @@ namespace ThMEPWSS.FlushPoint.Service
         private double leaderXForwardLength { get; set; }
         private double leaderYForwardLength { get; set; }
 
+        public ObjectIdList ObjIds { get; set; }
+
         public ThLayoutWashPointMarkService(WashPointLayoutData layoutData)
         {
             LayoutData = layoutData;
+            ObjIds = new ObjectIdList();
             textSize = LayoutData.GetMarkTextSize();
             leaderXForwardLength = LayoutData.GetLeaderXForwardLength();
             leaderYForwardLength = LayoutData.GetLeaderYForwardLength();
@@ -58,9 +61,9 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.Linetype = "ByLayer";
                 dbText.LineWeight = LineWeight.ByLayer;
 
-                acadDb.ModelSpace.Add(firstLine);
-                acadDb.ModelSpace.Add(secondLine);
-                acadDb.ModelSpace.Add(dbText);
+                ObjIds.Add(acadDb.ModelSpace.Add(firstLine));
+                ObjIds.Add(acadDb.ModelSpace.Add(secondLine));
+                ObjIds.Add(acadDb.ModelSpace.Add(dbText));
             }
         }
         private Dictionary<Point3d, string> BuildPointCode()

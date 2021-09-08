@@ -1,6 +1,8 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using AcHelper.Commands;
 using GeometryExtensions;
@@ -10,6 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
+using ThMEPElectrical.SystemDiagram.Extension;
 
 namespace ThMEPElectrical.Command
 {
@@ -79,6 +82,19 @@ namespace ThMEPElectrical.Command
 
                 //获取块引擎附加信息
                 var datas = BlockReferenceEngine.QueryAllOriginDatas();
+
+                var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
+                var labelDB = labelEngine.Extract(acadDatabase.Database, pts);
+                var labelLine = labelEngine.CreateLabelLineList();//----12s----
+
+                var textEngine = new ThExtractLabelText();//提取文字
+                var textCollection = textEngine.Extract(acadDatabase.Database, pts);
+                //var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
+
+                ThQuantityMarkExtension.ReSet();
+                ThQuantityMarkExtension.SetGlobalLineData(labelLine);
+                ThQuantityMarkExtension.SetGlobalMarkData(textCollection);
+                ThQuantityMarkExtension.SetGlobalBlockIOData(datas.Where(o => o.Value.Count == 1 && o.Value[0].Key == "F" && o.Value[0].Value == "I/O").Select(o => acadDatabase.Database.GetBlockReferenceOBB(o.Key as BlockReference)).ToCollection());
 
                 //填充块数量到防火分区
                 diagram.SetGlobalData(acadDatabase.Database, datas, null);

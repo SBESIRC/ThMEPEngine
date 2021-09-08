@@ -29,18 +29,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 1);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
-                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                try
                 {
-                    continue;
+                    var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                    var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                    if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                    {
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
+                    {
+                        if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var line = new Line(pt1._pt, pt2._pt);
+                    lineList.Add(line);
                 }
-                if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                catch
                 {
-                    continue;
+                    ;
                 }
-                var line = new Line(pt1._pt, pt2._pt);
-                lineList.Add(line);
+                
             }
             lineList = CleanLaneLines3(lineList);
         }
@@ -91,65 +103,73 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var connectLine = new List<Line>();
             foreach(var line in lineList)
             {
-                var pt1 = new Point3dEx(line.StartPoint);
-                var pt2 = new Point3dEx(line.EndPoint);
-                var flag1 = true;
-                var flag2 = true;
-                foreach(var stop in stopPts)
+                try
                 {
-                    if(pt1._pt.DistanceTo(stop._pt) < 10)
+                    var pt1 = new Point3dEx(line.StartPoint);
+                    var pt2 = new Point3dEx(line.EndPoint);
+                    var flag1 = true;
+                    var flag2 = true;
+                    foreach (var stop in stopPts)
                     {
-                        flag1 = false;
-                        break;
-                    }
-                    if (pt2._pt.DistanceTo(stop._pt) < 10)
-                    {
-                        flag2 = false;
-                        break;
-                    }
-                }
-                if(line.Length < 50)
-                {
-                    continue;//把一些短线直接跳过
-                }
-                if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.HydrantPosition))
-                {
-                    foreach(var l in lineList)
-                    {
-                        if(l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < 150 && !l.Equals(line))
+                        if (pt1._pt.DistanceTo(stop._pt) < 10)
                         {
-                            var pts = new Point3dCollection();
-                            l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
-                            if(pts.Count > 0)
-                            {
-                                if (pts[0].DistanceTo(pt1._pt) < 150 && pts[0].DistanceTo(pt1._pt) > 1)
-                                {
-                                    connectLine.Add(new Line(pts[0], pt1._pt));
-                                }
-                            }
-                            
+                            flag1 = false;
+                            break;
+                        }
+                        if (pt2._pt.DistanceTo(stop._pt) < 10)
+                        {
+                            flag2 = false;
+                            break;
                         }
                     }
-                }
-                if(flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.HydrantPosition))
-                {
-                    foreach (var l in lineList)
+                    if (line.Length < 50)
                     {
-                        if (l.GetClosestPointTo(pt2._pt, false).DistanceTo(pt2._pt) < 150 && !l.Equals(line))
+                        continue;//把一些短线直接跳过
+                    }
+                    if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.HydrantPosition))
+                    {
+                        foreach (var l in lineList)
                         {
-                            var pts = new Point3dCollection();
-                            l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
-                            if (pts.Count > 0)
+                            if (l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < 150 && !l.Equals(line))
                             {
-                                if (pts[0].DistanceTo(pt2._pt) < 150 && pts[0].DistanceTo(pt2._pt) > 1)
+                                var pts = new Point3dCollection();
+                                l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
+                                if (pts.Count > 0)
                                 {
-                                    connectLine.Add(new Line(pts[0], pt2._pt));
+                                    if (pts[0].DistanceTo(pt1._pt) < 150 && pts[0].DistanceTo(pt1._pt) > 1)
+                                    {
+                                        connectLine.Add(new Line(pts[0], pt1._pt));
+                                    }
                                 }
-                            }
 
+                            }
+                        }
+                    }
+                    if (flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.HydrantPosition))
+                    {
+                        foreach (var l in lineList)
+                        {
+                            if (l.GetClosestPointTo(pt2._pt, false).DistanceTo(pt2._pt) < 150 && !l.Equals(line))
+                            {
+                                var pts = new Point3dCollection();
+                                l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
+                                if (pts.Count > 0)
+                                {
+                                    if (pts[0].DistanceTo(pt2._pt) < 150 && pts[0].DistanceTo(pt2._pt) > 1)
+                                    {
+                                        connectLine.Add(new Line(pts[0], pt2._pt));
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
+                catch
+                {
+                    ;
+                }
+                
             }
             foreach(var l in connectLine)
             {

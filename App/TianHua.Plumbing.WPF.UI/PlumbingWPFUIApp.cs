@@ -109,6 +109,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 return;
             }
+            THLayoutFlushPointCmd.FlushPointVM.Parameter.BlockNameDict= 
+                uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             uiFlushPoint = new FlushPointUI(THLayoutFlushPointCmd.FlushPointVM);
             AcadApp.ShowModelessWindow(uiFlushPoint);
         }
@@ -175,6 +177,17 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var ui = new uiPipeDrawControl();
             AcadApp.ShowModelessWindow(ui);
+        }
+
+        /// <summary>
+        /// 冷水给水轴侧
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THJSZC", CommandFlags.Modal)]
+        public void ThDrainageAxonoCoolSupply()
+        {
+            var ui = new DrainageSystemSupplyAxonometricUI();
+            AcadApp .ShowModelessWindow(ui);
+
         }
     }
 }

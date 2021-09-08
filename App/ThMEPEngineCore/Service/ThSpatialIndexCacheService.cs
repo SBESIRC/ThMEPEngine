@@ -26,7 +26,8 @@ namespace ThMEPEngineCore.Service
         public List<SpatialIndexFactory> Factories { get; set; }
         public void Build(Database database, Point3dCollection polygon)
         {
-            foreach(var factory in Factories)
+            Factories = new List<SpatialIndexFactory>();
+            foreach (var factory in Factories)
             {
                 factory.Transformer = Transformer;
                 factory.Create(database, polygon);
@@ -34,12 +35,13 @@ namespace ThMEPEngineCore.Service
         }
         public void Build(Dictionary<BuiltInCategory,DBObjectCollection> dict)
         {
-            foreach(var item in dict)
+            Factories = new List<SpatialIndexFactory>();
+            foreach (var item in dict)
             {
                 SpatialIndexFactory spatialIndex = null;
                 switch(item.Key)
                 {
-                    case BuiltInCategory.ArchitectureOutline:
+                    case BuiltInCategory.ArchitectureWall:
                         spatialIndex = new ArchitectureWallSpatialIndexFactory();
                         break;
                     case BuiltInCategory.ShearWall:
@@ -57,6 +59,7 @@ namespace ThMEPEngineCore.Service
                 }
                 if(spatialIndex!=null)
                 {
+                    spatialIndex.Transformer = Transformer;
                     spatialIndex.Create(item.Value);
                     Factories.Add(spatialIndex);
                 }

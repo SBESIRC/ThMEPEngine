@@ -500,11 +500,13 @@ namespace ThMEPEngineCore
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
 
+                var layerId = acadDatabase.Database.CreateBeamLayer();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
                 {
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_PRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -512,6 +514,7 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_HALFPRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -519,6 +522,7 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_OVERHANGINGPRIMARY;
                 }));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
@@ -526,13 +530,38 @@ namespace ThMEPEngineCore
                     var curve = n.Outline as Curve;
                     var clone = curve.WashClone();
                     acadDatabase.ModelSpace.Add(clone);
+                    clone.LayerId = layerId;
                     clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_SECONDARY;
                 }));
 
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
-                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var mark = CreateBeamMarkText(n);
+                    acadDatabase.ModelSpace.Add(mark);
+                    mark.LayerId = layerId;
+                    mark.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_TEXT;
+                }));
 
                 List<ThIfcBeam> allBeams = new List<ThIfcBeam>();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
@@ -780,60 +809,6 @@ namespace ThMEPEngineCore
                         o.SetDatabaseDefaults();
                         acadDatabase.ModelSpace.Add(o);
                     });
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THExtractDrainageWell", CommandFlags.Modal)]
-        public void THExtractDrainageWell()
-        {
-            using (var acadDb = AcadDatabase.Active())            
-            {
-                var frame = ThWindowInteraction.GetPolyline(
-                  PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                if (frame.Area < 1e-4)
-                {
-                    return;
-                }
-                var pts = frame.Vertices();
-                var center = pts.Envelope().CenterPoint();
-                var transformer = new ThMEPOriginTransformer(center);
-                var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
-
-                var drainageCurveExtraction = new ThDrainageWellExtractionEngine();
-                drainageCurveExtraction.Extract(acadDb.Database);
-                drainageCurveExtraction.Results.ForEach(o => transformer.Transform(o.Geometry));
-                var curveEngine = new ThDrainageWellRecognitionEngine();
-                curveEngine.Recognize(drainageCurveExtraction.Results,newPts);
-
-                var drainageBlkExtraction = new ThDrainageWellBlockExtractionEngine();
-                drainageBlkExtraction.Extract(acadDb.Database);
-                drainageBlkExtraction.Results.ForEach(o => transformer.Transform(o.Geometry));
-                var drainageBlkEngine = new ThDrainageWellBlockRecognitionEngine();
-                drainageBlkEngine.Recognize(drainageBlkExtraction.Results,newPts);
-
-                var objs = new DBObjectCollection();
-                curveEngine.Geos.ForEach(o => objs.Add(o));
-                drainageBlkEngine.Geos.Cast<BlockReference>().ForEach(o =>
-                {
-                    ThDrawTool.Explode(o)
-                        .Cast<Entity>()
-                        .Where(p => p is Line || p is Polyline)
-                        .ForEach(p => objs.Add(p));
-                });
-
-                var breakService = new ThBreakDrainageFacilityService();
-                breakService.Break(objs);
-                breakService.DrainageDitches.CreateGroup(acadDb.Database, 1);
-                breakService.CollectingWells.CreateGroup(acadDb.Database, 2);
-
-                foreach(Entity e in breakService.DrainageDitches)
-                {
-                    transformer.Reset(e);
-                }
-                foreach (Entity e in breakService.CollectingWells)
-                {
-                    transformer.Reset(e);
                 }
             }
         }

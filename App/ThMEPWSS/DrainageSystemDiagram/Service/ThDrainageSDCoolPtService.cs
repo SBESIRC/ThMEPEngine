@@ -41,6 +41,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         private static List<Point3d> findPtOnWall(List<Line> wallList, ThTerminalToilet terminal, int TolClosedWall, List<ThTerminalToilet> islandToilet)
         {
+            var moveTol = 0.01;
             List<string> noPriority = new List<string> { "A-Toilet-3", "A-Toilet-7", "给水角阀平面" };
             List<Point3d> ptOnWall = new List<Point3d>();
 
@@ -63,8 +64,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 //不是岛的情况
                 //岛也有可能反但是没有处理
-                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, turnCloseWallSet.Key);
-                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.Boundary = ThDrainageSDCommonService.turnBoundary(terminal.Boundary, turnCloseWallSet.Key);
+                terminal.setDir();
                 terminal.setInfo();
 
             }
@@ -74,7 +75,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
             if (closestWall != null)
             {
                 //靠墙
-                terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
+                foreach (var pt in terminal.SupplyCool)
+                {
+                    var ptOnWallTemp = closestWall.GetClosestPointTo(pt, false);
+                    ptOnWallTemp = ptOnWallTemp + terminal.Dir * moveTol;
+                    ptOnWall.Add(ptOnWallTemp);
+                }
+                //terminal.SupplyCool.ForEach(x => ptOnWall.Add(closestWall.GetClosestPointTo(x, false)));
             }
             else
             {   //岛，有可能反的
@@ -299,8 +306,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //转island boundary
             foreach (var terminal in needTurn)
             {
-                terminal.Boundary = ThTerminalToilet.turnBoundary(terminal.Boundary, 2);
-                terminal.Dir = (terminal.Boundary.GetPoint3dAt(0) - terminal.Boundary.GetPoint3dAt(1)).GetNormal();
+                terminal.Boundary = ThDrainageSDCommonService.turnBoundary(terminal.Boundary, 2);
+                terminal.setDir();
                 terminal.setInfo();
                 terminal.SupplyCoolOnWall = terminal.SupplyCool;
             }
@@ -437,7 +444,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         private static Point3d virtualSupplyPt(Polyline boundary, int turn, string type)
         {
 
-            var pl = ThTerminalToilet.turnBoundary(boundary, turn);
+            var pl = ThDrainageSDCommonService.turnBoundary(boundary, turn);
             var pt = ThTerminalToilet.CalculateSupplyCoolPoint(type, pl);
 
             return pt.First();

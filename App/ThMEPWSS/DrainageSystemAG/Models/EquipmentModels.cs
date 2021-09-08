@@ -82,7 +82,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     {
         public EnumEquipmentType enumEquipmentType { get; }
         public Point3d blockPosition { get; }
-        public Point3d blockCenterPoint { get; }
+        public Point3d blockCenterPoint { get; set; }
         public BlockReference equmBlockReference { get; }
         public EnumRoomType enumRoomType { get; set; }
         public string roomSpaceId { get; set; }
@@ -203,6 +203,11 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         /// </summary>
         [Description("污废合流立管")]
         sewageWasteRiser =13,
+        /// <summary>
+        /// 马桶
+        /// </summary>
+        [Description("马桶")]
+        toilet =14,
         /// <summary>
         /// 水管井
         /// </summary>

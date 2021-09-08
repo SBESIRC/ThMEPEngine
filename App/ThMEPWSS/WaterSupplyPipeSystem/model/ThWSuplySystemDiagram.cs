@@ -67,6 +67,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             foreach (var line1 in lineList)
             {
                 line1.LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+                line1.ColorIndex = (int)ColorIndex.BYLAYER;
             }
             PipeX = pt1.X;
             PipeY = pt2.Y;
@@ -123,8 +124,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             ptLs[2] = new Point3d(GetPipeX() + 5500 + 600 * i, ptLs[1].Y, 0);
             var polyLine = new Polyline3d(0, new Point3dCollection(ptLs), false)
             {
-                LayerId = DbHelper.GetLayerId("W-WSUP-NOTE")
-            };
+                LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
+                ColorIndex = (int)ColorIndex.BYLAYER
+        };
             acadDatabase.CurrentSpace.Add(polyLine);
 
             var textString = "";
@@ -156,7 +158,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             ptPipeNumLs[2] = new Point3d(GetPipeX(), ptPipeNumLs[0].Y - 200 - (PipeNums - i - 1) * 600, 0);
             var PipePolyLine = new Polyline3d(0, new Point3dCollection(ptPipeNumLs), false)
             {
-                LayerId = DbHelper.GetLayerId("W-NOTE")
+                LayerId = DbHelper.GetLayerId("W-NOTE"),
+                ColorIndex = (int)ColorIndex.BYLAYER
             };
             acadDatabase.CurrentSpace.Add(PipePolyLine);
 

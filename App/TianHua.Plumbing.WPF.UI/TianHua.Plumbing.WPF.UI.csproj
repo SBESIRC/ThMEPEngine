@@ -93,6 +93,9 @@
     <Compile Include="Converter\ArrangePositionBooleanConverter.cs" />
     <Compile Include="PlumbingWPFUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
+      <DependentUpon>DrainageSystemSupplyAxonometricUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\FireHydrant.xaml.cs">
       <DependentUpon>FireHydrant.xaml</DependentUpon>
     </Compile>
@@ -194,6 +197,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\FireHydrant.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

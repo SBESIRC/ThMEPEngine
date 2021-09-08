@@ -14,15 +14,16 @@ namespace ThMEPElectrical.BlockConvert
         public List<ThBConvertRule> Rules { get; set; }
 
         /// <summary>
-        /// 从数据库中读取数据创建对象
+        /// 从Excel中读取数据创建对象
         /// </summary>
-        /// <param name="database"></param>
+        /// <param name="bConvertConfigUrl"></param>
+        /// <param name="mode"></param>
         /// <returns></returns>
-        public static ThBConvertManager CreateManager(Database database, ConvertMode mode)
+        public static ThBConvertManager CreateManager(string bConvertConfigUrl, ConvertMode mode)
         {
             return new ThBConvertManager()
             {
-                Rules = database.Rules(mode),
+                Rules = bConvertConfigUrl.Rules(mode),
             };
         }
 

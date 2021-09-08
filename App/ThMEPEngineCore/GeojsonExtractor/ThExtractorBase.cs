@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.GeojsonExtractor
 {
@@ -72,11 +73,17 @@ namespace ThMEPEngineCore.GeojsonExtractor
         }
         protected virtual List<Entity> FilterWindowPolygon(Point3dCollection pts,List<Entity> ents)
         {
-            var loop = pts.CreatePolyline();
+            var center = pts.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            ents.ForEach(e=> transformer.Transform(e));
+            var newPts = transformer.Transform(pts);
+            var loop = newPts.CreatePolyline();
             var bufferService = new ThNTSBufferService();
             var enlarge = bufferService.Buffer(loop, LoopBufferLength) as Polyline;
             var spatialIndex = new ThCADCoreNTSSpatialIndex(ents.ToCollection());
-            return spatialIndex.SelectWindowPolygon(enlarge).Cast<Entity>().ToList();
+            var querys = spatialIndex.SelectWindowPolygon(enlarge).Cast<Entity>().ToList();
+            querys.ForEach(e=> transformer.Reset(e));
+            return querys;
         }
         protected string BuildString(Dictionary<Entity, List<string>> owners, Entity curve, string linkChar = ";")
         {

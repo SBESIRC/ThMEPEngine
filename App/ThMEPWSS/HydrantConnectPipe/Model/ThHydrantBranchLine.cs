@@ -46,10 +46,23 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 acadDatabase.CurrentSpace.Add(line);
             }
         }
-        public void InsertValve(AcadDatabase acadDatabase)
+        public void InsertValve(AcadDatabase acadDatabase, string strMapScale)
         {
+            double scale = 1;
+            switch (strMapScale)
+            {
+                case "1:100":
+                    scale = 1;
+                    break;
+                case "1:150":
+                    scale = 1.5;
+                    break;
+                default:
+                    break;
+            }
+
             List<Line> lines = BranchPolyline.ToLines();
-            while (!InsertValve(acadDatabase, lines))
+            while (!InsertValve(acadDatabase, scale, lines))
             {
                 if (lines.Count != 0)
                 {
@@ -117,7 +130,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
                 double tmpAngle = angle + Math.PI / 2.0;
                 var tmpVecotr = new Vector3d(Math.Cos(tmpAngle), Math.Sin(tmpAngle), 0.0);
-                position = position + 50 * tmpVecotr;
+                position = position + 150 * tmpVecotr;
 
                 var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", riserName, position, new Scale3d(1, 1, 1), angle);
                 var blk = acadDatabase.Element<BlockReference>(blkId);
@@ -145,7 +158,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             }
 
         }
-        private bool InsertValve(AcadDatabase acadDatabase, List<Line> lines)
+        private bool InsertValve(AcadDatabase acadDatabase, double scale, List<Line> lines)
         {
             if (lines.Count != 0)
             {
@@ -160,7 +173,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 {
                     return false;
                 }
-                var postion = line.EndPoint + vector;
+                var postion = line.GetCenter();
                 var refVector = new Vector3d(0, 0, 1);
                 var basVector = new Vector3d(1, 0, 0);
                 double angle = basVector.GetAngleTo(vector, refVector);
@@ -174,6 +187,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
                 var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "蝶阀", postion, new Scale3d(1, 1, 1), angle);
                 var blk = acadDatabase.Element<BlockReference>(blkId);
+                blk.ScaleFactors = new Scale3d(scale, scale, scale);
+
                 if (blk.IsDynamicBlock)
                 {
                     foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)

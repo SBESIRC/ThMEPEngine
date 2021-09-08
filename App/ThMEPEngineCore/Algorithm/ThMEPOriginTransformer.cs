@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -50,6 +52,10 @@ namespace ThMEPEngineCore.Algorithm
             var matrix = Displacement;
             TransformBy(ref point, matrix);
         }
+        public Point3dCollection Transform(Point3dCollection pts)
+        {
+            return pts.OfType<Point3d>().Select(o => Transform(o)).ToCollection();
+        }
 
         public void Reset(Entity entity)
         {
@@ -66,6 +72,12 @@ namespace ThMEPEngineCore.Algorithm
         {
             var matrix = Displacement.Inverse();
             TransformBy(ref point, matrix);
+        }
+
+        public Point3d Reset(Point3d point)
+        {
+            var matrix = Displacement.Inverse();
+            return point.TransformBy(matrix);
         }
 
         private void TransformBy(DBObjectCollection objs, Matrix3d matrix)

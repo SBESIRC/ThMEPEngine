@@ -216,6 +216,12 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             doorNames.Add("A-door-", 1);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.door, doorNames));
 
+            //获取马桶
+            Dictionary<string, int> toiletNames = new Dictionary<string, int>();
+            toiletNames.Add("A-Toilet-5", 1);
+            GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
+
             /* 楼梯块目前有问题，暂时不获取
             //获取楼梯块
             Dictionary<string, int> stairsNames = new Dictionary<string, int>();
@@ -291,6 +297,12 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             GetVisitorDictionary(EnumEquipmentType.sideRainBucket, ref sideRainBucketNames);
             if (sideRainBucketNames.Count > 0)
                 this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.sideRainBucket, sideRainBucketNames));
+
+            //获取马桶
+            Dictionary<string, int> toiletNames = new Dictionary<string, int>();
+            toiletNames.Add("A-Toilet-5", 1);
+            GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
         }
 
         private void GetVisitorDictionary(EnumEquipmentType type,ref Dictionary<string,int> visirorDict) 
@@ -311,6 +323,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                         break;
                     case "洗衣机":
                         thisType = (int)EnumEquipmentType.washingMachine;
+                        break;
+                    case "坐便器":
+                        thisType = (int)EnumEquipmentType.toilet;
                         break;
                 }
                 if (thisType != (int)type)

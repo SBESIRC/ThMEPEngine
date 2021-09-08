@@ -46,21 +46,10 @@ namespace FireAlarm.Data
         }
         private DBObjectCollection ExtractDb3Railing(Point3dCollection pts)
         {
-            var db3Railings = new DBObjectCollection();
-            Db3ExtractResults.ForEach(o => Transformer.Transform(o.Geometry));
-
             var railingEngine = new ThDB3RailingRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            var newPts = Transformer.Transform(pts);            
             railingEngine.Recognize(Db3ExtractResults, newPts);
-            db3Railings = railingEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
-
-            return db3Railings;
+            return railingEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
         }
         private DBObjectCollection ExtractMsRailing(Database database, Point3dCollection pts)
         {
@@ -75,13 +64,11 @@ namespace FireAlarm.Data
             localRailings = instance.Polys.ToCollection();
 
             ThCleanEntityService clean = new ThCleanEntityService();
-            localRailings = localRailings.FilterSmallArea(SmallAreaTolerance)
+            return localRailings.FilterSmallArea(SmallAreaTolerance)
                 .Cast<Polyline>()
                 .Select(o => clean.Clean(o))
                 .Cast<Entity>()
                 .ToCollection();
-
-            return localRailings;
         }
         public override List<ThGeometry> BuildGeometries()
         {

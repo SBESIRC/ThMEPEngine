@@ -1,54 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class DepthFirstSearch
     {
-        public static void BranchDepthSearch(Point3dEx startPt, HashSet<Point3dEx> visited, List<Point3dEx> termPts,
-            List<Point3dEx> tempPts, List<Point3dEx> valvePts, List<Point3dEx> loopPath, FireHydrantSystemIn fireHydrantSysIn)
+        public static void dfsMainLoop(Point3dEx cur, Point3dEx target, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
+            ref List<List<Point3dEx>> rstPaths, FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
-            var cur = startPt;
-            var getNextPt = true;//拿到下个点置为false
-            
-            if(fireHydrantSysIn.PtDic[cur].Count == 1)
+            if(cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1497661.8, 413291.9, 0)) < 10)
             {
-                termPts.Add(cur);
-                foreach (var pt in tempPts)
-                {
-                    BranchDepthSearch(pt, visited, termPts, tempPts, valvePts, loopPath, fireHydrantSysIn);
-                }
-                return;
+                ;
             }
-            foreach (var pt in fireHydrantSysIn.PtDic[cur])
-            {
-                if (loopPath.Contains(pt))//若起始点的临近点是环路点，pass
-                {
-                    continue;
-                }
-                if(visited.Contains(pt))//若该点被访问了
-                {
-                    continue;
-                }
-                if(getNextPt)
-                {
-                    cur = pt;
-                    visited.Add(cur);
-                    getNextPt = false;
-                }
-                else
-                {
-                    tempPts.Add(pt);
-                }
-            }
-            BranchDepthSearch(cur, visited, termPts, tempPts, valvePts, loopPath, fireHydrantSysIn);
-            return;
-        }
-        
-        public static void dfsMainLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
-             FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
-        {
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
@@ -91,7 +55,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                     }
                                 }
                             }
-
                         }
                     }
                     if(flag)
@@ -118,7 +81,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     continue;
                 }
-
                 if (subLoopPoint)//次环点
                 {
                     if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
@@ -126,12 +88,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-
                 tempPath.Add(p);
                 visited.Add(p);
-               
+               if(tempPath.Count > 93)
+                {
+                    ;
+                }
                 //递归搜索
-                dfsMainLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn, ref extraNodes);
+                dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
 
                 //删除不符合要求的点
                 tempPath.RemoveAt(tempPath.Count - 1);
@@ -139,8 +103,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, Point3dEx target,
-            FireHydrantSystemIn fireHydrantSysIn)
+        public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
+            ref List<List<Point3dEx>> rstPaths, Point3dEx target, FireHydrantSystemIn fireHydrantSysIn)
         {
             if (cur._pt.DistanceTo(target._pt) < 5)
             {
@@ -190,7 +154,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     break;
                 }
             }
-
             foreach (var p in neighbors)
             {
                 if (visited.Contains(p))
@@ -205,7 +168,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-
                 if (subStartPoint)
                 {
                     if (!PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
@@ -213,12 +175,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         continue;
                     }
                 }
-
                 tempPath.Add(p);
                 visited.Add(p);
 
                 dfsSubLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn);
-
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }

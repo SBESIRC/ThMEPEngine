@@ -61,6 +61,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
             var line1 = CreateLine(insertPt, floorLength);
             line1.LayerId = DbHelper.GetLayerId("W-NOTE");
+            line1.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(line1);
             var textFirst = new DBText();
             if(i < floorNums)
@@ -71,6 +72,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), "RF");
             }
+            textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(textFirst);
             var attNameValues = new Dictionary<string, string>() { { "标高", "X.XX" } };
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,

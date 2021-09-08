@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -13,6 +14,9 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public BlockReference blk { get; set; }
         public string Uuid { get; set; }
         public string Type { get; set; }
+        public Polyline Boundary { get; set; }
+        public Vector3d Dir { get; private set; }
+
         public List<Point3d> SupplyCool { get; set; }
         public List<Point3d> SupplyCoolOnWall { get; set; }
         public List<Point3d> SupplyCoolOnBranch { get; set; }
@@ -21,8 +25,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
         public Point3d SupplyWarmSec { get; set; }
         public Point3d Sewage { get; set; }
         public Point3d SewageSec { get; set; }
-        public Polyline Boundary { get; set; }
-        public Vector3d Dir { get; set; }
+
         public string GroupId { get; set; }
         public string AreaId { get; set; }
 
@@ -41,13 +44,13 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
             Uuid = Guid.NewGuid().ToString();
 
-            Boundary = turnBoundary(Boundary, Type);
+            turnBoundary();
             if (blk.ScaleFactors.X * blk.ScaleFactors.Y < 0)
             {
                 Boundary.ReverseCurve();
             }
-            Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
 
+            setDir();
             setInfo();
 
             //Point3d leftBPt = Boundary.GetPoint3dAt(0);
@@ -68,6 +71,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //SupplyCool.ForEach(x => DrawUtils.ShowGeometry(x, "l0coolPt", 130, 30, 20, "X"));
         }
 
+        /// <summary>
+        /// 防止出现精度过高的double。但是比较危险且没有解决问题。还是先不用round值
+        /// </summary>
+        public void setDir()
+        {
+            //var DirTemp = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
+            //double x = Math.Round(DirTemp.X);
+            //double y = Math.Round(DirTemp.Y);
+
+            //Dir = new Vector3d(x, y, 0);
+            Dir = (Boundary.GetPoint3dAt(0) - Boundary.GetPoint3dAt(1)).GetNormal();
+        }
         public void setInfo()
         {
             SupplyCool.Clear();
@@ -218,11 +233,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return supplyPt;
         }
 
-        private static Polyline turnBoundary(Polyline boundary, string type)
+        private void turnBoundary()
         {
             int turn = 0;
-            //Boundary
-            switch (type)
+
+            switch (Type)
             {
                 case "A-Toilet-5":
                 case "A-Toilet-9":
@@ -238,24 +253,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     break;
             }
 
-            Polyline boundaryNew = turnBoundary(boundary, turn);
-
-            return boundaryNew;
-
-        }
-
-        public static Polyline turnBoundary(Polyline boundary, int turn)
-        {
-            //
-            Polyline boundaryNew = boundary.Clone() as Polyline;
-            if (turn != 0)
-            {
-                for (int i = 0; i < boundary.NumberOfVertices; i++)
-                {
-                    boundaryNew.SetPointAt(i, boundary.GetPoint3dAt((i + turn) % boundary.NumberOfVertices).ToPoint2D());
-                }
-            }
-            return boundaryNew;
+            Polyline boundaryNew = ThDrainageSDCommonService.turnBoundary(Boundary, turn);
+            Boundary = boundaryNew;
         }
 
         private static Point3d CalculateSupplyWarmPoint()
@@ -316,5 +315,22 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
         }
 
+
+        public void transformBy(Matrix3d matrix)
+        {
+            blk.TransformBy(matrix);
+            Boundary.TransformBy(matrix);
+            setDir();
+
+            SupplyCool = SupplyCool.Select(x => x.TransformBy(matrix)).ToList();
+            SupplyCoolOnWall = SupplyCoolOnWall.Select(x => x.TransformBy(matrix)).ToList();
+            SupplyCoolOnBranch = SupplyCoolOnBranch.Select(x => x.TransformBy(matrix)).ToList();
+
+            SupplyWarm = SupplyWarm.TransformBy(matrix);
+            SupplyWarmSec = SupplyWarmSec.TransformBy(matrix);
+            Sewage = Sewage.TransformBy(matrix);
+            SewageSec = SewageSec.TransformBy(matrix);
+
+        }
     }
 }

@@ -55,7 +55,8 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                     var possibleDimArea = ThDrainageSDDimService.getPossibleDimArea(baseLineDict, group.Key, group.Value);
 
-                    var dimArea = ThDrainageSDDimService.getDimOptimalArea(possibleDimArea, allIsolateLine, alreadyDimArea);
+                    var possibleDimAreaList = possibleDimArea.Select(x => x.Key).ToList();
+                    var dimArea = ThDrainageSDDimService.getDimOptimalArea(possibleDimAreaList, allIsolateLine, alreadyDimArea);
 
                     toDimInfo(dimArea, possibleDimArea, out var dir, out var dist);
 

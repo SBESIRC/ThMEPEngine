@@ -1,14 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
+using ThCADExtension;
 
 namespace ThMEPWSS.DrainageSystemAG.Services
 {
@@ -20,6 +18,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             ThWSSCommon.Layout_PositionRiserBlockName,
             ThWSSCommon.Layout_PositionRiser150BlockName,
             ThWSSCommon.Layout_PipeCasingBlockName,
+            ThWSSCommon.Layout_CleanoutBlockName,
         };
         static List<string> layerNames = new List<string>()
         {

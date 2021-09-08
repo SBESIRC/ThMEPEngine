@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{5E8993EB-06AC-4E69-BA40-E3AF561C3664}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{C4F27530-9321-49D5-9BD3-18A0BA57E219}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -76,6 +76,8 @@
                 <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THPPARTITION" Global="THPPARTITION" />
+                <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
                 <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractSlab" Global="THExtractSlab" />
@@ -97,6 +99,8 @@
                 <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
+                <Command Local="THPPARTITION" Global="THPPARTITION" />
+                <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
                 <Command Local="THExtractDoor" Global="THExtractDoor" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractSlab" Global="THExtractSlab" />
@@ -232,7 +236,6 @@
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -254,7 +257,6 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
                 <Command Local="THJSDY" Global="THJSDY" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -276,7 +278,6 @@
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
                 <Command Local="-THDXXHSXTT" Global="-THDXXHSXTT" />
                 <Command Local="THJSDY" Global="THJSDY" />
-                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -394,6 +395,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -415,6 +417,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -436,6 +439,7 @@
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THJSZC" Global="THJSZC" />
             </Commands>
         </ComponentEntry>
     </Components>

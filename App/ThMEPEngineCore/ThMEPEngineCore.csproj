@@ -69,7 +69,9 @@
     <Compile Include="Algorithm\BFSAlgorithm\BFSPathPlaner.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
+    <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
+    <Compile Include="Algorithm\ThMEPPolygonService.cs" />
     <Compile Include="Algorithm\ThMEPRegionService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
@@ -162,6 +164,7 @@
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
+    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="IO\ThExtractorPropertyNameManager.cs" />
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
@@ -177,7 +180,6 @@
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
     <Compile Include="Service\ThDclPrintService.cs" />
-    <Compile Include="IO\GeoJSON\ThGeometryJsonReader.cs" />
     <Compile Include="Service\ThDclResultParseService.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />

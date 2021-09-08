@@ -4,11 +4,13 @@ using Linq2Acad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -18,8 +20,6 @@ using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Algorithm;
-using Dreambuild.AutoCAD;
 
 namespace FireAlarm.Data
 {
@@ -32,6 +32,8 @@ namespace FireAlarm.Data
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+
+        public ThBuildingElementVisitorManager VisitorManager { get; set; }
 
         public ThFaDoorOpeningExtractor()
         {
@@ -62,43 +64,120 @@ namespace FireAlarm.Data
                 Doors[i].Outline = bufferService.Buffer(Doors[i].Outline, 15);
             }
         }
+        #region ----------提取DB3门-----------
+        private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var columnEngine = new ThDB3ColumnRecognitionEngine();
+            columnEngine.Recognize(VisitorManager.DB3ColumnVisitor.Results, newPts);
+            return columnEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+        private DBObjectCollection ExtractColumn(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var columnEngine = new ThColumnRecognitionEngine();
+            columnEngine.Recognize(VisitorManager.ColumnVisitor.Results, newPts);
+            return columnEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+        private DBObjectCollection ExtractDb3ArchitectureWall(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var wallEngine = new ThDB3ArchWallRecognitionEngine();
+            wallEngine.Recognize(VisitorManager.DB3ArchWallVisitor.Results, newPts);
+            return wallEngine.Elements.Select(o => o.Outline).ToCollection();
+        }       
+        private DBObjectCollection ExtractDb3Curtainwall(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var curtainWallEngine = new ThDB3CurtainWallRecognitionEngine();
+            curtainWallEngine.Recognize(VisitorManager.DB3CurtainWallVisitor.Results, newPts);
+            return curtainWallEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+
+        private DBObjectCollection ExtractDb3Shearwall(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var shearWallEngine = new ThDB3ShearWallRecognitionEngine();
+            shearWallEngine.Recognize(VisitorManager.DB3ShearWallVisitor.Results, newPts);
+            return shearWallEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+        private DBObjectCollection ExtractShearwall(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var shearWallEngine = new ThShearWallRecognitionEngine();
+            shearWallEngine.Recognize(VisitorManager.ShearWallVisitor.Results, newPts);
+            return shearWallEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+
+        private DBObjectCollection ExtractDb3Window(Point3dCollection pts)
+        {
+            //提取了DB3中的墙，并移动到原点
+            var newPts = Transformer.Transform(pts);
+            var windowEngine = new ThDB3WindowRecognitionEngine();
+            windowEngine.Recognize(VisitorManager.DB3WindowVisitor.Results, newPts);
+            return windowEngine.Elements.Select(o => o.Outline).ToCollection();
+        }
+
+        /// <summary>
+        /// 提取门依赖的数据，是在图纸原位的
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <returns></returns>
+        private Dictionary<BuiltInCategory, DBObjectCollection> DoorDependElements(Point3dCollection pts)
+        {
+            //都在原点
+            var dict = new Dictionary<BuiltInCategory, DBObjectCollection>();       
+            var columns = ExtractColumn(pts);
+            var shearWalls = ExtractShearwall(pts);
+            var db3Windows = ExtractDb3Window(pts);
+            var db3Columns = ExtractDb3Column(pts);
+            var db3ShearWalls = ExtractDb3Shearwall(pts);
+            var db3CurtainWalls = ExtractDb3Curtainwall(pts);
+            var db3ArchitectureWalls = ExtractDb3ArchitectureWall(pts);
+
+            dict.Add(BuiltInCategory.Column, db3Columns.Union(columns));
+            dict.Add(BuiltInCategory.ArchitectureWall, db3ArchitectureWalls);
+            dict.Add(BuiltInCategory.CurtainWall, db3CurtainWalls);
+            dict.Add(BuiltInCategory.ShearWall, db3ShearWalls.Union(shearWalls));
+            dict.Add(BuiltInCategory.Window, db3Windows);
+            return dict;
+        }
         private List<ThIfcDoor> ExtractDb3Door(Database database, Point3dCollection pts)
         {
             // 构件索引服务
-            ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
+            //ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
+            //{
+            //    BuiltInCategory.ArchitectureWall,
+            //    BuiltInCategory.Column,
+            //    BuiltInCategory.CurtainWall,
+            //    BuiltInCategory.ShearWall,
+            //    BuiltInCategory.Window
+            //});            
+            //ThSpatialIndexCacheService.Instance.Build(database, pts);
+            var dict = DoorDependElements(pts);            
+            ThSpatialIndexCacheService.Instance.Transformer = new ThMEPOriginTransformer()
             {
-                BuiltInCategory.ArchitectureWall,
-                BuiltInCategory.Column,
-                BuiltInCategory.CurtainWall,
-                BuiltInCategory.ShearWall,
-                BuiltInCategory.Window
-            });
-            ThSpatialIndexCacheService.Instance.Transformer = transformer;
-            ThSpatialIndexCacheService.Instance.Build(database, pts);
+                Displacement = Matrix3d.Identity,
+            };
+            ThSpatialIndexCacheService.Instance.Build(dict);
 
-            var doorExtraction = new ThDB3DoorExtractionEngine();
-            doorExtraction.Extract(database);
-            doorExtraction.Results.ForEach(o =>
-            {
-                if (o is ThRawDoorMark doorMark)
-                {
-                    Transformer.Transform(doorMark.Data as Entity);
-                }
-                Transformer.Transform(o.Geometry);
-            });
+            var doorDatas = new List<ThRawIfcBuildingElementData>();
+            doorDatas.AddRange(VisitorManager.DB3DoorMarkVisitor.Results);
+            doorDatas.AddRange(VisitorManager.DB3DoorStoneVisitor.Results);
 
             var doorEngine = new ThDB3DoorRecognitionEngine();
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(p =>
-            {
-                var pt = new Point3d(p.X, p.Y, p.Z);
-                Transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
-            doorEngine.Recognize(doorExtraction.Results, newPts);
-            var db3Doors = doorEngine.Elements.Cast<ThIfcDoor>().ToList();
-            return db3Doors;
+            var newPts = Transformer.Transform(pts);            
+            doorEngine.Recognize(doorDatas, newPts);
+            return doorEngine.Elements.Cast<ThIfcDoor>().ToList();
         }
+
+        #endregion
         private List<ThIfcDoor> ExtractMsDoor(Database database, Point3dCollection pts)
         {
             var localdoors = new List<ThIfcDoor>();
@@ -108,12 +187,11 @@ namespace FireAlarm.Data
             };
             instance.Extract(database, pts);
             instance.Polys.ForEach(o => Transformer.Transform(o));
-            localdoors = instance.Polys
+            return instance.Polys
                 .Where(o => o.Area >= SmallAreaTolerance)
                 .Select(o => new ThIfcDoor { Outline=o})
                 .Cast<ThIfcDoor>()
                 .ToList();
-            return localdoors;
         }
         public override List<ThGeometry> BuildGeometries()
         {

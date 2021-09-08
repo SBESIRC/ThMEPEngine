@@ -53,6 +53,7 @@ namespace ThMEPEngineCore.Engine
         {
             return new ThRawDoorStone()
             {
+                Data = null,
                 Geometry = curve,
             };
         }

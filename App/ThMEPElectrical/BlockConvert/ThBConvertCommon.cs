@@ -10,6 +10,7 @@
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER = "目标图层";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL = "内含图块";
 
         public static readonly string PROPERTY_POWER_VOLTAGE = "电压";
         public static readonly string PROPERTY_POWER_QUANTITY = "电量";
@@ -33,5 +34,10 @@
 
         public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_WEAK = "天华弱电提资转换对应表";
         public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_STRONG = "天华强电提资转换对应表";
+
+        public static readonly string COLLECTING_WELL = "集水井提资表表身";
+
+        public static readonly string STRONG_CURRENT = "强电";
+        public static readonly string WEAK_CURRENT = "弱电";
     }
 }

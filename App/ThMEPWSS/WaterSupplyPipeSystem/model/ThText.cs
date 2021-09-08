@@ -20,8 +20,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 LayerId = DbHelper.GetLayerId("W-NOTE"),
                 WidthFactor = 0.7,
                 Height = 350,
-                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
-            };
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                ColorIndex = (int)ColorIndex.BYLAYER
+        };
             return text;
         }
 
@@ -34,7 +35,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
                 WidthFactor = 0.7,
                 Height = 350,
-                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                ColorIndex = (int)ColorIndex.BYLAYER
             };
             return text;
         }

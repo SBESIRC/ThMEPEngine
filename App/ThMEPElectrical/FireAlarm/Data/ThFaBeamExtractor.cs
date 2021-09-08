@@ -96,14 +96,8 @@ namespace FireAlarm.Data
         {
             var beams = new List<ThIfcBeam>();
             Db3ExtractResults.ForEach(o => beams.Add(ThIfcLineBeam.Create(o.Data as ThIfcBeamAnnotation)));
-            beams.ForEach(o => transformer.Transform(o.Outline));           
-            var newPts = new Point3dCollection();
-            pts.Cast<Point3d>().ForEach(o =>
-            {
-                var pt = new Point3d(o.X, o.Y, o.Z);
-                transformer.Transform(ref pt);
-                newPts.Add(pt);
-            });
+            beams.ForEach(o => transformer.Transform(o.Outline));
+            var newPts = Transformer.Transform(pts);
             if (newPts.Count > 0)
             {
                 var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(
@@ -127,13 +121,11 @@ namespace FireAlarm.Data
             };
             instance.Extract(database, pts);
             instance.Polys.ForEach(o => Transformer.Transform(o));
-            localBeams = instance.Polys
+            return instance.Polys
                 .Where(o => o.Area >= SmallAreaTolerance)
                 .Select(o => ThIfcLineBeam.Create(o))
                 .Cast<ThIfcBeam>()
                 .ToList();
-
-            return localBeams;
         }
         public void Group(Dictionary<Entity, string> groupId)
         {

@@ -105,5 +105,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return line;
         }
 
+        public void TransformBy(Matrix3d matrix)
+        {
+            blk.TransformBy(matrix);
+            boundary.TransformBy(matrix);
+            dir = (boundary.GetPoint3dAt(2) - boundary.GetPoint3dAt(1)).GetNormal();
+            centerLine.TransformBy(matrix);
+        }
     }
 }

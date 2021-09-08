@@ -41,6 +41,7 @@ namespace ThMEPWSS.Command
             using (var waterwellEngine = new ThWWaterWellRecognitionEngine(configInfo.WaterWellInfo.identifyInfo))
             {
                 waterwellEngine.Recognize(database.Database, input);
+                waterwellEngine.RecognizeMS(database.Database, input);
                 var objIds = new ObjectIdCollection(); // Print
                 foreach (var element in waterwellEngine.Datas)
                 {

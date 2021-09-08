@@ -190,7 +190,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 if (toiletSibling.Count > 0)
                 {
-                    var toiletNotHandWashSink = toiletSibling.Where(x => HandWashSinkType.Contains(x.Type) == false);
+                    var toiletNotHandWashSink = toiletSibling.Where(x => x!=null && HandWashSinkType.Contains(x.Type) == false);
                     if (toiletNotHandWashSink.Count() == 0)
                     {
                         newNode = node.Parent;

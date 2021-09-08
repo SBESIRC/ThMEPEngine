@@ -45,13 +45,6 @@ namespace ThMEPWSS.Pipe.Engine
             if (entity is BlockReference reference)
             {
                 var name = reference.GetEffectiveName();
-                foreach (string label in ConfigInfo.BlackList)
-                {
-                    if (name.Contains(label) && label != "")
-                    {
-                        return false;
-                    }
-                }
                 foreach (string label in ConfigInfo.WhiteList)
                 {
                     if (name.EndsWith(label) && label != "")
@@ -165,8 +158,11 @@ namespace ThMEPWSS.Pipe.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Datas = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
-            Elements.AddRange(Datas.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
+
+            var tmpData = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+
+            Datas.AddRange(tmpData);
+            Elements.AddRange(tmpData.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
         }
     }
 }

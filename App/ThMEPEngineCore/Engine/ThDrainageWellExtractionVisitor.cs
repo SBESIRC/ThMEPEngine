@@ -1,7 +1,8 @@
-﻿using ThCADExtension;
-using System.Collections.Generic;
+﻿using System;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -69,6 +70,13 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThDrainageWellBlkExtractionVisitor : ThDistributionElementExtractionVisitor
     {
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        public ThDrainageWellBlkExtractionVisitor()
+        {
+            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedBlockName = (Entity entity) => true;
+        }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference br)
@@ -100,10 +108,6 @@ namespace ThMEPEngineCore.Engine
             }
             return results;
         }
-        public override bool IsDistributionElement(Entity entity)
-        {
-            return true;
-        }
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
         {
             if (ent is BlockReference br)
@@ -114,6 +118,14 @@ namespace ThMEPEngineCore.Engine
             {
                 return false;
             }
+        }
+        public override bool IsDistributionElement(Entity entity)
+        {
+            return CheckQualifiedBlockName(entity);
+        }        
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return CheckQualifiedLayer(curve);
         }
     }
 }

@@ -77,24 +77,22 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                if (GroupSwitch)
+                var parentId = BuildString(GroupOwner, o.Outline);
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    var parentId = BuildString(GroupOwner, o.Outline);
-                    if (string.IsNullOrEmpty(parentId))
-                    {
-                        var storeyInfo = Query(o.Outline);
-                        parentId = storeyInfo.Id;
-                    }
-                    geometry.Properties.Add(ParentIdPropertyName, parentId);
+                    var storeyInfo = Query(o.Outline);
+                    parentId = storeyInfo.Id;
                 }
-                if(FireDoorNeibourIds.ContainsKey(o.Outline))
+                geometry.Properties.Add(ParentIdPropertyName, parentId);
+                if (FireDoorNeibourIds.ContainsKey(o.Outline))
                 {
                     geometry.Properties.Add(NeibourFireApartIdsPropertyName,string.Join(",", FireDoorNeibourIds[o.Outline]));
                 }
-                if(IsFireDoor(o))
+                else
                 {
-                    geometry.Properties.Add(UsePropertyName, "防火门");
+                    geometry.Properties.Add(NeibourFireApartIdsPropertyName, "");
                 }
+                geometry.Properties.Add(UsePropertyName, IsFireDoor(o) ? "防火门" : "");
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });

@@ -50,6 +50,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public override void SetGlobalData(Database database, Dictionary<Entity, List<KeyValuePair<string, string>>> elements, List<Entity> Entitydata)
         {
+            this._database = database;
             GlobleBlockAttInfoDic = elements;
             GlobleEntityData = Entitydata;
             GlobleNotInAlarmControlWireCircuitData = Entitydata.Where(o => o is BlockReference br && ThAutoFireAlarmSystemCommon.NotInAlarmControlWireCircuitBlockNames.Contains(br.Name)).ToList();
@@ -186,7 +187,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 });
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
-                    FillingFireCompartmentData(ref fireDistrict, GraphEngine.GraphsDic);
+                    FillingFireCompartmentData(ref fireDistrict, GraphEngine.GraphsDic, adb.Database);
                 });
             });
 
@@ -269,13 +270,24 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         /// <param name="fireDistrictBoundary"></param>
         /// <returns></returns>
-        public void FillingFireCompartmentData(ref ThFireDistrictModel fireDistrict, Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> graphsDic)
+        public void FillingFireCompartmentData(ref ThFireDistrictModel fireDistrict, Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> graphsDic, Database database)
         {
             string fireDistrictName = fireDistrict.FireDistrictName;
             var polygon = fireDistrict.FireDistrictBoundary;
             if (polygon is Polyline || polygon is MPolygon)
             {
                 fireDistrict.NotInAlarmControlWireCircuitData = FloorNotInAlarmControlWireCircuitIndex.SelectCrossingPolygon(polygon).Cast<BlockReference>().ToList();
+                int count = fireDistrict.NotInAlarmControlWireCircuitData.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var quantity = ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(fireDistrict.NotInAlarmControlWireCircuitData[i]));
+                    while(quantity>1)
+                    {
+                        fireDistrict.NotInAlarmControlWireCircuitData.Add(fireDistrict.NotInAlarmControlWireCircuitData[i]);
+                        quantity--;
+                    }
+                }
+
                 var DataSpatialIndex = new ThCADCoreNTSSpatialIndex(graphsDic.Keys.Select(o => new DBPoint(o)).ToCollection());
                 var dbObjs = DataSpatialIndex.SelectCrossingPolygon(polygon).Cast<DBPoint>().Select(o => o.Position);
                 var GraphData = graphsDic.Where(o => dbObjs.Contains(o.Key));

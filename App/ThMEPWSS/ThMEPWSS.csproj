@@ -38,6 +38,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLabelLayoutDirection.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\ToiletRoomCleanout.cs" />
     <Compile Include="Hydrant\Data\ThHydrantArchitectureWallExtractor.cs" />
     <Compile Include="Hydrant\Data\ThHydrantShearwallExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="DrainageSystemAG\Bussiness\RaisePipeConvert.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RoofLayout.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThDrainageSDADBlkOutput.cs" />
+    <Compile Include="DrainageSystemAD\Service\THDrainageADUISetting.cs" />
     <Compile Include="DrainageSystemAD\Model\ThDrainageSDADDataExchange.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertLineService.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADConvertValveService.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="DrainageSystemAD\ThDrainageADCommon.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDMessageServie.cs" />
     <Compile Include="Engine\ThRoomBuilderEngineWSS.cs" />
+    <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDSpaceDirectionService.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
     <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />
@@ -459,6 +462,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
     <Compile Include="ViewModel\BlockConfigSetViewModel.cs" />
     <Compile Include="ViewModel\BlockConfigViewModel.cs" />
+    <Compile Include="ViewModel\DrainageSystemSupplyAxonoViewModel.cs" />
     <Compile Include="ViewModel\HydrantConnectPipeViewModel.cs" />
     <Compile Include="ViewModel\FireHydrantSystemSetViewModel.cs" />
     <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />

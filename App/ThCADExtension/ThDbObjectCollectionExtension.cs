@@ -18,5 +18,25 @@ namespace ThCADExtension
             coll.Cast<Entity>().ForEach(e => extents.AddExtents(e.GeometricExtents));
             return extents;
         }
+
+        public static DBObjectCollection Union(this DBObjectCollection first, DBObjectCollection second)
+        {
+            var results = new DBObjectCollection();
+            foreach (DBObject dbObj in first)
+            {
+                if(!results.Contains(dbObj))
+                {
+                    results.Add(dbObj);
+                }                
+            }
+            foreach (DBObject dbObj in second)
+            {
+                if (!results.Contains(dbObj))
+                {
+                    results.Add(dbObj);
+                }
+            }
+            return results;
+        }
     }
 }

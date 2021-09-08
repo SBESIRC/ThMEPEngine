@@ -2,9 +2,12 @@
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Service;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -40,90 +43,99 @@ namespace ThMEPEngineCore.Engine
         }
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            var ents = new List<Entity>();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
+            var center = polygon.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            transformer.Transform(objs);
+            var newPts = transformer.Transform(polygon);
+            if (newPts.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var pline = new Polyline()
                 {
                     Closed = true,
                 };
-                pline.CreatePolyline(polygon);
-                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(pline))
-                {
-                    ents.Add(filterObj as Entity);
-                }
+                pline.CreatePolyline(newPts);
+                objs = spatialIndex.SelectCrossingPolygon(pline);
             }
-            else
-            {
-                ents = objs.Cast<Entity>().ToList();
-            }
-            ents.ForEach(o => Geos.Add(o));
+            transformer.Reset(objs);
+            objs.Cast<Entity>().ForEach(o => Geos.Add(o));
         }        
     }
 
     public class ThDrainageWellBlockExtractionEngine : ThDistributionElementExtractionEngine
     {
+        public ThDrainageWellBlkExtractionVisitor Visitor { get; set; }
+        public ThDrainageWellBlockExtractionEngine()
+        {
+            Visitor = new ThDrainageWellBlkExtractionVisitor();
+        }
         public override void Extract(Database database)
         {
-            var visitor = new ThDrainageWellBlkExtractionVisitor()
+            if(Visitor.LayerFilter.Count==0)
             {
-                LayerFilter = new HashSet<string>(ThDrainageWellLayerManager.CurveXrefLayers(database)),
-            };
+                Visitor.LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet();
+            }
             var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(visitor);
+            extractor.Accept(Visitor);
             extractor.Extract(database);
-            extractor.ExtractFromMS(database);
-            Results = visitor.Results;
+            Results.AddRange(Visitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            throw new System.NotImplementedException();
+            if (Visitor.LayerFilter.Count == 0)
+            {
+                Visitor.LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet();
+            }
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(Visitor);
+            extractor.ExtractFromMS(database);
+            Results.AddRange(Visitor.Results);
         }
     }
 
     public class ThDrainageWellBlockRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public List<Entity> Geos { get; set; }
+        public ThDrainageWellBlkExtractionVisitor Visitor { get; set; }
         public ThDrainageWellBlockRecognitionEngine()
         {
             Geos = new List<Entity>();
+            Visitor = new ThDrainageWellBlkExtractionVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDrainageWellBlockExtractionEngine();
+            var engine = new ThDrainageWellBlockExtractionEngine()
+            {
+                Visitor = this.Visitor,
+            };
             engine.Extract(database);
+            Recognize(engine.Results, polygon);
+        }
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThDrainageWellBlockExtractionEngine()
+            {
+                Visitor=this.Visitor,
+            };
+            engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {
-            var ents = new List<Entity>();
             var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
+            var center = polygon.Envelope().CenterPoint();
+            var transformer = new ThMEPOriginTransformer(center);
+            transformer.Transform(objs);
+            var newPts = transformer.Transform(polygon);
+            if (newPts.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var pline = new Polyline()
-                {
-                    Closed = true,
-                };
-                pline.CreatePolyline(polygon);
-                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(pline))
-                {
-                    ents.Add(filterObj as Entity);
-                }
+                objs = spatialIndex.SelectCrossingPolygon(newPts);
             }
-            else
-            {
-                ents = objs.Cast<Entity>().ToList();
-            }
-            ents.ForEach(o => Geos.Add(o));
-        }
-
-        public override void RecognizeMS(Database database, Point3dCollection polygon)
-        {
-            throw new System.NotImplementedException();
+            transformer.Reset(objs);
+            objs.Cast<Entity>().ForEach(o => Geos.Add(o));
         }
     }
 }

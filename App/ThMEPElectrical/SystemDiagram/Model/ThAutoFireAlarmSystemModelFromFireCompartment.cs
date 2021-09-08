@@ -42,6 +42,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public override void SetGlobalData(Database database, Dictionary<Entity, List<KeyValuePair<string, string>>> elements, List<Entity> Entitydata)
         {
+            this._database = database;
             GlobleBlockAttInfoDic = elements;
             GlobalBlockInfo = new List<ThIfcDistributionFlowElement>();
             GlobleCenterPointDic = new Dictionary<Entity, DBPoint>();
@@ -287,6 +288,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
             this.DrawData = AllData;
         }
 
+
         /// <summary>
         /// 填充防火分区数据
         /// </summary>
@@ -302,23 +304,23 @@ namespace ThMEPElectrical.SystemDiagram.Model
 
                 ThBlockConfigModel.BlockConfig.ForEach(o =>
                 {
-                    switch (o.StatisticMode)
-                    {
-                        case StatisticType.BlockName:
-                            {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (x.Outline as BlockReference).Name == o.BlockName);
+                switch (o.StatisticMode)
+                {
+                    case StatisticType.BlockName:
+                        {
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x => (x.Outline as BlockReference).Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 if (o.HasAlias)
                                 {
-                                    BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Count(x => o.AliasList.Contains((x.Outline as BlockReference).Name));
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Where(x => o.AliasList.Contains((x.Outline as BlockReference).Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 }
                                 break;
                             }
                         case StatisticType.Attributes:
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0);
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x => (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 if (o.HasAlias)
                                 {
-                                    BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Count(x => o.AliasList.Contains((x.Outline as BlockReference).Name));
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Where(x => o.AliasList.Contains((x.Outline as BlockReference).Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 }
                                 break;
                             }
@@ -339,12 +341,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                                 //如果是大屋面
                                 if (IsJF && o.UniqueName == "消防水箱")
                                 {
-                                    BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (x.Outline as BlockReference).Name == o.BlockName);
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x => (x.Outline as BlockReference).Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 }
                                 //其他正常楼层
                                 else if (!IsJF && o.UniqueName == "消防水池")
                                 {
-                                    BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Count(x => (x.Outline as BlockReference).Name == o.BlockName);
+                                    BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x => (x.Outline as BlockReference).Name == o.BlockName).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 }
                                 break;
                             }

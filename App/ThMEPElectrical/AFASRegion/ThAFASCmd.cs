@@ -21,7 +21,7 @@ namespace ThMEPElectrical.AFASRegion
                 //选择区域
                 Active.Editor.WriteLine("\n请选择楼层块");
                 var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
+                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
@@ -93,7 +93,7 @@ namespace ThMEPElectrical.AFASRegion
                         var Detectionspace = cmd.DivideRoomWithDetectionRegion(pline, AFASDetector.SmokeDetectorLow);
                         foreach (var polygon in Detectionspace)
                         {
-                            polygon.ColorIndex = 2;
+                            polygon.ColorIndex = 3;
                             acadDatabase.ModelSpace.Add(polygon);
                         }
                     }

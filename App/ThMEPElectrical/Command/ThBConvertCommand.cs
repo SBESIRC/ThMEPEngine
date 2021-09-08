@@ -1,6 +1,7 @@
 ﻿using System;
 using NFox.Cad;
 using AcHelper;
+using System.IO;
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace ThMEPElectrical.Command
 {
     public class ThBConvertCommand : IAcadCommand, IDisposable
     {
+        readonly static string BConvertConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "提资转换配置表.xlsx");
+
         /// <summary>
         /// 模式
         /// </summary>
@@ -89,13 +92,13 @@ namespace ThMEPElectrical.Command
 
                 using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    var manager = ThBConvertManager.CreateManager(blockDb.Database, Mode);
+                    var manager = ThBConvertManager.CreateManager(BConvertConfigUrl, Mode);
                     if (manager.Rules.Count == 0)
                     {
                         return;
                     }
 
-                    // 获取目标图块名
+                    // 获取源块图块名
                     var srcNames = new List<String>();
                     manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
                     {
@@ -103,7 +106,7 @@ namespace ThMEPElectrical.Command
                         srcNames.Add(block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
                     });
 
-                    // 从图纸中提取目标图块
+                    // 从图纸中提取源图块
                     var rEngine = new ThBConvertElementExtractionEngine()
                     {
                         NameFilter = srcNames,
@@ -122,9 +125,32 @@ namespace ThMEPElectrical.Command
                     // 从图纸中提取集水井提资表表身
                     var collectingWellEngine = new ThBConvertElementExtractionEngine()
                     {
-                        NameFilter = new List<string>{ "集水井提资表表身"},
+                        NameFilter = new List<string>{ ThBConvertCommon.COLLECTING_WELL }
                     };
                     collectingWellEngine.Extract(currentDb.Database);
+
+                    // 获取目标块图块名
+                    var targetNames = new List<String>();
+                    manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
+                    {
+                        var targetBlock = o.Transformation.Item2;
+                        targetNames.Add(targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
+
+                        var str = targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL);
+                        if(!str.IsNullOrEmpty())
+                        {
+                            targetNames.AddRange(str.Split(','));
+                        }
+                    });
+                    targetNames = targetNames.Distinct().ToList();
+
+                    // 从图纸中提取目标块
+                    var targetEngine = new ThBConvertBlockExtractionEngine()
+                    {
+                        NameFilter = targetNames,
+                    };
+                    targetEngine.ExtractFromMS(currentDb.Database);
+                    var targetBlocks = SelectCrossingPolygon(targetEngine.Results, frame);
 
                     var mapping = new Dictionary<ThBlockReferenceData, bool>();
                     srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
@@ -201,12 +227,15 @@ namespace ThMEPElectrical.Command
                                         return;
                                     }
 
+                                    // 标记已经转换的块
+                                    mapping[o] = true;
+
                                     // 导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
                                     currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                     currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
-                                    
+
 
                                     // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                                     // 修正插入动态块的图层顺序
@@ -220,6 +249,10 @@ namespace ThMEPElectrical.Command
                                     var scale = new Scale3d(Scale);
                                     var engine = CreateConvertEngine(mode);
                                     var objId = engine.Insert(targetBlockName, scale, o);
+                                    if (objId == ObjectId.Null)
+                                    {
+                                        return;
+                                    }
 
                                     // 设置新插入的块引用的镜像变化
                                     engine.Mirror(objId, o);
@@ -239,49 +272,79 @@ namespace ThMEPElectrical.Command
                                         engine.Displacement(objId, o);
                                     }
 
+                                    var targetBlockData = new ThBlockReferenceData(objId);
+                                    targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                                .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == targetBlockData.EffectiveName)
+                                                .ForEach(t =>
+                                                {
+                                                    if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                                                    {
+                                                        var e = currentDb.Element<Entity>(objId, true);
+                                                        e.Erase();
+                                                    }
+                                                });
+
                                     // 设置动态块可见性
-                                    engine.SetVisibilityState(objId, o);
-
-                                    // 将源块引用的属性“刷”到新的块引用
-                                    engine.MatchProperties(objId, o);
-
-                                    // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
-                                    // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
-                                    var refIds = new ObjectIdCollection();
-                                    if (rule.Explodable())
+                                    if (!objId.IsErased)
                                     {
-                                        ExplodeWithErase(objId, refIds);
+                                        engine.SetVisibilityState(objId, o);
 
-                                        // 如果是“单台潜水泵”，继续炸一次
-                                        var objIds = new ObjectIdCollection();
-                                        foreach(ObjectId item in refIds)
+                                        // 将源块引用的属性“刷”到新的块引用
+                                        engine.MatchProperties(objId, o);
+
+                                        // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
+                                        // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
+                                        var refIds = new ObjectIdCollection();
+                                        if (rule.Explodable())
                                         {
-                                            if (item.GetBlockName() == "单台潜水泵")
+                                            ExplodeWithErase(objId, refIds);
+
+                                            // 如果是“单台潜水泵”，继续炸一次
+                                            var objIds = new ObjectIdCollection();
+                                            foreach (ObjectId item in refIds)
                                             {
-                                                ExplodeWithErase(item, objIds);
+                                                if (item.GetBlockName().Contains("单台潜水泵"))
+                                                {
+                                                    ExplodeWithErase(item, objIds);
+                                                }
+                                                else
+                                                {
+                                                    objIds.Add(item);
+                                                }
                                             }
-                                            else
+
+                                            // 获取最终结果
+                                            refIds = objIds;
+
+                                            foreach (ObjectId id in refIds)
                                             {
-                                                objIds.Add(item);
+                                                var explodeBlockData = new ThBlockReferenceData(id);
+                                                targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                                            .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == explodeBlockData.EffectiveName)
+                                                            .ForEach(t =>
+                                                            {
+                                                                if (t.Position.DistanceTo(explodeBlockData.Position) < 10.0)
+                                                                {
+                                                                    var e = currentDb.Element<Entity>(id, true);
+                                                                    e.Erase();
+                                                                }
+                                                            });
                                             }
                                         }
+                                        else
+                                        {
+                                            refIds.Add(objId);
+                                        }
 
-                                        // 获取最终结果
-                                        refIds = objIds;
+                                        // 设置块引用的数据库属性
+                                        refIds.Cast<ObjectId>().ForEach(b =>
+                                        {
+                                            if (!b.IsErased)
+                                            {
+                                                engine.SetDatbaseProperties(b, o, targetBlockLayer);
+                                            }
+                                        });
                                     }
-                                    else
-                                    {
-                                        refIds.Add(objId);
-                                    }
-
-                                    // 设置块引用的数据库属性
-                                    refIds.Cast<ObjectId>().ForEach(b =>
-                                    {
-                                        engine.SetDatbaseProperties(b, o, targetBlockLayer);
-                                    });
-
-                                    // 标记已经转换的块
-                                    mapping[o] = true;
                                 }
                             });
                     }
@@ -317,7 +380,8 @@ namespace ThMEPElectrical.Command
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var result = spatialIndex.SelectCrossingPolygon(frame.Vertices());
             var filters = blocks.Where(o => result.Contains(o.Geometry)).ToList();
-            filters.ForEach(o => transformer.Reset(o.Geometry));
+            transformer.Reset(objs);
+            transformer.Reset(frame);
             return filters;
         }
     }
