@@ -102,10 +102,13 @@ namespace ThMEPWSS.ViewModel
             var ls30 = new List<string>();
             BlockNameConfigList.Add("集水井", new List<List<string>>() { ls29, ls30 });
 
-            Blocks.Add("车位");
+            Blocks.Add("非机械车位");
             var ls31 = new List<string>();
             var ls32 = new List<string>();
-            BlockNameConfigList.Add("车位", new List<List<string>>() { ls31, ls32 });
+            BlockNameConfigList.Add("非机械车位", new List<List<string>>() { ls31, ls32 });
+
+            Blocks.Add("机械车位");
+            BlockNameConfigList.Add("机械车位", new List<List<string>>() { new List<string>(), new List<string>() });
         }
     }
 }
