@@ -119,6 +119,14 @@ namespace TianHua.Electrical.UI
             cmd.Execute();
         }
 
+        //火灾报警
+        [CommandMethod("TIANHUACAD", "THHZBJ", CommandFlags.Modal)]
+        public void THHZBJUI()
+        {
+            var ui = new uiThFireAlarm();
+            AcadApp.ShowModelessWindow(ui);
+        }
+
         private string LayoutType
         {
             get

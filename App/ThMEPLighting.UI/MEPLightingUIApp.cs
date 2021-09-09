@@ -47,5 +47,13 @@ namespace ThMEPLighting.UI
             //exampleUI = new ExampleUI();
             //AcadApp.ShowModelessWindow(exampleUI);
         }
+
+        //照明
+        [CommandMethod("TIANHUACAD", "THZM", CommandFlags.Modal)]
+        public void THZMUI()
+        {
+            var ui = new TianHua.Lighting.UI.uiThLighting();
+            AcadApp.ShowModelessWindow(ui);
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -121,6 +122,22 @@ namespace ThControlLibraryWPF.CustomControl
         #endregion
 
         ResourceDictionary _resource = null;
+
+        protected string MutexName = Guid.NewGuid().ToString();
+        private bool IsFirstInstance;
+        private Mutex _WindowMutex;
+
+        protected bool IsFirstWindowInstance()
+        {
+            // Allow for multiple runs but only try and get the mutex once
+            if (_WindowMutex == null)
+            {
+                _WindowMutex = new Mutex(true, MutexName, out IsFirstInstance);
+            }
+
+            return IsFirstInstance;
+        }
+
         public ThCustomWindow()
         {
             InitializeStyle();
@@ -133,7 +150,24 @@ namespace ThControlLibraryWPF.CustomControl
 
             // 解决最大化覆盖任务栏问题
             this.SourceInitialized += new EventHandler(win_SourceInitialized);
+            this.Loaded += new RoutedEventHandler(OnWindow_Loaded);
+            this.Closed += new EventHandler(OnWindow_Closed);
         }
+
+        private void OnWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!IsFirstWindowInstance())
+                Close();
+        }
+        void OnWindow_Closed(object sender, EventArgs e)
+        {
+            // Close and dispose our mutex.
+            if (_WindowMutex != null)
+            {
+                _WindowMutex.Dispose();
+            }
+        }
+
         public bool CheckInputData()
         {
             //获取该页面中的Textbox进行验证是否有输入不正确的数据

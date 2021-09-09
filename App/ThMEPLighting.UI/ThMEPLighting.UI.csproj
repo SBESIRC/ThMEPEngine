@@ -55,6 +55,9 @@
     <Compile Include="emgLightLayout\UIEmgLightLayout.xaml.cs">
       <DependentUpon>UIEmgLightLayout.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Lighting\uiThLighting.xaml.cs">
+      <DependentUpon>uiThLighting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MEPLightingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MEPLightingUIEmgLightApp.cs" />
@@ -115,6 +118,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Lighting\uiThLighting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\ExampleUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -132,6 +139,10 @@
     <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
       <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
       <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
       <Project>{6eb17675-61ba-4669-a2ed-da7a8a4af715}</Project>

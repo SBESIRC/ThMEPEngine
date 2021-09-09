@@ -13,40 +13,42 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
-using TianHua.Electrical.ViewModels;
-using TianHua.Electrical.Commands;
+using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.Lighting.Commands;
 using ThMEPEngineCore.Command;
+using System.Threading;
 
-namespace TianHua.Electrical.UI
+namespace TianHua.Lighting.UI
 {
     /// <summary>
-    /// uiThFireAlarm.xaml 的交互逻辑
+    /// uiThLighting.xaml 的交互逻辑
     /// </summary>
-    public partial class uiThFireAlarm : ThCustomWindow
+    public partial class uiThLighting : ThCustomWindow
     {
-        static FireAlarmViewModel UiConfigs = null;
-        public uiThFireAlarm()
+        static LightingViewModel UIConfigs = null;
+        public uiThLighting()
         {
             InitializeComponent();
-            if(UiConfigs == null)
+             if(UIConfigs == null)
             {
-                UiConfigs = new FireAlarmViewModel();
+                UIConfigs = new LightingViewModel();
             }
-            DataContext = UiConfigs;
-            MutexName = "Mutext_uiThFireAlarm";
+            DataContext = UIConfigs;
+
+            //For single form instance
+            MutexName = "Mutext_uiThLighting";
         }
 
         private void btnLayout_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new FireAlarmLayoutCommand(UiConfigs))
+            using (var cmd = new LightingLayoutCommand(UIConfigs))
             {
                 cmd.Execute();
             }
         }
-
-        private void btnRouting_Click(object sender, RoutedEventArgs e)
+        private void bthRouting_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new FireAlarmRouteCableCommand(UiConfigs))
+            using (var cmd = new LightingRouteCableCommand(UIConfigs))
             {
                 cmd.Execute();
             }
