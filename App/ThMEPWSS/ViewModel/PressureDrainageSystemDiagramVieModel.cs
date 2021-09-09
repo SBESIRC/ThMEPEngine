@@ -56,6 +56,8 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        public List<Point3dCollection> WellsAreas;
+        public List<string> WellBlockKeyNames = new List<string>();
 
         /// <summary>
         /// 楼层框定

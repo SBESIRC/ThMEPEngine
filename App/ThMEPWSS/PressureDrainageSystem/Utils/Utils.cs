@@ -762,5 +762,32 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
 
             return FloorAreaList;
         }
+
+        /// <summary>
+        /// 实现一个Icomparer接口根据潜水泵位置排序集水井
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="dm"></param>
+        /// <returns></returns>
+        public static List<WellInfo> SortWellsBasedSpecailPumps(List<WellInfo> wells, Point3d pt)
+        {
+            var comparer = new WellInfoComparer(pt);
+            wells.Sort(comparer);
+            return wells;
+        }
+        public class WellInfoComparer : IComparer<WellInfo>
+        {
+            public WellInfoComparer(Point3d pt)
+            {
+                Pt = pt;
+            }
+            private Point3d Pt;
+            public int Compare(WellInfo a, WellInfo b)
+            {
+                if (a.Location.DistanceTo(Pt) == b.Location.DistanceTo(Pt)) return 0;
+                else if (a.Location.DistanceTo(Pt) < b.Location.DistanceTo(Pt)) return -1;
+                else return 1;
+            }
+        }
     }
 }

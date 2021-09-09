@@ -1,11 +1,14 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -54,7 +57,51 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel.InitListDatas();
             }
             catch { }
+            try
+            {
+                ReadPumpWellKeyBlockNames();
+            }
+            catch { }
         }
+
+        /// <summary>
+        /// 从图块配置内存中读取集水井数据
+        /// </summary>
+        private void ReadPumpWellKeyBlockNames()
+        {
+            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            FormUtil.DisableForm(gridForm);
+            ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(new List<ThMEPWSS.Model.FloorFramed>(), new DrainageSystemAGViewmodel(), config);
+            thDrainSystem.Execute();
+            //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
+            FormUtil.EnableForm(gridForm);
+            ThMEPWSS.Common.Utils.FocusToCAD();        
+            List<string> wellnames = new List<string>();
+            foreach (var fig in config)
+            {
+                if (fig.Key == "集水井")
+                {
+                    foreach (var value in fig.Value)
+                    {
+                        bool quit = false;
+                        for (int i = 0; i < wellnames.Count; i++)
+                        {
+                            if (wellnames.Equals(value))
+                            {
+                                quit = true;
+                                break;
+                            }
+                        }
+                        if (quit)
+                            continue;
+                        else
+                            wellnames.Add(value);
+                    }
+                }
+            }
+            wellnames.ForEach(e => viewModel.WellBlockKeyNames.Add(e));
+        }
+
         /// <summary>
         /// 生成系统图
         /// </summary>
@@ -66,7 +113,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 if (null == viewModel)
                 {
-                    MessageBox.Show("数据错误：获取选中住户分区失败，无法进行后续操作");
+                    System.Windows.Forms.MessageBox.Show("数据错误：获取选中住户分区失败，无法进行后续操作");
                     return;
                 }
                 uiUNDPDrainageSystemInfoCheck infoCheck = new uiUNDPDrainageSystemInfoCheck();
@@ -75,6 +122,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     return;
                 }
+
+
+                //Func();
+
                 Point3d insertPt = new Point3d();
                 var pt = Active.Editor.GetPoint("\n请输入插入点");
                 if (pt.Status == PromptStatus.OK)
@@ -94,6 +145,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel.PreGenerateDiagram(cmd);
             }
         }
+
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

@@ -17,6 +17,8 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Common;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Pipe.Engine;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using ThMEPWSS.PressureDrainageSystem.Utils;
 using ThMEPWSS.Uitl;
@@ -40,6 +42,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             this.CollectVerticalPipes();
             this.CollectWaterWells();
             this.CollectWrappingPipes();
+            this.CollectpumpWells(viewmodel);
             this.CollectSubmergedPumps();
             this.CollectHorizontalPipes();
             this.CollectStoryFrame();
@@ -306,6 +309,59 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
         }
         /// <summary>
+        /// 识别并提取集水井
+        /// </summary>
+        public void CollectpumpWells(PressureDrainageSystemDiagramVieModel viewmodel)
+        {
+            List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
+            WaterWellIdentifyConfigInfo info = new WaterWellIdentifyConfigInfo();
+            info.WhiteList.Clear();
+            viewmodel.WellBlockKeyNames.ForEach(e => info.WhiteList.Add(e));
+            using (var database = AcadDatabase.Active())
+            using (var waterwellEngine = new ThWWaterWellRecognitionEngine(info))
+            {
+                waterwellEngine.Recognize(database.Database, viewmodel.SelectedArea);
+                waterwellEngine.RecognizeMS(database.Database, viewmodel.SelectedArea);
+                var objIds = new ObjectIdCollection(); // Print
+                foreach (var element in waterwellEngine.Datas)
+                {
+                    ThWWaterWell waterWell = ThWWaterWell.Create(element);
+                    waterWell.Init();
+                    waterWellList.Add(waterWell);
+                }
+            }
+            this.CollectedData.Wells = new List<WellInfo>();
+            foreach (var e in waterWellList)
+            {
+                WellInfo well = new WellInfo();
+                well.Location = e.OBB.GetCenter();
+                if (e.Length < e.Width)
+                {
+                    double tmp = e.Length;
+                    e.Length = e.Width;
+                    e.Width = tmp;
+                }
+                well.Length = ((int)(e.Length / 100)) * 100;
+                well.Width = ((int)(e.Width / 100)) * 100;
+                this.CollectedData.Wells.Add(well);
+            }
+        }
+        /// <summary>
+        /// 识别提取潜水井
+        /// </summary>
+        public void CollectPumpWells()
+        {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                var wells = Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid).
+                    Where(e => e.GetEffectiveName().Contains("Well"));
+                foreach (var br in wells)
+                {
+                    int a = 1;
+                }
+            }
+        }
+        /// <summary>
         /// 提取潜水泵
         /// </summary>
         public void CollectSubmergedPumps()
@@ -361,6 +417,16 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         submergedPump.Visibility = submergedPump.Visibility == null ? "" : submergedPump.Visibility;
                         submergedPump.Location = submergedPump.Location == null ? "" : submergedPump.Location;
                         submergedPump.Allocation = submergedPump.Allocation == null ? "" : submergedPump.Allocation;
+                        SortWellsBasedSpecailPumps(this.CollectedData.Wells, submergedPump.Extents.GetCenter());
+                        if (this.CollectedData.Wells.Count > 0)
+                        {
+                            if (this.CollectedData.Wells[0].Location.DistanceTo(submergedPump.Extents.GetCenter()) < 5000)
+                            {
+                                submergedPump.Length = this.CollectedData.Wells[0].Length.ToString();
+                                submergedPump.Width = this.CollectedData.Wells[0].Width.ToString();
+                                this.CollectedData.Wells.RemoveAt(0);
+                            }
+                        }
                         this.CollectedData.SubmergedPumps.Add(submergedPump);
                     }
                 }
