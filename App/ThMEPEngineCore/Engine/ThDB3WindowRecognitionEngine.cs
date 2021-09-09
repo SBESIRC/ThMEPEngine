@@ -72,7 +72,11 @@ namespace ThMEPEngineCore.Engine
                 results = results.FilterSmallArea(1.0);
                 foreach (Curve obj in results)
                 {
-                    Elements.Add(ThIfcWindow.Create(Wash(obj)));
+                    var ent = Wash(obj); //清洗
+                    if(ent is Polyline poly && poly.Area>1.0)
+                    {
+                        Elements.Add(ThIfcWindow.Create(poly));
+                    }
                 }
             }
         }
