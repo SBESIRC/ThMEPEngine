@@ -16,7 +16,10 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThDB3RoomOutlineExtractionVisitor();
+            var visitor = new ThDB3RoomOutlineExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
