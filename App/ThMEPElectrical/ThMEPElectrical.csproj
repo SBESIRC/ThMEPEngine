@@ -149,8 +149,9 @@
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
     <Compile Include="FireAlarm\Data\BuildingType.cs" />
     <Compile Include="FireAlarm\Data\ThFaPlaceCoverageExtractor.cs" />
+    <Compile Include="FireAlarm\Data\ThFireAlarmBlkExtractor.cs" />
     <Compile Include="FireAlarm\Data\ThFireAlarmDataSetFactory.cs" />
-    <Compile Include="FireAlarm\Data\ThFireAlarmSimpleDataSetFactory.cs" />
+    <Compile Include="AlarmSensorLayout\Data\ThFireAlarmSimpleDataSetFactory.cs" />
     <Compile Include="FireAlarm\Logic\ThDataQueryService.cs" />
     <Compile Include="FireAlarm\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarm\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="FireAlarm\Service\DrawUtils.cs" />
     <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
+    <Compile Include="FireAlarm\ThFixLayoutCommon.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />

@@ -36,7 +36,7 @@ namespace FireAlarm.Data
                 ElementLayer = "AI-楼层框定E",
                 Transformer = Transformer,
             };
-            storeyExtractor.Extract(database, collection);            
+            storeyExtractor.Extract(database, collection);
             storeyExtractor.Transform(); //移到原点
 
             //再提取防火分区，接着用楼层框线对防火分区分组
@@ -112,6 +112,11 @@ namespace FireAlarm.Data
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
+                     new ThFireAlarmBlkExtractor ()
+                    {
+                        Transformer = Transformer ,
+                        BlkNameList = ThMEPElectrical.FireAlarm.ThFixLayoutCommon.BlkNameList, //add needed all blk name string 
+                    }
                 };
             extractors.ForEach(o => o.Extract(database, collection));
 
@@ -176,7 +181,7 @@ namespace FireAlarm.Data
         {
             geos.ForEach(g =>
             {
-                if(g.Boundary!=null)
+                if (g.Boundary != null)
                 {
                     if (g.Boundary is Polyline polyline)
                     {
@@ -225,7 +230,7 @@ namespace FireAlarm.Data
             };
         }
 
-        private void Print(Database database , List<ThExtractorBase> extractors)
+        private void Print(Database database, List<ThExtractorBase> extractors)
         {
             short colorIndex = 1;
             extractors.ForEach(o =>

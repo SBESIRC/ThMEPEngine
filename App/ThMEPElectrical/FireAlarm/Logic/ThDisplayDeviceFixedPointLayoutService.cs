@@ -16,10 +16,13 @@ namespace ThMEPElectrical.FireAlarm.Logic
     public class ThDisplayDeviceFixedPointLayoutService : ThFixedPointLayoutService
     {
         public BuildingType BuildingType { get; set; }
+       
         //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
-        public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas) : base(datas)
+        
+        public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas, List<string> LayoutBlkName, List<string> AvoidBlkName) : base(datas, LayoutBlkName, AvoidBlkName)
         {
         }
+
         public override List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
             List<KeyValuePair<Point3d, Vector3d>> ans = new List<KeyValuePair<Point3d, Vector3d>>();

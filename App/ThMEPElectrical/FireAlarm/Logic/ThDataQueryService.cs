@@ -22,25 +22,35 @@ namespace ThMEPElectrical.FireAlarm.Logic
     public class ThDataQueryService
     {
         private List<ThGeometry> Data { get; set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Storeys { get; private set; } = new List<ThGeometry>(); //StoreyBorder
-        public List<ThGeometry>  DoorOpenings { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  FireAparts { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  ArchitectureWalls { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Shearwalls { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Columns { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Windows { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Rooms { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry>  Holes { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Storeys { get; private set; } = new List<ThGeometry>(); //StoreyBorder
+        public List<ThGeometry> DoorOpenings { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> FireAparts { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> ArchitectureWalls { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Shearwalls { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Columns { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Windows { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireProofs { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Avoidence { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireLinkageRooms { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> LayoutEquipments { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> AvoidEquipments { get; private set; } = new List<ThGeometry>();
         public string floorTag { get; private set; }
         private Dictionary<Entity, ThGeometry> GeometryMap { get; set; }
         public List<string> FireApartMap { get; set; } = new List<string>();
-        public ThDataQueryService(List<ThGeometry> data)
+
+        public List<string> LayoutBlkName { get; set; }
+        public List<string> AvoidBlkNameList { get; set; }
+        public ThDataQueryService(List<ThGeometry> data, List<string> layoutBlkName, List<string> avoidBlkNameList)
         {
             Data = data;
+            LayoutBlkName = layoutBlkName;
+            AvoidBlkNameList = avoidBlkNameList;
+
             PrepareData();
+            CleanData();
+
             GeometryMap = new Dictionary<Entity, ThGeometry>();
             data.ForEach(o =>
             {
@@ -51,7 +61,7 @@ namespace ThMEPElectrical.FireAlarm.Logic
             });
             for (int i = 0; i < FireAparts.Count; ++i)
                 FireApartMap.Add(FireAparts[i].Properties[ThExtractorPropertyNameManager.IdPropertyName].ToString());
-            
+
         }
         protected void PrepareData()
         {
@@ -65,13 +75,45 @@ namespace ThMEPElectrical.FireAlarm.Logic
             Rooms = QueryC(BuiltInCategory.Room.ToString());
             Holes = QueryC(BuiltInCategory.Hole.ToString());
             FireProofs = QueryC(BuiltInCategory.LaneLine.ToString());
+
+            var equipments = QueryC(BuiltInCategory.Distribution.ToString());
+            if (LayoutBlkName != null)
+            {
+                LayoutEquipments = equipments.Where(x => LayoutBlkName.Contains(x.Properties["Name"].ToString())).ToList();
+            }
+            if (AvoidBlkNameList != null)
+            {
+                AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
+            }
+
             Avoidence.AddRange(DoorOpenings);
             Avoidence.AddRange(Windows);
             Avoidence.AddRange(FireProofs);
+            Avoidence.AddRange(AvoidEquipments);
             floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
             GetFireLinkageRooms();
         }
-        
+
+        private void CleanData()
+        {
+            LayoutEquipments.ForEach(x =>
+            {
+                var handle = x.Properties[ThExtractorPropertyNameManager.HandlerPropertyName].ToString();
+
+                var dbTrans = new DBTransaction();
+                var objId = dbTrans.GetObjectId(handle);
+                var obj = dbTrans.GetObject(objId, OpenMode.ForWrite, false);
+                obj.UpgradeOpen();
+                obj.Erase();
+                obj.DowngradeOpen();
+                dbTrans.Commit();
+                Data.Remove(x);
+
+            });
+
+
+        }
+
         private List<ThGeometry> QueryC(string category)
         {
             var result = new List<ThGeometry>();
@@ -99,14 +141,14 @@ namespace ThMEPElectrical.FireAlarm.Logic
         private void GetFireLinkageRooms()
         {
             ReadRoomConfigTable();
-            List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房", 
+            List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房",
                 "主要通风和空调机房", "防排烟机房", "灭火控制系统操作装置处或控制室", "企业消防站", "消防值班室", "总调度室", "消防电梯机房" };
             List<string> NameCollection = new List<string>();
-            foreach(string a in FireLinkageNames)
+            foreach (string a in FireLinkageNames)
             {
-                NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(roomTableConfig,a));
+                NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(roomTableConfig, a));
             }
-            foreach(ThGeometry room in Rooms)
+            foreach (ThGeometry room in Rooms)
             {
                 foreach (string roomtag in NameCollection)
                 {
@@ -124,12 +166,12 @@ namespace ThMEPElectrical.FireAlarm.Logic
             var rooms = targetRooms;
             var spatialColumnSet = new ThCADCoreNTSSpatialIndex(columnSet);
             List<Polyline> decorableOutline = new List<Polyline>();
-            foreach(Polyline room in rooms)
+            foreach (Polyline room in rooms)
             {
                 var crossingColumns = spatialColumnSet.SelectCrossingPolygon(room);
                 var roomOutlineL = room.Difference(crossingColumns).Cast<Polyline>().Where(o => o.Closed = true).ToList(); //封闭polyline
                 var DecOutline = roomOutlineL[0];
-                for(int i = 1; i<roomOutlineL.Count; ++i) //找differce后的最大框线作为返回结果防止出错
+                for (int i = 1; i < roomOutlineL.Count; ++i) //找differce后的最大框线作为返回结果防止出错
                 {
                     if (roomOutlineL[i].Area > DecOutline.Area)
                         DecOutline = roomOutlineL[i];
@@ -143,27 +185,27 @@ namespace ThMEPElectrical.FireAlarm.Logic
 
         public KeyValuePair<Point3d, Vector3d> FindVector(Point3d pt, Polyline room) // 给定点找在房间框线的朝向
         {
-            if(room.NumberOfVertices > 2)
+            if (room.NumberOfVertices > 2)
             {
                 if (room.IsCCW())
                     room.ReverseCurve(); //房间框线转为顺时针
             }
             int index = 0;
             Tolerance tol = new Tolerance(5, 5);
-            for(int i = 0; i < room.NumberOfVertices; ++i)
+            for (int i = 0; i < room.NumberOfVertices; ++i)
             {
-                if(new Line(room.GetPoint3dAt(i), room.GetPoint3dAt((i+1)%room.NumberOfVertices)).ToCurve3d().IsOn(pt, tol))
+                if (new Line(room.GetPoint3dAt(i), room.GetPoint3dAt((i + 1) % room.NumberOfVertices)).ToCurve3d().IsOn(pt, tol))
                 {
                     index = i;
                     break;
                 }
             }
             var vec = (room.GetPoint3dAt(index + 1) - pt).GetNormal().RotateBy(-Math.PI / 2, Vector3d.ZAxis);
-            return new KeyValuePair<Point3d, Vector3d> (pt, vec);
+            return new KeyValuePair<Point3d, Vector3d>(pt, vec);
         }
         public Dictionary<string, List<ThGeometry>> ClassifyByFireApart(List<ThGeometry> className) //将框线按防火分区分类
         {
-            Dictionary<string,List< ThGeometry>> classfiyResultsDict = new Dictionary<string, List<ThGeometry>>();
+            Dictionary<string, List<ThGeometry>> classfiyResultsDict = new Dictionary<string, List<ThGeometry>>();
 
             foreach (ThGeometry toClassify in className)
             {
@@ -187,7 +229,7 @@ namespace ThMEPElectrical.FireAlarm.Logic
         {
             int num = room.NumberOfVertices;
             Tolerance tol = new Tolerance(5, 5);
-            for (int i = 0; i< num - 1; ++i)
+            for (int i = 0; i < num - 1; ++i)
             {
                 if (new Line(room.GetPoint3dAt(i), room.GetPoint3dAt(i + 1)).ToCurve3d().IsOn(point, tol))
                     return i;
@@ -200,20 +242,20 @@ namespace ThMEPElectrical.FireAlarm.Logic
             int num = room.NumberOfVertices;
             foreach (Polyline avoid in avoidence)
             {
-                List<Point3d> temp = new List<Point3d>(); 
+                List<Point3d> temp = new List<Point3d>();
                 temp.AddRange(avoid.IntersectWithEx(room).OfType<Point3d>().ToList());
                 if (temp.Count < 2)
 
                     continue;
                 int zindex = FindIndex(room, temp[0]);
-                int oindex = FindIndex(room, temp[temp.Count-1]);
-                if(zindex == oindex)
+                int oindex = FindIndex(room, temp[temp.Count - 1]);
+                if (zindex == oindex)
                 {
                     result.Add(temp);
                 }
                 else
                 {
-                    for(int i = 0; i < num-1 ; ++i)
+                    for (int i = 0; i < num - 1; ++i)
                     {
                         Point3d pt = room.GetPoint3dAt(i);
                         if (avoid.Contains(pt))
@@ -229,20 +271,20 @@ namespace ThMEPElectrical.FireAlarm.Logic
             int num = walls.NumberOfVertices;
             Tolerance tol = new Tolerance(5, 5);
             var result = new List<Line>();
-            for(int i = 0; i< num-1; ++i)
+            for (int i = 0; i < num - 1; ++i)
             {
                 Line tempwall = new Line(walls.GetPoint3dAt(i), walls.GetPoint3dAt(i + 1));
                 foreach (List<Point3d> avoidEnt in avoidencePt)
                 {
                     var tempAvoid = new List<Point3d>();
-                    foreach(Point3d pt in avoidEnt)
+                    foreach (Point3d pt in avoidEnt)
                     {
-                        if (tempwall.ToCurve3d().IsOn(pt,tol))
+                        if (tempwall.ToCurve3d().IsOn(pt, tol))
                             tempAvoid.Add(pt);
                     }
                     if (tempAvoid.Count < 2)
                         continue;
-                    for(int j = 0; j< tempAvoid.Count - 1; ++j)
+                    for (int j = 0; j < tempAvoid.Count - 1; ++j)
                     {
                         Line avoidOnWall = new Line(tempAvoid[j], tempAvoid[j + 1]);
                         Line actualAvoid = new Line((avoidOnWall.StartPoint + avoidOnWall.Delta.GetNormal().MultiplyBy(-reservedLength)),
@@ -290,7 +332,7 @@ namespace ThMEPElectrical.FireAlarm.Logic
         }
 
         /// 判断当前点是凸点还是凹点(-1，凸点；1，凹点；0，点在线上，不是拐点)
-        public int IsConvexPoint(Polyline poly, Point3d pt, Point3d nextP, Point3d preP) 
+        public int IsConvexPoint(Polyline poly, Point3d pt, Point3d nextP, Point3d preP)
         {
             Vector3d nextV = (nextP - pt).GetNormal();
             Vector3d preV = (pt - preP).GetNormal();

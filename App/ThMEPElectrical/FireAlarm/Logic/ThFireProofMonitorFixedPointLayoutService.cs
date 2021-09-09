@@ -15,11 +15,22 @@ namespace ThMEPElectrical.FireAlarm.Logic
 {
     public class ThFireProofMonitorFixedPointLayoutService : ThFixedPointLayoutService
     {
-        public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data):base(data)
+        /// <summary>
+        /// 读取房间配置表设置
+        /// </summary>
+        static string evacuationConfigUrl = ThCADCommon.SupportPath() + "\\疏散方向判断.xlsx";
+        public List<List<string>> MonitorRoomNameConfigMap = new List<List<string>>();       //
+        protected Dictionary<string, int> routeMap = new Dictionary<string, int>();  //房间名编号
+        protected List<Dictionary<int, List<int>>> ConfigRouteMap = new List<Dictionary<int, List<int>>>
+                                            { new Dictionary<int, List<int>>(), new Dictionary<int, List<int>> (),
+                                             new Dictionary<int, List<int>> (), new Dictionary<int, List<int>> ()};  //不同楼层路径优先级
+
+        public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data, List<string> LayoutBlkName, List<string> AvoidBlkName) :base(data, LayoutBlkName, AvoidBlkName)
         {
         }
-        public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
+        public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
+    
         public override List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
 
@@ -121,15 +132,6 @@ namespace ThMEPElectrical.FireAlarm.Logic
             return results;
         }
 
-        /// <summary>
-        /// 读取房间配置表设置
-        /// </summary>
-        static string evacuationConfigUrl = ThCADCommon.SupportPath() + "\\疏散方向判断.xlsx";
-        public List<List<string>> MonitorRoomNameConfigMap = new List<List<string>>();       //
-        protected Dictionary<string, int> routeMap = new Dictionary<string, int>();  //房间名编号
-        protected List<Dictionary<int, List<int>>> ConfigRouteMap = new List<Dictionary<int, List<int>>> 
-            { new Dictionary<int, List<int>>(), new Dictionary<int, List<int>> (),
-             new Dictionary<int, List<int>> (), new Dictionary<int, List<int>> ()};  //不同楼层路径优先级
         
         public void SetConfigTableForMonitor()
         {

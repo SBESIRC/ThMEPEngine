@@ -61,6 +61,11 @@ namespace FireAlarm.Data
                     {
                         Transformer = Transformer,
                     },
+                    new ThFireAlarmBlkExtractor ()
+                    {
+                        Transformer = Transformer ,
+                        BlkNameList = new List<string >(){}, //to do
+                    }
             };
             extractors.ForEach(o => o.Extract(database, collection));
             //收集数据

@@ -12,10 +12,11 @@ namespace ThMEPElectrical.FireAlarm.Logic
     {
         protected ThDataQueryService DataQueryWorker { get; set; }
 
-        public ThFixedPointLayoutService(List<ThGeometry> totalData)
+        public ThFixedPointLayoutService(List<ThGeometry> totalData, List<string> LayoutBlkName, List<string> AvoidBlkName)
         {
-            DataQueryWorker = new ThDataQueryService(totalData);
+            DataQueryWorker = new ThDataQueryService(totalData, LayoutBlkName, AvoidBlkName);
         }
         public abstract List<KeyValuePair<Point3d, Vector3d>> Layout();
+
     }
 }
