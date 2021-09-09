@@ -31,7 +31,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = vm.Clone();
             this.vm = vm;
             this.DataContext = _vm;
-            this.阳台地漏.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
+            this.阳台地漏.ItemsSource = new string[] { "DN50", "DN75", };
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)

@@ -171,7 +171,7 @@ namespace ThMEPWSS.Pipe.Model
             DrawLabel(basePt, text);
         }
 
-        public static void DrawLabel(Point3d basePt, string text,double textHeight=350)
+        public static void DrawLabel(Point3d basePt, string text, double textHeight = 350)
         {
             var height = textHeight;
             var width = height * .8 * text.Length;
@@ -184,7 +184,7 @@ namespace ThMEPWSS.Pipe.Model
             var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(50, 50));
             Dr.SetLabelStylesForRainNote(t);
         }
-        public static void DrawSimpleLabel(Point2d _basePt, string text)
+        public static void DrawSimpleLabel(Point2d _basePt, string text, string layer = null)
         {
             var basePt = _basePt.ToPoint3d();
             var height = 350;
@@ -197,11 +197,16 @@ namespace ThMEPWSS.Pipe.Model
             foreach (var seg in segs)
             {
                 var line = DU.DrawLineSegmentLazy(seg);
+                if (layer != null) line.Layer = layer;
             }
-            var txtBasePt = segs[1].EndPoint ;
+            var txtBasePt = segs[1].EndPoint;
             txtBasePt = txtBasePt.OffsetY(gap);
             var t = DU.DrawTextLazy(text, height, txtBasePt);
             t.WidthFactor = factor;
+            if (layer != null)
+            {
+                t.Layer = layer;
+            }
         }
 
         public static void DrawUnderBoardLabelAtLeftTop(Point3d basePt)
@@ -240,7 +245,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             DU.DrawingQueue.Enqueue(adb =>
             {
-             
+
                 {
                     DU.DrawBlockReference(blkName: "地漏系统", basePt: basePt.OffsetY(-390), scale: 2, cb: br =>
                     {
@@ -264,7 +269,7 @@ namespace ThMEPWSS.Pipe.Model
             DU.SetLayerAndByLayer("W-RAIN-EQPM", c);
         }
 
-      
+
         public static void DrawRainPort(Point3d basePt)
         {
             DU.DrawBlockReference(
@@ -666,7 +671,7 @@ namespace ThMEPWSS.Pipe.Model
                     Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
-                     
+
                     }
                 }
                 if (fds.Count == 2)
@@ -683,7 +688,7 @@ namespace ThMEPWSS.Pipe.Model
                     Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
-                      
+
                     }
                 }
                 if (Dr.GetHasAirConditionerFloorDrain() && ctx.ThWRainPipeRun.MainRainPipe.Label.StartsWith("Y2L") && ctx.ThWRainPipeRun.CondensePipes.Count == 2)
@@ -727,7 +732,7 @@ namespace ThMEPWSS.Pipe.Model
                 ThWRainPipeSystem.SetPipeRunLineStyle(line);
                 if (fd.HasDrivePipe)
                 {
-                  
+
                 }
             }
         }
