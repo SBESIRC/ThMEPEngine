@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +64,14 @@ namespace ThMEPEngineCore
                 poly.AddVertexAt(i, pts[i].ToPoint2D(), 0, 0, 0);
             }
             return poly;
+        }
+
+        public static bool IsAisleArea(Geometry areaPolygon, double shrinkValue = 3600, double threshold = 0.1)
+        {
+            var originalArea = areaPolygon.Area;
+            var shrinkedArea = areaPolygon.Buffer(-shrinkValue).Area;
+
+            return shrinkedArea / originalArea < threshold;
         }
     }
 }
