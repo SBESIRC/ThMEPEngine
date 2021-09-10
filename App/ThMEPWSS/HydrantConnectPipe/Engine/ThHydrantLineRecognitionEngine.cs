@@ -27,7 +27,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
 
         private bool IsHydrantLineLayer(string layer)
         {
-            if (layer.ToUpper().Contains("W-FRPT-1-HYDT-PIPE") || layer.ToUpper().Contains("W-FRPT-HYDT-PIPE"))
+            if (layer.ToUpper().Contains("W-FRPT") && layer.ToUpper().Contains("HYDT") && layer.ToUpper().Contains("PIPE"))
             {
                 return true;
             }

@@ -26,7 +26,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
         }
         private bool IsHydrantLineLayer(string layer)
         {
-            if (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-PIPE"))
+            if (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-PIPE") && (!layer.ToUpper().Contains("HYDT")))
             {
                 return true;
             }
