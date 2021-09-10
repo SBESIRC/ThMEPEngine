@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
@@ -7,10 +10,6 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.IO;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using NFox.Cad;
 
 namespace ThMEPWSS.FlushPoint.Data
 {
@@ -30,27 +29,35 @@ namespace ThMEPWSS.FlushPoint.Data
         public override void Extract(Database database, Point3dCollection pts)
         {
             // 只看块名
-            using (var engine = new ThParkingStallRecognitionEngine())
+            if(BlockNames.Count>0)
             {
-                var visitor = new ThParkingStallExtractionVisitor();
-                visitor.CheckQualifiedBlockName = CheckBlockNameQualified;
-                visitor.CheckQualifiedLayer = (Entity e) => true;
-                engine.Visitor = visitor;
-                engine.Recognize(database, pts);
-                engine.RecognizeMS(database, pts);
-                ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
+                using (var engine = new ThParkingStallRecognitionEngine())
+                {
+                    var visitor = new ThParkingStallExtractionVisitor();
+                    visitor.CheckQualifiedBlockName = CheckBlockNameQualified;
+                    visitor.CheckQualifiedLayer = (Entity e) => true;
+                    engine.Visitor = visitor;
+                    engine.Recognize(database, pts);
+                    engine.RecognizeMS(database, pts);
+                    ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
+                }
             }
+            
             // 只看图层
-            using (var engine = new ThParkingStallRecognitionEngine())
+            if(LayerNames.Count>0)
             {
-                var visitor = new ThParkingStallExtractionVisitor();
-                visitor.CheckQualifiedLayer = CheckLayerNameQualified;
-                visitor.CheckQualifiedBlockName = (Entity e) => true;
-                engine.Visitor = visitor;
-                engine.Recognize(database, pts);
-                engine.RecognizeMS(database, pts);
-                ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
+                using (var engine = new ThParkingStallRecognitionEngine())
+                {
+                    var visitor = new ThParkingStallExtractionVisitor();
+                    visitor.CheckQualifiedLayer = CheckLayerNameQualified;
+                    visitor.CheckQualifiedBlockName = (Entity e) => true;
+                    engine.Visitor = visitor;
+                    engine.Recognize(database, pts);
+                    engine.RecognizeMS(database, pts);
+                    ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
+                }
             }
+            
             DuplicatedRemove();
         }
 

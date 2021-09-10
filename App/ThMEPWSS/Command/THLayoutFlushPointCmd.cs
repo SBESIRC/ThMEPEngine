@@ -90,21 +90,21 @@ namespace ThMEPWSS.Command
             parkingStalls.ForEach(p => Transfomer.Transform(p));
             obstacles.ForEach(p => Transfomer.Transform(p));
 
-            var filterService = new ThFilterWashPointsService()
+            var filterService = new ThFilterWashPointsService(FlushPointVM.Parameter.NearbyDistance*1000)
             {
                 Rooms = rooms.Select(o=>o.Boundary).ToList(),
                 DrainFacilityExtractor = drainFacilityExtractor,
             };
             // 过滤哪些点位靠近排水设施，哪些远离排水设施
             // 因暂时不考虑对远离和靠近排水设施的过滤。注释掉相关代码，后期根据需求再打开
-            //filterService.Filter(washPoints);
+            filterService.Filter(washPoints);
             var layoutInfo = filterService.LayoutInfo; //用于保存插入块的结果、靠近/远离排水设施的点 
             var layOutPts = washPoints; //区域满布
-                                        //if (FlushPointVM.Parameter.ArrangePosition == ArrangePositionOps.OnlyDrainageFacility)
-                                        //{
-                                        //    layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
-                                        //}
-                                        //调整点位位置               
+            if (FlushPointVM.Parameter.ArrangePosition == ThMEPWSS.FlushPoint.Model.ArrangePositionOps.OnlyDrainageFacility)
+            {
+                layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
+            }
+            //调整点位位置               
             var adjustService = new ThAdjustWashPointPositionService(
                 columns, parkingStalls, walls, rooms.Select(o => o.Boundary).ToList(), obstacles);
             adjustService.Adjust(layOutPts);

@@ -72,7 +72,7 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcDistributionElementData>();
             if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
             {
-                visitor.DoExtract(results, e, Matrix3d.Identity);
+                visitor.DoExtract(results, e, e.BlockTransform);
             }
             return results;
         }

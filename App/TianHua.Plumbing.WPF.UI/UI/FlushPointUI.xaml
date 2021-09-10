@@ -9,7 +9,7 @@
              xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d" SizeToContent="Height"
-             Width="180" MinWidth="180" Title="冲洗点位" ResizeMode="NoResize">
+             Width="160" MinWidth="160" Title="冲洗点位" ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <converters:ArrangePositionBooleanConverter x:Key="apConverter"/>
@@ -75,14 +75,14 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="3,3,3,10">
+    <Grid Margin="5,3,3,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="90"></RowDefinition>
             <RowDefinition Height="120"></RowDefinition>
-            <RowDefinition Height="90"></RowDefinition>
+            <RowDefinition Height="110"></RowDefinition>
             <RowDefinition Height="10"></RowDefinition>
             <RowDefinition Height="20"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -92,12 +92,12 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" VerticalAlignment="Center" Orientation="Horizontal">
             <TextBlock Text="出图比例：" HorizontalAlignment="Left" Style="{StaticResource TextStyl1}"></TextBlock>
-            <ComboBox Name="cbPlotScale" Width="90" ItemsSource="{Binding PlotScales}" 
+            <ComboBox Name="cbPlotScale" Width="70" ItemsSource="{Binding PlotScales}" 
                       Text="{Binding Parameter.PlotScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
         </StackPanel>
         <StackPanel Grid.Row="1" VerticalAlignment="Center" Orientation="Horizontal">
             <TextBlock Text="楼层标识：" HorizontalAlignment="Left" Style="{StaticResource TextStyl1}"></TextBlock>
-            <TextBox Name="tbFloorSign" Width="90" Style="{StaticResource TextBoxTextStyle}" 
+            <TextBox Name="tbFloorSign" Width="70" Style="{StaticResource TextBoxTextStyle}" 
                      Text="{Binding Parameter.FloorSign,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
         </StackPanel>
         <StackPanel Grid.Row="2" VerticalAlignment="Top">
@@ -111,22 +111,16 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Text="保护半径：" HorizontalAlignment="Left" Style="{StaticResource TextStyl2}"></TextBlock>
                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,3">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="125"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Width="125" Name="tbProtectRadius" Style="{DynamicResource ValidationTextBoxStyle}"                                  
+                    <TextBox Grid.Column="0" Width="115" Name="tbProtectRadius" Style="{DynamicResource ValidationTextBoxStyle}"                                  
                          InputMethod.IsInputMethodEnabled="False" PreviewTextInput="tbProtectRadius_PreviewTextInput" 
                          PreviewKeyDown="tbProtectRadius_PreviewKeyDown" LostKeyboardFocus="tbProtectRadius_LostKeyboardFocus">
-                            <Binding Path="Parameter.ProtectRadius" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                <Binding.ValidationRules>
-                                    <validations:ProtectRadiusRule/>
-                                </Binding.ValidationRules>
-                            </Binding>
-                        </TextBox>
-                        <TextBlock Grid.Column="1" Text="米" Style="{StaticResource TextStyl1}" Margin="5,0"></TextBlock>
-                    </Grid>
+                        <Binding Path="Parameter.ProtectRadius" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <validations:ProtectRadiusRule/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
+                    <TextBlock Grid.Column="1" Text="米" Style="{StaticResource TextStyl1}" Margin="5,0"></TextBlock>
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -147,8 +141,8 @@
                           IsHitTestVisible="False" IsChecked="{Binding Parameter.ParkingAreaOfProtectTarget,
                     Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxTextStyle}">
                     <TextBlock TextWrapping="Wrap" Text="停车区域" Style="{StaticResource TextStyl1}"></TextBlock>
-                </CheckBox>                
-                <CheckBox Grid.Row="2" Grid.Column="0" Name="chkNecessarySpace" VerticalAlignment="Center" IsThreeState="False"  
+                </CheckBox>
+                <CheckBox Grid.Row="2" Grid.Column="0" Name="chkNecessarySpace" VerticalAlignment="Center" IsThreeState="False"  Width="120"
                           IsHitTestVisible="False" IsChecked="{Binding Parameter.NecessaryArrangeSpaceOfProtectTarget,
                     Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxTextStyle}">
                     <TextBlock TextWrapping="Wrap" Text="隔油池、污水提升等必布空间" Style="{StaticResource TextStyl1}"></TextBlock>
@@ -165,20 +159,17 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"></RowDefinition>
                     <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="布置策略：" 
+                <TextBlock Grid.Row="0" Text="布置策略：" 
                            Style="{StaticResource TextStyl2}" HorizontalAlignment="Left" Margin="0,1,0,0"></TextBlock>
-                <CheckBox Grid.Row="1" Grid.Column="0" Name="chkNecesaryArrangeSpacePoints" VerticalAlignment="Center" 
+                <CheckBox Grid.Row="1" Name="chkNecesaryArrangeSpacePoints" VerticalAlignment="Center" Width="120"
                           IsThreeState="false" IsEnabled="False" IsChecked="{Binding Parameter.NecesaryArrangeSpacePointsOfArrangeStrategy,
                     Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxTextStyle}">
-                    <TextBlock Text="必布空间的点位可以保护停车区域和其他空间" TextWrapping="Wrap" Style="{StaticResource TextStyl1}" ></TextBlock>
+                    <TextBlock Text="必布空间的点位可以保护停车区域和其他空间" TextWrapping="Wrap" Style="{StaticResource TextStyl1}"></TextBlock>
                 </CheckBox>
-                <CheckBox Grid.Row="2" Grid.Column="0" Name="chkParkingAreaPoints" VerticalAlignment="Center" 
-                          IsThreeState="false" IsEnabled="False" IsChecked="{Binding Parameter.ParkingAreaPointsOfArrangeStrategy,
+                <CheckBox Grid.Row="2" Name="chkParkingAreaPoints" VerticalAlignment="Center"  IsThreeState="false" Width="120"
+                          IsEnabled="False" IsChecked="{Binding Parameter.ParkingAreaPointsOfArrangeStrategy, 
                     Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxTextStyle}">
                     <TextBlock Text="停车区域的点位可以保护其他空间" TextWrapping="Wrap" Style="{StaticResource TextStyl1}" ></TextBlock>
                 </CheckBox>                
@@ -187,6 +178,7 @@
         <StackPanel Grid.Row="5" VerticalAlignment="Top">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="20"></RowDefinition>
                     <RowDefinition Height="20"></RowDefinition>
                     <RowDefinition Height="20"></RowDefinition>
                     <RowDefinition Height="20"></RowDefinition>
@@ -199,25 +191,41 @@
                            Style="{StaticResource TextStyl2}" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
                 <RadioButton Grid.Row="1" Name="rbAreaFullLayout"
                              GroupName="LayoutPosition" Margin="0,3"
-                             IsChecked="{Binding Parameter.ArrangePosition,Converter={StaticResource apConverter},
-                    ConverterParameter=0,Mode=TwoWay}">
+                             IsChecked="{Binding Parameter.ArrangePosition,Converter={StaticResource apConverter},                    
+                    ConverterParameter=0,Mode=TwoWay}"
+                             Checked="rbAreaFullLayout_Checked">
                     <TextBlock Text="区域满布" TextWrapping="Wrap" Style="{StaticResource TextStyl1}"></TextBlock>
                 </RadioButton>
                 <RadioButton Grid.Row="2" Name="rbNearbyDrainageFacility"
                              GroupName="LayoutPosition" Margin="0,3"
                              IsChecked="{Binding Parameter.ArrangePosition,Converter={StaticResource apConverter},
-                    ConverterParameter=1,Mode=TwoWay}">
+                    ConverterParameter=1,Mode=TwoWay}" Checked="rbNearbyDrainageFacility_Checked">
                     <TextBlock Text="仅排水设施附近" TextWrapping="Wrap" Style="{StaticResource TextStyl1}"></TextBlock>
                 </RadioButton>
+                <StackPanel Grid.Row="3" VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock Text="靠近距离：" HorizontalAlignment="Left" Style="{StaticResource TextStyl1}"></TextBlock>
+                    <TextBox Name="tbNearbyDistance" Width="55" Style="{StaticResource TextBoxTextStyle}" 
+                             InputMethod.IsInputMethodEnabled="False"                              
+                             PreviewTextInput="tbNearbyDistance_PreviewTextInput"
+                             PreviewKeyDown="tbNearbyDistance_PreviewKeyDown"                            
+                             LostKeyboardFocus="tbNearbyDistance_LostKeyboardFocus">
+                        <Binding Path="Parameter.NearbyDistance" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <validations:NearbyDistanceRule/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
+                    <TextBlock Text="米" Style="{StaticResource TextStyl1}" Margin="5,0"></TextBlock>
+                </StackPanel>
                 <Button Grid.Row="4" Grid.Column="0" Name="btnLayoutFlushPoint" Content="布置冲洗点位" 
-                        Width="100" Height="20" HorizontalAlignment="Left" Margin="5,5"
+                        Width="90" Height="20" HorizontalAlignment="Left" Margin="5,5"
                         Command="{Binding LayOutFlushPointCmd}"
                         Style="{StaticResource ButtonTextStyle}"></Button>
             </Grid>
         </StackPanel>
         <Line Grid.Row="6" Grid.Column="0" X1="0" Y1="0" X2="200" Y2="0" StrokeDashArray="6"
               Stroke="Gray"  StrokeThickness="2" VerticalAlignment="Center"></Line>
-        <StackPanel Grid.Row="7" Orientation="Vertical">
+        <StackPanel Grid.Row="7" Orientation="Vertical" Margin="0,2">
             <CheckBox Name="chkLayoutOnColumn" Content="仅布置在孤立柱上" Width="120"
                       Style="{StaticResource CheckBoxTextStyle}" IsThreeState="False"
                       IsChecked="{Binding Parameter.OnlyLayoutOnColumn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">

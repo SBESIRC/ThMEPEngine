@@ -9,12 +9,13 @@ namespace ThMEPWSS.FlushPoint.Service
 {
     public class ThDrainageDitchNearbyService: ThNearbyService
     {
-        public double NearbyDistance { get; set; } //排水沟的中心线外扩4000范围内视为“附近”
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         
-        public ThDrainageDitchNearbyService(List<Entity> ditches,List<Entity> rooms):base(rooms)
+        public ThDrainageDitchNearbyService(
+            List<Entity> ditches,
+            List<Entity> rooms,
+            double nearbyDistance):base(rooms, nearbyDistance)
         {
-            NearbyDistance = 4000;
             SpatialIndex = new ThCADCoreNTSSpatialIndex(ditches.ToCollection());
         }
 
