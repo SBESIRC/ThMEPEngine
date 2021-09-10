@@ -39,6 +39,8 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLabelLayoutDirection.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\ToiletRoomCleanout.cs" />
+    <Compile Include="HydrantConnectPipe\Engine\ThOtherLineRecognitionEngine.cs" />
+    <Compile Include="HydrantConnectPipe\Service\ThOtherPipeLineService.cs" />
     <Compile Include="Hydrant\Data\ThHydrantArchitectureWallExtractor.cs" />
     <Compile Include="Hydrant\Data\ThHydrantShearwallExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />

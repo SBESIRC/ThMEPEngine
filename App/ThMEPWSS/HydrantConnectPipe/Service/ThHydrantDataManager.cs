@@ -91,6 +91,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var hydrantMainLineService = new ThHydrantPipeLineService();
             hydrantMainLineService.RemoveBranchLines(branchLines, loopLines, selectArea);
         }
+        public static List<Line> GetOtherPipeLineList(Point3dCollection selectArea)
+        {
+            var otherPipeLineService = new ThOtherPipeLineService();
+            return otherPipeLineService.GetOtherPipeLineList(selectArea);
+        }
 
         private static List<RoomTableTree> GetRoomTableTree(DataSet dataSet)
         {

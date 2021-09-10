@@ -11,7 +11,7 @@ using ThCADCore.NTS;
 
 namespace ThMEPWSS.HydrantConnectPipe.Engine
 {
-    public class ThHydrantLineRecognitionEngine
+    public class ThOtherLineRecognitionEngine
     {
         public DBObjectCollection Dbjs { get; private set; }
         public void Extract(Point3dCollection selectArea)
@@ -24,10 +24,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
                 Dbjs = spatialIndex.SelectCrossingPolygon(selectArea);
             }
         }
-
         private bool IsHydrantLineLayer(string layer)
         {
-            if (layer.ToUpper().Contains("W-FRPT-1-HYDT-PIPE") || layer.ToUpper().Contains("W-FRPT-HYDT-PIPE"))
+            if (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-PIPE"))
             {
                 return true;
             }
