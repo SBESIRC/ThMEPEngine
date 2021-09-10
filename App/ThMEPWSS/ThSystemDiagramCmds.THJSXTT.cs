@@ -26,7 +26,17 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        
+        [CommandMethod("TIANHUACAD", "-THJSXTT", CommandFlags.Modal)]
+        public void THJSXTT()
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个对象");//交互界面
+            }
+        }
+
+
+
         [CommandMethod("TIANHUACAD", "TestExractKitchens", CommandFlags.Modal)]
         public void TestExractKitchens()
         {
