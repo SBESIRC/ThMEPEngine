@@ -17,10 +17,6 @@ namespace ThMEPEngineCore.Engine
 
         public abstract void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix);
         public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
-        public virtual void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj)
-        {
-            //
-        }
         public virtual bool IsDistributionElement(Entity entity)
         {
             return false;
