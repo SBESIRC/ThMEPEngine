@@ -4,6 +4,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -115,6 +116,13 @@ namespace ThMEPEngineCore.Engine
                                     }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     results.AddRange(DoExtract(blockObj, mcs2wcs, visitor));
+                                }
+                            }
+                            else if (dbObj.IsTCHElement())
+                            {
+                                if (visitor.CheckLayerValid(dbObj) && visitor.IsDistributionElement(dbObj))
+                                {
+                                    visitor.DoExtract(results, dbObj, matrix);
                                 }
                             }
                         }
