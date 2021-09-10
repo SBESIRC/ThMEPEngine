@@ -535,7 +535,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             return null;
         }
-        private Polyline GetPathByAStar(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Line> rooms)
+        public Polyline GetPathByAStar(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes, List<Line> rooms)
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
