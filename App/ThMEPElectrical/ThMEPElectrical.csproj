@@ -160,6 +160,7 @@
     <Compile Include="FireAlarm\Logic\ThFireTelFixedPointLayoutService.cs" />
     <Compile Include="FireAlarm\Logic\ThFixedPointLayoutService.cs" />
     <Compile Include="FireAlarm\Service\DrawUtils.cs" />
+    <Compile Include="FireAlarm\Service\ThFireAlarmInsertBlk.cs" />
     <Compile Include="FireAlarm\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarm\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="FireAlarm\ThFixLayoutCommon.cs" />

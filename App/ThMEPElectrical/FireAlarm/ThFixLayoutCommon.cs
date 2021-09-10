@@ -17,11 +17,22 @@ namespace ThMEPElectrical.FireAlarm
         public static string BlkName_Monitor = "E-BEFPS110";
         public static string BlkName_FireTel = "E-BFAS220";
         public static List<string> BlkNameList = new List<string>() { BlkName_Display_Fire, BlkName_Display_Floor, BlkName_Monitor, BlkName_FireTel };
-        
+
         public static int blk_scale = 100;
-        public static double blk_display_size_x = 5;
-        public static double blk_display_size_y = 3;
+      
+        public static Dictionary<string, double> blk_move_length = new Dictionary<string, double>() {
+                                                                    {BlkName_Display_Fire,3},
+                                                                    {BlkName_Display_Floor, 3},
+                                                                    {BlkName_Monitor, 3},
+                                                                    {BlkName_FireTel, 3},
+                                                                };
 
-
+        public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
+                                                                {
+                                                                    {BlkName_Display_Fire,"E-FAS-DEVC"},
+                                                                    {BlkName_Display_Floor, "E-FAS-DEVC"},
+                                                                    {BlkName_Monitor, "E-FAS-DEVC"},
+                                                                    {BlkName_FireTel, "E-FAS-DEVC"},
+                                                                 };
     }
 }
