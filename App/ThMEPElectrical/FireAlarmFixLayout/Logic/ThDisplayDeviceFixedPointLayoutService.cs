@@ -1,17 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using ThMEPElectrical.FireAlarm.Data;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+
 using NFox.Cad;
-using ThMEPEngineCore.IO;
-using ThMEPElectrical.FireAlarm.Service;
+
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Config;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
 
-namespace ThMEPElectrical.FireAlarm.Logic
+using ThMEPElectrical.FireAlarmFixLayout.Data;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDisplayDeviceFixedPointLayoutService : ThFixedPointLayoutService
     {

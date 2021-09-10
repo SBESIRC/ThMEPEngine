@@ -1,22 +1,23 @@
-﻿using NFox.Cad;
-using System.Linq;
-using Dreambuild.AutoCAD;
+﻿using System.Linq;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
+using NFox.Cad;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPElectrical.FireAlarm.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IGroup, ISetStorey, ITransformer
     {

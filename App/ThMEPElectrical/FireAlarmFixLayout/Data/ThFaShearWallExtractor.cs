@@ -1,22 +1,27 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace FireAlarm.Data
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaShearWallExtractor : ThShearwallExtractor, IGroup, ISetStorey, ITransformer
     {

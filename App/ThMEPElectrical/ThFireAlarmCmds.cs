@@ -10,20 +10,19 @@ using AcHelper;
 using Linq2Acad;
 using NFox.Cad;
 using Dreambuild.AutoCAD;
-using FireAlarm.Data;
 
 using ThCADExtension;
-using ThMEPElectrical.FireAlarm.Logic;
-using ThMEPElectrical.FireAlarm;
-using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPElectrical.Command;
-using FireAlarm;
 
-namespace ThMEPElectrical
+using ThMEPElectrical.FireAlarmFixLayout.Data;
+using ThMEPElectrical.FireAlarmFixLayout.Logic;
+using ThMEPElectrical.FireAlarmFixLayout;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarmFixLayout
 {
     public class ThFireAlarmCmds
     {
@@ -93,14 +92,14 @@ namespace ThMEPElectrical
                 if (rst.Status != PromptStatus.OK)
                     return;
 
-                var buildingType = FireAlarm.Data.BuildingType.None;
+                var buildingType = FireAlarmFixLayout.Data.BuildingType.None;
                 if (rst.StringResult.Equals(strResident))
                 {
-                    buildingType = FireAlarm.Data.BuildingType.Resident;
+                    buildingType = FireAlarmFixLayout.Data.BuildingType.Resident;
                 }
                 else if (rst.StringResult.Equals(strPublic))
                 {
-                    buildingType = FireAlarm.Data.BuildingType.Public;
+                    buildingType = FireAlarmFixLayout.Data.BuildingType.Public;
                 }
                 else return;
 
@@ -133,7 +132,7 @@ namespace ThMEPElectrical
                 });
 
                 //插入真实块
-                FireAlarm.Service.ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale,  layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale,  layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -184,7 +183,7 @@ namespace ThMEPElectrical
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                FireAlarm.Service.ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -235,7 +234,7 @@ namespace ThMEPElectrical
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                FireAlarm.Service.ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
 
 
                 //Print

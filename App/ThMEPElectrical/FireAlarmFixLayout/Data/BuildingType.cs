@@ -1,4 +1,4 @@
-﻿namespace ThMEPElectrical.FireAlarm.Data
+﻿namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
     public enum BuildingType
     {

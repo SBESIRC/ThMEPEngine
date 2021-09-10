@@ -1,17 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
-using NFox.Cad;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using System.Data;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Config;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
 
-namespace ThMEPElectrical.FireAlarm.Logic
+namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThFireProofMonitorFixedPointLayoutService : ThFixedPointLayoutService
     {

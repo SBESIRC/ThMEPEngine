@@ -1,19 +1,24 @@
-﻿using NFox.Cad;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
 using DotNetARX;
-using ThMEPEngineCore.IO;
+
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using ThMEPElectrical.AFASRegion;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Interface;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer,IGroup,ISetStorey
     {
@@ -50,7 +55,7 @@ namespace FireAlarm.Data
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var cmd = new AFASRegion();
+            var cmd = new AFASRegion.AFASRegion();
             cmd.BufferDistance = 500;
             //获取可布置区域
             var poly = pts.CreatePolyline();

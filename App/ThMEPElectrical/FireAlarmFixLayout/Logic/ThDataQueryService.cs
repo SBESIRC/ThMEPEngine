@@ -1,23 +1,28 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPElectrical.FireAlarm.Service;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
-using ThMEPEngineCore.Config;
-using ThMEPEngineCore.IO.ExcelService;
+﻿using System;
 using System.Data;
-using ThMEPElectrical.Service;
-using GeometryExtensions;
-using ThMEPEngineCore.CAD;
+using System.Linq;
+using System.Collections.Generic;
 
-namespace ThMEPElectrical.FireAlarm.Logic
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Config;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.IO.ExcelService;
+using ThMEPElectrical.Service;
+
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDataQueryService
     {

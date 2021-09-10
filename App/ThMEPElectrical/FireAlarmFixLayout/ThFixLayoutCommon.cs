@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPElectrical.FireAlarm
+namespace ThMEPElectrical.FireAlarmFixLayout
 {
     public class ThFixLayoutCommon
     {

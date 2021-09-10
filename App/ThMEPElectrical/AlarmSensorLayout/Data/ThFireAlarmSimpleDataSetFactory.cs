@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPElectrical.FireAlarm.Service;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.FireAlarm.Data;
+
+namespace ThMEPElectrical.FireAlarmSmokeHygro.Data
 {
     public class ThFireAlarmSimpleDataSetFactory : ThMEPDataSetFactory
     {
@@ -88,7 +90,7 @@ namespace FireAlarm.Data
             extractor.Accept(visitors.DB3ShearWallVisitor);
             extractor.Accept(visitors.DB3ColumnVisitor);
             extractor.Accept(visitors.ColumnVisitor);
-            extractor.Accept(visitors.ShearWallVisitor);            
+            extractor.Accept(visitors.ShearWallVisitor);
             extractor.Extract(database);
             return visitors;
         }
@@ -99,7 +101,7 @@ namespace FireAlarm.Data
                 Container = Geos,
             };
         }
-        private void Print(Database database , List<ThExtractorBase> extractors)
+        private void Print(Database database, List<ThExtractorBase> extractors)
         {
             short colorIndex = 1;
             extractors.ForEach(o =>

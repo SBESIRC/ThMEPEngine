@@ -1,22 +1,29 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+using DotNetARX;
+
 using ThCADCore.NTS;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPElectrical.FireAlarm.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.Service;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     class ThFireApartExtractor : ThExtractorBase, IPrint, IGroup,ITransformer
     {

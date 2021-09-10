@@ -1,14 +1,18 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPEngineCore.GeojsonExtractor;
+
 using Autodesk.AutoCAD.DatabaseServices;
+
+using NFox.Cad;
+
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace FireAlarm.Data
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaEStoreyExtractor : ThEStoreyExtractor,IPrint,IGroup,ITransformer
     {

@@ -1,22 +1,27 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+
 using ThCADCore.NTS;
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Service;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, ISetStorey, ITransformer
     {

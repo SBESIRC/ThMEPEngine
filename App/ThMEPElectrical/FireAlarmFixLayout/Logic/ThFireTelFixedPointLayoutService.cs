@@ -1,15 +1,20 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
-using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
 using Linq2Acad;
 
-namespace ThMEPElectrical.FireAlarm.Logic
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Model;
+
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThFireTelFixedPointLayoutService : ThFixedPointLayoutService
     {

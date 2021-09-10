@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Linq;
-using ThMEPEngineCore.Model;
 using System.Collections.Generic;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.IO;
-using NFox.Cad;
-using ThMEPElectrical.FireAlarm.Interface;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Algorithm;
 
-namespace FireAlarm.Data
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     class ThHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {

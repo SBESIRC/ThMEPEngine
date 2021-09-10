@@ -1,19 +1,27 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using NFox.Cad;
+using Linq2Acad;
+
 using ThCADExtension;
 using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Data;
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+
+namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
     public class ThFireAlarmDataSetFactory : ThMEPDataSetFactory
     {
@@ -115,7 +123,7 @@ namespace FireAlarm.Data
                      new ThFireAlarmBlkExtractor ()
                     {
                         Transformer = Transformer ,
-                        BlkNameList = ThMEPElectrical.FireAlarm.ThFixLayoutCommon.BlkNameList, //add needed all blk name string 
+                        BlkNameList = ThFixLayoutCommon.BlkNameList, //add needed all blk name string 
                     }
                 };
             extractors.ForEach(o => o.Extract(database, collection));

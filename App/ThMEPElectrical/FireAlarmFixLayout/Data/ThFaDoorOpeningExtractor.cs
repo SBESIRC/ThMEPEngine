@@ -1,27 +1,31 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
-using System.Linq;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.Service;
 
-namespace FireAlarm.Data
+using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarm.Data
 {
     public class ThFaDoorOpeningExtractor : ThExtractorBase,IPrint,IGroup, ISetStorey, ITransformer
     {

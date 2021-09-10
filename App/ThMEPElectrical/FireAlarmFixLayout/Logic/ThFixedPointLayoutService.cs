@@ -1,12 +1,13 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model;
 
-namespace ThMEPElectrical.FireAlarm.Logic
+namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public abstract class ThFixedPointLayoutService
     {
