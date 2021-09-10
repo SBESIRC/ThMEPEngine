@@ -55,6 +55,7 @@
     <Compile Include="ThLinqExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />
+    <Compile Include="ThOPMTools.cs" />
     <Compile Include="ThPoint3dCollectionExtensions.cs" />
     <Compile Include="ThMPolygonExtension.cs" />
     <Compile Include="ThPolylineExtension.cs" />
