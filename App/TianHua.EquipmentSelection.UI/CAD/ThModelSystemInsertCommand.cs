@@ -41,8 +41,7 @@ namespace TianHua.FanSelection.UI.CAD
                 else if (dbManager.Models[_FanDataModel.ID].Count != _FanDataModel.VentQuan)
                 {
                     // 场景2：若检测到图纸中有对应的风机图块，但图块数量不同
-                    ThFanSelectionEngine.RemoveModels(_FanDataModel);
-                    ThFanSelectionEngine.InsertModels(_FanDataModel);
+                    ThFanSelectionEngine.ReplaceModels(_FanDataModel);
                 }
                 else if (dbManager.Models[_FanDataModel.ID].Count == _FanDataModel.VentQuan)
                 {
@@ -53,8 +52,7 @@ namespace TianHua.FanSelection.UI.CAD
                     // 风机形式变化
                     if (ThFanSelectionEngine.IsModelStyleChanged(model, _FanDataModel))
                     {
-                        ThFanSelectionEngine.RemoveModels(_FanDataModel);
-                        ThFanSelectionEngine.InsertModels(_FanDataModel);
+                        ThFanSelectionEngine.ReplaceModels(_FanDataModel);
                         return;
                     }
 

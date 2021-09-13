@@ -74,6 +74,12 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
+        public static void ReplaceModels(FanDataModel dataModel)
+        {
+            RemoveModels(dataModel);
+            InsertModels(dataModel);
+        }
+
         public static void CloneModels(FanDataModel targetDataModel, FanDataModel srcDataModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
