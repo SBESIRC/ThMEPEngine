@@ -34,6 +34,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel  Grid.Row="0">
@@ -55,42 +56,6 @@
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="重力流雨水斗" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
-
-        <!--<Grid Grid.Row="3">
-            <WrapPanel Orientation="Vertical">
-                <Label Content="立管" Label.FontWeight ="Bold"></Label>
-            </WrapPanel>
-        </Grid>
-
-        <Grid  Grid.Row="4">
-            <WrapPanel Orientation="Vertical">
-                <Label Content="房屋雨水立管"></Label>
-            </WrapPanel>
-            <cus:ImageButton Content="->"  Tag="房屋雨水立管" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
-        </Grid>
-
-        <Grid   Grid.Row="5">
-            <WrapPanel Orientation="Vertical">
-                <Label Content="阳台立管"></Label>
-            </WrapPanel>
-            <cus:ImageButton Content="->" Tag="阳台立管" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
-        </Grid>
-
-        <Grid   Grid.Row="6">
-            <WrapPanel Orientation="Vertical">
-                <Label Content="冷凝立管"></Label>
-            </WrapPanel>
-            <cus:ImageButton Content="->" Tag="冷凝立管" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
-        </Grid>
-
-        <Grid   Grid.Row="7" 
-                    >
-            <WrapPanel Orientation="Vertical"  >
-                <Label Content="地漏"></Label>
-            </WrapPanel>
-            <cus:ImageButton Content="->" Tag="地漏" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
-        </Grid>-->
-
 
         <Grid   Grid.Row="8">
             <WrapPanel Orientation="Vertical">
@@ -177,7 +142,21 @@
             </WrapPanel>
             <cus:ImageButton Content="->" Tag="机械车位" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
+
         <Grid   Grid.Row="21">
+            <WrapPanel Orientation="Vertical">
+                <Label Content="空调内机--挂机"></Label>
+            </WrapPanel>
+            <cus:ImageButton Content="->" Tag="空调内机--挂机" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+        </Grid>
+        <Grid   Grid.Row="22">
+            <WrapPanel Orientation="Vertical">
+                <Label Content="空调内机--柜机"></Label>
+            </WrapPanel>
+            <cus:ImageButton Content="->" Tag="空调内机--柜机" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="btnSet_Click"  Margin="5,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
+        </Grid>
+        
+        <Grid   Grid.Row="23">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="66*"/>

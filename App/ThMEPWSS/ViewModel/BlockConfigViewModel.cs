@@ -109,6 +109,12 @@ namespace ThMEPWSS.ViewModel
 
             Blocks.Add("机械车位");
             BlockNameConfigList.Add("机械车位", new List<List<string>>() { new List<string>(), new List<string>() });
+
+            Blocks.Add("空调内机--挂机");
+            BlockNameConfigList.Add("空调内机--挂机", new List<List<string>>() { new List<string>(), new List<string>() });
+
+            Blocks.Add("空调内机--柜机");
+            BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
         }
     }
 }
