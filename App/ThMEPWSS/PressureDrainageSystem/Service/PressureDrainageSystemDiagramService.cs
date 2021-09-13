@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
@@ -493,22 +494,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             DefinePropertiesOfCADObjects(floorLines[0], "W-NOTE");
                             floorLines[0].AddToCurrentSpace();
                         }
-
                     }
                 }
-                //
-                List<string> strs1 = new List<string>();
-                List<string> strs2 = new List<string>();
-                allBlocks[0].ForEach(o => strs1.Add(o.Name));
-                allBlocks[1].ForEach(o => strs2.Add(o.Name));
-                int aa = 1;
-                strs1.Clear();
-                strs2.Clear();
-                allBlocks[0].ForEach(o => strs1.Add(o.BlockName));
-                allBlocks[1].ForEach(o => strs2.Add(o.BlockName));
-                aa = 1;
-                //
-                MessageBox.Show("共有排水单元" + allEntities.Count.ToString() + "组");
+                Active.Editor.WriteMessage("共有排水单元" + allEntities.Count.ToString() + "组");
             }
         }
 
