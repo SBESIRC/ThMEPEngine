@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThSprinkler : ThIfcFireSuppressionTerminal
     {
+        public string Category {get;set;}
+
+        public Point3d Position { get; set; }
+
+        public Vector3d Direction { get; set; }
     }
 }

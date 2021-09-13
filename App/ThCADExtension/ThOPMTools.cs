@@ -41,7 +41,7 @@ namespace ThCADExtension
                         }
                     }
                 }
-                Marshal.Release(pUnk);
+                //Marshal.Release(pUnk);
             }
             return map;
         }

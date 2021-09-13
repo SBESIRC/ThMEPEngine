@@ -120,6 +120,8 @@
     <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThSlabBuilderEngine.cs" />
     <Compile Include="Engine\ThStairBuilderEngine.cs" />
+    <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThWindowBuilderEngine.cs" />

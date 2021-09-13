@@ -657,28 +657,26 @@ namespace ThMEPEngineCore.Test
             return results;
         }
 
-        [CommandMethod("TIANHUACAD", "THTESTAREA", CommandFlags.Modal)]
-        public void ThBuildArea()
+        [CommandMethod("TIANHUACAD", "THTZPT", CommandFlags.Modal)]
+        public void THTZPT()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-                Geometry geometry = objs.BuildAreaGeometry();
-
-                var isAisleArea = ThMEPEngineCoreGeUtils.IsAisleArea(geometry);
-
-                Active.Editor.WriteMessageWithReturn($"\nIs Aisle Area: {isAisleArea}");
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                var engine = new ThTCHSprinklerRecognitionEngine();
+                engine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                var temp = engine.Elements;
             }
         }
     }

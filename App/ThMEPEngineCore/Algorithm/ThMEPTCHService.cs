@@ -39,7 +39,18 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
-        /// 是否是天正喷头
+        /// 是否是天正风管
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHDuct(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("DBHVACDUCT");
+        }
+
+        /// <summary>
+        /// 是否为天正喷头
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
