@@ -108,6 +108,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
                     var buildRooms = ThHydrantDataManager.GetBuildRoom(range);//获取建筑房间
                     var otherPileLines = ThHydrantDataManager.GetOtherPipeLineList(range);//获取其他管线
+                    var hydrantValve = ThHydrantDataManager.GetHydrantValve(range);//获取蝶阀
+                    var pipeMark = ThHydrantDataManager.GetHydrantPipeMark(range);//获取管径标记
                     List<Line> loopLines = new List<Line>();
                     List<Line> branchLines = new List<Line>();
                     ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
@@ -146,7 +148,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
                     if (ConfigInfo.isCoveredGraph)
                     {
-                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, range);
+                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, hydrantValve, pipeMark,range);
                     }
                     
                     var brLines = new List<ThHydrantBranchLine>();

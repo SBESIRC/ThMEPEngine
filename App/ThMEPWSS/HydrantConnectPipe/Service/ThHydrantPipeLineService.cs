@@ -190,7 +190,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             return pipeLines;
         }
 
-        public void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, Point3dCollection selectArea)
+        public void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, List<BlockReference> valves, List<BlockReference> pipeMarks, Point3dCollection selectArea)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -243,6 +243,34 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                             var tmpPts = box.IntersectWithEx(dbj);
                             MoveLine(dbj, startPt, tmpPts[0]);
                             break;
+                        }
+                    }
+                }
+                foreach (var v in valves)
+                {
+                    foreach (var l in branchLines)
+                    {
+                        var box = l.Buffer(10);
+                        box = box.Buffer(1.0)[0] as Polyline;
+                        if (box.Contains(v.Position))
+                        {
+                            v.UpgradeOpen();
+                            v.Erase();
+                            v.DowngradeOpen();
+                        }
+                    }
+                }
+                foreach (var m in pipeMarks)
+                {
+                    foreach (var l in branchLines)
+                    {
+                        var box = l.Buffer(200);
+                        box = box.Buffer(100.0)[0] as Polyline;
+                        if (box.Contains(m.Position))
+                        {
+                            m.UpgradeOpen();
+                            m.Erase();
+                            m.DowngradeOpen();
                         }
                     }
                 }

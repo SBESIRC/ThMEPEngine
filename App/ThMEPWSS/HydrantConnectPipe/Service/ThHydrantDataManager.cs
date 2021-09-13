@@ -86,17 +86,27 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var lines = hydrantMainLineService.GetHydrantMainLine(selectArea);
             return lines;
         }
-        public static void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, Point3dCollection selectArea)
+        public static void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines,List<BlockReference> valves, List<BlockReference> pipeMarks, Point3dCollection selectArea)
         {
             var hydrantMainLineService = new ThHydrantPipeLineService();
-            hydrantMainLineService.RemoveBranchLines(branchLines, loopLines, selectArea);
+            hydrantMainLineService.RemoveBranchLines(branchLines, loopLines, valves, pipeMarks, selectArea);
         }
         public static List<Line> GetOtherPipeLineList(Point3dCollection selectArea)
         {
             var otherPipeLineService = new ThOtherPipeLineService();
             return otherPipeLineService.GetOtherPipeLineList(selectArea);
         }
+        public static List<BlockReference> GetHydrantValve(Point3dCollection selectArea)
+        {
+            var valveService = new ThHydrantValveService();
+            return valveService.GetHydrantValve(selectArea);
+        }
+        public static List<BlockReference> GetHydrantPipeMark(Point3dCollection selectArea)
+        {
+            var pipMarkService = new ThHydrantPipeMarkService();
+            return pipMarkService.GetHydrantPipeMark(selectArea);
 
+        }
         private static List<RoomTableTree> GetRoomTableTree(DataSet dataSet)
         {
             foreach (System.Data.DataTable table in dataSet.Tables)
