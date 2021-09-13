@@ -6,14 +6,14 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsReDrawFactory
     {
-        public static Line_Info Create_reducing(Entity_modify_param reducing, int port_idx, string modify_size)
+        public static Line_Info Create_reducing(Entity_modify_param reducing, int port_idx, string modify_size, bool is_axis)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_size);
             reducing.port_widths[port_idx] = modify_width;
             var sp = new Point3d(reducing.pos[0].X, reducing.pos[0].Y, 0);
             var ep = new Point3d(reducing.pos[1].X, reducing.pos[1].Y, 0);
             var line = new Line(sp, ep);
-            return Create_reducing(line, reducing.port_widths[0], reducing.port_widths[1], false);
+            return Create_reducing(line, reducing.port_widths[0], reducing.port_widths[1], is_axis);
         }
         public static Line_Info Create_reducing(Point2d sp, Point2d ep, double big_width, double small_width)
         {

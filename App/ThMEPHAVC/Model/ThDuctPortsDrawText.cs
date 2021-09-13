@@ -15,7 +15,7 @@ namespace ThMEPHVAC.Model
         public ThDuctPortsDrawText(string duct_size_layer)
         {
             is_first = true;
-            duct_size_style = "HT-STYLE3";
+            duct_size_style = "TH-STYLE3";
             this.duct_size_layer = duct_size_layer;
         }
         public void Get_fjf_duct_info(string scale,

@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
@@ -84,8 +85,15 @@
     <Compile Include="fmDuctSpec.Designer.cs">
       <DependentUpon>fmDuctSpec.cs</DependentUpon>
     </Compile>
+    <Compile Include="fmFjfFpm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFjfFpm.Designer.cs">
+      <DependentUpon>fmFjfFpm.cs</DependentUpon>
+    </Compile>
     <Compile Include="HvacUiApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThHvacUIService.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -179,6 +187,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="fmDuctSpec.resx">
       <DependentUpon>fmDuctSpec.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmFjfFpm.resx">
+      <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>

@@ -18,8 +18,22 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
-        private static readonly ThMEPHVACParam in_param = new ThMEPHVACParam();
+        private bool is_integrate;
         private Point3d start_point;
+        private ThMEPHVACParam inte_param;
+        private DBObjectCollection inte_center_line;
+        private static readonly ThMEPHVACParam in_param = new ThMEPHVACParam();
+        public ThHvacDuctPortsCmd() { }
+        public ThHvacDuctPortsCmd(bool is_integrate,
+                                  Point3d start_point,
+                                  ThMEPHVACParam inte_param,
+                                  DBObjectCollection center_line)
+        {
+            this.inte_param = inte_param;
+            this.start_point = start_point;
+            inte_center_line = center_line;
+            this.is_integrate = is_integrate;
+        }
         public void Dispose() { }
 
         public void Execute()
@@ -58,46 +72,84 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var db = AcadDatabase.Active())
             {
-                start_point = Get_point_from_prompt("选择起点");
-                var dxfNames = new string[]
+                if (is_integrate)
                 {
-                    RXClass.GetClass(typeof(Line)).DxfName,
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                if (start_point == null)
-                {
-                    center_lines = new DBObjectCollection();
-                    return;
+                    center_lines = inte_center_line;
                 }
-                var sf = ThSelectionFilterTool.Build(dxfNames);
-                center_lines = Get_center_line("请选择中心线", sf, out string layer);
-                if (center_lines.Count == 0)
-                    return;
-                var mat = Matrix3d.Displacement(start_point.GetAsVector());
-                ThDuctPortsDrawService.Draw_lines(center_lines, mat, layer, out _);
+                else
+                {
+                    Proc_not_integer(out center_lines);
+                }
             }
+        }
+        private void Proc_not_integer(out DBObjectCollection center_lines)
+        {
+            start_point = Get_point_from_prompt("选择起点");
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Line)).DxfName,
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            if (start_point == null)
+            {
+                center_lines = new DBObjectCollection();
+                return;
+            }
+            var sf = ThSelectionFilterTool.Build(dxfNames);
+            center_lines = Get_center_line("请选择中心线", sf, out string layer);
+            if (center_lines.Count == 0)
+                return;
+            var mat = Matrix3d.Displacement(start_point.GetAsVector());
+            ThDuctPortsDrawService.Draw_lines(center_lines, mat, layer, out _);
         }
         private bool Get_duct_port_info()
         {
             in_param.is_redraw = false;
-            var dlg = new fmDuctPorts(in_param);
-            if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+            if (is_integrate)
             {
-                in_param.port_num = dlg.port_num;
-                in_param.scenario = dlg.scenario;
-                in_param.scale = dlg.graph_scale;
-                in_param.elevation = dlg.elevation;
-                in_param.port_size = dlg.port_size;
-                in_param.port_name = dlg.port_name;
-                in_param.air_volume = dlg.air_volume;
-                in_param.port_range = dlg.port_range;
-                in_param.in_duct_size = dlg.duct_size;
-                in_param.air_speed = dlg.air_speed;
-                if (in_param.scale == null)
-                    return false;
-                if (in_param.port_range.Contains("侧"))
-                    in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-                return true;
+                // 从集成面板获取参数
+                if (inte_param.air_volume > 0)
+                {
+                    in_param.port_num = inte_param.port_num;
+                    in_param.scenario = inte_param.scenario;
+                    in_param.scale = inte_param.scale;
+                    in_param.elevation = inte_param.elevation;
+                    in_param.port_size = inte_param.port_size;
+                    in_param.port_name = inte_param.port_name;
+                    in_param.air_volume = inte_param.air_volume;
+                    in_param.port_range = inte_param.port_range;
+                    in_param.in_duct_size = inte_param.in_duct_size;
+                    in_param.air_speed = inte_param.air_speed;
+                    if (in_param.scale == null)
+                        return false;
+                    if (in_param.port_range.Contains("侧"))
+                        in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
+                    return true;
+                }
+                return false;
+            }
+            else
+            {
+                // 从风平面面板获取参数
+                var dlg = new fmDuctPorts(in_param);
+                if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                {
+                    in_param.port_num = dlg.port_num;
+                    in_param.scenario = dlg.scenario;
+                    in_param.scale = dlg.graph_scale;
+                    in_param.elevation = dlg.elevation;
+                    in_param.port_size = dlg.port_size;
+                    in_param.port_name = dlg.port_name;
+                    in_param.air_volume = dlg.air_volume;
+                    in_param.port_range = dlg.port_range;
+                    in_param.in_duct_size = dlg.duct_size;
+                    in_param.air_speed = dlg.air_speed;
+                    if (in_param.scale == null)
+                        return false;
+                    if (in_param.port_range.Contains("侧"))
+                        in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
+                    return true;
+                }
             }
             return false;
         }

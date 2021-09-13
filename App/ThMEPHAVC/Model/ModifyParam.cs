@@ -4,6 +4,14 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.Model
 {
+    public class Fan_modify_param
+    {
+        public string fan_name;
+        public Fan_modify_param(string fan_name) 
+        {
+            this.fan_name = fan_name;
+        }
+    }
     public class Port_modify_param
     {
         public Point2d pos;
