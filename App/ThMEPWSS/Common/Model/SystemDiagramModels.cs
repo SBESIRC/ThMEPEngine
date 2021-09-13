@@ -349,6 +349,12 @@ namespace ThMEPWSS.Uitl
     {
         public GRect Boundary;
         public string Text;
+        public Polygon ToPolygon()
+        {
+            var pl = Boundary.ToPolygon();
+            pl.UserData = Text;
+            return pl;
+        }
     }
     public struct GVector
     {

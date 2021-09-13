@@ -11,30 +11,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
 {
     public partial class uiBlockNameConfig : ThCustomWindow
     {
-        private BlockConfigViewModel viewModel;
+        private BlockConfigViewModel viewModel => BlockConfigService.Instance;
         public static uiBlockNameConfig staticUIBlockName = new uiBlockNameConfig();
-
         private uiBlockNameConfig()
         {
             InitializeComponent();
-            viewModel = new BlockConfigViewModel();
             DataContext = viewModel;
             staticUIBlockName = this;
         }
 
         public Dictionary<string, List<string>> GetBlockNameList()
         {
-            var dic = new Dictionary<string, List<string>>();
-            foreach (var key in this.viewModel.BlockNameConfigList.Keys)
-            {
-                dic.Add(key, viewModel.BlockNameConfigList[key].First());
-                dic[key].AddRange(viewModel.BlockNameConfigList[key].Last());
-            }
-            foreach(var key in this.viewModel.BlockNameList.Keys)
-            {
-                dic[key].AddRange(viewModel.BlockNameList[key].Select(e=>e.layerName).ToList());
-            }
-            return dic;
+            return BlockConfigService.GetBlockNameListDict();
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
@@ -102,7 +90,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 foreach (BlockNameConfigViewModel config in viewModel.BlockNameList[block])
                 {
-                    if(!viewModel.BlockNameConfigList[block].Last().Contains(config.layerName))
+                    if (!viewModel.BlockNameConfigList[block].Last().Contains(config.layerName))
                     {
                         viewModel.BlockNameConfigList[block].Last().Add(config.layerName);
                     }

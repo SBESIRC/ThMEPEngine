@@ -107,6 +107,11 @@ namespace ThMEPWSS.Assistant
                 Update(seg);
             }
         }
+        public void Update(GRect r)
+        {
+            Update(r.LeftTop);
+            Update(r.RightButtom);
+        }
         public void Update(GLineSegment seg)
         {
             Update(seg.StartPoint);
@@ -792,7 +797,11 @@ namespace ThMEPWSS.Assistant
                 var arr = ls.Coordinates;
                 for (int i = 0; i < arr.Length - 1; i++)
                 {
-                    yield return new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
+                    var seg= new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
+                    if (seg.IsValid)
+                    {
+                        yield return seg;
+                    }
                 }
             }
             else if (geo is GeometryCollection mls)
