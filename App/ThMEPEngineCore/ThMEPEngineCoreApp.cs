@@ -1149,11 +1149,5 @@ namespace ThMEPEngineCore
                 }
             }
         }
-        [CommandMethod("TIANHUACAD", "THWiringGeo", CommandFlags.Modal)]
-        public void THWiringGeo()
-        {
-            ConnectWiringService connectWiring = new ConnectWiringService();
-            connectWiring.GetData();
-        }
     }
 }

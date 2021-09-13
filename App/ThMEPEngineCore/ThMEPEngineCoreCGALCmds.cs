@@ -23,6 +23,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using CLI;
+using ThMEPEngineCore.ConnectWiring;
 
 namespace ThMEPEngineCore
 {
@@ -495,6 +496,12 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THWiringGeo", CommandFlags.Modal)]
+        public void THWiringGeo()
+        {
+            ConnectWiringService connectWiring = new ConnectWiringService();
+            connectWiring.GetData();
+        }
 
         [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]
         public void TH2DVisiblityTest()

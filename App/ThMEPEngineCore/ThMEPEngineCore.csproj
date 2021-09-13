@@ -86,8 +86,10 @@
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />
+    <Compile Include="ConnectWiring\Data\ThFaFireApartExtractor.cs" />
     <Compile Include="ConnectWiring\Data\ThFaRoomExtractor.cs" />
     <Compile Include="ConnectWiring\Data\ThFireAlarmWiringDateSetFactory.cs" />
+    <Compile Include="ConnectWiring\Data\ThLaneLineExtractor.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />

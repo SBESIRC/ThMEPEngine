@@ -1,4 +1,5 @@
-﻿using AcHelper;
+﻿#if (ACAD2016 || ACAD2018)
+using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -165,3 +166,4 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         }
     }
 }
+#endif
