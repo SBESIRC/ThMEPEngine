@@ -16,7 +16,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210908.dwg");
+                var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板.dwg");
                 using (AcadDatabase Db = AcadDatabase.Open(file, DwgOpenMode.ReadOnly, false))
                 {
                     //导入图块
