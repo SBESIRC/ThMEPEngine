@@ -27,11 +27,11 @@ namespace TianHua.Hvac.UI
             AcceptButton = button1;
             textBox2.Text = _DuctSpecModel.StrAirVolume;
             textBox3.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
-            air_volume = Double.Parse(textBox2.Text);
+            air_volume = Get_air_volume(textBox2.Text);
             air_speed = Double.Parse(textBox3.Text);
             Init_scenario();
             Update_port_name();
-            Init_listbox( _DuctSpecModel, is_exhaust);
+            Init_listbox(_DuctSpecModel, is_exhaust);
         }
         private void Init_scenario()
         {
@@ -43,7 +43,7 @@ namespace TianHua.Hvac.UI
         {
             if (String.IsNullOrEmpty(textBox2.Text) || String.IsNullOrEmpty(textBox3.Text))
                 return;
-            air_volume = Double.Parse(textBox2.Text);
+            air_volume = Get_air_volume(textBox2.Text);
             Update_air_volume();
             air_speed = Double.Parse(textBox3.Text);
             Update_air_speed();
@@ -54,11 +54,12 @@ namespace TianHua.Hvac.UI
         }
         private void air_volume_changed(object sender, EventArgs e)
         {
-            if (ThHvacUIService.Is_integer_str(textBox2.Text))
+            if (ThHvacUIService.Is_integer_str(textBox2.Text) || 
+                ThHvacUIService.Is_double_volume(textBox2.Text))
             {
                 if (!String.IsNullOrEmpty(textBox2.Text))
                 {
-                    air_volume = Double.Parse(textBox2.Text);
+                    air_volume = Get_air_volume(textBox2.Text);
                     Update_air_volume();
                     Set_port_speed();
                     ThHvacUIService.Update_recommend_duct_size_list(listBox1, air_volume, air_speed);
@@ -274,7 +275,7 @@ namespace TianHua.Hvac.UI
         private void btnOK(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
-            air_volume = Double.Parse(textBox2.Text);
+            air_volume = Get_air_volume(textBox2.Text);
             air_speed = Double.Parse(textBox3.Text);
             elevation1 = Double.Parse(textBox4.Text);
             elevation2 = Double.Parse(textBox12.Text);
@@ -289,6 +290,16 @@ namespace TianHua.Hvac.UI
             port_name = textBox9.Text;
             Set_port_range();
             this.Close();
+        }
+        private double Get_air_volume(string str_volume)
+        {
+            if (str_volume.Contains("/"))
+            {
+                string[] str = textBox2.Text.Split('/');
+                return Double.Parse(str[1]);
+            }
+            else
+                return Double.Parse(textBox2.Text);
         }
     }
 }

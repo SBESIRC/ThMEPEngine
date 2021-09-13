@@ -118,5 +118,9 @@ namespace TianHua.Hvac.UI
             string reg = "^[0-9]*$";
             return Regex.Match(text, reg).Success;
         }
+        public static bool Is_double_volume(string str_volume)
+        {
+            return str_volume.Contains("/");
+        }
     }
 }
