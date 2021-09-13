@@ -397,6 +397,7 @@
     <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
+    <Folder Include="FireAlarm\Model\" />
     <Folder Include="FireAlarmFixLayout\Model\" />
   </ItemGroup>
   <Choose>

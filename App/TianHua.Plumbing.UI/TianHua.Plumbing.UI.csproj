@@ -43,6 +43,16 @@
     <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DotNetARX, Version=1.5.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DotNetARX\2010\bin\Debug-NET45\DotNetARX.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader">
+      <HintPath>C:\Users\tangyongjing\.nuget\packages\exceldatareader\3.6.0\lib\net45\ExcelDataReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader.DataSet">
+      <HintPath>C:\Users\tangyongjing\.nuget\packages\exceldatareader.dataset\3.6.0\lib\net35\ExcelDataReader.DataSet.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -57,6 +67,18 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="ThCADCore, Version=1.5.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ThCADCore\bin\Debug-NET45\ThCADCore.dll</HintPath>
+    </Reference>
+    <Reference Include="ThCADExtension, Version=1.5.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ThCADExtension\bin\Debug-NET45\ThCADExtension.dll</HintPath>
+    </Reference>
+    <Reference Include="ThMEPEngineCore, Version=1.5.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ThMEPEngineCore\bin\Debug-NET45\ThMEPEngineCore.dll</HintPath>
+    </Reference>
     <Reference Include="TianHua.Publics.BaseCode, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
@@ -186,6 +208,10 @@
     <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
       <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
       <Name>ThMEPWSS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TianHua.EquipmentSelection.UI\TianHua.EquipmentSelection.UI.csproj">
+      <Project>{5A202950-BF0E-4887-AA2A-B6AF1C949FF4}</Project>
+      <Name>TianHua.EquipmentSelection.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
       <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>

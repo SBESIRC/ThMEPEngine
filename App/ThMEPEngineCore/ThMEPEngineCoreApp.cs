@@ -24,6 +24,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.ConnectWiring;
 
 namespace ThMEPEngineCore
 {
@@ -1147,6 +1148,12 @@ namespace ThMEPEngineCore
                     });
                 }
             }
+        }
+        [CommandMethod("TIANHUACAD", "THWiringGeo", CommandFlags.Modal)]
+        public void THWiringGeo()
+        {
+            ConnectWiringService connectWiring = new ConnectWiringService();
+            connectWiring.GetData();
         }
     }
 }
