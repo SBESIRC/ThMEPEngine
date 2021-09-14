@@ -35,5 +35,27 @@ namespace ThMEPEngineCore.Service
             // 合并处理
             return ThLaneLineMergeExtension.Merge(mergedLines, extendedLines);
         }
+
+        public DBObjectCollection CleanNoding(DBObjectCollection curves)
+        {
+            // 配置参数
+            ThLaneLineEngine.extend_distance = ExtendDistance;
+            ThLaneLineEngine.collinear_gap_distance = CollinearGap;
+
+            // 合并处理
+            var mergedLines = ThLaneLineEngine.Explode(curves);
+            mergedLines = ThLaneLineMergeExtension.Merge(mergedLines);
+            mergedLines = ThLaneLineEngine.Noding(mergedLines);
+            mergedLines = ThLaneLineEngine.CleanZeroCurves(mergedLines);
+
+            // 延伸处理
+            var extendedLines = ThLaneLineExtendEngine.ExtendEx(mergedLines);
+            extendedLines = ThLaneLineMergeExtension.Merge(extendedLines);
+            extendedLines = ThLaneLineEngine.Noding(extendedLines);
+            extendedLines = ThLaneLineEngine.CleanZeroCurves(extendedLines);
+
+
+            return extendedLines;
+        }
     }
 }

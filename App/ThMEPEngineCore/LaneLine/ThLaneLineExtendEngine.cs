@@ -28,6 +28,28 @@ namespace ThMEPEngineCore.LaneLine
             return curves.Cast<Line>().Union(extendedLines).ToCollection();
         }
 
+        public static DBObjectCollection ExtendEx(DBObjectCollection curves)
+        {
+            var extendedInfo = CreateExtendedLinesEx(curves);
+            var extendedLines = extendedInfo.SelectMany(x => x.Value).ToList();
+            var allLines = curves.Cast<Line>().Union(extendedLines).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(allLines);
+            extendedLines.RemoveAll(o =>
+            {
+                var objs = spatialIndex.SelectFence(o);
+                objs.Remove(o);
+                var exLines = extendedInfo.Where(x => x.Value.Contains(o)).Select(x => x.Key).ToList();
+                foreach (var exLine in exLines)
+                {
+                    objs.Remove(exLine);
+                }
+
+                return !IsProperIntersectsEx(objs, o);
+            });
+
+            return curves.Cast<Line>().Union(extendedLines).ToCollection();
+        }
+
         private static bool IsProperIntersects(DBObjectCollection lines, Line line)
         {
             // 计算交点
@@ -53,6 +75,33 @@ namespace ThMEPEngineCore.LaneLine
                 objs.Add(new Line(o.StartPoint, o.StartPoint - direction * extend_distance));
             });
             return objs;
+        }
+
+        private static bool IsProperIntersectsEx(DBObjectCollection lines, Line line)
+        {
+            // 计算交点
+            var geometry = lines.Intersection(line);
+            // 判断是否存在多个交点（但是要排查共线的情况）
+            if (geometry is Point || geometry is MultiPoint)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static Dictionary<Line, List<Line>> CreateExtendedLinesEx(DBObjectCollection lines)
+        {
+            Dictionary<Line, List<Line>> lineDic = new Dictionary<Line, List<Line>>();
+            lines.Cast<Line>().ForEach(o =>
+            {
+                var objs = new List<Line>();
+                var direction = o.LineDirection();
+                objs.Add(new Line(o.EndPoint - extend_distance * direction, o.EndPoint + direction * extend_distance));
+                objs.Add(new Line(o.StartPoint + extend_distance * direction, o.StartPoint - direction * extend_distance));
+
+                lineDic.Add(o, objs);
+            });
+            return lineDic;
         }
     }
 }
