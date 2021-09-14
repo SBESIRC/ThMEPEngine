@@ -48,47 +48,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class TempGeoFac
     {
-        public static double GetMinDis(List<LineString> geos1, List<LineString> geos2, out LineString m1, out LineString m2)
-        {
-            var minDis = double.MaxValue;
-            m1 = null;
-            m2 = null;
-            foreach (var ls1 in geos1)
-            {
-                foreach (var ls2 in geos2)
-                {
-                    var dis = ls1.Distance(ls2);
-                    if (minDis > dis)
-                    {
-                        minDis = dis;
-                        m1 = ls1;
-                        m2 = ls2;
-                    }
-                }
-            }
-            return minDis;
-        }
-        public static IEnumerable<GLineSegment> TryExtend(GLineSegment s1, GLineSegment s2, double extend)
-        {
-            var pt = s1.Extend(extend).ToLineString().Intersection(s2.Extend(extend).ToLineString()) as Point;
-            if (pt != null)
-            {
-                var bf1 = s1.ToLineString().Buffer(THESAURUSCOUNCIL);
-                var bf2 = s2.ToLineString().Buffer(THESAURUSCOUNCIL);
-                if (!bf1.Intersects(pt))
-                {
-                    var s3 = new GLineSegment(pt.ToPoint2d(), s1.StartPoint);
-                    var s4 = new GLineSegment(pt.ToPoint2d(), s1.EndPoint);
-                    yield return s3.Length < s4.Length ? s3 : s4;
-                }
-                if (!bf2.Intersects(pt))
-                {
-                    var s3 = new GLineSegment(pt.ToPoint2d(), s2.StartPoint);
-                    var s4 = new GLineSegment(pt.ToPoint2d(), s2.EndPoint);
-                    yield return s3.Length < s4.Length ? s3 : s4;
-                }
-            }
-        }
         public static IEnumerable<GLineSegment> GetMinConnSegs(List<GLineSegment> segs)
         {
             if (segs.Count <= PIEZOELECTRICAL) yield break;
@@ -121,38 +80,50 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
+        public static IEnumerable<GLineSegment> TryExtend(GLineSegment s1, GLineSegment s2, double extend)
+        {
+            var pt = s1.Extend(extend).ToLineString().Intersection(s2.Extend(extend).ToLineString()) as Point;
+            if (pt != null)
+            {
+                var bf1 = s1.ToLineString().Buffer(THESAURUSCOUNCIL);
+                var bf2 = s2.ToLineString().Buffer(THESAURUSCOUNCIL);
+                if (!bf1.Intersects(pt))
+                {
+                    var s3 = new GLineSegment(pt.ToPoint2d(), s1.StartPoint);
+                    var s4 = new GLineSegment(pt.ToPoint2d(), s1.EndPoint);
+                    yield return s3.Length < s4.Length ? s3 : s4;
+                }
+                if (!bf2.Intersects(pt))
+                {
+                    var s3 = new GLineSegment(pt.ToPoint2d(), s2.StartPoint);
+                    var s4 = new GLineSegment(pt.ToPoint2d(), s2.EndPoint);
+                    yield return s3.Length < s4.Length ? s3 : s4;
+                }
+            }
+        }
+        public static double GetMinDis(List<LineString> geos1, List<LineString> geos2, out LineString m1, out LineString m2)
+        {
+            var minDis = double.MaxValue;
+            m1 = null;
+            m2 = null;
+            foreach (var ls1 in geos1)
+            {
+                foreach (var ls2 in geos2)
+                {
+                    var dis = ls1.Distance(ls2);
+                    if (minDis > dis)
+                    {
+                        minDis = dis;
+                        m1 = ls1;
+                        m2 = ls2;
+                    }
+                }
+            }
+            return minDis;
+        }
     }
     public class FixingLogic1
     {
-        public static FlFixType GetFlFixType(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
-        {
-            FlFixType f()
-            {
-                if (label == null) return FlFixType.NoFix;
-                if (storey == null) return FlFixType.NoFix;
-                if (existsXXRoomAtUpperStorey)
-                {
-                    if (circlesCount > TEREBINTHINATED)
-                    {
-                        return FlFixType.MiddleHigher;
-                    }
-                    if (circlesCount == TEREBINTHINATED)
-                    {
-                        return FlFixType.Lower;
-                    }
-                }
-                else
-                {
-                    if (circlesCount == TEREBINTHINATED)
-                    {
-                        return FlFixType.Higher;
-                    }
-                }
-                return FlFixType.NoFix;
-            }
-            var ret = f();
-            return ret;
-        }
         public enum FlFixType
         {
             NoFix,
@@ -196,12 +167,47 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             var ret = f();
             return ret;
         }
+        public static FlFixType GetFlFixType(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
+        {
+            FlFixType f()
+            {
+                if (label == null) return FlFixType.NoFix;
+                if (storey == null) return FlFixType.NoFix;
+                if (existsXXRoomAtUpperStorey)
+                {
+                    if (circlesCount > TEREBINTHINATED)
+                    {
+                        return FlFixType.MiddleHigher;
+                    }
+                    if (circlesCount == TEREBINTHINATED)
+                    {
+                        return FlFixType.Lower;
+                    }
+                }
+                else
+                {
+                    if (circlesCount == TEREBINTHINATED)
+                    {
+                        return FlFixType.Higher;
+                    }
+                }
+                return FlFixType.NoFix;
+            }
+            var ret = f();
+            return ret;
+        }
     }
     public class FixingLogic2
     {
         public enum PlFixType
         {
             NoFix,
+        }
+        public enum PlCaseEnum
+        {
+            Unknown,
+            Case1,
+            Case3,
         }
         public static PlCaseEnum GetPlCase(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
         {
@@ -232,12 +238,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             var ret = f();
             return ret;
         }
-        public enum PlCaseEnum
-        {
-            Unknown,
-            Case1,
-            Case3,
-        }
         public static PlFixType GetPlFixType(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
         {
             return PlFixType.NoFix;
@@ -245,8 +245,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class LabelItem
     {
+        public string Label;
         public string Prefix;
+        public string D1S;
         public string D2S;
+        public string Suffix;
         public int D1
         {
             get
@@ -254,6 +257,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 int.TryParse(D1S, out int r); return r;
             }
         }
+        public int D2
+        {
+            get
+            {
+                int.TryParse(D2S, out int r); return r;
+            }
+        }
+        static readonly Regex re = new Regex(QUOTATIONASSERTORY);
         public static LabelItem Parse(string label)
         {
             if (label == null) return null;
@@ -268,24 +279,51 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 Suffix = m.Groups[THESAURUSEVINCE].Value,
             };
         }
-        public string Label;
-        static readonly Regex re = new Regex(QUOTATIONASSERTORY);
-        public string D1S;
-        public int D2
-        {
-            get
-            {
-                int.TryParse(D2S, out int r); return r;
-            }
-        }
-        public string Suffix;
     }
 #pragma warning disable
     public class DrainageGroupingPipeItem : IEquatable<DrainageGroupingPipeItem>
     {
+        public bool MoveTlLineUpper;
         public string Label;
-        public bool HasWrappingPipe;
+        public bool HasWaterPort;
         public bool HasBasinInKitchenAt1F;
+        public bool HasWrappingPipe;
+        public bool IsSingleOutlet;
+        public string WaterPortLabel;
+        public List<ValueItem> Items;
+        public List<Hanging> Hangings;
+        public bool HasTL;
+        public string TlLabel;
+        public int MaxTl;
+        public int MinTl;
+        public int FloorDrainsCountAt1F;
+        public bool CanHaveAring;
+        public bool IsFL0;
+        public bool MergeFloorDrainForFL0;
+        public bool HasRainPortForFL0;
+        public bool IsConnectedToFloorDrainForFL0;
+        public PipeType PipeType;
+        public string OutletWrappingPipeRadius;
+        public bool Equals(DrainageGroupingPipeItem other)
+        {
+            return this.HasWaterPort == other.HasWaterPort
+                && this.HasWrappingPipe == other.HasWrappingPipe
+                && this.MoveTlLineUpper == other.MoveTlLineUpper
+                && this.HasBasinInKitchenAt1F == other.HasBasinInKitchenAt1F
+                && this.CanHaveAring == other.CanHaveAring
+                && this.PipeType == other.PipeType
+                && this.OutletWrappingPipeRadius == other.OutletWrappingPipeRadius
+                && this.IsFL0 == other.IsFL0
+                && this.MergeFloorDrainForFL0 == other.MergeFloorDrainForFL0
+                && this.HasRainPortForFL0 == other.HasRainPortForFL0
+                && this.IsConnectedToFloorDrainForFL0 == other.IsConnectedToFloorDrainForFL0
+                && this.MaxTl == other.MaxTl
+                && this.MinTl == other.MinTl
+                && this.IsSingleOutlet == other.IsSingleOutlet
+                && this.FloorDrainsCountAt1F == other.FloorDrainsCountAt1F
+                && this.Items.SeqEqual(other.Items)
+                && this.Hangings.SeqEqual(other.Hangings);
+        }
         public class Hanging : IEquatable<Hanging>
         {
             public string Storey;
@@ -326,12 +364,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     ;
             }
         }
-        public int FloorDrainsCountAt1F;
-        public bool CanHaveAring;
-        public List<ValueItem> Items;
-        public bool HasRainPortForFL0;
-        public string TlLabel;
-        public bool IsFL0;
         public struct ValueItem
         {
             public bool Exist;
@@ -339,42 +371,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             public bool DrawLongHLineHigher;
             public bool HasShort;
         }
-        public bool IsConnectedToFloorDrainForFL0;
-        public int MaxTl;
-        public List<Hanging> Hangings;
-        public PipeType PipeType;
-        public bool HasWaterPort;
-        public bool IsSingleOutlet;
-        public string OutletWrappingPipeRadius;
-        public bool Equals(DrainageGroupingPipeItem other)
-        {
-            return this.HasWaterPort == other.HasWaterPort
-                && this.HasWrappingPipe == other.HasWrappingPipe
-                && this.MoveTlLineUpper == other.MoveTlLineUpper
-                && this.HasBasinInKitchenAt1F == other.HasBasinInKitchenAt1F
-                && this.CanHaveAring == other.CanHaveAring
-                && this.PipeType == other.PipeType
-                && this.OutletWrappingPipeRadius == other.OutletWrappingPipeRadius
-                && this.IsFL0 == other.IsFL0
-                && this.MergeFloorDrainForFL0 == other.MergeFloorDrainForFL0
-                && this.HasRainPortForFL0 == other.HasRainPortForFL0
-                && this.IsConnectedToFloorDrainForFL0 == other.IsConnectedToFloorDrainForFL0
-                && this.MaxTl == other.MaxTl
-                && this.MinTl == other.MinTl
-                && this.IsSingleOutlet == other.IsSingleOutlet
-                && this.FloorDrainsCountAt1F == other.FloorDrainsCountAt1F
-                && this.Items.SeqEqual(other.Items)
-                && this.Hangings.SeqEqual(other.Hangings);
-        }
-        public bool MoveTlLineUpper;
         public override int GetHashCode()
         {
             return BATHYDRACONIDAE;
         }
-        public string WaterPortLabel;
-        public bool MergeFloorDrainForFL0;
-        public bool HasTL;
-        public int MinTl;
     }
     public enum PipeType
     {
@@ -382,73 +382,73 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class DrainageGroupedPipeItem
     {
-        public List<string> TlLabels;
-        public string OutletWrappingPipeRadius;
-        public int MinTl;
-        public bool IsConnectedToFloorDrainForFL0;
-        public PipeType PipeType;
-        public List<string> WaterPortLabels;
         public List<string> Labels;
-        public List<DrainageGroupingPipeItem.Hanging> Hangings;
-        public bool HasBasinInKitchenAt1F;
-        public bool IsFL0;
-        public bool MoveTlLineUpper;
-        public bool HasTl => TlLabels != null && TlLabels.Count > BATHYDRACONIDAE;
-        public bool MergeFloorDrainForFL0;
-        public bool IsSingleOutlet;
-        public bool HasWaterPort => WaterPortLabels != null && WaterPortLabels.Count > BATHYDRACONIDAE;
+        public List<string> WaterPortLabels;
         public bool HasWrappingPipe;
-        public int MaxTl;
-        public bool HasRainPortForFL0;
-        public bool CanHaveAring;
-        public int FloorDrainsCountAt1F;
+        public bool HasWaterPort => WaterPortLabels != null && WaterPortLabels.Count > BATHYDRACONIDAE;
         public List<DrainageGroupingPipeItem.ValueItem> Items;
+        public List<string> TlLabels;
+        public int MinTl;
+        public int MaxTl;
+        public bool HasTl => TlLabels != null && TlLabels.Count > BATHYDRACONIDAE;
+        public PipeType PipeType;
+        public List<DrainageGroupingPipeItem.Hanging> Hangings;
+        public bool IsSingleOutlet;
+        public bool HasBasinInKitchenAt1F;
+        public int FloorDrainsCountAt1F;
+        public bool CanHaveAring;
+        public bool IsFL0;
+        public bool MergeFloorDrainForFL0;
+        public bool MoveTlLineUpper;
+        public bool HasRainPortForFL0;
+        public bool IsConnectedToFloorDrainForFL0;
+        public string OutletWrappingPipeRadius;
     }
     public class ThwPipeRun
     {
-        public bool IsFirstItem;
+        public string Storey;
+        public bool ShowStoreyLabel;
+        public bool HasDownBoardLine;
+        public bool DrawLongHLineHigher;
+        public bool Is4Tune;
+        public bool HasShortTranslator;
+        public bool HasLongTranslator;
         public bool IsShortTranslatorToLeftOrRight;
         public bool IsLongTranslatorToLeftOrRight;
-        public Hanging LeftHanging;
-        public bool HasCleaningPort;
-        public bool HasCheckPoint;
-        public bool ShowStoreyLabel;
-        public string Storey;
-        public bool DrawLongHLineHigher;
-        public Hanging RightHanging;
         public bool ShowShortTranslatorLabel;
-        public bool Is4Tune;
-        public BranchInfo BranchInfo;
-        public bool HasShortTranslator;
+        public bool HasCheckPoint;
+        public bool IsFirstItem;
         public bool IsLastItem;
-        public bool HasDownBoardLine;
-        public bool HasLongTranslator;
+        public Hanging LeftHanging;
+        public Hanging RightHanging;
+        public bool HasCleaningPort;
+        public BranchInfo BranchInfo;
     }
     public class BranchInfo
     {
-        public bool BlueToRightFirst;
-        public bool LastLeftRun;
         public bool FirstLeftRun;
-        public bool BlueToRightLast;
         public bool MiddleLeftRun;
-        public bool HasLongTranslatorToRight;
-        public bool BlueToRightMiddle;
-        public bool IsLast;
+        public bool LastLeftRun;
         public bool FirstRightRun;
-        public bool HasLongTranslatorToLeft;
-        public bool BlueToLeftMiddle;
-        public bool LastRightRun;
-        public bool BlueToLeftLast;
         public bool MiddleRightRun;
+        public bool LastRightRun;
         public bool BlueToLeftFirst;
+        public bool BlueToLeftMiddle;
+        public bool BlueToLeftLast;
+        public bool BlueToRightFirst;
+        public bool BlueToRightMiddle;
+        public bool BlueToRightLast;
+        public bool HasLongTranslatorToLeft;
+        public bool HasLongTranslatorToRight;
+        public bool IsLast;
     }
     public class Hanging
     {
-        public bool HasDoubleSCurve;
-        public bool HasSCurve;
-        public bool IsSeries;
-        public bool HasUnderBoardLabel;
         public int FloorDrainsCount;
+        public bool IsSeries;
+        public bool HasSCurve;
+        public bool HasDoubleSCurve;
+        public bool HasUnderBoardLabel;
     }
     public enum GDirection
     {
@@ -456,44 +456,46 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class ThwOutput
     {
-        public string DN2;
-        public bool HasLargeCleaningPort;
         public int LinesCount = PIEZOELECTRICAL;
-        public bool HasCleaningPort1;
         public List<string> DirtyWaterWellValues;
-        public bool HasCleaningPort3;
-        public string DN3;
         public bool HasVerticalLine2;
-        public int HangingCount = BATHYDRACONIDAE;
-        public bool HasCleaningPort2;
-        public bool HasWrappingPipe3;
         public bool HasWrappingPipe1;
-        public Hanging Hanging2;
         public bool HasWrappingPipe2;
-        public Hanging Hanging1;
+        public bool HasWrappingPipe3;
         public string DN1;
+        public string DN2;
+        public string DN3;
+        public bool HasCleaningPort1;
+        public bool HasCleaningPort2;
+        public bool HasCleaningPort3;
+        public bool HasLargeCleaningPort;
+        public int HangingCount = BATHYDRACONIDAE;
+        public Hanging Hanging1;
+        public Hanging Hanging2;
     }
     public class ThwPipeLine
     {
         public List<string> Labels;
+        public bool? IsLeftOrMiddleOrRight;
         public List<ThwPipeRun> PipeRuns;
         public ThwOutput Output;
-        public bool? IsLeftOrMiddleOrRight;
     }
     public class StoreyItem
     {
+        public List<int> Ints;
         public List<string> Labels;
         public void Init()
         {
             Ints ??= new List<int>();
             Labels ??= new List<string>();
         }
-        public List<int> Ints;
     }
     public class ThwPipeLineGroup
     {
-        public ThwPipeLine TL;
         public ThwOutput Output;
+        public ThwPipeLine TL;
+        public ThwPipeLine DL;
+        public ThwPipeLine PL;
         public ThwPipeLine FL;
         public int LinesCount
         {
@@ -507,34 +509,32 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 return s;
             }
         }
-        public ThwPipeLine PL;
         public ThwPipeLineGroup Clone()
         {
             return this.ToCadJson().FromCadJson<ThwPipeLineGroup>();
         }
-        public ThwPipeLine DL;
     }
     class FloorDrainCbItem
     {
-        public string Name;
         public Point2d BasePt;
+        public string Name;
         public bool LeftOrRight;
     }
     public class PipeRunLocationInfo
     {
+        public string Storey;
+        public Point2d BasePoint;
+        public Point2d StartPoint;
+        public Point2d EndPoint;
+        public Point2d HangingEndPoint;
+        public List<Vector2d> Vector2ds;
         public List<GLineSegment> Segs;
         public List<GLineSegment> DisplaySegs;
-        public Point2d PlBasePt;
-        public Point2d HangingEndPoint;
-        public List<GLineSegment> RightSegsMiddle;
         public List<GLineSegment> RightSegsFirst;
-        public List<Vector2d> Vector2ds;
-        public bool Visible;
-        public Point2d BasePoint;
-        public string Storey;
-        public Point2d EndPoint;
+        public List<GLineSegment> RightSegsMiddle;
         public List<GLineSegment> RightSegsLast;
-        public Point2d StartPoint;
+        public bool Visible;
+        public Point2d PlBasePt;
     }
     public class StoreyContext
     {
@@ -542,73 +542,89 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class CommandContext
     {
-        public System.Windows.Window window;
-        public DrainageSystemDiagramViewModel ViewModel;
         public Point3dCollection range;
         public StoreyContext StoreyContext;
+        public DrainageSystemDiagramViewModel ViewModel;
+        public System.Windows.Window window;
     }
     public class DrainageSystemDiagram
     {
-        public static IEnumerable<string> ConvertLabelStrings(IEnumerable<string> pipeIds)
+        public static void SetLabelStylesForRainNote(params Entity[] ents)
         {
-            var items = pipeIds.Select(id => LabelItem.Parse(id)).Where(m => m != null);
-            var gs = items.GroupBy(m => VTFac.Create(m.Prefix, m.D1, m.Suffix)).Select(l => l.OrderBy(x => x.D2).ToList());
-            foreach (var g in gs)
+            foreach (var e in ents)
             {
-                if (g.Count == PIEZOELECTRICAL)
+                e.Layer = THESAURUSSPELLBOUND;
+                ByLayer(e);
+                if (e is DBText t)
                 {
-                    yield return g.First().Label;
-                }
-                else if (g.Count > TEREBINTHINATED && g.Count == g.Last().D2 - g.First().D2 + PIEZOELECTRICAL)
-                {
-                    var m = g.First();
-                    yield return $"{m.Prefix}{m.D1S}-{g.First().D2S}{m.Suffix}~{g.Last().D2S}{m.Suffix}";
-                }
-                else
-                {
-                    var sb = new StringBuilder();
-                    {
-                        var m = g.First();
-                        sb.Append($"{m.Prefix}{m.D1S}-");
-                    }
-                    for (int i = BATHYDRACONIDAE; i < g.Count; i++)
-                    {
-                        var m = g[i];
-                        sb.Append($"{m.D2S}{m.Suffix}");
-                        if (i != g.Count - PIEZOELECTRICAL)
-                        {
-                            sb.Append(THESAURUSLUGGAGE);
-                        }
-                    }
-                    yield return sb.ToString();
+                    t.WidthFactor = THESAURUSADVANCEMENT;
+                    SetTextStyleLazy(t, THESAURUSEXTEMPORE);
                 }
             }
         }
-        public static void DrawAiringSymbol(Point2d pt, bool canPeopleBeOnRoof, string layer = THESAURUSOBJECTIVELY)
+        public static void DrawShortTranslatorLabel(Point2d basePt, bool isLeftOrRight)
         {
-            DrawAiringSymbol(pt, canPeopleBeOnRoof ? THESAURUSACQUIRE : THESAURUSASTUTE, layer);
+            var vecs = new List<Vector2d> { new Vector2d(-PSYCHOPHYSIOLOGICAL, THESAURUSBEFRIEND), new Vector2d(-THESAURUSNOTIFY, BATHYDRACONIDAE) };
+            if (!isLeftOrRight) vecs = vecs.GetYAxisMirror();
+            var segs = vecs.ToGLineSegments(basePt);
+            var wordPt = isLeftOrRight ? segs[PIEZOELECTRICAL].EndPoint : segs[PIEZOELECTRICAL].StartPoint;
+            var text = THESAURUSCONSENT;
+            var height = REVOLUTIONIZATION;
+            var lines = DrawLineSegmentsLazy(segs);
+            SetLabelStylesForRainNote(lines.ToArray());
+            var t = DrawTextLazy(text, height, wordPt);
+            SetLabelStylesForRainNote(t);
         }
-        public static CommandContext commandContext;
-        public static void DrawAiringSymbol(Point2d pt, string name, string layer)
+        public static void DrawWashingMachineRaisingSymbol(Point2d bsPt, bool isLeftOrRight)
         {
-            DrawBlockReference(blkName: THESAURUSEXPUNGE, basePt: pt.ToPoint3d(), layer: layer, cb: br =>
+            if (isLeftOrRight)
             {
-                br.ObjectId.SetDynBlockValue(THESAURUSGENTILITY, name);
-            });
-        }
-        public static void DrawBluePipes(IEnumerable<GLineSegment> segs)
-        {
-            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
-            lines.ForEach(line =>
+                var v = new Vector2d(THESAURUSSATISFY, -QUOTATIONRASCHIG);
+                DrawBlockReference(THESAURUSPURIFY, (bsPt - v).ToPoint3d(), br =>
+                {
+                    br.Layer = THESAURUSRECRIMINATION;
+                    br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, THESAURUSCONDITION);
+                    }
+                });
+            }
+            else
             {
-                line.Layer = NEUROTRANSMITTER;
-                ByLayer(line);
-            });
+                var v = new Vector2d(-THESAURUSSATISFY, -QUOTATIONRASCHIG);
+                DrawBlockReference(THESAURUSPURIFY, (bsPt - v).ToPoint3d(), br =>
+                {
+                    br.Layer = THESAURUSRECRIMINATION;
+                    br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, THESAURUSCONDITION);
+                    }
+                });
+            }
         }
-        public static bool CollectDrainageData(AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = THESAURUSESPECIALLY)
+        public static double LONG_TRANSLATOR_HEIGHT1 = THESAURUSADMIRABLE;
+        public static double CHECKPOINT_OFFSET_Y = SUPERCILIOUSNESS;
+        public static void DrawDrainageSystemDiagram(List<DrainageDrawingData> drDatas, List<StoreyItem> storeysItems, Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, DrainageSystemDiagramViewModel viewModel)
         {
-            CollectDrainageGeoData(adb, out storeysItems, out DrainageGeoData geoData, ctx);
-            return CreateDrainageDrawingData(out drDatas, noWL, geoData);
+            var allNumStoreyLabels = allNumStoreys.Select(i => i + PHENYLENEDIAMINE).ToList();
+            var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
+            var start = allStoreys.Count - PIEZOELECTRICAL;
+            var end = BATHYDRACONIDAE;
+            var OFFSET_X = HYPERCHOLESTERO;
+            var SPAN_X = QUOTATIONCOLLARED + THESAURUSBEFRIEND + PSYCHOGERIATRIC;
+            var HEIGHT = THESAURUSRECAPITULATE;
+            {
+                if (viewModel?.Params?.StoreySpan is double v)
+                {
+                    HEIGHT = v;
+                }
+            }
+            var COUNT = pipeGroupItems.Count;
+            var dy = HEIGHT - THESAURUSRECAPITULATE;
+            var __dy = DIETHYLSTILBOESTROL;
+            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
         }
         public class Opt
         {
@@ -2737,35 +2753,162 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
-        public static AlignedDimension DrawDimLabel(Point2d pt1, Point2d pt2, Vector2d v, string text, string layer)
+        public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel)
         {
-            var dim = new AlignedDimension();
-            dim.XLine1Point = pt1.ToPoint3d();
-            dim.XLine2Point = pt2.ToPoint3d();
-            dim.DimLinePoint = (GeoAlgorithm.MidPoint(pt1, pt2) + v).ToPoint3d();
-            dim.DimensionText = text;
-            dim.Layer = layer;
-            ByLayer(dim);
-            DrawEntityLazy(dim);
-            return dim;
+            var o = new Opt()
+            {
+                basePoint = basePoint,
+                pipeGroupItems = pipeGroupItems,
+                allNumStoreyLabels = allNumStoreyLabels,
+                allStoreys = allStoreys,
+                start = start,
+                end = end,
+                OFFSET_X = OFFSET_X,
+                SPAN_X = SPAN_X,
+                HEIGHT = HEIGHT,
+                COUNT = COUNT,
+                dy = dy,
+                __dy = __dy,
+                viewModel = viewModel,
+            };
+            o.Draw();
+        }
+        public static void DrawAiringSymbol(Point2d pt, bool canPeopleBeOnRoof, string layer = THESAURUSOBJECTIVELY)
+        {
+            DrawAiringSymbol(pt, canPeopleBeOnRoof ? THESAURUSACQUIRE : THESAURUSASTUTE, layer);
+        }
+        public static void DrawAiringSymbol(Point2d pt, string name, string layer)
+        {
+            DrawBlockReference(blkName: THESAURUSEXPUNGE, basePt: pt.ToPoint3d(), layer: layer, cb: br =>
+            {
+                br.ObjectId.SetDynBlockValue(THESAURUSGENTILITY, name);
+            });
+        }
+        public static void DrawAiringSymbol(Point2d pt, double offsetY)
+        {
+            DrawBlockReference(blkName: THESAURUSCENSOR, basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: THESAURUSOBJECTIVELY, cb: br =>
+            {
+                br.ObjectId.SetDynBlockValue(PALAEOGEOMORPHOLOGY, offsetY);
+                br.ObjectId.SetDynBlockValue(THESAURUSGENTILITY, THESAURUSREPREHENSIBLE);
+            });
+        }
+        public static CommandContext commandContext;
+        public static IEnumerable<string> ConvertLabelStrings(IEnumerable<string> pipeIds)
+        {
+            var items = pipeIds.Select(id => LabelItem.Parse(id)).Where(m => m != null);
+            var gs = items.GroupBy(m => VTFac.Create(m.Prefix, m.D1, m.Suffix)).Select(l => l.OrderBy(x => x.D2).ToList());
+            foreach (var g in gs)
+            {
+                if (g.Count == PIEZOELECTRICAL)
+                {
+                    yield return g.First().Label;
+                }
+                else if (g.Count > TEREBINTHINATED && g.Count == g.Last().D2 - g.First().D2 + PIEZOELECTRICAL)
+                {
+                    var m = g.First();
+                    yield return $"{m.Prefix}{m.D1S}-{g.First().D2S}{m.Suffix}~{g.Last().D2S}{m.Suffix}";
+                }
+                else
+                {
+                    var sb = new StringBuilder();
+                    {
+                        var m = g.First();
+                        sb.Append($"{m.Prefix}{m.D1S}-");
+                    }
+                    for (int i = BATHYDRACONIDAE; i < g.Count; i++)
+                    {
+                        var m = g[i];
+                        sb.Append($"{m.D2S}{m.Suffix}");
+                        if (i != g.Count - PIEZOELECTRICAL)
+                        {
+                            sb.Append(THESAURUSLUGGAGE);
+                        }
+                    }
+                    yield return sb.ToString();
+                }
+            }
+        }
+        public static void CollectFloorListDatasEx(bool focus)
+        {
+            if (focus) FocusMainWindow();
+            ThMEPWSS.Common.FramedReadUtil.SelectFloorFramed(out _, () =>
+            {
+                using (DocLock)
+                {
+                    var range = TrySelectRangeEx();
+                    if (range == null) return;
+                    using var adb = AcadDatabase.Active();
+                    var (ctx, brs) = GetStoreyContext(range, adb);
+                    commandContext.StoreyContext = ctx;
+                    InitFloorListDatas(adb, brs);
+                }
+            });
+        }
+        public static (StoreyContext, List<BlockReference>) GetStoreyContext(Point3dCollection range, AcadDatabase adb)
+        {
+            var ctx = new StoreyContext();
+            var geo = range?.ToGRect().ToPolygon();
+            var brs = GetStoreyBlockReferences(adb);
+            var _brs = new List<BlockReference>();
+            var storeys = new List<StoreyInfo>();
+            foreach (var br in brs)
+            {
+                var info = GetStoreyInfo(br);
+                if (geo?.Contains(info.Boundary.ToPolygon()) ?? THESAURUSNEGATIVE)
+                {
+                    _brs.Add(br);
+                    storeys.Add(info);
+                }
+            }
+            FixStoreys(storeys);
+            ctx.StoreyInfos = storeys;
+            return (ctx, _brs);
+        }
+        public static void InitFloorListDatas(AcadDatabase adb, List<BlockReference> brs)
+        {
+            var ctx = commandContext.StoreyContext;
+            var storeys = brs.Select(x => x.ObjectId).ToObjectIdCollection();
+            var service = new ThReadStoreyInformationService();
+            service.Read(storeys);
+            commandContext.ViewModel.FloorListDatas = service.StoreyNames.Select(o => o.Item2).ToList();
+        }
+        public static bool CreateDrainageDrawingData(out List<DrainageDrawingData> drDatas, bool noWL, DrainageGeoData geoData)
+        {
+            ThDrainageService.PreFixGeoData(geoData);
+            if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
+            {
+                MessageBox.Show(ARCHIPRESBYTERATUS);
+                drDatas = null;
+                return THESAURUSESPECIALLY;
+            }
+            drDatas = _CreateDrainageDrawingData(geoData, THESAURUSNEGATIVE);
+            return THESAURUSNEGATIVE;
+        }
+        public static List<DrainageDrawingData> CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
+        {
+            ThDrainageService.PreFixGeoData(geoData);
+            return _CreateDrainageDrawingData(geoData, noDraw);
+        }
+        private static List<DrainageDrawingData> _CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
+        {
+            List<DrainageDrawingData> drDatas;
+            ThDrainageService.ConnectLabelToLabelLine(geoData);
+            geoData.FixData();
+            var cadDataMain = DrainageCadData.Create(geoData);
+            var cadDatas = cadDataMain.SplitByStorey();
+            DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out drDatas);
+            if (noDraw) Dispose();
+            return drDatas;
         }
         public static bool CollectDrainageData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, bool noWL = THESAURUSESPECIALLY)
         {
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData);
             return CreateDrainageDrawingData(out drDatas, noWL, geoData);
         }
-        public static void DrawShortTranslatorLabel(Point2d basePt, bool isLeftOrRight)
+        public static bool CollectDrainageData(AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = THESAURUSESPECIALLY)
         {
-            var vecs = new List<Vector2d> { new Vector2d(-PSYCHOPHYSIOLOGICAL, THESAURUSBEFRIEND), new Vector2d(-THESAURUSNOTIFY, BATHYDRACONIDAE) };
-            if (!isLeftOrRight) vecs = vecs.GetYAxisMirror();
-            var segs = vecs.ToGLineSegments(basePt);
-            var wordPt = isLeftOrRight ? segs[PIEZOELECTRICAL].EndPoint : segs[PIEZOELECTRICAL].StartPoint;
-            var text = THESAURUSCONSENT;
-            var height = REVOLUTIONIZATION;
-            var lines = DrawLineSegmentsLazy(segs);
-            SetLabelStylesForRainNote(lines.ToArray());
-            var t = DrawTextLazy(text, height, wordPt);
-            SetLabelStylesForRainNote(t);
+            CollectDrainageGeoData(adb, out storeysItems, out DrainageGeoData geoData, ctx);
+            return CreateDrainageDrawingData(out drDatas, noWL, geoData);
         }
         public static List<StoreyItem> GetStoreysItem(List<StoreyInfo> storeys)
         {
@@ -2798,165 +2941,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             return storeysItems;
         }
-        static bool IsNumStorey(string storey)
+        public static List<StoreyInfo> GetStoreys(AcadDatabase adb, CommandContext ctx)
         {
-            return GetStoreyScore(storey) < ushort.MaxValue;
-        }
-        public static void DrawDomePipes(params GLineSegment[] segs)
-        {
-            DrawDomePipes((IEnumerable<GLineSegment>)segs);
-        }
-        public static void DrawRainWaterWell(Point3d basePt, string value)
-        {
-            DrawBlockReference(blkName: THESAURUSASSIGN, basePt: basePt.OffsetY(-PSYCHOPHYSIOLOGICAL),
-          props: new Dictionary<string, string>() { { CONTEMPTIBILITY, value } },
-          cb: br =>
-          {
-              br.Layer = THESAURUSINSPECTOR;
-              ByLayer(br);
-          });
-        }
-        public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel)
-        {
-            var o = new Opt()
-            {
-                basePoint = basePoint,
-                pipeGroupItems = pipeGroupItems,
-                allNumStoreyLabels = allNumStoreyLabels,
-                allStoreys = allStoreys,
-                start = start,
-                end = end,
-                OFFSET_X = OFFSET_X,
-                SPAN_X = SPAN_X,
-                HEIGHT = HEIGHT,
-                COUNT = COUNT,
-                dy = dy,
-                __dy = __dy,
-                viewModel = viewModel,
-            };
-            o.Draw();
-        }
-        public static double LONG_TRANSLATOR_HEIGHT1 = THESAURUSADMIRABLE;
-        public static int GetStoreyScore(string label)
-        {
-            if (label == null) return BATHYDRACONIDAE;
-            switch (label)
-            {
-                case THESAURUSINSURANCE: return ushort.MaxValue;
-                case THESAURUSBLACKOUT: return ushort.MaxValue + PIEZOELECTRICAL;
-                case HYDROMETALLURGY: return ushort.MaxValue + TEREBINTHINATED;
-                default:
-                    {
-                        int.TryParse(label.Replace(PHENYLENEDIAMINE, THESAURUSAMENITY), out int ret);
-                        return ret;
-                    }
-            }
-        }
-        public static void CollectFloorListDatasEx(bool focus)
-        {
-            if (focus) FocusMainWindow();
-            ThMEPWSS.Common.FramedReadUtil.SelectFloorFramed(out _, () =>
-            {
-                using (DocLock)
-                {
-                    var range = TrySelectRangeEx();
-                    if (range == null) return;
-                    using var adb = AcadDatabase.Active();
-                    var (ctx, brs) = GetStoreyContext(range, adb);
-                    commandContext.StoreyContext = ctx;
-                    InitFloorListDatas(adb, brs);
-                }
-            });
-        }
-        public static IEnumerable<Point2d> GetBasePoints(Point2d basePoint, int maxCol, int num, double width, double height)
-        {
-            int i = BATHYDRACONIDAE, j = BATHYDRACONIDAE;
-            for (int k = BATHYDRACONIDAE; k < num; k++)
-            {
-                yield return new Point2d(basePoint.X + i * width, basePoint.Y - j * height);
-                i++;
-                if (i >= maxCol)
-                {
-                    j++;
-                    i = BATHYDRACONIDAE;
-                }
-            }
-        }
-        public static void DrawDirtyWaterWell(Point3d basePt, string value)
-        {
-            DrawBlockReference(blkName: QUOTATIONADJACENT, basePt: basePt.OffsetY(-PSYCHOPHYSIOLOGICAL),
-            props: new Dictionary<string, string>() { { CONTEMPTIBILITY, value } },
-            cb: br =>
-            {
-                br.Layer = THESAURUSRECRIMINATION;
-                ByLayer(br);
-            });
-        }
-        public static void DrawStoreyLine(string label, Point2d basePt, double lineLen)
-        {
-            DrawStoreyLine(label, basePt.ToPoint3d(), lineLen);
-        }
-        public static void DrawFloorDrain(Point3d basePt, bool leftOrRight, string value = THESAURUSMELODIOUS)
-        {
-            if (Testing) return;
-            if (leftOrRight)
-            {
-                DrawBlockReference(THESAURUSCOMMUTE, basePt, br =>
-                {
-                    br.Layer = THESAURUSRECRIMINATION;
-                    ByLayer(br);
-                    br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                    if (br.IsDynamicBlock)
-                    {
-                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
-                    }
-                });
-            }
-            else
-            {
-                DrawBlockReference(THESAURUSCOMMUTE, basePt,
-               br =>
-               {
-                   br.Layer = THESAURUSRECRIMINATION;
-                   ByLayer(br);
-                   br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                   if (br.IsDynamicBlock)
-                   {
-                       br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
-                   }
-               });
-            }
-        }
-        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
-        {
-            int i = BATHYDRACONIDAE, j = BATHYDRACONIDAE;
-            for (int k = BATHYDRACONIDAE; k < num; k++)
-            {
-                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, BATHYDRACONIDAE);
-                i++;
-                if (i >= maxCol)
-                {
-                    j++;
-                    i = BATHYDRACONIDAE;
-                }
-            }
-        }
-        public static void SortStoreys(List<string> storeys)
-        {
-            storeys.Sort((x, y) => GetStoreyScore(x) - GetStoreyScore(y));
-        }
-        public static void SetLabelStylesForRainNote(params Entity[] ents)
-        {
-            foreach (var e in ents)
-            {
-                e.Layer = THESAURUSSPELLBOUND;
-                ByLayer(e);
-                if (e is DBText t)
-                {
-                    t.WidthFactor = THESAURUSADVANCEMENT;
-                    SetTextStyleLazy(t, THESAURUSEXTEMPORE);
-                }
-            }
+            return ctx.StoreyContext.StoreyInfos;
         }
         public static void CollectDrainageGeoData(AcadDatabase adb, out List<StoreyItem> storeysItems, out DrainageGeoData geoData, CommandContext ctx)
         {
@@ -2968,179 +2955,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             DrainageService.CollectGeoData(adb, geoData, ctx);
             geoData.Flush();
         }
-        public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
+        public static List<StoreyInfo> GetStoreys(Point3dCollection range, AcadDatabase adb)
         {
-            {
-                var line = DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
-                var dbt = DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, BATHYDRACONIDAE));
-                Dr.SetLabelStylesForWNote(line, dbt);
-                DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: basePt.OffsetX(COMMENSURATENESS), layer: THESAURUSGOODNESS, props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSAMENITY } });
-            }
-            if (label == THESAURUSINSURANCE)
-            {
-                var line = DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, BATHYDRACONIDAE), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, BATHYDRACONIDAE));
-                var dbt = DrawTextLazy(THESAURUSVERIFICATION, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, BATHYDRACONIDAE));
-                Dr.SetLabelStylesForWNote(line, dbt);
-            }
-        }
-        public static void DrawWashingMachineRaisingSymbol(Point2d bsPt, bool isLeftOrRight)
-        {
-            if (isLeftOrRight)
-            {
-                var v = new Vector2d(THESAURUSSATISFY, -QUOTATIONRASCHIG);
-                DrawBlockReference(THESAURUSPURIFY, (bsPt - v).ToPoint3d(), br =>
-                {
-                    br.Layer = THESAURUSRECRIMINATION;
-                    br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                    if (br.IsDynamicBlock)
-                    {
-                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, THESAURUSCONDITION);
-                    }
-                });
-            }
-            else
-            {
-                var v = new Vector2d(-THESAURUSSATISFY, -QUOTATIONRASCHIG);
-                DrawBlockReference(THESAURUSPURIFY, (bsPt - v).ToPoint3d(), br =>
-                {
-                    br.Layer = THESAURUSRECRIMINATION;
-                    br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                    if (br.IsDynamicBlock)
-                    {
-                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, THESAURUSCONDITION);
-                    }
-                });
-            }
-        }
-        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value, string shadow)
-        {
-            if (!Testing) DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight, value);
-        }
-        public static void SetDomePipeLineStyle(Line line)
-        {
-            line.Layer = THESAURUSOBJECTIVELY;
-            ByLayer(line);
-        }
-        public static void DrawRainWaterWell(Point2d basePt, string value)
-        {
-            DrawRainWaterWell(basePt.ToPoint3d(), value);
-        }
-        public static void DrawCheckPoint(Point3d basePt, bool leftOrRight)
-        {
-            DrawBlockReference(blkName: QUOTATIONEMBRYOID, basePt: basePt,
-      cb: br =>
-      {
-          if (leftOrRight)
-          {
-              br.ScaleFactors = new Scale3d(-PIEZOELECTRICAL, PIEZOELECTRICAL, PIEZOELECTRICAL);
-          }
-          ByLayer(br);
-          br.Layer = THESAURUSRECRIMINATION;
-      });
-        }
-        public static void DrawDrainageSystemDiagram(List<DrainageDrawingData> drDatas, List<StoreyItem> storeysItems, Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, DrainageSystemDiagramViewModel viewModel)
-        {
-            var allNumStoreyLabels = allNumStoreys.Select(i => i + PHENYLENEDIAMINE).ToList();
-            var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
-            var start = allStoreys.Count - PIEZOELECTRICAL;
-            var end = BATHYDRACONIDAE;
-            var OFFSET_X = HYPERCHOLESTERO;
-            var SPAN_X = QUOTATIONCOLLARED + THESAURUSBEFRIEND + PSYCHOGERIATRIC;
-            var HEIGHT = THESAURUSRECAPITULATE;
-            {
-                if (viewModel?.Params?.StoreySpan is double v)
-                {
-                    HEIGHT = v;
-                }
-            }
-            var COUNT = pipeGroupItems.Count;
-            var dy = HEIGHT - THESAURUSRECAPITULATE;
-            var __dy = DIETHYLSTILBOESTROL;
-            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
-        }
-        public static bool Testing;
-        public static List<StoreyInfo> GetStoreys(AcadDatabase adb, CommandContext ctx)
-        {
-            return ctx.StoreyContext.StoreyInfos;
-        }
-        public static void DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
-        {
-            var h = HEIGHT * THESAURUSADVANCEMENT;
-            if (HEIGHT - h > LONG_TRANSLATOR_HEIGHT1)
-            {
-                h = HEIGHT - LONG_TRANSLATOR_HEIGHT1 + THESAURUSTRAGEDY;
-            }
-            var p1 = basePt.OffsetY(h);
-            var p2 = p1.OffsetX(-UNCONJECTURABLE);
-            var p3 = p1.OffsetX(UNCONJECTURABLE);
-            var line = DrawLineLazy(p2, p3);
-            line.Layer = THESAURUSSMASHING;
-            ByLayer(line);
-        }
-        public static void DrawNoteText(string text, Point2d pt)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            var t = DrawTextLazy(text, REVOLUTIONIZATION, pt);
-            SetLabelStylesForDraiNote(t);
-        }
-        public static void DrawPipeButtomHeightSymbol(double w, double h, Point2d p)
-        {
-            var vecs = new List<Vector2d> { new Vector2d(w, BATHYDRACONIDAE), new Vector2d(BATHYDRACONIDAE, h) };
-            var segs = vecs.ToGLineSegments(p);
-            var lines = DrawLineSegmentsLazy(segs);
-            Dr.SetLabelStylesForDraiNote(lines.ToArray());
-            DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: segs.Last().EndPoint.OffsetX(HYPERSENSITIZED).ToPoint3d(),
-      props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSOBSESS } },
-      cb: br =>
-      {
-          br.Layer = THESAURUSSMASHING;
-      });
-        }
-        public static void DrawCleaningPort(Point3d basePt, bool leftOrRight, double scale)
-        {
-            if (leftOrRight)
-            {
-                DrawBlockReference(MAGNANIMOUSNESS, basePt, scale: scale, cb: br =>
-                {
-                    br.Layer = THESAURUSRECRIMINATION;
-                    ByLayer(br);
-                    br.Rotation = GeoAlgorithm.AngleFromDegree(QUOTATIONSORCERER);
-                });
-            }
-            else
-            {
-                DrawBlockReference(MAGNANIMOUSNESS, basePt, scale: scale, cb: br =>
-                {
-                    br.Layer = THESAURUSRECRIMINATION;
-                    ByLayer(br);
-                    br.Rotation = GeoAlgorithm.AngleFromDegree(QUOTATIONSORCERER + THESAURUSDOWNHEARTED);
-                });
-            }
-        }
-        public static void DrawDomePipes(IEnumerable<GLineSegment> segs)
-        {
-            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
-            lines.ForEach(line => SetDomePipeLineStyle(line));
-        }
-        public static void DrawAiringSymbol(Point2d pt, double offsetY)
-        {
-            DrawBlockReference(blkName: THESAURUSCENSOR, basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: THESAURUSOBJECTIVELY, cb: br =>
-            {
-                br.ObjectId.SetDynBlockValue(PALAEOGEOMORPHOLOGY, offsetY);
-                br.ObjectId.SetDynBlockValue(THESAURUSGENTILITY, THESAURUSREPREHENSIBLE);
-            });
-        }
-        public static bool CreateDrainageDrawingData(out List<DrainageDrawingData> drDatas, bool noWL, DrainageGeoData geoData)
-        {
-            ThDrainageService.PreFixGeoData(geoData);
-            if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
-            {
-                MessageBox.Show(ARCHIPRESBYTERATUS);
-                drDatas = null;
-                return THESAURUSESPECIALLY;
-            }
-            drDatas = _CreateDrainageDrawingData(geoData, THESAURUSNEGATIVE);
-            return THESAURUSNEGATIVE;
+            var geo = range?.ToGRect().ToPolygon();
+            var storeys = GetStoreyBlockReferences(adb).Select(x => GetStoreyInfo(x)).Where(info => geo?.Contains(info.Boundary.ToPolygon()) ?? THESAURUSNEGATIVE).ToList();
+            FixStoreys(storeys);
+            return storeys;
         }
         public static void FixStoreys(List<StoreyInfo> storeys)
         {
@@ -3153,154 +2973,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 s.Numbers.AddRange(hs.OrderBy(i => i));
             }
         }
-        public static void DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
-        {
-            var p2 = p1 + vec7;
-            DrawDomePipes(new GLineSegment(p1, p2));
-            if (!Testing) DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
-        }
-        public static void DrawDiryWaterWells2(Point2d pt, List<string> values)
-        {
-            var dx = BATHYDRACONIDAE;
-            foreach (var value in values)
-            {
-                DrawDirtyWaterWell(pt.OffsetX(PSYCHOPHYSIOLOGICAL) + new Vector2d(dx, BATHYDRACONIDAE), value);
-                dx += CHLOROFLUOROCARBONS;
-            }
-        }
-        public static void SetLabelStylesForDraiNote(params Entity[] ents)
-        {
-            foreach (var e in ents)
-            {
-                e.Layer = THESAURUSSMASHING;
-                ByLayer(e);
-                if (e is DBText t)
-                {
-                    t.WidthFactor = THESAURUSADVANCEMENT;
-                    SetTextStyleLazy(t, THESAURUSEXTEMPORE);
-                }
-            }
-        }
-        public static void DrawDirtyWaterWell(Point2d basePt, string value)
-        {
-            DrawDirtyWaterWell(basePt.ToPoint3d(), value);
-        }
-        public static void DrawDoubleWashBasins(Point3d basePt, bool leftOrRight, string value)
-        {
-            if (leftOrRight)
-            {
-                if (value is INSTITUTIONALIZED)
-                {
-                    basePt += new Vector2d(THESAURUSDOWNHEARTED, -PSYCHOPHYSIOLOGICAL).ToVector3d();
-                }
-                DrawBlockReference(QUOTATIONCRIMEAN, basePt,
-                  br =>
-                  {
-                      br.Layer = THESAURUSRECRIMINATION;
-                      br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                      if (br.IsDynamicBlock)
-                      {
-                          br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
-                      }
-                  });
-            }
-            else
-            {
-                DrawBlockReference(QUOTATIONCRIMEAN, basePt,
-                  br =>
-                  {
-                      br.Layer = THESAURUSRECRIMINATION;
-                      br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
-                      if (br.IsDynamicBlock)
-                      {
-                          br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
-                      }
-                  });
-            }
-        }
-        public static void InitFloorListDatas(AcadDatabase adb, List<BlockReference> brs)
-        {
-            var ctx = commandContext.StoreyContext;
-            var storeys = brs.Select(x => x.ObjectId).ToObjectIdCollection();
-            var service = new ThReadStoreyInformationService();
-            service.Read(storeys);
-            commandContext.ViewModel.FloorListDatas = service.StoreyNames.Select(o => o.Item2).ToList();
-        }
-        public static double CHECKPOINT_OFFSET_Y = SUPERCILIOUSNESS;
-        public static void DrawDiryWaterWells1(Point2d pt, List<string> values, bool isRainWaterWell = THESAURUSESPECIALLY)
-        {
-            if (values == null) return;
-            if (values.Count == PIEZOELECTRICAL)
-            {
-                var dy = -THESAURUSMALODOROUS;
-                if (!isRainWaterWell)
-                {
-                    DrawDirtyWaterWell(pt.OffsetY(dy), values[BATHYDRACONIDAE]);
-                }
-                else
-                {
-                    DrawRainWaterWell(pt.OffsetY(dy), values[BATHYDRACONIDAE]);
-                }
-            }
-            else if (values.Count >= TEREBINTHINATED)
-            {
-                var pts = GetBasePoints(pt.OffsetX(-CHLOROFLUOROCARBONS), TEREBINTHINATED, values.Count, CHLOROFLUOROCARBONS, CHLOROFLUOROCARBONS).ToList();
-                for (int i = BATHYDRACONIDAE; i < values.Count; i++)
-                {
-                    if (!isRainWaterWell)
-                    {
-                        DrawDirtyWaterWell(pts[i], values[i]);
-                    }
-                    else
-                    {
-                        DrawRainWaterWell(pts[i], values[i]);
-                    }
-                }
-            }
-        }
-        private static List<DrainageDrawingData> _CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
-        {
-            List<DrainageDrawingData> drDatas;
-            ThDrainageService.ConnectLabelToLabelLine(geoData);
-            geoData.FixData();
-            var cadDataMain = DrainageCadData.Create(geoData);
-            var cadDatas = cadDataMain.SplitByStorey();
-            DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out drDatas);
-            if (noDraw) Dispose();
-            return drDatas;
-        }
-        public static List<DrainageDrawingData> CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
-        {
-            ThDrainageService.PreFixGeoData(geoData);
-            return _CreateDrainageDrawingData(geoData, noDraw);
-        }
-        public static List<StoreyInfo> GetStoreys(Point3dCollection range, AcadDatabase adb)
-        {
-            var geo = range?.ToGRect().ToPolygon();
-            var storeys = GetStoreyBlockReferences(adb).Select(x => GetStoreyInfo(x)).Where(info => geo?.Contains(info.Boundary.ToPolygon()) ?? THESAURUSNEGATIVE).ToList();
-            FixStoreys(storeys);
-            return storeys;
-        }
-        public static void DrawDraiNoteLines(IEnumerable<GLineSegment> segs)
-        {
-            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
-            lines.ForEach(line =>
-            {
-                line.Layer = THESAURUSSMASHING;
-                ByLayer(line);
-            });
-        }
-        public static void DrawPipeButtomHeightSymbol(Point2d p, List<GLineSegment> segs)
-        {
-            var lines = DrawLineSegmentsLazy(segs);
-            Dr.SetLabelStylesForDraiNote(lines.ToArray());
-            DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: p.ToPoint3d(),
-      props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSOBSESS } },
-      cb: br =>
-      {
-          br.Layer = THESAURUSSMASHING;
-      });
-        }
         public static void CollectDrainageGeoData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeysItems, out DrainageGeoData geoData)
         {
             var storeys = GetStoreys(range, adb);
@@ -3311,25 +2983,73 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             DrainageService.CollectGeoData(range, adb, geoData);
             geoData.Flush();
         }
-        public static (StoreyContext, List<BlockReference>) GetStoreyContext(Point3dCollection range, AcadDatabase adb)
+        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel, bool focus)
         {
-            var ctx = new StoreyContext();
-            var geo = range?.ToGRect().ToPolygon();
-            var brs = GetStoreyBlockReferences(adb);
-            var _brs = new List<BlockReference>();
-            var storeys = new List<StoreyInfo>();
-            foreach (var br in brs)
+            if (focus) FocusMainWindow();
+            if (commandContext == null) return;
+            if (commandContext.StoreyContext == null) return;
+            if (commandContext.StoreyContext.StoreyInfos == null) return;
+            if (!TrySelectPoint(out Point3d basePt)) return;
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+            using (DocLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new _DrawingTransaction(adb, THESAURUSNEGATIVE))
             {
-                var info = GetStoreyInfo(br);
-                if (geo?.Contains(info.Boundary.ToPolygon()) ?? THESAURUSNEGATIVE)
+                Dispose();
+                LayerThreeAxes(new List<string>() { THESAURUSGOODNESS, THESAURUSOBJECTIVELY, THESAURUSSMASHING, THESAURUSRECRIMINATION, THESAURUSEXCOMMUNICATE, THESAURUSSPELLBOUND, THESAURUSDECISIVE });
+                var storeys = commandContext.StoreyContext.StoreyInfos;
+                List<StoreyItem> storeysItems;
+                List<DrainageDrawingData> drDatas;
+                var range = commandContext.range;
+                if (range != null)
                 {
-                    _brs.Add(br);
-                    storeys.Add(info);
+                    if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSNEGATIVE)) return;
                 }
+                else
+                {
+                    if (!CollectDrainageData(adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSNEGATIVE)) return;
+                }
+                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, DrainageSystemDiagram.commandContext?.ViewModel, out List<int> allNumStoreys, out List<string> allRfStoreys);
+                var allNumStoreyLabels = allNumStoreys.Select(i => i + PHENYLENEDIAMINE).ToList();
+                var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
+                var start = allStoreys.Count - PIEZOELECTRICAL;
+                var end = BATHYDRACONIDAE;
+                var OFFSET_X = HYPERCHOLESTERO;
+                var SPAN_X = QUOTATIONCOLLARED + THESAURUSBEFRIEND + PSYCHOGERIATRIC;
+                var HEIGHT = viewModel?.Params?.StoreySpan ?? THESAURUSRECAPITULATE;
+                var COUNT = pipeGroupItems.Count;
+                var dy = HEIGHT - THESAURUSRECAPITULATE;
+                var __dy = DIETHYLSTILBOESTROL;
+                Dispose();
+                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
+                FlushDQ(adb);
             }
-            FixStoreys(storeys);
-            ctx.StoreyInfos = storeys;
-            return (ctx, _brs);
+        }
+        public static void DrawDrainageSystemDiagram()
+        {
+            FocusMainWindow();
+            var range = TrySelectRange();
+            if (range == null) return;
+            if (!TrySelectPoint(out Point3d point3D)) return;
+            var basePoint = point3D.ToPoint2d();
+            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
+            using (DocLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new _DrawingTransaction(adb, THESAURUSNEGATIVE))
+            {
+                List<StoreyItem> storeysItems;
+                List<DrainageDrawingData> drDatas;
+                if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSNEGATIVE)) return;
+                var vm = DrainageSystemDiagram.commandContext?.ViewModel;
+                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, vm, out List<int> allNumStoreys, out List<string> allRfStoreys);
+                Dispose();
+                DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, vm);
+                FlushDQ(adb);
+            }
+        }
+        static bool IsNumStorey(string storey)
+        {
+            return GetStoreyScore(storey) < ushort.MaxValue;
         }
         public static List<DrainageGroupedPipeItem> GetDrainageGroupedPipeItems(List<DrainageDrawingData> drDatas, List<StoreyItem> storeysItems, DrainageSystemDiagramViewModel vm, out List<int> allNumStoreys, out List<string> allRfStoreys)
         {
@@ -4198,68 +3918,206 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }).ToList();
             return pipeGroupedItems;
         }
-        public static void DrawDrainageSystemDiagram()
+        public static void DrawHorizontalLineOnPipeRun(double HEIGHT, Point3d basePt)
         {
-            FocusMainWindow();
-            var range = TrySelectRange();
-            if (range == null) return;
-            if (!TrySelectPoint(out Point3d point3D)) return;
-            var basePoint = point3D.ToPoint2d();
-            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (DocLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new _DrawingTransaction(adb, THESAURUSNEGATIVE))
+            var h = HEIGHT * THESAURUSADVANCEMENT;
+            if (HEIGHT - h > LONG_TRANSLATOR_HEIGHT1)
             {
-                List<StoreyItem> storeysItems;
-                List<DrainageDrawingData> drDatas;
-                if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSNEGATIVE)) return;
-                var vm = DrainageSystemDiagram.commandContext?.ViewModel;
-                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, vm, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                Dispose();
-                DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, vm);
-                FlushDQ(adb);
+                h = HEIGHT - LONG_TRANSLATOR_HEIGHT1 + THESAURUSTRAGEDY;
+            }
+            var p1 = basePt.OffsetY(h);
+            var p2 = p1.OffsetX(-UNCONJECTURABLE);
+            var p3 = p1.OffsetX(UNCONJECTURABLE);
+            var line = DrawLineLazy(p2, p3);
+            line.Layer = THESAURUSSMASHING;
+            ByLayer(line);
+        }
+        public static void DrawPipeButtomHeightSymbol(Point2d p, List<GLineSegment> segs)
+        {
+            var lines = DrawLineSegmentsLazy(segs);
+            Dr.SetLabelStylesForDraiNote(lines.ToArray());
+            DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: p.ToPoint3d(),
+      props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSOBSESS } },
+      cb: br =>
+      {
+          br.Layer = THESAURUSSMASHING;
+      });
+        }
+        public static void DrawPipeButtomHeightSymbol(double w, double h, Point2d p)
+        {
+            var vecs = new List<Vector2d> { new Vector2d(w, BATHYDRACONIDAE), new Vector2d(BATHYDRACONIDAE, h) };
+            var segs = vecs.ToGLineSegments(p);
+            var lines = DrawLineSegmentsLazy(segs);
+            Dr.SetLabelStylesForDraiNote(lines.ToArray());
+            DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: segs.Last().EndPoint.OffsetX(HYPERSENSITIZED).ToPoint3d(),
+      props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSOBSESS } },
+      cb: br =>
+      {
+          br.Layer = THESAURUSSMASHING;
+      });
+        }
+        public static void DrawStoreyLine(string label, Point2d basePt, double lineLen)
+        {
+            DrawStoreyLine(label, basePt.ToPoint3d(), lineLen);
+        }
+        public static void DrawStoreyLine(string label, Point3d basePt, double lineLen)
+        {
+            {
+                var line = DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                var dbt = DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, BATHYDRACONIDAE));
+                Dr.SetLabelStylesForWNote(line, dbt);
+                DrawBlockReference(blkName: THESAURUSINCIDENTAL, basePt: basePt.OffsetX(COMMENSURATENESS), layer: THESAURUSGOODNESS, props: new Dictionary<string, string>() { { THESAURUSINCIDENTAL, THESAURUSAMENITY } });
+            }
+            if (label == THESAURUSINSURANCE)
+            {
+                var line = DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, BATHYDRACONIDAE), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, BATHYDRACONIDAE));
+                var dbt = DrawTextLazy(THESAURUSVERIFICATION, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, BATHYDRACONIDAE));
+                Dr.SetLabelStylesForWNote(line, dbt);
             }
         }
-        public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel, bool focus)
+        public static void SortStoreys(List<string> storeys)
         {
-            if (focus) FocusMainWindow();
-            if (commandContext == null) return;
-            if (commandContext.StoreyContext == null) return;
-            if (commandContext.StoreyContext.StoreyInfos == null) return;
-            if (!TrySelectPoint(out Point3d basePt)) return;
-            if (!ThRainSystemService.ImportElementsFromStdDwg()) return;
-            using (DocLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new _DrawingTransaction(adb, THESAURUSNEGATIVE))
+            storeys.Sort((x, y) => GetStoreyScore(x) - GetStoreyScore(y));
+        }
+        public static int GetStoreyScore(string label)
+        {
+            if (label == null) return BATHYDRACONIDAE;
+            switch (label)
             {
-                Dispose();
-                LayerThreeAxes(new List<string>() { THESAURUSGOODNESS, THESAURUSOBJECTIVELY, THESAURUSSMASHING, THESAURUSRECRIMINATION, THESAURUSEXCOMMUNICATE, THESAURUSSPELLBOUND, THESAURUSDECISIVE });
-                var storeys = commandContext.StoreyContext.StoreyInfos;
-                List<StoreyItem> storeysItems;
-                List<DrainageDrawingData> drDatas;
-                var range = commandContext.range;
-                if (range != null)
+                case THESAURUSINSURANCE: return ushort.MaxValue;
+                case THESAURUSBLACKOUT: return ushort.MaxValue + PIEZOELECTRICAL;
+                case HYDROMETALLURGY: return ushort.MaxValue + TEREBINTHINATED;
+                default:
+                    {
+                        int.TryParse(label.Replace(PHENYLENEDIAMINE, THESAURUSAMENITY), out int ret);
+                        return ret;
+                    }
+            }
+        }
+        public static void SetLabelStylesForDraiNote(params Entity[] ents)
+        {
+            foreach (var e in ents)
+            {
+                e.Layer = THESAURUSSMASHING;
+                ByLayer(e);
+                if (e is DBText t)
                 {
-                    if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSNEGATIVE)) return;
+                    t.WidthFactor = THESAURUSADVANCEMENT;
+                    SetTextStyleLazy(t, THESAURUSEXTEMPORE);
                 }
-                else
+            }
+        }
+        public static void DrawDomePipes(params GLineSegment[] segs)
+        {
+            DrawDomePipes((IEnumerable<GLineSegment>)segs);
+        }
+        public static void DrawDomePipes(IEnumerable<GLineSegment> segs)
+        {
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
+            lines.ForEach(line => SetDomePipeLineStyle(line));
+        }
+        public static void SetDomePipeLineStyle(Line line)
+        {
+            line.Layer = THESAURUSOBJECTIVELY;
+            ByLayer(line);
+        }
+        public static void DrawBluePipes(IEnumerable<GLineSegment> segs)
+        {
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
+            lines.ForEach(line =>
+            {
+                line.Layer = NEUROTRANSMITTER;
+                ByLayer(line);
+            });
+        }
+        public static void DrawDraiNoteLines(IEnumerable<GLineSegment> segs)
+        {
+            var lines = DrawLineSegmentsLazy(segs.Where(x => x.IsValid));
+            lines.ForEach(line =>
+            {
+                line.Layer = THESAURUSSMASHING;
+                ByLayer(line);
+            });
+        }
+        public static void DrawNoteText(string text, Point2d pt)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            var t = DrawTextLazy(text, REVOLUTIONIZATION, pt);
+            SetLabelStylesForDraiNote(t);
+        }
+        public static void DrawSCurve(Vector2d vec7, Point2d p1, bool leftOrRight)
+        {
+            var p2 = p1 + vec7;
+            DrawDomePipes(new GLineSegment(p1, p2));
+            if (!Testing) DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
+        }
+        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value, string shadow)
+        {
+            if (!Testing) DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight, value);
+        }
+        public static bool Testing;
+        public static void DrawDoubleWashBasins(Point3d basePt, bool leftOrRight, string value)
+        {
+            if (leftOrRight)
+            {
+                if (value is INSTITUTIONALIZED)
                 {
-                    if (!CollectDrainageData(adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSNEGATIVE)) return;
+                    basePt += new Vector2d(THESAURUSDOWNHEARTED, -PSYCHOPHYSIOLOGICAL).ToVector3d();
                 }
-                var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, DrainageSystemDiagram.commandContext?.ViewModel, out List<int> allNumStoreys, out List<string> allRfStoreys);
-                var allNumStoreyLabels = allNumStoreys.Select(i => i + PHENYLENEDIAMINE).ToList();
-                var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
-                var start = allStoreys.Count - PIEZOELECTRICAL;
-                var end = BATHYDRACONIDAE;
-                var OFFSET_X = HYPERCHOLESTERO;
-                var SPAN_X = QUOTATIONCOLLARED + THESAURUSBEFRIEND + PSYCHOGERIATRIC;
-                var HEIGHT = viewModel?.Params?.StoreySpan ?? THESAURUSRECAPITULATE;
-                var COUNT = pipeGroupItems.Count;
-                var dy = HEIGHT - THESAURUSRECAPITULATE;
-                var __dy = DIETHYLSTILBOESTROL;
-                Dispose();
-                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
-                FlushDQ(adb);
+                DrawBlockReference(QUOTATIONCRIMEAN, basePt,
+                  br =>
+                  {
+                      br.Layer = THESAURUSRECRIMINATION;
+                      br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                      if (br.IsDynamicBlock)
+                      {
+                          br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
+                      }
+                  });
+            }
+            else
+            {
+                DrawBlockReference(QUOTATIONCRIMEAN, basePt,
+                  br =>
+                  {
+                      br.Layer = THESAURUSRECRIMINATION;
+                      br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                      if (br.IsDynamicBlock)
+                      {
+                          br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
+                      }
+                  });
+            }
+        }
+        public static void DrawFloorDrain(Point3d basePt, bool leftOrRight, string value = THESAURUSMELODIOUS)
+        {
+            if (Testing) return;
+            if (leftOrRight)
+            {
+                DrawBlockReference(THESAURUSCOMMUTE, basePt, br =>
+                {
+                    br.Layer = THESAURUSRECRIMINATION;
+                    ByLayer(br);
+                    br.ScaleFactors = new Scale3d(TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                    if (br.IsDynamicBlock)
+                    {
+                        br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
+                    }
+                });
+            }
+            else
+            {
+                DrawBlockReference(THESAURUSCOMMUTE, basePt,
+               br =>
+               {
+                   br.Layer = THESAURUSRECRIMINATION;
+                   ByLayer(br);
+                   br.ScaleFactors = new Scale3d(-TEREBINTHINATED, TEREBINTHINATED, TEREBINTHINATED);
+                   if (br.IsDynamicBlock)
+                   {
+                       br.ObjectId.SetDynBlockValue(THESAURUSCOMPREHEND, value);
+                   }
+               });
             }
         }
         public static void DrawSWaterStoringCurve(Point3d basePt, bool leftOrRight)
@@ -4294,38 +4152,151 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                    });
             }
         }
-    }
-    public class ThDrainageService
-    {
-        public static void ConnectLabelToLabelLine(DrainageGeoData geoData)
+        public static AlignedDimension DrawDimLabel(Point2d pt1, Point2d pt2, Vector2d v, string text, string layer)
         {
-            static bool f(string s)
+            var dim = new AlignedDimension();
+            dim.XLine1Point = pt1.ToPoint3d();
+            dim.XLine2Point = pt2.ToPoint3d();
+            dim.DimLinePoint = (GeoAlgorithm.MidPoint(pt1, pt2) + v).ToPoint3d();
+            dim.DimensionText = text;
+            dim.Layer = layer;
+            ByLayer(dim);
+            DrawEntityLazy(dim);
+            return dim;
+        }
+        public static void DrawCleaningPort(Point3d basePt, bool leftOrRight, double scale)
+        {
+            if (leftOrRight)
             {
-                if (s == null) return THESAURUSESPECIALLY;
-                if (IsMaybeLabelText(s)) return THESAURUSNEGATIVE;
-                return THESAURUSESPECIALLY;
-            }
-            var lines = geoData.LabelLines.Distinct().ToList();
-            var bds = geoData.Labels.Where(x => f(x.Text)).Select(x => x.Boundary).ToList();
-            var lineHs = lines.Where(x => x.IsHorizontal(INTERLINGUISTICS)).ToList();
-            var lineHGs = lineHs.Select(x => x.ToLineString()).ToList();
-            var f1 = GeoFac.CreateContainsSelector(lineHGs);
-            foreach (var bd in bds)
-            {
-                var g = GRect.Create(bd.Center.OffsetY(-INTERLINGUISTICS).OffsetY(-HYPERSENSITIZED), PRAETERNATURALIS, HYPERSENSITIZED);
-                var _lineHGs = f1(g.ToPolygon());
-                var geo = GeoFac.NearestNeighbourGeometryF(_lineHGs)(bd.Center.ToNTSPoint());
-                if (geo == null) continue;
+                DrawBlockReference(MAGNANIMOUSNESS, basePt, scale: scale, cb: br =>
                 {
-                    var line = lineHs[lineHGs.IndexOf(geo)];
-                    var dis = line.Center.GetDistanceTo(bd.Center);
-                    if (dis.InRange(QUOTATIONPATRONAL, PSYCHOPHYSIOLOGICAL) || Math.Abs(line.Center.Y - bd.Center.Y).InRange(THESAURUSCOUNCIL, PSYCHOPHYSIOLOGICAL))
+                    br.Layer = THESAURUSRECRIMINATION;
+                    ByLayer(br);
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(QUOTATIONSORCERER);
+                });
+            }
+            else
+            {
+                DrawBlockReference(MAGNANIMOUSNESS, basePt, scale: scale, cb: br =>
+                {
+                    br.Layer = THESAURUSRECRIMINATION;
+                    ByLayer(br);
+                    br.Rotation = GeoAlgorithm.AngleFromDegree(QUOTATIONSORCERER + THESAURUSDOWNHEARTED);
+                });
+            }
+        }
+        public static void DrawCheckPoint(Point3d basePt, bool leftOrRight)
+        {
+            DrawBlockReference(blkName: QUOTATIONEMBRYOID, basePt: basePt,
+      cb: br =>
+      {
+          if (leftOrRight)
+          {
+              br.ScaleFactors = new Scale3d(-PIEZOELECTRICAL, PIEZOELECTRICAL, PIEZOELECTRICAL);
+          }
+          ByLayer(br);
+          br.Layer = THESAURUSRECRIMINATION;
+      });
+        }
+        public static void DrawDiryWaterWells2(Point2d pt, List<string> values)
+        {
+            var dx = BATHYDRACONIDAE;
+            foreach (var value in values)
+            {
+                DrawDirtyWaterWell(pt.OffsetX(PSYCHOPHYSIOLOGICAL) + new Vector2d(dx, BATHYDRACONIDAE), value);
+                dx += CHLOROFLUOROCARBONS;
+            }
+        }
+        public static void DrawRainWaterWell(Point3d basePt, string value)
+        {
+            DrawBlockReference(blkName: THESAURUSASSIGN, basePt: basePt.OffsetY(-PSYCHOPHYSIOLOGICAL),
+          props: new Dictionary<string, string>() { { CONTEMPTIBILITY, value } },
+          cb: br =>
+          {
+              br.Layer = THESAURUSINSPECTOR;
+              ByLayer(br);
+          });
+        }
+        public static void DrawRainWaterWell(Point2d basePt, string value)
+        {
+            DrawRainWaterWell(basePt.ToPoint3d(), value);
+        }
+        public static void DrawDirtyWaterWell(Point2d basePt, string value)
+        {
+            DrawDirtyWaterWell(basePt.ToPoint3d(), value);
+        }
+        public static void DrawDirtyWaterWell(Point3d basePt, string value)
+        {
+            DrawBlockReference(blkName: QUOTATIONADJACENT, basePt: basePt.OffsetY(-PSYCHOPHYSIOLOGICAL),
+            props: new Dictionary<string, string>() { { CONTEMPTIBILITY, value } },
+            cb: br =>
+            {
+                br.Layer = THESAURUSRECRIMINATION;
+                ByLayer(br);
+            });
+        }
+        public static void DrawDiryWaterWells1(Point2d pt, List<string> values, bool isRainWaterWell = THESAURUSESPECIALLY)
+        {
+            if (values == null) return;
+            if (values.Count == PIEZOELECTRICAL)
+            {
+                var dy = -THESAURUSMALODOROUS;
+                if (!isRainWaterWell)
+                {
+                    DrawDirtyWaterWell(pt.OffsetY(dy), values[BATHYDRACONIDAE]);
+                }
+                else
+                {
+                    DrawRainWaterWell(pt.OffsetY(dy), values[BATHYDRACONIDAE]);
+                }
+            }
+            else if (values.Count >= TEREBINTHINATED)
+            {
+                var pts = GetBasePoints(pt.OffsetX(-CHLOROFLUOROCARBONS), TEREBINTHINATED, values.Count, CHLOROFLUOROCARBONS, CHLOROFLUOROCARBONS).ToList();
+                for (int i = BATHYDRACONIDAE; i < values.Count; i++)
+                {
+                    if (!isRainWaterWell)
                     {
-                        geoData.LabelLines.Add(new GLineSegment(bd.Center, line.Center).Extend(THESAURUSCOUNCIL));
+                        DrawDirtyWaterWell(pts[i], values[i]);
+                    }
+                    else
+                    {
+                        DrawRainWaterWell(pts[i], values[i]);
                     }
                 }
             }
         }
+        public static IEnumerable<Point2d> GetBasePoints(Point2d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = BATHYDRACONIDAE, j = BATHYDRACONIDAE;
+            for (int k = BATHYDRACONIDAE; k < num; k++)
+            {
+                yield return new Point2d(basePoint.X + i * width, basePoint.Y - j * height);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = BATHYDRACONIDAE;
+                }
+            }
+        }
+        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = BATHYDRACONIDAE, j = BATHYDRACONIDAE;
+            for (int k = BATHYDRACONIDAE; k < num; k++)
+            {
+                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, BATHYDRACONIDAE);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = BATHYDRACONIDAE;
+                }
+            }
+        }
+    }
+    public class ThDrainageService
+    {
         public static void PreFixGeoData(DrainageGeoData geoData)
         {
             foreach (var ct in geoData.Labels)
@@ -4423,121 +4394,129 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 geoData.VerticalPipes = pipes.Where(x => x.UserData == null).Select(pipes).ToList(_pipes);
             }
         }
+        public static void ConnectLabelToLabelLine(DrainageGeoData geoData)
+        {
+            static bool f(string s)
+            {
+                if (s == null) return THESAURUSESPECIALLY;
+                if (IsMaybeLabelText(s)) return THESAURUSNEGATIVE;
+                return THESAURUSESPECIALLY;
+            }
+            var lines = geoData.LabelLines.Distinct().ToList();
+            var bds = geoData.Labels.Where(x => f(x.Text)).Select(x => x.Boundary).ToList();
+            var lineHs = lines.Where(x => x.IsHorizontal(INTERLINGUISTICS)).ToList();
+            var lineHGs = lineHs.Select(x => x.ToLineString()).ToList();
+            var f1 = GeoFac.CreateContainsSelector(lineHGs);
+            foreach (var bd in bds)
+            {
+                var g = GRect.Create(bd.Center.OffsetY(-INTERLINGUISTICS).OffsetY(-HYPERSENSITIZED), PRAETERNATURALIS, HYPERSENSITIZED);
+                var _lineHGs = f1(g.ToPolygon());
+                var geo = GeoFac.NearestNeighbourGeometryF(_lineHGs)(bd.Center.ToNTSPoint());
+                if (geo == null) continue;
+                {
+                    var line = lineHs[lineHGs.IndexOf(geo)];
+                    var dis = line.Center.GetDistanceTo(bd.Center);
+                    if (dis.InRange(QUOTATIONPATRONAL, PSYCHOPHYSIOLOGICAL) || Math.Abs(line.Center.Y - bd.Center.Y).InRange(THESAURUSCOUNCIL, PSYCHOPHYSIOLOGICAL))
+                    {
+                        geoData.LabelLines.Add(new GLineSegment(bd.Center, line.Center).Extend(THESAURUSCOUNCIL));
+                    }
+                }
+            }
+        }
     }
     public class ThDrainageSystemServiceGeoCollector3
     {
-        List<GRect> washingMachines => geoData.WashingMachines;
-        List<GRect> wrappingPipes => geoData.WrappingPipes;
-        const string XREF_LAYER = THESAURUSNUTRITIOUS;
-        readonly List<string> basinNames = new List<string>() { UNINTERMITTENTLY, THESAURUSAPPETIZING, DIPTEROCARPACEAE, QUOTATIONDENNIS, PALAEOICHTHYOLOGIST, THESAURUSBONDAGE, THESAURUSINQUIRY };
+        public AcadDatabase adb;
         public DrainageGeoData geoData;
+        List<Polygon> roomPolygons;
+        List<CText> roomNames;
+        List<KeyValuePair<string, Geometry>> roomData => geoData.RoomData;
+        List<GLineSegment> labelLines => geoData.LabelLines;
+        List<CText> cts => geoData.Labels;
+        List<GLineSegment> dlines => geoData.DLines;
+        List<GLineSegment> vlines => geoData.VLines;
+        List<GLineSegment> wlines => geoData.WLines;
         List<GRect> pipes => geoData.VerticalPipes;
+        List<GRect> downwaterPorts => geoData.DownWaterPorts;
+        List<GRect> wrappingPipes => geoData.WrappingPipes;
+        List<GRect> floorDrains => geoData.FloorDrains;
+        List<Point2d> sideFloorDrains => geoData.SideFloorDrains;
+        List<GRect> waterPorts => geoData.WaterPorts;
+        List<GRect> waterWells => geoData.WaterWells;
+        List<string> waterPortLabels => geoData.WaterPortLabels;
+        List<GRect> storeys => geoData.Storeys;
+        List<GRect> washingMachines => geoData.WashingMachines;
+        List<GRect> mopPools => geoData.MopPools;
+        List<GRect> basins => geoData.Basins;
+        List<GRect> pipeKillers => geoData.PipeKillers;
+        List<GRect> rainPortSymbols => geoData.RainPortSymbols;
+        List<KeyValuePair<Point2d, string>> wrappingPipeRadius => geoData.WrappingPipeRadius;
+        public void CollectStoreys(CommandContext ctx)
+        {
+            storeys.AddRange(ctx.StoreyContext.StoreyInfos.Select(x => x.Boundary));
+        }
+        public void CollectStoreys(Point3dCollection range)
+        {
+            var geo = range?.ToGRect().ToPolygon();
+            foreach (var br in GetStoreyBlockReferences(adb))
+            {
+                var bd = br.Bounds.ToGRect();
+                if (geo != null)
+                {
+                    if (!geo.Contains(bd.ToPolygon()))
+                    {
+                        continue;
+                    }
+                }
+                storeys.Add(bd);
+            }
+        }
+        public static IEnumerable<Entity> EnumerateVisibleEntites(AcadDatabase adb, BlockReference br)
+        {
+            var q = br.ExplodeToDBObjectCollection().OfType<Entity>().Where(e => e.Visible && e.Bounds.HasValue)
+                .Where(e =>
+                {
+                    if (e.LayerId.IsNull) return THESAURUSESPECIALLY;
+                    var layer = adb.Element<LayerTableRecord>(e.LayerId);
+                    return !layer.IsFrozen && !layer.IsHidden && !layer.IsOff;
+                });
+            var xclip = br.XClipInfo();
+            if (xclip.IsValid)
+            {
+                var gf = xclip.PreparedPolygon;
+                return q.Where(e => gf.Intersects(e.Bounds.ToGRect().ToPolygon()));
+            }
+            else
+            {
+                return q;
+            }
+        }
+        const int distinguishDiameter = THESAURUSDISPUTE;
         public static string GetEffectiveLayer(string entityLayer)
         {
             return GetEffectiveName(entityLayer);
         }
-        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, Action f)
+        public static string GetEffectiveName(string str)
         {
-            if (seg.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(seg.ToLineString(), f));
+            str ??= THESAURUSAMENITY;
+            var i = str.LastIndexOf(THESAURUSSLOPPY);
+            if (i >= BATHYDRACONIDAE && !str.EndsWith(THESAURUSMAJESTY))
+            {
+                str = str.Substring(i + PIEZOELECTRICAL);
+            }
+            i = str.LastIndexOf(THESAURUSRECKON);
+            if (i >= BATHYDRACONIDAE && !str.EndsWith(THESAURUSMALICE))
+            {
+                str = str.Substring(i + PIEZOELECTRICAL);
+            }
+            return str;
         }
-        List<GLineSegment> labelLines => geoData.LabelLines;
-        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, Action f)
+        public static string GetEffectiveBRName(string brName)
         {
-            if (r.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(r.ToPolygon(), f));
-        }
-        HashSet<Handle> ok_group_handles;
-        public void CollectEntities()
-        {
-            if (!CollectRoomDataAtCurrentModelSpaceOnly)
-            {
-                roomNames ??= new List<CText>();
-                roomPolygons ??= new List<Polygon>();
-            }
-            if (HandleGroupAtCurrentModelSpaceOnly)
-            {
-                foreach (var g in adb.Groups)
-                {
-                    var lst = new List<GLineSegment>();
-                    foreach (var id in g.GetAllEntityIds())
-                    {
-                        var entity = adb.Element<Entity>(id);
-                        var dxfName = entity.GetRXClass().DxfName.ToUpper();
-                        if (dxfName is THESAURUSDICTIONARY && GetEffectiveLayer(entity.Layer) is THESAURUSOBJECTIVELY)
-                        {
-                            dynamic o = entity;
-                            var seg = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint);
-                            lst.Add(seg);
-                        }
-                    }
-                    lst = lst.Where(x => x.IsValid).Distinct().ToList();
-                    geoData.DLines.AddRange(TempGeoFac.GetMinConnSegs(lst.Where(x => x.IsValid).Distinct().ToList()));
-                }
-            }
-            foreach (var entity in adb.ModelSpace.OfType<Entity>())
-            {
-                {
-                    if (entity.Layer is THESAURUSFAMILIAR)
-                    {
-                        var bd = entity.Bounds.ToGRect();
-                        if (bd.IsValid)
-                        {
-                            washingMachines.Add(bd);
-                        }
-                        return;
-                    }
-                }
-                if (entity is BlockReference br)
-                {
-                    if (!br.BlockTableRecord.IsValid) continue;
-                    var btr = adb.Blocks.Element(br.BlockTableRecord);
-                    var _fs = new List<KeyValuePair<Geometry, Action>>();
-                    Action f = null;
-                    try
-                    {
-                        isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
-                        handleBlockReference(br, Matrix3d.Identity, _fs);
-                    }
-                    finally
-                    {
-                        isInXref = THESAURUSESPECIALLY;
-                    }
-                    {
-                        var info = br.XClipInfo();
-                        if (info.IsValid)
-                        {
-                            info.TransformBy(br.BlockTransform);
-                            var gf = info.PreparedPolygon;
-                            foreach (var kv in _fs)
-                            {
-                                if (gf.Intersects(kv.Key))
-                                {
-                                    f += kv.Value;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (var kv in _fs)
-                            {
-                                f += kv.Value;
-                            }
-                        }
-                        f?.Invoke();
-                    }
-                }
-                else
-                {
-                    var _fs = new List<KeyValuePair<Geometry, Action>>();
-                    handleEntity(entity, Matrix3d.Identity, _fs);
-                    foreach (var kv in _fs)
-                    {
-                        kv.Value();
-                    }
-                }
-            }
+            return GetEffectiveName(brName);
         }
         static bool isDrainageLayer(string layer) => GetEffectiveLayer(layer).Contains(THESAURUSSTENCH); 
-        bool isInXref;
+        HashSet<Handle> ok_group_handles;
         private void handleEntity(Entity entity, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
         {
             if (!IsLayerVisible(entity)) return;
@@ -4874,138 +4853,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 return;
             }
         }
-        public void CollectStoreys(Point3dCollection range)
-        {
-            var geo = range?.ToGRect().ToPolygon();
-            foreach (var br in GetStoreyBlockReferences(adb))
-            {
-                var bd = br.Bounds.ToGRect();
-                if (geo != null)
-                {
-                    if (!geo.Contains(bd.ToPolygon()))
-                    {
-                        continue;
-                    }
-                }
-                storeys.Add(bd);
-            }
-        }
-        List<GRect> floorDrains => geoData.FloorDrains;
-        public static string GetEffectiveName(string str)
-        {
-            str ??= THESAURUSAMENITY;
-            var i = str.LastIndexOf(THESAURUSSLOPPY);
-            if (i >= BATHYDRACONIDAE && !str.EndsWith(THESAURUSMAJESTY))
-            {
-                str = str.Substring(i + PIEZOELECTRICAL);
-            }
-            i = str.LastIndexOf(THESAURUSRECKON);
-            if (i >= BATHYDRACONIDAE && !str.EndsWith(THESAURUSMALICE))
-            {
-                str = str.Substring(i + PIEZOELECTRICAL);
-            }
-            return str;
-        }
-        List<GRect> pipeKillers => geoData.PipeKillers;
-        private static void reg(List<KeyValuePair<Geometry, Action>> fs, CText ct, List<CText> lst)
-        {
-            reg(fs, ct, () => { lst.Add(ct); });
-        }
-        List<GRect> basins => geoData.Basins;
-        List<GRect> downwaterPorts => geoData.DownWaterPorts;
-        List<GRect> rainPortSymbols => geoData.RainPortSymbols;
-        public AcadDatabase adb;
-        List<Point2d> sideFloorDrains => geoData.SideFloorDrains;
-        List<GRect> waterWells => geoData.WaterWells;
-        static bool HandleGroupAtCurrentModelSpaceOnly = THESAURUSESPECIALLY;
-        const int distinguishDiameter = THESAURUSDISPUTE;
-        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, List<GRect> lst)
-        {
-            if (r.IsValid) reg(fs, r, () => { lst.Add(r); });
-        }
-        List<KeyValuePair<Point2d, string>> wrappingPipeRadius => geoData.WrappingPipeRadius;
-        readonly List<string> washingMachinesNames = new List<string>() { THESAURUSBRACKET, CATEGOREMATICALLY };
-        List<string> waterPortLabels => geoData.WaterPortLabels;
-        public void CollectRoomData()
-        {
-            if (CollectRoomDataAtCurrentModelSpaceOnly)
-            {
-                roomData.AddRange(DrainageService.CollectRoomData(adb));
-            }
-            else
-            {
-                var ranges = roomPolygons;
-                var names = roomNames;
-                var f = GeoFac.CreateIntersectsSelector(ranges);
-                var list = roomData;
-                foreach (var name in names)
-                {
-                    if (name.Boundary.IsValid)
-                    {
-                        var l = f(name.Boundary.ToPolygon());
-                        if (l.Count == PIEZOELECTRICAL)
-                        {
-                            list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[BATHYDRACONIDAE]));
-                        }
-                        else
-                        {
-                            foreach (var geo in l)
-                            {
-                                DrawGeometryLazy(geo);
-                                ranges.Remove(geo);
-                            }
-                        }
-                    }
-                }
-                foreach (var range in ranges.Except(list.Select(kv => kv.Value)))
-                {
-                    list.Add(new KeyValuePair<string, Geometry>(THESAURUSAMENITY, range));
-                }
-            }
-        }
-        List<CText> cts => geoData.Labels;
-        public static IEnumerable<Entity> EnumerateVisibleEntites(AcadDatabase adb, BlockReference br)
-        {
-            var q = br.ExplodeToDBObjectCollection().OfType<Entity>().Where(e => e.Visible && e.Bounds.HasValue)
-                .Where(e =>
-                {
-                    if (e.LayerId.IsNull) return THESAURUSESPECIALLY;
-                    var layer = adb.Element<LayerTableRecord>(e.LayerId);
-                    return !layer.IsFrozen && !layer.IsHidden && !layer.IsOff;
-                });
-            var xclip = br.XClipInfo();
-            if (xclip.IsValid)
-            {
-                var gf = xclip.PreparedPolygon;
-                return q.Where(e => gf.Intersects(e.Bounds.ToGRect().ToPolygon()));
-            }
-            else
-            {
-                return q;
-            }
-        }
-        private static bool IsWantedBlock(BlockTableRecord blockTableRecord)
-        {
-            if (blockTableRecord.IsDynamicBlock)
-            {
-                return THESAURUSESPECIALLY;
-            }
-            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
-            {
-                return THESAURUSESPECIALLY;
-            }
-            if (!blockTableRecord.Explodable)
-            {
-                return THESAURUSESPECIALLY;
-            }
-            return THESAURUSNEGATIVE;
-        }
-        List<CText> roomNames;
-        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, List<GLineSegment> lst)
-        {
-            if (seg.IsValid) reg(fs, seg, () => { lst.Add(seg); });
-        }
-        static bool CollectRoomDataAtCurrentModelSpaceOnly = THESAURUSESPECIALLY;
+        const string XREF_LAYER = THESAURUSNUTRITIOUS;
         private void handleBlockReference(BlockReference br, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
         {
             if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
@@ -5193,38 +5041,183 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 fs.AddRange(lst);
             }
         }
-        List<GRect> mopPools => geoData.MopPools;
-        List<GLineSegment> vlines => geoData.VLines;
-        readonly List<string> killerNames = new List<string>() { THESAURUSINQUIRY, INOMETHYLCYCLOH, EXEMPLIFICATIONAL, CALLITRICHACEAE, THESAURUSPROTECTION, THESAURUSDISAPPOINTMENT, THESAURUSDISPERSE, THESAURUSAFFILIATE };
-        List<GLineSegment> dlines => geoData.DLines;
+        readonly List<string> basinNames = new List<string>() { UNINTERMITTENTLY, THESAURUSAPPETIZING, DIPTEROCARPACEAE, QUOTATIONDENNIS, PALAEOICHTHYOLOGIST, THESAURUSBONDAGE, THESAURUSINQUIRY };
         readonly List<string> mopPoolNames = new List<string>() { THESAURUSCOMPETITOR, };
-        List<KeyValuePair<string, Geometry>> roomData => geoData.RoomData;
-        List<GLineSegment> wlines => geoData.WLines;
-        public static string GetEffectiveBRName(string brName)
+        readonly List<string> killerNames = new List<string>() { THESAURUSINQUIRY, INOMETHYLCYCLOH, EXEMPLIFICATIONAL, CALLITRICHACEAE, THESAURUSPROTECTION, THESAURUSDISAPPOINTMENT, THESAURUSDISPERSE, THESAURUSAFFILIATE };
+        readonly List<string> washingMachinesNames = new List<string>() { THESAURUSBRACKET, CATEGOREMATICALLY };
+        bool isInXref;
+        static bool HandleGroupAtCurrentModelSpaceOnly = THESAURUSESPECIALLY;
+        public void CollectEntities()
         {
-            return GetEffectiveName(brName);
+            if (!CollectRoomDataAtCurrentModelSpaceOnly)
+            {
+                roomNames ??= new List<CText>();
+                roomPolygons ??= new List<Polygon>();
+            }
+            if (HandleGroupAtCurrentModelSpaceOnly)
+            {
+                foreach (var g in adb.Groups)
+                {
+                    var lst = new List<GLineSegment>();
+                    foreach (var id in g.GetAllEntityIds())
+                    {
+                        var entity = adb.Element<Entity>(id);
+                        var dxfName = entity.GetRXClass().DxfName.ToUpper();
+                        if (dxfName is THESAURUSDICTIONARY && GetEffectiveLayer(entity.Layer) is THESAURUSOBJECTIVELY)
+                        {
+                            dynamic o = entity;
+                            var seg = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint);
+                            lst.Add(seg);
+                        }
+                    }
+                    lst = lst.Where(x => x.IsValid).Distinct().ToList();
+                    geoData.DLines.AddRange(TempGeoFac.GetMinConnSegs(lst.Where(x => x.IsValid).Distinct().ToList()));
+                }
+            }
+            foreach (var entity in adb.ModelSpace.OfType<Entity>())
+            {
+                {
+                    if (entity.Layer is THESAURUSFAMILIAR)
+                    {
+                        var bd = entity.Bounds.ToGRect();
+                        if (bd.IsValid)
+                        {
+                            washingMachines.Add(bd);
+                        }
+                        return;
+                    }
+                }
+                if (entity is BlockReference br)
+                {
+                    if (!br.BlockTableRecord.IsValid) continue;
+                    var btr = adb.Blocks.Element(br.BlockTableRecord);
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    Action f = null;
+                    try
+                    {
+                        isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
+                        handleBlockReference(br, Matrix3d.Identity, _fs);
+                    }
+                    finally
+                    {
+                        isInXref = THESAURUSESPECIALLY;
+                    }
+                    {
+                        var info = br.XClipInfo();
+                        if (info.IsValid)
+                        {
+                            info.TransformBy(br.BlockTransform);
+                            var gf = info.PreparedPolygon;
+                            foreach (var kv in _fs)
+                            {
+                                if (gf.Intersects(kv.Key))
+                                {
+                                    f += kv.Value;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var kv in _fs)
+                            {
+                                f += kv.Value;
+                            }
+                        }
+                        f?.Invoke();
+                    }
+                }
+                else
+                {
+                    var _fs = new List<KeyValuePair<Geometry, Action>>();
+                    handleEntity(entity, Matrix3d.Identity, _fs);
+                    foreach (var kv in _fs)
+                    {
+                        kv.Value();
+                    }
+                }
+            }
         }
-        public void CollectStoreys(CommandContext ctx)
+        private static bool IsWantedBlock(BlockTableRecord blockTableRecord)
         {
-            storeys.AddRange(ctx.StoreyContext.StoreyInfos.Select(x => x.Boundary));
+            if (blockTableRecord.IsDynamicBlock)
+            {
+                return THESAURUSESPECIALLY;
+            }
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+            {
+                return THESAURUSESPECIALLY;
+            }
+            if (!blockTableRecord.Explodable)
+            {
+                return THESAURUSESPECIALLY;
+            }
+            return THESAURUSNEGATIVE;
         }
-        List<GRect> storeys => geoData.Storeys;
-        List<GRect> waterPorts => geoData.WaterPorts;
-        List<Polygon> roomPolygons;
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, Action f)
+        {
+            if (seg.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(seg.ToLineString(), f));
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GLineSegment seg, List<GLineSegment> lst)
+        {
+            if (seg.IsValid) reg(fs, seg, () => { lst.Add(seg); });
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, Action f)
+        {
+            if (r.IsValid) fs.Add(new KeyValuePair<Geometry, Action>(r.ToPolygon(), f));
+        }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, GRect r, List<GRect> lst)
+        {
+            if (r.IsValid) reg(fs, r, () => { lst.Add(r); });
+        }
         private static void reg(List<KeyValuePair<Geometry, Action>> fs, CText ct, Action f)
         {
             reg(fs, ct.Boundary, f);
         }
+        private static void reg(List<KeyValuePair<Geometry, Action>> fs, CText ct, List<CText> lst)
+        {
+            reg(fs, ct, () => { lst.Add(ct); });
+        }
+        public void CollectRoomData()
+        {
+            if (CollectRoomDataAtCurrentModelSpaceOnly)
+            {
+                roomData.AddRange(DrainageService.CollectRoomData(adb));
+            }
+            else
+            {
+                var ranges = roomPolygons;
+                var names = roomNames;
+                var f = GeoFac.CreateIntersectsSelector(ranges);
+                var list = roomData;
+                foreach (var name in names)
+                {
+                    if (name.Boundary.IsValid)
+                    {
+                        var l = f(name.Boundary.ToPolygon());
+                        if (l.Count == PIEZOELECTRICAL)
+                        {
+                            list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[BATHYDRACONIDAE]));
+                        }
+                        else
+                        {
+                            foreach (var geo in l)
+                            {
+                                DrawGeometryLazy(geo);
+                                ranges.Remove(geo);
+                            }
+                        }
+                    }
+                }
+                foreach (var range in ranges.Except(list.Select(kv => kv.Value)))
+                {
+                    list.Add(new KeyValuePair<string, Geometry>(THESAURUSAMENITY, range));
+                }
+            }
+        }
+        static bool CollectRoomDataAtCurrentModelSpaceOnly = THESAURUSESPECIALLY;
     }
     public class DrainageService
     {
-        public static void CollectGeoData(Point3dCollection range, AcadDatabase adb, DrainageGeoData geoData)
-        {
-            var cl = new ThDrainageSystemServiceGeoCollector3() { adb = adb, geoData = geoData };
-            cl.CollectStoreys(range);
-            cl.CollectEntities();
-            cl.CollectRoomData();
-        }
         public static void CollectGeoData(AcadDatabase adb, DrainageGeoData geoData, CommandContext ctx)
         {
             var cl = new ThDrainageSystemServiceGeoCollector3() { adb = adb, geoData = geoData };
@@ -5232,13 +5225,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             cl.CollectEntities();
             cl.CollectRoomData();
         }
-        public static Geometry CreateXGeoRect(GRect r)
+        public static void CollectGeoData(Point3dCollection range, AcadDatabase adb, DrainageGeoData geoData)
         {
-            return new MultiLineString(new LineString[] {
-                r.ToLinearRing(),
-                new LineString(new Coordinate[] { r.LeftTop.ToNTSCoordinate(), r.RightButtom.ToNTSCoordinate() }),
-                new LineString(new Coordinate[] { r.LeftButtom.ToNTSCoordinate(), r.RightTop.ToNTSCoordinate() })
-            });
+            var cl = new ThDrainageSystemServiceGeoCollector3() { adb = adb, geoData = geoData };
+            cl.CollectStoreys(range);
+            cl.CollectEntities();
+            cl.CollectRoomData();
         }
         static bool AllNotEmpty(params List<Geometry>[] plss)
         {
@@ -5247,6 +5239,59 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 if (pls.Count == BATHYDRACONIDAE) return THESAURUSESPECIALLY;
             }
             return THESAURUSNEGATIVE;
+        }
+        public static List<KeyValuePair<string, Geometry>> CollectRoomData(AcadDatabase adb)
+        {
+            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer?.ToUpper() is THESAURUSHUMORIST or THESAURUSDEFAME)
+                .SelectNotNull(ConvertToPolygon).ToList();
+            var names = adb.ModelSpace.Where(x => x.Layer?.ToUpper() is THESAURUSCOMPLEX or THESAURUSLIBIDO).SelectNotNull(entity =>
+            {
+                if (entity is MText mtx)
+                {
+                    return new CText() { Text = mtx.Text, Boundary = mtx.ExplodeToDBObjectCollection().OfType<DBText>().First().Bounds.ToGRect() };
+                }
+                if (entity is DBText dbt)
+                {
+                    return new CText() { Text = dbt.TextString, Boundary = dbt.Bounds.ToGRect() };
+                }
+                var dxfName = entity.GetRXClass().DxfName.ToUpper();
+                if (dxfName == THESAURUSMANIFEST)
+                {
+                    dynamic o = entity.AcadObject;
+                    string text = o.Text;
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        return new CText() { Text = text, Boundary = entity.Bounds.ToGRect() };
+                    }
+                }
+                return null;
+            }).ToList();
+            var f = GeoFac.CreateIntersectsSelector(ranges);
+            var list = new List<KeyValuePair<string, Geometry>>(names.Count);
+            foreach (var name in names)
+            {
+                if (name.Boundary.IsValid)
+                {
+                    var l = f(name.Boundary.ToPolygon());
+                    if (l.Count == PIEZOELECTRICAL)
+                    {
+                        list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[BATHYDRACONIDAE]));
+                    }
+                    else
+                    {
+                        foreach (var geo in l)
+                        {
+                            DrawGeometryLazy(geo);
+                            ranges.Remove(geo);
+                        }
+                    }
+                }
+            }
+            foreach (var range in ranges.Except(list.Select(kv => kv.Value)))
+            {
+                list.Add(new KeyValuePair<string, Geometry>(THESAURUSAMENITY, range));
+            }
+            return list;
         }
         public static void CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out string logString, out List<DrainageDrawingData> drDatas)
         {
@@ -6329,12 +6374,109 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             logString = sb.ToString();
         }
+        public static Geometry CreateXGeoRect(GRect r)
+        {
+            return new MultiLineString(new LineString[] {
+                r.ToLinearRing(),
+                new LineString(new Coordinate[] { r.LeftTop.ToNTSCoordinate(), r.RightButtom.ToNTSCoordinate() }),
+                new LineString(new Coordinate[] { r.LeftButtom.ToNTSCoordinate(), r.RightTop.ToNTSCoordinate() })
+            });
+        }
+        const double MAX_SHORTTRANSLATOR_DISTANCE = DIETHYLSTILBOESTROL;
+        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
+        {
+            return source1.Concat(source2).ToList();
+        }
+        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2, IEnumerable<T> source3)
+        {
+            return source1.Concat(source2).Concat(source3).ToList();
+        }
+        public static HashSet<Geometry> GetFLsWhereSupportingFloorDrainUnderWaterPoint(List<Geometry> FLs, List<Geometry> kitchens, List<Geometry> floorDrains, List<Geometry> washMachines)
+        {
+            var f = GeoFac.CreateIntersectsSelector(ToList(floorDrains, washMachines));
+            var hs = new HashSet<Geometry>();
+            {
+                var flsf = GeoFac.CreateIntersectsSelector(FLs);
+                foreach (var kitchen in kitchens)
+                {
+                    var lst = flsf(kitchen);
+                    if (lst.Count > BATHYDRACONIDAE)
+                    {
+                        if (f(kitchen).Count > BATHYDRACONIDAE)
+                        {
+                            hs.AddRange(lst);
+                        }
+                    }
+                }
+            }
+            return hs;
+        }
+        static List<GLineSegment> ExplodeGLineSegments(Geometry geo)
+        {
+            static IEnumerable<GLineSegment> enumerate(Geometry geo)
+            {
+                if (geo is LineString ls)
+                {
+                    if (ls.NumPoints == TEREBINTHINATED) yield return new GLineSegment(ls[BATHYDRACONIDAE].ToPoint2d(), ls[PIEZOELECTRICAL].ToPoint2d());
+                    else if (ls.NumPoints > TEREBINTHINATED)
+                    {
+                        for (int i = BATHYDRACONIDAE; i < ls.NumPoints - PIEZOELECTRICAL; i++)
+                        {
+                            yield return new GLineSegment(ls[i].ToPoint2d(), ls[i + PIEZOELECTRICAL].ToPoint2d());
+                        }
+                    }
+                }
+                else if (geo is GeometryCollection colle)
+                {
+                    foreach (var _geo in colle.Geometries)
+                    {
+                        foreach (var __geo in enumerate(_geo))
+                        {
+                            yield return __geo;
+                        }
+                    }
+                }
+            }
+            return enumerate(geo).ToList();
+        }
         static List<Point2d> GetEndPoints(Geometry start, List<Point2d> points, List<Geometry> dlines)
         {
             points = points.Distinct().ToList();
             var pts = points.Select(x => new GCircle(x, DOLICHOCEPHALOUS).ToCirclePolygon(PARALLELOGRAMMIC)).ToList();
             var dlinesGeo = GeoFac.CreateGeometry(GeoFac.CreateIntersectsSelector(dlines)(start));
             return GeoFac.CreateIntersectsSelector(pts)(dlinesGeo).Where(x => !x.Intersects(start)).Select(pts).ToList(points);
+        }
+        public static List<Geometry> GetKitchenAndBalconyBothFLs(List<Geometry> FLs, List<Geometry> kitchens, List<Geometry> nonames, List<Geometry> balconies, List<Point2d> pts, List<Geometry> dlines)
+        {
+            var kitchensGeo = GeoFac.CreateGeometryEx(kitchens);
+            var list = new List<Geometry>(FLs.Count);
+            {
+                return list;
+            }
+            foreach (var fl in FLs)
+            {
+                List<Point2d> endpoints = null;
+                Geometry endpointsGeo = null;
+                List<Point2d> _GetEndPoints()
+                {
+                    return GetEndPoints(fl, pts, dlines);
+                }
+                bool test1()
+                {
+                    return GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), THESAURUSBEFRIEND, THESAURUSADMISSION).Intersects(kitchensGeo);
+                }
+                bool test2()
+                {
+                    endpoints ??= _GetEndPoints();
+                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints.Select(x => x.ToNTSPoint()));
+                    return endpointsGeo.Intersects(GeoFac.CreateGeometryEx(ToList(nonames, balconies)));
+                }
+                if (test1() && test2())
+                {
+                    list.Add(fl);
+                }
+            }
+            return list;
         }
         public static List<Geometry> GetKitchenOnlyFLs(List<Geometry> FLs,
             List<Geometry> kitchens,
@@ -6436,160 +6578,27 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             return list;
         }
-        public static List<KeyValuePair<string, Geometry>> CollectRoomData(AcadDatabase adb)
-        {
-            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer?.ToUpper() is THESAURUSHUMORIST or THESAURUSDEFAME)
-                .SelectNotNull(ConvertToPolygon).ToList();
-            var names = adb.ModelSpace.Where(x => x.Layer?.ToUpper() is THESAURUSCOMPLEX or THESAURUSLIBIDO).SelectNotNull(entity =>
-            {
-                if (entity is MText mtx)
-                {
-                    return new CText() { Text = mtx.Text, Boundary = mtx.ExplodeToDBObjectCollection().OfType<DBText>().First().Bounds.ToGRect() };
-                }
-                if (entity is DBText dbt)
-                {
-                    return new CText() { Text = dbt.TextString, Boundary = dbt.Bounds.ToGRect() };
-                }
-                var dxfName = entity.GetRXClass().DxfName.ToUpper();
-                if (dxfName == THESAURUSMANIFEST)
-                {
-                    dynamic o = entity.AcadObject;
-                    string text = o.Text;
-                    if (!string.IsNullOrWhiteSpace(text))
-                    {
-                        return new CText() { Text = text, Boundary = entity.Bounds.ToGRect() };
-                    }
-                }
-                return null;
-            }).ToList();
-            var f = GeoFac.CreateIntersectsSelector(ranges);
-            var list = new List<KeyValuePair<string, Geometry>>(names.Count);
-            foreach (var name in names)
-            {
-                if (name.Boundary.IsValid)
-                {
-                    var l = f(name.Boundary.ToPolygon());
-                    if (l.Count == PIEZOELECTRICAL)
-                    {
-                        list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[BATHYDRACONIDAE]));
-                    }
-                    else
-                    {
-                        foreach (var geo in l)
-                        {
-                            DrawGeometryLazy(geo);
-                            ranges.Remove(geo);
-                        }
-                    }
-                }
-            }
-            foreach (var range in ranges.Except(list.Select(kv => kv.Value)))
-            {
-                list.Add(new KeyValuePair<string, Geometry>(THESAURUSAMENITY, range));
-            }
-            return list;
-        }
-        const double MAX_SHORTTRANSLATOR_DISTANCE = DIETHYLSTILBOESTROL;
-        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2)
-        {
-            return source1.Concat(source2).ToList();
-        }
-        static List<GLineSegment> ExplodeGLineSegments(Geometry geo)
-        {
-            static IEnumerable<GLineSegment> enumerate(Geometry geo)
-            {
-                if (geo is LineString ls)
-                {
-                    if (ls.NumPoints == TEREBINTHINATED) yield return new GLineSegment(ls[BATHYDRACONIDAE].ToPoint2d(), ls[PIEZOELECTRICAL].ToPoint2d());
-                    else if (ls.NumPoints > TEREBINTHINATED)
-                    {
-                        for (int i = BATHYDRACONIDAE; i < ls.NumPoints - PIEZOELECTRICAL; i++)
-                        {
-                            yield return new GLineSegment(ls[i].ToPoint2d(), ls[i + PIEZOELECTRICAL].ToPoint2d());
-                        }
-                    }
-                }
-                else if (geo is GeometryCollection colle)
-                {
-                    foreach (var _geo in colle.Geometries)
-                    {
-                        foreach (var __geo in enumerate(_geo))
-                        {
-                            yield return __geo;
-                        }
-                    }
-                }
-            }
-            return enumerate(geo).ToList();
-        }
-        public static List<T> ToList<T>(IEnumerable<T> source1, IEnumerable<T> source2, IEnumerable<T> source3)
-        {
-            return source1.Concat(source2).Concat(source3).ToList();
-        }
-        public static HashSet<Geometry> GetFLsWhereSupportingFloorDrainUnderWaterPoint(List<Geometry> FLs, List<Geometry> kitchens, List<Geometry> floorDrains, List<Geometry> washMachines)
-        {
-            var f = GeoFac.CreateIntersectsSelector(ToList(floorDrains, washMachines));
-            var hs = new HashSet<Geometry>();
-            {
-                var flsf = GeoFac.CreateIntersectsSelector(FLs);
-                foreach (var kitchen in kitchens)
-                {
-                    var lst = flsf(kitchen);
-                    if (lst.Count > BATHYDRACONIDAE)
-                    {
-                        if (f(kitchen).Count > BATHYDRACONIDAE)
-                        {
-                            hs.AddRange(lst);
-                        }
-                    }
-                }
-            }
-            return hs;
-        }
-        public static List<Geometry> GetKitchenAndBalconyBothFLs(List<Geometry> FLs, List<Geometry> kitchens, List<Geometry> nonames, List<Geometry> balconies, List<Point2d> pts, List<Geometry> dlines)
-        {
-            var kitchensGeo = GeoFac.CreateGeometryEx(kitchens);
-            var list = new List<Geometry>(FLs.Count);
-            {
-                return list;
-            }
-            foreach (var fl in FLs)
-            {
-                List<Point2d> endpoints = null;
-                Geometry endpointsGeo = null;
-                List<Point2d> _GetEndPoints()
-                {
-                    return GetEndPoints(fl, pts, dlines);
-                }
-                bool test1()
-                {
-                    return GeoFac.CreateCirclePolygon(fl.GetCenter().ToPoint3d(), THESAURUSBEFRIEND, THESAURUSADMISSION).Intersects(kitchensGeo);
-                }
-                bool test2()
-                {
-                    endpoints ??= _GetEndPoints();
-                    endpointsGeo ??= GeoFac.CreateGeometry(endpoints.Select(x => x.ToNTSPoint()));
-                    return endpointsGeo.Intersects(GeoFac.CreateGeometryEx(ToList(nonames, balconies)));
-                }
-                if (test1() && test2())
-                {
-                    list.Add(fl);
-                }
-            }
-            return list;
-        }
     }
     public class DrainageDrawingData
     {
-        public Dictionary<string, int> SingleOutletFloorDrains;
+        public HashSet<string> VerticalPipeLabels;
+        public HashSet<string> LongTranslatorLabels;
         public HashSet<string> ShortTranslatorLabels;
-        public Dictionary<int, string> OutletWrappingPipeRadiusStringDict;
-        public HashSet<string> Merges;
-        public HashSet<string> HasRainPortSymbolsForFL0;
-        public Dictionary<int, string> OutletWrappingPipeDict;
-        public HashSet<string> BalconyFls;
+        public Dictionary<string, int> FloorDrains;
+        public Dictionary<string, int> SingleOutletFloorDrains;
+        public Dictionary<string, int> WashingMachineFloorDrains;
+        public Dictionary<string, int> circlesCount;
         public Dictionary<string, string> Outlets;
+        public HashSet<string> KitchenFls;
+        public HashSet<string> BalconyFls;
+        public HashSet<string> ToiletPls;
+        public HashSet<string> Merges;
+        public Dictionary<int, string> OutletWrappingPipeDict;
+        public Dictionary<int, string> OutletWrappingPipeRadiusStringDict;
+        public HashSet<string> Shunts;
         public HashSet<string> _4tunes;
+        public HashSet<string> HasRainPortSymbolsForFL0;
+        public HashSet<string> IsConnectedToFloorDrainForFL0;
         public void Init()
         {
             VerticalPipeLabels ??= new HashSet<string>();
@@ -6611,22 +6620,63 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             OutletWrappingPipeDict ??= new Dictionary<int, string>();
             OutletWrappingPipeRadiusStringDict ??= new Dictionary<int, string>();
         }
-        public Dictionary<string, int> circlesCount;
-        public Dictionary<string, int> WashingMachineFloorDrains;
-        public HashSet<string> Shunts;
-        public HashSet<string> ToiletPls;
-        public HashSet<string> LongTranslatorLabels;
-        public Dictionary<string, int> FloorDrains;
-        public HashSet<string> VerticalPipeLabels;
-        public HashSet<string> IsConnectedToFloorDrainForFL0;
-        public HashSet<string> KitchenFls;
     }
     public class DrainageGeoData
     {
-        public List<GRect> VerticalPipes;
-        public List<string> WaterPortLabels;
+        public List<GRect> Storeys;
         public List<KeyValuePair<string, Geometry>> RoomData;
+        public List<CText> Labels;
+        public List<GLineSegment> LabelLines;
+        public List<GLineSegment> DLines;
+        public List<GLineSegment> VLines;
+        public List<GLineSegment> WLines;
+        public List<GRect> VerticalPipes;
+        public List<GRect> WrappingPipes;
+        public List<GRect> FloorDrains;
         public List<GRect> WaterPorts;
+        public List<GRect> WaterWells;
+        public List<string> WaterPortLabels;
+        public List<GRect> WashingMachines;
+        public List<GRect> Basins;
+        public List<GRect> MopPools;
+        public List<Point2d> CleaningPorts;
+        public List<Point2d> SideFloorDrains;
+        public List<GRect> PipeKillers;
+        public List<GRect> DownWaterPorts;
+        public List<GRect> RainPortSymbols;
+        public List<KeyValuePair<Point2d, string>> FloorDrainTypeShooter;
+        public List<KeyValuePair<Point2d, string>> WrappingPipeRadius;
+        public List<GLineSegment> WrappingPipeLabelLines;
+        public List<CText> WrappingPipeLabels;
+        public void Init()
+        {
+            Storeys ??= new List<GRect>();
+            RoomData ??= new List<KeyValuePair<string, Geometry>>();
+            Labels ??= new List<CText>();
+            LabelLines ??= new List<GLineSegment>();
+            DLines ??= new List<GLineSegment>();
+            VLines ??= new List<GLineSegment>();
+            WLines ??= new List<GLineSegment>();
+            VerticalPipes ??= new List<GRect>();
+            WrappingPipes ??= new List<GRect>();
+            FloorDrains ??= new List<GRect>();
+            WaterPorts ??= new List<GRect>();
+            WaterWells ??= new List<GRect>();
+            WaterPortLabels ??= new List<string>();
+            WashingMachines ??= new List<GRect>();
+            Basins ??= new List<GRect>();
+            CleaningPorts ??= new List<Point2d>();
+            SideFloorDrains ??= new List<Point2d>();
+            PipeKillers ??= new List<GRect>();
+            MopPools ??= new List<GRect>();
+            DownWaterPorts ??= new List<GRect>();
+            RainPortSymbols ??= new List<GRect>();
+            FloorDrainTypeShooter ??= new List<KeyValuePair<Point2d, string>>();
+            WrappingPipeRadius ??= new List<KeyValuePair<Point2d, string>>();
+            WrappingPipeLabelLines ??= new List<GLineSegment>();
+            WrappingPipeLabels ??= new List<CText>();
+        }
+        Dictionary<Point2d, string> floorDrainTypeDict;
         public void UpdateFloorDrainTypeDict(Point2d bd, string v)
         {
             floorDrainTypeDict ??= new Dictionary<Point2d, string>();
@@ -6635,17 +6685,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 floorDrainTypeDict[bd] = v;
             }
         }
-        public List<GLineSegment> WrappingPipeLabelLines;
-        public List<GRect> WashingMachines;
-        public List<Point2d> SideFloorDrains;
-        public List<CText> Labels;
-        public List<KeyValuePair<Point2d, string>> FloorDrainTypeShooter;
-        public List<Point2d> CleaningPorts;
-        public List<GRect> MopPools;
-        public List<GLineSegment> LabelLines;
-        public List<GLineSegment> WLines;
-        public List<GRect> FloorDrains;
-        public List<GRect> RainPortSymbols;
+        public void Flush()
+        {
+            if (floorDrainTypeDict != null)
+            {
+                FloorDrainTypeShooter.AddRange(floorDrainTypeDict);
+                floorDrainTypeDict = null;
+            }
+        }
         public void FixData()
         {
             Init();
@@ -6688,56 +6735,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             SideFloorDrains = SideFloorDrains.Distinct().ToList();
             WrappingPipeLabelLines = WrappingPipeLabelLines.Distinct().ToList();
         }
-        Dictionary<Point2d, string> floorDrainTypeDict;
-        public List<GRect> Basins;
-        public void Init()
-        {
-            Storeys ??= new List<GRect>();
-            RoomData ??= new List<KeyValuePair<string, Geometry>>();
-            Labels ??= new List<CText>();
-            LabelLines ??= new List<GLineSegment>();
-            DLines ??= new List<GLineSegment>();
-            VLines ??= new List<GLineSegment>();
-            WLines ??= new List<GLineSegment>();
-            VerticalPipes ??= new List<GRect>();
-            WrappingPipes ??= new List<GRect>();
-            FloorDrains ??= new List<GRect>();
-            WaterPorts ??= new List<GRect>();
-            WaterWells ??= new List<GRect>();
-            WaterPortLabels ??= new List<string>();
-            WashingMachines ??= new List<GRect>();
-            Basins ??= new List<GRect>();
-            CleaningPorts ??= new List<Point2d>();
-            SideFloorDrains ??= new List<Point2d>();
-            PipeKillers ??= new List<GRect>();
-            MopPools ??= new List<GRect>();
-            DownWaterPorts ??= new List<GRect>();
-            RainPortSymbols ??= new List<GRect>();
-            FloorDrainTypeShooter ??= new List<KeyValuePair<Point2d, string>>();
-            WrappingPipeRadius ??= new List<KeyValuePair<Point2d, string>>();
-            WrappingPipeLabelLines ??= new List<GLineSegment>();
-            WrappingPipeLabels ??= new List<CText>();
-        }
-        public List<GLineSegment> DLines;
-        public List<KeyValuePair<Point2d, string>> WrappingPipeRadius;
-        public List<CText> WrappingPipeLabels;
-        public List<GRect> WrappingPipes;
-        public List<GRect> DownWaterPorts;
-        public List<GRect> Storeys;
-        public List<GRect> WaterWells;
-        public List<GLineSegment> VLines;
-        public List<GRect> PipeKillers;
         public DrainageGeoData Clone()
         {
             return (DrainageGeoData)MemberwiseClone();
-        }
-        public void Flush()
-        {
-            if (floorDrainTypeDict != null)
-            {
-                FloorDrainTypeShooter.AddRange(floorDrainTypeDict);
-                floorDrainTypeDict = null;
-            }
         }
         public DrainageGeoData DeepClone()
         {
@@ -6746,46 +6746,151 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     }
     public class DrainageCadData
     {
-        public static Func<GRect, Polygon> ConvertWashingMachinesF()
-        {
-            return x => x.ToPolygon();
-        }
-        public List<Geometry> RainPortSymbols;
-        public List<Geometry> VerticalPipes;
-        public static Func<GRect, Polygon> ConvertFloorDrainsF()
-        {
-            return x => x.ToGCircle(THESAURUSNEGATIVE).ToCirclePolygon(THESAURUSADMISSION);
-        }
-        public List<Geometry> WLines;
-        public List<Geometry> MopPools;
-        public DrainageCadData Clone()
-        {
-            return (DrainageCadData)MemberwiseClone();
-        }
-        public List<Geometry> WrappingPipes;
+        public List<Geometry> Storeys;
+        public List<Geometry> Labels;
         public List<Geometry> LabelLines;
-        private static Func<GRect, Polygon> ConvertWaterPortsF()
+        public List<Geometry> DLines;
+        public List<Geometry> VLines;
+        public List<Geometry> WLines;
+        public List<Geometry> VerticalPipes;
+        public List<Geometry> WrappingPipes;
+        public List<Geometry> FloorDrains;
+        public List<Geometry> WaterPorts;
+        public List<Geometry> WaterWells;
+        public List<Geometry> WashingMachines;
+        public List<Geometry> CleaningPorts;
+        public List<Geometry> SideFloorDrains;
+        public List<Geometry> PipeKillers;
+        public List<Geometry> Basins;
+        public List<Geometry> MopPools;
+        public List<Geometry> DownWaterPorts;
+        public List<Geometry> RainPortSymbols;
+        public void Init()
+        {
+            Storeys ??= new List<Geometry>();
+            Labels ??= new List<Geometry>();
+            LabelLines ??= new List<Geometry>();
+            DLines ??= new List<Geometry>();
+            VLines ??= new List<Geometry>();
+            WLines ??= new List<Geometry>();
+            VerticalPipes ??= new List<Geometry>();
+            WrappingPipes ??= new List<Geometry>();
+            FloorDrains ??= new List<Geometry>();
+            WaterPorts ??= new List<Geometry>();
+            WaterWells ??= new List<Geometry>();
+            WashingMachines ??= new List<Geometry>();
+            CleaningPorts ??= new List<Geometry>();
+            SideFloorDrains ??= new List<Geometry>();
+            PipeKillers ??= new List<Geometry>();
+            Basins ??= new List<Geometry>();
+            MopPools ??= new List<Geometry>();
+            DownWaterPorts ??= new List<Geometry>();
+            RainPortSymbols ??= new List<Geometry>();
+        }
+        public static DrainageCadData Create(DrainageGeoData data)
+        {
+            var bfSize = INTERLINGUISTICS;
+            var o = new DrainageCadData();
+            o.Init();
+            o.Storeys.AddRange(data.Storeys.Select(x => x.ToPolygon()));
+            o.Labels.AddRange(data.Labels.Select(x => x.Boundary.ToPolygon()));
+            if (THESAURUSESPECIALLY) o.LabelLines.AddRange(data.LabelLines.Select(NewMethod(bfSize)));
+            else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
+            o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
+            o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
+            o.WLines.AddRange(data.WLines.Select(ConvertVLinesF()));
+            o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
+            if (THESAURUSESPECIALLY) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
+            else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
+            o.FloorDrains.AddRange(data.FloorDrains.Select(ConvertFloorDrainsF()));
+            o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
+            o.WaterWells.AddRange(data.WaterWells.Select(ConvertWaterPortsF()));
+            o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
+            o.Basins.AddRange(data.Basins.Select(ConvertWashingMachinesF()));
+            o.MopPools.AddRange(data.MopPools.Select(ConvertWashingMachinesF()));
+            o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
+            o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
+            o.PipeKillers.AddRange(data.PipeKillers.Select(x => x.ToPolygon()));
+            o.DownWaterPorts.AddRange(data.DownWaterPorts.Select(x => x.ToPolygon()));
+            o.RainPortSymbols.AddRange(data.RainPortSymbols.Select(x => x.ToPolygon()));
+            return o;
+        }
+        private static Func<GRect, Polygon> ConvertWrappingPipesF()
         {
             return x => x.ToPolygon();
+        }
+        private static Func<GLineSegment, Geometry> NewMethod(int bfSize)
+        {
+            return x => x.Buffer(bfSize);
         }
         public static Func<Point2d, Point> ConvertSideFloorDrains()
         {
             return x => x.ToNTSPoint();
         }
-        public static Func<GLineSegment, LineString> ConvertDLinesF()
+        public static Func<Point2d, Polygon> ConvertCleaningPortsF()
         {
-            return x => x.ToLineString();
+            return x => new GCircle(x, DISCOMFORTABLENESS).ToCirclePolygon(THESAURUSADMISSION);
         }
-        public List<Geometry> WaterPorts;
+        public static Func<GRect, Polygon> ConvertWashingMachinesF()
+        {
+            return x => x.ToPolygon();
+        }
         public static Func<GRect, Polygon> ConvertWaterPortsLargerF()
         {
             return x => x.Center.ToGCircle(PRAETERNATURALIS).ToCirclePolygon(PARALLELOGRAMMIC);
+        }
+        private static Func<GRect, Polygon> ConvertWaterPortsF()
+        {
+            return x => x.ToPolygon();
+        }
+        public static Func<GRect, Polygon> ConvertFloorDrainsF()
+        {
+            return x => x.ToGCircle(THESAURUSNEGATIVE).ToCirclePolygon(THESAURUSADMISSION);
+        }
+        public static Func<GRect, Polygon> ConvertVerticalPipesF()
+        {
+            return x => x.ToPolygon();
+        }
+        private static Func<GRect, Polygon> ConvertVerticalPipesPreciseF()
+        {
+            return x => new GCircle(x.Center, x.InnerRadius).ToCirclePolygon(THESAURUSADMISSION);
+        }
+        public static Func<GLineSegment, LineString> ConvertVLinesF()
+        {
+            return x => x.ToLineString();
+        }
+        public static Func<GLineSegment, LineString> ConvertDLinesF()
+        {
+            return x => x.ToLineString();
         }
         public static Func<GLineSegment, LineString> ConvertLabelLinesF()
         {
             return x => x.Extend(THESAURUSCOUNCIL).ToLineString();
         }
-        public List<Geometry> DLines;
+        public List<Geometry> GetAllEntities()
+        {
+            var ret = new List<Geometry>(THESAURUSREGARDING);
+            ret.AddRange(Storeys);
+            ret.AddRange(Labels);
+            ret.AddRange(LabelLines);
+            ret.AddRange(DLines);
+            ret.AddRange(VLines);
+            ret.AddRange(WLines);
+            ret.AddRange(VerticalPipes);
+            ret.AddRange(WrappingPipes);
+            ret.AddRange(FloorDrains);
+            ret.AddRange(WaterPorts);
+            ret.AddRange(WaterWells);
+            ret.AddRange(WashingMachines);
+            ret.AddRange(CleaningPorts);
+            ret.AddRange(SideFloorDrains);
+            ret.AddRange(PipeKillers);
+            ret.AddRange(Basins);
+            ret.AddRange(MopPools);
+            ret.AddRange(DownWaterPorts);
+            ret.AddRange(RainPortSymbols);
+            return ret;
+        }
         public List<DrainageCadData> SplitByStorey()
         {
             var lst = new List<DrainageCadData>(this.Storeys.Count);
@@ -6818,195 +6923,20 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             return lst;
         }
-        public List<Geometry> SideFloorDrains;
-        public List<Geometry> Labels;
-        public List<Geometry> Basins;
-        public static DrainageCadData Create(DrainageGeoData data)
+        public DrainageCadData Clone()
         {
-            var bfSize = INTERLINGUISTICS;
-            var o = new DrainageCadData();
-            o.Init();
-            o.Storeys.AddRange(data.Storeys.Select(x => x.ToPolygon()));
-            o.Labels.AddRange(data.Labels.Select(x => x.Boundary.ToPolygon()));
-            if (THESAURUSESPECIALLY) o.LabelLines.AddRange(data.LabelLines.Select(NewMethod(bfSize)));
-            else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
-            o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
-            o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
-            o.WLines.AddRange(data.WLines.Select(ConvertVLinesF()));
-            o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
-            if (THESAURUSESPECIALLY) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
-            else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
-            o.FloorDrains.AddRange(data.FloorDrains.Select(ConvertFloorDrainsF()));
-            o.WaterPorts.AddRange(data.WaterPorts.Select(ConvertWaterPortsF()));
-            o.WaterWells.AddRange(data.WaterWells.Select(ConvertWaterPortsF()));
-            o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
-            o.Basins.AddRange(data.Basins.Select(ConvertWashingMachinesF()));
-            o.MopPools.AddRange(data.MopPools.Select(ConvertWashingMachinesF()));
-            o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
-            o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
-            o.PipeKillers.AddRange(data.PipeKillers.Select(x => x.ToPolygon()));
-            o.DownWaterPorts.AddRange(data.DownWaterPorts.Select(x => x.ToPolygon()));
-            o.RainPortSymbols.AddRange(data.RainPortSymbols.Select(x => x.ToPolygon()));
-            return o;
+            return (DrainageCadData)MemberwiseClone();
         }
-        public List<Geometry> Storeys;
-        public List<Geometry> PipeKillers;
-        public static Func<GRect, Polygon> ConvertVerticalPipesF()
-        {
-            return x => x.ToPolygon();
-        }
-        public List<Geometry> DownWaterPorts;
-        private static Func<GRect, Polygon> ConvertVerticalPipesPreciseF()
-        {
-            return x => new GCircle(x.Center, x.InnerRadius).ToCirclePolygon(THESAURUSADMISSION);
-        }
-        private static Func<GLineSegment, Geometry> NewMethod(int bfSize)
-        {
-            return x => x.Buffer(bfSize);
-        }
-        private static Func<GRect, Polygon> ConvertWrappingPipesF()
-        {
-            return x => x.ToPolygon();
-        }
-        public List<Geometry> WashingMachines;
-        public List<Geometry> GetAllEntities()
-        {
-            var ret = new List<Geometry>(THESAURUSREGARDING);
-            ret.AddRange(Storeys);
-            ret.AddRange(Labels);
-            ret.AddRange(LabelLines);
-            ret.AddRange(DLines);
-            ret.AddRange(VLines);
-            ret.AddRange(WLines);
-            ret.AddRange(VerticalPipes);
-            ret.AddRange(WrappingPipes);
-            ret.AddRange(FloorDrains);
-            ret.AddRange(WaterPorts);
-            ret.AddRange(WaterWells);
-            ret.AddRange(WashingMachines);
-            ret.AddRange(CleaningPorts);
-            ret.AddRange(SideFloorDrains);
-            ret.AddRange(PipeKillers);
-            ret.AddRange(Basins);
-            ret.AddRange(MopPools);
-            ret.AddRange(DownWaterPorts);
-            ret.AddRange(RainPortSymbols);
-            return ret;
-        }
-        public void Init()
-        {
-            Storeys ??= new List<Geometry>();
-            Labels ??= new List<Geometry>();
-            LabelLines ??= new List<Geometry>();
-            DLines ??= new List<Geometry>();
-            VLines ??= new List<Geometry>();
-            WLines ??= new List<Geometry>();
-            VerticalPipes ??= new List<Geometry>();
-            WrappingPipes ??= new List<Geometry>();
-            FloorDrains ??= new List<Geometry>();
-            WaterPorts ??= new List<Geometry>();
-            WaterWells ??= new List<Geometry>();
-            WashingMachines ??= new List<Geometry>();
-            CleaningPorts ??= new List<Geometry>();
-            SideFloorDrains ??= new List<Geometry>();
-            PipeKillers ??= new List<Geometry>();
-            Basins ??= new List<Geometry>();
-            MopPools ??= new List<Geometry>();
-            DownWaterPorts ??= new List<Geometry>();
-            RainPortSymbols ??= new List<Geometry>();
-        }
-        public static Func<GLineSegment, LineString> ConvertVLinesF()
-        {
-            return x => x.ToLineString();
-        }
-        public List<Geometry> WaterWells;
-        public List<Geometry> CleaningPorts;
-        public List<Geometry> VLines;
-        public static Func<Point2d, Polygon> ConvertCleaningPortsF()
-        {
-            return x => new GCircle(x, DISCOMFORTABLENESS).ToCirclePolygon(THESAURUSADMISSION);
-        }
-        public List<Geometry> FloorDrains;
     }
     public class StoreyInfo
     {
-        public Point2d ContraPoint;
-        public GRect Boundary;
         public StoreyType StoreyType;
         public List<int> Numbers;
+        public Point2d ContraPoint;
+        public GRect Boundary;
     }
     public static class THDrainageService
     {
-        public const string PALAEOGEOMORPHOLOGY = "距离1";
-        public const int SUPERESSENTIALIS = 210;
-        public const string THESAURUSSPITEFUL = "DN100";
-        public const string THESAURUSBURNING = "-0";
-        public const int DOLICHOCEPHALOUS = 5;
-        public const int PERCHLOROETHYLENE = 7;
-        public const int CINEFLUOROGRAPHY = 280;
-        public const int THESAURUSSATURATED = 447;
-        public const int THESAURUSLEANING = 172;
-        public const string THESAURUSHORRIFY = "基点 X";
-        public const int REVOLUTIONIZATION = 350;
-        public const string THESAURUSINSPECTOR = "W-RAIN-EQPM";
-        public const string THESAURUSHUMORIST = "AI-空间框线";
-        public const string THESAURUSCONDITION = "板上P弯";
-        public const string THESAURUSLOVING = "$LIGUAN";
-        public const int DISCONNECTEDNESS = 179;
-        public const string MICROSPECTROPHOTOMETRY = "666";
-        public const string THESAURUSLAYOUT = "排出：";
-        public const int PSYCHOPHYSIOLOGICAL = 400;
-        public const string THESAURUSCENSOR = "通气帽系统";
-        public const int HOOGMOGENDHEIDEN = 15;
-        public const int HYDROXYNAPHTHALENE = 211;
-        public const int THESAURUSPROGRAMME = 91;
-        public const string PHENYLENEDIAMINE = "F";
-        public const string THESAURUSCONSUME = "≥600";
-        public const string THESAURUSCOMMUNE = "西厨";
-        public const string THESAURUSINSURANCE = "RF";
-        public static bool IsNL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return label.StartsWith(CORRESPONDINGLY);
-        }
-        public const string QUOTATIONCRIMEAN = "双格洗涤盆排水-AI";
-        public const int LACKADAISICALNESS = 667;
-        public const string THESAURUSCOURTESAN = "W-RAIN-DIMS";
-        public const string THESAURUSDELETE = "Y1L";
-        public const string EXEMPLIFICATIONAL = "0$asdfghjgjhkl";
-        public const string PSYCHOLINGUISTICALLY = "普通地漏无存水弯";
-        public const int THESAURUSINTEMPERATE = 1079;
-        public const string THESAURUSSUSTAIN = "-1F";
-        public static StoreyInfo GetStoreyInfo(BlockReference br)
-        {
-            var props = br.DynamicBlockReferencePropertyCollection;
-            return new StoreyInfo()
-            {
-                StoreyType = GetStoreyType((string)props.GetValue(TRANSUBSTANTIALIS)),
-                Numbers = ParseFloorNums(GetStoreyNumberString(br)),
-                ContraPoint = GetContraPoint(br),
-                Boundary = br.Bounds.ToGRect(),
-            };
-        }
-        public const int THESAURUSPERSUASION = 511;
-        public const char THESAURUSOVERACT = '-';
-        public const string ALSOPREPONDERANCY = "A$C5E4A3C21";
-        public const string THESAURUSDEFENSIVE = "DN75";
-        public const string THESAURUSCOMMUTE = "地漏系统";
-        public const string THESAURUSMISOGYNIST = "FromImagination";
-        public const string THESAURUSSTENCH = "-DRAI-";
-        public const string INTERPUNCTUATION = "De";
-        public const string THESAURUSAMENITY = "";
-        public const double THESAURUSEXPENDABLE = .2778;
-        public static bool IsY2L(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return label.StartsWith(THESAURUSPERCEIVE);
-        }
-        public const string NEUROTRANSMITTER = "W-RAIN-PIPE";
-        public const int THESAURUSLABYRINTHINE = 479;
-        public const double QUOTATIONCOLLARED = 5500.0;
-        public const int INTERFEROMETERS = 29;
         public static Polygon ConvertToPolygon(Polyline pl)
         {
             if (pl.NumberOfVertices <= TEREBINTHINATED)
@@ -7036,13 +6966,536 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 return null;
             }
         }
-        public const int DISILLUSIONIZER = 921;
-        public const string UNCONSTITUTIONAL = "M";
-        public const string THESAURUSDEFICIENCY = "73-";
+        public static string TryParseWrappingPipeRadiusText(string text)
+        {
+            if (text == null) return null;
+            var t = Regex.Replace(text, THESAURUSBYPASS, THESAURUSAMENITY);
+            t = Regex.Replace(t, PROGNOSTICATIVE, CONTEMPTIBILITY);
+            return t;
+        }
+        public static StoreyType GetStoreyType(string s)
+        {
+            return s switch
+            {
+                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR => StoreyType.SmallRoof,
+                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR => StoreyType.LargeRoof,
+                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR => StoreyType.StandardStorey,
+                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR => StoreyType.NonStandardStorey,
+                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR => StoreyType.NonStandardStorey,
+                _ => StoreyType.Unknown,
+            };
+        }
+        public static List<int> ParseFloorNums(string floorStr)
+        {
+            if (string.IsNullOrWhiteSpace(floorStr)) return new List<int>();
+            floorStr = floorStr.Replace(DELETERIOUSNESS, INSTITUTIONALISM).Replace(THESAURUSFILIGREE, THESAURUSOVERACT).Replace(PHENYLENEDIAMINE, THESAURUSAMENITY).Replace(UNCONSTITUTIONAL, THESAURUSAMENITY).Replace(THESAURUSUNRELENTING, THESAURUSAMENITY);
+            var hs = new HashSet<int>();
+            foreach (var s in floorStr.Split(INSTITUTIONALISM))
+            {
+                if (string.IsNullOrEmpty(s)) continue;
+                var m = Regex.Match(s, THESAURUSAFFILIATION);
+                if (m.Success)
+                {
+                    var v1 = int.Parse(m.Groups[PIEZOELECTRICAL].Value);
+                    var v2 = int.Parse(m.Groups[TEREBINTHINATED].Value);
+                    var min = Math.Min(v1, v2);
+                    var max = Math.Max(v1, v2);
+                    for (int i = min; i <= max; i++)
+                    {
+                        hs.Add(i);
+                    }
+                    continue;
+                }
+                m = Regex.Match(s, DETERMINATIVENESS);
+                if (m.Success)
+                {
+                    hs.Add(int.Parse(m.Value));
+                }
+            }
+            hs.Remove(BATHYDRACONIDAE);
+            return hs.OrderBy(x => x).ToList();
+        }
+        public static StoreyInfo GetStoreyInfo(BlockReference br)
+        {
+            var props = br.DynamicBlockReferencePropertyCollection;
+            return new StoreyInfo()
+            {
+                StoreyType = GetStoreyType((string)props.GetValue(TRANSUBSTANTIALIS)),
+                Numbers = ParseFloorNums(GetStoreyNumberString(br)),
+                ContraPoint = GetContraPoint(br),
+                Boundary = br.Bounds.ToGRect(),
+            };
+        }
+        public static string GetStoreyNumberString(BlockReference br)
+        {
+            var d = br.ObjectId.GetAttributesInBlockReference(THESAURUSNEGATIVE);
+            d.TryGetValue(THESAURUSPERNICIOUS, out string ret);
+            return ret;
+        }
+        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() is THESAURUSATTENDANCE && x.IsDynamicBlock).ToList();
+        public static Point2d GetContraPoint(BlockReference br)
+        {
+            double dx = double.NaN;
+            double dy = double.NaN;
+            Point2d pt;
+            foreach (DynamicBlockReferenceProperty p in br.DynamicBlockReferencePropertyCollection)
+            {
+                if (p.PropertyName == THESAURUSHORRIFY)
+                {
+                    dx = Convert.ToDouble(p.Value);
+                }
+                else if (p.PropertyName == THESAURUSFURTHEST)
+                {
+                    dy = Convert.ToDouble(p.Value);
+                }
+            }
+            if (!double.IsNaN(dx) && !double.IsNaN(dy))
+            {
+                pt = br.Position.ToPoint2d() + new Vector2d(dx, dy);
+            }
+            else
+            {
+                throw new System.Exception(THESAURUSKNICKERS);
+            }
+            return pt;
+        }
+        public static string FixVerticalPipeLabel(string label)
+        {
+            if (label == null) return null;
+            if (label.StartsWith(THESAURUSDEFICIENCY))
+            {
+                return label.Substring(THESAURUSINTELLECT);
+            }
+            if (label.StartsWith(THESAURUSEMBODY))
+            {
+                return label.Substring(TEREBINTHINATED);
+            }
+            return label;
+        }
+        public static bool IsNotedLabel(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return label.Contains(THESAURUSTORTURE) || label.Contains(THESAURUSINTRUDE);
+        }
+        public static bool IsWantedLabelText(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label);
+        }
+        public static bool IsY1L(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return label.StartsWith(THESAURUSDELETE);
+        }
+        public static bool IsY2L(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return label.StartsWith(THESAURUSPERCEIVE);
+        }
+        public static bool IsNL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return label.StartsWith(CORRESPONDINGLY);
+        }
+        public static bool IsYL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return label.StartsWith(THESAURUSPUDDLE);
+        }
+        public static bool IsRainLabel(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return IsY1L(label) || IsY2L(label) || IsNL(label) || IsYL(label);
+        }
+        public static bool IsDrainageLabelText(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || IsWL(label);
+        }
+        public static bool IsMaybeLabelText(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            if (IsFL0(label)) return THESAURUSESPECIALLY;
+            static bool f(string label)
+            {
+                return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || IsWL(label);
+            }
+            return f(FixVerticalPipeLabel(label));
+        }
+        public const double THESAURUSCOUNCIL = .1;
+        public const int BATHYDRACONIDAE = 0;
+        public const bool THESAURUSESPECIALLY = false;
+        public const int THESAURUSADMISSION = 36;
+        public const bool THESAURUSNEGATIVE = true;
+        public const int DISCOMFORTABLENESS = 40;
+        public const int PRAETERNATURALIS = 1500;
+        public const int PARALLELOGRAMMIC = 6;
+        public const int THESAURUSREGARDING = 4096;
+        public const string THESAURUSDICTIONARY = "TCH_PIPE";
+        public const string NEUROTRANSMITTER = "W-RAIN-PIPE";
+        public const int PIEZOELECTRICAL = 1;
+        public const int TEREBINTHINATED = 2;
+        public const double THESAURUSDISRUPTION = 10e5;
+        public const string THESAURUSDECORATIVE = "W-BUSH-NOTE";
+        public const int QUOTATIONPATRONAL = 100;
+        public const string THESAURUSINSPECTOR = "W-RAIN-EQPM";
+        public const string QUOTATIONVENICE = "TCH_VPIPEDIM";
+        public const string CONTEMPTIBILITY = "-";
+        public const string THESAURUSMANIFEST = "TCH_TEXT";
+        public const string THESAURUSELUCIDATE = "TCH_MTEXT";
+        public const string THESAURUSMERRIMENT = "TCH_MULTILEADER";
+        public const string THESAURUSAMENITY = "";
+        public const int THESAURUSFORTIFICATION = 50;
+        public const char THESAURUSSLOPPY = '|';
+        public const string THESAURUSMAJESTY = "|";
+        public const char THESAURUSRECKON = '$';
+        public const string THESAURUSMALICE = "$";
+        public const string THESAURUSCOMPREHEND = "可见性";
+        public const string THESAURUSSUPPOSITION = "套管";
+        public const int CONSTRUCTIONISM = 1000;
+        public const string THESAURUSBALDERDASH = "带定位立管";
+        public const string THESAURUSBAPTIZE = "立管编号";
+        public const string THESAURUSLOVING = "$LIGUAN";
+        public const string THESAURUSCANDLE = "A$C6BDE4816";
+        public const string QUOTATIONADJACENT = "污废合流井编号";
+        public const string THESAURUSOBJECTIVELY = "W-DRAI-DOME-PIPE";
+        public const string THESAURUSSPELLBOUND = "W-RAIN-NOTE";
+        public const string THESAURUSCOURTESAN = "W-RAIN-DIMS";
+        public const string QUOTATIONPEIRCE = "TCH_EQUIPMENT";
+        public const char THESAURUSFILIGREE = 'B';
+        public const string THESAURUSINSURANCE = "RF";
+        public const string THESAURUSBLACKOUT = "RF+1";
+        public const string HYDROMETALLURGY = "RF+2";
+        public const string PHENYLENEDIAMINE = "F";
+        public const int INTERLINGUISTICS = 10;
+        public const int PSYCHOPHYSIOLOGICAL = 400;
+        public const string THESAURUSDEFILE = "1F";
+        public const string THESAURUSSUSTAIN = "-1F";
+        public const string THESAURUSGOODNESS = "W-NOTE";
+        public const string THESAURUSRECRIMINATION = "W-DRAI-EQPM";
+        public const string THESAURUSEXCOMMUNICATE = "W-BUSH";
+        public const string THESAURUSSMASHING = "W-DRAI-NOTE";
+        public const double HYPERCHOLESTERO = 2500.0;
+        public const double QUOTATIONCOLLARED = 5500.0;
+        public const double THESAURUSRECAPITULATE = 1800.0;
+        public const string THESAURUSACQUIRE = "伸顶通气2000";
+        public const string THESAURUSASTUTE = "伸顶通气500";
+        public const string THESAURUSGENTILITY = "可见性1";
+        public const string THESAURUSCENSOR = "通气帽系统";
+        public const string PALAEOGEOMORPHOLOGY = "距离1";
+        public const string THESAURUSREPREHENSIBLE = "伸顶通气管";
+        public const string STOICHIOMETRICALLY = "1000";
+        public const int SUPERCILIOUSNESS = 580;
+        public const string THESAURUSINCIDENTAL = "标高";
+        public const int COMMENSURATENESS = 550;
+        public const string THESAURUSVERIFICATION = "建筑完成面";
+        public const int THESAURUSCONFECTIONERY = 1800;
+        public const int THESAURUSSETBACK = 121;
+        public const int GASTRONOMICALLY = 1258;
+        public const int THESAURUSOBLITERATION = 120;
+        public const int THESAURUSBEWARE = 779;
+        public const int THESAURUSPROLONG = 1679;
+        public const int ANTHROPOMORPHITES = 658;
+        public const int QUOTATIONSORCERER = 90;
+        public const int CHLOROFLUOROCARBONS = 800;
+        public const int THESAURUSBEFRIEND = 500;
+        public const int THESAURUSSPREAD = 1879;
+        public const int THESAURUSDOWNHEARTED = 180;
+        public const int THESAURUSUNAVOIDABLE = 160;
+        public const string PSYCHOLINGUISTICALLY = "普通地漏无存水弯";
+        public const string THESAURUSBENEFIT = "*";
+        public const double THESAURUSINDEMNIFY = 0.0;
+        public const int THESAURUSADMIRABLE = 780;
+        public const int CHEMOTROPICALLY = 700;
+        public const double THESAURUSDISABILITY = .0;
         public const int DIETHYLSTILBOESTROL = 300;
-        public const string THESAURUSCLIENTELE = "板上S弯";
+        public const int THESAURUSINTRACTABLE = 24;
+        public const int THESAURUSABUNDANCE = 9;
+        public const int DOLICHOCEPHALOUS = 5;
+        public const int THESAURUSEVINCE = 4;
+        public const int THESAURUSINTELLECT = 3;
+        public const int QUOTATIONLUNGEING = 3600;
+        public const int REVOLUTIONIZATION = 350;
+        public const int THESAURUSTRAGEDY = 150;
+        public const int PROCHLORPERAZINE = 318;
+        public const int THESAURUSDEFICIT = 1400;
+        public const int QUOTATIONCHOROID = 1200;
+        public const int THESAURUSIMAGINATIVE = 2000;
+        public const int THESAURUSSUCCINCT = 600;
+        public const int THESAURUSLABYRINTHINE = 479;
+        public const int THESAURUSAPPORTION = 750;
+        public const string THESAURUSSPITEFUL = "DN100";
+        public const int THESAURUSDEVICE = 950;
+        public const int UNCONJECTURABLE = 200;
+        public const int QUINQUARTICULARIS = 360;
+        public const int THESAURUSMANKIND = 650;
+        public const int THESAURUSDISPUTE = 30;
+        public const string THESAURUSCONSUME = "≥600";
+        public const int THESAURUSUNDERWATER = 450;
+        public const int THESAURUSYAWNING = 18;
+        public const int HYPERSENSITIZED = 250;
+        public const double THESAURUSADVANCEMENT = .7;
+        public const string UNCOMPANIONABLE = ";";
+        public const double THESAURUSPROPRIETOR = .01;
+        public const string THESAURUSCOMMUTE = "地漏系统";
+        public const string THESAURUSEXTEMPORE = "TH-STYLE3";
+        public const int THESAURUSNOTIFY = 745;
+        public const string THESAURUSCONSENT = "乙字弯";
+        public const string QUOTATIONEMBRYOID = "立管检查口";
+        public const string THESAURUSREPRESSION = "套管系统";
+        public const string THESAURUSASSIGN = "重力流雨水井编号";
+        public const string MICROSPECTROPHOTOMETRY = "666";
+        public const string THESAURUSLUGGAGE = ",";
+        public const int PERCHLOROETHYLENE = 7;
+        public const int THESAURUSJAGGED = 229;
+        public const int THESAURUSENDING = 230;
+        public const int MINERALOCORTICOID = 8192;
+        public const int THESAURUSRETAIN = 8000;
+        public const int HOOGMOGENDHEIDEN = 15;
+        public const string THESAURUSMISOGYNIST = "FromImagination";
+        public const int STANDOFFISHNESS = 55;
+        public const string CH2OHRCHNH2RCOOH = "X.XX";
+        public const string THESAURUSLAYOUT = "排出：";
+        public const int THESAURUSBESTRIDE = 666;
+        public const string INTERSEGMENTALLY = "排出套管：";
+        public const string OVERCURIOUSNESS = "WaterWellWrappingPipeRadiusStringDict:";
+        public const int MELANCHOLIOUSNESS = 255;
+        public const int THESAURUSFELLOW = 0x91;
+        public const int THESAURUSBEDEVIL = 0xc7;
+        public const int THESAURUSTESTIMONY = 0xae;
+        public const int HYDROXYNAPHTHALENE = 211;
+        public const int THESAURUSFOLLOWER = 213;
+        public const int THESAURUSACCORDANCE = 111;
+        public const string THESAURUSHUMORIST = "AI-空间框线";
+        public const string THESAURUSCOMPLEX = "AI-空间名称";
+        public const string THESAURUSDEFICIENCY = "73-";
+        public const string THESAURUSEMBODY = "1-";
+        public const string THESAURUSBYPASS = @"[^\d\.\-]";
+        public const string PROGNOSTICATIVE = @"\d+\-";
+        public const string TRANSUBSTANTIALIS = "楼层类型";
+        public const char DELETERIOUSNESS = '，';
+        public const char INSTITUTIONALISM = ',';
+        public const char THESAURUSOVERACT = '-';
+        public const string UNCONSTITUTIONAL = "M";
+        public const string THESAURUSUNRELENTING = " ";
+        public const string THESAURUSAFFILIATION = @"(\-?\d+)-(\-?\d+)";
+        public const string DETERMINATIVENESS = @"\-?\d+";
+        public const string THESAURUSPERNICIOUS = "楼层编号";
+        public const string THESAURUSATTENDANCE = "楼层框定";
+        public const string THESAURUSHORRIFY = "基点 X";
+        public const string THESAURUSFURTHEST = "基点 Y";
+        public const string THESAURUSKNICKERS = "error occured while getting baseX and baseY";
+        public const string THESAURUSPRELUDE = "卫生间";
+        public const string THESAURUSSEVERITY = "主卫";
+        public const string LUCIOCEPHALIDAE = "公卫";
+        public const string THESAURUSLUSTFUL = "次卫";
         public const string THESAURUSSATIATE = "客卫";
+        public const string PROSELYTIZATION = "洗手间";
+        public const string UNCONSCIENTIOUS = "卫";
+        public const string THESAURUSEMPLOYMENT = @"^[卫]\d$";
+        public const string THESAURUSNESTLE = "厨房";
+        public const string THESAURUSCOMMUNE = "西厨";
+        public const string THESAURUSSHOWER = "厨";
+        public const string THESAURUSOUTCRY = "阳台";
+        public const string THESAURUSCIGARETTE = "连廊";
+        public const string THESAURUSDELETE = "Y1L";
+        public const string THESAURUSPERCEIVE = "Y2L";
+        public const string CORRESPONDINGLY = "NL";
+        public const string THESAURUSPUDDLE = "YL";
+        public const string PARALINGUISTICALLY = @"^W\d?L";
+        public const string THESAURUSBLISTER = @"^F\d?L";
+        public const string THESAURUSBURNING = "-0";
+        public const string THESAURUSEFFUSION = @"^P\d?L";
+        public const string THESAURUSEMIGRATE = @"^T\d?L";
+        public const string ANTHROPOMORPHISM = @"^D\d?L";
+        public const string QUOTATIONASSERTORY = @"^(F\d?L|T\d?L|P\d?L|D\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
+        public const double THESAURUSSATISFY = 383875.8169;
+        public const double QUOTATIONRASCHIG = 250561.9571;
+        public const string THESAURUSPURIFY = "P型存水弯";
+        public const string THESAURUSCONDITION = "板上P弯";
+        public const int PSYCHOGERIATRIC = 3500;
+        public const int HETEROTRANSPLANTED = 1479;
+        public const int THESAURUSORIGINATE = 2379;
+        public const int PSYCHOGENICALLY = 1779;
+        public const int THESAURUSSUPPLEMENTARY = 579;
+        public const int TRISYLLABICALLY = 279;
+        public const string THESAURUSFRIVOLITY = "双池S弯";
+        public const string THESAURUSDECISIVE = "W-DRAI-VENT-PIPE";
+        public const string THESAURUSTREASONABLE = "DN50";
+        public const string THESAURUSDEFENSIVE = "DN75";
+        public const int THESAURUSCHANNEL = 789;
+        public const int ALSOHEAVENWARDS = 1270;
+        public const int THESAURUSFABULOUS = 1090;
+        public const string INSTITUTIONALIZED = "双池P弯";
+        public const int INCREDULOUSNESS = 5479;
+        public const int THESAURUSINTEMPERATE = 1079;
+        public const int THESAURUSSEDATE = 5600;
+        public const int THESAURUSOMNIVOROUS = 6079;
+        public const int THESAURUSMYTHICAL = 8;
+        public const int THESAURUSVACILLATE = 1379;
+        public const int THESAURUSWITHIN = 569;
+        public const int THESAURUSUTILITY = 406;
+        public const int THESAURUSCHASTITY = 404;
+        public const int THESAURUSJUDGEMENT = 3150;
+        public const int QUOTATIONSCORIA = 12;
+        public const int THESAURUSWORKSHOP = 1300;
+        public const double QUOTATIONBITUMINOUS = .4;
+        public const string THESAURUSMISJUDGE = "接阳台洗手盆排水";
+        public const string CALYMMATOBACTERIUM = "DN50，余同";
+        public const int PHILANTHROPICALLY = 1190;
+        public const string STERNOPTYCHIDAE = "接卫生间排水管";
+        public const string MISAPPREHENSIVENESS = "DN100，余同";
+        public const int THESAURUSCORDIAL = 490;
+        public const int THESAURUSCONCEIVE = 170;
+        public const int THESAURUSSCENERY = 2830;
+        public const int DNIPRODZERZHINSK = 900;
+        public const int THESAURUSPROFFER = 330;
+        public const int THESAURUSRELEASE = 895;
+        public const int THESAURUSUNABLE = 285;
+        public const int THESAURUSENTHUSE = 390;
+        public const string THESAURUSMELODIOUS = "普通地漏P弯";
+        public const int THESAURUSVERTIGO = 1330;
         public const int INTERMINABLENESS = 270;
+        public const string THESAURUSOFFENDER = "接厨房洗涤盆排水";
+        public const int ELECTRODYNAMICAL = 156;
+        public const int THESAURUSCONSERVATIVE = 510;
+        public const int THESAURUSSHIFTLESS = 389;
+        public const int QUOTATIONSHIRTSLEEVE = 45;
+        public const int CORTICOSTEROIDS = 669;
+        public const int THESAURUSDESTITUTION = 590;
+        public const int THESAURUSSLIVER = 1700;
+        public const int QUOTATIONDERNIER = 919;
+        public const int MECHANORECEPTION = 990;
+        public const int THESAURUSCRITICIZE = 129;
+        public const int INACCESSIBILITY = 693;
+        public const int UNCOMPREHENDING = 1591;
+        public const int THESAURUSPERSUASION = 511;
+        public const int THESAURUSINSECTICIDE = 289;
+        public const string THESAURUSRESIGN = "W-DRAI-DIMS";
+        public const int QUOTATIONARENACEOUS = 1391;
+        public const int LACKADAISICALNESS = 667;
+        public const int MAGNETOHYDRODYNAMICS = 1450;
+        public const int THESAURUSBRAVADO = 251;
+        public const int VERGISSMEINNICHT = 660;
+        public const int THESAURUSSMUDGE = 110;
+        public const int THESAURUSPROGRAMME = 91;
+        public const int THESAURUSEXPIRE = 320;
+        public const int CONVENTIONALIZE = 427;
+        public const int INDISCRIMINATENESS = 183;
+        public const int INFINITESIMALLY = 283;
+        public const double QUOTATIONSENECA = 250.0;
+        public const int METHYLCARBAMATE = 225;
+        public const int CONSERVATIONIST = 1125;
+        public const int THESAURUSINTESTINAL = 499;
+        public const int CINEFLUOROGRAPHY = 280;
+        public const int OBSERVATIONALLY = 76;
+        public const int THESAURUSDETERIORATE = 424;
+        public const int RECRYSTALLIZATION = 1900;
+        public const string THESAURUSTUSSLE = "DN100乙字弯";
+        public const string THESAURUSHEARTY = "1350";
+        public const int THESAURUSCOMMAND = 275;
+        public const int SUPERESSENTIALIS = 210;
+        public const int METAMATHEMATICS = 151;
+        public const int THESAURUSMODIFY = 1109;
+        public const int THESAURUSSTEEPLE = 420;
+        public const int THESAURUSSATURATED = 447;
+        public const int THESAURUSREBUKE = 43;
+        public const int THESAURUSMEETING = 237;
+        public const string THESAURUSQUIETLY = "洗衣机地漏P弯";
+        public const int QUOTATION1AUNIPOLAR = 1380;
+        public const double OBJECTIONABLENESS = 200.0;
+        public const double PALAEOICHTHYOLOGY = 780.0;
+        public const double MICRODENSITOMETRY = 130.0;
+        public const int THESAURUSINTANGIBLE = 980;
+        public const int THESAURUSEXPERIENCED = 1358;
+        public const int THESAURUSLEANING = 172;
+        public const int THESAURUSEXCESSIVE = 155;
+        public const int THESAURUSPOIGNANT = 1650;
+        public const int THESAURUSCONFOUND = 71;
+        public const int TETRAHYDROXYHEXANEDIOIC = 221;
+        public const int INTERFEROMETERS = 29;
+        public const int THESAURUSFULSOME = 1158;
+        public const int DISCONNECTEDNESS = 179;
+        public const int THESAURUSFEARLESS = 880;
+        public const string THESAURUSDEGREE = ">1500";
+        public const int DISILLUSIONIZER = 921;
+        public const int THESAURUSCOOPERATION = 2320;
+        public const double THESAURUSEXPENDABLE = .2778;
+        public const string THESAURUSPRESENCE = "普通地漏S弯";
+        public const int THESAURUSSALUTATION = 3090;
+        public const int THESAURUSSENSATION = 371;
+        public const int THESAURUSHOUSING = 2730;
+        public const int THESAURUSHIGHLY = 888;
+        public const int DENOMINATIONALIZE = 460;
+        public const int INTELLIGIBILITY = 2499;
+        public const int QUOTATIONHODDEN = 1210;
+        public const int THESAURUSEULOGY = 850;
+        public const int THESAURUSESTEEM = 2279;
+        public const int THESAURUSDAMAGE = 1239;
+        public const int THESAURUSCUDDLE = 675;
+        public const string INFUNDIBULIFORM = "drainage_drawing_ctx";
+        public const string THESAURUSEXPUNGE = "通气帽系统-AI";
+        public const string ARCHIPRESBYTERATUS = "暂不支持污废分流";
+        public const string THESAURUSHARVEST = "PL";
+        public const string ETHELOTHRĒSKEIA = "TL";
+        public const string THESAURUSOBSESS = "管底h+X.XX";
+        public const string QUOTATIONCRIMEAN = "双格洗涤盆排水-AI";
+        public const string THESAURUSDISCRETE = "S型存水弯";
+        public const string THESAURUSCLIENTELE = "板上S弯";
+        public const string PHOTOMECHANICAL = "翻转状态";
+        public const string MAGNANIMOUSNESS = "清扫口系统";
+        public const int THESAURUSMALODOROUS = 21;
+        public const string THESAURUSSTENCH = "-DRAI-";
+        public const string THESAURUSDEFAME = "AI-房间框线";
+        public const string THESAURUSLIBIDO = "AI-房间名称";
+        public const string THESAURUSMARKET = "W-DRAI-OUT-PIPE";
+        public const string THESAURUSINCORPORATE = "WP_KTN_LG";
+        public const string INTERPUNCTUATION = "De";
+        public const string THESAURUSHANDICRAFT = "wb";
+        public const string THESAURUSNONCONFORMIST = "kd";
+        public const string THESAURUSNUTRITIOUS = "C-XREF-EXT";
+        public const string THESAURUSCOUNTRY = "雨水井";
+        public const string QUOTATIONARCTIC = "地漏平面";
+        public const int SENTIMENTALISING = 60;
+        public const string THESAURUSETHEREAL = "A$C58B12E6E";
+        public const string THESAURUSEPITAPH = "W-DRAI-PIEP-RISR";
+        public const string ALSOPREPONDERANCY = "A$C5E4A3C21";
+        public const string THESAURUSADDICTION = "PIPE-喷淋";
+        public const string UNINTERMITTENTLY = "A-Kitchen-3";
+        public const string THESAURUSAPPETIZING = "A-Kitchen-4";
+        public const string DIPTEROCARPACEAE = "A-Toilet-1";
+        public const string QUOTATIONDENNIS = "A-Toilet-2";
+        public const string PALAEOICHTHYOLOGIST = "A-Toilet-3";
+        public const string THESAURUSBONDAGE = "A-Toilet-4";
+        public const string THESAURUSINQUIRY = "-XiDiPen-";
+        public const string THESAURUSCOMPETITOR = "A-Kitchen-9";
+        public const string INOMETHYLCYCLOH = "0$座厕";
+        public const string EXEMPLIFICATIONAL = "0$asdfghjgjhkl";
+        public const string CALLITRICHACEAE = "A-Toilet-";
+        public const string THESAURUSPROTECTION = "A-Kitchen-";
+        public const string THESAURUSDISAPPOINTMENT = "|lp";
+        public const string THESAURUSDISPERSE = "|lp1";
+        public const string THESAURUSAFFILIATE = "|lp2";
+        public const string THESAURUSBRACKET = "A-Toilet-9";
+        public const string CATEGOREMATICALLY = "$xiyiji";
+        public const string THESAURUSFAMILIAR = "feng_dbg_test_washing_machine";
+        public const string THESAURUSMERCHANT = "ShortTranslatorLabels：";
+        public const string CHARACTERISTICAL = "LongTranslatorLabels：";
+        public const string THESAURUSBESTOW = "VerticalPipeLabels:";
+        public const string THESAURUSORIGIN = "ToiletPls:";
+        public const string THESAURUSCOMPARATIVE = "KitchenFls:";
+        public const string THESAURUSOPAQUE = "BalconyFls:";
+        public const string THESAURUSAPPRECIATION = "多通道";
+        public const string THESAURUSENFORCEMENT = "洗衣机";
+        public const string ALSOASTEREOGNOSIA = "FloorDrains：";
+        public const string THESAURUSJEALOUSY = "SingleOutletFloorDrains：";
+        public const string NEUROHYPOPHYSIS = "Shunts：";
+        public const string THESAURUSCREATOR = "circlesCount ";
+        public const string THESAURUSHONOUR = "Merges ";
+        public const string THESAURUSPOSSIBILITY = "drainage_drDatas";
+        public const string THESAURUSTORTURE = "单排";
+        public const string THESAURUSINTRUDE = "设置乙字弯";
+        public const string THESAURUSEXULTATION = "-0.XX";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>
@@ -7058,73 +7511,27 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 return THESAURUSNEGATIVE;
             return Regex.IsMatch(roomName, THESAURUSEMPLOYMENT);
         }
-        public const string THESAURUSEXCOMMUNICATE = "W-BUSH";
-        public const string QUOTATIONADJACENT = "污废合流井编号";
-        public const string THESAURUSGOODNESS = "W-NOTE";
-        public const int PHILANTHROPICALLY = 1190;
-        public const bool THESAURUSNEGATIVE = true;
-        public const string THESAURUSFRIVOLITY = "双池S弯";
-        public const int DNIPRODZERZHINSK = 900;
-        public const int THESAURUSINTESTINAL = 499;
-        public static bool IsY1L(string label)
+        public static bool IsKitchen(string roomName)
         {
-            if (label == null) return THESAURUSESPECIALLY;
-            return label.StartsWith(THESAURUSDELETE);
+            var roomNameContains = new List<string> { THESAURUSNESTLE, THESAURUSCOMMUNE };
+            if (string.IsNullOrEmpty(roomName))
+                return THESAURUSESPECIALLY;
+            if (roomNameContains.Any(c => roomName.Contains(c)))
+                return THESAURUSNEGATIVE;
+            if (roomName.Equals(THESAURUSSHOWER))
+                return THESAURUSNEGATIVE;
+            return THESAURUSESPECIALLY;
         }
-        public const int THESAURUSDISPUTE = 30;
-        public const string THESAURUSCOMPARATIVE = "KitchenFls:";
-        public const string THESAURUSEPITAPH = "W-DRAI-PIEP-RISR";
-        public const int THESAURUSABUNDANCE = 9;
-        public const int THESAURUSOBLITERATION = 120;
-        public const string CH2OHRCHNH2RCOOH = "X.XX";
-        public const string THESAURUSBYPASS = @"[^\d\.\-]";
-        public const int THESAURUSYAWNING = 18;
-        public const int THESAURUSFULSOME = 1158;
-        public const string THESAURUSENFORCEMENT = "洗衣机";
-        public const double MICRODENSITOMETRY = 130.0;
-        public const string THESAURUSVERIFICATION = "建筑完成面";
-        public const string THESAURUSPERCEIVE = "Y2L";
-        public const string THESAURUSEXTEMPORE = "TH-STYLE3";
-        public const string THESAURUSPUDDLE = "YL";
-        public const string THESAURUSFAMILIAR = "feng_dbg_test_washing_machine";
-        public const string THESAURUSDISAPPOINTMENT = "|lp";
-        public const int THESAURUSREBUKE = 43;
-        public const double THESAURUSADVANCEMENT = .7;
-        public const int THESAURUSSEDATE = 5600;
-        public const string THESAURUSBESTOW = "VerticalPipeLabels:";
-        public static bool IsYL(string label)
+        public static bool IsBalcony(string roomName)
         {
-            if (label == null) return THESAURUSESPECIALLY;
-            return label.StartsWith(THESAURUSPUDDLE);
+            if (roomName == null) return THESAURUSESPECIALLY;
+            var roomNameContains = new List<string> { THESAURUSOUTCRY };
+            if (string.IsNullOrEmpty(roomName))
+                return THESAURUSESPECIALLY;
+            if (roomNameContains.Any(c => roomName.Contains(c)))
+                return THESAURUSNEGATIVE;
+            return THESAURUSESPECIALLY;
         }
-        public const string THESAURUSBAPTIZE = "立管编号";
-        public const int QUOTATIONDERNIER = 919;
-        public const int QUOTATIONSCORIA = 12;
-        public const int THESAURUSINTRACTABLE = 24;
-        public const string THESAURUSCREATOR = "circlesCount ";
-        public const int THESAURUSRELEASE = 895;
-        public const int THESAURUSORIGINATE = 2379;
-        public const int THESAURUSFABULOUS = 1090;
-        public const int THESAURUSSTEEPLE = 420;
-        public const string THESAURUSASSIGN = "重力流雨水井编号";
-        public const int TEREBINTHINATED = 2;
-        public const int THESAURUSDETERIORATE = 424;
-        public const string THESAURUSCONSENT = "乙字弯";
-        public const int CHEMOTROPICALLY = 700;
-        public const int PARALLELOGRAMMIC = 6;
-        public const int THESAURUSVACILLATE = 1379;
-        public const string NEUROHYPOPHYSIS = "Shunts：";
-        public const int INDISCRIMINATENESS = 183;
-        public const string THESAURUSMELODIOUS = "普通地漏P弯";
-        public const string THESAURUSACQUIRE = "伸顶通气2000";
-        public const int OBSERVATIONALLY = 76;
-        public const string THESAURUSOBSESS = "管底h+X.XX";
-        public const string THESAURUSCOMPREHEND = "可见性";
-        public const string THESAURUSSHOWER = "厨";
-        public const double QUOTATIONRASCHIG = 250561.9571;
-        public const int THESAURUSENDING = 230;
-        public const char DELETERIOUSNESS = '，';
-        public const string THESAURUSHANDICRAFT = "wb";
         public static bool IsCorridor(string roomName)
         {
             if (roomName == null) return THESAURUSESPECIALLY;
@@ -7135,33 +7542,36 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 return THESAURUSNEGATIVE;
             return THESAURUSESPECIALLY;
         }
-        public const int THESAURUSFELLOW = 0x91;
-        public const string THESAURUSDISPERSE = "|lp1";
-        public const string THESAURUSBLACKOUT = "RF+1";
-        public const int THESAURUSDEFICIT = 1400;
-        public const int THESAURUSTESTIMONY = 0xae;
-        public const int THESAURUSBESTRIDE = 666;
-        public const string THESAURUSSEVERITY = "主卫";
-        public const string CORRESPONDINGLY = "NL";
-        public const string THESAURUSBRACKET = "A-Toilet-9";
-        public const int THESAURUSFEARLESS = 880;
-        public const int THESAURUSCUDDLE = 675;
-        public const string THESAURUSCIGARETTE = "连廊";
-        public const int THESAURUSJUDGEMENT = 3150;
-        public const string QUOTATIONPEIRCE = "TCH_EQUIPMENT";
-        public const int THESAURUSSUCCINCT = 600;
-        public const string THESAURUSEXULTATION = "-0.XX";
-        public const int MECHANORECEPTION = 990;
-        public const int QUOTATIONARENACEOUS = 1391;
-        public const int TETRAHYDROXYHEXANEDIOIC = 221;
-        public const int THESAURUSCONCEIVE = 170;
-        public const string THESAURUSCOMPETITOR = "A-Kitchen-9";
-        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() is THESAURUSATTENDANCE && x.IsDynamicBlock).ToList();
-        public const string THESAURUSMALICE = "$";
-        public const double QUOTATIONSENECA = 250.0;
-        public const int INCREDULOUSNESS = 5479;
-        public const string THESAURUSFURTHEST = "基点 Y";
-        public const string CONTEMPTIBILITY = "-";
+        public static bool IsWL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return Regex.IsMatch(label, PARALINGUISTICALLY);
+        }
+        public static bool IsFL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return Regex.IsMatch(label, THESAURUSBLISTER);
+        }
+        public static bool IsFL0(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return IsFL(label) && label.Contains(THESAURUSBURNING);
+        }
+        public static bool IsPL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return Regex.IsMatch(label, THESAURUSEFFUSION);
+        }
+        public static bool IsTL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return Regex.IsMatch(label, THESAURUSEMIGRATE);
+        }
+        public static bool IsDL(string label)
+        {
+            if (label == null) return THESAURUSESPECIALLY;
+            return Regex.IsMatch(label, ANTHROPOMORPHISM);
+        }
         public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
         {
             public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Autodesk.AutoCAD.DatabaseServices.Entity dbObj, Matrix3d matrix)
@@ -7203,421 +7613,27 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 });
             }
         }
-        public const int THESAURUSSMUDGE = 110;
-        public const int HYPERSENSITIZED = 250;
-        public const bool THESAURUSESPECIALLY = false;
-        public const string THESAURUSDEGREE = ">1500";
-        public const int THESAURUSUNABLE = 285;
-        public const string THESAURUSTORTURE = "单排";
-        public const int MELANCHOLIOUSNESS = 255;
-        public const int THESAURUSSENSATION = 371;
-        public const string THESAURUSADDICTION = "PIPE-喷淋";
-        public const int THESAURUSSPREAD = 1879;
-        public const double PALAEOICHTHYOLOGY = 780.0;
-        public const string THESAURUSBONDAGE = "A-Toilet-4";
-        public const int QUOTATIONPATRONAL = 100;
-        public const string THESAURUSORIGIN = "ToiletPls:";
-        public const string DETERMINATIVENESS = @"\-?\d+";
-        public const string THESAURUSCOUNTRY = "雨水井";
-        public const double THESAURUSINDEMNIFY = 0.0;
-        public const string THESAURUSNESTLE = "厨房";
-        public const int THESAURUSSCENERY = 2830;
-        public const int THESAURUSVERTIGO = 1330;
-        public const string MISAPPREHENSIVENESS = "DN100，余同";
-        public const double QUOTATIONBITUMINOUS = .4;
-        public const int THESAURUSDEVICE = 950;
-        public const string THESAURUSRESIGN = "W-DRAI-DIMS";
-        public const int THESAURUSACCORDANCE = 111;
-        public const double OBJECTIONABLENESS = 200.0;
-        public const string CHARACTERISTICAL = "LongTranslatorLabels：";
-        public const int THESAURUSCHASTITY = 404;
-        public const double THESAURUSDISRUPTION = 10e5;
-        public const int INTELLIGIBILITY = 2499;
-        public const string THESAURUSREPREHENSIBLE = "伸顶通气管";
-        public const int THESAURUSCONFECTIONERY = 1800;
-        public const int THESAURUSINTELLECT = 3;
-        public const char INSTITUTIONALISM = ',';
-        public const int THESAURUSESTEEM = 2279;
-        public const string THESAURUSTREASONABLE = "DN50";
-        public const string THESAURUSASTUTE = "伸顶通气500";
-        public const int THESAURUSMYTHICAL = 8;
-        public const string THESAURUSPERNICIOUS = "楼层编号";
-        public const int THESAURUSRETAIN = 8000;
-        public const string ARCHIPRESBYTERATUS = "暂不支持污废分流";
-        public const string THESAURUSAPPETIZING = "A-Kitchen-4";
-        public const char THESAURUSSLOPPY = '|';
-        public const string THESAURUSHEARTY = "1350";
-        public const int THESAURUSUTILITY = 406;
-        public const int CONVENTIONALIZE = 427;
-        public const int THESAURUSIMAGINATIVE = 2000;
-        public const string UNCOMPANIONABLE = ";";
-        public const int THESAURUSADMIRABLE = 780;
-        public const int THESAURUSCOOPERATION = 2320;
-        public const int THESAURUSSALUTATION = 3090;
-        public const string INFUNDIBULIFORM = "drainage_drawing_ctx";
-        public const double THESAURUSSATISFY = 383875.8169;
-        public const int THESAURUSEVINCE = 4;
-        public const string THESAURUSMERRIMENT = "TCH_MULTILEADER";
-        public const int THESAURUSCRITICIZE = 129;
-        public const int THESAURUSCORDIAL = 490;
-        public const string THESAURUSPOSSIBILITY = "drainage_drDatas";
-        public const string THESAURUSINTRUDE = "设置乙字弯";
-        public const string THESAURUSBALDERDASH = "带定位立管";
-        public const int THESAURUSBEFRIEND = 500;
-        public const int THESAURUSMANKIND = 650;
-        public const string THESAURUSPURIFY = "P型存水弯";
-        public const int THESAURUSINSECTICIDE = 289;
-        public const string THESAURUSKNICKERS = "error occured while getting baseX and baseY";
-        public static Point2d GetContraPoint(BlockReference br)
-        {
-            double dx = double.NaN;
-            double dy = double.NaN;
-            Point2d pt;
-            foreach (DynamicBlockReferenceProperty p in br.DynamicBlockReferencePropertyCollection)
-            {
-                if (p.PropertyName == THESAURUSHORRIFY)
-                {
-                    dx = Convert.ToDouble(p.Value);
-                }
-                else if (p.PropertyName == THESAURUSFURTHEST)
-                {
-                    dy = Convert.ToDouble(p.Value);
-                }
-            }
-            if (!double.IsNaN(dx) && !double.IsNaN(dy))
-            {
-                pt = br.Position.ToPoint2d() + new Vector2d(dx, dy);
-            }
-            else
-            {
-                throw new System.Exception(THESAURUSKNICKERS);
-            }
-            return pt;
-        }
-        public const int THESAURUSDOWNHEARTED = 180;
-        public const int CONSTRUCTIONISM = 1000;
-        public const int QUOTATIONHODDEN = 1210;
-        public const int METHYLCARBAMATE = 225;
-        public const int GASTRONOMICALLY = 1258;
-        public const string THESAURUSMERCHANT = "ShortTranslatorLabels：";
-        public const string QUOTATIONARCTIC = "地漏平面";
-        public const int THESAURUSFOLLOWER = 213;
-        public const int DENOMINATIONALIZE = 460;
-        public const string THESAURUSBENEFIT = "*";
-        public const string THESAURUSQUIETLY = "洗衣机地漏P弯";
-        public const string THESAURUSCANDLE = "A$C6BDE4816";
-        public static string GetStoreyNumberString(BlockReference br)
-        {
-            var d = br.ObjectId.GetAttributesInBlockReference(THESAURUSNEGATIVE);
-            d.TryGetValue(THESAURUSPERNICIOUS, out string ret);
-            return ret;
-        }
-        public const string QUOTATIONVENICE = "TCH_VPIPEDIM";
-        public const string PHOTOMECHANICAL = "翻转状态";
-        public const int INACCESSIBILITY = 693;
-        public const string THESAURUSLUSTFUL = "次卫";
-        public static bool IsKitchen(string roomName)
-        {
-            var roomNameContains = new List<string> { THESAURUSNESTLE, THESAURUSCOMMUNE };
-            if (string.IsNullOrEmpty(roomName))
-                return THESAURUSESPECIALLY;
-            if (roomNameContains.Any(c => roomName.Contains(c)))
-                return THESAURUSNEGATIVE;
-            if (roomName.Equals(THESAURUSSHOWER))
-                return THESAURUSNEGATIVE;
-            return THESAURUSESPECIALLY;
-        }
-        public const string QUOTATIONEMBRYOID = "立管检查口";
-        public const string THESAURUSMISJUDGE = "接阳台洗手盆排水";
-        public const int THESAURUSMALODOROUS = 21;
-        public const int THESAURUSUNAVOIDABLE = 160;
-        public const int THESAURUSHOUSING = 2730;
-        public const int THESAURUSINTANGIBLE = 980;
-        public const double HYPERCHOLESTERO = 2500.0;
-        public static bool IsMaybeLabelText(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            if (IsFL0(label)) return THESAURUSESPECIALLY;
-            static bool f(string label)
-            {
-                return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || IsWL(label);
-            }
-            return f(FixVerticalPipeLabel(label));
-        }
-        public const double THESAURUSDISABILITY = .0;
-        public const string THESAURUSJEALOUSY = "SingleOutletFloorDrains：";
-        public const int THESAURUSBEDEVIL = 0xc7;
-        public const string THESAURUSMAJESTY = "|";
-        public const int MAGNETOHYDRODYNAMICS = 1450;
-        public const string THESAURUSOFFENDER = "接厨房洗涤盆排水";
-        public const int THESAURUSCONSERVATIVE = 510;
-        public static bool IsDL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return Regex.IsMatch(label, ANTHROPOMORPHISM);
-        }
-        public const string THESAURUSOUTCRY = "阳台";
-        public const string THESAURUSBLISTER = @"^F\d?L";
-        public const double THESAURUSPROPRIETOR = .01;
-        public const string HYDROMETALLURGY = "RF+2";
-        public const string MAGNANIMOUSNESS = "清扫口系统";
-        public static List<int> ParseFloorNums(string floorStr)
-        {
-            if (string.IsNullOrWhiteSpace(floorStr)) return new List<int>();
-            floorStr = floorStr.Replace(DELETERIOUSNESS, INSTITUTIONALISM).Replace(THESAURUSFILIGREE, THESAURUSOVERACT).Replace(PHENYLENEDIAMINE, THESAURUSAMENITY).Replace(UNCONSTITUTIONAL, THESAURUSAMENITY).Replace(THESAURUSUNRELENTING, THESAURUSAMENITY);
-            var hs = new HashSet<int>();
-            foreach (var s in floorStr.Split(INSTITUTIONALISM))
-            {
-                if (string.IsNullOrEmpty(s)) continue;
-                var m = Regex.Match(s, THESAURUSAFFILIATION);
-                if (m.Success)
-                {
-                    var v1 = int.Parse(m.Groups[PIEZOELECTRICAL].Value);
-                    var v2 = int.Parse(m.Groups[TEREBINTHINATED].Value);
-                    var min = Math.Min(v1, v2);
-                    var max = Math.Max(v1, v2);
-                    for (int i = min; i <= max; i++)
-                    {
-                        hs.Add(i);
-                    }
-                    continue;
-                }
-                m = Regex.Match(s, DETERMINATIVENESS);
-                if (m.Success)
-                {
-                    hs.Add(int.Parse(m.Value));
-                }
-            }
-            hs.Remove(BATHYDRACONIDAE);
-            return hs.OrderBy(x => x).ToList();
-        }
-        public static bool IsPL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return Regex.IsMatch(label, THESAURUSEFFUSION);
-        }
-        public const string STOICHIOMETRICALLY = "1000";
-        public const string THESAURUSUNRELENTING = " ";
-        public const int THESAURUSPROLONG = 1679;
-        public const string THESAURUSCOMPLEX = "AI-空间名称";
-        public const int RECRYSTALLIZATION = 1900;
-        public const string PROGNOSTICATIVE = @"\d+\-";
-        public const string THESAURUSRECRIMINATION = "W-DRAI-EQPM";
-        public static string FixVerticalPipeLabel(string label)
-        {
-            if (label == null) return null;
-            if (label.StartsWith(THESAURUSDEFICIENCY))
-            {
-                return label.Substring(THESAURUSINTELLECT);
-            }
-            if (label.StartsWith(THESAURUSEMBODY))
-            {
-                return label.Substring(TEREBINTHINATED);
-            }
-            return label;
-        }
-        public static StoreyType GetStoreyType(string s)
-        {
-            return s switch
-            {
-                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR => StoreyType.SmallRoof,
-                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR => StoreyType.LargeRoof,
-                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR => StoreyType.StandardStorey,
-                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR => StoreyType.NonStandardStorey,
-                ThPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR => StoreyType.NonStandardStorey,
-                _ => StoreyType.Unknown,
-            };
-        }
-        public const string THESAURUSSUPPOSITION = "套管";
-        public const string CALLITRICHACEAE = "A-Toilet-";
-        public const string THESAURUSEMIGRATE = @"^T\d?L";
-        public const string THESAURUSELUCIDATE = "TCH_MTEXT";
-        public const int THESAURUSAPPORTION = 750;
-        public const string UNINTERMITTENTLY = "A-Kitchen-3";
-        public const int QUOTATIONLUNGEING = 3600;
-        public const int PRAETERNATURALIS = 1500;
-        public const int THESAURUSFORTIFICATION = 50;
-        public const string QUOTATIONASSERTORY = @"^(F\d?L|T\d?L|P\d?L|D\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
-        public const string THESAURUSEXPUNGE = "通气帽系统-AI";
-        public const string THESAURUSINQUIRY = "-XiDiPen-";
-        public const string THESAURUSNONCONFORMIST = "kd";
-        public const int THESAURUSCHANNEL = 789;
-        public const int THESAURUSSUPPLEMENTARY = 579;
-        public const string DIPTEROCARPACEAE = "A-Toilet-1";
-        public const int QUOTATIONCHOROID = 1200;
-        public const string THESAURUSEMPLOYMENT = @"^[卫]\d$";
-        public const char THESAURUSFILIGREE = 'B';
-        public const string THESAURUSAFFILIATION = @"(\-?\d+)-(\-?\d+)";
-        public const string UNCONSCIENTIOUS = "卫";
-        public const int THESAURUSEXCESSIVE = 155;
-        public const char THESAURUSRECKON = '$';
-        public const int PSYCHOGENICALLY = 1779;
-        public const int ELECTRODYNAMICAL = 156;
-        public const int THESAURUSMODIFY = 1109;
-        public static bool IsRainLabel(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return IsY1L(label) || IsY2L(label) || IsNL(label) || IsYL(label);
-        }
-        public static bool IsWL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return Regex.IsMatch(label, PARALINGUISTICALLY);
-        }
-        public const int QUOTATION1AUNIPOLAR = 1380;
-        public const string THESAURUSEMBODY = "1-";
-        public const string THESAURUSGENTILITY = "可见性1";
-        public const int UNCOMPREHENDING = 1591;
-        public const int THESAURUSEXPERIENCED = 1358;
-        public const int ANTHROPOMORPHITES = 658;
-        public const int THESAURUSADMISSION = 36;
-        public const string THESAURUSPRESENCE = "普通地漏S弯";
-        public const int THESAURUSJAGGED = 229;
-        public const string OVERCURIOUSNESS = "WaterWellWrappingPipeRadiusStringDict:";
-        public const string ALSOASTEREOGNOSIA = "FloorDrains：";
-        public static bool IsWantedLabelText(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label);
-        }
-        public const int THESAURUSDESTITUTION = 590;
-        public const int INFINITESIMALLY = 283;
-        public const int BATHYDRACONIDAE = 0;
-        public const string THESAURUSSPELLBOUND = "W-RAIN-NOTE";
-        public static bool IsDrainageLabelText(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return IsFL(label) || IsPL(label) || IsTL(label) || IsDL(label) || IsWL(label);
-        }
-        public const int MINERALOCORTICOID = 8192;
-        public const int THESAURUSREGARDING = 4096;
-        public const int THESAURUSWITHIN = 569;
-        public const string TRANSUBSTANTIALIS = "楼层类型";
-        public const int QUOTATIONSHIRTSLEEVE = 45;
-        public const string THESAURUSMARKET = "W-DRAI-OUT-PIPE";
-        public const string THESAURUSLUGGAGE = ",";
-        public const int THESAURUSCOMMAND = 275;
-        public const int SUPERCILIOUSNESS = 580;
-        public const string PROSELYTIZATION = "洗手间";
-        public const int THESAURUSDAMAGE = 1239;
-        public const string THESAURUSSMASHING = "W-DRAI-NOTE";
-        public const int THESAURUSEULOGY = 850;
-        public const string THESAURUSDECORATIVE = "W-BUSH-NOTE";
-        public const string INSTITUTIONALIZED = "双池P弯";
-        public const int THESAURUSOMNIVOROUS = 6079;
-        public const string THESAURUSOBJECTIVELY = "W-DRAI-DOME-PIPE";
-        public const string THESAURUSDEFILE = "1F";
-        public const string THESAURUSETHEREAL = "A$C58B12E6E";
-        public const string INTERSEGMENTALLY = "排出套管：";
-        public const string THESAURUSNUTRITIOUS = "C-XREF-EXT";
-        public const int THESAURUSTRAGEDY = 150;
-        public const int CONSERVATIONIST = 1125;
-        public const int THESAURUSSHIFTLESS = 389;
-        public const string THESAURUSDISCRETE = "S型存水弯";
-        public const double THESAURUSCOUNCIL = .1;
-        public const int TRISYLLABICALLY = 279;
-        public const int CHLOROFLUOROCARBONS = 800;
-        public const int THESAURUSUNDERWATER = 450;
-        public const int CORTICOSTEROIDS = 669;
-        public const string ANTHROPOMORPHISM = @"^D\d?L";
-        public const string THESAURUSPRELUDE = "卫生间";
-        public const string ETHELOTHRĒSKEIA = "TL";
-        public const int THESAURUSPROFFER = 330;
-        public static bool IsFL0(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return IsFL(label) && label.Contains(THESAURUSBURNING);
-        }
-        public const string THESAURUSOPAQUE = "BalconyFls:";
-        public const int THESAURUSMEETING = 237;
-        public const string LUCIOCEPHALIDAE = "公卫";
-        public const string THESAURUSEFFUSION = @"^P\d?L";
-        public const string THESAURUSMANIFEST = "TCH_TEXT";
-        public const int UNCONJECTURABLE = 200;
-        public const int THESAURUSENTHUSE = 390;
-        public const int QUOTATIONSORCERER = 90;
-        public const string THESAURUSPROTECTION = "A-Kitchen-";
-        public const string THESAURUSLIBIDO = "AI-房间名称";
-        public const int THESAURUSSETBACK = 121;
-        public const int THESAURUSEXPIRE = 320;
-        public const string THESAURUSDECISIVE = "W-DRAI-VENT-PIPE";
-        public const int INTERLINGUISTICS = 10;
-        public const string THESAURUSDEFAME = "AI-房间框线";
-        public const string CATEGOREMATICALLY = "$xiyiji";
-        public const int SENTIMENTALISING = 60;
-        public const int THESAURUSNOTIFY = 745;
-        public const int THESAURUSHIGHLY = 888;
-        public const int STANDOFFISHNESS = 55;
-        public const int COMMENSURATENESS = 550;
-        public const string THESAURUSHONOUR = "Merges ";
-        public const string THESAURUSTUSSLE = "DN100乙字弯";
-        public const int THESAURUSBEWARE = 779;
-        public static bool IsFL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return Regex.IsMatch(label, THESAURUSBLISTER);
-        }
-        public const int PROCHLORPERAZINE = 318;
-        public const int METAMATHEMATICS = 151;
-        public const int PSYCHOGERIATRIC = 3500;
-        public const string THESAURUSREPRESSION = "套管系统";
-        public const int DISCOMFORTABLENESS = 40;
-        public static string TryParseWrappingPipeRadiusText(string text)
-        {
-            if (text == null) return null;
-            var t = Regex.Replace(text, THESAURUSBYPASS, THESAURUSAMENITY);
-            t = Regex.Replace(t, PROGNOSTICATIVE, CONTEMPTIBILITY);
-            return t;
-        }
-        public const int THESAURUSBRAVADO = 251;
-        public const string PARALINGUISTICALLY = @"^W\d?L";
-        public const int VERGISSMEINNICHT = 660;
-        public const string THESAURUSDICTIONARY = "TCH_PIPE";
-        public const int PIEZOELECTRICAL = 1;
-        public static bool IsNotedLabel(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return label.Contains(THESAURUSTORTURE) || label.Contains(THESAURUSINTRUDE);
-        }
-        public const string PALAEOICHTHYOLOGIST = "A-Toilet-3";
-        public const string CALYMMATOBACTERIUM = "DN50，余同";
-        public static bool IsBalcony(string roomName)
-        {
-            if (roomName == null) return THESAURUSESPECIALLY;
-            var roomNameContains = new List<string> { THESAURUSOUTCRY };
-            if (string.IsNullOrEmpty(roomName))
-                return THESAURUSESPECIALLY;
-            if (roomNameContains.Any(c => roomName.Contains(c)))
-                return THESAURUSNEGATIVE;
-            return THESAURUSESPECIALLY;
-        }
-        public const string THESAURUSAFFILIATE = "|lp2";
-        public const double THESAURUSRECAPITULATE = 1800.0;
-        public const int QUINQUARTICULARIS = 360;
-        public const int THESAURUSSLIVER = 1700;
-        public const int THESAURUSCONFOUND = 71;
-        public const string STERNOPTYCHIDAE = "接卫生间排水管";
-        public const string THESAURUSHARVEST = "PL";
-        public const string INOMETHYLCYCLOH = "0$座厕";
-        public const string THESAURUSINCORPORATE = "WP_KTN_LG";
-        public const int THESAURUSPOIGNANT = 1650;
-        public const string QUOTATIONDENNIS = "A-Toilet-2";
-        public static bool IsTL(string label)
-        {
-            if (label == null) return THESAURUSESPECIALLY;
-            return Regex.IsMatch(label, THESAURUSEMIGRATE);
-        }
-        public const int HETEROTRANSPLANTED = 1479;
-        public const string THESAURUSINCIDENTAL = "标高";
-        public const string THESAURUSATTENDANCE = "楼层框定";
-        public const int THESAURUSWORKSHOP = 1300;
-        public const string THESAURUSAPPRECIATION = "多通道";
-        public const int ALSOHEAVENWARDS = 1270;
     }
     public static class GeometryExtensions
     {
-        public static Polygon Clone(Polygon o) => new Polygon(o.Shell);
+        public static Geometry Clone(this Geometry geo)
+        {
+            if (geo is null) return null;
+            if (geo is Point pt) return Clone(pt);
+            if (geo is LineString ls) return Clone(ls);
+            if (geo is Polygon pl) return Clone(pl);
+            if (geo is MultiPoint mpt) return new MultiPoint(mpt.Geometries.Cast<Point>().Select(Clone).ToArray());
+            if (geo is MultiLineString mls) return new MultiLineString(mls.Geometries.Cast<LineString>().Select(Clone).ToArray());
+            if (geo is MultiPolygon mpl) return new MultiPolygon(mpl.Geometries.Cast<Polygon>().Select(Clone).ToArray());
+            throw new NotSupportedException();
+        }
+        public static Coordinate Clone(Coordinate o) => new Coordinate(o.X, o.Y);
+        public static Point Clone(Point o) => new Point(o.X, o.Y);
         public static LineString Clone(LineString o) => new LineString(o.Coordinates);
+        public static Polygon Clone(Polygon o) => new Polygon(o.Shell);
+        public static IEnumerable<Point> Clone(this IEnumerable<Point> geos) => geos.Select(Clone);
+        public static IEnumerable<LineString> Clone(this IEnumerable<LineString> geos) => geos.Select(Clone);
+        public static IEnumerable<Polygon> Clone(this IEnumerable<Polygon> geos) => geos.Select(Clone);
         public static IEnumerable<Geometry> ToBaseGeometries(this Geometry geometry)
         {
             if (geometry is Point or LineString or Polygon)
@@ -7635,22 +7651,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
-        public static Coordinate Clone(Coordinate o) => new Coordinate(o.X, o.Y);
-        public static IEnumerable<Polygon> Clone(this IEnumerable<Polygon> geos) => geos.Select(Clone);
-        public static Geometry Clone(this Geometry geo)
-        {
-            if (geo is null) return null;
-            if (geo is Point pt) return Clone(pt);
-            if (geo is LineString ls) return Clone(ls);
-            if (geo is Polygon pl) return Clone(pl);
-            if (geo is MultiPoint mpt) return new MultiPoint(mpt.Geometries.Cast<Point>().Select(Clone).ToArray());
-            if (geo is MultiLineString mls) return new MultiLineString(mls.Geometries.Cast<LineString>().Select(Clone).ToArray());
-            if (geo is MultiPolygon mpl) return new MultiPolygon(mpl.Geometries.Cast<Polygon>().Select(Clone).ToArray());
-            throw new NotSupportedException();
-        }
-        public static IEnumerable<LineString> Clone(this IEnumerable<LineString> geos) => geos.Select(Clone);
-        public static Point Clone(Point o) => new Point(o.X, o.Y);
-        public static IEnumerable<Point> Clone(this IEnumerable<Point> geos) => geos.Select(Clone);
     }
 }
 namespace ThMEPWSS.Diagram.ViewModel
@@ -7690,6 +7690,20 @@ namespace ThMEPWSS.Diagram.ViewModel
     [Serializable]
     public class RainSystemDiagramViewModel : NotifyPropertyChangedBase
     {
+        private List<string> _FloorListDatas = new List<string>();
+        public List<string> FloorListDatas
+        {
+            get
+            {
+                return _FloorListDatas;
+            }
+            set
+            {
+                _FloorListDatas = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private RainSystemDiagramParamsViewModel _Params = new RainSystemDiagramParamsViewModel();
         public RainSystemDiagramParamsViewModel Params
         {
             get
@@ -7717,24 +7731,11 @@ namespace ThMEPWSS.Diagram.ViewModel
                 }
             }
         }
-        private RainSystemDiagramParamsViewModel _Params = new RainSystemDiagramParamsViewModel();
-        public List<string> FloorListDatas
-        {
-            get
-            {
-                return _FloorListDatas;
-            }
-            set
-            {
-                _FloorListDatas = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        private List<string> _FloorListDatas = new List<string>();
     }
     [Serializable]
     public class DrainageSystemDiagramViewModel : NotifyPropertyChangedBase
     {
+        private List<string> _FloorListDatas = new List<string>();
         public List<string> FloorListDatas
         {
             get
@@ -7747,6 +7748,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        private DrainageSystemDiagramParamsViewModel _Params = new DrainageSystemDiagramParamsViewModel();
         public DrainageSystemDiagramParamsViewModel Params
         {
             get
@@ -7759,8 +7761,6 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private List<string> _FloorListDatas = new List<string>();
-        private DrainageSystemDiagramParamsViewModel _Params = new DrainageSystemDiagramParamsViewModel();
         public void CollectFloorListDatas(bool focus)
         {
             try
@@ -7783,6 +7783,36 @@ namespace ThMEPWSS.Diagram.ViewModel
     [Serializable]
     public class DrainageSystemDiagramParamsViewModel : NotifyPropertyChangedBase
     {
+        public void CopyTo(DrainageSystemDiagramParamsViewModel other)
+        {
+            foreach (var pi in GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                pi.SetValue(other, pi.GetValue(this));
+            }
+        }
+        public DrainageSystemDiagramParamsViewModel Clone()
+        {
+            return this.ToJson().FromJson<DrainageSystemDiagramParamsViewModel>();
+        }
+        private double _StoreySpan = THESAURUSCONFECTIONERY; 
+        public double StoreySpan
+        {
+            get
+            {
+                if (_StoreySpan <= BATHYDRACONIDAE)
+                {
+                    _StoreySpan = THESAURUSIMAGINATIVE;
+                    this.RaisePropertyChanged();
+                }
+                return _StoreySpan;
+            }
+            set
+            {
+                _StoreySpan = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _WashingMachineFloorDrainDN = THESAURUSTREASONABLE;
         public string WashingMachineFloorDrainDN
         {
             get
@@ -7796,114 +7826,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
         private string _OtherFloorDrainDN = THESAURUSTREASONABLE;
-        private bool _CanHaveDownboard = THESAURUSNEGATIVE;
-        private bool _ShouldRaiseWashingMachine = THESAURUSESPECIALLY;
-        public string 厨房洗涤盆
-        {
-            get
-            {
-                return _厨房洗涤盆;
-            }
-            set
-            {
-                _厨房洗涤盆 = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool CouldHavePeopleOnRoof
-        {
-            get
-            {
-                return _CouldHavePeopleOnRoof;
-            }
-            set
-            {
-                _CouldHavePeopleOnRoof = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool CanHaveDownboard
-        {
-            get
-            {
-                return _CanHaveDownboard;
-            }
-            set
-            {
-                _CanHaveDownboard = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public string DirtyWaterWellDN
-        {
-            get
-            {
-                return _DirtyWaterWellDN;
-            }
-            set
-            {
-                _DirtyWaterWellDN = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        private bool _CouldHavePeopleOnRoof = THESAURUSNEGATIVE;
-        private string _厨房洗涤盆 = THESAURUSFRIVOLITY;
-        public void CopyTo(DrainageSystemDiagramParamsViewModel other)
-        {
-            foreach (var pi in GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
-            {
-                pi.SetValue(other, pi.GetValue(this));
-            }
-        }
-        public double StoreySpan
-        {
-            get
-            {
-                if (_StoreySpan <= BATHYDRACONIDAE)
-                {
-                    _StoreySpan = THESAURUSIMAGINATIVE;
-                    this.RaisePropertyChanged();
-                }
-                return _StoreySpan;
-            }
-            set
-            {
-                _StoreySpan = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool ShouldRaiseWashingMachine
-        {
-            get
-            {
-                return _ShouldRaiseWashingMachine;
-            }
-            set
-            {
-                _ShouldRaiseWashingMachine = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool 通气H件隔层布置
-        {
-            get
-            {
-                return _通气H件隔层布置;
-            }
-            set
-            {
-                _通气H件隔层布置 = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public DrainageSystemDiagramParamsViewModel Clone()
-        {
-            return this.ToJson().FromJson<DrainageSystemDiagramParamsViewModel>();
-        }
-        private double _StoreySpan = THESAURUSCONFECTIONERY; 
-        private string _WashingMachineFloorDrainDN = THESAURUSTREASONABLE;
-        private string _DirtyWaterWellDN = THESAURUSTREASONABLE;
-        private bool _通气H件隔层布置;
         public string OtherFloorDrainDN
         {
             get
@@ -7916,49 +7838,33 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-    }
-    [Serializable]
-    public class RainSystemDiagramParamsViewModel : NotifyPropertyChangedBase
-    {
-        public bool HasAirConditionerFloorDrain
+        private string _DirtyWaterWellDN = THESAURUSTREASONABLE;
+        public string DirtyWaterWellDN
         {
             get
             {
-                return _HasAirConditionerFloorDrain;
+                return _DirtyWaterWellDN;
             }
             set
             {
-                _HasAirConditionerFloorDrain = value;
+                _DirtyWaterWellDN = value;
                 this.RaisePropertyChanged();
             }
         }
-        private bool _HasAirConditionerFloorDrain = THESAURUSESPECIALLY;
-        private string _CondensePipeHorizontalDN = THESAURUSTREASONABLE;
+        private bool _ShouldRaiseWashingMachine = THESAURUSESPECIALLY;
+        public bool ShouldRaiseWashingMachine
+        {
+            get
+            {
+                return _ShouldRaiseWashingMachine;
+            }
+            set
+            {
+                _ShouldRaiseWashingMachine = value;
+                this.RaisePropertyChanged();
+            }
+        }
         private bool _CouldHavePeopleOnRoof = THESAURUSNEGATIVE;
-        public string CondensePipeVerticalDN
-        {
-            get
-            {
-                return _CondensePipeDN;
-            }
-            set
-            {
-                _CondensePipeDN = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public string BalconyRainPipeDN
-        {
-            get
-            {
-                return _BalconyRainPipeDN;
-            }
-            set
-            {
-                _BalconyRainPipeDN = value;
-                this.RaisePropertyChanged();
-            }
-        }
         public bool CouldHavePeopleOnRoof
         {
             get
@@ -7971,6 +7877,61 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        private bool _CanHaveDownboard = THESAURUSNEGATIVE;
+        public bool CanHaveDownboard
+        {
+            get
+            {
+                return _CanHaveDownboard;
+            }
+            set
+            {
+                _CanHaveDownboard = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _通气H件隔层布置;
+        public bool 通气H件隔层布置
+        {
+            get
+            {
+                return _通气H件隔层布置;
+            }
+            set
+            {
+                _通气H件隔层布置 = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _厨房洗涤盆 = THESAURUSFRIVOLITY;
+        public string 厨房洗涤盆
+        {
+            get
+            {
+                return _厨房洗涤盆;
+            }
+            set
+            {
+                _厨房洗涤盆 = value;
+                this.RaisePropertyChanged();
+            }
+        }
+    }
+    [Serializable]
+    public class RainSystemDiagramParamsViewModel : NotifyPropertyChangedBase
+    {
+        public void CopyTo(RainSystemDiagramParamsViewModel other)
+        {
+            foreach (var pi in GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                pi.SetValue(other, pi.GetValue(this));
+            }
+        }
+        public RainSystemDiagramParamsViewModel Clone()
+        {
+            return this.ToJson().FromJson<RainSystemDiagramParamsViewModel>();
+        }
+        private double _StoreySpan = THESAURUSCONFECTIONERY; 
         public double StoreySpan
         {
             get
@@ -7988,26 +7949,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private string _BalconyRainPipeDN = THESAURUSSPITEFUL;
-        private bool _HasAiringForCondensePipe = THESAURUSESPECIALLY;
-        private string _CondensePipeDN = THESAURUSTREASONABLE;
-        public RainSystemDiagramParamsViewModel Clone()
-        {
-            return this.ToJson().FromJson<RainSystemDiagramParamsViewModel>();
-        }
-        public string CondensePipeHorizontalDN
-        {
-            get
-            {
-                return _CondensePipeHorizontalDN;
-            }
-            set
-            {
-                _CondensePipeHorizontalDN = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        private double _StoreySpan = THESAURUSCONFECTIONERY; 
+        private string _BalconyFloorDrainDN = THESAURUSTREASONABLE;
         public string BalconyFloorDrainDN
         {
             get
@@ -8020,13 +7962,59 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        public void CopyTo(RainSystemDiagramParamsViewModel other)
+        private string _CondensePipeDN = THESAURUSTREASONABLE;
+        public string CondensePipeVerticalDN
         {
-            foreach (var pi in GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            get
             {
-                pi.SetValue(other, pi.GetValue(this));
+                return _CondensePipeDN;
+            }
+            set
+            {
+                _CondensePipeDN = value;
+                this.RaisePropertyChanged();
             }
         }
+        private string _CondensePipeHorizontalDN = THESAURUSTREASONABLE;
+        public string CondensePipeHorizontalDN
+        {
+            get
+            {
+                return _CondensePipeHorizontalDN;
+            }
+            set
+            {
+                _CondensePipeHorizontalDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private string _BalconyRainPipeDN = THESAURUSSPITEFUL;
+        public string BalconyRainPipeDN
+        {
+            get
+            {
+                return _BalconyRainPipeDN;
+            }
+            set
+            {
+                _BalconyRainPipeDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _HasAirConditionerFloorDrain = THESAURUSESPECIALLY;
+        public bool HasAirConditionerFloorDrain
+        {
+            get
+            {
+                return _HasAirConditionerFloorDrain;
+            }
+            set
+            {
+                _HasAirConditionerFloorDrain = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _HasAiringForCondensePipe = THESAURUSESPECIALLY;
         public bool HasAiringForCondensePipe
         {
             get
@@ -8039,6 +8027,18 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private string _BalconyFloorDrainDN = THESAURUSTREASONABLE;
+        private bool _CouldHavePeopleOnRoof = THESAURUSNEGATIVE;
+        public bool CouldHavePeopleOnRoof
+        {
+            get
+            {
+                return _CouldHavePeopleOnRoof;
+            }
+            set
+            {
+                _CouldHavePeopleOnRoof = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
 }
