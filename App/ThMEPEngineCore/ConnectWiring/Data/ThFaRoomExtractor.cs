@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.ConnectWiring.Data
 {
@@ -23,19 +25,29 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         {
             //读取数据
             base.Extract(database, pts);
+        }
+
+        public override List<ThGeometry> BuildGeometries()
+        {
             //读取配置表
             ReadRoomConfigTable();
             //数据处理
-            List<Polyline> roomPolys = new List<Polyline>();
+            var geos = new List<ThGeometry>();
             foreach (var room in Rooms)
             {
+                var roomInfos = GetMPolygonInfo(room.Boundary);
+                holes.AddRange(roomInfos.Value);
+                var geometry = new ThGeometry();
                 if (room.Tags.Count > 0 && !RoomConfigTreeService.IsPublicRoom(roomTableConfig, room.Tags[0]))
                 {
-                    var roomInfos = GetMPolygonInfo(room.Boundary);
-                    roomPolys.Add(roomInfos.Key);
-                    holes.AddRange(roomInfos.Value);
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, room.Name);
+                    geometry.Boundary = roomInfos.Key;
+                    geos.Add(geometry);
                 }
             }
+
+            return geos;
         }
 
         private KeyValuePair<Polyline, List<Polyline>> GetMPolygonInfo(Entity entity)
