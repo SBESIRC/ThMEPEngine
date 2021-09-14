@@ -74,9 +74,25 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                 Closed = true,
             };
             pline.CreatePolyline(collection);
+            Geos.AddRange(CreateFireApartGeos(pline));//添加防火分区
             Geos.AddRange(GetLineGeos(pline));//添加中心线
             Geos.AddRange(CreatePowerGeos());//添加电源
             Geos.AddRange(CreateHolesGeos());//添加洞口
+        }
+
+        /// <summary>
+        /// 创建防火分区
+        /// </summary>
+        /// <returns></returns>
+        private List<ThGeometry> CreateFireApartGeos(Polyline frame)
+        {
+            var geos = new List<ThGeometry>();
+            var geometry = new ThGeometry();
+            geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.FireApart.ToString());
+            geometry.Boundary = frame;
+            geos.Add(geometry);
+
+            return geos;
         }
 
         /// <summary>
