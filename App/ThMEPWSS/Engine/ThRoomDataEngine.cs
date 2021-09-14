@@ -120,21 +120,22 @@ namespace ThMEPWSS.Engine
                     //计算类别，这里是获取基本的房间
                     foreach (var name in item.Tags)
                     {
+                        var checkName = RoomNameFormat(name);
                         if (pRoom.roomTypeName != EnumRoomType.Other)
                             break;
-                        if (IsToilte(name))
+                        if (IsToilte(checkName))
                         {
                             pRoom.roomTypeName = EnumRoomType.Toilet;
                         }
-                        else if (IsKitchen(name))
+                        else if (IsKitchen(checkName))
                         {
                             pRoom.roomTypeName = EnumRoomType.Kitchen;
                         }
-                        else if (IsBalcony(name))
+                        else if (IsBalcony(checkName))
                         {
                             pRoom.roomTypeName = EnumRoomType.Balcony;
                         }
-                        else if (IsCorridor(name))
+                        else if (IsCorridor(checkName))
                         {
                             pRoom.roomTypeName = EnumRoomType.Corridor;
                         }
@@ -282,7 +283,19 @@ namespace ThMEPWSS.Engine
             }
             return flueRooms;
         }
-        
+
+        private string RoomNameFormat(string name) 
+        {
+            //将字符串中的非汉字移除，只保留汉字
+            string strRet = "";
+            if (string.IsNullOrEmpty(name))
+                return strRet;
+            var copyName = (string)name.Clone();
+            MatchCollection results = Regex.Matches(copyName, "[\u4e00-\u9fa5]+");
+            foreach (var v in results)
+                strRet += v.ToString();
+            return strRet;
+        }
         private bool IsToilte(string roomName)
         {
             //1)	包含“卫生间” //2)	包含“主卫” //3)	包含“次卫”
