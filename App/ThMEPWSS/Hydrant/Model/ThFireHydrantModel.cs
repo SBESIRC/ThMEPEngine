@@ -8,12 +8,12 @@ namespace ThMEPWSS.Hydrant.Model
         public ThFireHydrantModel()
         {
             hoseLength = 25.0;
-            selfLength = 15.0;            
+            selfLength = 15.0;
             fireType = "A类火灾";
             dangerLevel = "中危险级";
             isShowCheckResult = true;
             checkObjectOption = CheckObjectOps.FireHydrant;
-            protectStrengthOption = ProtectStrengthOps.DoubleStrand;            
+            protectStrengthOption = ProtectStrengthOps.DoubleStrand;
             waterColumnLengthOption = WaterColumnLengthOps.TenMeters;
             maxProtectDisOption = MaxProtectDisOps.Calculation;
             reductionFactorOption = ReductionFactorOps.ZeroDotEight;
@@ -35,7 +35,7 @@ namespace ThMEPWSS.Hydrant.Model
                 RaisePropertyChanged("CheckObjectOption");
             }
         }
-        
+
         private ProtectStrengthOps protectStrengthOption;
         /// <summary>
         /// 保护强度->双股
@@ -51,7 +51,7 @@ namespace ThMEPWSS.Hydrant.Model
                 protectStrengthOption = value;
                 RaisePropertyChanged("ProtectStrengthOption");
             }
-        }       
+        }
 
         private double hoseLength;
         /// <summary>
@@ -118,7 +118,7 @@ namespace ThMEPWSS.Hydrant.Model
             }
         }
 
-        private MaxProtectDisOps maxProtectDisOption; 
+        private MaxProtectDisOps maxProtectDisOption;
         /// <summary>
         /// 最大距离保护-> 计算值选项
         /// </summary>
@@ -133,7 +133,7 @@ namespace ThMEPWSS.Hydrant.Model
                 maxProtectDisOption = value;
                 RaisePropertyChanged("MaxProtectDisOption");
             }
-        }        
+        }
 
         private double selfLength;
         /// <summary>
@@ -263,7 +263,7 @@ namespace ThMEPWSS.Hydrant.Model
         {
             get
             {
-                var ang = waterColumnAngleOption == WaterColumnAngleOps.FortyFiveDegree ? 45.0 : 90.0;
+                var ang = waterColumnAngleOption == WaterColumnAngleOps.FortyFiveDegree ? 45.0 : 60.0;
                 var rad = ThMEPEngineCore.CAD.ThAuxiliaryUtils.AngToRad(ang);
                 return Math.Sin(rad) * WaterColumnLength;
             }
@@ -276,7 +276,7 @@ namespace ThMEPWSS.Hydrant.Model
             // true->单股，false->双股
             get
             {
-                if(checkObjectOption == CheckObjectOps.FireHydrant)
+                if (checkObjectOption == CheckObjectOps.FireHydrant)
                 {
                     return protectStrengthOption == ProtectStrengthOps.SingleStrand ? true : false;
                 }
@@ -317,7 +317,7 @@ namespace ThMEPWSS.Hydrant.Model
     public enum WaterColumnLengthOps
     {
         TenMeters = 0,
-        ThirteenMeters =1,
+        ThirteenMeters = 1,
     }
     /// <summary>
     /// 折减系数
@@ -344,8 +344,8 @@ namespace ThMEPWSS.Hydrant.Model
         /// </summary>
         FortyFiveDegree,
         /// <summary>
-        /// 90°
+        /// 60°
         /// </summary>
-        NinetyDegree
+        SixtyDegree
     }
 }
