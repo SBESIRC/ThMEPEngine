@@ -14,23 +14,27 @@ namespace TianHua.FanSelection.UI.CAD
         public ThFanSelectionDbDeepCloneHandler(Database database)
         {
             Database = database;
-            ThFanModelOverruleManager.Instance.Register();
             ModelSystemMapping = new Dictionary<string, string>();
-            Database.DeepCloneEnded += DbEvent_DeepCloneEnded_Handler;
+            Database.BeginDeepClone += DbEvent_BeginDeepClone_Handler;
             Database.BeginDeepCloneTranslation += DbEvent_BeginDeepCloneTranslation_Handler;
+            Database.DeepCloneEnded += DbEvent_DeepCloneEnded_Handler;
         }
 
         public void Dispose()
         {
-            ThFanModelOverruleManager.Instance.UnRegister();
-            Database.DeepCloneEnded -= DbEvent_DeepCloneEnded_Handler;
+            Database.BeginDeepClone -= DbEvent_BeginDeepClone_Handler;
             Database.BeginDeepCloneTranslation -= DbEvent_BeginDeepCloneTranslation_Handler;
+            Database.DeepCloneEnded -= DbEvent_DeepCloneEnded_Handler;
+        }
+
+        public void DbEvent_BeginDeepClone_Handler(object sender, IdMappingEventArgs e)
+        {
+            //
         }
 
         public void DbEvent_BeginDeepCloneTranslation_Handler(object sender, IdMappingEventArgs e)
         {
             Mapping = e.IdMapping;
-            ThFanModelOverruleManager.Instance.Reset();
         }
 
         public void DbEvent_DeepCloneEnded_Handler(object sender, EventArgs e)

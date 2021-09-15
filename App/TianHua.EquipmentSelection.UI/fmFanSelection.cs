@@ -232,7 +232,7 @@ namespace TianHua.FanSelection.UI
             m_ListAxialFanParametersDouble = FuncJson.Deserialize<List<AxialFanParameters>>(_JsonAxialFanParametersDouble);
 
             // 从图纸NOD中读取风机模型
-            var dataSource = new ThFanModelDbDataSource();
+            var dataSource = new ThFanModelDataDbSource();
             dataSource.Load(Active.Database);
             if (dataSource.Models.Count > 0)
             {
@@ -2259,6 +2259,7 @@ namespace TianHua.FanSelection.UI
 
             // 发送CAD命令
             ThFanSelectionService.Instance.Model = _FanDataModel;
+            ThFanSelectionService.Instance.SubModel = m_ListFan.GetSubModel(_FanDataModel.ID);
             CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMINSERT");
         }
 
@@ -2415,33 +2416,23 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelCopied(ThModelCopyMessage message)
         {
+            var ds = new ThFanModelDataDbSource();
+            ds.Load(Active.Database);
             foreach (var item in message.Data.ModelSystemMapping)
             {
                 var _Guid = item.Key;
                 var models = new List<FanDataModel>();
-                var _Fan = m_ListFan.Find(p => p.ID == item.Value);
+                var _Fan = ds.Models.Find(p => p.ID == _Guid);
                 if (_Fan != null)
                 {
-                    var _Json = FuncJson.Serialize(_Fan);
-                    var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
+                    //
+                    models.Add(_Fan);
 
-                    _FanDataModel.PID = "0";
-                    _FanDataModel.ID = _Guid;
-                    _FanDataModel.IsErased = false;
-                    _FanDataModel.Name = _FanDataModel.Name;
-                    _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
-                    models.Add(_FanDataModel);
-
-                    var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                    //
+                    var _SonFan = ds.Models.Find(p => p.PID == _Guid);
                     if (_SonFan != null)
                     {
-                        var _SonJson = FuncJson.Serialize(_SonFan);
-                        var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
-
-                        _SonFanData.ID = Guid.NewGuid().ToString();
-                        _SonFanData.PID = _Guid;
-                        _SonFanData.IsErased = false;
-                        models.Add(_SonFanData);
+                        models.Add(_SonFan);
                     }
 
                     // 更新数据源
@@ -2451,24 +2442,62 @@ namespace TianHua.FanSelection.UI
                         m_ListFan.InsertRange(_Index + 1, models);
                     }
                 }
-            }
 
-            // 更新图纸
-            var mappings = new Dictionary<FanDataModel, FanDataModel>();
-            foreach (var item in message.Data.ModelSystemMapping)
-            {
-                var target = m_ListFan.Find(p => p.ID == item.Key);
-                var source = m_ListFan.Find(p => p.ID == item.Value);
-                if (target != null && source != null)
-                {
-                    mappings.Add(target, source);
-                }
             }
-            if (mappings.Count > 0)
-            {
-                ThFanSelectionService.Instance.ModelMapping = mappings;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMCOPY");
-            }
+            //foreach (var item in message.Data.ModelSystemMapping)
+            //{
+            //    var _Guid = item.Key;
+            //    var models = new List<FanDataModel>();
+            //    var _Fan = m_ListFan.Find(p => p.ID == item.Value);
+            //    if (_Fan != null)
+            //    {
+            //        var _Json = FuncJson.Serialize(_Fan);
+            //        var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
+
+            //        _FanDataModel.PID = "0";
+            //        _FanDataModel.ID = _Guid;
+            //        _FanDataModel.IsErased = false;
+            //        _FanDataModel.Name = _FanDataModel.Name;
+            //        _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
+            //        models.Add(_FanDataModel);
+
+            //        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+            //        if (_SonFan != null)
+            //        {
+            //            var _SonJson = FuncJson.Serialize(_SonFan);
+            //            var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
+
+            //            _SonFanData.ID = Guid.NewGuid().ToString();
+            //            _SonFanData.PID = _Guid;
+            //            _SonFanData.IsErased = false;
+            //            models.Add(_SonFanData);
+            //        }
+
+            //        // 更新数据源
+            //        if (models.Count > 0)
+            //        {
+            //            var _Index = m_ListFan.IndexOf(_Fan);
+            //            m_ListFan.InsertRange(_Index + 1, models);
+            //        }
+            //    }
+            //}
+
+            //// 更新图纸
+            //var mappings = new Dictionary<FanDataModel, FanDataModel>();
+            //foreach (var item in message.Data.ModelSystemMapping)
+            //{
+            //    var target = m_ListFan.Find(p => p.ID == item.Key);
+            //    var source = m_ListFan.Find(p => p.ID == item.Value);
+            //    if (target != null && source != null)
+            //    {
+            //        mappings.Add(target, source);
+            //    }
+            //}
+            //if (mappings.Count > 0)
+            //{
+            //    ThFanSelectionService.Instance.ModelMapping = mappings;
+            //    CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMCOPY");
+            //}
 
             // 更新界面
             TreeList.RefreshDataSource();
@@ -2614,7 +2643,7 @@ namespace TianHua.FanSelection.UI
             TreeList.PostEditor();
 
             // 保存到图纸NOD中
-            var dataSource = new ThFanModelDbDataSource()
+            var dataSource = new ThFanModelDataDbSource()
             {
                 Models = m_ListFan,
             };

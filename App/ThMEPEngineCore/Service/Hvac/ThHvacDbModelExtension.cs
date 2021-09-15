@@ -71,6 +71,18 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
+        public static void UpdateModelIdentifier(this DBObject dBObject, string identifier)
+        {
+            var oldValue = dBObject.GetModelIdentifier();
+            if (!string.IsNullOrEmpty(identifier) && (oldValue != identifier))
+            {
+                dBObject.ModXData(
+                    ThHvacCommon.RegAppName_FanSelection,
+                    DxfCode.ExtendedDataAsciiString,
+                    oldValue, identifier);
+            }
+        }
+
         public static string GetModelIdentifier(this ObjectId obj)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);
@@ -139,6 +151,24 @@ namespace ThMEPEngineCore.Service.Hvac
                 newValues.Add(DxfCode.ExtendedDataRegAppName, regAppName);
                 dBObject.XData = newValues; //为对象的XData属性重新赋值，从而删除扩展数据 
             }
+        }
+
+        public static void ModXData(this DBObject dBObject, string regAppName, DxfCode code, object oldValue, object newValue)
+        {
+            // 获取regAppName注册应用程序下的扩展数据列表
+            TypedValueList xdata = dBObject.GetXDataForApplication(regAppName);
+            for (int i = 0; i < xdata.Count; i++)// 遍历扩展数据列表
+            {
+                TypedValue tv = xdata[i]; //扩展数据
+                //判断扩展数据的类型和值是否满足条件
+                if (tv.TypeCode == (short)code && tv.Value.Equals(oldValue))
+                {
+                    // 设置新的扩展数据值
+                    xdata[i] = new TypedValue(tv.TypeCode, newValue);
+                    break; //要修改的数据已找到，跳出循环
+                }
+            }
+            dBObject.XData = xdata; // 覆盖原来的扩展数据，达到修改的目的
         }
 
         public static string GetModelStyle(this ObjectId obj)

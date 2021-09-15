@@ -58,6 +58,11 @@ namespace TianHua.FanSelection.Function
             return model.PID == "0";
         }
 
+        public static bool IsSubModel(this FanDataModel model)
+        {
+            return model.PID != "0";
+        }
+
         public static bool IsFireModel(this FanDataModel model)
         {
             return model.Scenario.Contains("消防");

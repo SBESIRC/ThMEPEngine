@@ -1,5 +1,5 @@
-﻿using System;
-using Linq2Acad;
+﻿using System.Linq;
+using Autodesk.AutoCAD.Runtime;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
@@ -8,15 +8,18 @@ namespace TianHua.FanSelection.UI.CAD
 {
     public class ThFanModelObjectOverrule : ObjectOverrule
     {
+        private List<FanDataModel> Models { get; set; }
         private Dictionary<string, string> SystemMapping { get; set; }
 
         public ThFanModelObjectOverrule()
         {
+            Models = new List<FanDataModel>();
             SystemMapping = new Dictionary<string, string>();
         }
 
         public void Reset()
         {
+            Models.Clear();
             SystemMapping.Clear();
         }
 
@@ -24,31 +27,87 @@ namespace TianHua.FanSelection.UI.CAD
         {
             DBObject result = base.DeepClone(dbObject, ownerObject, idMap, isPrimary);
 
-            if (dbObject.IsModel())
+            // 处理PASTECLIP命令
+            if (idMap.DeepCloneContext == DeepCloneType.Explode)
             {
-                UpdateClonedModelIdentifier(dbObject, idMap);
+                CloneModels(result, idMap);
+            }
+
+            // 处理COPY命令
+            if (idMap.DeepCloneContext == DeepCloneType.Copy)
+            {
+                CacheModels(dbObject, idMap);
+                CloneModels(result, idMap);
             }
 
             return result;
         }
 
-        private void UpdateClonedModelIdentifier(DBObject dbObject, IdMapping idMap)
+        public override DBObject WblockClone(DBObject dbObject, RXObject ownerObject, IdMapping idMap, bool isPrimary)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(dbObject.Database))
+            DBObject result = base.WblockClone(dbObject, ownerObject, idMap, isPrimary);
+
+            if (idMap.DeepCloneContext == DeepCloneType.Wblock)
             {
-                if (idMap[dbObject.ObjectId] != null)
+                CacheModels(dbObject, idMap);
+            }
+
+            return result;
+        }
+
+        private void CloneModels(DBObject dbObject, IdMapping idMap)
+        {
+            //
+            var dest = new ThFanModelDataDbSource();
+            dest.Load(idMap.DestinationDatabase);
+
+            // 
+            var identifier = dbObject.GetModelIdentifier();
+            if (Models.Where(o => o.ID == identifier).Any())
+            {
+                if (dest.Models.Where(o => o.ID == identifier).Any())
                 {
-                    ObjectId targetId = idMap[dbObject.ObjectId].Value;
-                    if (targetId != ObjectId.Null)
+                    if (!SystemMapping.ContainsKey(identifier))
                     {
-                        var identifier = dbObject.GetModelIdentifier();
-                        if (!SystemMapping.ContainsKey(identifier))
-                        {
-                            SystemMapping.Add(identifier, Guid.NewGuid().ToString());
-                        }
-                        targetId.UpdateModelIdentifier(SystemMapping[identifier]);
+                        // 复制风机模型
+                        var modelId = dest.Models.CloneModel(identifier);
+                        SystemMapping.Add(identifier, modelId);
+                        dest.Save(idMap.DestinationDatabase);
                     }
+
+                    // 关联风机到新的风机模型
+                    dbObject.UpdateModelIdentifier(SystemMapping[identifier]);
                 }
+                else
+                {
+                    if (!SystemMapping.ContainsKey(identifier))
+                    {
+                        // 复制风机模型
+                        var modelId = "";
+                        dest.Models.AddRange(Models.CloneModel(identifier, ref modelId));
+                        SystemMapping.Add(identifier, modelId);
+                        dest.Save(idMap.DestinationDatabase);
+                    }
+
+                    // 关联风机到新的风机模型
+                    dbObject.UpdateModelIdentifier(SystemMapping[identifier]);
+                }
+            }
+        }
+
+        private void CacheModels(DBObject dbObject, IdMapping idMap)
+        {
+            //
+            var orig = new ThFanModelDataDbSource();
+            orig.Load(idMap.OriginalDatabase);
+
+            // 
+            var identifier = dbObject.GetModelIdentifier();
+            if (orig.Models.Where(o => o.ID == identifier).Any() &&
+                !Models.Where(o => o.ID == identifier).Any())
+            {
+                Models.AddRange(orig.Models.Where(o => o.ID == identifier));
+                Models.AddRange(orig.Models.Where(o => o.PID == identifier));
             }
         }
     }

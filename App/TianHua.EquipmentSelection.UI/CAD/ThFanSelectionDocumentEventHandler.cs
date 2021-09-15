@@ -89,6 +89,7 @@ namespace TianHua.FanSelection.UI.CAD
             else if (e.GlobalCommandName == "COPY")
             {
                 SendCopyMessage();
+                ThFanModelOverruleManager.Instance.Reset();
             }
             else if (e.GlobalCommandName == "CUTCLIP")
             {
@@ -97,6 +98,7 @@ namespace TianHua.FanSelection.UI.CAD
             else if (e.GlobalCommandName == "PASTECLIP")
             {
                 SendCopyMessage();
+                ThFanModelOverruleManager.Instance.Reset();
             }
             ResetDbHandlers();
         }
@@ -111,6 +113,7 @@ namespace TianHua.FanSelection.UI.CAD
             if (e.GlobalCommandName == "COPY")
             {
                 SendCopyMessage();
+                ThFanModelOverruleManager.Instance.Reset();
             }
             ResetDbHandlers();
         }

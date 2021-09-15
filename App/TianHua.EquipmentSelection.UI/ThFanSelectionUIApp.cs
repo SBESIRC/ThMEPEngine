@@ -25,6 +25,7 @@ namespace TianHua.FanSelection.UI
         public void Initialize()
         {
             AddDoubleClickHandler();
+            SubscribeToObjectOverrule();
             SubscribeToDocumentManagerEvents();
             if (Active.Document != null)
             {
@@ -36,6 +37,7 @@ namespace TianHua.FanSelection.UI
         public void Terminate()
         {
             RemoveDoubleClickHandler();
+            UnSubscribeToObjectOverrule();
             UnSubscribeToDocumentManagerEvents();
         }
 
@@ -78,6 +80,7 @@ namespace TianHua.FanSelection.UI
             }
             Active.Document.CreateModelSelectionDialog();
             Active.Document.ShowModelSelectionDialog();
+            Active.Document.SubscribeModelSelectionDialog();
         }
 
         [CommandMethod("TIANHUACAD", "THFJZH", CommandFlags.Modal)]
@@ -94,10 +97,14 @@ namespace TianHua.FanSelection.UI
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ObjectId entId = GetSelectedEntity();
-                if (!entId.IsNull)
+                if (entId.IsValid)
                 {
                     Active.Document.ShowModelSelectionDialog();
-                    Active.Document.Form().ShowFormByID(entId.GetModelIdentifier());
+                    var form = Active.Document.Form();
+                    if (form != null && form.Visible)
+                    {
+                        form.ShowFormByID(entId.GetModelIdentifier());
+                    }
                 }
             }
         }
@@ -162,6 +169,16 @@ namespace TianHua.FanSelection.UI
             AcadApp.BeginDoubleClick -= Application_BeginDoubleClick;
         }
 
+        private static void SubscribeToObjectOverrule()
+        {
+            ThFanModelOverruleManager.Instance.Register();
+        }
+
+        private static void UnSubscribeToObjectOverrule()
+        {
+            ThFanModelOverruleManager.Instance.UnRegister();
+        }
+
         private static void SubscribeToDocumentManagerEvents()
         {
             AcadApp.DocumentManager.DocumentCreated += DocumentManager_DocumentCreated;
@@ -214,6 +231,7 @@ namespace TianHua.FanSelection.UI
                 {
                     e.Document.HideModelSelectionDialog();
                 }
+                e.Document.SubscribeModelSelectionDialog();
             }
         }
 
@@ -223,6 +241,7 @@ namespace TianHua.FanSelection.UI
             {
                 e.Document.PushModelSelectionDialogVisible();
                 e.Document.HideModelSelectionDialog();
+                e.Document.UnsubscribeModelSelectionDialog();
             }
         }
 
@@ -241,7 +260,7 @@ namespace TianHua.FanSelection.UI
         {
             if (e.Document != null)
             {
-                e.Document.CloseModelSelectionDialog();
+                e.Document.DestroyModelSelectionDialog();
 
                 // 取消订阅Docuemnt事件
                 UnSubscribeToDocumentEvents(e.Document);

@@ -16,7 +16,6 @@ namespace TianHua.FanSelection.UI.CAD
             }
             if (form != null)
             {
-                SubscribeToMessages(form);
                 if (!form.Visible)
                 {
                     AcadApp.ShowModelessDialog(form);
@@ -26,10 +25,34 @@ namespace TianHua.FanSelection.UI.CAD
 
         public static void CreateModelSelectionDialog(this Document document)
         {
+            Form form = null;
             if (!document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
             {
-                var form = new fmFanSelection();
+                form = new fmFanSelection();
+            }
+            if (form != null)
+            {
                 document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] = form;
+                document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI_VISIBLE] = false;
+            }
+        }
+
+        public static void DestroyModelSelectionDialog(this Document document)
+        {
+            Form form = null;
+            if (document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
+            {
+                form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
+            }
+            if (form != null)
+            {
+                document.UserData.Remove(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI);
+                document.UserData.Remove(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI_VISIBLE);
+            }
+            if (form != null)
+            {
+                form.Close();
+                form.Dispose();
             }
         }
 
@@ -42,12 +65,37 @@ namespace TianHua.FanSelection.UI.CAD
             }
             if (form != null)
             {
-                UnSubscribeToMessages(form);
                 if (form.Visible)
                 {
                     form.Hide();
                     HidefmOverView(form);
                 }
+            }
+        }
+
+        public static void SubscribeModelSelectionDialog(this Document document)
+        {
+            Form form = null;
+            if (document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
+            {
+                form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
+            }
+            if (form != null)
+            {
+                SubscribeToMessages(form);
+            }
+        }
+
+        public static void UnsubscribeModelSelectionDialog(this Document document)
+        {
+            Form form = null;
+            if (document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
+            {
+                form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
+            }
+            if (form != null)
+            {
+                UnSubscribeToMessages(form);
             }
         }
 
@@ -58,7 +106,7 @@ namespace TianHua.FanSelection.UI.CAD
                 ThModelUndoMessage.Register(fm, fm.OnModelUndoHandler);
                 ThModelCopyMessage.Register(fm, fm.OnModelCopiedHandler);
                 ThModelDeleteMessage.Register(fm, fm.OnModelDeletedHandler);
-                ThModelBeginSaveMessage.Register(fm, fm.OnModelBeginSaveHandler);
+                //ThModelBeginSaveMessage.Register(fm, fm.OnModelBeginSaveHandler);
             }
         }
 
@@ -69,7 +117,7 @@ namespace TianHua.FanSelection.UI.CAD
                 ThModelUndoMessage.Unregister(fm, fm.OnModelUndoHandler);
                 ThModelCopyMessage.Unregister(fm, fm.OnModelCopiedHandler);
                 ThModelDeleteMessage.Unregister(fm, fm.OnModelDeletedHandler);
-                ThModelBeginSaveMessage.Unregister(fm, fm.OnModelBeginSaveHandler);
+                //ThModelBeginSaveMessage.Unregister(fm, fm.OnModelBeginSaveHandler);
             }
         }
 
@@ -82,20 +130,6 @@ namespace TianHua.FanSelection.UI.CAD
                 {
                     _fmFanSelection.m_fmOverView.Hide();
                 }
-            }
-        }
-
-        public static void CloseModelSelectionDialog(this Document document)
-        {
-            Form form = null;
-            if (document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
-            {
-                form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
-                document.UserData.Remove(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI);
-            }
-            if (form != null)
-            {
-                form.Dispose();
             }
         }
 
@@ -113,7 +147,6 @@ namespace TianHua.FanSelection.UI.CAD
             bool visible = false;
             if (document.UserData.ContainsKey(ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI))
             {
-                Form form = document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI] as Form;
                 visible = (bool)document.UserData[ThFanSelectionUICommon.DOCUMENT_USER_DATA_UI_VISIBLE];
             }
             return visible;
