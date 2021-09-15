@@ -1,13 +1,13 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPWSS.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
@@ -20,10 +20,7 @@ namespace ThMEPWSS.Hydrant.Engine
         }
         public override void Extract(Database database)
         {
-            var service = new ThBlockElementExtractor()
-            {
-                FindExternalReference = false,
-            };
+            var service = new ThDistributionElementExtractor();
             service.Accept(Visitor);
             service.Extract(database);
             Results.AddRange(Visitor.Results);
@@ -31,10 +28,7 @@ namespace ThMEPWSS.Hydrant.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            var service = new ThBlockElementExtractor()
-            {
-                FindExternalReference = false,
-            };
+            var service = new ThDistributionElementExtractor();
             service.Accept(Visitor);
             service.ExtractFromMS(database);
             Results.AddRange(Visitor.Results);
@@ -49,13 +43,15 @@ namespace ThMEPWSS.Hydrant.Engine
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var extractEngine = new ThExtractFireHydrant(Visitor);
-            extractEngine.Extract(database, polygon);
-            Recognize(extractEngine.DBobjs, polygon);
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
+            var extractEngine = new ThFireHydrantExtractionEngine(Visitor);
+            extractEngine.Extract(database);
+            Recognize(extractEngine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
             var extractEngine = new ThFireHydrantExtractionEngine(Visitor);
             extractEngine.ExtractFromMS(database);
             Recognize(extractEngine.Results, polygon);
@@ -86,7 +82,11 @@ namespace ThMEPWSS.Hydrant.Engine
             {
                 originDatas = datas.Cast<Entity>().ToList();
             }
-            Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.GeometricExtents.ToRectangle() }));
+            Elements.AddRange(originDatas.Select(x => 
+            new ThIfcDistributionFlowElement()
+            { 
+                Outline = x.GeometricExtents.ToRectangle() 
+            }));
         }
     }
 }

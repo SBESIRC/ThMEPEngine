@@ -19,10 +19,7 @@ namespace ThMEPWSS.Hydrant.Engine
         }
         public override void Extract(Database database)
         {
-            var service = new ThBlockElementExtractor()
-            {
-                FindExternalReference = false,
-            };
+            var service = new ThDistributionElementExtractor();
             service.Accept(Visitor);
             service.Extract(database);
             Results.AddRange(Visitor.Results);
@@ -30,10 +27,7 @@ namespace ThMEPWSS.Hydrant.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            var service = new ThBlockElementExtractor()
-            {
-                FindExternalReference = false,
-            };
+            var service = new ThDistributionElementExtractor();
             service.Accept(Visitor);
             service.ExtractFromMS(database);
             Results.AddRange(Visitor.Results);
@@ -48,15 +42,15 @@ namespace ThMEPWSS.Hydrant.Engine
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var extroctor = new ThExtractFireExtinguisher(Visitor.BlkNames[0],Visitor);
-            extroctor.Extract(database, polygon);
-            //var extractEngine = new ThFireExtinguisherExtractionEngine(Visitor);
-            //extractEngine.Extract(database);
-            Recognize(extroctor.DBobjs, polygon);
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
+            var extractEngine = new ThFireExtinguisherExtractionEngine(Visitor);
+            extractEngine.Extract(database);
+            Recognize(extractEngine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
             var extractEngine = new ThFireExtinguisherExtractionEngine(Visitor);
             extractEngine.ExtractFromMS(database);
             Recognize(extractEngine.Results, polygon);

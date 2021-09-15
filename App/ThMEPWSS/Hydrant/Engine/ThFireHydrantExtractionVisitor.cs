@@ -13,8 +13,6 @@ namespace ThMEPWSS.Engine
     public class ThFireHydrantExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> BlkNames { get; set; }
-        public Func<string, List<string>, bool> JudgeBlkNameExisted {get;set;}
-        public Func<Entity, bool> JudgeLayerExisted { get; set; }
         /// <summary>
         /// 获取块中心的小方块
         /// </summary>
@@ -22,8 +20,6 @@ namespace ThMEPWSS.Engine
         public ThFireHydrantExtractionVisitor()
         {
             BuildCenterSquare = true;
-            JudgeBlkNameExisted = CheckBlkNameIsExisted;
-            JudgeLayerExisted = CheckLayerIsExisted;
             BlkNames = new List<string>() { ""};            
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -68,10 +64,10 @@ namespace ThMEPWSS.Engine
         public override bool IsDistributionElement(Entity entity)
         {
             //ToDo
-            if (entity is BlockReference br)
+            if (entity is BlockReference br && br.Visible)
             {
                 var blkName = br.GetEffectiveName();
-                return JudgeBlkNameExisted(blkName, BlkNames) || CheckBlockReferenceVisibility(br);
+                return CheckBlkNameIsExisted(blkName, BlkNames) || CheckBlockReferenceVisibility(br);
             }
             return false;
         }
@@ -97,14 +93,6 @@ namespace ThMEPWSS.Engine
                 throw new NotSupportedException();
             }
         }
-        public override bool CheckLayerValid(Entity curve)
-        {
-            return JudgeLayerExisted(curve);
-        }
-        private bool CheckLayerIsExisted(Entity curve)
-        {
-            return true;
-        }
         public bool CheckBlockReferenceVisibility(BlockReference br)
         {
             if(br.GetEffectiveName().Contains("消火栓"))
@@ -123,6 +111,13 @@ namespace ThMEPWSS.Engine
         }
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
+            // 不支持外部参照、附着
+            if (blockTableRecord.IsFromExternalReference ||
+                blockTableRecord.IsFromOverlayReference)
+            {
+                return false;
+            }
+
             // 忽略图纸空间和匿名块
             if (blockTableRecord.IsLayout)
             {

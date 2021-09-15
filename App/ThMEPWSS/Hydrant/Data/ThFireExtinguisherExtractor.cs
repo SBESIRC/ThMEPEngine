@@ -1,14 +1,13 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Engine;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -26,13 +25,11 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var fireExtinguisherExtractor = new ThFireExtinguisherRecognitionEngine(Vistor);
             fireExtinguisherExtractor.Recognize(database, pts);
-            //Vistor.Results = new List<ThRawIfcDistributionElementData>();
-
-            //fireExtinguisherExtractor.RecognizeMS(database, pts);
-            //Vistor.Results = new List<ThRawIfcDistributionElementData>();
-
-            var newCenterPoints = fireExtinguisherExtractor.Elements.Select(o => GetCenter(o.Outline as Polyline))
-                                                           .Where(o => !FireExtinguishers.Contains(new DBPoint(o))).ToList();
+            fireExtinguisherExtractor.RecognizeMS(database, pts);
+            var newCenterPoints = fireExtinguisherExtractor
+                .Elements
+                .Select(o => GetCenter(o.Outline as Polyline))
+                .Where(o => !FireExtinguishers.Contains(new DBPoint(o))).ToList();
             FireExtinguishers.AddRange(newCenterPoints.Select(o => new DBPoint(o)).ToList());
         }
         public override List<ThGeometry> BuildGeometries()

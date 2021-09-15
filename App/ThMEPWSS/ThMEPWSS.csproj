@@ -240,7 +240,6 @@
     <Compile Include="Hydrant\Data\ThExternalSpaceExtractor.cs" />
     <Compile Include="Hydrant\Data\ThFireExtinguisherExtractor.cs" />
     <Compile Include="Hydrant\Data\ThFireHydrantExtractor.cs" />
-    <Compile Include="Hydrant\Engine\ThBlockElementExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThFireExtinguisherExtractionVisitor.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantExtractionVisitor.cs" />
     <Compile Include="Hydrant\Engine\ThFireExtinguisherRecognitionEngine.cs" />
