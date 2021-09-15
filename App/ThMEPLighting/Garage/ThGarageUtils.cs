@@ -43,7 +43,7 @@ namespace ThMEPLighting.Garage
             var first = firstList[1 - a].GetVectorTo(firstList[a]);
             var second = secondList[b].GetVectorTo(secondList[1 - b]);
 
-            if (first.GetAngleTo(second) < Math.PI / 4 - 1e-5)
+            if (first.GetAngleTo(second) - Math.PI / 4 <= 1e-5)
             {
                 return true;
             }

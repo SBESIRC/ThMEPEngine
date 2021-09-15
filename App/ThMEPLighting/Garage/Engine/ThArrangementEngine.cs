@@ -90,13 +90,13 @@ namespace ThMEPLighting.Garage.Engine
             }            
         }
 
-        protected virtual List<Curve> MergeDxLine(Polyline border, List<Line> dxLines)
+        protected virtual List<Curve> MergeDxLine(Polyline border, List<Line> dxLines,double mergeRange)
         {
             //单位化、修正方向
             var dxNomalLines = new List<Line>();
             dxLines.ForEach(o => dxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
             //从小汤车道线合并服务中获取合并的主道线，辅道线            
-            return ThMergeLightCenterLines.Merge(border, dxNomalLines, ThGarageLightCommon.LaneMergeRange);
+            return ThMergeLightCenterLines.Merge(border, dxNomalLines, mergeRange);
         }
         protected List<Line> Explode(List<Curve> curves)
         {
