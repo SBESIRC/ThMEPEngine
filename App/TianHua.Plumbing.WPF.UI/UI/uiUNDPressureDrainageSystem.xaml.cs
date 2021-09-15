@@ -69,13 +69,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// </summary>
         private void ReadPumpWellKeyBlockNames()
         {
-            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            FormUtil.DisableForm(gridForm);
-            ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(new List<ThMEPWSS.Model.FloorFramed>(), new DrainageSystemAGViewmodel(), config);
-            thDrainSystem.Execute();
-            //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
-            FormUtil.EnableForm(gridForm);
-            ThMEPWSS.Common.Utils.FocusToCAD();        
+            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList(); 
             List<string> wellnames = new List<string>();
             foreach (var fig in config)
             {
@@ -122,10 +116,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     return;
                 }
-
-
-                //Func();
-
                 Point3d insertPt = new Point3d();
                 var pt = Active.Editor.GetPoint("\n请输入插入点");
                 if (pt.Status == PromptStatus.OK)
