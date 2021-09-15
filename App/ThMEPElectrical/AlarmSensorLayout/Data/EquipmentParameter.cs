@@ -17,7 +17,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Data
         public BlindType blindType = BlindType.VisibleArea; //盲区类型
         public double MinGap = 5300;
         public double MaxGap = 8200;
-        public double AdjustGap = 8200;
+        public double AdjustGap = 7600;
 
 
         public EquipmentParameter(double paraRadius = 5.8 * 1e3, BlindType paraType = BlindType.VisibleArea)
@@ -26,7 +26,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Data
             blindType = paraType;
             MinGap = paraRadius / 58 * 53;
             MaxGap = paraRadius / 58 * 82;
-            AdjustGap = paraRadius / 58 * 82;
+            AdjustGap = paraRadius / 58 * 76;
         }
     }
 }

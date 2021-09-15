@@ -13,6 +13,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPElectrical.AlarmSensorLayout.Data;
 using ThMEPElectrical.AlarmSensorLayout.Command;
 using ThMEPElectrical.AlarmSensorLayout.Sensorlayout;
+using DotNetARX;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Test
 {
@@ -411,92 +412,93 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                 layoutCmd.Execute();
             }
         }
-        //[CommandMethod("TIANHUACAD", "THASLM", CommandFlags.Modal)]
-        //public void THASLM()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        // 获取框线
-        //        PromptSelectionOptions options = new PromptSelectionOptions()
-        //        {
-        //            AllowDuplicates = false,
-        //            MessageForAdding = "请选择布置区域框线",
-        //            RejectObjectsOnLockedLayers = true,
-        //        };
-        //        var dxfNames = new string[]
-        //        {
-        //            RXClass.GetClass(typeof(Polyline)).DxfName,
-        //        };
-        //        var filter = ThSelectionFilterTool.Build(dxfNames);
-        //        var result = Active.Editor.GetSelection(options, filter);
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
+        [CommandMethod("TIANHUACAD", "THASLM", CommandFlags.Modal)]
+        public void THASLM()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择布置区域框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
 
-        //        var ptOri = new Point3d();
-        //        var transformer = new ThMEPOriginTransformer(ptOri);
-        //        var frameList = new List<Polyline>();
+                var ptOri = new Point3d();
+                var transformer = new ThMEPOriginTransformer(ptOri);
+                var frameList = new List<Polyline>();
 
-        //        foreach (ObjectId obj in result.Value.GetObjectIds())
-        //        {
-        //            //获取外包框
-        //            var frameTemp = acadDatabase.Element<Polyline>(obj);
-        //            var nFrame = processFrame(frameTemp, transformer);
-        //            if (nFrame.Area < 1)
-        //            {
-        //                continue;
-        //            }
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    //获取外包框
+                    var frameTemp = acadDatabase.Element<Polyline>(obj);
+                    var nFrame = processFrame(frameTemp, transformer);
+                    if (nFrame.Area < 1)
+                    {
+                        continue;
+                    }
 
-        //            frameList.Add(nFrame);
-        //        }
+                    frameList.Add(nFrame);
+                }
 
-        //        var frame = frameList.OrderByDescending(x => x.Area).First();
+                var frame = frameList.OrderByDescending(x => x.Area).First();
 
-        //        var holeList = getPoly(frame, "AI-房间框线", transformer, true);
+                var holeList = getPoly(frame, "AI-房间框线", transformer, true);
 
-        //        var layoutList = getPoly(frame, "AI-可布区域", transformer, false);
+                var layoutList = getPoly(frame, "AI-可布区域", transformer, false);
 
-        //        var wallList = getPoly(frame, "AI-墙", transformer, false);
+                var wallList = getPoly(frame, "AI-墙", transformer, false);
 
-        //        SpaceDivider groupOpt = new SpaceDivider(layoutList, frame);
+                SpaceDivider groupOpt = new SpaceDivider();
+                groupOpt.Compute(frame, layoutList);
 
-        //        foreach (var id in UCS_List)
-        //        {
-        //            id.Erase();
-        //        }
-        //        UCS_List.Clear();
+                foreach (var id in UCS_List)
+                {
+                    id.Erase();
+                }
+                UCS_List.Clear();
 
-        //        //foreach (var layout in groupOpt.layouts)
-        //        //{
-        //        //    var dblayout = layout.ent;
-        //        //    dblayout.ColorIndex = layout.GroupID;
-        //        //    var id = acadDatabase.ModelSpace.Add(dblayout);
-        //        //    circle_List.Add(id);
+                //foreach (var layout in groupOpt.layouts)
+                //{
+                //    var dblayout = layout.ent;
+                //    dblayout.ColorIndex = layout.GroupID;
+                //    var id = acadDatabase.ModelSpace.Add(dblayout);
+                //    circle_List.Add(id);
 
-        //        //    var dbline = new Line(layout.ent.GetCentroidPoint(), layout.ent.GetCentroidPoint() + new Vector3d(300, 0, 0));
-        //        //    dbline.Rotate(dbline.StartPoint, layout.angle / 180 * Math.PI);
-        //        //    dbline.ColorIndex = layout.GroupID;
-        //        //    id = acadDatabase.ModelSpace.Add(dbline);
-        //        //    circle_List.Add(id);
-        //        //}
-        //        foreach (var group in groupOpt.UCSs)
-        //        {
-        //            var dbucs = group.Key;
-        //            dbucs.ColorIndex = 5;
+                //    var dbline = new Line(layout.ent.GetCentroidPoint(), layout.ent.GetCentroidPoint() + new Vector3d(300, 0, 0));
+                //    dbline.Rotate(dbline.StartPoint, layout.angle / 180 * Math.PI);
+                //    dbline.ColorIndex = layout.GroupID;
+                //    id = acadDatabase.ModelSpace.Add(dbline);
+                //    circle_List.Add(id);
+                //}
+                foreach (var group in groupOpt.UCSs)
+                {
+                    var dbucs = group.Key;
+                    dbucs.ColorIndex = 5;
 
-        //            var dbline = new Line(dbucs.GetCentroidPoint(), dbucs.GetCentroidPoint() + new Vector3d(3000, 0, 0));
-        //            dbline.Rotate(dbline.StartPoint, group.Value / 180 * Math.PI);
-        //            dbline.ColorIndex = 5;
-        //            var id = acadDatabase.ModelSpace.Add(dbline);
-        //            UCS_List.Add(id);
+                    //var dbline = new Line(dbucs.GetCentroidPoint(), dbucs.GetCentroidPoint() + new Vector3d(3000, 0, 0));
+                    //dbline.Rotate(dbline.StartPoint, group.Value / 180 * Math.PI);
+                    //dbline.ColorIndex = 5;
+                    //var id = acadDatabase.ModelSpace.Add(dbline);
+                    //UCS_List.Add(id);
 
-        //            //dbucs.Rotate(dbucs.GetCentroidPoint(),-group.Value / 180 * Math.PI);
-        //            id = acadDatabase.ModelSpace.Add(dbucs);
-        //            UCS_List.Add(id);
-        //        }
-        //    }
-        //}
+                    //dbucs.Rotate(dbucs.GetCentroidPoint(),-group.Value / 180 * Math.PI);
+                    var id = acadDatabase.ModelSpace.Add(dbucs);
+                    UCS_List.Add(id);
+                }
+            }
+        }
 
         //private void ShowLines()
         //{

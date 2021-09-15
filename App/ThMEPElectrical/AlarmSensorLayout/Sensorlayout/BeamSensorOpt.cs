@@ -18,7 +18,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
 {
     class BeamSensorOpt : AlarmSensorLayout
     {
-        public List<UCSOpt> UCSs { get; set; } = new List<UCSOpt>();//UCS列表
+        public List<UCSOpt1> UCSs { get; set; } = new List<UCSOpt1>();//UCS列表
         public List<Coordinate> Positions { get; set; } = new List<Coordinate>();//交点位置
         public List<Polygon> Detect { get; set; } = new List<Polygon>();//每个点的探测范围
         
@@ -35,7 +35,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 dBObjectCollection.Add(layout.ToDbMPolygon());
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);//建立关于可布置区域的索引
             foreach (var record in UCS)
-                UCSs.Add(new UCSOpt(record.Key, record.Value, room, layouts, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
+                UCSs.Add(new UCSOpt1(record.Key, record.Value, room, layouts, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
         }
 
         public override void Calculate()
