@@ -58,13 +58,13 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 var extractEngine = new ThDB3ArchWallExtractionEngine();
                 extractEngine.Extract(database);
 
-                var center = pts.Envelope().CenterPoint();
-                var transformer = new ThMEPOriginTransformer(center);
-                var newPts = transformer.Transform(pts);
-                extractEngine.Results.ForEach(e=> transformer.Transform(e.Geometry));                
+                //var center = pts.Envelope().CenterPoint();
+                //var transformer = new ThMEPOriginTransformer(center);
+                //var newPts = transformer.Transform(pts);
+                //extractEngine.Results.ForEach(e=> transformer.Transform(e.Geometry));                
 
                 var recogEngine = new ThDB3ArchWallRecognitionEngine();
-                recogEngine.Recognize(extractEngine.Results, newPts);
+                recogEngine.Recognize(extractEngine.Results, pts);
 
                 recogEngine.Elements.ForEach(o => Walls.Add(o.Outline));
             }

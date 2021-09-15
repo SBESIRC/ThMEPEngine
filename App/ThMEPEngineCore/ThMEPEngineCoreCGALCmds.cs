@@ -500,7 +500,7 @@ namespace ThMEPEngineCore
         public void THWiringGeo()
         {
             ConnectWiringService connectWiring = new ConnectWiringService();
-            connectWiring.GetData();
+            connectWiring.Routing();
         }
 
         [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]

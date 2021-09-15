@@ -3,6 +3,7 @@ using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using CLI;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,17 @@ namespace ThMEPEngineCore.ConnectWiring
     {
         public void Routing()
         {
-            
+            var data = GetData();
+            if (data != null)
+            {
+                ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
+                var res = thCableRouter.RouteCable(data, 25);
+            }
         }
 
-        public void GetData()
+        public string GetData()
         {
+            string geoJson = null;
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 // 获取框线
@@ -43,7 +50,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
-                    return;
+                    return geoJson;
                 }
                 List<Polyline> frameLst = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
@@ -68,7 +75,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 var blockResult = Active.Editor.GetSelection(blockOptions, blockFilter);
                 if (blockResult.Status != PromptStatus.OK)
                 {
-                    return;
+                    return geoJson;
                 }
                 var block = acadDatabase.Element<BlockReference>(blockResult.Value.GetObjectIds().First());
 
@@ -80,8 +87,10 @@ namespace ThMEPEngineCore.ConnectWiring
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());
 
-                var geoJson = ThGeoOutput.Output(data.Container);
+                geoJson = ThGeoOutput.Output(data.Container);
             }
+
+            return geoJson;
         }
 
         /// <summary>
