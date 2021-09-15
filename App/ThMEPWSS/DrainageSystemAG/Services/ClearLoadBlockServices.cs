@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -105,8 +104,8 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                     var layer = blockDb.Layers.ElementOrDefault(item);
                     if (null == layer)
                         continue;
-                    currentDb.Layers.Import(layer, false);
-                    DbHelper.EnsureLayerOn(item);
+                    currentDb.Layers.Import(layer, true);
+                    //DbHelper.EnsureLayerOn(item);
                 }
                 foreach (var item in textStyleNames) 
                 {

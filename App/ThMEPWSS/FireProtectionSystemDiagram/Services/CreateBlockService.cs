@@ -1,13 +1,9 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.FireProtectionSystemDiagram.Models;
@@ -62,8 +58,8 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Services
                     var layer = blockDb.Layers.ElementOrDefault(item);
                     if (null == layer)
                         continue;
-                    currentDb.Layers.Import(layer, false);
-                    DbHelper.EnsureLayerOn(item);
+                    currentDb.Layers.Import(layer, true);
+                    //DbHelper.EnsureLayerOn(item);
                 }
                 foreach (var item in textStyleNames)
                 {
