@@ -297,7 +297,8 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
     <Compile Include="Staircase\ThStairCommon.cs" />
-    <Compile Include="Staircase\ThStairEngine.cs" />
+    <Compile Include="Staircase\ThStairElectricalEngine.cs" />
+    <Compile Include="Staircase\ThStairEquimentLayout.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
@@ -398,8 +399,8 @@
     <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
-    <Folder Include="FireAlarm\Model\" />
     <Folder Include="FireAlarmFixLayout\Model\" />
+    <Folder Include="FireAlarm\Model\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
