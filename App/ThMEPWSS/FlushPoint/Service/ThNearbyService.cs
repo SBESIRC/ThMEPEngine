@@ -11,10 +11,12 @@ namespace ThMEPWSS.FlushPoint.Service
     public abstract class ThNearbyService
     {
         protected List<Entity> Rooms { get; set; }
+        protected double NearbyDistance { get; set; }
         protected ThCADCoreNTSSpatialIndex RoomSpatialIndex { get; set; }
-        public ThNearbyService(List<Entity> rooms)
+        public ThNearbyService(List<Entity> rooms,double nearbyDistance)
         {
             Rooms = rooms;
+            NearbyDistance = nearbyDistance;
             RoomSpatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
         }
         public abstract bool Find(Point3d pt);

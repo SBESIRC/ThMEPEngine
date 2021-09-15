@@ -168,6 +168,7 @@
     <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
       <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Validations\NearbyDistanceRule.cs" />
     <Compile Include="Validations\SelfLengthRule.cs" />
     <Compile Include="Validations\HoseLengthRule.cs" />
     <Compile Include="Validations\NumberRangeInfo.cs" />

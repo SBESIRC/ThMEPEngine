@@ -120,12 +120,16 @@ namespace ThMEPHVAC.Model
             if (is_recreate)
             {
                 Get_start_line(modifyer.center_line, Point3d.Origin, out Point3d search_point, out Line start_l);
+                if (start_line.StartPoint.IsEqualTo(start_line.EndPoint, point_tor))
+                    return;
                 Set_duct_info(search_point, start_l, modifyer);
                 Set_special_shape_info(search_point);
             }
             else
             {
                 Get_start_line(center_lines, Point3d.Origin, out Point3d search_point);
+                if (start_line.StartPoint.IsEqualTo(start_line.EndPoint, point_tor))
+                    return;
                 Set_duct_air_volume(port_num, search_point, center_lines);
                 Set_special_shape_info(search_point);
             }
@@ -259,12 +263,13 @@ namespace ThMEPHVAC.Model
         {
             start_line = new Line();
             search_point = Point3d.Origin;
+            var tor = new Tolerance(2.5, 2.5);
             foreach (Line l in center_lines)
             {
-                if (start_point.IsEqualTo(l.StartPoint, point_tor) || start_point.IsEqualTo(l.EndPoint, point_tor))
+                if (start_point.IsEqualTo(l.StartPoint, tor) || start_point.IsEqualTo(l.EndPoint, tor))
                 {
                     start_line = l;
-                    search_point = start_point.IsEqualTo(l.StartPoint, point_tor) ? l.EndPoint : l.StartPoint;
+                    search_point = start_point.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace ThMEPLighting.Garage.Engine
             var mergeCurves = ThMergeLightCenterLines.Merge(
                 lightRegion.RegionBorder, 
                 lightRegion.LaneLines.Select(o=> ThGarageLightUtils.NormalizeLaneLine(o)).ToList(), 
-                ThGarageLightCommon.LaneMergeRange);
+                301);
             var centerLines =ThLaneLineEngine.Explode(mergeCurves.ToCollection()).Cast<Line>().ToList();
 
             //根据车道线，已布置的灯线分割1号线、2号线

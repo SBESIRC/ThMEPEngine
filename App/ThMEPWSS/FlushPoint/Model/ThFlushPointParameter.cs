@@ -14,6 +14,7 @@ namespace ThMEPWSS.FlushPoint.Model
             parkingAreaOfPT = true;
             onlyLayoutOnColumn = true;
             necessaryArrangeSpaceOfPT = true;
+            nearbyDistance = 5;
             ArrangePosition = ArrangePositionOps.AreaFullLayout;
             BlockNameDict = new Dictionary<string, List<string>>();
         }
@@ -76,6 +77,23 @@ namespace ThMEPWSS.FlushPoint.Model
                 RaisePropertyChanged("ProtectRadius"); 
             }
         }
+        private double nearbyDistance;
+        /// <summary>
+        /// 冲洗点位靠近排水实施的距离
+        /// </summary>
+        public double NearbyDistance
+        {
+            get
+            {
+                return nearbyDistance;
+            }
+            set
+            {
+                nearbyDistance = value;
+                RaisePropertyChanged("NearbyDistance");
+            }
+        }
+
         private bool parkingAreaOfPT;
         public bool ParkingAreaOfProtectTarget
         {

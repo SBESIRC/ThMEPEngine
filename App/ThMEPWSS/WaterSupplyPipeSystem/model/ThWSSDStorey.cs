@@ -47,22 +47,44 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         }
 
         //绘制楼层线
-        public Line CreateLine(Point3d insertPt, double floorLength)
+        public List<Line> CreateLine(Point3d insertPt, double floorLength, List<int> highestStorey, Double[] PipeOffsetX)
         {
             var pt1 = insertPt.OffsetY((FloorNumber - 1) * FloorHeight);
             var pt2 = insertPt.OffsetXY(floorLength, (FloorNumber - 1) * FloorHeight);
-            var line1 = new Line(pt1, pt2);
+            if (highestStorey.Contains(FloorNumber - 1))
+            {
+                var pt11 = new Point3d(PipeOffsetX[FloorNumber - 2] - 150, pt1.Y, 0);
+                var pt22 = new Point3d(PipeOffsetX[FloorNumber - 2] + 150, pt1.Y, 0);
+                var pt12 = pt11.OffsetY(100);
+                var pt21 = pt22.OffsetY(100);
+                var ls = new List<Line>();
+                ls.Add(new Line(pt1, pt11));
+                ls.Add(new Line(pt11, pt12));
+                ls.Add(new Line(pt12, pt21));
+                ls.Add(new Line(pt21, pt22));
+                ls.Add(new Line(pt22, pt2));
 
-            return line1;
+                return ls;
+            }
+            else
+            {
+                var line1 = new Line(pt1, pt2);
+                return new List<Line>() { line1 };
+            }
         }
 
-        public void DrawStorey(int i, int floorNums, Point3d insertPt, double floorLength)
+        public void DrawStorey(int i, int floorNums, Point3d insertPt, double floorLength, List<int> highestStorey,
+            Double[] PipeOffsetX)
         {
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
-            var line1 = CreateLine(insertPt, floorLength);
-            line1.LayerId = DbHelper.GetLayerId("W-NOTE");
-            line1.ColorIndex = (int)ColorIndex.BYLAYER;
-            acadDatabase.CurrentSpace.Add(line1);
+            var lines = CreateLine(insertPt, floorLength, highestStorey, PipeOffsetX);
+            foreach(var line1 in lines)
+            {
+                line1.LayerId = DbHelper.GetLayerId("W-NOTE");
+                line1.ColorIndex = (int)ColorIndex.BYLAYER;
+                acadDatabase.CurrentSpace.Add(line1);
+            }
+            
             var textFirst = new DBText();
             if(i < floorNums)
             {

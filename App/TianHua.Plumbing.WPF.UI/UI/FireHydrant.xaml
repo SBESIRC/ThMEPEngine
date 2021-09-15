@@ -121,7 +121,7 @@
                                  IsChecked="{Binding Parameter.WaterColumnAngleOption, Converter={StaticResource waterColumnAngleOpsConverter}, 
                                  ConverterParameter=0,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>
-                    <RadioButton x:Name="rb90Deree" Content="90°" Margin="28,0" GroupName="WaterColumnAngle" IsThreeState="False"
+                    <RadioButton x:Name="rb60Deree" Content="60°" Margin="28,0" GroupName="WaterColumnAngle" IsThreeState="False"
                                  IsChecked="{Binding Parameter.WaterColumnAngleOption,Converter={StaticResource waterColumnAngleOpsConverter},
                                  ConverterParameter=1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>

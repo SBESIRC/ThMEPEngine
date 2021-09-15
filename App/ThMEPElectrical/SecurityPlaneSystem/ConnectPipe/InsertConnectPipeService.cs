@@ -12,8 +12,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
     public static class InsertConnectPipeService
     {
-        public static void InsertConnectPipe(List<Polyline> polylines, string layerName, string lineType)
+        public static List<Line> InsertConnectPipe(List<Polyline> polylines, string layerName, string lineType)
         {
+            List<Line> reLines = new List<Line>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(ThCADCommon.ElectricalSecurityPlaneDwgPath(), layerName);
@@ -24,6 +25,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     for (int i = 0; i < poly.NumberOfVertices - 1; i++)
                     {
                         var pipe = new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1));
+                        reLines.Add(pipe);
                         pipe.Linetype = lineType;
                         pipe.Layer = layerName;
                         pipe.ColorIndex = 256;
@@ -31,7 +33,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     }
                 }
             }
-
+            return reLines;
         }
     }
 }

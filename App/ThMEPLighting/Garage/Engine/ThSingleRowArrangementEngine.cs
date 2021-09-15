@@ -25,8 +25,8 @@ namespace ThMEPLighting.Garage.Engine
             TrimAndShort(regionBorder);
             CleanAndFilter(); //对DxLines操作 
 
-            // 合并车道线
-            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines);
+            // 合并车道线,小于线槽的宽度
+            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines, ArrangeParameter.Width);
             DxLines = Explode(mergeDxLines); //把合并的车道线重新设成
             DxLines = ThPreprocessLineService.Preprocess(DxLines);
 

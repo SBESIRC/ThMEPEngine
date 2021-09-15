@@ -15,6 +15,7 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -197,6 +198,8 @@
     <Compile Include="Garage\Service\ThWireOffsetDataService.cs" />
     <Compile Include="Common\ThGarageLightCommon.cs" />
     <Compile Include="Common\ThGarageLightUtils.cs" />
+    <Compile Include="Lighting\LightingCommand.cs" />
+    <Compile Include="Lighting\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
     <Compile Include="ParkingStall\Business\Block\BlockInsertDBExtension.cs" />
@@ -285,6 +288,10 @@
     <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
+      <Name>ThControlLibraryWPF</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>

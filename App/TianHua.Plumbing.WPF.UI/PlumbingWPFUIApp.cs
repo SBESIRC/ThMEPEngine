@@ -1,8 +1,14 @@
-﻿using ThMEPWSS.Command;
+﻿using Linq2Acad;
+using System.Linq;
+using ThMEPWSS.Command;
 using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.CAD;
+using ThMEPWSS.FlushPoint.Data;
 using Autodesk.AutoCAD.Runtime;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
+using Autodesk.AutoCAD.DatabaseServices;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -188,6 +194,75 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new DrainageSystemSupplyAxonometricUI();
             AcadApp .ShowModelessWindow(ui);
 
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractWSSDrainageWell", CommandFlags.Modal)]
+        public void THExtractWSSDrainageWell()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var per = AcHelper.Active.Editor.GetEntity("请框选一个范围");
+                if(per.Status!=Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var entity = acadDb.Element<Entity>(per.ObjectId);
+                if(entity is Polyline poly)
+                {
+                    var pts = poly.EntityVertices();
+                    var drainageWellBlkNames = new List<string>();
+                    var blkNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+                    if (blkNameDict.ContainsKey("集水井"))
+                    {
+                        drainageWellBlkNames = blkNameDict["集水井"];
+                    }
+                    var drainFacilityExtractor = new ThDrainFacilityExtractor()
+                    {
+                        ColorIndex = 1,
+                        DrainageBlkNames = drainageWellBlkNames.Distinct().ToList(),
+                    };
+                    drainFacilityExtractor.Extract(acadDb.Database, pts);
+                    drainFacilityExtractor.CollectingWells.CreateGroup(acadDb.Database, 5);
+                    drainFacilityExtractor.DrainageDitches.CreateGroup(acadDb.Database, 6);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThExtractWSSParkingStall", CommandFlags.Modal)]
+        public void ThExtractParkingStall()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var per = AcHelper.Active.Editor.GetEntity("请框选一个范围");
+                if (per.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var entity = acadDb.Element<Entity>(per.ObjectId);
+                if (entity is Polyline poly)
+                {
+                    var pts = poly.EntityVertices();
+                    var parkingStallBlkNames = new List<string>();
+                    var blkNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+                    if (blkNameDict.ContainsKey("机械车位"))
+                    {
+                        parkingStallBlkNames.AddRange(blkNameDict["机械车位"]);
+                    }
+                    if (blkNameDict.ContainsKey("非机械车位"))
+                    {
+                        parkingStallBlkNames.AddRange(blkNameDict["非机械车位"]);
+                    }  
+                    var parkingStallExtractor = new ThParkingStallExtractor()
+                    {
+                        ColorIndex = 1,
+                        BlockNames = parkingStallBlkNames.Distinct().ToList(),
+                    };
+                    parkingStallExtractor.Extract(acadDb.Database, pts);
+                    parkingStallExtractor.ParkingStalls.Cast<Entity>().ToList().CreateGroup(acadDb.Database, 1);
+                }
+            }
         }
     }
 }

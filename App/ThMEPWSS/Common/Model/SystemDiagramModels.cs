@@ -22,6 +22,7 @@ using Linq2Acad;
 using ThCADExtension;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.Uitl
 {
@@ -348,6 +349,12 @@ namespace ThMEPWSS.Uitl
     {
         public GRect Boundary;
         public string Text;
+        public Polygon ToPolygon()
+        {
+            var pl = Boundary.ToPolygon();
+            pl.UserData = Text;
+            return pl;
+        }
     }
     public struct GVector
     {
@@ -474,6 +481,7 @@ namespace ThMEPWSS.Uitl
         public double CenterX => (MinX + MaxX) / 2;
         public double CenterY => (MinY + MaxY) / 2;
         public double OuterRadius => (new Point2d(MinX, MinY)).GetDistanceTo(new Point2d(CenterX, CenterY));
+        public double MiddleRadius => Math.Max(Width, Height) / 2;
         public double InnerRadius => Math.Min(Width, Height) / 2;
         public Extents2d ToExtents2d() => new Extents2d(MinX, MinY, MaxX, MaxY);
         public GRect Expand(double thickness)
@@ -515,9 +523,16 @@ namespace ThMEPWSS.Uitl
         {
             if (this.IsNull) return this;
             if (matrix == Matrix3d.Identity) return this;
-            var pl = this.ToCadPolyline();
-            pl.TransformBy(matrix);
-            return pl.Bounds.ToGRect();
+            var o = new Extents2dCalculator();
+            o.Update(this.LeftTop.ToPoint3d().TransformBy(matrix));
+            o.Update(this.LeftButtom.ToPoint3d().TransformBy(matrix));
+            o.Update(this.RightTop.ToPoint3d().TransformBy(matrix));
+            o.Update(this.RightButtom.ToPoint3d().TransformBy(matrix));
+            if (o.IsValid) return o.ToGRect();
+            return default;
+            //var pl = this.ToCadPolyline();
+            //pl.TransformBy(matrix);
+            //return pl.Bounds.ToGRect();
         }
         public GRect TransformBy(ref Matrix3d matrix)
         {
@@ -844,7 +859,7 @@ namespace ThMEPWSS.Uitl
 
     public static class LinqAlgorithm
     {
-        public static IEnumerable<V> SelectNotNull<T,V>(this IEnumerable<T> source,Func<T,V> f) where V : class
+        public static IEnumerable<V> SelectNotNull<T, V>(this IEnumerable<T> source, Func<T, V> f) where V : class
         {
             foreach (var item in source)
             {

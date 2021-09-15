@@ -37,7 +37,7 @@ namespace TianHua.Hvac.UI
             Model = _DuctSpecModel;
 
             TxtAirVolume.Text = _DuctSpecModel.StrAirVolume;
-
+            //TxtAirSpeed.Text = TxtAirSpeed.Text.ToString();
             TxtAirSpeed.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
 
             ListBoxOuterTube.DataSource = _DuctSpecModel.ListOuterTube;
@@ -48,20 +48,6 @@ namespace TianHua.Hvac.UI
 
             ListBoxInnerTube.SelectedItem = is_exhaust ? _DuctSpecModel.InnerTube : _DuctSpecModel.OuterTube;
             AcceptButton = BtnOK;
-            //if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
-            //{
-            //    ListBoxInnerTube.Enabled = false;
-            //    TxtInnerTube1.Enabled = false;
-            //    TxtInnerTube2.Enabled = false;
-
-            //}
-
-            //if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
-            //{
-            //    ListBoxOuterTube.Enabled = false;
-            //    TxtOuterTube1.Enabled = false;
-            //    TxtOuterTube2.Enabled = false;
-            //}
         }
 
         private void Rad_SelectedIndexChanged(object sender, EventArgs e)

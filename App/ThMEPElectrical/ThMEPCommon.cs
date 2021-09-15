@@ -37,6 +37,9 @@ namespace ThMEPElectrical
         public const string DOMECAMERA_SHILED_BLOCK_NAME = "E-BVSCS210";                //半球摄像机保护罩图块
         public const string GUNCAMERA_SHIELD_BLOCK_NAME = "E-VSCS-DEVC";                //枪式摄像机保护罩图块
         public const string FACERECOGNITIONCAMERA_BLOCK_NAME = "E-BVSCS110-Bio";        //人脸识别摄像机图块
+        //----视频监控系统连管
+        public static readonly string VM_PIPE_LAYER_NAME = "E-VSCS-WIRE";               //视频监控系统连管图层
+        public static readonly string VM_PIPE_LINETYPE = "ByLayer";                     //视频监控系统连管线型
         //----出入口控制系统
         public const string AC_LAYER_NAME = "E-ACS-DEVC";                               //出入口控制系统放置图层
         public const string BUTTON_BLOCK_NAME = "E-BACS51";                             //电锁按钮图块

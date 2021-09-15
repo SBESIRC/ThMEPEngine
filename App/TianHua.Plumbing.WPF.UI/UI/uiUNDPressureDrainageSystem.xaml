@@ -8,7 +8,7 @@
                     Title="压力排水系统图"
                     SizeToContent="WidthAndHeight"
              mc:Ignorable="d" Height="350" >
-    <Grid  Margin="5" >
+    <Grid  Margin="5"  x:Name="gridForm">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>

@@ -171,5 +171,13 @@
         /// 区域
         /// </summary>
         Zone,
+        /// <summary>
+        /// 连线点位
+        /// </summary>
+        WiringPosition,
+        /// <summary>
+        /// 电源点位
+        /// </summary>
+        PowerPosition,
     }
 }

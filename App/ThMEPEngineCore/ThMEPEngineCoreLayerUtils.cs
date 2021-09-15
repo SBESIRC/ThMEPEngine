@@ -11,6 +11,16 @@ namespace ThMEPEngineCore
             return database.CreateAILayer("AI-梁", 6);
         }
 
+        public static ObjectId CreateAIRoomOutlineLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-房间框线", 30);
+        }
+
+        public static ObjectId CreateAIRoomMarkLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-房间名称", 31);
+        }
+
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)
         {
             using (var acadDatabase = AcadDatabase.Use(database))

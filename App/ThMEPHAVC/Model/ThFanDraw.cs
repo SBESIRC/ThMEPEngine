@@ -37,7 +37,7 @@ namespace ThMEPHVAC.Model
             bypass = anay_res.bypass;
             point_tor = anay_res.point_tor;
             service = new ThDuctPortsDrawService(fan.scenario, param.scale);
-            start_id = service.Insert_start_flag(anay_res.move_srt_p);
+            start_id = service.Insert_start_flag(anay_res.fan_break_p);
             var par = new ThMEPHVACParam() { scenario = fan.scenario, scale = param.scale };
             ThDuctPortsRecoder.Attach_start_param(start_id, par);
         }
@@ -46,7 +46,7 @@ namespace ThMEPHVAC.Model
             var room_elevation = Double.Parse(param.room_elevation);
             var other_elevation = Double.Parse(param.other_elevation);
             var mat = Matrix3d.Displacement(srt_p.GetAsVector());
-            for (int i = 0; i < 2; ++i)
+            for (int i = 0; i < text_alignment.Count; ++i)
             {
                 var t = text_alignment[i];
                 t.l.TransformBy(mat);

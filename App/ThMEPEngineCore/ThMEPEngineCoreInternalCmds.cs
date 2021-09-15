@@ -237,7 +237,7 @@ namespace ThMEPEngineCore
                 }
 
                 var service = new ThLaneLineCleanService();
-                foreach (Line line in service.Clean(objs))
+                foreach (Line line in service.CleanNoding(objs))
                 {
                     acadDatabase.ModelSpace.Add(line);
                     line.SetDatabaseDefaults();

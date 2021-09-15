@@ -624,6 +624,22 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             }
             return FlushFaucet;
         }
+
+        public static int GetMaxHouseholds(List<int[]> households, List<int> FlushFaucet)
+        {
+            var maxHouse = 0;
+            for(int i = 0; i < households.Count; i++)
+            {
+                var house = households[i];
+                maxHouse = Math.Max(maxHouse, house.Max());
+                if(FlushFaucet.Contains(i+1))
+                {
+                    maxHouse += 1;
+                }
+            }
+            return maxHouse;
+        }
+       
     }
 }
 

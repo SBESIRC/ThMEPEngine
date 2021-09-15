@@ -1,20 +1,40 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.ViewModel
 {
+    public static class BlockConfigService
+    {
+        public static readonly BlockConfigViewModel Instance = new BlockConfigViewModel();
+        public static Dictionary<string, List<string>> GetBlockNameListDict()
+        {
+            var viewModel = Instance;
+            var dic = new Dictionary<string, List<string>>();
+            foreach (var key in viewModel.BlockNameConfigList.Keys)
+            {
+                dic.Add(key, viewModel.BlockNameConfigList[key].First());
+                dic[key].AddRange(viewModel.BlockNameConfigList[key].Last());
+            }
+            foreach (var key in viewModel.BlockNameList.Keys)
+            {
+                dic[key].AddRange(viewModel.BlockNameList[key].Select(e => e.layerName));
+            }
+            return dic;
+        }
+    }
     public class BlockConfigViewModel : NotifyPropertyChangedBase
     {
         public Dictionary<string, List<List<string>>> BlockNameConfigList { get; set; }
         public Dictionary<string, ObservableCollection<BlockNameConfigViewModel>> BlockNameList { get; set; }
-        private List<string> Blocks{ get; set; }
+        private List<string> Blocks { get; set; }
 
         public BlockConfigViewModel()
         {
             BlockNameConfigList = new Dictionary<string, List<List<string>>>();
             CreateBlockList();
-            
+
             BlockNameList = new Dictionary<string, ObservableCollection<BlockNameConfigViewModel>>();
             foreach (string block in Blocks)
             {
@@ -30,7 +50,7 @@ namespace ThMEPWSS.ViewModel
             Blocks.Add("侧入式雨水斗");
             var ls1 = new List<string>() { "W-drain-2", "W-drain-5" };
             var ls2 = new List<string>();
-            BlockNameConfigList.Add("侧入式雨水斗", new List<List<string>>() { ls1,ls2});
+            BlockNameConfigList.Add("侧入式雨水斗", new List<List<string>>() { ls1, ls2 });
 
             Blocks.Add("重力流雨水斗");
             var ls3 = new List<string>() { "W-drain-1" };
@@ -109,6 +129,16 @@ namespace ThMEPWSS.ViewModel
 
             Blocks.Add("机械车位");
             BlockNameConfigList.Add("机械车位", new List<List<string>>() { new List<string>(), new List<string>() });
+
+
+
+            Blocks.Add("空调内机--挂机");
+            BlockNameConfigList.Add("空调内机--挂机", new List<List<string>>() { new List<string>(), new List<string>() });
+
+            Blocks.Add("空调内机--柜机");
+            BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
+
+
         }
     }
 }

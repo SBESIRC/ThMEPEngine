@@ -43,6 +43,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public string InitialLayer;
         public List<Polyline> WallPolyLines;
         public List<Polyline> ColumnsPolyLines;
+        public List<WellInfo> Wells;
     }
     public class DrainWellClass
     {
@@ -53,6 +54,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
     public class LabelClass
     {
         public DBText DBText;
+    }
+    public class WellInfo
+    {
+        public Point3d Location;
+        public double Length;
+        public double Width;
     }
     public class VerticalPipeClass
     {
@@ -91,6 +98,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Model
         public string Allocation = "";
         public double Depth=0;
         public int PumpCount = 1;
+        public string Length = "x";
+        public string Width = "x";
     }
     public class PipeLineSystemUnitClass
     {

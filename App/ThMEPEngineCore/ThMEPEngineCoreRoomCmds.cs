@@ -39,12 +39,28 @@ namespace ThMEPEngineCore
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
 
                 // 输出房间
-                var layerId = acadDatabase.Database.CreateAILayer("AI-空间框线", 30);
-                engine.Elements.Cast<ThIfcRoom>().Select(r => r.Boundary as Polyline).ForEach(p =>
+                var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
+                var outlineLayerId = acadDatabase.Database.CreateAIRoomOutlineLayer();
+                engine.Elements.OfType<ThIfcRoom>().ForEach(r =>
                 {
-                    p.LayerId = layerId;
-                    p.ConstantWidth = 20;
-                    acadDatabase.ModelSpace.Add(p);
+                    // 轮廓线
+                    var outline = r.Boundary as Polyline;
+                    outline.ConstantWidth = 20;
+                    outline.LayerId = outlineLayerId;
+                    acadDatabase.ModelSpace.Add(outline);
+
+                    // 名称
+                    var dbText = new DBText
+                    {
+                        TextString = r.Name,
+                        TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                        Height = 300,
+                        WidthFactor = 0.7,
+                        Justify = AttachmentPoint.MiddleCenter,
+                        LayerId = markLayerId,
+                    };
+                    dbText.AlignmentPoint = outline.GetMaximumInscribedCircleCenter();
+                    acadDatabase.ModelSpace.Add(dbText);
                 });
             }
         }

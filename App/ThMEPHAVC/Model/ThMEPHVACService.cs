@@ -270,8 +270,8 @@ namespace ThMEPHVAC.Model
             if (scale == "1:100")
                 seperate_dis = 1800;
             else if (scale == "1:50")
-                seperate_dis = 900;
-            return seperate_dis;
+                seperate_dis = 1100;
+            return seperate_dis - 400;
         }
         public static string Get_dim_style(string scale)
         {
@@ -596,6 +596,12 @@ namespace ThMEPHVAC.Model
         {
             var poly = new Polyline();
             poly.CreatePolygon(p.ToPoint2D(), 4, 10);
+            return poly;
+        }
+        public static Polyline Create_detect_poly(Point3d p, double len)
+        {
+            var poly = new Polyline();
+            poly.CreatePolygon(p.ToPoint2D(), 4, len);
             return poly;
         }
         public static bool Is_point_in_left_side(Line l, Point3d p)

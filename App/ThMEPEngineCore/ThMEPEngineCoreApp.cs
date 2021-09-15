@@ -24,6 +24,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.ConnectWiring;
 
 namespace ThMEPEngineCore
 {

@@ -5,6 +5,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
+using GeometryExtensions;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -35,8 +37,9 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Use(LayoutData.Db))
             {
-                var cornerPt = new Point3d(pt.X + leaderXForwardLength, pt.Y + leaderYForwardLength, 0.0);
-                var firstLine = new Line(pt, cornerPt);
+                var ucsPt = pt.Wcs2Ucs(); //Ucs Pt
+                var cornerPt = new Point3d(ucsPt.X + leaderXForwardLength, ucsPt.Y + leaderYForwardLength, 0.0); //Ucs Pt
+                var firstLine = new Line(pt, cornerPt.Ucs2Wcs());
                 firstLine.Layer = LayoutData.WaterSupplyMarkLayerName;
                 firstLine.ColorIndex = (int)ColorIndex.BYLAYER;
                 firstLine.Linetype = "ByLayer";
@@ -44,7 +47,8 @@ namespace ThMEPWSS.FlushPoint.Service
 
 
                 var textWidth = GetTextWidth(content);
-                var secondLine = new Line(cornerPt, new Point3d(cornerPt.X + textWidth, cornerPt.Y, 0));
+                var endPt = new Point3d(cornerPt.X + textWidth, cornerPt.Y, 0); //Ucs Pt
+                var secondLine = new Line(cornerPt.Ucs2Wcs(), endPt.Ucs2Wcs());
                 secondLine.Layer = LayoutData.WaterSupplyMarkLayerName;
                 secondLine.ColorIndex = (int)ColorIndex.BYLAYER;
                 secondLine.Linetype = "ByLayer";
@@ -52,6 +56,7 @@ namespace ThMEPWSS.FlushPoint.Service
 
                 var dbText = new DBText();
                 dbText.Position = cornerPt;
+                dbText.Rotation = 0.0;
                 dbText.TextString = content;
                 dbText.Height = textSize;
                 dbText.Layer = LayoutData.WaterSupplyMarkLayerName;
@@ -60,6 +65,7 @@ namespace ThMEPWSS.FlushPoint.Service
                 dbText.ColorIndex = (int)ColorIndex.BYLAYER;
                 dbText.Linetype = "ByLayer";
                 dbText.LineWeight = LineWeight.ByLayer;
+                dbText.TransformBy(AcHelper.Active.Editor.UCS2WCS());
 
                 ObjIds.Add(acadDb.ModelSpace.Add(firstLine));
                 ObjIds.Add(acadDb.ModelSpace.Add(secondLine));

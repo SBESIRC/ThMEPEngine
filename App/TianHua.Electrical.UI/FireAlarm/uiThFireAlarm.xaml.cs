@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using TianHua.Electrical.ViewModels;
+using TianHua.Electrical.Commands;
+using ThMEPEngineCore.Command;
 
 namespace TianHua.Electrical.UI
 {
@@ -21,9 +24,32 @@ namespace TianHua.Electrical.UI
     /// </summary>
     public partial class uiThFireAlarm : ThCustomWindow
     {
+        static FireAlarmViewModel UiConfigs = null;
         public uiThFireAlarm()
         {
             InitializeComponent();
+            if(UiConfigs == null)
+            {
+                UiConfigs = new FireAlarmViewModel();
+            }
+            DataContext = UiConfigs;
+            MutexName = "Mutext_uiThFireAlarm";
+        }
+
+        private void btnLayout_Click(object sender, RoutedEventArgs e)
+        {
+            using (var cmd = new FireAlarmLayoutCommand(UiConfigs))
+            {
+                cmd.Execute();
+            }
+        }
+
+        private void btnRouting_Click(object sender, RoutedEventArgs e)
+        {
+            using (var cmd = new FireAlarmRouteCableCommand(UiConfigs))
+            {
+                cmd.Execute();
+            }
         }
     }
 }

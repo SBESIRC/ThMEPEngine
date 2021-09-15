@@ -12,6 +12,7 @@ namespace ThMEPHVAC.Model
         private Tolerance tor;
         private Matrix2d dis_mat;
         private List<VT_elbow_modify_param> vt_elbows;
+        private ThModifyDuctConnComponent duct_conn_service;
         public ThFanModifyVBypass(ObjectId[] ids, string modify_size, Duct_modify_param param)
         {
             using (var db = AcadDatabase.Active())
@@ -32,6 +33,11 @@ namespace ThMEPHVAC.Model
                     vt_pinter.Draw_4vertical_bypass(vt.vt_elbow, i_vt_pos, o_vt_pos);
                 else
                     vt_pinter.Draw_5vertical_bypass(vt.vt_elbow, i_vt_pos, o_vt_pos);
+                duct_conn_service = new ThModifyDuctConnComponent(p);
+                var l = new Line(i_vt_pos, o_vt_pos);
+                var pl = ThMEPHVACService.Get_line_extend(l, 10);
+                var width = ThMEPHVACService.Get_width(modify_size);
+                duct_conn_service.Update_valve(pl, Point2d.Origin, width);// 只更新电动多叶调节阀，不需要给new_p
             }
         }
         private void Update_v_elbow_pos(Point2d start_point)

@@ -16,11 +16,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板.dwg");
+                var file = ThCADCommon.WSSDwgPath();
                 using (AcadDatabase Db = AcadDatabase.Open(file, DwgOpenMode.ReadOnly, false))
                 {
                     //导入图块
-                    List<string> blockNames = new() { "潜水泵出水管阀组", "潜水泵系统", "套管系统", "标高", "排水管径100", "重力流雨水井编号", "污废合流井编号", "污水井编号" };
+                    List<string> blockNames = new() { "潜水泵出水管阀组-AI", "潜水泵系统", "套管系统", "标高", "排水管径100", "重力流雨水井编号", "污废合流井编号", "污水井编号" };
                     foreach (var brname in blockNames)
                     {
                         if (!adb.Blocks.Contains(brname)) adb.Blocks.Import(Db.Blocks.ElementOrDefault(brname));

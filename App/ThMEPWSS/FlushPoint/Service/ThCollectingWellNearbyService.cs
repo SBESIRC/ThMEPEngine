@@ -10,12 +10,13 @@ namespace ThMEPWSS.FlushPoint.Service
 {
     public class ThCollectingWellNearbyService:ThNearbyService
     {
-        //排水沟的中心线外扩4000范围内视为“附近”
-        public double NearbyDistance { get; set; }
+        //排水沟的中心线外扩4000范围内视为“附近”        
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public ThCollectingWellNearbyService(List<Polyline> wells, List<Entity> rooms):base(rooms)
+        public ThCollectingWellNearbyService(
+            List<Polyline> wells, 
+            List<Entity> rooms,
+            double nearbyDistance) :base(rooms, nearbyDistance)
         {
-            NearbyDistance = 3000;
             SpatialIndex = new ThCADCoreNTSSpatialIndex(wells.ToCollection());
         }
 

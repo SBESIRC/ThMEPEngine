@@ -10,18 +10,19 @@ using AcHelper;
 using Linq2Acad;
 using NFox.Cad;
 using Dreambuild.AutoCAD;
-using FireAlarm.Data;
 
 using ThCADExtension;
-using ThMEPElectrical.FireAlarm.Logic;
-using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPElectrical.Command;
 
-namespace ThMEPElectrical
+using ThMEPElectrical.FireAlarmFixLayout.Data;
+using ThMEPElectrical.FireAlarmFixLayout.Logic;
+using ThMEPElectrical.FireAlarmFixLayout;
+using ThMEPElectrical.FireAlarm.Service;
+
+namespace ThMEPElectrical.FireAlarmFixLayout
 {
     public class ThFireAlarmCmds
     {
@@ -91,26 +92,30 @@ namespace ThMEPElectrical
                 if (rst.Status != PromptStatus.OK)
                     return;
 
-                var buildingType = FireAlarm.Data.BuildingType.None;
+                var buildingType = FireAlarmFixLayout.Data.BuildingType.None;
                 if (rst.StringResult.Equals(strResident))
                 {
-                    buildingType = FireAlarm.Data.BuildingType.Resident;
+                    buildingType = FireAlarmFixLayout.Data.BuildingType.Resident;
                 }
                 else if (rst.StringResult.Equals(strPublic))
                 {
-                    buildingType = FireAlarm.Data.BuildingType.Public;
+                    buildingType = FireAlarmFixLayout.Data.BuildingType.Public;
                 }
                 else return;
 
                 getData(out var transformer, out var geos);
+
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
+                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_Display_Fire, ThFixLayoutCommon.BlkName_Display_Floor };
+                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
+                var layoutThisBlkName = ThFixLayoutCommon.BlkName_Display_Fire;//to do： from UI
+
                 ThFixedPointLayoutService layoutService = null;
-              
-                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos)
+                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, layoutBlkName, avoidBlkName)
                 {
                     BuildingType = buildingType,
                 };
@@ -125,6 +130,9 @@ namespace ThMEPElectrical
                     transformer.Reset(ref pt);
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
+
+                //插入真实块
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale,  layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -157,9 +165,13 @@ namespace ThMEPElectrical
                     return;
                 }
 
+                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_Monitor };
+                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
+                var layoutThisBlkName = ThFixLayoutCommon.BlkName_Monitor;//to do： from UI
+
                 ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThFireProofMonitorFixedPointLayoutService(geos);
-              
+                layoutService = new ThFireProofMonitorFixedPointLayoutService(geos, layoutBlkName, avoidBlkName);
+
                 var results = layoutService.Layout();
 
                 // 对结果的重设
@@ -170,6 +182,8 @@ namespace ThMEPElectrical
                     transformer.Reset(ref pt);
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
+
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -182,14 +196,13 @@ namespace ThMEPElectrical
                     ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
                     ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
                 });
-                //pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
             }
 
         }
 
         [CommandMethod("TIANHUACAD", "ThFireTel", CommandFlags.Modal)]
         public void ThFireTelLayout()
-        
+
         {
             //选择Geojson File,获取数据
             //测试布置逻辑
@@ -203,12 +216,14 @@ namespace ThMEPElectrical
                     return;
                 }
 
-                ThFixedPointLayoutService layoutService = null;
-               
-                layoutService = new ThFireTelFixedPointLayoutService(geos);
-                
-                var results = layoutService.Layout();
+                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_FireTel };
+                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
+                var layoutThisBlkName = ThFixLayoutCommon.BlkName_FireTel;//to do： from UI
 
+                ThFixedPointLayoutService layoutService = null;
+                layoutService = new ThFireTelFixedPointLayoutService(geos, layoutBlkName, avoidBlkName);
+
+                var results = layoutService.Layout();
 
                 // 对结果的重设
                 var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
@@ -218,6 +233,9 @@ namespace ThMEPElectrical
                     transformer.Reset(ref pt);
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
+
+                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+
 
                 //Print
                 pairs.ForEach(p =>

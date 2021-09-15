@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
@@ -493,22 +494,9 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             DefinePropertiesOfCADObjects(floorLines[0], "W-NOTE");
                             floorLines[0].AddToCurrentSpace();
                         }
-
                     }
                 }
-                //
-                List<string> strs1 = new List<string>();
-                List<string> strs2 = new List<string>();
-                allBlocks[0].ForEach(o => strs1.Add(o.Name));
-                allBlocks[1].ForEach(o => strs2.Add(o.Name));
-                int aa = 1;
-                strs1.Clear();
-                strs2.Clear();
-                allBlocks[0].ForEach(o => strs1.Add(o.BlockName));
-                allBlocks[1].ForEach(o => strs2.Add(o.BlockName));
-                aa = 1;
-                //
-                MessageBox.Show("共有排水单元" + allEntities.Count.ToString() + "组");
+                Active.Editor.WriteMessage("共有排水单元" + allEntities.Count.ToString() + "组");
             }
         }
 
@@ -1016,9 +1004,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     plys1.Add((Polyline)j);
                 }
-                else if (j is DBText)
+                else if (j is DBText b)
                 {
-                    dbs1.Add((DBText)j);
+                    if(!b.TextString.Contains("集水井尺寸"))
+                        dbs1.Add(b);
                 }
                 else
                 {
@@ -1037,9 +1026,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     plys2.Add((Polyline)j);
                 }
-                else if (j is DBText)
+                else if (j is DBText b)
                 {
-                    dbs2.Add((DBText)j);
+                    if (!b.TextString.Contains("集水井尺寸"))
+                        dbs2.Add(b);
                 }
                 else
                 {
@@ -1584,9 +1574,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             entities.Add(db07);
             DBText db_dim_annot = new();
             Point3d ptloc_dim_annot = ptloc_ply_tmp01.TransformBy(Matrix3d.Displacement(new Vector3d(0, -dim_offset_annot, 0)));
-            string str_annot = "注：集水井尺寸x * x * x " + " mm(h)";
+            string str_tmpdim = "x";
             if (dim_length > 0)
-                str_annot = "注：集水井尺寸x * x * " + dim_length.ToString() + " mm(h)";
+                str_tmpdim = dim_length.ToString();
+            string str_annot = "注：集水井尺寸" + pump.Length + "*" + pump.Width + "*" + str_tmpdim + " mm(h)";
             DefinePropertiesOfCADDBTexts(db_dim_annot, "W-NOTE", str_annot, ptloc_dim_annot, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid);
             entities.Add(db_dim_annot);
             if (parLayers[parLayers.Count - 1] == 0)
@@ -1692,7 +1683,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     pipeLineSystemUnit.PipeLineUnits[parLayers[parLayers.Count - 1]].VerticalPipes[parIndexes[parIndexes.Count - 1]].totalQ += pump.paraQ * CalculateUsedPump(pump.Allocation);
                 }
                 Point3d ptlocbr2 = new Point3d(line2.EndPoint.X, line2.EndPoint.Y - dim5, 0);
-                var blkId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "潜水泵出水管阀组", ptlocbr2, new Scale3d(1), 0);
+                var blkId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "潜水泵出水管阀组-AI", ptlocbr2, new Scale3d(1), 0);
                 blkId2.SetDynBlockValue("可见性1", "闸阀");
                 tmpBlocksCopied.Add(adb.Element<BlockReference>(blkId2));
                 adb.Element<BlockReference>(blkId2).Visible = false;
@@ -1729,7 +1720,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 tmpEntitiesCopied.Clear();
                 Dictionary<string, string> atts01 = new();
                 atts01.Add("标高", "h+1.50");
-                var blkId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", ptlocelv150, new Scale3d(0), 0, atts01);
+                Point3d ptlocelv150_note = ptlocelv150.TransformBy(Matrix3d.Displacement(new Vector3d(0, 75, 0)));
+                var blkId3 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", ptlocelv150_note, new Scale3d(0), 0, atts01);
                 blkId3.SetDynBlockValue("翻转状态1", (short)0);
                 blkId3.SetDynBlockValue("翻转状态2", (short)0);
                 tmpBlocksUnique.Add(adb.Element<BlockReference>(blkId3));

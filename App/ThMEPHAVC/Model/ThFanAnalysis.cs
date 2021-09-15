@@ -71,13 +71,13 @@ namespace ThMEPHVAC.CAD
                                                                             out Line room_line, out Line not_room_line);
             spatial_index = new ThCADCoreNTSSpatialIndex(center_line);
             Get_duct_info(i_room_p, room_line, room_lines);
+            Get_duct_info(i_not_room_p, not_room_line, not_room_lines);
+            Cut_center_line(wall_lines);
+            Re_construct_center_line(ref room_line, ref not_room_line);
+            Get_duct_info(i_room_p, room_line, room_lines);
             text_alignment.Add(new TextAlignLine(last_line, true, param.room_duct_size));
             Get_duct_info(i_not_room_p, not_room_line, not_room_lines);
             text_alignment.Add(new TextAlignLine(last_line, false, param.other_duct_size));
-            Cut_center_line(fan.scenario, wall_lines);
-            Re_construct_center_line(ref room_line, ref not_room_line);
-            Get_duct_info(i_room_p, room_line, room_lines);
-            Get_duct_info(i_not_room_p, not_room_line, not_room_lines);
             Get_special_shape_info(i_room_p, room_line, room_lines, param.room_duct_size);
             Get_special_shape_info(i_not_room_p, not_room_line, not_room_lines, param.other_duct_size);
             Collect_lines();
@@ -164,10 +164,14 @@ namespace ThMEPHVAC.CAD
         }
         private void Move_to_org()
         {
-            var dis_mat = Matrix3d.Displacement(-move_srt_p.GetAsVector());
+            var dis_mat = Matrix3d.Displacement(move_srt_p.GetAsVector());
             foreach (Line l in out_center_line)
                 l.TransformBy(dis_mat);
-            fan_break_p.TransformBy(dis_mat);
+            fan_break_p = fan_break_p.TransformBy(dis_mat);
+            // Move for FPM
+            dis_mat = Matrix3d.Displacement(-fan_break_p.GetAsVector());
+            foreach (Line l in out_center_line)
+                l.TransformBy(dis_mat);
         }
         private void Move_to_zero(Point3d fan_inlet_p,
                                   Point3d fan_outlet_p,
@@ -346,7 +350,7 @@ namespace ThMEPHVAC.CAD
             }
             special_shapes_info.Add(new Special_graph_Info(lines, shape_port_widths));
         }
-        public void Cut_center_line(string scenario, DBObjectCollection wall_lines)
+        public void Cut_center_line(DBObjectCollection wall_lines)
         {
             var index = new ThCADCoreNTSSpatialIndex(wall_lines);
             Do_adjust(param.room_duct_size, wall_lines, room_lines, index);
@@ -426,6 +430,8 @@ namespace ThMEPHVAC.CAD
             center_lines.Remove(cross_line);
             var p = ThMEPHVACService.Is_in_polyline(cross_line.StartPoint, wall_lines) ?
                     cross_line.StartPoint : cross_line.EndPoint;
+            var dir_vec = (p - fan_break_p).GetNormal();
+            fan_break_p += dir_vec;// 用于消除1mm的外延
             center_lines.Add(new Line(p, fan_break_p));
             var other_p = p.IsEqualTo(cross_line.StartPoint, point_tor) ?
                     cross_line.EndPoint : cross_line.StartPoint;

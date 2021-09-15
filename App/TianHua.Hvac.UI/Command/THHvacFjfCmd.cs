@@ -2,13 +2,10 @@
 using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Linq2Acad;
 using NFox.Cad;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
 using TianHua.FanSelection.Function;
@@ -20,80 +17,86 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacFjfCmd : IAcadCommand, IDisposable
     {
+        private bool is_integrate;
         private double type3_sep_dis = 30;
-        public void Dispose()
+        public ThHvacFjfCmd() { }
+        public ThHvacFjfCmd(bool is_integrate)
         {
-            //
+            this.is_integrate = is_integrate;
         }
+        public void Dispose() { }
         public void Execute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var center_lines = Get_fan_and_centerline(out ObjectId fan_id);
+                var center_lines = ThHvacCmdService.Get_fan_and_centerline(out ObjectId fan_id);
                 if (fan_id.IsNull || center_lines.Count == 0)
                 {
                     ThMEPHVACService.Prompt_msg("未选择中心线或风机");
                     return;
                 }
-                var wall_lines = Get_walls();
+                var wall_lines = ThHvacCmdService.Get_walls();
                 if (wall_lines.Count == 0)
                 {
                     ThMEPHVACService.Prompt_msg("未选择墙线");
                     return;
                 }
                 var fan = new ThDbModelFan(fan_id);
-                var param = Get_duct_info(fan, out string air_volume);
+                var fjf_param = Get_duct_info(fan, out string air_volume, out ThMEPHVACParam fpm_param);
                 if (string.IsNullOrEmpty(air_volume))
                 {
                     ThMEPHVACService.Prompt_msg("风机风量为0");
                     return;
                 }
-                Fix_duct_size_info(ref param);
                 if (fan.scenario == "消防加压送风")
                 {
-                    Get_bypass_info(fan, ref param);
-                    if (string.IsNullOrEmpty(param.bypass_pattern))
+                    Get_bypass_info(fan, ref fjf_param);
+                    if (string.IsNullOrEmpty(fjf_param.bypass_pattern))
                     {
                         ThMEPHVACService.Prompt_msg("未选择旁通模式");
                         return;
                     }
-                    string tee_pattern = param.bypass_pattern;
+                    string tee_pattern = fjf_param.bypass_pattern;
                     var bypass_lines = Get_bypass(tee_pattern, out Line max_bypass);
                     if (!Checkout_input(tee_pattern, bypass_lines, center_lines))
                         return;
-                    var anay_res = new ThFanAnalysis(fan, param, bypass_lines, center_lines, wall_lines);
+                    var anay_res = new ThFanAnalysis(fan, fjf_param, bypass_lines, center_lines, wall_lines);
                     if (anay_res.center_lines.Count == 0)
                     {
                         ThMEPHVACService.Prompt_msg("未搜索到与风机相连的中心线");
                         return;
                     }
-                    Record_bypass_alignment_line(max_bypass, param, fan, bypass_lines, anay_res.text_alignment);
+                    Record_bypass_alignment_line(max_bypass, fjf_param, fan, bypass_lines, anay_res.text_alignment, anay_res.move_srt_p);
                     Merge_bypass(tee_pattern, anay_res.center_lines);
-                    var pinter = new ThFanDraw(anay_res);
-                    var valve_hole = new ThHolesAndValvesEngine(fan, wall_lines, bypass_lines, param, anay_res.room_lines, anay_res.not_room_lines);
+                    // 先画阀，pinter会移动中心线导致墙线与中心线交不上
+                    var valve_hole = new ThHolesAndValvesEngine(fan, wall_lines, bypass_lines, fjf_param, anay_res.room_lines, anay_res.not_room_lines);
                     valve_hole.RunInletValvesInsertEngine();
                     valve_hole.RunOutletValvesInsertEngine();
-                    Insert_electric_valve(param, fan, max_bypass, pinter);
-                    
+                    var pinter = new ThFanDraw(anay_res);
+                    Insert_electric_valve(fjf_param, fan, max_bypass, pinter);
                     if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
                     {
-                        var vt_pinter = new ThDrawVBypass(fan.air_volume, param.scale, fan.scenario, anay_res.move_srt_p, pinter.start_id, param.bypass_size, param.room_elevation);
+                        var vt_pinter = new ThDrawVBypass(fan.air_volume, fjf_param.scale, fan.scenario, anay_res.move_srt_p, pinter.start_id, fjf_param.bypass_size, fjf_param.room_elevation);
                         if (tee_pattern == "RBType4")
                             vt_pinter.Draw_4vertical_bypass(anay_res.vt.vt_elbow, anay_res.in_vt_pos, anay_res.out_vt_pos);
                         else
                             vt_pinter.Draw_5vertical_bypass(anay_res.vt.vt_elbow, anay_res.in_vt_pos, anay_res.out_vt_pos);
                     }
+                    var duct_port=  new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
+                    duct_port.Execute();
                 }
                 else
                 {
-                    var bypass_lines = Get_bypass(param.bypass_pattern, out Line _);
-                    var anay_res = new ThFanAnalysis(fan, param, bypass_lines, center_lines, wall_lines);
+                    var bypass_lines = Get_bypass(fjf_param.bypass_pattern, out Line _);
+                    var anay_res = new ThFanAnalysis(fan, fjf_param, bypass_lines, center_lines, wall_lines);
                     if (anay_res.center_lines.Count == 0)
                         return;
-                    _ = new ThFanDraw(anay_res);
-                    var valve_hole = new ThHolesAndValvesEngine(fan, wall_lines, bypass_lines, param, anay_res.room_lines, anay_res.not_room_lines);
+                    var valve_hole = new ThHolesAndValvesEngine(fan, wall_lines, bypass_lines, fjf_param, anay_res.room_lines, anay_res.not_room_lines);
                     valve_hole.RunInletValvesInsertEngine();
                     valve_hole.RunOutletValvesInsertEngine();
+                    _ = new ThFanDraw(anay_res);
+                    var duct_port = new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
+                    duct_port.Execute();
                 }
             }
         }
@@ -120,14 +123,19 @@ namespace TianHua.Hvac.UI.Command
                                                   Duct_InParam param, 
                                                   ThDbModelFan fan, 
                                                   DBObjectCollection bypass, 
-                                                  List<TextAlignLine> text_alignment)
+                                                  List<TextAlignLine> text_alignment,
+                                                  Point3d move_srt_p)
         {
             if (param.bypass_size == null)
                 return;
             if (bypass.Count == 0)
                 text_alignment.Add(new TextAlignLine(new Line(fan.FanInletBasePoint, fan.FanOutletBasePoint), true, param.bypass_size));
             else
+            {
+                var dis_mat = Matrix3d.Displacement(-move_srt_p.GetAsVector());
+                max_bypass.TransformBy(dis_mat);
                 text_alignment.Add(new TextAlignLine(max_bypass, true, param.bypass_size));
+            }
         }
         private void Insert_electric_valve(Duct_InParam param, ThDbModelFan fan, Line max_bypass, ThFanDraw pinter)
         {
@@ -183,22 +191,73 @@ namespace TianHua.Hvac.UI.Command
             info.room_duct_size = big_size;
             info.other_duct_size = small_size;
         }
-        private Duct_InParam Get_duct_info(ThDbModelFan DbFanModel, out string air_volume)
+        private Duct_InParam Get_duct_info(ThDbModelFan fan, out string air_volume, out ThMEPHVACParam fpm_param)
         {
             air_volume = string.Empty;
-            var info = new Duct_InParam();
-            using (var dlg = Create_duct_diag(DbFanModel))
+            fpm_param = new ThMEPHVACParam();
+            if (is_integrate)
             {
-                if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                using (var dlg = Create_integrate_diag(fan))
                 {
-                    info.room_duct_size = dlg.SelectedInnerDuctSize;
-                    info.other_duct_size = dlg.SelectedOuterDuctSize;
-                    air_volume = dlg.AirVolume;
-                    info.room_elevation = DbFanModel.is_exhaust ? dlg.Elevation : dlg.Elevation2;
-                    info.other_elevation = DbFanModel.is_exhaust ? dlg.Elevation2 : dlg.Elevation;
-                    info.scale = dlg.TextSize;
+                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                    {
+                        var fjf_param = Get_fjf_param(dlg, fan.is_exhaust, out air_volume);
+                        Fix_duct_size_info(ref fjf_param);
+                        fpm_param = Get_fpm_param(dlg, fan.is_exhaust, fjf_param.room_duct_size);
+                        return fjf_param;
+                    }
                 }
             }
+            else
+            {
+                using (var dlg = Create_duct_diag(fan))
+                {
+                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                    { 
+                        var fjf_param = Get_fjf_param(dlg, fan.is_exhaust, out air_volume);
+                        Fix_duct_size_info(ref fjf_param);
+                        return fjf_param;
+                    }
+                }
+            }
+            return new Duct_InParam();
+        }
+        private ThMEPHVACParam Get_fpm_param(fmFjfFpm dlg, bool is_exhaust, string room_duct_size)
+        {
+            var info = new ThMEPHVACParam();
+            info.port_num = dlg.port_num;
+            info.scenario = dlg.scenario;
+            info.scale = dlg.scale;
+            var elevation = is_exhaust ? dlg.elevation1.ToString() : dlg.elevation2.ToString();
+            info.elevation = Double.Parse(elevation);
+            info.port_size = dlg.port_size;
+            info.port_name = dlg.port_name;
+            info.air_volume = dlg.air_volume;
+            info.port_range = dlg.port_range;
+            info.in_duct_size = room_duct_size;//room 侧
+            info.air_speed = dlg.air_speed;
+            return info;
+        }
+        private Duct_InParam Get_fjf_param(fmFjfFpm dlg, bool is_exhaust, out string air_volume)
+        {
+            var info = new Duct_InParam();
+            info.room_duct_size = dlg.i_duct_size;
+            info.other_duct_size = dlg.o_duct_size;
+            air_volume = dlg.air_volume.ToString();
+            info.room_elevation = is_exhaust ? dlg.elevation1.ToString() : dlg.elevation2.ToString();
+            info.other_elevation = is_exhaust ? dlg.elevation2.ToString() : dlg.elevation1.ToString();
+            info.scale = dlg.scale;
+            return info;
+        }
+        private Duct_InParam Get_fjf_param(fmDuctSpec dlg, bool is_exhaust, out string air_volume)
+        {
+            var info = new Duct_InParam();
+            info.room_duct_size = dlg.SelectedInnerDuctSize;
+            info.other_duct_size = dlg.SelectedOuterDuctSize;
+            air_volume = dlg.AirVolume.ToString();
+            info.room_elevation = is_exhaust ? dlg.Elevation : dlg.Elevation2;
+            info.other_elevation = is_exhaust ? dlg.Elevation2 : dlg.Elevation;
+            info.scale = dlg.TextSize;
             return info;
         }
         private void Get_bypass_info(ThDbModelFan fan, ref Duct_InParam info)
@@ -214,52 +273,6 @@ namespace TianHua.Hvac.UI.Command
                     return;
             }
         }
-        private ObjectIdCollection Get_from_prompt(string prompt, bool only_able)
-        {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = prompt,
-                RejectObjectsOnLockedLayers = true,
-                SingleOnly = only_able
-            };
-            var result = Active.Editor.GetSelection(options);
-            if (result.Status == PromptStatus.OK)
-            {
-                return result.Value.GetObjectIds().ToObjectIdCollection();
-            }
-            else
-            {
-                return new ObjectIdCollection();
-            }
-        }
-        private ObjectId Classify_fan(ObjectIdCollection selections, out DBObjectCollection center_lines)
-        {
-            ObjectId fan_id = ObjectId.Null;
-            center_lines = new DBObjectCollection();
-            foreach (ObjectId oid in selections)
-            {
-                var obj = oid.GetDBObject();
-                if (obj.IsRawModel())
-                {
-                    fan_id = oid;
-                }
-                else if (obj is Curve curve)
-                {
-                    center_lines.Add(curve.Clone() as Curve);
-                }
-            }
-            return fan_id;
-        }
-        private DBObjectCollection Get_fan_and_centerline(out ObjectId fan_id)
-        {
-            fan_id = ObjectId.Null;
-            var objIds = Get_from_prompt("请选择风机和中心线", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            fan_id = Classify_fan(objIds, out DBObjectCollection center_lines);
-            return ThMEPHVACLineProc.Pre_proc(center_lines);
-        }
         private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass_line)
         {
             max_bypass_line = new Line();
@@ -267,7 +280,7 @@ namespace TianHua.Hvac.UI.Command
                 return new DBObjectCollection();
             if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
                 return new DBObjectCollection();
-            var objIds = Get_from_prompt("请选择旁通管", false);
+            var objIds = ThHvacCmdService.Get_from_prompt("请选择旁通管", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             var bypass = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
@@ -291,26 +304,9 @@ namespace TianHua.Hvac.UI.Command
             p = mid_p + shrink_len * dir_vec;
             bypass.Add(new Line(p, max_bypass.EndPoint));
         }
-        private DBObjectCollection Get_walls()
-        {
-            var wallobjects = new DBObjectCollection();
-            var objIds = Get_from_prompt("请选择内侧墙线", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            foreach (ObjectId oid in objIds)
-            {
-                var obj = oid.GetDBObject();
-                if (obj is Curve curveobj)
-                {
-                    wallobjects.Add(curveobj);
-                }
-            }
-            return ThMEPHVACLineProc.Pre_proc(wallobjects);
-        }
         private fmBypass Create_bypass_diag(ThDbModelFan fan)
         {
-            bool is_exhaust = !(fan.scenario.Contains("补") || fan.scenario.Contains("送"));
-            var info = Get_duct_info(fan.air_volume, fan.scenario, fan.str_air_volume, is_exhaust);
+            var info = Get_duct_info(fan.air_volume, fan.scenario, fan.str_air_volume);
             var fm = new fmBypass(fan.air_volume);
             fm.InitForm(info);
             return fm;
@@ -318,27 +314,32 @@ namespace TianHua.Hvac.UI.Command
         private fmDuctSpec Create_duct_diag(ThDbModelFan fan)
         {
             bool is_exhaust = !(fan.scenario.Contains("补") || fan.scenario.Contains("送"));
-            var info = Get_duct_info(fan.air_volume, fan.scenario, fan.str_air_volume, is_exhaust);
+            var info = Get_duct_info(fan.air_volume, fan.scenario, fan.str_air_volume);
             var fm = new fmDuctSpec();
             fm.InitForm(info, is_exhaust);
             return fm;
         }
-        private DuctSpecModel Get_duct_info(double air_volume, string scenario, string str_air_volume, bool is_exhaust)
+        private fmFjfFpm Create_integrate_diag(ThDbModelFan fan)
+        {
+            bool is_exhaust = !(fan.scenario.Contains("补") || fan.scenario.Contains("送"));
+            var info = Get_duct_info(fan.air_volume, fan.scenario, fan.str_air_volume);
+            var fm = new fmFjfFpm(info, is_exhaust);
+            return fm;
+        }
+        private DuctSpecModel Get_duct_info(double air_volume, string scenario, string str_air_volume)
         {
             var duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(scenario), true);
             return new DuctSpecModel()
             {
+                AirVolume = air_volume,
+                StrAirVolume = str_air_volume,
                 AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(scenario),
                 MaxAirSpeed = ThFanSelectionUtils.GetMaxAirSpeed(scenario),
                 MinAirSpeed = ThFanSelectionUtils.GetMinAirSpeed(scenario),
-                StrAirVolume = str_air_volume,
-                AirVolume = air_volume,
                 ListOuterTube = new List<string>(duct_param.DuctSizeInfor.DefaultDuctsSizeString),
                 ListInnerTube = new List<string>(duct_param.DuctSizeInfor.DefaultDuctsSizeString),
-                OuterTube = is_exhaust ? duct_param.DuctSizeInfor.RecommendOuterDuctSize:
-                                         duct_param.DuctSizeInfor.RecommendInnerDuctSize,
-                InnerTube = is_exhaust ? duct_param.DuctSizeInfor.RecommendInnerDuctSize : 
-                                         duct_param.DuctSizeInfor.RecommendOuterDuctSize
+                OuterTube = duct_param.DuctSizeInfor.RecommendOuterDuctSize,
+                InnerTube = duct_param.DuctSizeInfor.RecommendInnerDuctSize
             };
         }
     }

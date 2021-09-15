@@ -33,7 +33,8 @@ namespace ThMEPEngineCore.Service
             }            
             else
             {
-                throw new NotSupportedException();
+                //throw new NotSupportedException();
+                return null;
             }
         }
         private static Polyline Tesslate(Polyline polyline, double length)
