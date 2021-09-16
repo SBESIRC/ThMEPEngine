@@ -20,6 +20,25 @@ namespace TianHua.FanSelection.UI.CAD
             Models.Clear();
         }
 
+        public override void Erase(DBObject dbObject, bool erasing)
+        {
+            // 删除风机图块
+            base.Erase(dbObject, erasing);
+
+            // 删除风机模型
+            EraseModels(dbObject, erasing);
+        }
+
+        private void EraseModels(DBObject dbObject, bool erasing)
+        {
+            var identifier = dbObject.GetModelIdentifier();
+            if (!string.IsNullOrEmpty(identifier) && erasing)
+            {
+                var ds = new ThFanModelDataDbSource();
+                ds.Erase(dbObject.Database, identifier);
+            }
+        }
+
         public override DBObject DeepClone(DBObject dbObject, DBObject ownerObject, IdMapping idMap, bool isPrimary)
         {
             DBObject result = base.DeepClone(dbObject, ownerObject, idMap, isPrimary);

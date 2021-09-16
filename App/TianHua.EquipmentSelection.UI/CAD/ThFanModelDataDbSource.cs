@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Dreambuild.AutoCAD;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -30,6 +31,15 @@ namespace TianHua.FanSelection.UI.CAD
             return ds;
         }
 
+        public static void EraseModels(Database database, FanDataModel model)
+        {
+            Debug.Assert(model != null);
+            Debug.Assert(model.IsValid());
+            Debug.Assert(model.IsMainModel());
+            var ds = new ThFanModelDataDbSource();
+            ds.Erase(database, model.ID);
+        }
+
         /// <summary>
         /// 将风机模型数据存入图纸NOD中
         /// </summary>
@@ -55,6 +65,45 @@ namespace TianHua.FanSelection.UI.CAD
                     dictionary.SetAt(m.ID, xres);
                     tx.AddNewlyCreatedDBObject(xres, true);
                 });
+                tx.Commit();
+            }
+        }
+
+        /// <summary>
+        /// 删除风机模型
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="identifier"></param>
+        public void Erase(Database database, string identifier)
+        {
+            using (OpenCloseTransaction tx = database.TransactionManager.StartOpenCloseTransaction())
+            {
+                var nod_collection = tx.GetObject(database.NamedObjectsDictionaryId, OpenMode.ForRead) as DBDictionary;
+                if (nod_collection.Contains(NOD_THMEP_FAN))
+                {
+                    ObjectId oid = nod_collection.GetAt(NOD_THMEP_FAN);
+                    var dictionary = tx.GetObject(oid, OpenMode.ForWrite) as DBDictionary;
+                    if (dictionary != null)
+                    {
+                        using (DbDictionaryEnumerator enumerator = dictionary.GetEnumerator())
+                        {
+                            while (enumerator.MoveNext())
+                            {
+                                var xres = tx.GetObject(enumerator.Current.Value, OpenMode.ForWrite) as Xrecord;
+                                var data = FromResultBuffer(xres.Data);
+                                var model = DeserializeBinary(DeCompressBinary(data));
+                                if (model.ID == identifier)
+                                {
+                                    xres.Erase();
+                                }
+                                else if (model.PID == identifier)
+                                {
+                                    xres.Erase();
+                                }
+                            }
+                        }
+                    }
+                }
                 tx.Commit();
             }
         }

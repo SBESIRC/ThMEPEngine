@@ -53,7 +53,7 @@ namespace TianHua.FanSelection.Function
             return FuncStr.NullToStr(model.VentStyle) == "轴流";
         }
 
-        public static bool IsHighSpeedModel(this FanDataModel model)
+        public static bool IsMainModel(this FanDataModel model)
         {
             return model.PID == "0";
         }
@@ -70,7 +70,7 @@ namespace TianHua.FanSelection.Function
 
         public static FanDataModel ParentModel(this List<FanDataModel> models, FanDataModel model)
         {
-            if (model.IsHighSpeedModel())
+            if (model.IsMainModel())
             {
                 return null;
             }
@@ -80,7 +80,7 @@ namespace TianHua.FanSelection.Function
 
         public static FanDataModel ChildModel(this List<FanDataModel> models, FanDataModel model)
         {
-            if (!model.IsHighSpeedModel())
+            if (model.IsSubModel())
             {
                 return null;
             }
@@ -90,7 +90,7 @@ namespace TianHua.FanSelection.Function
 
         public static bool HasChildModel(this List<FanDataModel> models, FanDataModel model)
         {
-            if (!model.IsHighSpeedModel())
+            if (model.IsSubModel())
             {
                 return false;
             }
