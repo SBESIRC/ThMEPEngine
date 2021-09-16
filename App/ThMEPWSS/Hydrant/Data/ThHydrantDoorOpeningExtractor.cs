@@ -15,6 +15,8 @@ namespace ThMEPWSS.Hydrant.Data
     public class ThHydrantDoorOpeningExtractor : ThDoorOpeningExtractor
     {
         private const double EnlargeTolerance = 5.0;
+        private const double MinimumAreaTolerance = 100.0;
+
         public override void Extract(Database database, Point3dCollection pts)
         {
             var doors = new DBObjectCollection();
@@ -31,10 +33,15 @@ namespace ThMEPWSS.Hydrant.Data
             {
                 doors = FilterWindowPolygon(pts, doors.Cast<Entity>().ToList()).ToCollection();
             }
-            var objs = doors.UnionPolygons();
-            objs = objs.FilterSmallArea(100.0);
-            Doors.AddRange(objs.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList());
-        }        
+            // 去重
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(doors);
+            doors = spatialIndex.Geometries.Values.ToCollection();
+            doors = doors.FilterSmallArea(MinimumAreaTolerance);
+            doors = doors.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToCollection();
+            doors = doors.UnionPolygons();
+            doors = doors.FilterSmallArea(MinimumAreaTolerance);
+            Doors.AddRange(doors.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList());
+        }  
 
         public void FilterOuterDoors(List<Entity> rooms)
         {
