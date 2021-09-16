@@ -275,7 +275,10 @@ namespace ThMEPHVAC.Model
         public static void Remove_ids(ObjectId[] objectIds)
         {
             foreach (var id in objectIds)
-                id.Erase();
+            {
+                if (!id.IsErased)
+                    id.Erase();
+            }
         }
         public static string Get_cur_layer(ObjectIdCollection colle)
         {
@@ -440,8 +443,11 @@ namespace ThMEPHVAC.Model
                 var ids = id.GetGroups();
                 foreach (var g_id in ids)
                 {
-                    g_id.RemoveXData(ThHvacCommon.RegAppName_Duct_Info);
-                    Remove_group(g_id);
+                    if (!g_id.IsErased)
+                    {
+                        g_id.RemoveXData(ThHvacCommon.RegAppName_Duct_Info);
+                        Remove_group(g_id);
+                    }
                 }
             }  
         }
@@ -453,7 +459,8 @@ namespace ThMEPHVAC.Model
                 {
                     var g_id = db.Database.GetObjectId(false, handle, 0);
                     //g_id.RemoveXData(ThHvacCommon.RegAppName_Info);
-                    Remove_group(g_id);
+                    if (!g_id.IsErased)
+                        Remove_group(g_id);
                 }
             }
         }
