@@ -1,6 +1,4 @@
 ﻿using System;
-using DotNetARX;
-using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
 using ThMEPEngineCore.Model;
@@ -19,18 +17,18 @@ namespace ThMEPElectrical.Stair
             //
         }
 
-        public Dictionary<Point3d, double> Layout(Database database, Point3dCollection points, double scale, string equiment, bool platOnly)
+        public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, Point3dCollection points, double scale, string equimentName, bool platOnly)
         {
             // 提取楼梯块
-            var engine = new ThDB3StairRecognitionEngine();
+            var engine = new ThDB3StairRecognitionEngine { Rooms = rooms};
             engine.Recognize(database, points);
             var stairs = engine.Elements.Cast<ThIfcStair>().ToList();
 
             // 计算布置位置
-            return Calculate(stairs, scale, equiment, platOnly);
+            return Calculate(stairs, scale, equimentName, platOnly);
         }
 
-        private Dictionary<Point3d, double> Calculate(List<ThIfcStair> stairs, double scale, string equiment, bool platOnly)
+        private Dictionary<Point3d, double> Calculate(List<ThIfcStair> stairs, double scale, string equimentName, bool platOnly)
         {
             var dictionary = new Dictionary<Point3d, double>();
             stairs.ForEach(stair =>
@@ -41,61 +39,92 @@ namespace ThMEPElectrical.Stair
                 var angle = 0.0;
                 stair.PlatForLayout.ForEach(o =>
                 {
-                    var position = layoutEngine.Displacement(o, doors, equiment, scale, ref angle);
+                    var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey, ref angle);
                     dictionary.Add(position, angle);
                 });
                 if (!platOnly)
                 {
                     stair.HalfPlatForLayout.ForEach(o =>
                     {
-                        var position = layoutEngine.Displacement(o, doors, equiment, scale, ref angle);
+                        var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey,ref angle);
                         dictionary.Add(position, angle);
                     });
+                }
+                
+                if(equimentName == "E-BFAS110")
+                {
+                    if (stair.Storey == "顶层")
+                    {
+                        var dirction = new Vector3d(0, 1, 0);
+                        if (stair.StairType == "双跑楼梯")
+                        {
+                            var position = stair.Rungs.GeometricExtents().CenterPoint();
+                            angle = GetAngle(dirction, GetVector(stair.PlatForLayout[0][0], stair.PlatForLayout[0][3]));
+                            dictionary.Add(position, angle);
+                        }
+                        else if(stair.StairType == "剪刀楼梯")
+                        {
+                            foreach(Entity rung in stair.Rungs)
+                            {
+                                var position = rung.GeometricExtents.CenterPoint();
+                                angle = GetAngle(dirction, GetVector(stair.PlatForLayout[0][0], stair.PlatForLayout[0][3]));
+                                dictionary.Add(position, angle);
+                            }
+                        }
+                        else
+                        {
+                            throw new NotSupportedException();
+                        }
+                    }
                 }
             });
             return dictionary;
         }
 
-        private Point3d Displacement(List<Point3d> platform, List<List<Point3d>> doors, string name, double scale, ref double angle)
+        private Point3d Displacement(List<Point3d> platform, List<List<Point3d>> doors, string equimentName,
+                                     double scale, string storey, ref double angle)
         {
             // 默认方向
             var dirction = new Vector3d(0, 1, 0);
             // 正常照明点位 平台中心吸顶布置
             var position = new Vector3d();
-            if (name == "E-BL302")
+            if (equimentName == "E-BL302")
             {
                 position = (platform[0].GetAsVector() + platform[1].GetAsVector()
                             + platform[2].GetAsVector() + platform[3].GetAsVector()) / platform.Count();
                 angle = GetAngle(dirction, GetVector(platform[0], platform[3]));
             }
             // 平台靠近下行方向1/4位置中心吸顶布置
-            else if (name == "E-BFEL800")
+            else if (equimentName == "E-BFEL800")
             {
                 position = platform[0].GetAsVector() + (GetVector(platform[0], platform[1]) / 4)
                            + (GetVector(platform[0], platform[3]) / 2);
                 angle = GetAngle(dirction, GetVector(platform[0], platform[3]));
             }
             // 平台靠近上行方向1/4位置中心吸顶布置
-            else if (name == "E-BFAS110")
+            else if (equimentName == "E-BFAS110")
             {
-                position = platform[0].GetAsVector() + (GetVector(platform[0], platform[1]) * 3 / 4)
+                if(storey != "顶层")
+                {
+                    position = platform[0].GetAsVector() + (GetVector(platform[0], platform[1]) * 3 / 4)
                            + (GetVector(platform[0], platform[3]) / 2);
-                angle = GetAngle(dirction, GetVector(platform[0], platform[3]));
+                    angle = GetAngle(dirction, GetVector(platform[0], platform[3]));
+                }
             }
             // 平台中心壁装布置
-            else if (name == "E-BFEL110")
+            else if (equimentName == "E-BFEL110")
             {
-                var length = 0.0 * scale;
-                var width = 0.0 * scale;
+                var length = 5.0 * scale;
+                var width = 2.5 * scale;
                 var layoutLine = LayoutLine(platform, doors, length);
                 var positionTidal = ToPoint3d((platform[0].GetAsVector() + platform[1].GetAsVector()) / 2);
                 position = Avoid(platform, positionTidal, layoutLine, width, ref angle);
             }
             // 平台靠近下行方向1/4位置壁装布置
-            else if (name == "E-BFAS410-4")
+            else if (equimentName == "E-BFAS410-4")
             {
-                var length = 0.0 * scale;
-                var width = 0.0 * scale;
+                var length = 5.0 * scale;
+                var width = 3.0 * scale;
                 var layoutLine = LayoutLine(platform, doors, length);
                 var positionTidal = ToPoint3d((platform[0].GetAsVector() + GetVector(platform[0], platform[1]) / 4));
                 position = Avoid(platform, positionTidal, layoutLine, width, ref angle);

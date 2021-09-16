@@ -11,6 +11,7 @@ namespace ThMEPEngineCore.Model
         public BlockReference SrcBlock { get; set; }
         public string StairType { get; set; }
         public string Storey { get; set; }
+        public DBObjectCollection Rungs { get; set; }
         
         public ThIfcStair()
         {

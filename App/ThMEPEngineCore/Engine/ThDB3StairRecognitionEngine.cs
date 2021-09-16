@@ -26,6 +26,8 @@ namespace ThMEPEngineCore.Engine
 
     public class ThDB3StairRecognitionEngine : ThBuildingElementRecognitionEngine
     {
+        public List<Polyline> Rooms { get; set; }
+
         public override void Recognize(Database database, Point3dCollection frame)
         {
             var engine = new ThDB3StairExtractionEngine();
@@ -52,11 +54,11 @@ namespace ThMEPEngineCore.Engine
 
             foreach (BlockReference block in stairBlocks)
             {
-                Elements.Add(CreatIfcStair(block));
+                Elements.Add(CreatIfcStair(block, Rooms));
             }
         }
 
-        private ThIfcStair CreatIfcStair(BlockReference stair)
+        private ThIfcStair CreatIfcStair(BlockReference stair, List<Polyline> rooms)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -96,14 +98,25 @@ namespace ThMEPEngineCore.Engine
                 var halfPlatform = new Polyline();
                 if (platforms.Count == 0)
                 {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+                    var frameTidal = spatialIndex.SelectCrossingPolygon(stair.ToOBB(Matrix3d.Identity).Vertices());
+                    var frame = new Polyline();
+                    if (frameTidal.Count > 0)
+                    {
+                        frame = frameTidal.GeometricExtents().ToRectangle();
+                    }
+
                     ifcStair.Storey = "首层";
                     if (rungs.Count == 1)
                     {
                         ifcStair.StairType = "双跑楼梯";
+                        ifcStair.PlatForLayout.Add(GetLayoutList(frame, beams));
+
                     }
                     else if (rungs.Count == 2)
                     {
                         ifcStair.StairType = "剪刀楼梯";
+                        ifcStair.PlatForLayout = GetLayoutList(frame, beams, up.ToCollection());
                     }
 
                     return ifcStair;
@@ -115,11 +128,11 @@ namespace ThMEPEngineCore.Engine
                     platform = platforms[0] as Polyline;
                     if (down.Any())
                     {
-                        ifcStair.PlatForLayout.Add(GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
                     }
                     else if (up.Any())
                     {
-                        ifcStair.PlatForLayout.Add(GetLatoutList(platform, beamCenter, up.ToCollection(), false, beams));
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, up.ToCollection(), false, beams));
                     }
                     else
                     {
@@ -134,6 +147,7 @@ namespace ThMEPEngineCore.Engine
                         {
                             ifcStair.Storey = "顶层";
                             ifcStair.StairType = "双跑楼梯";
+                            ifcStair.Rungs = rungs;
 
                             platform = platforms[0] as Polyline;
                             halfPlatform = platforms[1] as Polyline;
@@ -153,16 +167,17 @@ namespace ThMEPEngineCore.Engine
                                     ChangeOrder(ref platform, ref halfPlatform);
                                 }
                             }
-                            ifcStair.PlatForLayout.Add(GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams));
-                            ifcStair.HalfPlatForLayout.Add(GetLatoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                            ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
                         }
                         else if (down.ToCollection().Count == 2)
                         {
                             ifcStair.Storey = "顶层";
                             ifcStair.StairType = "剪刀楼梯";
-                            ifcStair.PlatForLayout.Add(GetLatoutList(platforms[0] as Polyline,
+                            ifcStair.Rungs = rungs;
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
                                                        beamCenter, down.ToCollection(), true, beams));
-                            ifcStair.PlatForLayout.Add(GetLatoutList(platforms[1] as Polyline,
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
                                                        beamCenter, down.ToCollection(), true, beams));
                         }
                         else
@@ -193,16 +208,16 @@ namespace ThMEPEngineCore.Engine
                             }
                         }
                         var temp = down.ToCollection();
-                        ifcStair.PlatForLayout.Add(GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams));
-                        ifcStair.HalfPlatForLayout.Add(GetLatoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                        ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
                     }
                     else if (coverage.Count == 2)
                     {
                         ifcStair.Storey = "中间层";
                         ifcStair.StairType = "剪刀楼梯";
-                        ifcStair.PlatForLayout.Add(GetLatoutList(platforms[0] as Polyline,
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
                                                        beamCenter, down.ToCollection(), true, beams));
-                        ifcStair.PlatForLayout.Add(GetLatoutList(platforms[1] as Polyline,
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
                                                    beamCenter, down.ToCollection(), true, beams));
                     }
                 }
@@ -210,34 +225,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private Point3d GetMinPoint(Point3d point, DBObjectCollection dBObject)
-        {
-            var minDistance = 0.0;
-            var minPoint = new Point3d();
-            foreach (Polyline e in dBObject)
-            {
-                foreach (Point3d vertice in e.Vertices())
-                {
-                    var distance = vertice.DistanceTo(point);
-                    if (minDistance < 0.01)
-                    {
-                        minDistance = distance;
-                        minPoint = vertice;
-                    }
-                    else
-                    {
-                        if (distance < minDistance)
-                        {
-                            minDistance = distance;
-                            minPoint = vertice;
-                        }
-                    }
-                }
-            }
-            return minPoint;
-        }
-
-        private List<Point3d> GetLatoutList(Polyline platform, Point3d beamCenter, DBObjectCollection labels, bool labelTag, DBObjectCollection beams)
+        private List<Point3d> GetLayoutList(Polyline platform, Point3d beamCenter, DBObjectCollection labels, bool labelTag, DBObjectCollection beams)
         {
             var vertices = new List<Point3d>();
             var downPoint = new Point3d();
@@ -274,9 +262,109 @@ namespace ThMEPEngineCore.Engine
 
             vertices.Add(downPoint);
             vertices.Add(upPoint);
-            vertices.Add(GetMinPoint(upPoint, beams));
-            vertices.Add(GetMinPoint(downPoint, beams));
+            vertices.Add(GetClosePoint(upPoint, beams));
+            vertices.Add(GetClosePoint(downPoint, beams));
             return vertices;
+        }
+
+        private List<Point3d> GetLayoutList(Polyline frame, DBObjectCollection beams)
+        {
+            
+            var center = frame.GetCentroidPoint();
+            var maxDistance = 0.0;
+            var maxPoint = new Point3d();
+            foreach (Polyline e in beams)
+            {
+                foreach (Point3d vertice in e.Vertices())
+                {
+                    var distance = vertice.DistanceTo(center);
+                    if (distance > maxDistance)
+                    {
+                        maxDistance = distance;
+                        maxPoint = vertice;
+                    }
+                }
+            }
+
+            var thirdPoint = maxPoint;
+            var secondPoint = GetClosePoint(thirdPoint, frame.Vertices());
+            var firstPoint = GetClosePoint(secondPoint, frame.Vertices());
+            var forthPoint = ToPoint3d(GetVector(Point3d.Origin, thirdPoint) + GetVector(secondPoint, firstPoint));
+
+            return new List<Point3d> { firstPoint, secondPoint, thirdPoint, forthPoint };
+        }
+
+        private List<List<Point3d>> GetLayoutList(Polyline frame, DBObjectCollection beams, DBObjectCollection labels)
+        {
+            var platForLayout = new List<List<Point3d>>();
+            foreach (Entity e in labels)
+            {
+                if(e.Bounds.HasValue)
+                {
+                    var labelPoint = e.GeometricExtents.CenterPoint();
+                    var downPoint = new Point3d();
+                    var upPoint = new Point3d();
+                    var maxDistance = 0.0;
+                    Point3d maxPoint;
+                    foreach (Point3d vertice in frame.Vertices())
+                    {
+                        var distance = vertice.DistanceTo(labelPoint);
+                        if (distance - maxDistance > -10.0)
+                        {
+                            maxDistance = distance;
+                            maxPoint = vertice;
+                            downPoint = upPoint;
+                            upPoint = maxPoint;
+                        }
+                    }
+                    var platform = new List<Point3d>
+                    {
+                        upPoint,
+                        downPoint,
+                        GetClosePoint(downPoint, beams),
+                        GetClosePoint(upPoint, beams)
+                    };
+
+                    platForLayout.Add(platform);
+                }
+            }
+            return platForLayout;
+        }
+
+        private Point3d GetClosePoint(Point3d point, DBObjectCollection dBObject)
+        {
+            var minDistance = double.MaxValue;
+            var minPoint = new Point3d();
+            foreach (Polyline e in dBObject)
+            {
+                foreach (Point3d vertice in e.Vertices())
+                {
+                    var distance = vertice.DistanceTo(point);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        minPoint = vertice;
+                    }
+                }
+            }
+            return minPoint;
+        }
+
+        private Point3d GetClosePoint(Point3d point, Point3dCollection vertices)
+        {
+            var minDistance = double.MaxValue;
+            var minPoint = new Point3d();
+            foreach (Point3d vertice in vertices)
+            {
+                var distance = vertice.DistanceTo(point);
+                if (distance < minDistance && distance > 1.0)
+                {
+                    minDistance = distance;
+                    minPoint = vertice;
+                }
+            }
+
+            return minPoint;
         }
 
         private void ChangeOrder(ref Point3d downPoint, ref Point3d upPoint)
@@ -291,6 +379,16 @@ namespace ThMEPEngineCore.Engine
             var temp = platform;
             platform = halfPlatform;
             halfPlatform = temp;
+        }
+
+        private Vector3d GetVector(Point3d starPoint, Point3d endPoint)
+        {
+            return endPoint.GetAsVector() - starPoint.GetAsVector();
+        }
+
+        private Point3d ToPoint3d(Vector3d vector)
+        {
+            return new Point3d(vector.X, vector.Y, vector.Z);
         }
     }
 }
