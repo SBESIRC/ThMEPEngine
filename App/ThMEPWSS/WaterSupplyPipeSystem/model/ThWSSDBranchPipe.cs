@@ -39,7 +39,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         private int MaxHouse { get; set; } //最大住户数
         private double Dist { get; set; } //管间距
         private int Flag { get; set; } //距离1,2
-        public ThWSSDBranchPipe(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX, 
+        public ThWSSDBranchPipe(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX,
             List<double[]> blockSize, int layingMethod, int areaIndex, int maxHouse, bool hasflush = true)
         {
             DN = dn;//管径号
@@ -55,341 +55,76 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             AreaIndex = areaIndex;
             MaxHouse = maxHouse;
             bool chaochu = false;
-            
-            if (LayingMethod == 0)
+
+            var ratio = new double[] { 1.0, 0.7, 0.6 };
+            var maxGap = new double[] { 350, 250, 200 };
+            for (int i = 0; i < 3; i++)
             {
-                var ratio = new double[] { 1.0, 0.7, 0.6};
-                foreach(var r in ratio)
+                var r = ratio[i];
+                var mGap = maxGap[i];
+                var gapYDown1 = 30 + 150 * r;
+                var gapYDown2 = 180;
+                double gapY = 300 * r;//水表间距 * 缩放因子 为 最小间距
+                var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+                var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - gapYDown2 - 100 * layingMethod) / (MaxHouse - 1);//较小值
+                if (r == 1.0 || r == 0.7)
                 {
-                    var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - 120) / 
-                        (MaxHouse);//较大值
-                    var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - 150) /
-                        (MaxHouse);//较小值
-                    if(r == 1.0)
+                    if (dist1 > gapY || dist2 > gapY)
                     {
-                        if (dist1 > 350 || dist2 > 350)
+                        AutoValveRatio = r - 0.1;
+                        BlockRatio = r;
+                        if (dist2 > mGap)
                         {
-                            AutoValveRatio = 1.0;
-                            BlockRatio = 1.0;
-                            Dist = 350;
-                            if (dist2 > 350)
-                            {
-                                Flag = 2;
-                            }
-                            else
-                            {
-                                Flag = 1;
-                            }
-                            break;
-                            
-                        }
-                    }
-                    if(r == 0.7)
-                    {
-                        if (dist1 > 250 || dist2 > 250)
-                        {
-                            AutoValveRatio = 0.6;
-                            BlockRatio = 0.7;
-                            if (dist1 < 350)
-                            {
-                                Dist = dist1;
-                                Flag = 1;
-                            }
-                            else
-                            {
-                                Dist = dist2;
-                                Flag = 2;
-                            }
-                            break;
-                        }
-                    }
-                    if(r == 0.6)
-                    {
-                        if (dist1 < 180)
-                        {
-                            chaochu = true;
-                            AutoValveRatio = 0.5;
-                            BlockRatio = 0.6;
-                            Dist = 180;
-                            Flag = 1;
-                            break;
-                        }
-                        AutoValveRatio = 0.5;
-                        BlockRatio = 0.6;
-                        if (dist1 < 250)
-                        {
-                            Dist = dist1;
-                            Flag = 1;
+                            Dist = mGap;
+                            Flag = 2;
                         }
                         else
                         {
-                            Dist = dist2;
-                            Flag = 2;
+                            Dist = Math.Min(mGap, dist1);
+                            Flag = 1;
                         }
                         break;
                     }
+                    else
+                    {
+                        chaochu = true;
+                        dist1 = (FloorHeight + 100 - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+                        Flag = 1;
+                        if (dist1 > gapY)
+                        {
+                            AutoValveRatio = r - 0.1;
+                            BlockRatio = r;
+                            Dist = dist1;
+                            break;
+                        }
+                    }
                 }
-            }
-            else
-            {
-                var ratio = new double[] { 1.0, 0.7, 0.6 };
-                foreach (var r in ratio)
+                if (r == 0.6)
                 {
-                    var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - 120 - 100) /
-                        (MaxHouse);//较大值
-                    var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - 150 - 100) /
-                        (MaxHouse);//较小值
-                    if (r == 1.0)
+                    if (dist1 < gapY)
                     {
-                        if (dist1 > 350 || dist2 > 350)
-                        {
-                            AutoValveRatio = 1.0;
-                            BlockRatio = 1.0;
-                            Dist = 350;
-                            if (dist2 > 350)
-                            {
-                                Flag = 2;
-                            }
-                            else
-                            {
-                                Flag = 1;
-                            }
-                            break;
-                        }
-                    }
-                    if (r == 0.7)
-                    {
-                        if (dist1 > 250 || dist2 > 250)
-                        {
-                            AutoValveRatio = 0.6;
-                            BlockRatio = 0.7;
-                            if (dist1 < 350)
-                            {
-                                Dist = dist1;
-                                Flag = 1;
-                            }
-                            else
-                            {
-                                Dist = dist2;
-                                Flag = 2;
-                            }
-                            break;
-                        }
-                    }
-                    if (r == 0.6)
-                    {
-                        if (dist1 < 180)
-                        {
-                            chaochu = true;
-                            AutoValveRatio = 0.5;
-                            BlockRatio = 0.6;
-                            Dist = 180;
-                            Flag = 1;
-                            break;
-                        }
+                        chaochu = true;
                         AutoValveRatio = 0.5;
                         BlockRatio = 0.6;
-                        if (dist1 < 250)
-                        {
-                            Dist = dist1;
-                            Flag = 1;
-                        }
-                        else
-                        {
-                            Dist = dist2;
-                            Flag = 2;
-                        }
+                        Dist = 180;
+                        Flag = 1;
                         break;
                     }
+                    AutoValveRatio = 0.5;
+                    BlockRatio = 0.6;
+                    if (dist1 > mGap)
+                    {
+                        Dist = mGap;
+                        Flag = 1;
+                    }
+                    else
+                    {
+                        Dist = dist1;
+                        Flag = 1;
+                    }
+                    break;
                 }
             }
-
-           if(layingMethod == 0)
-           {
-                if (Households[AreaIndex] != 0 || HasFlushFaucet)
-                {
-                    InitChuanLiang(1.0 / 15, 0.1, chaochu);
-                }
-           }
-           else
-           {
-
-                if (Households[AreaIndex] != 0 || HasFlushFaucet)
-                {
-                    InitMaiDi(chaochu);
-                }
-            }
-            
-        }
-
-
-
-        public void ThWSSDBranchPipe1(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX,
-            List<double[]> blockSize, int layingMethod, int areaIndex, int maxHouse, bool hasflush = true)
-        {
-            DN = dn;//管径号
-            FloorNumber = storey.GetFloorNumber();//楼层号
-            HasFlushFaucet = hasflush;//storey.GetFlushFaucet();//有冲洗龙头
-            NoValve = storey.GetPRValve();//无减压阀
-            FloorHeight = storey.GetFloorHeight();//楼层高
-            //Households = storey.GetHouseholds();//住户数
-            Households = new int[] { maxHouse, maxHouse, maxHouse, maxHouse, maxHouse };
-            PipeOffsetX = pipeOffsetX;//立管的 X 偏移量
-            IndexStartY = indexStartY;//起始 Y 偏移量
-            BlockSize = blockSize;//模型尺寸
-            LayingMethod = layingMethod;//敷设方式
-            AreaIndex = areaIndex;
-            MaxHouse = maxHouse;
-            bool chaochu = false;
-
-            if (LayingMethod == 0)
-            {
-                var ratio = new double[] { 1.0, 0.7, 0.6 };
-                foreach (var r in ratio)
-                {
-                    var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - 120) /
-                        (MaxHouse - 1 + Convert.ToInt32(HasFlushFaucet));//较大值
-                    var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - 150) /
-                        (MaxHouse - 1 + Convert.ToInt32(HasFlushFaucet));//较小值
-                    if (r == 1.0)
-                    {
-                        if (dist1 > 350 || dist2 > 350)
-                        {
-                            AutoValveRatio = 1.0;
-                            BlockRatio = 1.0;
-                            Dist = 350;
-                            if (dist2 > 350)
-                            {
-                                Flag = 2;
-                            }
-                            else
-                            {
-                                Flag = 1;
-                            }
-                            break;
-
-                        }
-                    }
-                    if (r == 0.7)
-                    {
-                        if (dist1 > 250 || dist2 > 250)
-                        {
-                            AutoValveRatio = 0.6;
-                            BlockRatio = 0.7;
-                            if (dist1 < 350)
-                            {
-                                Dist = dist1;
-                                Flag = 1;
-                            }
-                            else
-                            {
-                                Dist = dist2;
-                                Flag = 2;
-                            }
-                            break;
-                        }
-                    }
-                    if (r == 0.6)
-                    {
-                        if (dist1 < 180)
-                        {
-                            chaochu = true;
-                            AutoValveRatio = 0.5;
-                            BlockRatio = 0.6;
-                            Dist = 180;
-                            Flag = 1;
-                            break;
-                        }
-                        AutoValveRatio = 0.5;
-                        BlockRatio = 0.6;
-                        if (dist1 < 250)
-                        {
-                            Dist = dist1;
-                            Flag = 1;
-                        }
-                        else
-                        {
-                            Dist = dist2;
-                            Flag = 2;
-                        }
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                var ratio = new double[] { 1.0, 0.7, 0.6 };
-                foreach (var r in ratio)
-                {
-                    var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - 120 - 100) /
-                        (MaxHouse - 1 + Convert.ToInt32(HasFlushFaucet));//较大值
-                    var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - 150 - 100) /
-                        (MaxHouse - 1 + Convert.ToInt32(HasFlushFaucet));//较小值
-                    if (r == 1.0)
-                    {
-                        if (dist1 > 350 || dist2 > 350)
-                        {
-                            AutoValveRatio = 1.0;
-                            BlockRatio = 1.0;
-                            Dist = 350;
-                            if (dist2 > 350)
-                            {
-                                Flag = 2;
-                            }
-                            else
-                            {
-                                Flag = 1;
-                            }
-                            break;
-                        }
-                    }
-                    if (r == 0.7)
-                    {
-                        if (dist1 > 250 || dist2 > 250)
-                        {
-                            AutoValveRatio = 0.6;
-                            BlockRatio = 0.7;
-                            if (dist1 < 350)
-                            {
-                                Dist = dist1;
-                                Flag = 1;
-                            }
-                            else
-                            {
-                                Dist = dist2;
-                                Flag = 2;
-                            }
-                            break;
-                        }
-                    }
-                    if (r == 0.6)
-                    {
-                        if (dist1 < 180)
-                        {
-                            chaochu = true;
-                            AutoValveRatio = 0.5;
-                            BlockRatio = 0.6;
-                            Dist = 180;
-                            Flag = 1;
-                            break;
-                        }
-                        AutoValveRatio = 0.5;
-                        BlockRatio = 0.6;
-                        if (dist1 < 250)
-                        {
-                            Dist = dist1;
-                            Flag = 1;
-                        }
-                        else
-                        {
-                            Dist = dist2;
-                            Flag = 2;
-                        }
-                        break;
-                    }
-                }
-            }
-
             if (layingMethod == 0)
             {
                 if (Households[AreaIndex] != 0 || HasFlushFaucet)
@@ -399,15 +134,123 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             }
             else
             {
-
                 if (Households[AreaIndex] != 0 || HasFlushFaucet)
                 {
                     InitMaiDi(chaochu);
                 }
             }
-
         }
 
+        //public ThWSSDBranchPipe(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX,
+        //    List<double[]> blockSize, int layingMethod, int areaIndex, int maxHouse, bool hasflush = true)
+        //{
+        //    DN = dn;//管径号
+        //    FloorNumber = storey.GetFloorNumber();//楼层号
+        //    HasFlushFaucet = hasflush;//storey.GetFlushFaucet();//有冲洗龙头
+        //    NoValve = storey.GetPRValve();//无减压阀
+        //    FloorHeight = storey.GetFloorHeight();//楼层高
+        //    //Households = storey.GetHouseholds();//住户数
+        //    Households = new int[] { maxHouse, maxHouse, maxHouse, maxHouse, maxHouse };
+        //    PipeOffsetX = pipeOffsetX;//立管的 X 偏移量
+        //    IndexStartY = indexStartY;//起始 Y 偏移量
+        //    BlockSize = blockSize;//模型尺寸
+        //    LayingMethod = layingMethod;//敷设方式
+        //    AreaIndex = areaIndex;
+        //    MaxHouse = maxHouse;
+        //    bool chaochu = false;
+
+        //    var ratio = new double[] { 1.0, 0.7, 0.6 };
+        //    var maxGap = new double[] { 350, 250, 200 };
+        //    if (hasflush)
+        //    {
+        //        MaxHouse++;
+        //    }
+        //    for (int i = 0; i < 3; i++)
+        //    {
+
+        //        var r = ratio[i];
+        //        var mGap = maxGap[i];
+        //        var gapYDown1 = 30 + 150 * r;
+        //        var gapYDown2 = 180;
+        //        double gapY = 300 * r;//水表间距 * 缩放因子 为 最小间距
+        //        var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+        //        var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - gapYDown2 - 100 * layingMethod) / (MaxHouse - 1);//较小值
+        //        if (r == 1.0 || r == 0.7)
+        //        {
+        //            if (dist1 > gapY || dist2 > gapY)
+        //            {
+        //                AutoValveRatio = r - 0.1;
+        //                BlockRatio = r;
+        //                if (dist2 > mGap)
+        //                {
+        //                    Dist = mGap;
+        //                    Flag = 2;
+        //                }
+        //                else
+        //                {
+        //                    Dist = Math.Min(mGap, dist1);
+        //                    Flag = 1;
+        //                }
+        //                break;
+        //            }
+        //            else
+        //            {
+        //                chaochu = true;
+        //                dist1 = (FloorHeight + 100 - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+        //                Flag = 1;
+        //                if (dist1 > gapY)
+        //                {
+        //                    AutoValveRatio = r - 0.1;
+        //                    BlockRatio = r;
+        //                    Dist = dist1;
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //        if (r == 0.6)
+        //        {
+        //            if (dist1 < gapY)
+        //            {
+        //                chaochu = true;
+        //                AutoValveRatio = 0.5;
+        //                BlockRatio = 0.6;
+        //                Dist = 180;
+        //                Flag = 1;
+        //                break;
+        //            }
+        //            AutoValveRatio = 0.5;
+        //            BlockRatio = 0.6;
+        //            if (dist1 > mGap)
+        //            {
+        //                Dist = mGap;
+        //                Flag = 1;
+        //            }
+        //            else
+        //            {
+        //                Dist = dist1;
+        //                Flag = 1;
+        //            }
+        //            break;
+        //        }
+        //    }
+
+        //    if (layingMethod == 0)
+        //    {
+        //        if (Households[AreaIndex] != 0 || HasFlushFaucet)
+        //        {
+        //            InitChuanLiang(1.0 / 15, 0.1, chaochu);
+        //        }
+        //    }
+        //    else
+        //    {
+
+        //        if (Households[AreaIndex] != 0 || HasFlushFaucet)
+        //        {
+        //            InitMaiDi(chaochu);
+        //        }
+        //    }
+
+        //}
 
         public void InitChuanLiang(double gap2, double gapY2, bool chaochu)
         {
@@ -428,20 +271,16 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             Point3d pt232;
             if (NoValve)
             {
-                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[1][0]); 
+                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[1][0]);
             }
             else
             {
-                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[0][0]); 
+                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[0][0]);
             }
 
-            double gapDown = 120;
-            if (Flag == 2)
-            {
-                gapDown += 30;
-            }
-            
-            var h = (Households[AreaIndex] -1 ) * Dist + gapDown + FloorHeight * (FloorNumber - 1) + IndexStartY;
+            double gapDown = 30 + 150 * BlockRatio;
+
+            var h = (Households[AreaIndex] - 1) * Dist + gapDown + FloorHeight * (FloorNumber - 1) + IndexStartY;
             if (HasFlushFaucet)
             {
                 h += Dist;
@@ -459,7 +298,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
             CheckValveSite = new List<Point3d>();//截止阀位置列表
             WaterMeterSite = new List<Point3d>();//水表位置列表
-            
+
             if (NoValve)
             {
                 PressureReducingValveSite = new Point3d(pt2.X, (pt231.Y + pt232.Y) / 2, 0);//无减压阀的截止阀位置
@@ -469,10 +308,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 PressureReducingValveSite = pt231;//减压阀位置
             }
 
-
             AutoExhaustValveSite = pt1;
-
-
 
             BranchPipes.Add(new Line(pt1, pt2));
             BranchPipes.Add(new Line(pt1, pt1.OffsetY(-200)));
@@ -495,7 +331,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
                 for (int i = 1; i < Households[AreaIndex]; i++)
                 {
-                    var pt4 = new Point3d(pt2.X, pt3.Y - i * this.Dist, 0);
+                    var pt4 = new Point3d(pt2.X, pt3.Y - i * Dist, 0);
                     var pt481 = new Point3d(pt371.X, pt4.Y, 0);
                     var pt482 = new Point3d(pt372.X, pt4.Y, 0);
                     var pt483 = new Point3d(pt373.X, pt4.Y, 0);
@@ -507,7 +343,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     WaterMeterSite.Add(new Point3d((pt483.X + pt484.X) / 2, pt4.Y, 0));//第i个水表位置
 
                     var pt8 = new Point3d(pt7.X + Dist * i, pt4.Y, 0);
-                    var pt12 = new Point3d(pt8.X, pt11.Y - i * this.Dist, 0);
+                    var pt12 = new Point3d(pt8.X, pt11.Y - i * Dist, 0);
                     var pt16 = new Point3d(pt11.X + (Households[AreaIndex] - 1) * Dist + 300, pt12.Y, 0);
                     BranchPipes.Add(new Line(pt12, pt16));
                     WaterPipeInterrupted.Add(pt16);//第i个水管截断位置
@@ -525,17 +361,22 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
             if (HasFlushFaucet) //有冲洗龙头
             {
-                double pt19Y = IndexStartY + (gap2 + FloorNumber - 1) * FloorHeight;
-                
+                double pt19Y = IndexStartY + (FloorNumber - 1) * FloorHeight + gapDown;
+
                 var pt19 = new Point3d(pt3.X, pt19Y, 0);
                 var pt19201 = new Point3d(pt371.X, pt19.Y, 0);
                 var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
                 var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
                 var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-          
+
                 var pt20 = new Point3d(pt374.X + Dist * (Households[AreaIndex] - 1) + 900, pt19.Y, 0);
 
-                double pt21Y = pt20.Y + Convert.ToInt32((Households[AreaIndex] + 2) / 2) * this.Dist;
+                double waterGap = 150;
+                if (BlockRatio == 0.6)
+                {
+                    waterGap = 100;
+                }
+                double pt21Y = pt20.Y + Convert.ToInt32((Households[AreaIndex] + 1) / 2) * Dist + waterGap;
                 if (Households[AreaIndex] == 0)
                 {
                     pt21Y = pt20.Y + FloorHeight * 0.4;
@@ -551,7 +392,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 CheckValveSite.Add(new Point3d((pt19201.X + pt19202.X) / 2, pt19201.Y, 0));//第五个截止阀位置
                 WaterMeterSite.Add(new Point3d((pt19203.X + pt19204.X) / 2, pt19203.Y, 0));//第五个水表位置
                 VacuumBreakerSite = pt21;//真空破坏器位置
-                WaterTapSite = new Point3d(pt21.X, pt21.Y - 150, 0);//水龙头位置
+                WaterTapSite = new Point3d(pt21.X, pt21.Y - waterGap, 0);//水龙头位置
             }
         }
 
@@ -583,7 +424,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var h = pt232.Y + offsetY;
             if (HasFlushFaucet)
             {
-                h -=  Dist;
+                h -= Dist;
             }
             var pt3 = new Point3d(pt2.X, h, 0);
             TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
@@ -611,12 +452,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             BranchPipes.Add(new Line(pt1, pt1.OffsetY(-0.12 * FloorHeight)));
             BranchPipes.Add(new Line(pt1, pt2));
             BranchPipes.Add(new Line(pt2, pt231));
-            
+
             if (Households[AreaIndex] != 0)
             {
-                
+
                 pt7 = pt374.OffsetX(Dist * (Households[AreaIndex] - 1) + 300);
-                pt11 = new Point3d(pt7.X, IndexStartY + FloorHeight * (FloorNumber -1) + 100, 0);
+                pt11 = new Point3d(pt7.X, IndexStartY + FloorHeight * (FloorNumber - 1) + 100, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
                 BranchPipes.Add(new Line(pt232, pt3));
                 BranchPipes.Add(new Line(pt3, pt371));
@@ -644,7 +485,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                     pt8 = new Point3d(pt7.X - i * Dist, pt4.Y, 0);
                     pt12 = new Point3d(pt8.X, pt11.Y, 0);
                     WaterPipeInterrupted.Add(pt12);//第i个水管截断位置
-                    
+
                     BranchPipes.Add(new Line(pt4, pt481));
 
                     BranchPipes.Add(new Line(pt482, pt483));
@@ -659,11 +500,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 }
             }
 
-
-
             if (HasFlushFaucet) //有冲洗龙头
             {
-                
+
                 double pt19Y = pt3.Y + Dist;
 
                 var pt19 = new Point3d(pt3.X, pt19Y, 0);
@@ -672,8 +511,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
                 var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
                 Point3d pt20;
-               
-                
+
+
                 pt20 = new Point3d(pt19204.X + Dist * Households[AreaIndex] + 300, pt19.Y, 0);
 
                 var pt22 = pt20.OffsetY(100);
@@ -797,35 +636,26 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
         public void DrawLayMethodNote()
         {
-            if(LayingMethod == 0)
+
+            if (LayingMethod == 0)
             {
                 using var acadDatabase = AcadDatabase.Active();
                 for (int j = 0; j < GetWaterPipeInterrupted().Count; j++)
                 {
                     var pti1 = new Point3d(GetWaterPipeInterrupted()[j].X - 53 - 150, GetWaterPipeInterrupted()[j].Y - 53, 0);
                     var pti2 = new Point3d(GetWaterPipeInterrupted()[j].X + 53 - 150, GetWaterPipeInterrupted()[j].Y + 53, 0);
-                    
-                    var line1 = new Line(pti1, pti2);
-                    line1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                    line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                    acadDatabase.CurrentSpace.Add(line1);
+                    InsertLine(acadDatabase, pti1, pti2);
                 }
                 var pt1 = new Point3d(GetWaterPipeInterrupted()[0].X - 150, GetWaterPipeInterrupted()[GetWaterPipeInterrupted().Count - 1].Y, 0);
-                //var pt2 = new Point3d(pt1.X, GetWaterPipeInterrupted()[0].Y + 650, 0);
-                var pt2 = new Point3d(pt1.X, IndexStartY + FloorHeight * FloorNumber + 400, 0);
+                var pt2 = new Point3d(pt1.X, IndexStartY + FloorHeight * FloorNumber + 500, 0);
                 var pt3 = new Point3d(pt2.X + 4100, pt2.Y, 0);
                 if (HasFlushFaucet)
                 {
                     pt3.OffsetX(450);
                 }
-                var line12 = new Line(pt1, pt2);
-                var line23 = new Line(pt2, pt3);
-                line12.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                line23.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                line12.ColorIndex = (int)ColorIndex.BYLAYER;
-                line23.ColorIndex = (int)ColorIndex.BYLAYER;
-                acadDatabase.CurrentSpace.Add(line12);
-                acadDatabase.CurrentSpace.Add(line23);
+
+                InsertLine(acadDatabase, pt1, pt2);
+                InsertLine(acadDatabase, pt2, pt3);
                 var textX = 450;
                 if (HasFlushFaucet)
                 {
@@ -833,7 +663,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 }
                 var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
-                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -350), "穿梁敷设，接至户内给水管");
+
+                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -400), "穿梁敷设，接至户内给水管");
                 acadDatabase.CurrentSpace.Add(text2);
             }
             else
@@ -843,37 +674,40 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 {
                     var pti1 = new Point3d(GetWaterPipeInterrupted()[j].X - 53, GetWaterPipeInterrupted()[j].Y - 53 + 60, 0);
                     var pti2 = new Point3d(GetWaterPipeInterrupted()[j].X + 53, GetWaterPipeInterrupted()[j].Y + 53 + 60, 0);
-                   
-                    var line1 = new Line(pti1, pti2);
-                    line1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                    line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                    acadDatabase.CurrentSpace.Add(line1);
+                    InsertLine(acadDatabase, pti1, pti2);
                 }
                 var pt1 = GetWaterPipeInterrupted()[0].OffsetY(60);
-                var pt2 = GetWaterPipeInterrupted().Last().OffsetY(60);
+                var pt2 = GetWaterPipeInterrupted().Last().OffsetXY(200, 60);
                 if (GetWaterPipeInterrupted()[0].X > GetWaterPipeInterrupted().Last().X)
                 {
                     pt1 = GetWaterPipeInterrupted().Last().OffsetY(60);
-                    pt2 = GetWaterPipeInterrupted()[0].OffsetY(60);
+                    pt2 = GetWaterPipeInterrupted()[0].OffsetXY(200, 60);
                 }
-                var pt3 = pt2.OffsetX(4100);
+                var pt4 = new Point3d(pt2.X, IndexStartY + FloorHeight * (FloorNumber - 1) + 500, 0);// pt2.OffsetY(400);
+                var pt3 = pt4.OffsetX(4100);
 
-                var line12 = new Line(pt1, pt2);
-                var line23 = new Line(pt2, pt3);
-                line12.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                line23.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                line12.ColorIndex = (int)ColorIndex.BYLAYER;
-                line23.ColorIndex = (int)ColorIndex.BYLAYER;
-                acadDatabase.CurrentSpace.Add(line12);
-                acadDatabase.CurrentSpace.Add(line23);
+                InsertLine(acadDatabase, pt1, pt2);
+                InsertLine(acadDatabase, pt2, pt4);
+                InsertLine(acadDatabase, pt4, pt3);
+
                 var textX = 450;
                 if (HasFlushFaucet)
                 {
                     textX += 450;
                 }
-                var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
+                var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
-            } 
+                var text2 = ThText.NoteText(pt4.OffsetXY(textX, -400), "埋地敷设，接至户内给水管");
+                acadDatabase.CurrentSpace.Add(text2);
+            }
+        }
+
+        public static void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2)
+        {
+            var line12 = new Line(pt1, pt2);
+            line12.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+            line12.ColorIndex = (int)ColorIndex.BYLAYER;
+            acadDatabase.CurrentSpace.Add(line12);
         }
     }
 }
