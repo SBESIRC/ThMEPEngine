@@ -36,6 +36,10 @@ namespace ThMEPWSS.Diagram.ViewModel
             DynamicRadios = new ObservableCollection<DynamicRadioButton>();
             DynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
             DynamicRadios.Add(new DynamicRadioButton() { Content = "埋地", GroupName = "type", IsChecked = false });
+
+            DynamicRadios2 = new ObservableCollection<DynamicRadioButton>();
+            DynamicRadios2.Add(new DynamicRadioButton() { Content = "图纸", GroupName = "type2", IsChecked = true });
+            DynamicRadios2.Add(new DynamicRadioButton() { Content = "缺省", GroupName = "type2", IsChecked = false });
         }
         private double floorLineSpace { get; set; }
         /// <summary>
@@ -158,6 +162,22 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+
+        private ObservableCollection<DynamicRadioButton> dynamicRadios2 { get; set; }
+        /// <summary>
+        /// 敷设方式数据列表
+        /// </summary>
+        public ObservableCollection<DynamicRadioButton> DynamicRadios2
+        {
+            get { return dynamicRadios2; }
+            set
+            {
+                this.dynamicRadios2 = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+
         RelayCommand addPartitionRow;
         public RelayCommand AddPartitionRow
         {

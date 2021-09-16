@@ -138,6 +138,8 @@ namespace ThMEPWSS.Diagram.ViewModel
         public bool IsChecked { get; set; }
     }
 
+
+
     public class DynamicRadioButtonViewModel : DynamicRadioButton
     {
     }

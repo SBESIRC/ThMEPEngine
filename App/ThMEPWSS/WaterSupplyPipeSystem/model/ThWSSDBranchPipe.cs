@@ -833,7 +833,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 }
                 var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
-                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -350), "XXXX敷设，接至户内给水管");
+                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -350), "穿梁敷设，接至户内给水管");
                 acadDatabase.CurrentSpace.Add(text2);
             }
             else

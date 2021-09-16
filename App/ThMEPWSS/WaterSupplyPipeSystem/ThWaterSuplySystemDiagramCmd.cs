@@ -174,9 +174,11 @@ namespace ThMEPWSS.Command
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
                 
                 var maxHouseholds = ThWCompute.GetMaxHouseholds(households, FlushFaucet);
+
+                bool cleanToolFlag = setViewModel.DynamicRadios2[0].IsChecked;
                 //统计卫生洁具数
                 var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea, 
-                    notExistFloor, blockConfig);
+                    notExistFloor, blockConfig, cleanToolFlag);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
@@ -469,9 +471,10 @@ namespace ThMEPWSS.Command
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
 
                 var maxHouseholds = ThWCompute.GetMaxHouseholds(households, FlushFaucet);
+                var cleanToolFlag = setViewModel.DynamicRadios2[0].IsChecked;
                 //统计卫生洁具数
                 var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea,
-                    notExistFloor, blockConfig);
+                    notExistFloor, blockConfig, cleanToolFlag);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
