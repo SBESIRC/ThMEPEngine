@@ -5,8 +5,13 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using CLI;
 using Linq2Acad;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,14 +25,30 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing()
+        public List<Polyline> Routing()
         {
+            var lines = new List<Polyline>();
             var data = GetData();
             if (data != null)
             {
                 ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
                 var res = thCableRouter.RouteCable(data, 25);
+                var serializer = GeoJsonSerializer.Create();
+                using (var stringReader = new StringReader(res))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    foreach (var f in features)
+                    {
+                        if (f.Geometry is LineString line)
+                        {
+                            lines.Add(line.ToDbPolyline());
+                        }
+                    }
+                } 
             }
+
+            return lines;
         }
 
         public string GetData()
