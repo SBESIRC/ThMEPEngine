@@ -9,18 +9,15 @@ namespace TianHua.FanSelection.UI.CAD
     public class ThFanModelObjectOverrule : ObjectOverrule
     {
         private List<FanDataModel> Models { get; set; }
-        private Dictionary<string, string> SystemMapping { get; set; }
 
         public ThFanModelObjectOverrule()
         {
             Models = new List<FanDataModel>();
-            SystemMapping = new Dictionary<string, string>();
         }
 
         public void Reset()
         {
             Models.Clear();
-            SystemMapping.Clear();
         }
 
         public override DBObject DeepClone(DBObject dbObject, DBObject ownerObject, IdMapping idMap, bool isPrimary)
@@ -67,30 +64,22 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 if (dest.Models.Where(o => o.ID == identifier).Any())
                 {
-                    if (!SystemMapping.ContainsKey(identifier))
-                    {
-                        // 复制风机模型
-                        var modelId = dest.Models.CloneModel(identifier);
-                        SystemMapping.Add(identifier, modelId);
-                        dest.Save(idMap.DestinationDatabase);
-                    }
+                    // 复制风机模型
+                    var modelId = dest.Models.CloneModel(identifier);
+                    dest.Save(idMap.DestinationDatabase);
 
                     // 关联风机到新的风机模型
-                    dbObject.UpdateModelIdentifier(SystemMapping[identifier]);
+                    dbObject.UpdateModelIdentifier(modelId);
                 }
                 else
                 {
-                    if (!SystemMapping.ContainsKey(identifier))
-                    {
-                        // 复制风机模型
-                        var modelId = "";
-                        dest.Models.AddRange(Models.CloneModel(identifier, ref modelId));
-                        SystemMapping.Add(identifier, modelId);
-                        dest.Save(idMap.DestinationDatabase);
-                    }
+                    // 复制风机模型
+                    var modelId = "";
+                    dest.Models.AddRange(Models.CloneModel(identifier, ref modelId));
+                    dest.Save(idMap.DestinationDatabase);
 
                     // 关联风机到新的风机模型
-                    dbObject.UpdateModelIdentifier(SystemMapping[identifier]);
+                    dbObject.UpdateModelIdentifier(modelId);
                 }
             }
         }
