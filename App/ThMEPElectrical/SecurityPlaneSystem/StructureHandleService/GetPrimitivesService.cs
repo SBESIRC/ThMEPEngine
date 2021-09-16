@@ -264,7 +264,7 @@ namespace ThMEPElectrical.StructureHandleService
                 }
                 else if (trunking is Polyline poly)
                 {
-                    resLines.AddRange(poly.GetAllLinesInPolyline());
+                    resLines.AddRange(poly.GetAllLinesInPolyline(false));
                 }
             }
 

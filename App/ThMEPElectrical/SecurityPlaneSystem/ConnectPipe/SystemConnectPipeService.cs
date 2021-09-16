@@ -18,6 +18,7 @@ using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPWSS.HydrantConnectPipe.Service;
 using Catel.Collections;
+using ThMEPElectrical.ConnectPipe.Service;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
@@ -26,44 +27,80 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         public Dictionary<Line, List<Polyline>> Conenct(Polyline polyline, List<Polyline> columns, List<BlockModel> allBlocks, List<Line> trunkings, List<Line> ExistingLines, List<BlockModel> models, List<Polyline> holes)
         {
             Dictionary<Line, List<Polyline>> resLines = new Dictionary<Line, List<Polyline>>();
-            trunkings = trunkings.Where(o => o.Length > 400).ToList();
             if (trunkings.Count <= 0)
             {
                 return resLines;
             }
             List<Polyline> allHoles = new List<Polyline>(holes);
             holes.AddRange(columns);
-
-
             var blocksBoundary = allBlocks.Select(o => o.Boundary);
             var blocks = blocksBoundary.Select(o => o.BufferPL(30)[0] as Polyline);
             ThCADCoreNTSSpatialIndex columnSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
             ThCADCoreNTSSpatialIndex blockSpatialIndex = new ThCADCoreNTSSpatialIndex(blocks.ToCollection());
-            List<Task> Tasks = new List<Task>();
-            TaskFactory factory = new TaskFactory();
             foreach (BlockModel model in models)
             {
-                Tasks.Add(factory.StartNew(() =>
+                var closetLine = GetClosetLane(trunkings, model.position, polyline);
+                Polyline path = AdjustStartRoute(polyline, columns, blocksBoundary.Where(o => o != model.Boundary).ToList(), model, closetLine, columnSpatialIndex, blockSpatialIndex, ExistingLines);
+                path = SetType(model, path);
+                if (path.NumberOfVertices < 2)
                 {
-                    var closetLine = GetClosetLane(trunkings, model.position, polyline);
-                    Polyline path = AdjustStartRoute(polyline, columns, blocksBoundary.Where(o => o != model.Boundary).ToList(), model, closetLine, columnSpatialIndex, blockSpatialIndex, ExistingLines);
-                    path = SetType(model, path);
-                    if (path.NumberOfVertices < 2)
-                    {
-                        //舍弃掉该路径 do not
-                    }
-                    else if (resLines.ContainsKey(closetLine))
-                    {
-                        resLines[closetLine].Add(path);
-                    }
-                    else
-                    {
-                        resLines.Add(closetLine, new List<Polyline>() { path });
-                    }
-                }));
+                    //舍弃掉该路径 do not
+                }
+                else if (resLines.ContainsKey(closetLine))
+                {
+                    resLines[closetLine].Add(path);
+                }
+                else
+                {
+                    resLines.Add(closetLine, new List<Polyline>() { path });
+                }
             }
-            Task.WaitAll(Tasks.ToArray());
             return resLines;
+        }
+
+        /// <summary>
+        /// 重选线槽
+        /// </summary>
+        /// <param name="trunking"></param>
+        /// <param name="resPolyDic"></param>
+        /// <returns></returns>
+        public Dictionary<Line, List<Polyline>> ChooseTrunking(List<Line> trunking, Dictionary<Line, List<Polyline>> resPolyDic)
+        {
+            Dictionary<Line, List<Polyline>> reDic = new Dictionary<Line, List<Polyline>>();
+            ThCADCoreNTSSpatialIndex SpatialIndex = new ThCADCoreNTSSpatialIndex(trunking.ToCollection());
+            foreach (var Paths in resPolyDic)
+            {
+                if (!reDic.ContainsKey(Paths.Key))
+                {
+                    reDic.Add(Paths.Key, new List<Polyline>());
+                }
+                foreach (var path in Paths.Value)
+                {
+                    var IntersectingPath = SpatialIndex.SelectFence(path.ExtendPolyline(-5));
+                    IntersectingPath.Remove(Paths.Key);
+                    if(IntersectingPath.Count>0)
+                    {
+                        Line IntersectingLine = IntersectingPath[0] as Line;
+                        var pts = new Point3dCollection();
+                        IntersectingLine.IntersectWith(path, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                        {
+                            Polyline newpath = ResetEndPath(path, pts[0]);
+                            if (reDic.ContainsKey(IntersectingLine))
+                            {
+                                reDic[IntersectingLine].Add(newpath);
+                            }
+                            else
+                            {
+                                reDic.Add(IntersectingLine, new List<Polyline>() { newpath });
+                            }
+                            continue;
+                        }
+                    }
+                    reDic[Paths.Key].Add(path);
+                }
+            }
+            return reDic;
         }
 
         /// <summary>
@@ -75,29 +112,23 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         /// <returns></returns>
         private Line GetClosetLane(List<Line> lanes, Point3d startPt, Polyline polyline)
         {
-            var minDistance = lanes.Min(x => x.DistanceTo(startPt, false)) * 1.2;
-            var choiseLanes = lanes.Where(x => x.DistanceTo(startPt, false) < minDistance);
+            //var minDistance = lanes.Min(x => x.DistanceTo(startPt, false)) * 1.2;
+            //var choiseLanes = lanes.Where(x => x.DistanceTo(startPt, false) < minDistance);
+            var minDistance = lanes.Min(x => GetDistanceToLine(x, startPt));
+            var choiseLanes = lanes.Where(x => GetDistanceToLine(x, startPt) < minDistance * 1.2);
             var inLines = choiseLanes.Where(x => ThGeometryTool.IsProjectionPtInLine(x.StartPoint, x.EndPoint, startPt));
             Line choiseLine = new Line();
-            if (inLines.Count()>0)
+            if (inLines.Count() > 0)
             {
                 choiseLine = inLines.OrderBy(x => x.DistanceTo(startPt, false)).First();
             }
             else
             {
-                var minDisLine= choiseLanes.OrderBy(x => x.DistanceTo(startPt, false)).First();
-                var MaxLenLine= choiseLanes.OrderByDescending(x => x.Length).First();
-                if(minDisLine.IsParallelToEx(MaxLenLine))
-                {
-                    choiseLine = minDisLine;
-                }
-                else
-                {
-                    choiseLine = MaxLenLine;
-                }
+                var MaxLenLine = choiseLanes.Where(x =>Math.Abs( GetDistanceToLine(x, startPt) - minDistance)<5).OrderByDescending(x => x.Length).First();
+                choiseLine = MaxLenLine;
             }
             Line checkLine = new Line(startPt, choiseLine.GetClosestPointTo(startPt, false));
-            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline))
+            if (!Utils.CheckService.CheckIntersectWithFrame(checkLine, polyline))
             {
                 return choiseLine;
             }
@@ -210,221 +241,236 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 var trunking = item;
                 var trunkingPaths = paths[trunking];
                 Vector3d endLineDic = trunking.StartPoint.GetVectorTo(trunking.EndPoint).GetNormal();
-                var NearStartPaths = trunkingPaths.Where(o => o.EndPoint.DistanceTo(trunking.StartPoint) < 150).ToList();
-                var NearEndPaths = trunkingPaths.Where(o => o.EndPoint.DistanceTo(trunking.EndPoint) < 150).ToList();
+                var NearStartPaths = trunkingPaths.Where(o => o.EndPoint.DistanceTo(trunking.StartPoint) < 150).OrderBy(o => o.EndPoint.DistanceTo(trunking.StartPoint)).ToList();
+                var NearEndPaths = trunkingPaths.Where(o => o.EndPoint.DistanceTo(trunking.EndPoint) < 150).OrderBy(o => o.EndPoint.DistanceTo(trunking.StartPoint)).ToList();
                 trunkingPaths = trunkingPaths.Except(NearStartPaths).Except(NearEndPaths).OrderBy(o => o.EndPoint.DistanceTo(trunking.StartPoint)).ToList();
                 //处理起点
                 {
                     var parallelDirPath = NearStartPaths.Where(o => endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 1))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//平行线
 
-                    var sameDirPath = NearStartPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//同向线
-                    var DifferentDirPath = NearStartPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//逆向线
+                    var sameDirPath = NearStartPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                    var DifferentDirPath = NearStartPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                     var beeLinePath = NearStartPaths.Except(parallelDirPath).Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
+                    sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                    DifferentDirPath = AdjustSpacing(DifferentDirPath).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
 
-                    //处理起点的垂直线
+                    if (NearStartPaths.Count > 0)
                     {
-                        int OffsetIndex = sameDirPath.Count + DifferentDirPath.Count + beeLinePath.Count - 1;//偏移量
-                        Point3d endPt;
-                        for (int i = 0; i < sameDirPath.Count(); i++)
+                        //处理起点的垂直线
                         {
-                            var path = sameDirPath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                        for (int i = 0; i < beeLinePath.Count(); i++)
-                        {
-                            var path = beeLinePath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                        for (int i = 0; i < DifferentDirPath.Count(); i++)
-                        {
-                            var path = DifferentDirPath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                    }
-                    //处理起点的平行线
-                    {
-                        if (parallelDirPath.Count > 1)
-                        {
-                            Vector3d vector = Vector3d.ZAxis.CrossProduct(endLineDic).GetNormal();
-                            sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 1)) > 150 && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//同向线
-                            DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 1)) > 150 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//逆向线
-                            beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
-                            bool HasbeeLinePath = false;
-                            bool HassameDirPath = false;
-                            if (beeLinePath.Count > 0)
-                            {
-                                beeLinePath.ForEach(o => Path.Add(o));
-                                HasbeeLinePath = true;
-                            }
+                            Point3d CurrentPoint = NearStartPaths[0].EndPoint;
+                            int OffsetIndex = sameDirPath.Count + DifferentDirPath.Count + beeLinePath.Count - 1;//偏移量
                             Point3d endPt;
-                            int OffsetIndex = sameDirPath.Count - 1;//偏移量
                             for (int i = 0; i < sameDirPath.Count(); i++)
                             {
                                 var path = sameDirPath[i];
-                                if (OffsetIndex == 0 && !HasbeeLinePath)
-                                {
-                                    Path.Add(path);
-                                    HassameDirPath = true;
-                                    break;
-                                }
-                                endPt = path.EndPoint - endLineDic * 150 + vector * 150 * OffsetIndex--;
+                                endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
                                 int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                 path = ResetEndPath(path, endPt);
-                                path.AddVertexAt(path.NumberOfVertices, trunking.StartPoint.ToPoint2D(), 0, 0, 0);
                                 Path.Add(path);
                             }
-
-                            OffsetIndex = DifferentDirPath.Count - 1;//偏移量
+                            for (int i = 0; i < beeLinePath.Count(); i++)
+                            {
+                                var path = beeLinePath[i];
+                                endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
+                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                path = ResetEndPath(path, endPt);
+                                Path.Add(path);
+                            }
                             for (int i = 0; i < DifferentDirPath.Count(); i++)
                             {
                                 var path = DifferentDirPath[i];
-                                if (OffsetIndex == 0 && !HasbeeLinePath && !HassameDirPath)
-                                {
-                                    Path.Add(path);
-                                    break;
-                                }
-                                endPt = path.EndPoint - endLineDic * 150 - vector * 150 * OffsetIndex--;
+                                endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
                                 int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                 path = ResetEndPath(path, endPt);
-                                path.AddVertexAt(path.NumberOfVertices, trunking.StartPoint.ToPoint2D(), 0, 0, 0);
                                 Path.Add(path);
                             }
                         }
-                        else
+                        //处理起点的平行线
                         {
-                            parallelDirPath.ForEach(o => Path.Add(o));
+                            if (parallelDirPath.Count > 1)
+                            {
+                                Vector3d vector = Vector3d.ZAxis.CrossProduct(endLineDic).GetNormal();
+                                sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                                DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
+                                beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
+                                sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                DifferentDirPath=AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                bool HasbeeLinePath = false;
+                                bool HassameDirPath = false;
+                                if (beeLinePath.Count > 0)
+                                {
+                                    beeLinePath.ForEach(o => Path.Add(o));
+                                    HasbeeLinePath = true;
+                                }
+                                Point3d endPt;
+                                int OffsetIndex = sameDirPath.Count - 1;//偏移量
+                                for (int i = 0; i < sameDirPath.Count(); i++)
+                                {
+                                    var path = sameDirPath[i];
+                                    if (OffsetIndex == 0 && !HasbeeLinePath)
+                                    {
+                                        Path.Add(path);
+                                        HassameDirPath = true;
+                                        break;
+                                    }
+                                    endPt = path.EndPoint - endLineDic * 150 + vector * 150 * OffsetIndex--;
+                                    if (path.GetPoint3dAt(path.NumberOfVertices - 2).DistanceTo(path.GetPoint3dAt(path.NumberOfVertices - 1)) < 150)
+                                    {
+                                        Line line = new Line(path.EndPoint, endPt);
+                                        Point3dCollection pts = new Point3dCollection();
+                                        line.IntersectWith(path, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                                        if (pts.Count > 0)
+                                            endPt = pts[0];
+                                    }
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                    path = ResetEndPath(path, endPt);
+                                    path.AddVertexAt(path.NumberOfVertices, trunking.StartPoint.ToPoint2D(), 0, 0, 0);
+                                    Path.Add(path);
+                                }
+
+                                OffsetIndex = DifferentDirPath.Count - 1;//偏移量
+                                for (int i = 0; i < DifferentDirPath.Count(); i++)
+                                {
+                                    var path = DifferentDirPath[i];
+                                    if (OffsetIndex == 0 && !HasbeeLinePath && !HassameDirPath)
+                                    {
+                                        Path.Add(path);
+                                        break;
+                                    }
+                                    endPt = path.EndPoint - endLineDic * 150 - vector * 150 * OffsetIndex--;
+                                    if (path.GetPoint3dAt(path.NumberOfVertices - 2).DistanceTo(path.GetPoint3dAt(path.NumberOfVertices - 1)) < 150)
+                                    {
+                                        Line line = new Line(path.EndPoint, endPt);
+                                        Point3dCollection pts = new Point3dCollection();
+                                        line.IntersectWith(path, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                                        if (pts.Count > 0)
+                                            endPt = pts[0];
+                                    }
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                    path = ResetEndPath(path, endPt);
+                                    path.AddVertexAt(path.NumberOfVertices, trunking.StartPoint.ToPoint2D(), 0, 0, 0);
+                                    Path.Add(path);
+                                }
+                            }
+                            else
+                            {
+                                parallelDirPath.ForEach(o => Path.Add(o));
+                            }
                         }
                     }
-
                 }
                 //处理终点
                 {
                     var parallelDirPath = NearEndPaths.Where(o => endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 1))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//平行线
-
-                    var sameDirPath = NearEndPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//同向线
-                    var DifferentDirPath = NearEndPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//逆向线
+                    var sameDirPath = NearEndPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                    var DifferentDirPath = NearEndPaths.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                     var beeLinePath = NearEndPaths.Except(parallelDirPath).Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
-
-                    //处理起点的垂直线
+                    sameDirPath = AdjustSpacing(sameDirPath).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                    DifferentDirPath = AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                    if (NearEndPaths.Count > 0)
                     {
-                        int OffsetIndex = sameDirPath.Count + DifferentDirPath.Count + beeLinePath.Count - 1;//偏移量
-                        Point3d endPt;
-                        for (int i = 0; i < DifferentDirPath.Count(); i++)
+                        //处理终点的垂直线
                         {
-                            var path = DifferentDirPath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                        for (int i = 0; i < beeLinePath.Count(); i++)
-                        {
-                            var path = beeLinePath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                        for (int i = 0; i < sameDirPath.Count(); i++)
-                        {
-                            var path = sameDirPath[i];
-                            if (OffsetIndex == 0)
-                            {
-                                Path.Add(path);
-                                break;
-                            }
-                            endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
-                            int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                            path = ResetEndPath(path, endPt);
-                            Path.Add(path);
-                        }
-                    }
-                    //处理起点的平行线
-                    {
-                        if (parallelDirPath.Count > 1)
-                        {
-                            Vector3d vector = Vector3d.ZAxis.CrossProduct(endLineDic).GetNormal();
-                            sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 1)) > 150 && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//同向线
-                            DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 1)) > 150 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//逆向线
-                            beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
-                            bool HasbeeLinePath = false;
-                            bool HassameDirPath = false;
-                            if (beeLinePath.Count > 0)
-                            {
-                                beeLinePath.ForEach(o => Path.Add(o));
-                                HasbeeLinePath = true;
-                            }
+                            Point3d CurrentPoint = NearEndPaths.Last().EndPoint;
+                            int OffsetIndex = sameDirPath.Count + DifferentDirPath.Count + beeLinePath.Count - 1;//偏移量
                             Point3d endPt;
-                            int OffsetIndex = sameDirPath.Count - 1;//偏移量
-                            for (int i = 0; i < sameDirPath.Count(); i++)
-                            {
-                                var path = sameDirPath[i];
-                                if (OffsetIndex == 0 && !HasbeeLinePath)
-                                {
-                                    Path.Add(path);
-                                    HassameDirPath = true;
-                                    break;
-                                }
-                                endPt = path.EndPoint + endLineDic * 150 + vector * 150 * OffsetIndex--;
-                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
-                                path = ResetEndPath(path, endPt);
-                                path.AddVertexAt(path.NumberOfVertices, trunking.EndPoint.ToPoint2D(), 0, 0, 0);
-                                Path.Add(path);
-                            }
-
-                            OffsetIndex = DifferentDirPath.Count - 1;//偏移量
                             for (int i = 0; i < DifferentDirPath.Count(); i++)
                             {
                                 var path = DifferentDirPath[i];
-                                if (OffsetIndex == 0 && !HasbeeLinePath && !HassameDirPath)
-                                {
-                                    Path.Add(path);
-                                    break;
-                                }
-                                endPt = path.EndPoint + endLineDic * 150 - vector * 150 * OffsetIndex--;
+                                endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
                                 int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                 path = ResetEndPath(path, endPt);
-                                path.AddVertexAt(path.NumberOfVertices, trunking.EndPoint.ToPoint2D(), 0, 0, 0);
+                                Path.Add(path);
+                            }
+                            for (int i = 0; i < beeLinePath.Count(); i++)
+                            {
+                                var path = beeLinePath[i];
+                                endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
+                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                path = ResetEndPath(path, endPt);
+                                Path.Add(path);
+                            }
+                            for (int i = 0; i < sameDirPath.Count(); i++)
+                            {
+                                var path = sameDirPath[i];
+                                endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
+                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                path = ResetEndPath(path, endPt);
                                 Path.Add(path);
                             }
                         }
-                        else
+                        //处理终点的平行线
                         {
-                            parallelDirPath.ForEach(o => Path.Add(o));
+                            if (parallelDirPath.Count > 1)
+                            {
+                                Vector3d vector = Vector3d.ZAxis.CrossProduct(endLineDic).GetNormal();
+                                sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2  && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                                DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
+                                beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
+                                sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                DifferentDirPath=AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                bool HasbeeLinePath = false;
+                                bool HassameDirPath = false;
+                                if (beeLinePath.Count > 0)
+                                {
+                                    beeLinePath.ForEach(o => Path.Add(o));
+                                    HasbeeLinePath = true;
+                                }
+                                Point3d endPt;
+                                int OffsetIndex = sameDirPath.Count - 1;//偏移量
+                                for (int i = 0; i < sameDirPath.Count(); i++)
+                                {
+                                    var path = sameDirPath[i];
+                                    if (OffsetIndex == 0 && !HasbeeLinePath)
+                                    {
+                                        Path.Add(path);
+                                        HassameDirPath = true;
+                                        break;
+                                    }
+                                    endPt = path.EndPoint + endLineDic * 150 + vector * 150 * OffsetIndex--;
+                                    if (path.GetPoint3dAt(path.NumberOfVertices - 2).DistanceTo(path.GetPoint3dAt(path.NumberOfVertices - 1)) < 150)
+                                    {
+                                        Line line = new Line(path.EndPoint, endPt);
+                                        Point3dCollection pts = new Point3dCollection();
+                                        line.IntersectWith(path, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                                        if (pts.Count > 0)
+                                            endPt = pts[0];
+                                    }
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                    path = ResetEndPath(path, endPt);
+                                    path.AddVertexAt(path.NumberOfVertices, trunking.EndPoint.ToPoint2D(), 0, 0, 0);
+                                    Path.Add(path);
+                                }
+
+                                OffsetIndex = DifferentDirPath.Count - 1;//偏移量
+                                for (int i = 0; i < DifferentDirPath.Count(); i++)
+                                {
+                                    var path = DifferentDirPath[i];
+                                    if (OffsetIndex == 0 && !HasbeeLinePath && !HassameDirPath)
+                                    {
+                                        Path.Add(path);
+                                        break;
+                                    }
+                                    endPt = path.EndPoint + endLineDic * 150 - vector * 150 * OffsetIndex--;
+                                    if (path.GetPoint3dAt(path.NumberOfVertices - 2).DistanceTo(path.GetPoint3dAt(path.NumberOfVertices - 1)) < 150)
+                                    {
+                                        Line line = new Line(path.EndPoint, endPt);
+                                        Point3dCollection pts = new Point3dCollection();
+                                        line.IntersectWith(path, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                                        if (pts.Count > 0)
+                                            endPt = pts[0];
+                                    }
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
+                                    path = ResetEndPath(path, endPt);
+                                    path.AddVertexAt(path.NumberOfVertices, trunking.EndPoint.ToPoint2D(), 0, 0, 0);
+                                    Path.Add(path);
+                                }
+                            }
+                            else
+                            {
+                                parallelDirPath.ForEach(o => Path.Add(o));
+                            }
                         }
                     }
                 }
@@ -440,84 +486,83 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     }
                     else
                     {
-                        var sameDirPath = NeighborPath.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//同向线
-                        var DifferentDirPath = NeighborPath.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();//逆向线
+                        Point3d CurrentPoint = trunkingPaths[index].EndPoint;
+                        var sameDirPath = NeighborPath.Where(o => o.NumberOfVertices > 2 && endLineDic.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                        var DifferentDirPath = NeighborPath.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                         var beeLinePath = NeighborPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
-
+                        sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                        DifferentDirPath= AdjustSpacing(DifferentDirPath).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
                         if (beeLinePath.Count() == 0)
                         {
                             //距离足够，往后偏移
                             Point3d endPt = trunkingPaths.Count > index + neighborNum ? trunkingPaths[index + neighborNum].EndPoint : trunking.EndPoint;
+                            Point3d startPt = index > 0 ? trunkingPaths[index - 1].EndPoint : trunking.StartPoint;
                             if (endPt.DistanceTo(trunkingPaths[index].EndPoint) > neighborNum * 150)
                             {
                                 int OffsetIndex = neighborNum - 1;//偏移量
                                 for (int i = 0; i < sameDirPath.Count(); i++)
                                 {
-                                    if (OffsetIndex == 0)
-                                        break;
                                     var path = sameDirPath[i];
-                                    endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
+                                    endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
                                     int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                     path = ResetEndPath(path, endPt);
                                     trunkingPaths[indexof] = path;
                                 }
                                 for (int i = 0; i < DifferentDirPath.Count(); i++)
                                 {
-                                    if (OffsetIndex == 0)
-                                        break;
                                     var path = DifferentDirPath[i];
-                                    endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
+                                    endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
                                     int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                     path = ResetEndPath(path, endPt);
                                     trunkingPaths[indexof] = path;
                                 }
                             }
                             //距离不够，往前偏移
-                            else if (trunkingPaths[index].EndPoint.DistanceTo(trunkingPaths[index - 1].EndPoint) > neighborNum * 150)
+                            else if (trunkingPaths[index].EndPoint.DistanceTo(startPt) > neighborNum * 150)
                             {
                                 int OffsetIndex = neighborNum - 1;//偏移量
                                 sameDirPath.Reverse();
                                 DifferentDirPath.Reverse();
                                 for (int i = 0; i < DifferentDirPath.Count(); i++)
                                 {
-                                    if (OffsetIndex == 0)
-                                        break;
                                     var path = DifferentDirPath[i];
-                                    endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
+                                    endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                     path = ResetEndPath(path, endPt);
+                                    trunkingPaths[indexof] = path;
                                 }
                                 for (int i = 0; i < sameDirPath.Count(); i++)
                                 {
-                                    if (OffsetIndex == 0)
-                                        break;
                                     var path = sameDirPath[i];
-                                    endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
+                                    endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
+                                    int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                     path = ResetEndPath(path, endPt);
+                                    trunkingPaths[indexof] = path;
                                 }
                             }
                         }
                         else
                         {
                             //同向的往后偏移
-                            int OffsetIndex = sameDirPath.Count() - 1;//偏移量
+                            int OffsetIndex = sameDirPath.Count();//偏移量
                             for (int i = 0; i < sameDirPath.Count(); i++)
                             {
-                                if (OffsetIndex == 0)
-                                    break;
                                 var path = sameDirPath[i];
-                                Point3d endPt = path.EndPoint + endLineDic * 150 * OffsetIndex--;
+                                Point3d endPt = CurrentPoint + endLineDic * 150 * OffsetIndex--;
+                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                 path = ResetEndPath(path, endPt);
+                                trunkingPaths[indexof] = path;
                             }
                             //逆向的往前偏移
-                            OffsetIndex = DifferentDirPath.Count() - 1;//偏移量
+                            OffsetIndex = DifferentDirPath.Count();//偏移量
                             DifferentDirPath.Reverse();
                             for (int i = 0; i < DifferentDirPath.Count(); i++)
                             {
-                                if (OffsetIndex == 0)
-                                    break;
                                 var path = DifferentDirPath[i];
-                                Point3d endPt = path.EndPoint - endLineDic * 150 * OffsetIndex--;
+                                Point3d endPt = CurrentPoint - endLineDic * 150 * OffsetIndex--;
+                                int indexof = trunkingPaths.FindIndex(o => o.StartPoint == path.StartPoint);
                                 path = ResetEndPath(path, endPt);
+                                trunkingPaths[indexof] = path;
                             }
                         }
                         index += neighborNum;
@@ -527,7 +572,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             return Path;
         }
-
+        
+        /// <summary>
+        /// 断开路径
+        /// </summary>
+        /// <param name="resPolys"></param>
+        /// <param name="modelBoundary"></param>
+        /// <returns></returns>
         public List<Line> DisconnectRoute(List<Polyline> resPolys, List<Polyline> modelBoundary)
         {
             Vector3d vector = Vector3d.XAxis;
@@ -541,16 +592,19 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 
             foreach (var line in VerticalLines)
             {
-                var intersectCollection = spatialIndex.SelectFence(line.ExtendLine(-1));
+                var intersectCollection = spatialIndex.SelectFence(line.ExtendLine(-10));
                 intersectCollection.Remove(line);
                 var intersectEntitys = intersectCollection.Cast<Entity>().ToList();
                 var intersectPts = new List<Point3dCollection>();
                 intersectEntitys.ForEach(o =>
                 {
-                    Point3dCollection pts = new Point3dCollection();
-                    line.IntersectWith(o, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    if (pts.Count > 0)
-                        intersectPts.Add(pts);
+                    if (!(o is Line oline) || !line.IsParallelToEx(oline))
+                    {
+                        Point3dCollection pts = new Point3dCollection();
+                        line.IntersectWith(o, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                            intersectPts.Add(pts);
+                    }
                 });
 
                 processedLines.Add(line);
@@ -558,7 +612,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             foreach (var line in untreatedLines)
             {
-                var intersectCollection = spatialIndex.SelectFence(line.ExtendLine(-1));
+                var intersectCollection = spatialIndex.SelectFence(line.ExtendLine(-10));
                 intersectCollection.Remove(line);
                 var intersectEntitys = intersectCollection.Cast<Entity>().ToList();
                 var intersectPts = new List<Point3dCollection>();
@@ -571,10 +625,13 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 });
                 intersectEntitys.Where(o => o is Line && !processedLines.Contains(o)).Cast<Line>().ForEach(o =>
                 {
-                    Point3dCollection pts = new Point3dCollection();
-                    line.IntersectWith(o, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    if (pts.Count > 0)
-                        intersectPts.Add(pts);
+                    if (!line.IsParallelToEx(o))
+                    {
+                        Point3dCollection pts = new Point3dCollection();
+                        line.IntersectWith(o, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                            intersectPts.Add(pts);
+                    }
                 });
                 processedLines.Add(line);
                 reLines.AddRange(SegmentationLine(line, intersectPts));
@@ -582,6 +639,92 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             return reLines;
         }
 
+        /// <summary>
+        /// 调整间距
+        /// </summary>
+        /// <param name="sameDirPath"></param>
+        /// <returns></returns>
+        private List<Polyline> AdjustSpacing(List<Polyline> paths)
+        {
+            List<Polyline> newPaths = paths.OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+            int index = 0;
+            while (index < newPaths.Count)
+            {
+                var path = newPaths[index];
+                double length = path.GetPoint3dAt(path.NumberOfVertices - 1).DistanceTo(path.GetPoint3dAt(path.NumberOfVertices - 2));
+                var neighborPaths = newPaths.Skip(index).Where(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2)) < length + 150).ToList();
+                if (neighborPaths.Count == 1)
+                {
+                    index++;
+                }
+                else
+                {
+                    double lastlength = index == 0 ? 0 : newPaths[index - 1].GetPoint3dAt(newPaths[index - 1].NumberOfVertices - 1).DistanceTo(newPaths[index - 1].GetPoint3dAt(newPaths[index - 1].NumberOfVertices - 2));
+                    double nextlength = index + neighborPaths.Count == newPaths.Count ? double.NaN : newPaths[index + neighborPaths.Count].GetPoint3dAt(newPaths[index + neighborPaths.Count].NumberOfVertices - 1).DistanceTo(newPaths[index + neighborPaths.Count].GetPoint3dAt(newPaths[index + neighborPaths.Count].NumberOfVertices - 2));
+                    var directPath = neighborPaths.Where(o => o.NumberOfVertices < 4).ToList();
+                    if (directPath.Count == 0)
+                    {
+                        //向内缩
+                        if (length - lastlength > 150 * neighborPaths.Count)
+                        {
+                            neighborPaths = neighborPaths.OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 3))).ToList();
+                            int count = neighborPaths.Count - 1;
+                            for (int i = 0; i < neighborPaths.Count; i++)
+                            {
+                                Polyline polyline = neighborPaths[i];
+                                int numberOfVertices = polyline.NumberOfVertices;
+                                var lastLine = new Line(polyline.GetPoint3dAt(numberOfVertices - 2), polyline.GetPoint3dAt(numberOfVertices - 1));
+                                var lastpoint = lastLine.StartPoint + lastLine.LineDirection() * 150 * count--;
+                                var thirdLine = new Line(polyline.GetPoint3dAt(numberOfVertices - 4), polyline.GetPoint3dAt(numberOfVertices - 3));
+                                var thirdpoint = thirdLine.GetClosestPointTo(lastpoint, true);
+                                Polyline newpath = new Polyline() { Layer = polyline.Layer, Linetype = polyline.Linetype, ColorIndex = polyline.ColorIndex };
+                                int j = 0;
+                                for (; j < polyline.NumberOfVertices - 3; j++)
+                                {
+                                    newpath.AddVertexAt(j, polyline.GetPoint2dAt(j), 0, 0, 0);
+                                }
+                                newpath.AddVertexAt(j++, thirdpoint.ToPoint2D(), 0, 0, 0);
+                                newpath.AddVertexAt(j++, lastpoint.ToPoint2D(), 0, 0, 0);
+                                newpath.AddVertexAt(j++, polyline.EndPoint.ToPoint2D(), 0, 0, 0);
+                                neighborPaths[i] = newpath;
+                            }
+                            neighborPaths.Reverse();
+                            newPaths.RemoveRange(index, neighborPaths.Count);
+                            newPaths.InsertRange(index, neighborPaths);
+                        }
+                        //向外扩
+                        else if (nextlength - length > 150 * neighborPaths.Count)
+                        {
+                            neighborPaths = neighborPaths.OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 2).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 3))).ToList();
+                            int count = neighborPaths.Count - 1;
+                            for (int i = 0; i < neighborPaths.Count; i++)
+                            {
+                                Polyline polyline = neighborPaths[i];
+                                int numberOfVertices = polyline.NumberOfVertices;
+                                var lastLine = new Line(polyline.GetPoint3dAt(numberOfVertices - 2), polyline.GetPoint3dAt(numberOfVertices - 1));
+                                var lastpoint = lastLine.StartPoint - lastLine.LineDirection() * 150 * count--;
+                                var thirdLine = new Line(polyline.GetPoint3dAt(numberOfVertices - 4), polyline.GetPoint3dAt(numberOfVertices - 3));
+                                var thirdpoint = thirdLine.GetClosestPointTo(lastpoint, true);
+                                Polyline newpath = new Polyline() { Layer = polyline.Layer, Linetype = polyline.Linetype, ColorIndex = polyline.ColorIndex };
+                                int j = 0;
+                                for (; j < polyline.NumberOfVertices - 3; j++)
+                                {
+                                    newpath.AddVertexAt(j, polyline.GetPoint2dAt(j), 0, 0, 0);
+                                }
+                                newpath.AddVertexAt(j++, thirdpoint.ToPoint2D(), 0, 0, 0);
+                                newpath.AddVertexAt(j++, lastpoint.ToPoint2D(), 0, 0, 0);
+                                newpath.AddVertexAt(j++, polyline.EndPoint.ToPoint2D(), 0, 0, 0);
+                            }
+                            newPaths.RemoveRange(index, neighborPaths.Count);
+                            newPaths.InsertRange(index, neighborPaths);
+                        }
+                    }
+                    //neighborPaths = AdjustNerbor(neighborPaths);
+                    index += neighborPaths.Count;
+                }
+            }
+            return newPaths;
+        }
 
         /// <summary>
         /// 获取连接点
@@ -683,13 +826,9 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             {
                 return new Polyline();
             }
-            if(Intersectpts.Count > 1)
-            {
-                throw new NotImplementedException();
-            }
-            Point3d intersectPt = Intersectpts[0];
+            Point3d intersectPt = Intersectpts.Cast<Point3d>().OrderByDescending(o => o.DistanceTo(oldPath.StartPoint)).First();
             var pts = GetConnectPoints(model);
-            int pathedgs = oldPath.Vertices().Count;
+            int pathedgs = oldPath.NumberOfVertices;
             Point3d StartPt = pts.OrderBy(o => o.DistanceTo(intersectPt)).First();
             
             int i = 1;
@@ -712,7 +851,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             Polyline newpolyline = new Polyline();
             newpolyline.AddVertexAt(0, StartPt.ToPoint2D(), 0, 0, 0);
             newpolyline.AddVertexAt(1, secondPt.ToPoint2D(), 0, 0, 0);
-            for (int j = 2; j < pathedgs - i + 1; j++)
+            int Number = pathedgs - i + 1;
+            for (int j = 2; j < Number; j++)
             {
                 newpolyline.AddVertexAt(j, oldPath.GetPoint3dAt(++i).ToPoint2D(), 0, 0, 0);
             }
@@ -725,6 +865,8 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 
         private Polyline ResetEndPath(Polyline oldPath, Point3d newEndPoint)
         {
+            if (newEndPoint.DistanceTo(oldPath.EndPoint) < 1)
+                return oldPath;
             Polyline polyline = new Polyline() { Layer = oldPath.Layer, Linetype = oldPath.Linetype, ColorIndex = oldPath.ColorIndex };
             var verticesCount = oldPath.NumberOfVertices;
             if (verticesCount > 2)
@@ -787,6 +929,12 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             reLines.ForEach(o => { o.Layer = line.Layer; o.Linetype = line.Linetype; o.ColorIndex = line.ColorIndex; });
             return reLines;
+        }
+
+        private double GetDistanceToLine(Line line,Point3d point)
+        {
+            Point3d closedPt = line.GetClosestPointTo(point, true);
+            return point.DistanceTo(closedPt) + line.DistanceTo(closedPt, false);
         }
     }
 }
