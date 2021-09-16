@@ -79,13 +79,6 @@ namespace TianHua.Lighting.UI
                             return;
                         }
                     }
-                }
-                finally
-                {
-                    lastSelCount = lstBox.SelectedItems.Count;
-                }
-
-                {
                     var lst = UIConfigs.Items.Except(lstBox.SelectedItems.Cast<LightingViewModel.Item>()).ToList();
                     if (lst.Count == 1)
                     {
@@ -95,7 +88,10 @@ namespace TianHua.Lighting.UI
                         }
                     }
                 }
-
+                finally
+                {
+                    lastSelCount = lstBox.SelectedItems.Count;
+                }
             };
             lstBox.SelectionChanged += f;
             lstBox.PreviewKeyDown += (s, e) => { e.Handled = true; };
