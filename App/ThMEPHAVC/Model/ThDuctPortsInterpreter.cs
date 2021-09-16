@@ -73,16 +73,6 @@ namespace ThMEPHVAC.Model
             var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
             return Get_vt_elbow_param(duct_list, id.Handle);
         }
-        public static void Get_valves(out List<Valve_modify_param> valves)
-        {
-            valves = new List<Valve_modify_param>();
-            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风阀");
-            foreach (var id in valveIds)
-                valves.Add(Get_valve_param(id, "风阀"));
-            valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("防火阀");
-            foreach (var id in valveIds)
-                valves.Add(Get_valve_param(id, "防火阀"));
-        }
         public static void Get_ducts_dic(out Dictionary<Polyline, Duct_modify_param> dic)
         {
             dic = new Dictionary<Polyline, Duct_modify_param>();
@@ -164,21 +154,18 @@ namespace ThMEPHVAC.Model
         public static void Get_valves_dic(out Dictionary<Polyline, Valve_modify_param> dic)
         {
             dic = new Dictionary<Polyline, Valve_modify_param>();
-            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风阀");
+            Get_valves_dic_by_name(dic, "风阀");
+            Get_valves_dic_by_name(dic, "防火阀");
+        }
+        public static void Get_valves_dic_by_name(Dictionary<Polyline, Valve_modify_param> dic, string valve_name)
+        {
+            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name(valve_name);
             foreach (var id in valveIds)
             {
                 var blk = (BlockReference)id.GetEntity();
                 var poly = new Polyline();
                 poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
-                dic.Add(poly, Get_valve_param(id, "风阀"));
-            }
-            valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("防火阀");
-            foreach (var id in valveIds)
-            {
-                var blk = (BlockReference)id.GetEntity();
-                var poly = new Polyline();
-                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
-                dic.Add(poly, Get_valve_param(id, "防火阀"));
+                dic.Add(poly, Get_valve_param(id, valve_name));
             }
         }
         public static void Get_holes_dic(out Dictionary<Polyline, Hole_modify_param> dic)
@@ -216,20 +203,6 @@ namespace ThMEPHVAC.Model
                 poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
                 dic.Add(poly, Get_port_param(id));
             }
-        }
-        public static void Get_ports(out List<Port_modify_param> ports)
-        {
-            ports = new List<Port_modify_param>();
-            var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风口-AI研究中心");
-            foreach (var id in valveIds)
-                ports.Add(Get_port_param(id));
-        }
-        public static void Get_texts(out List<Text_modify_param> texts)
-        {
-            texts = new List<Text_modify_param>();
-            var textIds = ThDuctPortsReadComponent.Read_duct_texts();
-            foreach (var text in textIds)
-                texts.Add(Get_text_param(text));
         }
         private static Text_modify_param Get_text_param(DBText text)
         {

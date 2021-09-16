@@ -17,7 +17,7 @@ namespace ThMEPHVAC.Model
         private Vector3d org_dis_vec;
         private Matrix3d org_dis_mat;
         private ThDuctPortsDrawService service;
-        private DBObjectCollection hoses_bounds;                         // 软接外包框
+        private DBObjectCollection hoses_bounds;                     // 软接外包框
         private Dictionary<Polyline, Fan_modify_param> fans_dic;     // 风机外包框到文字参数的映射
         private Dictionary<Polyline, Port_modify_param> ports_dic;   // 风口外包框到文字参数的映射
         private Dictionary<Polyline, Text_modify_param> texts_dic;   // 文字外包框到文字参数的映射
@@ -612,23 +612,22 @@ namespace ThMEPHVAC.Model
             var duct_param = ThMEPHVACService.Create_duct_modify_param(new_duct.center_line, conn_duct.duct_size, conn_duct.air_volume, in_param, start_handle);
             ThDuctPortsDrawService.Clear_graph(conn_duct.handle);
             ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
-            Insert_rev_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
+            Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
         }
-        private void Insert_rev_reducing(double connect_width,
+        private void Insert_reducing(double connect_width,
                                          double modify_width,
                                          Point2d new_sp,
                                          Point2d new_ep,
                                          Point2d detect_p,
                                          Vector2d dis_vec)
         {
-            // 插入反向变径
             if (connect_width > modify_width)
             {
                 var dis1 = detect_p.GetDistanceTo(new_sp);
                 var dis2 = detect_p.GetDistanceTo(new_ep);
                 var reducing_geo = (dis1 < dis2) ?
-                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, modify_width, connect_width) :
-                    ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, modify_width, connect_width);
+                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, connect_width, modify_width) :
+                    ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, connect_width, modify_width);
                 Update_reducing(reducing_geo);
             }
         }

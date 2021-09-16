@@ -265,11 +265,11 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        public ObjectId Insert_start_flag(Point3d p)
+        public ObjectId Insert_start_flag(Point3d p, double angle)
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                return acadDb.ModelSpace.ObjectId.InsertBlockReference(start_layer, start_name, p, new Scale3d(), 0);
+                return acadDb.ModelSpace.ObjectId.InsertBlockReference(start_layer, start_name, p, new Scale3d(), angle);
             }
         }
         public static void Remove_ids(ObjectId[] objectIds)

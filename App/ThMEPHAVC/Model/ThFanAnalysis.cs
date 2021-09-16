@@ -39,6 +39,7 @@ namespace ThMEPHVAC.CAD
     }
     public class ThFanAnalysis
     {
+        public Vector3d start_dir_vec;
         public ThDbModelFan fan;
         public Duct_InParam param;
         public Tolerance point_tor;
@@ -69,6 +70,7 @@ namespace ThMEPHVAC.CAD
             Move_to_zero(fan.FanInletBasePoint, fan.FanOutletBasePoint, center_line, wall_lines, out Point3d room_p, out Point3d not_room_p);
             Update_search_point(room_p, not_room_p, param, ref center_line, out Point3d i_room_p, out Point3d i_not_room_p, 
                                                                             out Line room_line, out Line not_room_line);
+            start_dir_vec = ThMEPHVACService.Get_edge_direction(room_line);
             spatial_index = new ThCADCoreNTSSpatialIndex(center_line);
             Get_duct_info(i_room_p, room_line, room_lines);
             Get_duct_info(i_not_room_p, not_room_line, not_room_lines);
@@ -430,8 +432,6 @@ namespace ThMEPHVAC.CAD
             center_lines.Remove(cross_line);
             var p = ThMEPHVACService.Is_in_polyline(cross_line.StartPoint, wall_lines) ?
                     cross_line.StartPoint : cross_line.EndPoint;
-            var dir_vec = (p - fan_break_p).GetNormal();
-            fan_break_p += dir_vec;// 用于消除1mm的外延
             center_lines.Add(new Line(p, fan_break_p));
             var other_p = p.IsEqualTo(cross_line.StartPoint, point_tor) ?
                     cross_line.EndPoint : cross_line.StartPoint;
@@ -482,7 +482,7 @@ namespace ThMEPHVAC.CAD
             i_room_p = ThMEPHVACService.Round_point(room_p, 6);
             i_not_room_p = ThMEPHVACService.Round_point(not_room_p, 6);
             center_line = Get_start_line(i_room_p, i_not_room_p, center_line, out room_line, out not_room_line);
-            ThDuctPortsDrawService.Get_fan_dyn_block_properity(fan.Data, is_axis, out double fan_in_width, out double fan_out_width);
+            
             if (is_exhaust)
             {
                 if (fan.IntakeForm.Contains("上进") || fan.IntakeForm.Contains("下进") ||
@@ -493,9 +493,9 @@ namespace ThMEPHVAC.CAD
                 }
                 else
                 {
-                    Update_out_start_info(true, fan_in_width, info, center_line, ref room_line, ref i_room_p);
+                    Update_out_start_info(true, fan.fan_in_width, info, center_line, ref room_line, ref i_room_p);
                 }
-                Update_out_start_info(false, fan_out_width, info, center_line, ref not_room_line, ref i_not_room_p);
+                Update_out_start_info(false, fan.fan_out_width, info, center_line, ref not_room_line, ref i_not_room_p);
             }
             else
             {
@@ -505,20 +505,20 @@ namespace ThMEPHVAC.CAD
                     // 进风口加上翻，出风口变径
                     Update_in_start_info(center_line, param.other_duct_size, ref not_room_line, ref i_not_room_p);
                     Do_add_inner_duct(not_room_line, i_not_room_p, param.other_duct_size);
-                    Update_out_start_info(true, fan_out_width, info, center_line, ref room_line, ref i_room_p);
+                    Update_out_start_info(true, fan.fan_out_width, info, center_line, ref room_line, ref i_room_p);
                 }
                 else if (fan.IntakeForm.Contains("上出") || fan.IntakeForm.Contains("下出"))
                 {
                     // 出风口加上翻，进风口变径
                     Update_in_start_info(center_line, param.room_duct_size, ref room_line, ref i_room_p);
                     Do_add_inner_duct(room_line, i_room_p, param.room_duct_size);
-                    Update_out_start_info(false, fan_in_width, info, center_line, ref not_room_line, ref i_not_room_p);
+                    Update_out_start_info(false, fan.fan_in_width, info, center_line, ref not_room_line, ref i_not_room_p);
                 }
                 else
                 {
                     // 两边变径
-                    Update_out_start_info(true, fan_out_width, info, center_line, ref room_line, ref i_room_p);
-                    Update_out_start_info(false, fan_in_width, info, center_line, ref not_room_line, ref i_not_room_p);
+                    Update_out_start_info(true, fan.fan_out_width, info, center_line, ref room_line, ref i_room_p);
+                    Update_out_start_info(false, fan.fan_in_width, info, center_line, ref not_room_line, ref i_not_room_p);
                 }
             }            
         }

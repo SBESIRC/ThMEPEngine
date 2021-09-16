@@ -1,4 +1,6 @@
-﻿using AcHelper;
+﻿using System.Collections.Generic;
+using Linq2Acad;
+using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.Service.Hvac;
@@ -10,28 +12,35 @@ namespace TianHua.Hvac.UI.Command
     {
         public static DBObjectCollection Get_walls()
         {
-            var wallobjects = new DBObjectCollection();
-            var objIds = ThHvacCmdService.Get_from_prompt("请选择内侧墙线", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            foreach (ObjectId oid in objIds)
+            using (var db = AcadDatabase.Active())
             {
-                var obj = oid.GetDBObject();
-                if (obj is Curve curveobj)
+                var wallobjects = new DBObjectCollection();
+                var objIds = Get_from_prompt("请选择内侧墙线", false);
+                if (objIds.Count == 0)
+                    return new DBObjectCollection();
+                foreach (ObjectId oid in objIds)
                 {
-                    wallobjects.Add(curveobj);
+                    var obj = oid.GetDBObject();
+                    if (obj is Curve curveobj)
+                    {
+                        wallobjects.Add(curveobj);
+                    }
                 }
-            }
-            return ThMEPHVACLineProc.Pre_proc(wallobjects);
+                return ThMEPHVACLineProc.Pre_proc(wallobjects);
+            }  
         }
-        public static DBObjectCollection Get_fan_and_centerline(out ObjectId fan_id)
+        public static DBObjectCollection Get_fan_and_centerline(out ObjectId fan_id, out List<ObjectId> line_ids)
         {
-            fan_id = ObjectId.Null;
-            var objIds = Get_from_prompt("请选择风机和中心线", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            fan_id = Classify_fan(objIds, out DBObjectCollection center_lines);
-            return ThMEPHVACLineProc.Pre_proc(center_lines);
+            using (var db = AcadDatabase.Active())
+            {
+                fan_id = ObjectId.Null;
+                line_ids = new List<ObjectId>();
+                var objIds = Get_from_prompt("请选择风机和中心线", false);
+                if (objIds.Count == 0)
+                    return new DBObjectCollection();
+                fan_id = Classify_fan(objIds, out line_ids, out DBObjectCollection center_lines);
+                return ThMEPHVACLineProc.Pre_proc(center_lines);
+            }  
         }
         public static ObjectIdCollection Get_from_prompt(string prompt, bool only_able)
         {
@@ -52,9 +61,12 @@ namespace TianHua.Hvac.UI.Command
                 return new ObjectIdCollection();
             }
         }
-        private static ObjectId Classify_fan(ObjectIdCollection selections, out DBObjectCollection center_lines)
+        private static ObjectId Classify_fan(ObjectIdCollection selections, 
+                                             out List<ObjectId> line_ids,
+                                             out DBObjectCollection center_lines)
         {
             ObjectId fan_id = ObjectId.Null;
+            line_ids = new List<ObjectId>();
             center_lines = new DBObjectCollection();
             foreach (ObjectId oid in selections)
             {
@@ -66,6 +78,7 @@ namespace TianHua.Hvac.UI.Command
                 else if (obj is Curve curve)
                 {
                     center_lines.Add(curve.Clone() as Curve);
+                    line_ids.Add(oid);
                 }
             }
             return fan_id;

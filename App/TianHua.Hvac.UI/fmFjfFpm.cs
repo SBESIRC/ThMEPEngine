@@ -19,16 +19,19 @@ namespace TianHua.Hvac.UI
         public double elevation1 { get; set; }
         public double elevation2 { get; set; }
         public double air_volume { get; set; }
+        public double high_air_volume;
         private double air_speed_max;
         private double air_speed_min;
-        public fmFjfFpm(DuctSpecModel _DuctSpecModel, bool is_exhaust)
+        public fmFjfFpm(DuctSpecModel _DuctSpecModel, bool is_exhaust, string scenario)
         {
             InitializeComponent();
             AcceptButton = button1;
             textBox2.Text = _DuctSpecModel.StrAirVolume;
             textBox3.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
             air_volume = Get_air_volume(textBox2.Text);
+            high_air_volume = Get_high_air_volume(textBox2.Text);
             air_speed = Double.Parse(textBox3.Text);
+            this.scenario = scenario;
             Init_scenario();
             Update_port_name();
             Init_listbox(_DuctSpecModel, is_exhaust);
@@ -36,7 +39,7 @@ namespace TianHua.Hvac.UI
         private void Init_scenario()
         {
             comboBox1.Text = "1:100";
-            comboBox2.Text = "消防排烟兼平时排风";
+            comboBox2.Text = scenario;
             ThHvacUIService.Limit_air_speed_range(comboBox2.Text, ref air_speed, ref air_speed_min, ref air_speed_max);
         }
         private void Init_listbox(DuctSpecModel _DuctSpecModel, bool is_exhaust)
@@ -300,6 +303,16 @@ namespace TianHua.Hvac.UI
             }
             else
                 return Double.Parse(textBox2.Text);
+        }
+        private double Get_high_air_volume(string str_volume)
+        {
+            if (str_volume.Contains("/"))
+            {
+                string[] str = textBox2.Text.Split('/');
+                return Double.Parse(str[0]);
+            }
+            else
+                return 0;
         }
     }
 }

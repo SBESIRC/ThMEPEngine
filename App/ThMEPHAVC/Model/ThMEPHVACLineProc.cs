@@ -16,13 +16,15 @@ namespace ThMEPHVAC.Model
         }
         public static DBObjectCollection Pre_proc(DBObjectCollection lines)
         {
+            //var service = new ThLaneLineCleanService();
+            //var res = ThLaneLineEngine.Explode(service.Clean(lines));
+            //var extendLines = res.OfType<Line>().Select(o => o.ExtendLine(1.0)).ToCollection();
+            //lines = ThLaneLineEngine.Noding(extendLines);
+            //lines = ThLaneLineEngine.CleanZeroCurves(lines);
+            //lines = lines.LineMerge();
+            //lines = ThLaneLineEngine.Explode(lines);
             var service = new ThLaneLineCleanService();
-            var res = ThLaneLineEngine.Explode(service.Clean(lines));
-            var extendLines = res.OfType<Line>().Select(o => o.ExtendLine(1.0)).ToCollection();
-            lines = ThLaneLineEngine.Noding(extendLines);
-            lines = ThLaneLineEngine.CleanZeroCurves(lines);
-            lines = lines.LineMerge();
-            lines = ThLaneLineEngine.Explode(lines);
+            lines = service.CleanNoding(lines);
             return lines;
         }
     }
