@@ -14,6 +14,7 @@ using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
 using ThMEPWSS.Command;
 using ThMEPWSS.Bussiness.LayoutBussiness;
+using ThMEPWSS.Sprinkler.Analysis;
 
 namespace ThMEPWSS
 {
@@ -166,6 +167,15 @@ namespace ThMEPWSS
         public void ThCreateLayoutArea()
         {
             using (var cmd = new ThSprinklerLayoutAreaCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPTJH", CommandFlags.Modal)]
+        public void THPTJH()
+        {
+            using (var cmd = new ThSprinklerCommand())
             {
                 cmd.Execute();
             }
