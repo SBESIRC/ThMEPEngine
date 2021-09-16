@@ -40,6 +40,14 @@
     <Compile Include="AFASRegion\Service\AFASRegionService.cs" />
     <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
+    <Compile Include="AlarmLayout\Command\FireAlarmSystemLayoutCommand.cs" />
+    <Compile Include="AlarmLayout\LayoutProcess\DeletePoints.cs" />
+    <Compile Include="AlarmLayout\LayoutProcess\LayoutOpt.cs" />
+    <Compile Include="AlarmLayout\Test\TestCmd.cs" />
+    <Compile Include="AlarmLayout\Utils\AreaCaculator.cs" />
+    <Compile Include="AlarmLayout\Utils\CenterLineSimplify.cs" />
+    <Compile Include="AlarmLayout\Utils\PointsDealer.cs" />
+    <Compile Include="AlarmLayout\Utils\ShowInfo.cs" />
     <Compile Include="AlarmSensorLayout\AlarmSensorLayout.cs" />
     <Compile Include="AlarmSensorLayout\Command\AlarmSensorLayoutCmd.cs" />
     <Compile Include="AlarmSensorLayout\Data\InputArea.cs" />
