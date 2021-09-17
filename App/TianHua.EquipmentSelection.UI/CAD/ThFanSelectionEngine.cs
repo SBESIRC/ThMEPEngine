@@ -144,6 +144,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var identifier = dataModel.ID;
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(identifier))
                     .ToList();
 
@@ -193,6 +194,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var identifier = dataModel.ID;
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(identifier))
                     .ToList();
 
@@ -214,6 +216,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var identifier = dataModel.ID;
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(identifier))
                     .ToList();
 
@@ -236,6 +239,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var identifier = dataModel.ID;
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(identifier))
                     .ToList();
 
@@ -257,6 +261,7 @@ namespace TianHua.FanSelection.UI.CAD
                 // 获取原模型对象
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(dataModel.ID))
                     .ToList();
 
@@ -287,6 +292,7 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(dataModel.ID))
                     .ForEach(o => o.ObjectId.ModifyModelAttributes(dataModel.Attributes()));
             }
@@ -298,6 +304,7 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(dataModel.ID))
                     .OrderBy(o => o.ObjectId.GetModelNumber()).ToList();
                 var numbers = dataModel.ListVentQuan.OrderBy(o => o).ToList();
@@ -323,6 +330,7 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(dataModel.ID));
                 foreach (var model in models.Select((value, i) => new { i, value }))
                 {
@@ -372,6 +380,7 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 var blockReferences = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
                     .Where(o => o.ObjectId.IsModel(dataModel.ID));
                 if (blockReferences.Any())
                 {
