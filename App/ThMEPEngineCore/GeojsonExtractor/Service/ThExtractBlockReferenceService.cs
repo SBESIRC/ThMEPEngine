@@ -24,6 +24,7 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
 
                 Blocks = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(b => !b.BlockTableRecord.IsNull)
                     .Where(b => IsElementLayer(b.Layer) && IsBlockName(b.GetEffectiveName()))
                     .ToList();
 

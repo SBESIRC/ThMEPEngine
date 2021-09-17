@@ -1,6 +1,6 @@
 ﻿using System;
-using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Engine;
@@ -24,6 +24,7 @@ namespace ThMEPElectrical.BlockConvert
             {
                 acadDatabase.ModelSpace
                     .OfType<BlockReference>()
+                    .Where(e => !e.BlockTableRecord.IsNull)
                     .ForEach(e =>
                     {
                         if (NameFilter.Contains(e.GetEffectiveName()))

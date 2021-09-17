@@ -154,23 +154,17 @@ namespace ThMEPLighting.FEI
             {
                 var exitBlock = acdb.ModelSpace
                 .OfType<BlockReference>()
+                .Where(x => !x.BlockTableRecord.IsNull)
                 .Where(x =>
                 {
-                    try
-                    {
-                        var name = x.GetEffectiveName();
-                        return name == ThMEPLightingCommon.FEI_EXIT_NAME100 ||
-                         name == ThMEPLightingCommon.FEI_EXIT_NAME101 ||
-                         name == ThMEPLightingCommon.FEI_EXIT_NAME102 ||
-                         name == ThMEPLightingCommon.FEI_EXIT_NAME103 ||
-                         name == ThMEPLightingCommon.FEI_EXIT_NAME140 ||
-                         name == ThMEPLightingCommon.FEI_EXIT_NAME141;
-                    }
-                    catch (Exception)
-                    {
-                        return false;
-                    }
-                    
+                    var name = x.GetEffectiveName();
+                    return name == ThMEPLightingCommon.FEI_EXIT_NAME100 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME101 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME102 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME103 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME140 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME141;
+
                 });
                 exitBlock.ForEach(x =>
                 {
