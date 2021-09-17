@@ -18,16 +18,18 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
         private Dictionary<Polyline, LightPlaceInfo> m_lightCacheMap = new Dictionary<Polyline, LightPlaceInfo>();
 
         private LaneGroup GroupInfo;
+        private double m_offSet;
 
-        public IndexerCalculator(Polyline polyline, List<LightPlaceInfo> lightPlaceInfos)
+        public IndexerCalculator(Polyline polyline, List<LightPlaceInfo> lightPlaceInfos, double offSet)
         {
             m_extendPolyline = polyline;
             m_lightPlaceInfos = lightPlaceInfos;
+            m_offSet = offSet;
         }
 
-        public static LaneGroup MakeLaneGroupInfo(Polyline polyline, List<LightPlaceInfo> lightPlaceInfos)
+        public static LaneGroup MakeLaneGroupInfo(Polyline polyline, List<LightPlaceInfo> lightPlaceInfos,double offSet)
         {
-            var indexerCalculator = new IndexerCalculator(polyline, lightPlaceInfos);
+            var indexerCalculator = new IndexerCalculator(polyline, lightPlaceInfos,offSet);
             indexerCalculator.Do();
             return indexerCalculator.GroupInfo;
         }
@@ -37,10 +39,10 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             var bigGroupPolys = CalculateCacheMap();
 
             // one Side
-            var oneSideLightPlaceInfos = CalculateIntersectPolys(bigGroupPolys, ParkingStallCommon.LaneOffset);
+            var oneSideLightPlaceInfos = CalculateIntersectPolys(bigGroupPolys, m_offSet);//ParkingStallCommon.LaneOffset);
 
             // another Side
-            var anotherSideLightPlaceInfos = CalculateIntersectPolys(bigGroupPolys, -ParkingStallCommon.LaneOffset);
+            var anotherSideLightPlaceInfos = CalculateIntersectPolys(bigGroupPolys, -m_offSet);// -ParkingStallCommon.LaneOffset);
 
             GroupInfo = new LaneGroup(m_extendPolyline, oneSideLightPlaceInfos, anotherSideLightPlaceInfos);
         }

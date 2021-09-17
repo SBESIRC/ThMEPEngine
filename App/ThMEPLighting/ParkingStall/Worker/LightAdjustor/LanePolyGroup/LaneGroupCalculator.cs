@@ -1,9 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPLighting.ParkingStall.Model;
 
 namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
@@ -39,9 +42,58 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
         {
             // 初步计算再细分
             LaneGroups = CalculateLaneGroupFirstStep();
+            
 
+            //无归属车位基本不会再处于两个车道交界处，这里对无归属车位找车道线不在处理交界问题
+            var noLaneLineParks = NoLaneLineParks();
+            foreach(var item in LaneGroups) 
+            {
+                if (noLaneLineParks.Count < 1)
+                    break;
+                var laneGroup = IndexerCalculator.MakeLaneGroupInfo(item.LanePoly, noLaneLineParks, 8000.0);
+                //laneGroups.Add(laneGroup);
+                bool isAdd = false;
+                if (laneGroup.OneSideLightPlaceInfos.LightPlaceInfos.Count >0)
+                {
+                    var addLights = laneGroup.OneSideLightPlaceInfos.LightPlaceInfos;
+                    item.OneSideLightPlaceInfos.LightPlaceInfos.AddRange(addLights);
+                    noLaneLineParks = noLaneLineParks.Where(c => !addLights.Any(x => x.Position.DistanceTo(c.Position) < 1)).ToList();
+                    isAdd = true;
+                }
+                if (laneGroup.AnotherSideLightPlaceInfos.LightPlaceInfos.Count > 0) 
+                {
+                    var addLights = laneGroup.AnotherSideLightPlaceInfos.LightPlaceInfos;
+                    item.AnotherSideLightPlaceInfos.LightPlaceInfos.AddRange(addLights);
+                    noLaneLineParks = noLaneLineParks.Where(c => !addLights.Any(x => x.Position.DistanceTo(c.Position) < 1)).ToList();
+                    isAdd = true;
+                }
+                //if(isAdd)
+                //    GroupInfoDifferentiation.MakeGroupInfoDifferentiation(item);
+            }
             // 删除无效的车位块
             DifferentiationGroupInfo(LaneGroups);
+            //while (true) 
+            //{
+            //    //防止有需要临近的临近去找车位
+            //    if (noLaneLineParks.Count < 1)
+            //        break;
+            //    bool havePark = false;
+            //    foreach (var item in noLaneLineParks)
+            //    {
+            //        //获取最近的车位
+            //        var parkOrders = m_lightPlaceInfos.OrderBy(c => c.BigGroupInfo.BigGroupPoly.EndPoint.DistanceTo(item.BigGroupInfo.BigGroupPoly.EndPoint)).ToList();
+            //    }
+            //    if (!havePark)
+            //        break;
+            //}
+            //再针对无归属车道的找离的近的车位
+            if (m_bView) 
+            {
+                foreach (var drawLaneGroup in LaneGroups)
+                {
+                    LaneGroupDrawer.MakeDrawLaneGroup(drawLaneGroup);
+                }
+            }
         }
 
         private void DifferentiationGroupInfo(List<LaneGroup> laneGroups)
@@ -56,11 +108,6 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
             EraseInvalidParkLights(laneGroups);
 
-            if (m_bView)
-                foreach (var drawLaneGroup in laneGroups)
-                {
-                    LaneGroupDrawer.MakeDrawLaneGroup(drawLaneGroup);
-                }
         }
 
         private void EraseInvalidParkLights(List<LaneGroup> laneGroups)
@@ -163,11 +210,40 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             var laneGroups = new List<LaneGroup>();
             foreach (var poly in m_extendPolylines)
             {
-                var laneGroup = IndexerCalculator.MakeLaneGroupInfo(poly, m_lightPlaceInfos);
+                var laneGroup = IndexerCalculator.MakeLaneGroupInfo(poly, m_lightPlaceInfos, ParkingStallCommon.LaneOffset);
                 laneGroups.Add(laneGroup);
             }
-
             return laneGroups;
         }
+        private List<LightPlaceInfo> NoLaneLineParks() 
+        {
+            var noLaneLineParks = new List<LightPlaceInfo>();
+            if (null == m_lightPlaceInfos || m_lightPlaceInfos.Count < 1 || LaneGroups ==null || LaneGroups.Count<1)
+                return noLaneLineParks;
+            foreach (var park in m_lightPlaceInfos)
+            {
+                bool inLine = false;
+                foreach (var item in LaneGroups)
+                {
+                    if (inLine)
+                        break;
+                    if (item.OneSideLightPlaceInfos.LightPlaceInfos.Any(c => c.Position.DistanceTo(park.Position) < 1))
+                    {
+                        inLine = true;
+                        break;
+                    }
+                    if (item.AnotherSideLightPlaceInfos.LightPlaceInfos.Any(c => c.Position.DistanceTo(park.Position) < 1))
+                    {
+                        inLine = true;
+                        break;
+                    }
+                }
+                if (inLine)
+                    continue;
+                noLaneLineParks.Add(park);
+            }
+            return noLaneLineParks;
+        }
+
     }
 }

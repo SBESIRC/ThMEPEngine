@@ -6,6 +6,7 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -40,6 +41,7 @@ namespace ThMEPEngineCore.Engine
             if (IsDistributionElement(br))
             {
                 var objs = CAD.ThDrawTool.Explode(br);
+                objs = ExplodeToBasic(objs);
                 var obb = ToObb(objs);
                 if (obb.Area > 1.0)
                 {
@@ -53,25 +55,24 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private Polyline ToObb(DBObjectCollection objs)
+        private Polyline ToObb(DBObjectCollection basicCurves)
         {
             var curves = new DBObjectCollection();
-            objs.Cast<Entity>().Where(o => o is Curve).ToList().ForEach(e =>
-              {
-                  var newEnt = ThTesslateService.Tesslate(e, 100.0);
-                  if (newEnt != null)
-                  {
-                      if (newEnt is Line line && line.Length > 0.0)
-                      {
-                          curves.Add(newEnt);
-                      }
-                      if (newEnt is Polyline polyline && polyline.Length > 0.0)
-                      {
-                          curves.Add(newEnt);
-                      }
-                  }
-
-              });
+            basicCurves.Cast<Curve>().ForEach(e =>
+            {
+                var newEnt = ThTesslateService.Tesslate(e, 100.0);
+                if (newEnt != null)
+                {
+                    if (newEnt is Line line && line.Length > 0.0)
+                    {
+                        curves.Add(newEnt);
+                    }
+                    if (newEnt is Polyline polyline && polyline.Length > 0.0)
+                    {
+                        curves.Add(newEnt);
+                    }
+                }
+            });
             if (curves.Count > 0)
             {
                 var transformer = new ThMEPOriginTransformer(curves);
@@ -82,6 +83,37 @@ namespace ThMEPEngineCore.Engine
             }
             return new Polyline() { Closed = true };
         }
+
+        private DBObjectCollection ExplodeToBasic(DBObjectCollection objs)
+        {
+            //理想是炸到Line,Arc,Circle,Ellipse
+            var results = new DBObjectCollection();
+            objs.Cast<Entity>().Where(o => o is Curve).ForEach(c =>
+                {
+                    if(c is Line || c is Arc || c is Circle)
+                    {
+                        results.Add(c);
+                    }
+                    else if(c is Polyline poly)
+                    {
+                        var subObjs = new DBObjectCollection();
+                        poly.Explode(subObjs);
+                        subObjs.Cast<Curve>().ForEach(e => results.Add(e));
+                    }
+                    else if(c is Polyline2d poly2d)
+                    {
+                        var subObjs = new DBObjectCollection();
+                        poly2d.Explode(subObjs);
+                        subObjs.Cast<Curve>().ForEach(e => results.Add(e));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                });
+            return results;
+        }
+
         public override bool IsDistributionElement(Entity entity)
         {
             return CheckQualifiedBlockName(entity);

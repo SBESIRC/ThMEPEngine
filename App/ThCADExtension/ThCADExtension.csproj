@@ -58,6 +58,7 @@
     <Compile Include="ThOPMTools.cs" />
     <Compile Include="ThPoint3dCollectionExtensions.cs" />
     <Compile Include="ThMPolygonExtension.cs" />
+    <Compile Include="ThPointVectorUtil.cs" />
     <Compile Include="ThPolylineExtension.cs" />
     <Compile Include="ThRectangleExtension.cs" />
     <Compile Include="ThRegionTool.cs" />

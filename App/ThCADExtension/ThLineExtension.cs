@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
 
 namespace ThCADExtension
 {
@@ -40,6 +41,24 @@ namespace ThCADExtension
                 poly.AddVertexAt(i, new Point2d(pts[i].X, pts[i].Y), 0.0, 0.0, 0.0);
             }
             return poly;
+        }
+        public static bool LineIsIntersection(this Line line, Line targetLine)
+        {
+            //严格判断线段是否相交
+            double EPS3 = 1.0e-3f;
+            var s1 = line.StartPoint;
+            var e1 = line.EndPoint;
+            var s2 = targetLine.StartPoint;
+            var e2 = targetLine.EndPoint;
+            var dir = e2 - s2;
+            var dValue = (s1 - s2).CrossProduct(dir).Z * (e1 - s2).CrossProduct(dir).Z;
+            if (Math.Abs(dValue) > EPS3 && dValue < 0)
+            {
+                dir = e1 - s1;
+                dValue = (s2 - s1).CrossProduct(dir).Z * (e2 - s1).CrossProduct(dir).Z;
+                return Math.Abs(dValue) > EPS3 && dValue < 0;
+            }
+            return false;
         }
     }
 }

@@ -517,7 +517,7 @@ namespace ThMEPWSS.Command
                     int inter = PointVectorUtil.LineIntersectionLine(line.StartPoint, lineDir, checkLine.StartPoint, checkDir, out Point3d interPoint);
                     if (inter != 1)
                         continue;
-                    if (!interPoint.PointInLineSegment(line) || !interPoint.PointInLineSegment(checkLine))
+                    if (!PointVectorUtil.PointInLineSegment(interPoint,line) || !PointVectorUtil.PointInLineSegment(interPoint, checkLine))
                         continue;
                     delCurveIds.Add(pipeLine.uid);
                     if (sp.DistanceTo(interPoint) > _roofY1BreakMoveLength) 
