@@ -81,23 +81,11 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "THPLZX", CommandFlags.Modal)]
         public void ThPTLayout()
         {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
+            var polylines = ThSprinklerLayoutCmdUtils.GetFrames();
+            if (polylines.Count <= 0)
             {
                 return;
             }
-
             if (!ThSprinklerLayoutCmdUtils.CalWCSLayoutDirection(out Matrix3d matrix))
             {
                 return;
@@ -105,14 +93,6 @@ namespace ThMEPWSS
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                List<Polyline> polylines = new List<Polyline>();
-                foreach (ObjectId frame in result.Value.GetObjectIds())
-                {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-                    polylines.Add(plFrame);
-                }
-
                 CalHolesService calHolesService = new CalHolesService();
                 var holeDic = calHolesService.CalHoles(polylines);
                 foreach (var holeInfo in holeDic)

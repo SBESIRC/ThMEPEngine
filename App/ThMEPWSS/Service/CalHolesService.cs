@@ -38,6 +38,31 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
+        /// 删除框线中的洞口
+        /// </summary>
+        /// <param name="frames"></param>
+        /// <returns></returns>
+        public List<Polyline> RemoveHoles(List<Polyline> frames)
+        {
+            frames = frames.OrderByDescending(x => x.Area).ToList();
+
+            List<Polyline> resFrames = new List<Polyline>(); //外包框和洞口
+            while (frames.Count > 0)
+            {
+                var firFrame = frames[0];
+                frames.Remove(firFrame);
+
+                var bufferFrames = firFrame.Buffer(1)[0] as Polyline;
+                var holes = frames.Where(x => bufferFrames.Contains(x)).ToList();
+                frames.RemoveAll(x => holes.Contains(x));
+
+                resFrames.Add(firFrame);
+            }
+
+            return resFrames;
+        }
+
+        /// <summary>
         /// 清除洞口内的喷淋
         /// </summary>
         /// <param name="holes"></param>
