@@ -57,7 +57,7 @@ namespace ThMEPHVAC.Model
                 var group_bounds = bounds_2_id_dic.Keys.ToCollection();
                 Move_bounds_to_org(group_bounds, start_p);
                 conn_group_handles = Get_conn_comp_index(group_bounds);
-                var all_port_blk = ThDuctPortsReadComponent.Read_all_port_by_name("风口-AI研究中心");
+                var all_port_blk = ThDuctPortsReadComponent.Read_blk_by_name("风口-AI研究中心");
                 Get_port_info(all_port_blk);
                 if (status != ModifyerStatus.OK)
                     return;
