@@ -53,6 +53,7 @@ namespace ThMEPLighting.Garage
 
                             var blks = acdb.ModelSpace
                             .OfType<BlockReference>()
+                            .Where(b => !b.BlockTableRecord.IsNull)
                             .Where(b => b.Layer == racewayParameter.LaneLineBlockParameter.Layer);
                             var lightBlks = newBorder.SpatialFilter(blks.ToCollection()).Cast<BlockReference>().ToList();
 
@@ -62,10 +63,9 @@ namespace ThMEPLighting.Garage
                             var numberTexts = newBorder.SpatialFilter(texts.ToCollection()).Cast<DBText>().ToList();
 
                             var dbOBjs = acdb.ModelSpace
-                            .Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e)).ToList();                           
-                            var laneLines = GetRegionLines(newBorder, dbOBjs.Where(e => 
-                            ThGarageLightUtils.IsLightCableCarrierCenterline(e)).ToCollection());
-                           
+                            .Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e)).ToCollection();        
+                            
+                            var laneLines = GetRegionLines(newBorder, dbOBjs);
                             var regionLightEdge = new ThRegionLightEdge
                             {
                                 Lights = lightBlks,
