@@ -111,15 +111,28 @@ namespace ThMEPHVAC.Model
     }
     public class Duct_modify_param
     {
-        public Point2d sp;
-        public Point2d ep;
-        public Handle handle;
-        public Handle start_handle;
+        public Point2d sp;          // 管段起点
+        public Point2d ep;          // 管段终点
+        public Handle handle;       // 管段组handle
+        public Handle start_handle; // 总管段起始点handle
         public string type;
         public string duct_size;
         public double air_volume;
         public double elevation;
         public Duct_modify_param() { }
+        public Duct_modify_param(string duct_size,
+                                 double air_volume,
+                                 double elevation,
+                                 Point2d sp,
+                                 Point2d ep)
+        {
+            type = "Duct";
+            this.sp = sp;
+            this.ep = ep;
+            this.elevation = elevation;
+            this.duct_size = duct_size;
+            this.air_volume = air_volume;
+        }
         public Duct_modify_param(string duct_size, 
                                  double air_volume,
                                  double elevation,

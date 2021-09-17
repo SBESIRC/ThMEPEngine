@@ -28,6 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
     <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
