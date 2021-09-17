@@ -1,16 +1,15 @@
-﻿
-
+﻿using System;
 using AcHelper;
-using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Linq2Acad;
+using ThCADExtension;
+using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using Linq2Acad;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThCADExtension;
-using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcHelper.Commands;
-using System;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -42,11 +41,19 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var factory = new ThSprinklerDataSetFactory();
                 var geometries = factory.Create(currentDb.Database, frame.Vertices()).Container;
 
-                var beamChecker = new ThSprinklerBeamChecker();
-                var objs = beamChecker.Check(geometries);
-                beamChecker.Present(currentDb.Database, objs);
 
+                var engine = new ThTCHSprinklerRecognitionEngine();
+                engine.RecognizeMS(currentDb.Database, frame.Vertices());
 
+                // 梁高校核
+                //var beamChecker = new ThSprinklerBeamChecker();
+                //var objs = beamChecker.Check(geometries);
+                //beamChecker.Present(currentDb.Database, objs);
+
+                // 房间布置情况校核
+                var roomChecker = new ThSprinklerRoomChecker();
+                var objs = roomChecker.Check(geometries, engine.Elements);
+                roomChecker.Present(currentDb.Database, objs);
             }
         }
     }

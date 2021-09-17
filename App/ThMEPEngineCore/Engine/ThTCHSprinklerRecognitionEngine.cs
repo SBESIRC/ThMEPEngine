@@ -129,10 +129,16 @@ namespace ThMEPEngineCore.Engine
         {
             foreach (var data in dataList)
             {
-                var sprinkler = new ThSprinkler();
                 var block = data.Geometry as BlockReference;
-                var dictionary = data.Data as Dictionary<string, object>;
+                if (block == null || !block.Bounds.HasValue)
+                {
+                    continue;
+                }
+                var sprinkler = new ThSprinkler();
                 sprinkler.Position = block.Position;
+                sprinkler.Outline = block.GeometricExtents.ToRectangle();
+
+                var dictionary = data.Data as Dictionary<string, object>;
                 if (block.Name.Contains("$TwtSys$00000131"))
                 {
                     sprinkler.Category = "侧喷";

@@ -55,12 +55,14 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerData.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDataSetFactory.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerBeamExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerColumnExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerDoorOpeningExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerFireproofshutterExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerHoleExtractor.cs" />
+    <Compile Include="Sprinkler\Data\ThSprinklerRoomExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCleanEntityService.cs" />
@@ -69,6 +71,7 @@
     <Compile Include="Sprinkler\Service\ThSprinklerIsExteriorDoorService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerLayerService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerQueryHoleTextInfoService.cs" />
+    <Compile Include="Sprinkler\Service\ThSprinklerRoomService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerUtils.cs" />
     <Compile Include="ThSystemDiagramCmds.THWTKSB.cs" />
     <Compile Include="Command\ThPipeDrawCmd.cs" />

@@ -73,6 +73,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     Transformer = Transformer,
                     Db3ExtractResults = manger.DB3BeamVisitor.Results,
                 },
+                new ThSprinklerRoomExtractor()
+                {
+                    IsWithHole=false,
+                    UseDb3Engine=true,
+                    Transformer = Transformer,
+                },
             };
             extractors.ForEach(o => o.Extract(database, collection));
             //收集数据

@@ -41,7 +41,7 @@ namespace ThMEPWSS.Hydrant.Service
                 });
             });
         }
-        private void Print(Entity entity,int colorIndex)
+        public void Print(Entity entity,int colorIndex)
         {
             // 填充
             using (var acadDatabase = AcadDatabase.Use(Db))

@@ -1,16 +1,9 @@
-﻿
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using System.Collections.Generic;
-using System.Linq;
-using ThCADCore.NTS;
+﻿using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
