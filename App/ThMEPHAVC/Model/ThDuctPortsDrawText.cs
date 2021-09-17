@@ -18,6 +18,20 @@ namespace ThMEPHVAC.Model
             duct_size_style = "TH-STYLE3";
             this.duct_size_layer = duct_size_layer;
         }
+        public void Draw_duct_text(Duct_modify_param param, string scale)
+        {
+            ThMEPHVACService.Seperate_size_info(param.duct_size, out double w, out double h);
+            var sp = new Point3d(param.sp.X, param.sp.Y, 0);
+            var ep = new Point3d(param.ep.X, param.ep.Y, 0);
+            var l = new Line(sp, ep);
+            var text = Create_duct_info(true, param.elevation, h, scale, param.duct_size);
+            ThMEPHVACService.Get_line_pos_info(l, out double angle, out Point3d center_point);
+            var mat = Get_side_text_info_trans_mat(angle, w, center_point, text, l);
+            var dir_vec = ThMEPHVACService.Get_edge_direction(l);
+            Seperate_duct_size_elevation(scale, text, mat, dir_vec, out DBText duct_size_text, out DBText elevation_size);
+            var duct_size_info = new List<DBText> { duct_size_text, elevation_size };
+            Draw_duct_size_info(duct_size_info);
+        }
         public void Get_fjf_duct_info(string scale,
                                       double room_elevation, 
                                       double other_elevation,
