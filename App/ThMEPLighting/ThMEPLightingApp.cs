@@ -1,11 +1,6 @@
 ﻿using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.ParkingStall.Core;
-using Autodesk.AutoCAD.EditorInput;
-using AcHelper;
-using ThMEPLighting.ParkingStall.Business.UserInteraction;
-using DotNetARX;
-using GeometryExtensions;
 
 namespace ThMEPLighting
 {
@@ -87,17 +82,6 @@ namespace ThMEPLighting
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THSubGroupAdjustor", CommandFlags.Modal)]
-        public void THSubGroupAdjustor()
-        {
-            //根据车位分组和车道线生成相应的数据
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var packageManager = new CommandManager();
-                packageManager.LaneSubGroupOptimization();
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THSideLaneConnect", CommandFlags.Modal)]
         public void THSideLaneConnect()
         {
@@ -116,37 +100,6 @@ namespace ThMEPLighting
             {
                 var packageManager = new CommandManager();
                 packageManager.THLaneConnect();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THLightConnect", CommandFlags.Modal)]
-        public void LightConnect()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var wallPolylines = EntityPicker.MakeUserPickPolys();
-                if (wallPolylines.Count == 0)
-                    return;
-                if (wallPolylines.Count > 1)
-                {
-                    Active.Database.GetEditor().WriteMessage("选择了多个区域，该功能只支持单个区域，请选择一个区域进行后续操作");
-                    return;
-                }
-                PromptPointOptions pPtOpts = new PromptPointOptions("请选择配电箱所在点");
-                var result = Active.Editor.GetPoint(pPtOpts);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var point = result.Value;
-                point = point.TransformBy(Active.Editor.UCS2WCS());
-                var packageManager = new ParkLightConnectCommand(wallPolylines[0], point);
-                packageManager.Execute();
-                if (packageManager.ErrorMsgs != null && packageManager.ErrorMsgs.Count > 0) 
-                {
-                    string msg = string.Join("，", packageManager.ErrorMsgs.ToArray());
-                    Active.Database.GetEditor().WriteMessage(msg);
-                }
             }
         }
     }

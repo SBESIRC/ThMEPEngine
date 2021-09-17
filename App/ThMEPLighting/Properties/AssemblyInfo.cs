@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.5.7.0")]
 [assembly: AssemblyFileVersion("1.5.7.0")]
 
-[assembly: CommandClass(typeof(ThMEPLighting.ThMEPLightingApp))]
+[assembly: CommandClass(typeof(ThMEPLighting.ThFEICmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThEmgLightCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPGarageLightingCmds))]
-[assembly: CommandClass(typeof(ThMEPLighting.ThFEICmds))]
+[assembly: CommandClass(typeof(ThMEPLighting.ThMEPParkingStallLightingCmd))]
