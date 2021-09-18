@@ -215,6 +215,7 @@ namespace ThMEPWSS.Command
                         else if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
                         {
                             item.tag = "FL";
+                            item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         }
                     }
                 }

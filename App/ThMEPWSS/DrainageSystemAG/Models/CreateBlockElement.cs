@@ -13,7 +13,7 @@ namespace ThMEPWSS.DrainageSystemAG.Models
     {
         public string uid { get; }
         public string floorId { get; }
-        public string layerName { get; }
+        public string layerName { get; set; }
         public string blockName { get; }
         public Point3d createPoint { get; set; }
         public double rotateAngle { get; set; }
