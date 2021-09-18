@@ -124,7 +124,8 @@ namespace ThMEPHVAC.CAD
                 foreach (var wallline in walllines)
                 {
                     Point3dCollection IntersectPoints = new Point3dCollection();
-                    l.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
+                    var ex_l = ThMEPHVACService.Extend_line(l, 1.5);
+                    ex_l.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
                     if (IntersectPoints.Count > 0)
                     {
                         var vec = new Vector2d(dir_vec.X, dir_vec.Y);
@@ -139,7 +140,6 @@ namespace ThMEPHVAC.CAD
                             ValveGroupPosion = valvePosion,
                             ValveToFanSpacing = IntersectPoints[0].DistanceTo(l.StartPoint),
                         };
-                        
                         var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer, fanmodel.is_exhaust);
                         valvegroups.Add(valvegroup);
                     }

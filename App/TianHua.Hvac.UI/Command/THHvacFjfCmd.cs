@@ -82,8 +82,11 @@ namespace TianHua.Hvac.UI.Command
                     else
                         vt_pinter.Draw_5vertical_bypass(anay_res.vt.vt_elbow, anay_res.in_vt_pos, anay_res.out_vt_pos);
                 }
-                var duct_port = new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
-                duct_port.Execute();
+                if (is_integrate)
+                {
+                    var duct_port = new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
+                    duct_port.Execute();
+                }
             }
             else
             {
@@ -97,8 +100,11 @@ namespace TianHua.Hvac.UI.Command
                 using (var db = AcadDatabase.Active())
                     ThDuctPortsDrawService.Remove_ids(line_ids.ToArray());
                 _ = new ThFanDraw(anay_res);
-                var duct_port = new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
-                duct_port.Execute();
+                if (is_integrate)
+                {
+                    var duct_port = new ThHvacDuctPortsCmd(is_integrate, anay_res.fan_break_p, fpm_param, anay_res.out_center_line);
+                    duct_port.Execute();
+                }
             }
         }
         private bool Checkout_input(string tee_pattern, DBObjectCollection bypass_lines, DBObjectCollection center_lines)

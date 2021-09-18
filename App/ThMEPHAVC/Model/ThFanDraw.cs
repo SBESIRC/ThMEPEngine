@@ -51,11 +51,11 @@ namespace ThMEPHVAC.Model
                 var dis_mat = Matrix3d.Displacement(anay_res.move_srt_p.GetAsVector());
                 foreach (var l in anay_res.not_room_lines)
                     lines.Add(l);
+                foreach (var l in anay_res.room_lines)
+                    lines.Add(l);
                 ThDuctPortsDrawService.Draw_lines(lines, dis_mat, "0", out _);
                 lines.Clear();
                 dis_mat = Matrix3d.Displacement(anay_res.fan_break_p.GetAsVector());
-                foreach (var l in anay_res.room_lines)
-                    lines.Add(l);
                 foreach (Line l in anay_res.out_center_line)
                     lines.Add(l);
                 ThDuctPortsDrawService.Draw_lines(lines, dis_mat, "0", out _);
