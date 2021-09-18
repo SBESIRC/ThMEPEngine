@@ -26,7 +26,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDataQueryService
     {
+        //input
         private List<ThGeometry> Data { get; set; } = new List<ThGeometry>();
+        private List<string> CleanBlkName { get; set; } = new List<string>();
+        private List<string> AvoidBlkNameList { get; set; } = new List<string>();
+
+        //output
         public List<ThGeometry> Storeys { get; private set; } = new List<ThGeometry>(); //StoreyBorder
         public List<ThGeometry> DoorOpenings { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireAparts { get; private set; } = new List<ThGeometry>();
@@ -39,18 +44,21 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         public List<ThGeometry> FireProofs { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Avoidence { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireLinkageRooms { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry> LayoutEquipments { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> CleanEquipments { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> AvoidEquipments { get; private set; } = new List<ThGeometry>();
         public string floorTag { get; private set; }
         private Dictionary<Entity, ThGeometry> GeometryMap { get; set; }
         public List<string> FireApartMap { get; set; } = new List<string>();
 
-        public List<string> LayoutBlkName { get; set; }
-        public List<string> AvoidBlkNameList { get; set; }
-        public ThDataQueryService(List<ThGeometry> data, List<string> layoutBlkName, List<string> avoidBlkNameList)
+        //房间配置表属性
+        public string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+        public List<RoomTableTree> roomTableConfig = new List<RoomTableTree>();  //房间配置表
+        //public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       //
+
+        public ThDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
         {
             Data = data;
-            LayoutBlkName = layoutBlkName;
+            CleanBlkName = cleanBlkName;
             AvoidBlkNameList = avoidBlkNameList;
 
             PrepareData();
@@ -82,26 +90,21 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             FireProofs = QueryC(BuiltInCategory.LaneLine.ToString());
 
             var equipments = QueryC(BuiltInCategory.Distribution.ToString());
-            if (LayoutBlkName != null)
-            {
-                LayoutEquipments = equipments.Where(x => LayoutBlkName.Contains(x.Properties["Name"].ToString())).ToList();
-            }
-            if (AvoidBlkNameList != null)
-            {
-                AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
-            }
+            CleanEquipments = equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
+            AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
 
             Avoidence.AddRange(DoorOpenings);
             Avoidence.AddRange(Windows);
             Avoidence.AddRange(FireProofs);
             Avoidence.AddRange(AvoidEquipments);
             floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
+            roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(roomConfigUrl);
             GetFireLinkageRooms();
         }
 
         private void CleanData()
         {
-            LayoutEquipments.ForEach(x =>
+            CleanEquipments.ForEach(x =>
             {
                 var handle = x.Properties[ThExtractorPropertyNameManager.HandlerPropertyName].ToString();
 
@@ -145,7 +148,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         private void GetFireLinkageRooms()
         {
-            ReadRoomConfigTable();
             List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房",
                 "主要通风和空调机房", "防排烟机房", "灭火控制系统操作装置处或控制室", "企业消防站", "消防值班室", "总调度室", "消防电梯机房" };
             List<string> NameCollection = new List<string>();
@@ -165,6 +167,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 }
             }
         }
+
         public List<Polyline> GetDecorableOutlineBase(List<Polyline> targetRooms) // 获取房间可布范围框线（墙体考虑柱子）
         {
             var columnSet = Columns.Select(x => x.Boundary).ToCollection();
@@ -271,7 +274,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             }
             return result;
         }
-        public List<Line> FindAvoidLine(Polyline walls, List<List<Point3d>> avoidencePt, int reservedLength)
+        private List<Line> FindAvoidLine(Polyline walls, List<List<Point3d>> avoidencePt, int reservedLength)
         {
             int num = walls.NumberOfVertices;
             Tolerance tol = new Tolerance(5, 5);
@@ -356,22 +359,21 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             }
         }
 
-        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-        public List<RoomTableTree> roomTableConfig = null;    //房间配置表
-        public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       //
+        ///// <summary>
+        ///// 读取房间配置表
+        ///// </summary>
+        //public static List<RoomTableTree> ReadRoomConfigTable(string roomConfigUrl)
+        //{
+        //    var roomTableConfig = new List<RoomTableTree>();
+        //    ReadExcelService excelSrevice = new ReadExcelService();
+        //    var dataSet = excelSrevice.ReadExcelToDataSet(roomConfigUrl, true);
+        //    var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
+        //    if (table != null)
+        //    {
+        //        roomTableConfig = RoomConfigTreeService.CreateRoomTree(table);
+        //    }
 
-        /// <summary>
-        /// 读取房间配置表
-        /// </summary>
-        public void ReadRoomConfigTable()
-        {
-            ReadExcelService excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(roomConfigUrl, true);
-            var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
-            if (table != null)
-            {
-                roomTableConfig = RoomConfigTreeService.CreateRoomTree(table);
-            }
-        }
+        //    return roomTableConfig;
+        //}
     }
 }

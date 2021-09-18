@@ -10,12 +10,12 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarm.Data;
 
-namespace ThMEPElectrical.FireAlarmSmokeHygro.Data
+namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
-    public class ThFireAlarmSimpleDataSetFactory : ThMEPDataSetFactory
+    public class ThFaAreaLayoutDataSetFactory : ThMEPDataSetFactory
     {
         private List<ThGeometry> Geos { get; set; }
-        public ThFireAlarmSimpleDataSetFactory()
+        public ThFaAreaLayoutDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }
@@ -59,15 +59,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHygro.Data
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
-                    new ThFaPlaceCoverageExtractor()
-                    {
-                        Transformer = Transformer,
-                    },
-                    new ThFireAlarmBlkExtractor ()
-                    {
-                        Transformer = Transformer ,
-                        BlkNameList = new List<string >(){}, //to do
-                    }
             };
             extractors.ForEach(o => o.Extract(database, collection));
             //收集数据
@@ -80,6 +71,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHygro.Data
                     iTransformer.Reset();
                 }
             });
+
+            ThFireAlarmUtils.MoveToXYPlane(Geos);
         }
 
         private ThBuildingElementVisitorManager Extract(Database database)
@@ -100,18 +93,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHygro.Data
             {
                 Container = Geos,
             };
-        }
-        private void Print(Database database, List<ThExtractorBase> extractors)
-        {
-            short colorIndex = 1;
-            extractors.ForEach(o =>
-            {
-                o.ColorIndex = colorIndex++;
-                if (o is IPrint printer)
-                {
-                    printer.Print(database);
-                }
-            });
         }
     }
 }

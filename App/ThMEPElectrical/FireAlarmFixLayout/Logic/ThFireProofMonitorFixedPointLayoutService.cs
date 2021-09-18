@@ -14,6 +14,7 @@ using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
+using ThMEPElectrical.FireAlarm.Service;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
@@ -29,12 +30,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                                             { new Dictionary<int, List<int>>(), new Dictionary<int, List<int>> (),
                                              new Dictionary<int, List<int>> (), new Dictionary<int, List<int>> ()};  //不同楼层路径优先级
 
-        public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data, List<string> LayoutBlkName, List<string> AvoidBlkName) :base(data, LayoutBlkName, AvoidBlkName)
+        public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) : base(data, CleanBlkName, AvoidBlkName)
         {
         }
 
         public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
-    
+
         public override List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
 
@@ -55,9 +56,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
             //取与防火门相邻房间
             var fireDoorSet = DataQueryWorker.GetFireDoors().Select(x => x.Boundary).ToCollection();
-            var roomSet = DataQueryWorker.Rooms.Select(x=>x.Boundary).ToCollection();
+            var roomSet = DataQueryWorker.Rooms.Select(x => x.Boundary).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(roomSet);
-            List< KeyValuePair<Point3d ,Vector3d >>  results = new List<KeyValuePair<Point3d, Vector3d>>();
+            List<KeyValuePair<Point3d, Vector3d>> results = new List<KeyValuePair<Point3d, Vector3d>>();
             double bufferValue = 10;
 
 
@@ -70,10 +71,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 if (crossingRooms.Count < 2)
                     continue;
                 List<string> crossingRoomName = new List<string>();
-                crossingRoomName.AddRange(crossingRooms  
+                crossingRoomName.AddRange(crossingRooms
                     .Cast<Entity>()
                     .Select(o => DataQueryWorker.Query(o))
-                    .Select(o =>o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString()));
+                    .Select(o => o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString()));
                 var roomNameA = crossingRoomName[0];
                 var roomNameB = crossingRoomName[1];
                 int IndexA = -1;//判断该防火门是否需要布点,并记录房间所属编号
@@ -97,9 +98,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                     continue;
                 for (int i = 0; i < MonitorRoomNameConfigMap.Count; ++i)
                 {
-                    foreach(string o in MonitorRoomNameConfigMap[i])
+                    foreach (string o in MonitorRoomNameConfigMap[i])
                     {
-                        if(o.Contains(roomNameB))
+                        if (o.Contains(roomNameB))
                         {
                             IndexB = i;
                             break;
@@ -123,12 +124,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 if (ptNum == 0)
                     continue;
                 var sum = interPt.GetPoint3dAt(0);
-                for ( int i = 1; i < ptNum; ++i )
+                for (int i = 1; i < ptNum; ++i)
                 {
                     sum = interPt.GetPoint3dAt(i) + sum.GetAsVector();
                 }
                 var avg = sum / ptNum;
-                var ansPoint =   locateRoom.GetClosestPointTo(avg, false);
+                var ansPoint = locateRoom.GetClosestPointTo(avg, false);
                 if (locateRoom.IsCCW())
                     locateRoom.ReverseCurve(); //房间框线转为顺时针
                 results.Add(DataQueryWorker.FindVector(ansPoint, locateRoom));  //返回点位和方向
@@ -136,11 +137,11 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             return results;
         }
 
-        
+
         public void SetConfigTableForMonitor()
         {
             ReadEvacuationConfig();
-            DataQueryWorker.ReadRoomConfigTable();
+            //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
             MonitorRoomNameConfigMap
                 .AddRange(routeMap.Keys.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.roomTableConfig, o)));
         }
@@ -199,13 +200,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                     {
                         ConfigRouteMap[floorIndex][a].Add(b);
                     }
-
                 }
             }
         }
-
-
     }
-
-   
 }

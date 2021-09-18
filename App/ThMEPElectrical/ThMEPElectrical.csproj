@@ -157,13 +157,22 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutBusinessDataSetFactory.cs" />
+    <Compile Include="FireAlarmSmokeHygro\Common\ThFaCleanService.cs" />
+    <Compile Include="FireAlarmSmokeHygro\Data\ThFaAreaLayoutBusinessDataSetFactory.cs" />
+    <Compile Include="FireAlarmSmokeHygro\Data\ThSmokeDataQueryService.cs" />
+    <Compile Include="FireAlarmSmokeHygro\Service\ThFaAreaLayoutService.cs" />
+    <Compile Include="FireAlarmSmokeHygro\ThFireAlarmSmokeHeatCmd.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmCommand.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmViewModel.cs" />
     <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaPlaceCoverageExtractor.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFireAlarmBlkExtractor.cs" />
-    <Compile Include="FireAlarmFixLayout\Data\ThFireAlarmDataSetFactory.cs" />
-    <Compile Include="AlarmSensorLayout\Data\ThFireAlarmSimpleDataSetFactory.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutDataSetFactory.cs" />
+    <Compile Include="FireAlarmSmokeHygro\Data\ThFaAreaLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDataQueryService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
@@ -174,6 +183,7 @@
     <Compile Include="FireAlarmFixLayout\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarmFixLayout\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="FireAlarmFixLayout\ThFixLayoutCommon.cs" />
+    <Compile Include="FireAlarmSystem\ThFaCommon.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
@@ -354,7 +364,6 @@
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
-    <Compile Include="ThFireAlarmCmds.cs" />
     <Compile Include="ThGroundGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
@@ -407,8 +416,6 @@
     <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
-    <Folder Include="FireAlarmFixLayout\Model\" />
-    <Folder Include="FireAlarm\Model\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

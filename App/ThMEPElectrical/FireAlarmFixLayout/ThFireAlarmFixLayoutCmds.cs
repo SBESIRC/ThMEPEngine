@@ -21,6 +21,7 @@ using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
 using ThMEPElectrical.FireAlarmFixLayout;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.FireAlarm;
 
 namespace ThMEPElectrical.FireAlarmFixLayout
 {
@@ -43,41 +44,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout
             //测试布置逻辑
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-
-                //{
-                //    var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
-                //        PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                //    if (frame.Area < 1e-4)
-                //    {
-                //        return;
-                //    }
-                //    var pts = frame.Vertices();
-                //    var datasetFactory = new ThFireAlarmDataSetFactory();
-                //    var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-
-                //    //var psr = Active.Editor.GetFileNameForOpen("\n选择要打开的Geojson文件");
-                //    //if(psr.Status!=PromptStatus.OK)
-                //    //{
-                //    //    return;
-                //    //}
-                //    //var geos = ThGeometryJsonReader.ReadFromFile(psr.StringResult);                
-                //    var geos = dataset.Container;
-                //    //var geosTemp = dataset.Container;
-                //    //var geosJsonString = ThGeoOutput.Output(geosTemp);
-                //    //var geos = ThGeometryJsonReader.ReadFromContent(geosJsonString);
-                //    var objs = geos.Where(o => o.Boundary != null).Select(o => o.Boundary).ToCollection();
-                //    var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
-                //    var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
-
-                //    var transformer = new ThMEPOriginTransformer(objs);
-                //    geos.Where(o=>o.Boundary!=null).ForEach(o =>
-                //    {
-                //        transformer.Transform(o.Boundary);
-                //    });
-                //    datasetFactory.MoveToXYPlane(geos);
-
-                //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
-                //    //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
+                var _scale = 100;
 
                 // select an option
                 string strResident = "住宅";
@@ -103,19 +70,28 @@ namespace ThMEPElectrical.FireAlarmFixLayout
                 }
                 else return;
 
-                getData(out var transformer, out var geos);
 
+                var extractBlkList = ThFaCommon.BlkNameListFixLayout;
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_Fire, ThFaCommon.BlkName_Display_Floor };
+                var avoidBlkName = ThFaCommon.BlkNameListFixLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var layoutBlkName = ThFaCommon.BlkName_Display_Fire;//to do： from UI
+
+                //画框，提数据，转数据
+                var pts = ThFireAlarmUtils.getFrame();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+                var geos = ThFireAlarmUtils.getFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
+                var transformer = ThFireAlarmUtils.transformToOrig(geos);
 
-                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_Display_Fire, ThFixLayoutCommon.BlkName_Display_Floor };
-                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
-                var layoutThisBlkName = ThFixLayoutCommon.BlkName_Display_Fire;//to do： from UI
-
+                //
                 ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, layoutBlkName, avoidBlkName)
+                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, cleanBlkName, avoidBlkName)
                 {
                     BuildingType = buildingType,
                 };
@@ -132,7 +108,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout
                 });
 
                 //插入真实块
-                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale,  layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs,_scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -153,24 +129,32 @@ namespace ThMEPElectrical.FireAlarmFixLayout
         [CommandMethod("TIANHUACAD", "ThFireProofMonitor", CommandFlags.Modal)]
         public void ThFireProofMonitorLayout()
         {
+            var _scale = 100;
             //选择Geojson File,获取数据
             //测试布置逻辑
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var extractBlkList = ThFaCommon.BlkNameListFixLayout;
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Monitor };
+                var avoidBlkName = ThFaCommon.BlkNameListFixLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var layoutBlkName = ThFaCommon.BlkName_Monitor;//to do： from UI
 
-                getData(out var transformer, out var geos);
+                //画框，提数据，转数据
+                var pts = ThFireAlarmUtils.getFrame();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+                var geos = ThFireAlarmUtils.getFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
-
-                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_Monitor };
-                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
-                var layoutThisBlkName = ThFixLayoutCommon.BlkName_Monitor;//to do： from UI
+                var transformer = ThFireAlarmUtils.transformToOrig(geos);
 
                 ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThFireProofMonitorFixedPointLayoutService(geos, layoutBlkName, avoidBlkName);
+                layoutService = new ThFireProofMonitorFixedPointLayoutService(geos, cleanBlkName, avoidBlkName);
 
                 var results = layoutService.Layout();
 
@@ -183,7 +167,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName]);
 
                 //Print
                 pairs.ForEach(p =>
@@ -204,24 +188,33 @@ namespace ThMEPElectrical.FireAlarmFixLayout
         public void ThFireTelLayout()
 
         {
+            var _scale = 100;
             //选择Geojson File,获取数据
             //测试布置逻辑
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var extractBlkList = ThFaCommon.BlkNameListFixLayout;
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_FireTel };
+                var avoidBlkName = ThFaCommon.BlkNameListFixLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var layoutBlkName = ThFaCommon.BlkName_FireTel;
 
-                getData(out var transformer, out var geos);
+
+                //画框，提数据，转数据
+                var pts = ThFireAlarmUtils.getFrame();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+                var geos = ThFireAlarmUtils.getFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
-
-                var layoutBlkName = new List<string>() { ThFixLayoutCommon.BlkName_FireTel };
-                var avoidBlkName = ThFixLayoutCommon.BlkNameList.Where(x => layoutBlkName.Contains(x) == false).ToList();
-                var layoutThisBlkName = ThFixLayoutCommon.BlkName_FireTel;//to do： from UI
+                var transformer = ThFireAlarmUtils.transformToOrig(geos);
 
                 ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThFireTelFixedPointLayoutService(geos, layoutBlkName, avoidBlkName);
+                layoutService = new ThFireTelFixedPointLayoutService(geos, cleanBlkName, avoidBlkName);
 
                 var results = layoutService.Layout();
 
@@ -234,7 +227,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                ThFireAlarmInsertBlk.InsertBlock(pairs, ThFixLayoutCommon.blk_scale, layoutThisBlkName, ThFixLayoutCommon.blk_layer[layoutThisBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName]);
 
 
                 //Print
@@ -253,57 +246,24 @@ namespace ThMEPElectrical.FireAlarmFixLayout
 
         }
 
+        //private static List<ThGeometry> getData(Point3dCollection pts, List<string> extractBlkList)
+        //{
+        //    var geos = new List<ThGeometry>();
 
-        private static void getData(out ThMEPOriginTransformer transformer, out List<ThGeometry> geos)
-        {
-            geos = new List<ThGeometry>();
-            transformer = null;
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        var datasetFactory = new ThFaFixLayoutDataSetFactory();
+        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(dataset.Container);
+        //        var businessDataFactory = new ThFaFixLayoutBusinessDataSetFactory()
+        //        {
+        //            BlkNameList = extractBlkList,
+        //        };
+        //        var businessDataSet = businessDataFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(businessDataSet.Container);
 
-                var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
-                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                if (frame.Area < 1e-4)
-                {
-                    return;
-                }
-                var pts = frame.Vertices();
-                var datasetFactory = new ThFireAlarmDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                //var psr = Active.Editor.GetFileNameForOpen("\n选择要打开的Geojson文件");
-                //if(psr.Status!=PromptStatus.OK)
-                //{
-                //{
-                //    return;
-                //}
-                //var geos = ThGeometryJsonReader.ReadFromFile(psr.StringResult);                
-                geos = dataset.Container;
-                //var geosTemp = dataset.Container;
-                //var geosJsonString = ThGeoOutput.Output(geosTemp);
-                //var geos = ThGeometryJsonReader.ReadFromContent(geosJsonString);
-
-                var objs = geos.Where(o => o.Boundary != null).Select(o => o.Boundary).ToCollection();
-                var rooms = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "ROOM").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
-                var doors = geos.Where(o => o.Properties["Category"].ToString().ToUpper() == "DOOROPENING").Where(o => o.Boundary != null).Select(o => o.Boundary).ToList();
-
-                transformer = new ThMEPOriginTransformer(objs);
-                //geos.Where(o => o.Boundary != null).ForEach(o =>
-                //{
-                //    transformer.Transform(o.Boundary);
-                //});
-                foreach (var o in geos)
-                {
-                    if (o.Boundary != null)
-                    {
-                        transformer.Transform(o.Boundary);
-                    }
-                }
-
-                datasetFactory.MoveToXYPlane(geos);
-
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(rooms, acadDatabase.Database, 5);
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(doors, acadDatabase.Database, 6);
-            }
-        }
+        //        return geos;
+        //    }
+        //}
     }
 }

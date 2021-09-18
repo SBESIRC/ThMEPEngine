@@ -41,13 +41,13 @@
 
                     <StackPanel Orientation="Horizontal">
                         <Label>D:</Label>
-                        <TextBox Width="20" VerticalAlignment="Center" Text="{Binding ValueOfD}"></TextBox>
+                        <TextBox Width="40" VerticalAlignment="Center" Text="{Binding ValueOfD}"></TextBox>
                         <Label>mm</Label>
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal">
                         <Label>θ</Label>
-                        <ComboBox SelectedIndex="{Binding SelectedIndexForAngle}" Text="{Binding SelectedValueForTheta}" Height="20">
+                        <ComboBox SelectedIndex="{Binding SelectedIndexForAngle}" Text="{Binding SelectedValueForTheta}" Height="20" Width="85">
                             <ComboBoxItem Content="θ &lt;=15°"/>
                             <ComboBoxItem Content="15° &lt; θ &lt;=30°"></ComboBoxItem>
                             <ComboBoxItem Content="θ > 30°"></ComboBoxItem>

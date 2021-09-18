@@ -29,7 +29,7 @@ namespace ThMEPElectrical.Command
                     return;
                 }
                 var pts = frame.Vertices();
-                var datasetFactory = new ThFireAlarmDataSetFactory();
+                var datasetFactory = new ThFaFixLayoutDataSetFactory();
                 var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
