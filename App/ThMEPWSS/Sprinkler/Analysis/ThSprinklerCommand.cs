@@ -45,15 +45,23 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var engine = new ThTCHSprinklerRecognitionEngine();
                 engine.RecognizeMS(currentDb.Database, frame.Vertices());
 
+                var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
+                recognizeAllEngine.RecognizeMS(currentDb.Database);
+
                 // 梁高校核
                 //var beamChecker = new ThSprinklerBeamChecker();
                 //var objs = beamChecker.Check(geometries);
                 //beamChecker.Present(currentDb.Database, objs);
 
                 // 房间布置情况校核
-                var roomChecker = new ThSprinklerRoomChecker();
-                var objs = roomChecker.Check(geometries, engine.Elements);
-                roomChecker.Present(currentDb.Database, objs);
+                //var roomChecker = new ThSprinklerRoomChecker();
+                //var objs = roomChecker.Check(geometries, recognizeAllEngine.Elements);
+                //roomChecker.Present(currentDb.Database, objs);
+
+                var distanceChecker = new ThSprinklerDistanceBetweenSprinklerChecker();
+                var distanceCheck = distanceChecker.DistanceCheck(engine.Elements, 1800.0);
+                var buildingCheck = distanceChecker.BuildingCheck(geometries, distanceCheck);
+                distanceChecker.Present(currentDb.Database, buildingCheck);
             }
         }
     }
