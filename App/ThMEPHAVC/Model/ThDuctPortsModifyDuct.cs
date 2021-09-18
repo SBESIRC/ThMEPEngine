@@ -265,6 +265,7 @@ namespace ThMEPHVAC.Model
                 other_p = detect_p.IsEqualTo(duct.sp, tor) ? duct.ep : duct.sp;
                 var width = ThMEPHVACService.Get_width(modify_duct_size);
                 var new_duct = ThDuctPortsFactory.Create_duct(duct.sp, duct.ep, width);
+                Update_text(duct.sp, duct.ep, false, modify_duct_size);// 更新机房内管段的duct_size(如果不需要机房内标注置true)
                 ThDuctPortsDrawService.Clear_graph(duct.handle);
                 service.Draw_duct(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids,
                           out ObjectIdList center_ids, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);

@@ -345,36 +345,34 @@ namespace ThMEPHVAC.Model
             var port_mark = ThDuctPortsReadComponent.Read_blk_by_name("风口标注");
             var dims = ThDuctPortsReadComponent.Read_dimension();
             var leaders = ThDuctPortsReadComponent.Read_leader();
-            var dis_mat = Matrix3d.Displacement(start_p.GetAsVector());
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
+            foreach (Polyline b in text_dic.Keys.ToCollection())
+                b.TransformBy(m);
+            foreach (Polyline b in valves_dic.Keys.ToCollection())
+                b.TransformBy(m);
             foreach (Line line in center_line)
             {
-                var l = line.Clone() as Line;
-                l.TransformBy(dis_mat);
-                Delete_text(text_dic, l);
-                Delete_dim(dims, l);
-                Delete_valve(valves_dic, l);
-                Delete_port_mark(port_mark, l);
-                Delete_port_leader(leaders, l);
+                Delete_text(text_dic, line);
+                Delete_dim(dims, line);
+                Delete_valve(valves_dic, line);
+                Delete_port_mark(port_mark, line);
+                Delete_port_leader(leaders, line);
             }
         }
         private void Delete_text(Dictionary<Polyline, Text_modify_param> text_dic, Line l)
         {
-            var shadow = l.Clone() as Line;
-            var m = Matrix3d.Displacement(-start_p.GetAsVector());
-            foreach (Polyline b in text_dic.Keys.ToCollection())
-                b.TransformBy(m);
-            shadow.TransformBy(m);
             var texts_index = new ThCADCoreNTSSpatialIndex(text_dic.Keys.ToCollection());
-            var poly = ThMEPHVACService.Get_line_extend(shadow, 4000);//在风管附近两千范围内的text
+            var poly = ThMEPHVACService.Get_line_extend(l, 4000);//在风管附近两千范围内的text
             var res = texts_index.SelectCrossingPolygon(poly);
             foreach (Polyline pl in res)
                 ThDuctPortsDrawService.Clear_graph(text_dic[pl].handle);
         }
         private void Delete_dim(List<AlignedDimension> dims, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var dim in dims)
             {
-                var p = dim.Bounds.Value.CenterPoint();
+                var p = dim.Bounds.Value.CenterPoint().TransformBy(m);
                 double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2000 && handles.Add(dim.Handle))
                 {
@@ -384,31 +382,34 @@ namespace ThMEPHVAC.Model
         }
         private void Delete_valve(Dictionary<Polyline, Valve_modify_param> valves_dic, Line l)
         {
-            var shadow = l.Clone() as Line;
-            var m = Matrix3d.Displacement(-start_p.GetAsVector());
-            foreach (Polyline b in valves_dic.Keys.ToCollection())
-                b.TransformBy(m);
-            shadow.TransformBy(m);
             var valves_index = new ThCADCoreNTSSpatialIndex(valves_dic.Keys.ToCollection());
-            var poly = ThMEPHVACService.Get_line_extend(shadow, 1);
+            var poly = ThMEPHVACService.Get_line_extend(l, 1);
             var res = valves_index.SelectCrossingPolygon(poly);
             foreach (Polyline pl in res)
-                ThDuctPortsDrawService.Clear_graph(valves_dic[pl].handle);
+            {
+                var param = valves_dic[pl];
+                if (param.valve_visibility == "多叶调节风阀")
+                    ThDuctPortsDrawService.Clear_graph(param.handle);
+            }
         }
         private void Delete_port_mark(List<BlockReference> port_mark, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var mark in port_mark)
             {
-                double dis = l.GetClosestPointTo(mark.Position, false).DistanceTo(mark.Position);
+                var p = mark.Position.TransformBy(m);
+                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2501 && handles.Add(mark.ObjectId.Handle)) // 2500^2 = 1500^2 + 2000^2
                     ThDuctPortsDrawService.Clear_graph(mark.ObjectId.Handle);
             }
         }
         private void Delete_port_leader(List<Leader> leaders, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var leader in leaders)
             {
-                double dis = l.GetClosestPointTo(leader.StartPoint, false).DistanceTo(leader.StartPoint);
+                var p = leader.StartPoint.TransformBy(m);
+                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2501 && handles.Add(leader.ObjectId.Handle))
                     ThDuctPortsDrawService.Clear_graph(leader.ObjectId.Handle);
             }

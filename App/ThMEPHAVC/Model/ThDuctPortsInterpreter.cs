@@ -24,7 +24,7 @@ namespace ThMEPHVAC.Model
                 return;
             }
             int inc = 0;
-            if (values.Count() != 12)
+            if (values.Count() != 13)
                 throw new NotImplementedException("Tringle parameter error");
             param = new ThMEPHVACParam
             {
@@ -32,6 +32,7 @@ namespace ThMEPHVAC.Model
                 port_num = Int32.Parse((string)values.ElementAt(inc++).Value),
                 air_speed = Double.Parse((string)values.ElementAt(inc++).Value),
                 air_volume = Double.Parse((string)values.ElementAt(inc++).Value),
+                high_air_volume = Double.Parse((string)values.ElementAt(inc++).Value),
                 elevation = Double.Parse((string)values.ElementAt(inc++).Value),
                 main_height = Double.Parse((string)values.ElementAt(inc++).Value),
                 scale = (string)values.ElementAt(inc++).Value,
