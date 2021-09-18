@@ -590,7 +590,13 @@ namespace ThMEPHVAC.Model
         }
         public static Point2d Round_point(Point2d p, int tail_num)
         {
-            return new Point2d(Math.Round(p.X, tail_num), Math.Round(p.Y, tail_num));
+            double X = Math.Round(p.X, tail_num);
+            if (Math.Abs(X) < 1e-3)
+                X = 0;
+            double Y = Math.Round(p.Y, tail_num);
+            if (Math.Abs(Y) < 1e-3)
+                Y = 0;
+            return new Point2d(X, Y);
         }
         public static Polyline Create_detect_poly(Point3d p)
         {
@@ -803,6 +809,18 @@ namespace ThMEPHVAC.Model
                 }
             }
             return max_line;
+        }
+        public static Polyline Create_rect(Point2d p, Vector2d dir_vec, double width, double height)
+        {
+            var l_vec = Get_left_vertical_vec(dir_vec);
+            var r_vec = Get_right_vertical_vec(dir_vec);
+            var w = 0.5 * width;
+            var h = 0.5 * height;
+            var min_p = p - dir_vec * w + r_vec * h;
+            var max_p = p + dir_vec * w + l_vec * h;
+            var poly = new Polyline();
+            poly.CreateRectangle(min_p, max_p);
+            return poly;
         }
     }
 }

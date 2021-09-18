@@ -1,4 +1,5 @@
 ﻿#if (ACAD2016 || ACAD2018)
+using CLI;
 using System;
 using NFox.Cad;
 using System.Linq;
@@ -10,13 +11,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPWSS.ViewModel;
 using ThMEPWSS.Hydrant.Data;
 using ThMEPWSS.Hydrant.Engine;
-using CLI;
 #endif
 
 namespace ThMEPWSS.Hydrant.Service
@@ -103,6 +104,7 @@ namespace ThMEPWSS.Hydrant.Service
             var visitor = new ThFireExtinguisherExtractionVisitor()
             {
                 BlkNames = new List<string> { name },
+                LayerFilter = ThDbLayerManager.Layers(db).ToHashSet()
             };
             var extractor = new ThFireExtinguisherExtractor(visitor);
             extractor.Extract(db, frame);

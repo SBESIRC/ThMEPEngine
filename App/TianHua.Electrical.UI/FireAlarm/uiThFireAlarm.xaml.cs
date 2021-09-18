@@ -12,10 +12,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AcHelper;
 using ThControlLibraryWPF.CustomControl;
-using TianHua.Electrical.ViewModels;
-using TianHua.Electrical.Commands;
+using ThMEPElectrical.FireAlarm.ViewModels;
+using ThMEPElectrical.FireAlarm.Commands;
 using ThMEPEngineCore.Command;
+
 
 namespace TianHua.Electrical.UI
 {
@@ -28,7 +30,7 @@ namespace TianHua.Electrical.UI
         public uiThFireAlarm()
         {
             InitializeComponent();
-            if(UiConfigs == null)
+            if (UiConfigs == null)
             {
                 UiConfigs = new FireAlarmViewModel();
             }
@@ -40,6 +42,7 @@ namespace TianHua.Electrical.UI
         {
             using (var cmd = new FireAlarmLayoutCommand(UiConfigs))
             {
+                FocusToCAD();
                 cmd.Execute();
             }
         }
@@ -50,6 +53,16 @@ namespace TianHua.Electrical.UI
             {
                 cmd.Execute();
             }
+        }
+
+        void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
 }

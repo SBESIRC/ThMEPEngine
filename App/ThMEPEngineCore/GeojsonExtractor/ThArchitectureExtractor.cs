@@ -61,12 +61,16 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 var center = pts.Envelope().CenterPoint();
                 var transformer = new ThMEPOriginTransformer(center);
                 var newPts = transformer.Transform(pts);
-                extractEngine.Results.ForEach(e=> transformer.Transform(e.Geometry));                
+                extractEngine.Results.ForEach(e => transformer.Transform(e.Geometry));
 
                 var recogEngine = new ThDB3ArchWallRecognitionEngine();
                 recogEngine.Recognize(extractEngine.Results, newPts);
 
-                recogEngine.Elements.ForEach(o => Walls.Add(o.Outline));
+                recogEngine.Elements.ForEach(o =>
+                {
+                    transformer.Reset(o.Outline);
+                    Walls.Add(o.Outline);
+                });
             }
             else
             {

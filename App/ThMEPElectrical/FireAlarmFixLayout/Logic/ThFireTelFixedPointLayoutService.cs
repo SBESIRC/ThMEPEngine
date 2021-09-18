@@ -20,7 +20,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
     {
         public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
-        public ThFireTelFixedPointLayoutService(List<ThGeometry> data, List<string> LayoutBlkName, List<string> AvoidBlkName) :base(data, LayoutBlkName, AvoidBlkName)
+        public ThFireTelFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) :base(data, CleanBlkName, AvoidBlkName)
         {
         }
 

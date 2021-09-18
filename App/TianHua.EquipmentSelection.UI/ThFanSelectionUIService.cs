@@ -16,6 +16,9 @@ namespace TianHua.FanSelection.UI
         //-------------SINGLETON-----------------
 
         public FanDataModel Model { get; set; }
+
+        public FanDataModel SubModel { get; set; }
+
         public List<FanDataModel> ErasedModels { get; set; }
         public List<FanDataModel> UnerasedModels { get; set; }
         public Dictionary<FanDataModel, FanDataModel> ModelMapping { get; set; }

@@ -67,7 +67,16 @@
     <Compile Include="Algorithm\AStarAlgorithm_New\Model\RoutePlanData.cs" />
     <Compile Include="Algorithm\BFSAlgorithm\BFSNode.cs" />
     <Compile Include="Algorithm\BFSAlgorithm\BFSPathPlaner.cs" />
+    <Compile Include="Algorithm\ClusteringAlgorithm\DBScanClustering.cs" />
+    <Compile Include="Algorithm\ClusteringAlgorithm\PointDBSacn.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
+    <Compile Include="Algorithm\GraphDomain\GraphBase.cs" />
+    <Compile Include="Algorithm\GraphDomain\GraphNodeBase.cs" />
+    <Compile Include="Algorithm\GraphDomain\GraphNodeRelation.cs" />
+    <Compile Include="Algorithm\GraphDomain\GraphRoute.cs" />
+    <Compile Include="Algorithm\GraphDomain\GraphUtils.cs" />
+    <Compile Include="Algorithm\GraphDomain\IGraphNode.cs" />
+    <Compile Include="Algorithm\GraphDomain\PointGraphNode.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
     <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />

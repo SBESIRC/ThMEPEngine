@@ -206,12 +206,18 @@
     <Compile Include="ParkingStall\Business\Block\BlockInsertor.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\EntityPicker.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\WallPolygonInfoCalculator.cs" />
+    <Compile Include="ParkingStall\CAD\BaseElement.cs" />
     <Compile Include="ParkingStall\CAD\InfoReader.cs" />
+    <Compile Include="ParkingStall\CAD\LoadCraterClear.cs" />
+    <Compile Include="ParkingStall\CAD\ThWallColumnsEngine.cs" />
     <Compile Include="ParkingStall\Core\CommandManager.cs" />
+    <Compile Include="ParkingStall\Core\ParkLightConnectCommand.cs" />
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />
     <Compile Include="ParkingStall\Model\LaneGroup.cs" />
     <Compile Include="ParkingStall\Model\LanePolyline.cs" />
+    <Compile Include="ParkingStall\Model\LightGroup.cs" />
     <Compile Include="ParkingStall\Model\LightLaneGroup.cs" />
+    <Compile Include="ParkingStall\Model\LightMaxGroup.cs" />
     <Compile Include="ParkingStall\Model\LightPlaceInfo.cs" />
     <Compile Include="ParkingStall\Model\LineSegment.cs" />
     <Compile Include="ParkingStall\Model\NearParks.cs" />
@@ -242,6 +248,16 @@
     <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\SubGroupMover.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\LightPlaceInfoExtractor.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\SubGroupPosOptimization.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnectAdjust\LightAdjustConnectLine.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnectAdjust\LightAdjustConnectPoint.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LaneLineRoute.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightBeforehandGroup.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightConnectLight.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightConnectUtil.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightGroupByRoute.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightGroupConnect.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightGroupLane.cs" />
+    <Compile Include="ParkingStall\Worker\LightConnect\LightInnerGroupConnect.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\GenerateValidParkPolys.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\IntersectParkRelatedNodeCalculator.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\NearParksDivider.cs" />
@@ -267,6 +283,7 @@
     <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
     <Compile Include="ThMEPLightingCommon.cs" />
+    <Compile Include="ThMEPParkingStallLightingCmd.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />

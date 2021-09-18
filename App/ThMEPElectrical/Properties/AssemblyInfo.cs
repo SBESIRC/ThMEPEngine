@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.7.0")]
-[assembly: AssemblyFileVersion("1.5.7.0")]
+[assembly: AssemblyVersion("1.5.8.0")]
+[assembly: AssemblyFileVersion("1.5.8.0")]
 
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
@@ -41,8 +41,12 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThMEPElectricalApp))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAutoFireAlarmSystemCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AFASRegion.ThAFASCmd))]
-[assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.ThFireAlarmCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmDisplayDeviceLayoutCmdNoUI))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireProofMonitorLayoutCmdNoUI))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireTelLayoutCmdNoUI))]
+[assembly: CommandClass(typeof(ThMEPElectrical.AlarmLayout.Test.TestCmd))]
+[assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmSmokeHeat.ThFireAlarmSmokeHeatCmdsNoUI))]

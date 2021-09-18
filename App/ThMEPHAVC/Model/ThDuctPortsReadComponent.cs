@@ -142,28 +142,15 @@ namespace ThMEPHVAC.Model
         {
             using (var db = AcadDatabase.Active())
             {
-                var blks = db.ModelSpace.OfType<BlockReference>();
-                return blks.Where(b => b.GetEffectiveName().Contains(blk_name)).ToList();
+                return db.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(b => !b.BlockTableRecord.IsNull)
+                    .Where(b => b.GetEffectiveName().Contains(blk_name)).ToList();
             }
         }
         public static List<ObjectId> Read_blk_ids_by_name(string blk_name)
         {
-            var ids = new List<ObjectId>();
-            using (var db = AcadDatabase.Active())
-            {
-                var blks = db.ModelSpace.OfType<BlockReference>();
-                var selected_blks = blks.Where(b => b.GetEffectiveName().Contains(blk_name));
-                ids.AddRange(selected_blks.Select(blk => blk.ObjectId));
-            }
-            return ids;
-        }
-        public static List<BlockReference> Read_all_port_by_name(string port_name)
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                var blks = db.ModelSpace.OfType<BlockReference>();
-                return blks.Where(b => b.GetEffectiveName().Contains(port_name)).ToList();
-            }
+            return Read_blk_by_name(blk_name).Select(o => o.ObjectId).ToList();
         }
         public static List<DBText> Read_duct_texts()
         {

@@ -17,10 +17,10 @@ namespace TianHua.Hvac.UI.Command
         public void Dispose() { }
         public void Execute()
         {
-            var id = Get_start_node("选择起始节点");
+            var id = Get_start_node("选择起始节点", out double ro_angle);
             if (id == null)
                 return;
-            var modifyer = new ThDuctPortsModifyPort(id, ref in_param);
+            var modifyer = new ThDuctPortsModifyPort(id, ro_angle, ref in_param);
             if (!Get_duct_port_info())
                 return;
             modifyer.Construct();
@@ -64,10 +64,11 @@ namespace TianHua.Hvac.UI.Command
                     break;
             }
         }
-        private ObjectId[] Get_start_node(string prompt)
+        private ObjectId[] Get_start_node(string prompt, out double ro_angle)
         {
             using (var db = AcadDatabase.Active())
             {
+                ro_angle = 0;
                 var options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -88,6 +89,7 @@ namespace TianHua.Hvac.UI.Command
                 if (id[0].GetEntity() is BlockReference)
                 {
                     var blk = id[0].GetEntity() as BlockReference;
+                    ro_angle = blk.Rotation;
                     if (blk.Name != "AI-风管起点")
                     {
                         ThMEPHVACService.Prompt_msg("请选择AI-风管起点");

@@ -59,7 +59,7 @@ namespace TianHua.FanSelection.Function
             Point = ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(coordinate);
 
             //当前项为高速档，需过滤掉gear档位为低的元素，保留高档位元素，反之过滤掉gear档位为高的元素
-            if (fanmodel.IsHighSpeedModel())
+            if (fanmodel.IsMainModel())
             {
                 Models = models.ToGeometries(comparer, "低").ModelPick(Point);
             }
@@ -144,7 +144,7 @@ namespace TianHua.FanSelection.Function
             Point = ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(coordinate);
 
             //当前项为高速档，需过滤掉gear档位为低的元素，保留高档位元素，反之过滤掉gear档位为高的元素
-            if (fanmodel.IsHighSpeedModel())
+            if (fanmodel.IsMainModel())
             {
                 Models = models.ToGeometries(comparer, "低").ModelPick(Point);
             }

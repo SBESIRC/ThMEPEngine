@@ -29,6 +29,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         frameList[j].Closed = true;
                         ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(frameList[i], frameList[j]);
 
+                        //has bug!
                         if (relation.IsContains || relation.IsOverlaps)
                         {
                             holes.Add(frameList[j]);

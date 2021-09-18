@@ -120,9 +120,14 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             using var acadDatabase = AcadDatabase.Active();
             //统计厨房数
             //创建厨房识别引擎
-            var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
-            engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
-            var ele = engineKitchen.Elements;
+
+            var markEngine = new ThRoomMarkRecognitionEngine();
+            markEngine.RecognizeMS(acadDatabase.Database, selectArea);
+            var ele = markEngine.Elements;
+
+            //var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
+            //engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
+            //var ele = engineKitchen.Elements;
             var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
 
             var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
@@ -159,7 +164,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             return fHouseNumList;
         }
 
-        public static List<int[]> CountToiletNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
+        public static List<int[]> CountToiletNums(List<List<Point3dCollection>> floorAreaList,
+            Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
         {
             using var acadDatabase = AcadDatabase.Active();
             //统计卫生间
@@ -205,14 +211,43 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         }
 
 
-        public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList, 
-            List<int[]> households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor, 
-            Dictionary<string, List<string>> blockConfig)
+        public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList,
+            List<int[]> households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor,
+            Dictionary<string, List<string>> blockConfig, bool cleanToolFlag)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                //统计卫生间数目，弃用
-                //var toiletNums = CountToiletNums(floorAreaList, selectArea, floorList, FloorNumbers);
+                if (!cleanToolFlag)
+                {
+                    var CleanToolList2 = new List<List<CleaningToolsSystem>>();
+                    //统计卫生间数目，弃用
+                    //var toiletNums = CountToiletNums(floorAreaList, selectArea, floorList, FloorNumbers);
+                    for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层块
+                    {
+                        foreach (var f in floorList[i])//遍历每个楼层
+                        {
+                            var CleanTools = new List<CleaningToolsSystem>();
+                            for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                            {
+                                var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                                cleanTools[0] = households[f - 1][j] * 2;//坐便器
+                                cleanTools[1] = households[f - 1][j] * 2;//洗手台
+                                cleanTools[2] = 0;//双洗手台
+                                cleanTools[3] = households[f - 1][j];//洗涤盆
+                                cleanTools[4] = households[f - 1][j] * 2;//淋浴器
+                                cleanTools[5] = households[f - 1][j] * 2;//洗衣机
+                                cleanTools[6] = households[f - 1][j];//阳台洗手盆
+                                cleanTools[7] = 0;//浴缸
+
+                                var CleanTool = new CleaningToolsSystem(f, j, households[f - 1][j], cleanTools);
+                                CleanTools.Add(CleanTool);
+                            }
+                            CleanToolList2.Add(CleanTools);
+                        }
+                    }
+                    CleanToolList2 = CleanToolList2.OrderBy(l => l.First().GetFloorNumber()).ToList();
+                    return CleanToolList2;
+                }
 
                 //统计卫生洁具数
                 var engine = new ThWCleanToolsRecongnitionEngine(blockConfig);
@@ -234,7 +269,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                                 var cleanToolsInSubArea = allCleanToolsSpatialIndex.SelectCrossingPolygon(floorAreaList[i][j]);
                                 var allBlockNames = engine.Datas.Select(ct => ct.Data as string);
                                 var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-                                if(cleanToolsInSubArea.Count != 0)
+                                if (cleanToolsInSubArea.Count != 0)
                                 {
                                     foreach (var ct in cleanToolsInSubArea)
                                     {
@@ -260,7 +295,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
 
                                     }
                                 }
-                                
+
 
                                 var CleanTool = new CleaningToolsSystem(f, j, households[f - 1][j], cleanTools);
                                 CleanTools.Add(CleanTool);
@@ -341,7 +376,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     }
                     else
                     {
-                        U0List[j] = 100 * QL * m * Kh / (0.2 * (NgList[j]/householdNum) * T * 3600);
+                        U0List[j] = 100 * QL * m * Kh / (0.2 * (NgList[j] / householdNum) * T * 3600);
                     }
                 }
                 for (int j = lowestStorey[i] - 2; j >= 0; j--)
@@ -370,7 +405,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                 }
                 for (int j = 0; j < highestStorey[i]; j++)
                 {
-                    
+
                     var pipeCompute = new PipeCompute(U0aveList[j], NgTotalList[j]);
                     var DN = pipeCompute.PipeDiameterCompute();
                     PipeSystem[i].PipeUnits.Add(new ThWSSDPipeUnit(DN, j));
@@ -442,9 +477,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     {
                         continue;
                     }
-                    
+
                     LineXList.Add(spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("分割" + Convert.ToString(index) + " X")));
-                    
+
                 }
             }
 
@@ -468,12 +503,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     if (!br.IsDynamicBlock) continue;
                     if (sobj.StoreyType.ToString().Contains("StandardStorey"))
                     {
-                        if(!sobj.StoreyNumber.Trim().StartsWith("-") && !sobj.StoreyNumber.Trim().StartsWith("B"))
+                        if (!sobj.StoreyNumber.Trim().StartsWith("-") && !sobj.StoreyNumber.Trim().StartsWith("B"))
                         {
                             var rectList = CreateRectList(sobj);
                             FloorAreaList.Add(rectList);//分区的多段线添加
                         }
-                        
+
                     }
                 }
             }
@@ -496,7 +531,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                 var fiNum = new List<int>();
                 for (int i = 0; i < f.Length; i++)
                 {
-                    if(f[i].Trim().StartsWith("-"))
+                    if (f[i].Trim().StartsWith("-"))
                     {
                         continue;
                     }
@@ -526,7 +561,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                         fiNum.Add(Convert.ToInt32(f[i].Trim('B')));
                     }
                 }
-                if(fiNum.Count!=0)
+                if (fiNum.Count != 0)
                 {
                     FloorNumList.Add(fiNum);
                 }
@@ -542,9 +577,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             StartNum = 100;
             int AreaNums = 0;
             var areaNum = 1;
-            for(int i = 0; i < FloorAreaList.Count; i++)
+            for (int i = 0; i < FloorAreaList.Count; i++)
             {
-                if(FloorAreaList[i].Count()> areaNum)
+                if (FloorAreaList[i].Count() > areaNum)
                 {
                     areaNum = FloorAreaList[i].Count();
                 }
@@ -559,19 +594,19 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     if (households[i, j] > 0)
                     {
                         areaNums += households[i, j];
-                        if(StartNum > j)
+                        if (StartNum > j)
                         {
                             StartNum = j;
                         }
                     }
-                    
+
                 }
                 if (AreaNums < areaNums)
                 {
                     AreaNums = areaNums;
                 }
             }
-            
+
             return AreaNums;
         }
 
@@ -628,18 +663,18 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
         public static int GetMaxHouseholds(List<int[]> households, List<int> FlushFaucet)
         {
             var maxHouse = 0;
-            for(int i = 0; i < households.Count; i++)
+            for (int i = 0; i < households.Count; i++)
             {
                 var house = households[i];
                 maxHouse = Math.Max(maxHouse, house.Max());
-                if(FlushFaucet.Contains(i+1))
+                if (FlushFaucet.Contains(i + 1))
                 {
                     maxHouse += 1;
                 }
             }
             return maxHouse;
         }
-       
+
     }
 }
 

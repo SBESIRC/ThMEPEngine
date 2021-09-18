@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
@@ -25,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    .Where(o => IsHYDTPipeLayer(o.Layer));
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                var DBObjs = spatialIndex.SelectWindowPolygon(polygon.Envelope().ToRectangle());
 
                 DbTextCollection = new DBObjectCollection();
 
@@ -41,6 +42,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                 }
 
+                foreach(var db in DbTextCollection)
+                {
+                    var line = db as Line;
+                    if(line.Length < 10)
+                    {
+                        ;
+                    }
+                }
                 return DbTextCollection;
             }
         }

@@ -116,9 +116,10 @@ namespace ThMEPLighting.Garage.Service
             using (var acdb = AcadDatabase.Use(db))
             {
                 return acdb.ModelSpace
-                           .OfType<BlockReference>()
-                           .Where(b => b.Layer.ToUpper() == RacewayParameter.LaneLineBlockParameter.Layer.ToUpper())
-                           .ToCollection();
+                    .OfType<BlockReference>()
+                    .Where(b => !b.BlockTableRecord.IsNull)
+                    .Where(b => b.Layer.ToUpper() == RacewayParameter.LaneLineBlockParameter.Layer.ToUpper())
+                    .ToCollection();
             } 
         }
         private DBObjectCollection CollectMarks(Database db)

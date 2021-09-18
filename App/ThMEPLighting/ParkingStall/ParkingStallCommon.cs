@@ -22,10 +22,9 @@ namespace ThMEPLighting.ParkingStall
         public static readonly double ParkingStallGroupLengthRestrict = 6200; // 长边限制
 
         public static readonly string PARK_LIGHT_LAYER = "E-LITE-LITE";
-        public static readonly string PARK_LIGHT_BLOCK_NAME = "E-BL001-1";
-
+        public static readonly string PARK_LIGHT_BLOCK_NAME = "E-BL001-2";
         public static readonly string LANELINE_LAYER_NAME = "E-LANE-CENTER";
-
+        public const string PARKINGLIGHTCONNECT_LAYERAME = "E-LITE-WIRE";   //车位照明连线图层名称
 
         public static readonly double ReverseGapGroup = 1000; // 子分组倒车入库间距
         public static readonly double ParallelGapGroup = 400; // 子分组侧方停车间距

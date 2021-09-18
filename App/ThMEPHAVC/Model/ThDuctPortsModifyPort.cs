@@ -33,6 +33,7 @@ namespace ThMEPHVAC.Model
         private double port_width;
         private string port_range;
         private double port_height;
+        private double start_ro_angle;
         private ObjectId[] start_id;
         private ThMEPHVACParam in_param;
         private HashSet<Handle> handles;
@@ -46,17 +47,17 @@ namespace ThMEPHVAC.Model
         private Dictionary<Polyline, ObjectId> bounds_2_id_dic;
         public Dictionary<Point3d, Side_Port_Info> port_2_handle_dic;
         public ThDuctPortsModifyPort() { }
-        public ThDuctPortsModifyPort(ObjectId[] start_id, ref ThMEPHVACParam ui_param)
+        public ThDuctPortsModifyPort(ObjectId[] start_id, double start_ro_angle, ref ThMEPHVACParam ui_param)
         {
             using (var db = AcadDatabase.Active())
             {
                 ThDuctPortsInterpreter.Get_basic_param(start_id, out ThMEPHVACParam basic_param, out Point2d p);
-                Init(p, basic_param, start_id);
+                Init(p, basic_param, start_id, start_ro_angle);
                 bounds_2_id_dic = ThDuctPortsReadComponent.Read_all_component();
                 var group_bounds = bounds_2_id_dic.Keys.ToCollection();
                 Move_bounds_to_org(group_bounds, start_p);
                 conn_group_handles = Get_conn_comp_index(group_bounds);
-                var all_port_blk = ThDuctPortsReadComponent.Read_all_port_by_name("风口-AI研究中心");
+                var all_port_blk = ThDuctPortsReadComponent.Read_blk_by_name("风口-AI研究中心");
                 Get_port_info(all_port_blk);
                 if (status != ModifyerStatus.OK)
                     return;
@@ -69,7 +70,7 @@ namespace ThMEPHVAC.Model
                 ui_param = in_param;
             }
         }
-        private void Init(Point2d p, ThMEPHVACParam basic_param, ObjectId[] start_id)
+        private void Init(Point2d p, ThMEPHVACParam basic_param, ObjectId[] start_id, double start_ro_angle)
         {
             start_p = new Point3d(p.X, p.Y, 0);
             dis_mat = Matrix3d.Displacement(-start_p.GetAsVector());
@@ -82,6 +83,7 @@ namespace ThMEPHVAC.Model
             handles = new HashSet<Handle>();
             in_param = basic_param;
             this.start_id = start_id;
+            this.start_ro_angle = start_ro_angle;
         }
         public void Construct()
         {
@@ -338,40 +340,39 @@ namespace ThMEPHVAC.Model
         }
         private void Delete_text_dim_valve()
         {
-            ThDuctPortsInterpreter.Get_valves(out List<Valve_modify_param> valves);
-            ThDuctPortsInterpreter.Get_texts(out List<Text_modify_param> texts);
+            ThDuctPortsInterpreter.Get_valves_dic(out Dictionary<Polyline, Valve_modify_param> valves_dic);
+            ThDuctPortsInterpreter.Get_texts_dic(out Dictionary<Polyline, Text_modify_param> text_dic);
             var port_mark = ThDuctPortsReadComponent.Read_blk_by_name("风口标注");
             var dims = ThDuctPortsReadComponent.Read_dimension();
             var leaders = ThDuctPortsReadComponent.Read_leader();
-            var dis_mat = Matrix3d.Displacement(start_p.GetAsVector());
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
+            foreach (Polyline b in text_dic.Keys.ToCollection())
+                b.TransformBy(m);
+            foreach (Polyline b in valves_dic.Keys.ToCollection())
+                b.TransformBy(m);
             foreach (Line line in center_line)
             {
-                var l = line.Clone() as Line;
-                l.TransformBy(dis_mat);
-                Delete_text(texts, l);
-                Delete_dim(dims, l);
-                Delete_valve(valves, l);
-                Delete_port_mark(port_mark, l);
-                Delete_port_leader(leaders, l);
+                Delete_text(text_dic, line);
+                Delete_dim(dims, line);
+                Delete_valve(valves_dic, line);
+                Delete_port_mark(port_mark, line);
+                Delete_port_leader(leaders, line);
             }
         }
-        private void Delete_text(List<Text_modify_param> texts, Line l)
+        private void Delete_text(Dictionary<Polyline, Text_modify_param> text_dic, Line l)
         {
-            foreach (var cur_t in texts)
-            {
-                var p = new Point3d(cur_t.center_point.X, cur_t.center_point.Y, 0);
-                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
-                if (dis < 3000 && handles.Add(cur_t.handle))
-                {
-                    ThDuctPortsDrawService.Clear_graph(cur_t.handle);
-                }
-            }
+            var texts_index = new ThCADCoreNTSSpatialIndex(text_dic.Keys.ToCollection());
+            var poly = ThMEPHVACService.Get_line_extend(l, 4000);//在风管附近两千范围内的text
+            var res = texts_index.SelectCrossingPolygon(poly);
+            foreach (Polyline pl in res)
+                ThDuctPortsDrawService.Clear_graph(text_dic[pl].handle);
         }
         private void Delete_dim(List<AlignedDimension> dims, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var dim in dims)
             {
-                var p = dim.Bounds.Value.CenterPoint();
+                var p = dim.Bounds.Value.CenterPoint().TransformBy(m);
                 double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2000 && handles.Add(dim.Handle))
                 {
@@ -379,30 +380,36 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Delete_valve(List<Valve_modify_param> valves, Line l)
+        private void Delete_valve(Dictionary<Polyline, Valve_modify_param> valves_dic, Line l)
         {
-            foreach (var valve in valves)
+            var valves_index = new ThCADCoreNTSSpatialIndex(valves_dic.Keys.ToCollection());
+            var poly = ThMEPHVACService.Get_line_extend(l, 1);
+            var res = valves_index.SelectCrossingPolygon(poly);
+            foreach (Polyline pl in res)
             {
-                var p = new Point3d(valve.judge_p.X, valve.judge_p.Y, 0);
-                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
-                if (dis < 20 && handles.Add(valve.handle))
-                    ThDuctPortsDrawService.Clear_graph(valve.handle);
+                var param = valves_dic[pl];
+                if (param.valve_visibility == "多叶调节风阀")
+                    ThDuctPortsDrawService.Clear_graph(param.handle);
             }
         }
         private void Delete_port_mark(List<BlockReference> port_mark, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var mark in port_mark)
             {
-                double dis = l.GetClosestPointTo(mark.Position, false).DistanceTo(mark.Position);
+                var p = mark.Position.TransformBy(m);
+                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2501 && handles.Add(mark.ObjectId.Handle)) // 2500^2 = 1500^2 + 2000^2
                     ThDuctPortsDrawService.Clear_graph(mark.ObjectId.Handle);
             }
         }
         private void Delete_port_leader(List<Leader> leaders, Line l)
         {
+            var m = Matrix3d.Displacement(-start_p.GetAsVector());
             foreach (var leader in leaders)
             {
-                double dis = l.GetClosestPointTo(leader.StartPoint, false).DistanceTo(leader.StartPoint);
+                var p = leader.StartPoint.TransformBy(m);
+                double dis = l.GetClosestPointTo(p, false).DistanceTo(p);
                 if (dis < 2501 && handles.Add(leader.ObjectId.Handle))
                     ThDuctPortsDrawService.Clear_graph(leader.ObjectId.Handle);
             }
@@ -519,11 +526,20 @@ namespace ThMEPHVAC.Model
         {
             var queue = new Queue<Point3d>();
             queue.Enqueue(start_p);
+            bool is_first = true;
             while (queue.Count != 0)
             {
                 var curPt = queue.Dequeue();
                 var poly = new Polyline();
-                poly.CreatePolygon(curPt.ToPoint2D(), 4, 10);
+                if (!is_first)
+                    poly.CreatePolygon(curPt.ToPoint2D(), 4, 10);
+                else
+                {
+                    is_first = false;
+                    var dir_vec = ThMEPHVACService.Get_dir_vec_by_angle(start_ro_angle + Math.PI / 3 - Math.PI / 2);
+                    var srt_p = start_p.ToPoint2D() + (dir_vec * 50);
+                    poly = ThMEPHVACService.Create_rect(srt_p, dir_vec, 50, 3000);
+                }
                 var selectedBounds = group_index.SelectCrossingPolygon(poly);
                 foreach (Polyline b in selectedBounds)
                 {

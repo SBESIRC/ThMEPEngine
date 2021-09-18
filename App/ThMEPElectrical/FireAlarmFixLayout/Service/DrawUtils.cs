@@ -114,6 +114,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
 
             Entity clone = null;
+            Entity clone2 = null;
 
             if (symbol == "C")
             {
@@ -129,9 +130,13 @@ namespace ThMEPElectrical.FireAlarm.Service
                 sq.Closed = true;
                 clone = sq;
             }
-            else if (symbol == "T")
+            else if (symbol == "X")
             {
+                var x1 = new Line(new Point3d(pt.X - r, pt.Y + r, 0), new Point3d(pt.X + r, pt.Y - r, 0));
+                var x2 = new Line(new Point3d(pt.X + r, pt.Y + r, 0), new Point3d(pt.X - r, pt.Y - r, 0));
 
+                clone = x1;
+                clone2 = x2;
             }
             else
             {
@@ -139,6 +144,10 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
 
             DrawUtils.ShowGeometry(clone, LayerName, colorIndex, lineWeightNum);
+            if (clone2 != null)
+            {
+                DrawUtils.ShowGeometry(clone2, LayerName, colorIndex, lineWeightNum);
+            }
         }
 
         public static void ShowGeometry(Point3d pt, string s, string LayerName, int colorIndex = 3, int lineWeightNum = 25, double hight = 1000)

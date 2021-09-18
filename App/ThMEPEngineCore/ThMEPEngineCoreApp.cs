@@ -1030,20 +1030,27 @@ namespace ThMEPEngineCore
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
                 engine.Elements.Cast<ThIfcStair>().ForEach(o =>
                 {
-                    if (o.PlatForLayout.Count != 0)
+                if (o.PlatForLayout.Count != 0)
+                {
+                    var pline = new Polyline();
+                    o.PlatForLayout.ForEach(p =>
                     {
-                        var pline = new Polyline();
-                        pline.CreatePolyline(new Point3dCollection(o.PlatForLayout.ToArray()));
+                        pline.CreatePolyline(new Point3dCollection(p.ToArray()));
                         pline.Closed = true;
                         acadDatabase.ModelSpace.Add(pline);
+                    });
+                        
                     }
 
                     if (o.HalfPlatForLayout.Count != 0)
                     {
                         var halfPline = new Polyline();
-                        halfPline.CreatePolyline(new Point3dCollection(o.HalfPlatForLayout.ToArray()));
-                        halfPline.Closed = true;
-                        acadDatabase.ModelSpace.Add(halfPline);
+                        o.HalfPlatForLayout.ForEach(hp =>
+                        {
+                            halfPline.CreatePolyline(new Point3dCollection(hp.ToArray()));
+                            halfPline.Closed = true;
+                            acadDatabase.ModelSpace.Add(halfPline);
+                        });
                     }
                 });
             }

@@ -9,25 +9,22 @@ namespace ThMEPEngineCore
 {
     public class ThMEPEngineCoreRoomService
     {
-        readonly static string publicRoom = "公共区域";
-        readonly static string privateRoom = "私有区域";
-        readonly static string outdoorSafeArea = "室外安全区域";
-        readonly static string nonFireDetectionArea = "非火灾探测区域";
-        readonly static string evacuationInstruction = "疏散指示";
-        readonly static string evacuationLighting = "疏散照明";
-        readonly static string roomConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
-        readonly static string roomNameControl = "房间名称处理";
-        readonly static List<string> mustLayoutArea = new List<string> { "楼梯间", "前室" };
-        readonly static List<string> cannotLayoutArea = new List<string> { "井道", "存储房间", "设备机房", "无障碍套型", "居住套型" };
+        const string publicRoom = "公共区域";
+        const string privateRoom = "私有区域";
+        const string outdoorSafeArea = "室外安全区域";
+        const string nonFireDetectionArea = "非火灾探测区域";
+        const string evacuationInstruction = "疏散指示";
+        const string evacuationLighting = "疏散照明";
+        const string roomNameControl = "房间名称处理";
 
-        private List<RoomTableTree> Tree { get; set; }
+        public List<RoomTableTree> Tree { get; set; }
 
         /// <summary>
         /// 初始化
         /// </summary>
         public void Initialize()
         {
-            ReadRoomConfigTable(roomConfigUrl);
+            ReadRoomConfigTable(ThCADCommon.RoomConfigPath());
         }
 
         public List<string> GetLabels(ThIfcRoom room)
@@ -64,19 +61,17 @@ namespace ThMEPEngineCore
             return listString;
         }
 
-        private bool JudgeRoomType(List<RoomTableTree> tree, string roomName, List<string> listString)
+        public bool JudgeRoomType(List<RoomTableTree> tree, string roomName, List<string> listString)
         {
-            var tag = false;
             foreach (var roomType in listString)
             {
                 var roomTableTree = RoomTypeIteration(tree, roomName, roomType);
-                tag = JudgeRoomName(roomTableTree, roomName, roomType);
-                if (tag)
+                if (JudgeRoomName(roomTableTree, roomName, roomType))
                 {
-                    return tag;
+                    return true;
                 }
             }
-            return tag;
+            return false;
         }
 
         private RoomTableTree RoomTypeIteration(List<RoomTableTree> tree, string roomName, string roomType)
@@ -247,11 +242,15 @@ namespace ThMEPEngineCore
         /// </summary>
         /// <param name="labels"></param>
         /// <returns></returns>
-        public bool MustLayoutArea(ThIfcRoom room)
+        public virtual bool MustLayoutArea(ThIfcRoom room)
         {
+            var names = new List<string> { 
+                "楼梯间", 
+                "前室",
+            };
             foreach (var roomName in room.Tags)
             {
-                if (JudgeRoomType(Tree, roomName, mustLayoutArea))
+                if (JudgeRoomType(Tree, roomName, names))
                 {
                     return true;
                 }
@@ -264,11 +263,18 @@ namespace ThMEPEngineCore
         /// </summary>
         /// <param name="labels"></param>
         /// <returns></returns>
-        public bool CannotLayoutArea(ThIfcRoom room)
+        public virtual bool CannotLayoutArea(ThIfcRoom room)
         {
+            var names = new List<string> {
+                "井道",
+                "存储房间",
+                "设备机房",
+                "无障碍套型",
+                "居住套型"
+            };
             foreach (var roomName in room.Tags)
             {
-                if (JudgeRoomType(Tree, roomName, cannotLayoutArea))
+                if (JudgeRoomType(Tree, roomName, names))
                 {
                     return true;
                 }

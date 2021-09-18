@@ -26,7 +26,7 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 foreach (var ptInfo in insertPtInfo)
                 {
-                    var size = ThFixLayoutCommon.blk_move_length[blkName] / 2;
+                    var size = ThFaCommon.blk_move_length[blkName] / 2;
                     var pt = ptInfo.Key + ptInfo.Value * scale * size;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Value, Vector3d.ZAxis);
                     var attNameValues = new Dictionary<string, string>() { };

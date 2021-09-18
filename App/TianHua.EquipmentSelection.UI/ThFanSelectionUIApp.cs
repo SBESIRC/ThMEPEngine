@@ -4,12 +4,13 @@ using Linq2Acad;
 using System.IO;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
-using TianHua.FanSelection.UI.CAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPEngineCore.Service.Hvac;
+using TianHua.FanSelection.UI.CAD;
 
 namespace TianHua.FanSelection.UI
 {
@@ -19,23 +20,23 @@ namespace TianHua.FanSelection.UI
         private static bool _runCustomCommand = false;
         private static ObjectId _selectedEntId = ObjectId.Null;
         private static CustomCommandMappers _customCommands = null;
-        private static ThFanSelectionDatabaseEventHandler databaseEventHandler = null; 
-        private static ThFanSelectionDocumentEventHandler documentEventHandler = null;
+        private static Dictionary<Document, ThFanSelectionDocumentEventHandler> _documentEventHandlers = new Dictionary<Document, ThFanSelectionDocumentEventHandler>();
 
         public void Initialize()
         {
             AddDoubleClickHandler();
+            SubscribeToObjectOverrule();
             SubscribeToDocumentManagerEvents();
             if (Active.Document != null)
             {
                 SubscribeToDocumentEvents(Active.Document);
-                SubscribeToDatabaseEvents(Active.Document.Database);
             }
         }
 
         public void Terminate()
         {
             RemoveDoubleClickHandler();
+            UnSubscribeToObjectOverrule();
             UnSubscribeToDocumentManagerEvents();
         }
 
@@ -76,8 +77,10 @@ namespace TianHua.FanSelection.UI
                 AcadApp.ShowAlertDialog("请先保存当前图纸!");
                 return;
             }
+            SubscribeToDocumentEvents(Active.Document);
             Active.Document.CreateModelSelectionDialog();
             Active.Document.ShowModelSelectionDialog();
+            Active.Document.SubscribeModelSelectionDialog();
         }
 
         [CommandMethod("TIANHUACAD", "THFJZH", CommandFlags.Modal)]
@@ -94,10 +97,14 @@ namespace TianHua.FanSelection.UI
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ObjectId entId = GetSelectedEntity();
-                if (!entId.IsNull)
+                if (entId.IsValid)
                 {
                     Active.Document.ShowModelSelectionDialog();
-                    Active.Document.Form().ShowFormByID(entId.GetModelIdentifier());
+                    var form = Active.Document.Form();
+                    if (form != null && form.Visible)
+                    {
+                        form.ShowFormByID(entId.GetModelIdentifier());
+                    }
                 }
             }
         }
@@ -162,6 +169,16 @@ namespace TianHua.FanSelection.UI
             AcadApp.BeginDoubleClick -= Application_BeginDoubleClick;
         }
 
+        private static void SubscribeToObjectOverrule()
+        {
+            ThFanModelOverruleManager.Instance.Register();
+        }
+
+        private static void UnSubscribeToObjectOverrule()
+        {
+            ThFanModelOverruleManager.Instance.UnRegister();
+        }
+
         private static void SubscribeToDocumentManagerEvents()
         {
             AcadApp.DocumentManager.DocumentCreated += DocumentManager_DocumentCreated;
@@ -184,22 +201,24 @@ namespace TianHua.FanSelection.UI
 
         private static void SubscribeToDocumentEvents(Document document)
         {
-            documentEventHandler = new ThFanSelectionDocumentEventHandler(document);
+            if (!_documentEventHandlers.ContainsKey(document))
+            {
+                _documentEventHandlers.Add(document, new ThFanSelectionDocumentEventHandler(document));
+            }
         }
 
         private static void UnSubscribeToDocumentEvents(Document document)
         {
-            documentEventHandler.Dispose();
-        }
-
-        private static void SubscribeToDatabaseEvents(Database database)
-        {
-            databaseEventHandler = new ThFanSelectionDatabaseEventHandler(database);
-        }
-
-        private static void UnsubscribeToDatabaseEvents(Database database)
-        {
-            databaseEventHandler.Dispose();
+            ThFanSelectionDocumentEventHandler handler = null;
+            if (_documentEventHandlers.ContainsKey(document))
+            {
+                handler = _documentEventHandlers[document];
+                _documentEventHandlers.Remove(document);
+            }
+            if (handler != null)
+            {
+                handler.Dispose();
+            }
         }
 
         private static void DocumentManager_DocumentActivated(object sender, DocumentCollectionEventArgs e)
@@ -214,6 +233,7 @@ namespace TianHua.FanSelection.UI
                 {
                     e.Document.HideModelSelectionDialog();
                 }
+                e.Document.SubscribeModelSelectionDialog();
             }
         }
 
@@ -223,6 +243,7 @@ namespace TianHua.FanSelection.UI
             {
                 e.Document.PushModelSelectionDialogVisible();
                 e.Document.HideModelSelectionDialog();
+                e.Document.UnsubscribeModelSelectionDialog();
             }
         }
 
@@ -232,8 +253,6 @@ namespace TianHua.FanSelection.UI
             {
                 // 订阅Document事件
                 SubscribeToDocumentEvents(e.Document);
-                // 订阅Database事件
-                SubscribeToDatabaseEvents(e.Document.Database);
             }
         }
 
@@ -241,12 +260,10 @@ namespace TianHua.FanSelection.UI
         {
             if (e.Document != null)
             {
-                e.Document.CloseModelSelectionDialog();
+                e.Document.DestroyModelSelectionDialog();
 
                 // 取消订阅Docuemnt事件
                 UnSubscribeToDocumentEvents(e.Document);
-                // 取消订阅Database事件
-                UnsubscribeToDatabaseEvents(e.Document.Database);
             }
         }
 

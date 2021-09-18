@@ -63,6 +63,7 @@ namespace ThMEPHVAC.Model
         public List<Special_graph_Info> special_shapes_info { get; set; }
         public Point3d start_point { get; set; }
         public bool is_recreate;
+        public Vector3d start_dir_vec;
         // 用于内部传参
         private double in_speed;
         private double air_volumn;
@@ -93,6 +94,7 @@ namespace ThMEPHVAC.Model
             merged_endlines.Clear();
             Get_merged_endline(center_lines_, search_point, start_line);//建立排除掉不布风口的图结构
             Search_undistrib_line(exclude_lines_);//设置不布置风口的管段
+            start_dir_vec = ThMEPHVACService.Get_edge_direction(start_line);
         }
         private void Init_param(DBObjectCollection center_lines_, 
                                 ThMEPHVACParam in_param, 

@@ -40,19 +40,20 @@ namespace ThMEPEngineCore.Engine
             res.AddRange(stairRecognize.Elements);
             return res;
         }
+
         public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
         {
-            var rawelement = Extract(db);
+            var rawElement = Extract(db);
             var center = pts.Envelope().CenterPoint();
-            var transformer = new ThMEPOriginTransformer(center);
-            rawelement.ForEach(o => transformer.Transform(o.Geometry));
+            var transFormer = new ThMEPOriginTransformer(center);
+            rawElement.ForEach(o => transFormer.Transform(o.Geometry));
             var newPts = pts.OfType<Point3d>()
-                .Select(o => transformer.Transform(o))
+                .Select(o => transFormer.Transform(o))
                 .ToCollection();
-            var stairlist = Recognize(rawelement, newPts);
-            var staircollection = stairlist.Select(o => o.Outline).ToCollection();
-            transformer.Reset(staircollection);
-            return staircollection.Cast<Polyline>().Select(e => ThIfcStair.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            var stairList = Recognize(rawElement, newPts);
+            var stairCollection = stairList.Select(o => o.Outline).ToCollection();
+            transFormer.Reset(stairCollection);
+            return stairCollection.Cast<Polyline>().Select(e => ThIfcStair.Create(e)).Cast<ThIfcBuildingElement>().ToList();
         }
 
     }

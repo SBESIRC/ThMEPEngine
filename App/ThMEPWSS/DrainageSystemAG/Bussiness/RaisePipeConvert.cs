@@ -25,13 +25,13 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //沉箱立管
                         dn = SetServicesModel.Instance.caissonRiserPipeDiameter.ToString();
                         tag = "DL";
-                        layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
+                        layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         break;
                     case EnumEquipmentType.ventRiser:
                         //通气立管
                         dn = SetServicesModel.Instance.wasteSewageVentilationRiserPipeDiameter.ToString();
                         tag = "TL";
-                        layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
+                        layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         break;
                     case EnumEquipmentType.wastewaterRiser:
                         //废水立管
@@ -43,7 +43,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         //污废合流立管
                         dn = SetServicesModel.Instance.wasteSewageWaterRiserPipeDiameter.ToString();
                         tag = "PL";
-                        layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
+                        layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         break;
                     case EnumEquipmentType.balconyRiser:
                         dn = SetServicesModel.Instance.balconyRiserPipeDiameter.ToString();
@@ -58,12 +58,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
                 if (string.IsNullOrEmpty(dn))
                     continue;
-
                 var block = new CreateBlockInfo(floorId, blockName, layerName, item.blockCenterPoint, item.enumEquipmentType,item.uid);
                 block.spaceId = item.roomSpaceId;
                 block.tag = tag;
                 block.dymBlockAttr.Add("可见性1", dn);
-
                 createBlocks.Add(block);
             }
             return createBlocks;

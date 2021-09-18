@@ -232,7 +232,7 @@ namespace TianHua.FanSelection.UI
             m_ListAxialFanParametersDouble = FuncJson.Deserialize<List<AxialFanParameters>>(_JsonAxialFanParametersDouble);
 
             // 从图纸NOD中读取风机模型
-            var dataSource = new ThFanModelDbDataSource();
+            var dataSource = new ThFanModelDataDbSource();
             dataSource.Load(Active.Database);
             if (dataSource.Models.Count > 0)
             {
@@ -521,7 +521,7 @@ namespace TianHua.FanSelection.UI
 
         public ThFanSelectionAxialModelPicker PickThFanSelectionAxialModel(FanDataModel fanmodel, List<AxialFanParameters> lowaxialfanparameters = null)
         {
-            if (fanmodel.IsHighSpeedModel())
+            if (fanmodel.IsMainModel())
             {
                 if (fanmodel.Control == "双速")
                 {
@@ -549,7 +549,7 @@ namespace TianHua.FanSelection.UI
 
         public AxialFanParameters FindAxialPickParameters(FanDataModel fanmodel, IFanSelectionModelPicker picker, List<AxialFanParameters> lowaxialfanparameters = null)
         {
-            if (fanmodel.IsHighSpeedModel())
+            if (fanmodel.IsMainModel())
             {
                 if (fanmodel.Control == "单速")
                 {
@@ -569,7 +569,7 @@ namespace TianHua.FanSelection.UI
         public void SetAxialFanDataModel(FanDataModel setmodel, AxialFanParameters origindatamodel, IFanSelectionModelPicker picker)
         {
             setmodel.FanModelID = origindatamodel.No;
-            if (setmodel.IsHighSpeedModel())
+            if (setmodel.IsMainModel())
             {
                 setmodel.FanModelName = origindatamodel.ModelNum;
             }
@@ -676,7 +676,7 @@ namespace TianHua.FanSelection.UI
 
         public ThFanSelectionModelPicker PickThFanSelectionFugeModel(FanDataModel fanmodel, List<FanParameters> lowfugefanparameters = null)
         {
-            if (fanmodel.IsHighSpeedModel())
+            if (fanmodel.IsMainModel())
             {
                 if (FuncStr.NullToStr(fanmodel.VentStyle).Contains("前倾离心"))
                 {
@@ -722,7 +722,7 @@ namespace TianHua.FanSelection.UI
         public void SetFugeFanDataModel(FanDataModel setmodel, FanParameters origindatamodel, IFanSelectionModelPicker picker)
         {
             setmodel.FanModelID = origindatamodel.Suffix;
-            if (setmodel.IsHighSpeedModel())
+            if (setmodel.IsMainModel())
             {
                 setmodel.FanModelName = origindatamodel.CCCF_Spec;
             }
@@ -858,7 +858,7 @@ namespace TianHua.FanSelection.UI
                 return;
             }
 
-            if (_Fan.IsHighSpeedModel())
+            if (_Fan.IsMainModel())
             {
                 // 高速轴流
                 if (_Fan.IsAXIALModel())
@@ -969,7 +969,7 @@ namespace TianHua.FanSelection.UI
                     _Fan.FanSelectionStateInfo = new FanSelectionStateInfo();
                 }
             }
-            if (!_Fan.IsHighSpeedModel())
+            if (!_Fan.IsMainModel())
             {
                 var parent = m_ListFan.ParentModel(_Fan);
                 if (FuncStr.NullToStr(parent.VentStyle).Contains("前倾离心"))
@@ -1471,37 +1471,40 @@ namespace TianHua.FanSelection.UI
             {
                 if (_Fan.PID == "0")
                 {
+                    // 场景1：在界面中隐藏风机模型 + 子风机模型
                     if (XtraMessageBox.Show(" 已插入图纸的风机图块也将被删除，是否继续？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
                         _Fan.IsErased = true;
-                        //TreeList.DeleteSelectedNodes();
                         var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
                         if (_SonFan != null)
                         {
                             _SonFan.IsErased = true;
                         }
 
+                        // 在图纸中删除风机模型 + 风机图块
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
+                            acadDatabase.Database.EraseModelData(_Fan);
                             Active.Editor.Regen();
                         }
+
+                        // 刷新控件
                         ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
                 else
                 {
+                    // 场景2：在界面中只删除子风机模型
                     if (XtraMessageBox.Show(" 是否确认删除低速工况？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        //_Fan.IsErased = true;
                         TreeList.DeleteSelectedNodes();
                         SetFanModel();
                         ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
-
             }
             else
             {
@@ -1509,43 +1512,44 @@ namespace TianHua.FanSelection.UI
                 {
                     if (_Fan.PID == "0")
                     {
+                        // 场景1：在界面中隐藏风机模型 + 子风机模型
                         _Fan.IsErased = true;
-                        //TreeList.DeleteSelectedNodes();
-
                         var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
                         if (_SonFan != null)
                         {
                             _SonFan.IsErased = true;
                         }
 
+                        // 在图纸中删除风机模型 + 风机图块
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
+                            acadDatabase.Database.EraseModelData(_Fan);
                             Active.Editor.Regen();
                         }
                     }
                     else
                     {
+                        // 场景1：在界面中隐藏风机模型 + 子风机模型
                         _Fan.IsErased = true;
-                        //TreeList.DeleteSelectedNodes();
                         var _MainFan = m_ListFan.Find(p => p.ID == _Fan.PID);
                         if (_MainFan != null)
                         {
                             _MainFan.IsErased = true;
-                            //m_ListFan.Remove(_MainFan);
                             TreeList.RefreshDataSource();
-                            this.TreeList.ExpandAll();
+                            TreeList.ExpandAll();
 
+                            // 在图纸中删除风机模型 + 风机图块
                             using (Active.Document.LockDocument())
                             using (AcadDatabase acadDatabase = AcadDatabase.Active())
                             using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                             {
                                 dbManager.EraseModels(_MainFan.ID);
+                                acadDatabase.Database.EraseModelData(_MainFan);
                                 Active.Editor.Regen();
                             }
-                            //SetFanModel();
                         }
                     }
 
@@ -1554,35 +1558,6 @@ namespace TianHua.FanSelection.UI
                     m_fmOverView.DataSourceChanged(m_ListFan);
                 }
             }
-
-
-
-
-
-            //var _List = TreeList.GetAllCheckedNodes();
-            //List<FanDataModel> _ListFan = new List<FanDataModel>();
-            //if (_List != null && _List.Count > 0)
-            //{
-            //    _List.ForEach(p =>
-            //   {
-            //       var _ID = p.GetValue("ID");
-            //       var _Fan = m_ListFan.Find(s => FuncStr.NullToStr(s.ID) == FuncStr.NullToStr(_ID));
-            //       if (_Fan != null)
-            //           _ListFan.Add(_Fan);
-            //   });
-            //    if (_ListFan != null && _ListFan.Count > 0)
-            //    {
-            //        if (XtraMessageBox.Show(" 已插入图纸的风机图块也将被删除，是否继续？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            //        {
-            //            m_ListFan.RemoveAll(p => _ListFan.Contains(p));
-            //            TreeList.DataSource = m_ListFan;
-            //            TreeList.RefreshDataSource();
-            //            this.TreeList.ExpandAll();
-
-            //        }
-            //    }
-
-            //}
         }
 
         private void BtnUp_Click(object sender, EventArgs e)
@@ -2259,6 +2234,7 @@ namespace TianHua.FanSelection.UI
 
             // 发送CAD命令
             ThFanSelectionService.Instance.Model = _FanDataModel;
+            ThFanSelectionService.Instance.SubModel = m_ListFan.GetSubModel(_FanDataModel.ID);
             CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMINSERT");
         }
 
@@ -2415,33 +2391,23 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelCopied(ThModelCopyMessage message)
         {
+            var ds = new ThFanModelDataDbSource();
+            ds.Load(Active.Database);
             foreach (var item in message.Data.ModelSystemMapping)
             {
                 var _Guid = item.Key;
                 var models = new List<FanDataModel>();
-                var _Fan = m_ListFan.Find(p => p.ID == item.Value);
+                var _Fan = ds.Models.Find(p => p.ID == _Guid);
                 if (_Fan != null)
                 {
-                    var _Json = FuncJson.Serialize(_Fan);
-                    var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
+                    //
+                    models.Add(_Fan);
 
-                    _FanDataModel.PID = "0";
-                    _FanDataModel.ID = _Guid;
-                    _FanDataModel.IsErased = false;
-                    _FanDataModel.Name = _FanDataModel.Name;
-                    _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
-                    models.Add(_FanDataModel);
-
-                    var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                    //
+                    var _SonFan = ds.Models.Find(p => p.PID == _Guid);
                     if (_SonFan != null)
                     {
-                        var _SonJson = FuncJson.Serialize(_SonFan);
-                        var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
-
-                        _SonFanData.ID = Guid.NewGuid().ToString();
-                        _SonFanData.PID = _Guid;
-                        _SonFanData.IsErased = false;
-                        models.Add(_SonFanData);
+                        models.Add(_SonFan);
                     }
 
                     // 更新数据源
@@ -2451,24 +2417,62 @@ namespace TianHua.FanSelection.UI
                         m_ListFan.InsertRange(_Index + 1, models);
                     }
                 }
-            }
 
-            // 更新图纸
-            var mappings = new Dictionary<FanDataModel, FanDataModel>();
-            foreach (var item in message.Data.ModelSystemMapping)
-            {
-                var target = m_ListFan.Find(p => p.ID == item.Key);
-                var source = m_ListFan.Find(p => p.ID == item.Value);
-                if (target != null && source != null)
-                {
-                    mappings.Add(target, source);
-                }
             }
-            if (mappings.Count > 0)
-            {
-                ThFanSelectionService.Instance.ModelMapping = mappings;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMCOPY");
-            }
+            //foreach (var item in message.Data.ModelSystemMapping)
+            //{
+            //    var _Guid = item.Key;
+            //    var models = new List<FanDataModel>();
+            //    var _Fan = m_ListFan.Find(p => p.ID == item.Value);
+            //    if (_Fan != null)
+            //    {
+            //        var _Json = FuncJson.Serialize(_Fan);
+            //        var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
+
+            //        _FanDataModel.PID = "0";
+            //        _FanDataModel.ID = _Guid;
+            //        _FanDataModel.IsErased = false;
+            //        _FanDataModel.Name = _FanDataModel.Name;
+            //        _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
+            //        models.Add(_FanDataModel);
+
+            //        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+            //        if (_SonFan != null)
+            //        {
+            //            var _SonJson = FuncJson.Serialize(_SonFan);
+            //            var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
+
+            //            _SonFanData.ID = Guid.NewGuid().ToString();
+            //            _SonFanData.PID = _Guid;
+            //            _SonFanData.IsErased = false;
+            //            models.Add(_SonFanData);
+            //        }
+
+            //        // 更新数据源
+            //        if (models.Count > 0)
+            //        {
+            //            var _Index = m_ListFan.IndexOf(_Fan);
+            //            m_ListFan.InsertRange(_Index + 1, models);
+            //        }
+            //    }
+            //}
+
+            //// 更新图纸
+            //var mappings = new Dictionary<FanDataModel, FanDataModel>();
+            //foreach (var item in message.Data.ModelSystemMapping)
+            //{
+            //    var target = m_ListFan.Find(p => p.ID == item.Key);
+            //    var source = m_ListFan.Find(p => p.ID == item.Value);
+            //    if (target != null && source != null)
+            //    {
+            //        mappings.Add(target, source);
+            //    }
+            //}
+            //if (mappings.Count > 0)
+            //{
+            //    ThFanSelectionService.Instance.ModelMapping = mappings;
+            //    CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMCOPY");
+            //}
 
             // 更新界面
             TreeList.RefreshDataSource();
@@ -2515,32 +2519,6 @@ namespace TianHua.FanSelection.UI
 
                 if (_FanSon != null) { _FanSon.IsErased = false; }
             }
-
-            // 更新图纸
-            var erasedModels = new List<FanDataModel>();
-            foreach (var item in message.Data.ErasedModels)
-            {
-                var _ID = item.Key;
-                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(_ID));
-                if (_Fan != null)
-                {
-                    erasedModels.Add(_Fan);
-                }
-
-            }
-            var unerasedModels = new List<FanDataModel>();
-            foreach (var item in message.Data.UnerasedModels)
-            {
-                var _ID = item.Key;
-                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(_ID));
-                if (_Fan != null)
-                {
-                    unerasedModels.Add(_Fan);
-                }
-            }
-            ThFanSelectionService.Instance.ErasedModels = erasedModels;
-            ThFanSelectionService.Instance.UnerasedModels = unerasedModels;
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJSYSTEMERASE");
 
             // 更新界面
             TreeList.RefreshDataSource();
@@ -2614,7 +2592,7 @@ namespace TianHua.FanSelection.UI
             TreeList.PostEditor();
 
             // 保存到图纸NOD中
-            var dataSource = new ThFanModelDbDataSource()
+            var dataSource = new ThFanModelDataDbSource()
             {
                 Models = m_ListFan,
             };

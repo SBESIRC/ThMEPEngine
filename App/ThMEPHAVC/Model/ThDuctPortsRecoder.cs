@@ -19,6 +19,7 @@ namespace ThMEPHVAC.Model
                     { (int)DxfCode.ExtendedDataAsciiString, param.port_num},
                     { (int)DxfCode.ExtendedDataAsciiString, param.air_speed},
                     { (int)DxfCode.ExtendedDataAsciiString, param.air_volume},
+                    { (int)DxfCode.ExtendedDataAsciiString, param.high_air_volume},
                     { (int)DxfCode.ExtendedDataAsciiString, param.elevation},
                     { (int)DxfCode.ExtendedDataAsciiString, param.main_height},
                     { (int)DxfCode.ExtendedDataAsciiString, param.scale},

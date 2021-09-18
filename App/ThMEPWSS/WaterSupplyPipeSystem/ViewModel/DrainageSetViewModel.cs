@@ -33,9 +33,13 @@ namespace ThMEPWSS.Diagram.ViewModel
                 PartitionDatas.Add(partitionData);
             }
 
-            DynamicRadios = new ObservableCollection<DynamicRadioButton>();
-            DynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
-            DynamicRadios.Add(new DynamicRadioButton() { Content = "埋地", GroupName = "type", IsChecked = false });
+            LayingDynamicRadios = new ObservableCollection<DynamicRadioButton>();
+            LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
+            LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "埋地", GroupName = "type", IsChecked = false });
+
+            CleanToolDynamicRadios = new ObservableCollection<DynamicRadioButton>();
+            CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "图纸", GroupName = "type2", IsChecked = true });
+            CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "缺省", GroupName = "type2", IsChecked = false });
         }
         private double floorLineSpace { get; set; }
         /// <summary>
@@ -145,19 +149,35 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private ObservableCollection<DynamicRadioButton> dynamicRadios { get; set; }
+        private ObservableCollection<DynamicRadioButton> layingDynamicRadios { get; set; }
         /// <summary>
         /// 敷设方式数据列表
         /// </summary>
-        public ObservableCollection<DynamicRadioButton> DynamicRadios 
+        public ObservableCollection<DynamicRadioButton> LayingDynamicRadios 
         {
-            get { return dynamicRadios; }
+            get { return layingDynamicRadios; }
             set 
             {
-                this.dynamicRadios = value;
+                this.layingDynamicRadios = value;
                 this.RaisePropertyChanged();
             }
         }
+
+        private ObservableCollection<DynamicRadioButton> cleanToolDynamicRadios { get; set; }
+        /// <summary>
+        /// 卫生洁具数据选择
+        /// </summary>
+        public ObservableCollection<DynamicRadioButton> CleanToolDynamicRadios
+        {
+            get { return cleanToolDynamicRadios; }
+            set
+            {
+                this.cleanToolDynamicRadios = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+
         RelayCommand addPartitionRow;
         public RelayCommand AddPartitionRow
         {

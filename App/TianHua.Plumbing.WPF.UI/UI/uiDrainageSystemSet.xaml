@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <Label Content="楼层线间距"></Label>
@@ -52,7 +53,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="敷设方式："></Label>
-                <ItemsControl x:Name="testList" ItemsSource="{Binding DynamicRadios}">
+                <ItemsControl x:Name="testList" ItemsSource="{Binding LayingDynamicRadios}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
@@ -94,10 +95,30 @@
                     <TextBox Grid.Row="2" Grid.Column="1" Height="24" Width="40" LostFocus="LostFocus_NumberOfHouseholds" Text="{Binding NumberOfHouseholds,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}" HorizontalContentAlignment="Right" KeyDown = "KeyPress_NumberOfHouseholds" TextChanged="TextChanged_NumberOfHouseholds"></TextBox>
                     <Label Grid.Row="2" Grid.Column="2" Content="人" Padding="0" Margin="5,0,0,0" VerticalContentAlignment="Center"></Label>
                 </StackPanel>
-                
             </Grid>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">
+
+        <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center" Grid.Row="3" >
+            <Label Content="洁具数据："></Label>
+            <ItemsControl x:Name="testList1" ItemsSource="{Binding CleanToolDynamicRadios}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+        </StackPanel>
+
+
+
+
+        <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center" Margin="0,20,0,5">
             <cus:ImageButton ImageTextLocation="TextOnly" Content="确认" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly" Content="取消" Width="50" Height="24" Margin="30,0,0,0" Name="Cancle" Click="Cancle_Click"></cus:ImageButton>
         </StackPanel>

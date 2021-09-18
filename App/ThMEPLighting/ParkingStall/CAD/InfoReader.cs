@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThMEPEngineCore.Engine;
 using Linq2Acad;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPLighting.ParkingStall.CAD
 {
@@ -40,7 +41,7 @@ namespace ThMEPLighting.ParkingStall.CAD
                 var parkingStallRecognitionEngine = new ThParkingStallRecognitionEngine();
                 parkingStallRecognitionEngine.Recognize(acadDb.Database, m_previewWindow);
 
-                foreach (var space in parkingStallRecognitionEngine.Spaces)
+                foreach (var space in parkingStallRecognitionEngine.Elements.Cast<ThIfcParkingStall>().ToList())
                 {
                     if (space.Boundary is Polyline polyline)
                     {

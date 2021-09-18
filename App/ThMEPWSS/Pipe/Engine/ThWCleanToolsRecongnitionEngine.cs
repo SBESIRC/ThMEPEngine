@@ -67,11 +67,14 @@ namespace ThMEPWSS.Pipe.Engine
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            elements.Add(new ThRawIfcDistributionElementData()
+            if(blkref.Bounds.HasValue)
             {
-                Data = blkref.GetEffectiveName(),
-                Geometry = blkref.GetTransformedCopy(matrix),
-            });
+                elements.Add(new ThRawIfcDistributionElementData()
+                {
+                    Data = blkref.GetEffectiveName(),
+                    Geometry = blkref.GetTransformedCopy(matrix),
+                });
+            }
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)

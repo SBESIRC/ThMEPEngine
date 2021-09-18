@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 
-namespace TianHua.Electrical.ViewModels
+namespace ThMEPElectrical.FireAlarm.ViewModels
 {
     public class FireAlarmViewModel : NotifyPropertyChangedBase
     {
@@ -21,7 +21,6 @@ namespace TianHua.Electrical.ViewModels
             set 
             {
                 _SelectedIndexForH = value;
-
                 OnPropertyChanged("SelectedIndexForH");
             }
         }
@@ -281,5 +280,14 @@ namespace TianHua.Electrical.ViewModels
                 OnPropertyChanged("BusLoopPointMaxCount");
             }
         }
+
+        public FireAlarmViewModel()
+        {
+            _SelectedIndexForH = 0;
+            _valueOfD = 5800;
+            _SelectedIndexForAngle = 0;
+
+        }
+
     }
 }

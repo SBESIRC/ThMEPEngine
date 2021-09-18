@@ -17,7 +17,7 @@ namespace ThMEPHVAC.Model
         private Vector3d org_dis_vec;
         private Matrix3d org_dis_mat;
         private ThDuctPortsDrawService service;
-        private DBObjectCollection hoses_bounds;                         // 软接外包框
+        private DBObjectCollection hoses_bounds;                     // 软接外包框
         private Dictionary<Polyline, Fan_modify_param> fans_dic;     // 风机外包框到文字参数的映射
         private Dictionary<Polyline, Port_modify_param> ports_dic;   // 风口外包框到文字参数的映射
         private Dictionary<Polyline, Text_modify_param> texts_dic;   // 文字外包框到文字参数的映射
@@ -33,7 +33,7 @@ namespace ThMEPHVAC.Model
         private ThMEPHVACParam in_param;
         private Polyline cur_duct_geo;
         private ThModifyDuctConnComponent duct_conn_service;
-        private bool is_visit_duct_conn_duct;
+        private bool is_visit_duct_conn_duct;// 只处理一次管道连管道的情况
         public ThDuctPortsModifyDuct(ObjectId[] ids, string modify_size, Duct_modify_param param)
         {
             using (var db = AcadDatabase.Active())
@@ -231,8 +231,10 @@ namespace ThMEPHVAC.Model
                 Search_connected_shape(detect_p, out int port_idx, out Entity_modify_param shape);
                 if (shape.handle == ObjectId.Null.Handle)
                 {
-                    Do_proc_duct_conn_duct(modify_duct_width);
-                    return;
+                    Do_proc_duct_conn_duct(modify_duct_width, detect_p, out Point2d other_p);
+                    Search_connected_shape(other_p, out port_idx, out shape);
+                    if (shape.type == "")
+                        return;
                 }
                 if (shape.type == "Reducing")
                     Do_proc_reducing(port_idx, modify_duct_width, shape, out is_direct_duct, ref detect_p);
@@ -246,8 +248,9 @@ namespace ThMEPHVAC.Model
                     throw new NotImplementedException();
             }
         }
-        private void Do_proc_duct_conn_duct(string modify_duct_width)
+        private void Do_proc_duct_conn_duct(string modify_duct_size, Point2d detect_p, out Point2d other_p)
         {
+            other_p = Point2d.Origin;
             //管子连接管子
             if (is_visit_duct_conn_duct)
                 return;
@@ -258,12 +261,15 @@ namespace ThMEPHVAC.Model
             {
                 var pl = res[0] as Polyline;
                 var duct = ducts_dic[pl];
-                var width = ThMEPHVACService.Get_width(modify_duct_width);
+                duct_conn_service.Update_cur_duct_valve_hole(duct.sp, duct.sp, duct.ep, duct.ep, cur_line.duct_size, modify_duct_size);
+                other_p = detect_p.IsEqualTo(duct.sp, tor) ? duct.ep : duct.sp;
+                var width = ThMEPHVACService.Get_width(modify_duct_size);
                 var new_duct = ThDuctPortsFactory.Create_duct(duct.sp, duct.ep, width);
+                Update_text(duct.sp, duct.ep, false, modify_duct_size);// 更新机房内管段的duct_size(如果不需要机房内标注置true)
                 ThDuctPortsDrawService.Clear_graph(duct.handle);
                 service.Draw_duct(new_duct, org_dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids,
                           out ObjectIdList center_ids, out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
-                var duct_param = ThMEPHVACService.Create_duct_modify_param(new_duct.center_line, modify_duct_width, duct.air_volume, in_param, start_handle);
+                var duct_param = ThMEPHVACService.Create_duct_modify_param(new_duct.center_line, modify_duct_size, duct.air_volume, in_param, start_handle);
                 ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
             }
         }
@@ -612,23 +618,22 @@ namespace ThMEPHVAC.Model
             var duct_param = ThMEPHVACService.Create_duct_modify_param(new_duct.center_line, conn_duct.duct_size, conn_duct.air_volume, in_param, start_handle);
             ThDuctPortsDrawService.Clear_graph(conn_duct.handle);
             ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
-            Insert_rev_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
+            Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
         }
-        private void Insert_rev_reducing(double connect_width,
+        private void Insert_reducing(double connect_width,
                                          double modify_width,
                                          Point2d new_sp,
                                          Point2d new_ep,
                                          Point2d detect_p,
                                          Vector2d dis_vec)
         {
-            // 插入反向变径
             if (connect_width > modify_width)
             {
                 var dis1 = detect_p.GetDistanceTo(new_sp);
                 var dis2 = detect_p.GetDistanceTo(new_ep);
                 var reducing_geo = (dis1 < dis2) ?
-                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, modify_width, connect_width) :
-                    ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, modify_width, connect_width);
+                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, connect_width, modify_width) :
+                    ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, connect_width, modify_width);
                 Update_reducing(reducing_geo);
             }
         }

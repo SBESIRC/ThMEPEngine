@@ -166,8 +166,9 @@ namespace ThMEPLighting.EmgLight.Common
                 acadDatabase.Database.UnOffLayer(LayerName);
 
                 var items = acadDatabase.ModelSpace
-                .OfType<BlockReference>()
-                .Where(o => o.Layer == LayerName);
+                    .OfType<BlockReference>()
+                    .Where(o => !o.BlockTableRecord.IsNull)
+                    .Where(o => o.Layer == LayerName);
 
                 foreach (BlockReference block in items)
                 {

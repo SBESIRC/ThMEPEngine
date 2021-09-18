@@ -146,6 +146,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "疏散指示灯图块.dwg");
         }
 
+        // 房间名称分类处理
+        public static string RoomConfigPath()
+        {
+            return Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

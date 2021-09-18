@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using ThMEPEngineCore.GeojsonExtractor;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerBlindZoneChecker : ThSprinklerChecker
     {
-        public override void Check()
+        public override DBObjectCollection Check(ThExtractorBase extractor, Polyline pline)
         {
             throw new NotImplementedException();
         }
 
-        public override void Present()
+        public override void Present(Database database, DBObjectCollection objs)
         {
             throw new NotImplementedException();
         }

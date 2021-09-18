@@ -1,26 +1,24 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPLighting.ParkingStall.Model;
-using ThMEPLighting.ParkingStall.Business.UserInteraction;
-using ThCADExtension;
-using ThMEPLighting.ParkingStall.CAD;
-using ThMEPLighting.ParkingStall.Assistant;
-using ThMEPLighting.ParkingStall.Worker.ParkingGroup;
-using ThMEPLighting.ParkingStall.Worker.PlaceLight;
-using ThMEPLighting.ParkingStall.Business.Block;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPLighting.ParkingStall.Geometry;
-using ThMEPLighting.ParkingStall.Worker.LightAdjustor;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
+using ThMEPLighting.ParkingStall.Assistant;
+using ThMEPLighting.ParkingStall.Business.Block;
+using ThMEPLighting.ParkingStall.Business.UserInteraction;
+using ThMEPLighting.ParkingStall.CAD;
+using ThMEPLighting.ParkingStall.Geometry;
+using ThMEPLighting.ParkingStall.Model;
+using ThMEPLighting.ParkingStall.Worker.LightAdjustor;
+using ThMEPLighting.ParkingStall.Worker.ParkingGroup;
 using ThMEPLighting.ParkingStall.Worker.PipeConnector;
+using ThMEPLighting.ParkingStall.Worker.PlaceLight;
 using ThMEPLighting.ParkingStall.Worker.RegionLaneConnect;
 
 namespace ThMEPLighting.ParkingStall.Core
@@ -29,11 +27,11 @@ namespace ThMEPLighting.ParkingStall.Core
     {
         public void ExtractParkStallProfiles()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
@@ -55,11 +53,11 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void GenerateParkGroup()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
@@ -75,11 +73,11 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void GenerateGroupLight()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
@@ -102,11 +100,11 @@ namespace ThMEPLighting.ParkingStall.Core
         public List<Polyline> GenerateSrcLaneInfo()
         {
             var resPolys = new List<Polyline>();
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return resPolys;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
@@ -187,11 +185,11 @@ namespace ThMEPLighting.ParkingStall.Core
         public List<Polyline> ExtendLaneInfo()
         {
             var resPolys = new List<Polyline>();
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return resPolys;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
@@ -236,32 +234,80 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public List<Curve> GetLanes(Polyline polyline)
         {
-            using (var acdb = AcadDatabase.Active())
+            
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                List<Curve> otherLanes = new List<Curve>();
                 var objs = new DBObjectCollection();
                 var laneLines = acdb.ModelSpace
-                    .OfType<Curve>()
-                    .Where(o => o.Layer == ParkingStallCommon.LANELINE_LAYER_NAME);
-                laneLines.ForEach(x => objs.Add(x));
+                .OfType<Curve>()
+                .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
+                laneLines.ForEach(x =>
+                {
+                    var transCurve = x.Clone() as Curve;
+                    objs.Add(transCurve);
+                });
+                var _lanLineSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
 
-                //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+                var sprayLines = _lanLineSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+                otherLanes.Clear();
+                if (sprayLines.Count <= 0)
+                {
+                    return otherLanes;
+                }
+                sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Entity>().ToList().Where(c => c is Curve).Cast<Curve>().ToList()).ToList();
+                //sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
 
-                return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+                //return sprayLines;
+                //处理车道线
+                var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 100.0, 2.0, Math.PI / 180.0);
+                var parkingLinesService = new ParkingLinesService();
+                var parkingLines = parkingLinesService.CreateNodedParkingLines(polyline, handleLines, out List<List<Line>> otherPLines);
+                foreach (var item in parkingLines)
+                {
+                    if (null == item || item.Count < 1)
+                        continue;
+                    otherLanes.AddRange(item);
+                }
+                foreach (var item in otherPLines)
+                {
+                    if (null == item || item.Count < 1)
+                        continue;
+                    otherLanes.AddRange(item);
+                }
+                return otherLanes;
             }
+            
+
+            //using (var acdb = AcadDatabase.Active())
+            //{
+            //    var objs = new DBObjectCollection();
+            //    var laneLines = acdb.ModelSpace
+            //        .OfType<Curve>()
+            //        .Where(o => o.Layer == ParkingStallCommon.LANELINE_LAYER_NAME);
+            //    laneLines.ForEach(x => objs.Add(x));
+
+            //    //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+            //    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            //    var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+                
+            //    //return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            //    return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Entity>().ToList().Where(c => c is Curve).Cast<Curve>().ToList()).ToList();
+            //}
         }
 
         public void GenerateLaneGroup()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
+                if (curves == null || curves.Count < 1)
+                    continue;
                 var lines = new List<Line>();
                 curves.ForEach(e =>
                 {
@@ -310,6 +356,8 @@ namespace ThMEPLighting.ParkingStall.Core
 
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
 
+                if (groupLights == null || groupLights.Count < 1)
+                    continue;
                 // 根据车道线信息编组
                 LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
             }
@@ -317,14 +365,16 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void LaneSubGroupOptimization()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
+                if (null == curves || curves.Count < 1)
+                    continue;
                 var lines = new List<Line>();
                 curves.ForEach(e =>
                 {
@@ -388,11 +438,11 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void SideLaneConnect()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
@@ -466,11 +516,11 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void THLaneConnect()
         {
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
+            var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
+            if (wallPolygonInfos.Count == 0)
                 return;
 
-            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
@@ -541,5 +591,6 @@ namespace ThMEPLighting.ParkingStall.Core
                 RegionLaneConnector.MakeRegionConnector(pipeLighterPolyInfos);
             }
         }
+
     }
 }

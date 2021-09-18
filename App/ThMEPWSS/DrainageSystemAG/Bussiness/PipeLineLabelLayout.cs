@@ -325,17 +325,21 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     textStartPoint = textStartPoint + layoutDir.outDirection.MultiplyBy(textWidth);
                 var textPLine = TextOutPolyLine(textStartPoint, Vector3d.XAxis, textWidth, Vector3d.YAxis, textHeight);
                 _obstacleCreateEntities.Add(textPLine);
+                int plCount = 0;
                 for (int i = 0; i < thisLinePipes.Count; i++)
                 {
                     var pipe = thisLinePipes[i];
-                    string txtLayer = ThWSSCommon.Layout_PipeRainTextLayerName;
+                    string txtLineLayer = ThWSSCommon.Layout_PipeRainTextLayerName;
                     if (pipe.pipeAttrTag.ToUpper().Equals("FL") || pipe.pipeAttrTag.ToUpper().Equals("PL") || pipe.pipeAttrTag.ToUpper().Equals("TL"))
-                        txtLayer = ThWSSCommon.Layout_PipeWastDrainTextLayerName;
+                    {
+                        plCount += 1;
+                        txtLineLayer = ThWSSCommon.Layout_PipeWastDrainTextLayerName;
+                    }
                     var textCreatePoint = textStartPoint + Vector3d.YAxis.MultiplyBy(_labelTextYSpace/3) +Vector3d.XAxis.MultiplyBy(_labelTextXSpace/2);
-                    var text = CreateDBText(pipe.pipeNumText, textCreatePoint, txtLayer, ThWSSCommon.Layout_TextStyle);
+                    var text = CreateDBText(pipe.pipeNumText, textCreatePoint, txtLineLayer, ThWSSCommon.Layout_TextStyle);
 
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
-                    var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), ThWSSCommon.Layout_FloorDrainBlockRainLayerName, pipe.createBlockUid, "LG_BSLJX");
+                    var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.createBlockUid, "LG_BSLJX");
                     createBasicElements.Add(s);
                     if (i != thisLinePipes.Count - 1)
                     {
@@ -346,14 +350,24 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         textStartPoint = textStartPoint + yAxis.MultiplyBy(yDis + _labelTextYSpace);
                         lineStartPoint = lineStartPoint + yAxis.MultiplyBy(yDis + _labelTextYSpace);
                     }
-                    retText.Add(new CreateDBTextElement(_createFloor.floorUid, textStartPoint, text, pipe.createBlockUid, txtLayer, ThWSSCommon.Layout_TextStyle));
+                    retText.Add(new CreateDBTextElement(_createFloor.floorUid, textStartPoint, text, pipe.createBlockUid, txtLineLayer, ThWSSCommon.Layout_TextStyle));
                 }
                 var startPipe = layoutDir.direction.Y < 0 ? thisLinePipes.Last() : thisLinePipes.First();
                 var lineSp = new Point3d(centerPoint.X, startPipe.pipeCenterPoint.Y, 0);
                 var lineEp = layoutDir.direction.Y < 0 ? createPoint : lineStartPoint;
                 var mainLine = new Line(lineSp, lineEp);
-                var addLine = new CreateBasicElement(_createFloor.floorUid, mainLine, ThWSSCommon.Layout_FloorDrainBlockRainLayerName, connectPipeIds, "LG_BSLJX");
-                createBasicElements.Add(addLine);
+                if (plCount > 0) 
+                {
+                    //有废水立管,则添加一根废水对应线
+                    var addLine1 = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeWastDrainTextLayerName, connectPipeIds, "LG_BSLJX");
+                    createBasicElements.Add(addLine1);
+                }
+                if(plCount != thisLinePipes.Count)
+                {
+                    //还有雨水、阳台等立管，则加入一根雨水对应线
+                    var addLine = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeRainTextLayerName, connectPipeIds, "LG_BSLJX");
+                    createBasicElements.Add(addLine);
+                }
                 //将主线加入到后续的避让线中
                 _obstacleLines.Add(mainLine);
             }

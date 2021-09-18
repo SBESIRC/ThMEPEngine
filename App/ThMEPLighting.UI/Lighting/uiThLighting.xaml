@@ -1,157 +1,384 @@
 ﻿<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" x:Class="TianHua.Lighting.UI.uiThLighting"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
-                     Title="照明" SizeToContent="Manual" Height="500" 
-                    Width="350" MaxWidth="350" MaxHeight="500"
-             mc:Ignorable="d" >
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:s="clr-namespace:System;assembly=mscorlib"
+                         xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
+                                         Title="照明" SizeToContent="Manual" Height="750"
+                                        Width="450" MaxWidth="1000" MaxHeight="1000"
+                         mc:Ignorable="d" >
     <Window.Resources>
         <ResourceDictionary>
-            <viewmodels:EnumBooleanConverter x:Key="OptionConverter" ></viewmodels:EnumBooleanConverter>
+            <viewmodels:RadioUiValueConverter x:Key="RadioUiValueConverter" ></viewmodels:RadioUiValueConverter>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="3">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20*"></RowDefinition>
-            <RowDefinition Height="26*"></RowDefinition>
-            <RowDefinition Height="26*"></RowDefinition>
-            <RowDefinition Height="22*"></RowDefinition>
-            <RowDefinition Height="6*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50*"></RowDefinition>
-                    <RowDefinition Height="50*"></RowDefinition>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="1"  Margin="0,5" >
-                    <StackPanel >
-                        <Label Content="照明灯具"/>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton Margin="5,5,0,0" GroupName="rbGroupLights" IsChecked="{Binding LightOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioLightOptions.L1}}">L1</RadioButton>
-                                <RadioButton Margin="5,5,0,0" GroupName="rbGroupLights" IsChecked="{Binding LightOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioLightOptions.L2}}">L2</RadioButton>
-                                <RadioButton Margin="5,5,0,0" GroupName="rbGroupLights" IsChecked="{Binding LightOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioLightOptions.L3}}">L3</RadioButton>
-                                <RadioButton Margin="5,5,0,0" GroupName="rbGroupLights" IsChecked="{Binding LightOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioLightOptions.L4}}">L4</RadioButton>
-                                <RadioButton Margin="5,5,0,0" GroupName="rbGroupLights" IsChecked="{Binding LightOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioLightOptions.L5}}">L5</RadioButton>
+    <StackPanel Orientation="Vertical">
+        <StackPanel Grid.Row="1"  Margin="0,5" >
+            <StackPanel >
+                <GroupBox>
+                    <GroupBox.Header>
+                        <CheckBox FontSize="20" FontWeight="Bold">
+                            照明灯具
+                        </CheckBox>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=圆形吸顶灯}">圆形吸顶灯</RadioButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=半球吸顶灯}">半球吸顶灯</RadioButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=感应吸顶灯}">感应吸顶灯</RadioButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=筒灯}">筒灯</RadioButton>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=应急照明灯}">应急照明灯</RadioButton>
                             </StackPanel>
                         </StackPanel>
-                        
                     </StackPanel>
-                   
-                    <StackPanel Orientation="Horizontal">
-                        <!--<TextBlock Margin="5,5,0,0">功率(W)</TextBlock>
-                        <TextBox Width="40" Margin="5,5,0,0" ></TextBox>-->
-                        <!--<TextBlock Margin="5,5,0,0">光通量</TextBlock>
-                        <TextBox Width="40" Margin="5,5,0,0"></TextBox>-->
-                        <TextBlock Margin="5,5,0,0">正常照明半径(mm)</TextBlock>
-                        <TextBox Width="40" Margin="5,5,0,0" Text="{Binding LightingRadius}"></TextBox>
-                        <TextBlock Margin="5,5,0,0">疏散照明半径(mm)</TextBlock>
-                        <TextBox Width="40" Margin="5,5,0,0" Text="{Binding EvacuationRadius}"></TextBox>
-                    </StackPanel>
+                </GroupBox>
 
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="5,5,0,0">正常照明/疏散照明是否兼用</TextBlock>
-                        <RadioButton Height="15" Margin="5,5,0,0" GroupName="rbGroup0" IsChecked="{Binding DualUseOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioDualUseOptions.No}}">否</RadioButton>
-                        <RadioButton Height="15" Margin="5,5,0,0" GroupName="rbGroup0" IsChecked="{Binding DualUseOption, Converter={StaticResource OptionConverter}, ConverterParameter={x:Static viewmodels:RadioDualUseOptions.Yes}}">是</RadioButton>
+
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5,5,0,0">正常照明灯具布置半径(mm)</TextBlock>
+                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding LayoutRadiusOfNormalLightingLamps}"></TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5,5,0,0">应急照明灯具布置半径(mm)</TextBlock>
+                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding LayoutRadiusOfEmergencyLightingLamps}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="5,5,0,0">应急照明是否兼做平时照明</TextBlock>
+                <RadioButton Height="15" Margin="5,5,0,0"  IsChecked="{Binding WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=true}">是</RadioButton>
+                <RadioButton Height="15" Margin="5,5,0,0"  IsChecked="{Binding WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=false}">否</RadioButton>
+            </StackPanel>
+        </StackPanel>
+        <GroupBox>
+            <GroupBox.Header>
+                <CheckBox FontSize="20" FontWeight="Bold">
+                    车道照明
+                </CheckBox>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.RowDefinitions></Grid.RowDefinitions>
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="200"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"></ColumnDefinition>
+                                <ColumnDefinition Width="50"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0">布灯线槽中心线绘制</Label>
+                            <Button Grid.Row="0" Grid.Column="1" Click="btnDrawLightCenter">绘制</Button>
+                            <Label Grid.Row="1"  Grid.Column="0">非布灯线槽中心线绘制</Label>
+                            <Button Grid.Row="1"  Grid.Column="1" Click="btnDrawNonLightCenter" HorizontalAlignment="Left" Width="50">绘制</Button>
+                            <Label Grid.Row="2"  Grid.Column="0" >单排线槽中心线绘制</Label>
+                            <Button Grid.Row="2"  Grid.Column="1" Click="btnDrawSingleCenter">绘制</Button>
+                            <Label Grid.Row="3"  Grid.Column="0">建筑车道线拾取</Label>
+                            <Button Grid.Row="3"  Grid.Column="1" Height="25" VerticalAlignment="Bottom" Click="btnPickUp">拾取</Button>
+                        </Grid>
                     </StackPanel>
+                    <ListBox x:Name="lstBox" Height="100"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                             SelectionMode="Extended"
+                                        ItemsSource="{Binding Items}"
+                                         >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}" >
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Control.Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" Name="Bd" SnapsToDevicePixels="True">
+                                                <CheckBox
+                                                                                        IsChecked="{Binding Path=IsSelected,RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"
+                                                                                        >
+                                                    <ContentPresenter Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                                </CheckBox>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <MultiTrigger>
+                                                    <MultiTrigger.Conditions>
+                                                        <Condition Property="UIElement.IsMouseOver">
+                                                            <Condition.Value>
+                                                                <s:Boolean>True</s:Boolean>
+                                                            </Condition.Value>
+                                                        </Condition>
+                                                    </MultiTrigger.Conditions>
+                                                    <Setter Property="Panel.Background" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#1F26A0DA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#A826A0DA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </MultiTrigger>
+                                                <MultiTrigger>
+                                                    <MultiTrigger.Conditions>
+                                                        <Condition Property="Selector.IsSelectionActive">
+                                                            <Condition.Value>
+                                                                <s:Boolean>False</s:Boolean>
+                                                            </Condition.Value>
+                                                        </Condition>
+                                                        <Condition Property="Selector.IsSelected">
+                                                            <Condition.Value>
+                                                                <s:Boolean>True</s:Boolean>
+                                                            </Condition.Value>
+                                                        </Condition>
+                                                    </MultiTrigger.Conditions>
+                                                    <Setter Property="Panel.Background" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#3DDADADA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FFDADADA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </MultiTrigger>
+                                                <MultiTrigger>
+                                                    <MultiTrigger.Conditions>
+                                                        <Condition Property="Selector.IsSelectionActive">
+                                                            <Condition.Value>
+                                                                <s:Boolean>True</s:Boolean>
+                                                            </Condition.Value>
+                                                        </Condition>
+                                                        <Condition Property="Selector.IsSelected">
+                                                            <Condition.Value>
+                                                                <s:Boolean>True</s:Boolean>
+                                                            </Condition.Value>
+                                                        </Condition>
+                                                    </MultiTrigger.Conditions>
+                                                    <Setter Property="Panel.Background" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#3D26A0DA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FF26A0DA</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </MultiTrigger>
+                                                <Trigger Property="UIElement.IsEnabled">
+                                                    <Setter Property="TextElement.Foreground" TargetName="Bd">
+                                                        <Setter.Value>
+                                                            <DynamicResource ResourceKey="{x:Static SystemColors.GrayTextBrushKey}" />
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Trigger.Value>
+                                                        <s:Boolean>False</s:Boolean>
+                                                    </Trigger.Value>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Text}"></TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Horizontal" Margin="3">
+                        <TextBlock>线槽宽度：</TextBlock>
+                        <TextBox Width="100" Text="{Binding TrunkingWidth}"></TextBox>
+                        <TextBlock>mm</TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="3">
+                        <TextBlock>双排间距：</TextBlock>
+                        <TextBox Width="100" Text="{Binding DoubleRowSpacing}"></TextBox>
+                        <TextBlock>mm</TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="3">
+                        <TextBlock>灯具间距：</TextBlock>
+                        <TextBox Width="100" Text="{Binding LampSpacing}"></TextBox>
+                        <TextBlock>mm</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <GroupBox Grid.Row="0" Grid.Column="0">
+                            <GroupBox.Header>照度控制</GroupBox.Header>
+                            <StackPanel Orientation="Vertical">
+                                <RadioButton   Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=单排布置}">单排布置</RadioButton>
+                                <RadioButton  Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=双排布置}">双排布置</RadioButton>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Grid.Row="0" Grid.Column="1">
+                            <GroupBox.Header>安装方式</GroupBox.Header>
+                            <StackPanel Orientation="Vertical">
+                                <RadioButton    Margin="5,5,0,0"  IsChecked="{Binding InstallationMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=线槽安装}">线槽安装</RadioButton>
+                                <RadioButton  Margin="5,5,0,0"  IsChecked="{Binding InstallationMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=吊链安装}">吊链安装</RadioButton>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                    <GroupBox>
+                        <GroupBox.Header>布置模式</GroupBox.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <RadioButton Grid.Row="0" Grid.Column="0"  Margin="5,5,0,0"  IsChecked="{Binding LayoutMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=按柱跨布置}">按柱跨布置</RadioButton>
+                                <RadioButton Grid.Row="0" Grid.Column="1"    Margin="5,5,0,0"  IsChecked="{Binding LayoutMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=避梁布置}">避梁布置</RadioButton>
+                                <RadioButton Grid.Row="1" Grid.Column="0"   Margin="5,5,0,0"  IsChecked="{Binding LayoutMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=等间距布置}">等间距布置</RadioButton>
+                                <RadioButton Grid.Row="1" Grid.Column="1"    Margin="5,5,0,0"  IsChecked="{Binding LayoutMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=可跨梁布置}">可跨梁布置</RadioButton>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox>
+                        <GroupBox.Header>回路数量</GroupBox.Header>
+                        <StackPanel Orientation="Vertical">
+                            <RadioButton     Margin="5,5,0,0"  IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=自动计算}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock>自动计算</TextBlock>
+                                    <TextBox Width="30" Text="{Binding NumberOfCircuitsAutomaticCalculationOfNLoop}"></TextBox>
+                                    <TextBlock>盏/回路</TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton   Margin="5,5,0,0" IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=指定数量}">
+                                <StackPanel Orientation="Horizontal"  >
+                                    <TextBlock>指定数量</TextBlock>
+                                    <TextBox Width="30" Text="{Binding NumberOfCircuitsSpecifyTheNumberOfNPerCircuits}"></TextBox>
+                                    <TextBlock>个/回路</TextBlock>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </GroupBox>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock>起始编号：WL</TextBlock>
+                        <TextBox Width="30" Text="{Binding StartingNumber}"></TextBox>
+                    </StackPanel>
+                    <WrapPanel>
+                        <Button Width="120" Height="25" Click="btnReGen">重新生成回路标注</Button>
+                    </WrapPanel>
                 </StackPanel>
             </Grid>
-        </StackPanel>
-        <Separator BorderThickness="2"></Separator>
-        <StackPanel Grid.Row="1" >
-            
-            <StackPanel>
-                <Label>线槽灯</Label>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <RadioButton GroupName="rbGroup1" IsChecked="True"  Margin="5,5,0,0">单排</RadioButton>
-                <RadioButton GroupName="rbGroup1"  Margin="5,5,0,0">双排</RadioButton>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="5,5,0,0">线槽宽度(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0"></TextBox>
-                    <TextBlock Margin="5,5,0,0">线槽间距(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0"></TextBox>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="5,5,0,0">灯具间距(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0"></TextBox>
-                    <TextBlock Margin="5,5,0,0">起始编号  WL</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0"></TextBox>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton GroupName="rbGroup3" Margin="5,5,0,0" Name="rbLoopCnt">回路数量</RadioButton>
-                    <TextBox Width="40" Margin="5,5,0,0" ></TextBox>
-                    <RadioButton GroupName="rbGroup3" IsChecked="True" Margin="5,5,0,0">自动计算</RadioButton>
-                </StackPanel>
-            </StackPanel>
-        </StackPanel>
-        <Separator BorderThickness="2"></Separator>
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <StackPanel>
-            <StackPanel>
-                    <Label>疏散指示</Label>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                    <RadioButton Margin="5,5,0,0" GroupName="rbGroup4" IsChecked="True">优先壁装</RadioButton>
-                    <RadioButton Margin="5,5,0,0"  GroupName="rbGroup4">吊装</RadioButton>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                        <TextBlock Height="15" Margin="5,5,0,0">标志灯大小</TextBlock>
-                        <ComboBox Width="60" Height="20" Margin="5,5,0,0" SelectedIndex="0">
-                            <ComboBoxItem>中型</ComboBoxItem>
-                            <ComboBoxItem>大型</ComboBoxItem>
-                        </ComboBox>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                        <CheckBox Margin="5,5,0,0">显示疏散路径</CheckBox>
+        </GroupBox>
+
+        <GroupBox>
+            <GroupBox.Header>
+                <CheckBox FontSize="20" FontWeight="Bold">
+                    疏散指示
+                </CheckBox>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <RadioButton Margin="5,5,0,0"   IsChecked="{Binding EvacuationInstructions, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=优先壁装}">优先壁装</RadioButton>
                     </StackPanel>
-            </StackPanel>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                        <Button Margin="5,5,0,0">生成路径</Button>
+                    <StackPanel Orientation="Vertical">
+                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <RadioButton Margin="5,5,0,0"  IsChecked="{Binding EvacuationInstructions, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=优先吊装}">优先吊装</RadioButton>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-            </StackPanel>
-        </StackPanel>
-        <Separator BorderThickness="2"></Separator>
-        <StackPanel Grid.Row="3" Orientation="Horizontal">
-            <StackPanel>
-                <StackPanel>
-                    <Label>地库应急照明</Label>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton Margin="5,5,0,0" GroupName="rbGroup5" IsChecked="True">疏散照明壁灯</RadioButton>
-                    <RadioButton Margin="5,5,0,0" GroupName="rbGroup5">消防专用投光灯</RadioButton>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton Margin="5,5,0,0"  GroupName="rbGroup6" IsChecked="True">单排</RadioButton>
-                    <RadioButton Margin="5,5,0,0" GroupName="rbGroup6" >双排</RadioButton>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Height="15" Margin="5,5,0,0">标志灯大小</TextBlock>
+                        <ComboBox x:Name="cbSignLightSize" Width="60" Height="20" Margin="5,5,0,0" SelectedItem="{Binding MarkerLampSize}"></ComboBox>
+                    </StackPanel>
+                    <CheckBox Margin="5" IsChecked="{Binding DisplayEvacuationRoute}">显示疏散路径</CheckBox>
+                    <WrapPanel>
+                        <Button Width="120" Height="25" Click="btnCalcPath">估算疏散路径</Button>
+                    </WrapPanel>
                 </StackPanel>
 
-            </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox>
+            <GroupBox.Header>
+                <CheckBox FontSize="20" FontWeight="Bold">
+                    地库应急照明
+                </CheckBox>
+            </GroupBox.Header>
 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <RadioButton Margin="5,5,0,0"   IsChecked="{Binding BasementEmergencyLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=疏散照明壁灯}">疏散照明壁灯</RadioButton>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <RadioButton Margin="5,5,0,0"   IsChecked="{Binding BasementEmergencyLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=消防专用投光灯}">消防专用投光灯</RadioButton>
+                    </StackPanel>
+                </StackPanel>
+
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <RadioButton Margin="5,5,0,0" IsChecked="{Binding LaneLayout, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=车道单侧布置}">车道单侧布置</RadioButton>
+                    <RadioButton  Margin="5,5,0,0"  IsChecked="{Binding LaneLayout, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=车道双侧布置}">车道双侧布置</RadioButton>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Height="20" >全局比例：</TextBlock>
+            <ComboBox x:Name="cbRatio" Width="60" Height="20" SelectedItem="{Binding GlobalScale}"></ComboBox>
+            <Button Name="btnLayout" Width="116" Height="25" Click="btnPlace_Click" Margin="10,0,0,0">布置</Button>
+            <Button Name="btnRouting" Width="120" Height="25" Click="btnRouting_Click" Margin="10,0,0,0">连线</Button>
         </StackPanel>
-        <Separator BorderThickness="2"></Separator>
-        <StackPanel Orientation="Horizontal"  Grid.Row="4">
-            <TextBlock Height="20">比例:</TextBlock>
-            <ComboBox Width="80" Height="20" SelectedIndex="{Binding BlockRatioIndex}" Text="{Binding BlockRatio, Mode=OneWayToSource}" Margin="5,0,0,0">
-                <ComboBoxItem>1:100</ComboBoxItem>
-                <ComboBoxItem>1:150</ComboBoxItem>
-            </ComboBox>
-            <Button Height="20" Margin="5,0,0,0" Name="btnLayout" Click="btnLayout_Click">布置</Button>
-            <Button Height="20" Margin="5,0,0,0" Name="bthRouting" Click="bthRouting_Click">连线</Button>
-        </StackPanel>
-    </Grid>
+
+
+    </StackPanel>
 </cus:ThCustomWindow>
+

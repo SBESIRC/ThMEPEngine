@@ -37,7 +37,7 @@ namespace ThMEPWSS.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public void ExecuteTest1(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
+        public void ExecuteTest(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
             var tmpUiConfigs = uiConfigs;
             if (tmpUiConfigs.SelectRadionButton.Content is null)
@@ -54,7 +54,7 @@ namespace ThMEPWSS.Command
              
             var setViewModel = tmpUiConfigs.SetViewModel;
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
-            if (setViewModel.DynamicRadios[1].IsChecked)
+            if (setViewModel.LayingDynamicRadios[1].IsChecked)
             {
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
@@ -174,9 +174,11 @@ namespace ThMEPWSS.Command
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
                 
                 var maxHouseholds = ThWCompute.GetMaxHouseholds(households, FlushFaucet);
+
+                bool cleanToolFlag = setViewModel.CleanToolDynamicRadios[0].IsChecked;
                 //统计卫生洁具数
                 var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea, 
-                    notExistFloor, blockConfig);
+                    notExistFloor, blockConfig, cleanToolFlag);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
@@ -195,9 +197,9 @@ namespace ThMEPWSS.Command
 
                 var startPt = new Point3d(insertPt.X, insertPt.Y, 0);
                 var floorheight = new int[] { 1800,2000,2200,2500,3000};
-                //var floorheight = new int[] { 1800, 3000 };
+                //var floorheight = new int[] {3000 };
                 int houseNum = 0;
-                for(maxHouseholds = 2; maxHouseholds > 1; maxHouseholds--)
+                for(maxHouseholds = 7; maxHouseholds > 1; maxHouseholds--)
                 {
                     int indxx = 0;
                     for (var flush = 0; flush < 2; flush++)
@@ -349,7 +351,7 @@ namespace ThMEPWSS.Command
 
             var setViewModel = tmpUiConfigs.SetViewModel;
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
-            if (setViewModel.DynamicRadios[1].IsChecked)
+            if (setViewModel.LayingDynamicRadios[1].IsChecked)
             {
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
@@ -469,9 +471,10 @@ namespace ThMEPWSS.Command
                 var households = ThWCompute.CountKitchenNums(floorAreaList, selectedArea, floorNumList, floorNumbers);
 
                 var maxHouseholds = ThWCompute.GetMaxHouseholds(households, FlushFaucet);
+                var cleanToolFlag = setViewModel.CleanToolDynamicRadios[0].IsChecked;
                 //统计卫生洁具数
                 var floorCleanToolList = ThWCompute.CountCleanToolNums(floorAreaList, households, floorNumList, selectedArea,
-                    notExistFloor, blockConfig);
+                    notExistFloor, blockConfig, cleanToolFlag);
 
                 WaterSuplyUtils.ImportNecessaryBlocks();//导入需要的模块
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable

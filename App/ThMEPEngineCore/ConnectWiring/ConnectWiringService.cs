@@ -3,9 +3,15 @@ using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using CLI;
 using Linq2Acad;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,13 +25,35 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing()
+        public List<Polyline> Routing()
         {
-            
+            var lines = new List<Polyline>();
+            var data = GetData();
+            if (data != null)
+            {
+                ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
+                var res = thCableRouter.RouteCable(data, 25);
+                var serializer = GeoJsonSerializer.Create();
+                using (var stringReader = new StringReader(res))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    foreach (var f in features)
+                    {
+                        if (f.Geometry is LineString line)
+                        {
+                            lines.Add(line.ToDbPolyline());
+                        }
+                    }
+                } 
+            }
+
+            return lines;
         }
 
-        public void GetData()
+        public string GetData()
         {
+            string geoJson = null;
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 // 获取框线
@@ -43,7 +71,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
-                    return;
+                    return geoJson;
                 }
                 List<Polyline> frameLst = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
@@ -68,7 +96,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 var blockResult = Active.Editor.GetSelection(blockOptions, blockFilter);
                 if (blockResult.Status != PromptStatus.OK)
                 {
-                    return;
+                    return geoJson;
                 }
                 var block = acadDatabase.Element<BlockReference>(blockResult.Value.GetObjectIds().First());
 
@@ -80,8 +108,10 @@ namespace ThMEPEngineCore.ConnectWiring
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());
 
-                var geoJson = ThGeoOutput.Output(data.Container);
+                geoJson = ThGeoOutput.Output(data.Container);
             }
+
+            return geoJson;
         }
 
         /// <summary>

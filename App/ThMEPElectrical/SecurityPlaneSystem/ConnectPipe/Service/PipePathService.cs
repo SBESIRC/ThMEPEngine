@@ -150,7 +150,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(mapFrame, dir, closetLane, 400, 250, 250);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(mapFrame, dir, closetLane, 400, 250, 150);
 
             //----设置障碍物
             var objs = holes.ToCollection();

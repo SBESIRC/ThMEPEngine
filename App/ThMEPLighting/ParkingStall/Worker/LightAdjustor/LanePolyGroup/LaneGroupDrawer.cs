@@ -39,6 +39,8 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             var curPolyIds = DrawUtils.DrawProfileDebug(new List<Curve> { curPoly }, "DrawPileGroupInfo", Color.FromRgb(255, 0, 0));
 
             totalIds.AddRange(curPolyIds);
+            if (totalIds == null || totalIds.Count < 1)
+                return;
             using (var db = AcadDatabase.Active())
             {
                 GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), totalIds);

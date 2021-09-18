@@ -188,7 +188,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer2.Size = new System.Drawing.Size(192, 320);
-            this.splitContainer2.SplitterDistance = 87;
+            this.splitContainer2.SplitterDistance = 90;
             this.splitContainer2.SplitterWidth = 1;
             this.splitContainer2.TabIndex = 1;
             // 
@@ -205,6 +205,7 @@ namespace TianHua.Hvac.UI
             // comboBox2
             // 
             this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.Enabled = false;
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
             "消防排烟",
@@ -261,8 +262,8 @@ namespace TianHua.Hvac.UI
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer5);
-            this.splitContainer3.Size = new System.Drawing.Size(192, 232);
-            this.splitContainer3.SplitterDistance = 137;
+            this.splitContainer3.Size = new System.Drawing.Size(192, 229);
+            this.splitContainer3.SplitterDistance = 135;
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 5;
             // 
@@ -368,6 +369,7 @@ namespace TianHua.Hvac.UI
             // 
             this.textBox2.Location = new System.Drawing.Point(68, 18);
             this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(73, 21);
             this.textBox2.TabIndex = 7;
             this.textBox2.Text = "20000";
@@ -413,7 +415,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer5.Panel2.Controls.Add(this.label13);
             this.splitContainer5.Panel2.Controls.Add(this.textBox6);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(192, 94);
+            this.splitContainer5.Size = new System.Drawing.Size(192, 93);
             this.splitContainer5.SplitterDistance = 28;
             this.splitContainer5.SplitterWidth = 1;
             this.splitContainer5.TabIndex = 0;
@@ -425,7 +427,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(192, 94);
+            this.listBox1.Size = new System.Drawing.Size(192, 93);
             this.listBox1.TabIndex = 0;
             // 
             // label15
@@ -661,7 +663,7 @@ namespace TianHua.Hvac.UI
             this.button1.Location = new System.Drawing.Point(25, 478);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(128, 23);
-            this.button1.TabIndex = 20;
+            this.button1.TabIndex = 23;
             this.button1.Text = "确定";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.btnOK);
@@ -677,7 +679,7 @@ namespace TianHua.Hvac.UI
             this.comboBox1.Location = new System.Drawing.Point(83, 280);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(77, 20);
-            this.comboBox1.TabIndex = 2;
+            this.comboBox1.TabIndex = 22;
             // 
             // splitContainer4
             // 
@@ -725,7 +727,7 @@ namespace TianHua.Hvac.UI
             this.textBox9.Location = new System.Drawing.Point(84, 219);
             this.textBox9.Name = "textBox9";
             this.textBox9.Size = new System.Drawing.Size(61, 21);
-            this.textBox9.TabIndex = 19;
+            this.textBox9.TabIndex = 21;
             this.textBox9.Text = "AH/D";
             this.textBox9.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -771,7 +773,7 @@ namespace TianHua.Hvac.UI
             this.textBox1.Location = new System.Drawing.Point(83, 167);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(47, 21);
-            this.textBox1.TabIndex = 26;
+            this.textBox1.TabIndex = 20;
             this.textBox1.Text = "200";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
@@ -848,7 +850,7 @@ namespace TianHua.Hvac.UI
             this.textBox8.Location = new System.Drawing.Point(13, 167);
             this.textBox8.Name = "textBox8";
             this.textBox8.Size = new System.Drawing.Size(47, 21);
-            this.textBox8.TabIndex = 24;
+            this.textBox8.TabIndex = 20;
             this.textBox8.Text = "500";
             this.textBox8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox8.TextChanged += new System.EventHandler(this.textBox8_TextChanged);

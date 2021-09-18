@@ -215,6 +215,7 @@ namespace ThMEPWSS.Command
                         else if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
                         {
                             item.tag = "FL";
+                            item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                         }
                     }
                 }
@@ -517,7 +518,7 @@ namespace ThMEPWSS.Command
                     int inter = PointVectorUtil.LineIntersectionLine(line.StartPoint, lineDir, checkLine.StartPoint, checkDir, out Point3d interPoint);
                     if (inter != 1)
                         continue;
-                    if (!interPoint.PointInLineSegment(line) || !interPoint.PointInLineSegment(checkLine))
+                    if (!PointVectorUtil.PointInLineSegment(interPoint,line) || !PointVectorUtil.PointInLineSegment(interPoint, checkLine))
                         continue;
                     delCurveIds.Add(pipeLine.uid);
                     if (sp.DistanceTo(interPoint) > _roofY1BreakMoveLength) 

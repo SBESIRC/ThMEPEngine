@@ -85,16 +85,16 @@ namespace TianHua.Hvac.UI.Command
         private void Proc_not_integer(out DBObjectCollection center_lines)
         {
             start_point = Get_point_from_prompt("选择起点");
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Line)).DxfName,
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
             if (start_point == null)
             {
                 center_lines = new DBObjectCollection();
                 return;
             }
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Line)).DxfName,
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
             var sf = ThSelectionFilterTool.Build(dxfNames);
             center_lines = Get_center_line("请选择中心线", sf, out string layer);
             if (center_lines.Count == 0)
@@ -120,6 +120,7 @@ namespace TianHua.Hvac.UI.Command
                     in_param.port_range = inte_param.port_range;
                     in_param.in_duct_size = inte_param.in_duct_size;
                     in_param.air_speed = inte_param.air_speed;
+                    in_param.high_air_volume = inte_param.high_air_volume;
                     if (in_param.scale == null)
                         return false;
                     if (in_param.port_range.Contains("侧"))

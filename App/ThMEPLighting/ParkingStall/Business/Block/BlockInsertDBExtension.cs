@@ -24,7 +24,7 @@ namespace ThMEPLighting.ParkingStall.Business.Block
         public static void ImportModel(this Database database, string name, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ParkStallLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);

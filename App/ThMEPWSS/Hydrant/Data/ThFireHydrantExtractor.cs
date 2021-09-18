@@ -10,8 +10,8 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Engine;
 using DotNetARX;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -35,14 +35,13 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var vistor = new ThFireHydrantExtractionVisitor()
             {
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
                 BlkNames = new List<string>() { "室内消火栓平面" },
             };
             //后期再做远距离移动
             var hydrantExtractor = new ThFireHydrantRecognitionEngine(vistor);
-            hydrantExtractor.Recognize(database, pts);
-            //vistor.Results = new List<ThRawIfcDistributionElementData>();
-            //hydrantExtractor.RecognizeMS(database, pts);
-            //vistor.Results = new List<ThRawIfcDistributionElementData>();
+            hydrantExtractor.Recognize(database, pts);            
+            hydrantExtractor.RecognizeMS(database, pts);            
 
             hydrantExtractor.Elements.ForEach(o =>
             {
@@ -50,10 +49,6 @@ namespace ThMEPWSS.Hydrant.Data
                 var center = GetCenter(obb);
                 HydrantOutline.Add(new DBPoint(center), obb);
             });
-            //设置测试图层
-            //LayerTools.AddLayer(AcHelper.Active.Database, "111111");
-            //AcHelper.Active.Database.SetCurrentLayer("111111");
-            //hydrantExtractor.Elements.Select(o => o.Outline).ToList().CreateGroup(AcHelper.Active.Database, 1);
 
             var newHydrantPoints = HydrantOutline.Select(o => o.Key).Where(o => !FireHydrants.Contains(o)).ToList();
             FireHydrants.AddRange(newHydrantPoints);

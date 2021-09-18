@@ -21,10 +21,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
     public class ThDisplayDeviceFixedPointLayoutService : ThFixedPointLayoutService
     {
         public BuildingType BuildingType { get; set; }
-       
+
         //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
-        
-        public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas, List<string> LayoutBlkName, List<string> AvoidBlkName) : base(datas, LayoutBlkName, AvoidBlkName)
+
+        public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas, List<string> cleanBlkName, List<string> AvoidBlkName) : base(datas, cleanBlkName, AvoidBlkName)
         {
         }
 
@@ -68,9 +68,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 List<Polyline> decorableBaseLine = new List<Polyline>();
 
                 Tolerance tol = new Tolerance(5, 5);
-                
+
                 List<Point3d> viewPoint = new List<Point3d>();
-                
+
                 foreach (Polyline door in crossingDoors) // 遍历door记录tag,同时记录有门的墙体，墙体点位存储顺序为角落到门
                 {
                     var bufferedDoor = door.Buffer(bufferValue).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
@@ -157,7 +157,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 viewable[num - 1] = viewable[0];
 
                 int[] isConvexPt = new int[num];
-                
+
                 for (int i = 0; i < num - 1; ++i) // 得到每个顶点凹凸，并记录没有tag的点个数
                 {
                     isConvexPt[i] = DataQueryWorker.IsConvexPoint(room, room.GetPoint3dAt(i), room.GetPoint3dAt((i + 1) % (num - 1)), room.GetPoint3dAt((i + num - 2) % (num - 1)));
@@ -166,8 +166,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                         ++numNotTag;
                         notTagIndex.Add(i);
                     }
-                    if(viewable[i] == true)
-                            ++viewedNum;
+                    if (viewable[i] == true)
+                        ++viewedNum;
                 }
 
                 int flag = 0; //判断是否找到布点
@@ -254,15 +254,15 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 if (flag == 0) // 全可视，或非全可视的情况以上方法没找到
                 {
                     foreach (int index in notTagIndex) //优先找凹槽填
-                    {                        
-                        if (tag[(index + 1) % (num - 1)] == 0 && isConvexPt[(index + 1) % (num - 1)] == -1 && tag[(index - 1+num-1) % (num - 1)] == 0 && isConvexPt[(index - 1+num-1) % (num - 1)] == -1)
+                    {
+                        if (tag[(index + 1) % (num - 1)] == 0 && isConvexPt[(index + 1) % (num - 1)] == -1 && tag[(index - 1 + num - 1) % (num - 1)] == 0 && isConvexPt[(index - 1 + num - 1) % (num - 1)] == -1)
                         {
                             Polyline tempWall = new Polyline();
                             tempWall.AddVertexAt(0, room.GetPoint2dAt(index), 0, 0, 0);
                             tempWall.AddVertexAt(1, room.GetPoint2dAt((index + 1) % (num - 1)), 0, 0, 0);
                             decorableBaseLine.Add(tempWall);
                             tempWall.RemoveVertexAt(1);
-                            tempWall.AddVertexAt(1, room.GetPoint2dAt((index - 1+num-1) % (num - 1)), 0, 0, 0);
+                            tempWall.AddVertexAt(1, room.GetPoint2dAt((index - 1 + num - 1) % (num - 1)), 0, 0, 0);
                             decorableBaseLine.Add(tempWall);
                         }
                         if (decorableBaseLine.Count > 0)
@@ -278,7 +278,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                                 }
                             }
                         }
-                        
+
                         if (flag == 1)
                             break;
                     }
@@ -310,7 +310,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                                 }
                             }
                         }
-                        if(flag == 0)
+                        if (flag == 0)
                         {
                             for (int i = 0; i < num - 1; ++i)
                             {
@@ -319,7 +319,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                                 tempWall.AddVertexAt(1, room.GetPoint2dAt(i + 1), 0, 0, 0);
                                 decorableBaseLine.Add(tempWall);
                             }
-                        
+
                             if (decorableBaseLine.Count > 0)
                             {
                                 decorableBaseLine.OrderByDescending(o => o.Length);
@@ -338,7 +338,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 }
 
                 if (!locatePt.IsPositiveInfinity())
-                {               
+                {
                     ans.Add(DataQueryWorker.FindVector(locatePt, room));
                 }
             }
@@ -372,7 +372,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 var crossingRooms = spatialRoomsIndex.SelectCrossingPolygon(door);
                 foreach (Entity room in crossingRooms)
                     if (!DataQueryWorker.Query(room).Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
-                        locateRoomSet.Add(room is MPolygon ? (room as MPolygon).Shell() : room );
+                        locateRoomSet.Add(room is MPolygon ? (room as MPolygon).Shell() : room);
             }
             return locateRoomSet;
         }
@@ -382,13 +382,13 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             int fireApartNum = DataQueryWorker.FireAparts.Count;
             var roomsArranged = DataQueryWorker.ClassifyByFireApart(DataQueryWorker.Rooms);
             var doorsArranged = DataQueryWorker.ClassifyByFireApart(DataQueryWorker.DoorOpenings);
-            List<string> selectOrder = new List<string> { "消防电梯前室","前室", "走道", "门厅", "中庭" };
+            List<string> selectOrder = new List<string> { "消防电梯前室", "前室", "走道", "门厅", "中庭" };
             List<List<string>> selectOrderMap = new List<List<string>>();
-            DataQueryWorker.ReadRoomConfigTable();
+            //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
             selectOrderMap.AddRange(selectOrder.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.roomTableConfig, o)));
             foreach (string fireApartName in DataQueryWorker.FireApartMap) // 遍历每个防火分区
             {
-                if (!roomsArranged.ContainsKey(fireApartName)) 
+                if (!roomsArranged.ContainsKey(fireApartName))
                     continue;
                 var currentRoomSet = new List<ThGeometry>();
                 var tempRoomSet = new List<ThGeometry>();
@@ -397,7 +397,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 {
                     foreach (ThGeometry room in currentRoomSet)
                     {
-                        foreach(string name in tempNameList)
+                        foreach (string name in tempNameList)
                         {
                             if (room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains(name))
                             {
@@ -413,12 +413,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                     var polylineRoom = tempRoomSet
                         .Select(o => o.Boundary is MPolygon ? (o.Boundary as MPolygon).Shell() : o.Boundary as Polyline)
                         .ToList();
-                    polylineRoom.OrderByDescending(o=>o.Area);
+                    polylineRoom.OrderByDescending(o => o.Area);
                     locateRoomSet.Add(polylineRoom[0]);
                 }
 
             }
-            
+
             return locateRoomSet;
         }
 

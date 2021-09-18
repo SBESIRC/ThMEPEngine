@@ -26,6 +26,8 @@ namespace ThMEPEngineCore.Engine
 
     public class ThDB3StairRecognitionEngine : ThBuildingElementRecognitionEngine
     {
+        public List<Polyline> Rooms { get; set; }
+
         public override void Recognize(Database database, Point3dCollection frame)
         {
             var engine = new ThDB3StairExtractionEngine();
@@ -50,27 +52,29 @@ namespace ThMEPEngineCore.Engine
                 stairBlocks = objs;
             }
 
-            foreach(BlockReference block in stairBlocks)
+            foreach (BlockReference block in stairBlocks)
             {
-                var ifcStair = new ThIfcStair
-                {
-                    PlatForLayout = GetPlatForLayout(block, true),
-                    HalfPlatForLayout = GetHalfPlatForLayout(block, false),
-                    srcBlock = block
-                };
-                Elements.Add(ifcStair);
+                Elements.Add(CreatIfcStair(block, Rooms));
             }
         }
 
-        private List<Point3d> GetPlatForLayout(BlockReference stair, bool isPlat)
+        private ThIfcStair CreatIfcStair(BlockReference stair, List<Polyline> rooms)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var ifcStair = new ThIfcStair();
+                ifcStair.SrcBlock = stair;
+
                 var objs = new DBObjectCollection();
                 stair.Explode(objs);
                 var platforms = objs.Cast<Entity>()
                     .OfType<Curve>()
                     .Where(e => e.Layer.Contains("DEFPOINTS-2"))
+                    .ToCollection();
+                var rungs = objs.Cast<Entity>()
+                    .OfType<Curve>()
+                    .Where(e => e.Layer.Contains("AE-STAR"))
+                    .Where(e => e.Area > 0.1)
                     .ToCollection();
                 var beams = objs.Cast<Entity>()
                     .OfType<Curve>()
@@ -84,115 +88,144 @@ namespace ThMEPEngineCore.Engine
                     .OfType<DBText>()
                     .Where(e => e.TextString == "上")
                     .Where(e => e.Layer.Contains("DEFPOINTS-1"));
+                var coverage = objs.Cast<Entity>()
+                    .OfType<Wipeout>()
+                    .Where(e => e.Layer == "0")
+                    .ToCollection();
 
                 var beamCenter = beams.GeometricExtents().CenterPoint();
                 var platform = new Polyline();
                 var halfPlatform = new Polyline();
-                var listPlatform = new List<Point3d>();
                 if (platforms.Count == 0)
                 {
-                    return new List<Point3d>();
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+                    var frameTidal = spatialIndex.SelectCrossingPolygon(stair.ToOBB(Matrix3d.Identity).Vertices());
+                    var frame = new Polyline();
+                    if (frameTidal.Count > 0)
+                    {
+                        frame = frameTidal.GeometricExtents().ToRectangle();
+                    }
+
+                    ifcStair.Storey = "首层";
+                    if (rungs.Count == 1)
+                    {
+                        ifcStair.StairType = "双跑楼梯";
+                        ifcStair.PlatForLayout.Add(GetLayoutList(frame, beams));
+
+                    }
+                    else if (rungs.Count == 2)
+                    {
+                        ifcStair.StairType = "剪刀楼梯";
+                        ifcStair.PlatForLayout = GetLayoutList(frame, beams, up.ToCollection());
+                    }
+
+                    return ifcStair;
                 }
                 else if (platforms.Count == 1)
                 {
-                    if(isPlat)
-                    {
-                        platform = platforms[0] as Polyline;
-                        if (down.Any())
-                        {
-                            listPlatform = GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams);
-                        }
-                        else if (up.Any())
-                        {
-                            listPlatform = GetLatoutList(platform, beamCenter, up.ToCollection(), false, beams);
-                        }
-                        else
-                        {
-                            throw new NotSupportedException();
-                        }
-                    }
-                    else
-                    {
-                        return new List<Point3d>();
-                    }
-                }
-                else if (platforms.Count == 2)
-                {
+                    ifcStair.Storey = "中间层";
+                    ifcStair.StairType = "剪刀楼梯";
                     platform = platforms[0] as Polyline;
-                    halfPlatform = platforms[1] as Polyline;
                     if (down.Any())
                     {
-                        var downPoint = down.ToCollection().GeometricExtents().CenterPoint();
-                        if (platform.Distance(downPoint) > halfPlatform.Distance(downPoint))
-                        {
-                            ChangeOrder(ref platform, ref halfPlatform);
-                        }
-                        if (isPlat)
-                        {
-                            listPlatform = GetLatoutList(platform, beamCenter, down.ToCollection(), true, beams);
-                        }
-                        else
-                        {
-                            listPlatform = GetLatoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams);
-                        }
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
                     }
                     else if (up.Any())
                     {
-                        var upPoint = up.ToCollection().GeometricExtents().CenterPoint();
-                        if (platform.Distance(upPoint) < halfPlatform.Distance(upPoint))
-                        {
-                            ChangeOrder(ref platform, ref halfPlatform);
-                        }
-                        if (isPlat)
-                        {
-                            listPlatform = GetLatoutList(platform, beamCenter, up.ToCollection(), false, beams);
-                        }
-                        else
-                        {
-                            listPlatform = GetLatoutList(halfPlatform, beamCenter, up.ToCollection(), false, beams);
-                        }
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, up.ToCollection(), false, beams));
                     }
                     else
                     {
                         throw new NotSupportedException();
                     }
                 }
-                else
+                else if (platforms.Count == 2)
                 {
-                    throw new NotSupportedException();
-                }
-                return listPlatform;
-            }
-        }
-        
-        private Point3d GetMinPoint(Point3d point, DBObjectCollection dBObject)
-        {
-            var minDistance = 0.0;
-            var minPoint = new Point3d();
-            foreach (Polyline e in dBObject)
-            {
-                foreach (Point3d vertice in e.Vertices())
-                {
-                    var distance = vertice.DistanceTo(point);
-                    if (minDistance < 0.01)
+                    if (coverage.Count == 0)
                     {
-                        minDistance = distance;
-                        minPoint = vertice;
-                    }
-                    else
-                    {
-                        if (distance < minDistance)
+                        if (down.ToCollection().Count == 1)
                         {
-                            minDistance = distance;
-                            minPoint = vertice;
+                            ifcStair.Storey = "顶层";
+                            ifcStair.StairType = "双跑楼梯";
+                            ifcStair.Rungs = rungs;
+
+                            platform = platforms[0] as Polyline;
+                            halfPlatform = platforms[1] as Polyline;
+                            if (down.Any())
+                            {
+                                var downPoint = down.ToCollection().GeometricExtents().CenterPoint();
+                                if (platform.Distance(downPoint) > halfPlatform.Distance(downPoint))
+                                {
+                                    ChangeOrder(ref platform, ref halfPlatform);
+                                }
+                            }
+                            else if (up.Any())
+                            {
+                                var upPoint = up.ToCollection().GeometricExtents().CenterPoint();
+                                if (platform.Distance(upPoint) < halfPlatform.Distance(upPoint))
+                                {
+                                    ChangeOrder(ref platform, ref halfPlatform);
+                                }
+                            }
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                            ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
+                        }
+                        else if (down.ToCollection().Count == 2)
+                        {
+                            ifcStair.Storey = "顶层";
+                            ifcStair.StairType = "剪刀楼梯";
+                            ifcStair.Rungs = rungs;
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
+                                                       beamCenter, down.ToCollection(), true, beams));
+                            ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
+                                                       beamCenter, down.ToCollection(), true, beams));
+                        }
+                        else
+                        {
+                            throw new NotSupportedException();
                         }
                     }
+                    else if (coverage.Count == 1)
+                    {
+                        ifcStair.Storey = "中间层";
+                        ifcStair.StairType = "双跑楼梯";
+                        platform = platforms[0] as Polyline;
+                        halfPlatform = platforms[1] as Polyline;
+                        if (down.Any())
+                        {
+                            var downPoint = down.ToCollection().GeometricExtents().CenterPoint();
+                            if (platform.Distance(downPoint) > halfPlatform.Distance(downPoint))
+                            {
+                                ChangeOrder(ref platform, ref halfPlatform);
+                            }
+                        }
+                        else if (up.Any())
+                        {
+                            var upPoint = up.ToCollection().GeometricExtents().CenterPoint();
+                            if (platform.Distance(upPoint) < halfPlatform.Distance(upPoint))
+                            {
+                                ChangeOrder(ref platform, ref halfPlatform);
+                            }
+                        }
+                        var temp = down.ToCollection();
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                        ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
+                    }
+                    else if (coverage.Count == 2)
+                    {
+                        ifcStair.Storey = "中间层";
+                        ifcStair.StairType = "剪刀楼梯";
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
+                                                       beamCenter, down.ToCollection(), true, beams));
+                        ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
+                                                   beamCenter, down.ToCollection(), true, beams));
+                    }
                 }
+                return ifcStair;
             }
-            return minPoint;
         }
 
-        private List<Point3d> GetLatoutList(Polyline platform, Point3d beamCenter, DBObjectCollection labels, bool labelTag, DBObjectCollection beams)
+        private List<Point3d> GetLayoutList(Polyline platform, Point3d beamCenter, DBObjectCollection labels, bool labelTag, DBObjectCollection beams)
         {
             var vertices = new List<Point3d>();
             var downPoint = new Point3d();
@@ -229,26 +262,109 @@ namespace ThMEPEngineCore.Engine
 
             vertices.Add(downPoint);
             vertices.Add(upPoint);
-            vertices.Add(GetMinPoint(upPoint, beams));
-            vertices.Add(GetMinPoint(downPoint, beams));
+            vertices.Add(GetClosePoint(upPoint, beams));
+            vertices.Add(GetClosePoint(downPoint, beams));
             return vertices;
         }
 
-        private List<Point3d> GetHalfPlatForLayout(BlockReference stair, bool isPlat)
+        private List<Point3d> GetLayoutList(Polyline frame, DBObjectCollection beams)
         {
-            var vertices = GetPlatForLayout(stair, isPlat);
-            if (vertices.Count == 0)
+            
+            var center = frame.GetCentroidPoint();
+            var maxDistance = 0.0;
+            var maxPoint = new Point3d();
+            foreach (Polyline e in beams)
             {
-                return vertices;
+                foreach (Point3d vertice in e.Vertices())
+                {
+                    var distance = vertice.DistanceTo(center);
+                    if (distance > maxDistance)
+                    {
+                        maxDistance = distance;
+                        maxPoint = vertice;
+                    }
+                }
             }
-            var newVertices = new List<Point3d>
+
+            var thirdPoint = maxPoint;
+            var secondPoint = GetClosePoint(thirdPoint, frame.Vertices());
+            var firstPoint = GetClosePoint(secondPoint, frame.Vertices());
+            var forthPoint = ToPoint3d(GetVector(Point3d.Origin, thirdPoint) + GetVector(secondPoint, firstPoint));
+
+            return new List<Point3d> { firstPoint, secondPoint, thirdPoint, forthPoint };
+        }
+
+        private List<List<Point3d>> GetLayoutList(Polyline frame, DBObjectCollection beams, DBObjectCollection labels)
+        {
+            var platForLayout = new List<List<Point3d>>();
+            foreach (Entity e in labels)
             {
-                vertices[1],
-                vertices[0],
-                vertices[3],
-                vertices[2]
-            };
-            return newVertices;
+                if(e.Bounds.HasValue)
+                {
+                    var labelPoint = e.GeometricExtents.CenterPoint();
+                    var downPoint = new Point3d();
+                    var upPoint = new Point3d();
+                    var maxDistance = 0.0;
+                    Point3d maxPoint;
+                    foreach (Point3d vertice in frame.Vertices())
+                    {
+                        var distance = vertice.DistanceTo(labelPoint);
+                        if (distance - maxDistance > -10.0)
+                        {
+                            maxDistance = distance;
+                            maxPoint = vertice;
+                            downPoint = upPoint;
+                            upPoint = maxPoint;
+                        }
+                    }
+                    var platform = new List<Point3d>
+                    {
+                        upPoint,
+                        downPoint,
+                        GetClosePoint(downPoint, beams),
+                        GetClosePoint(upPoint, beams)
+                    };
+
+                    platForLayout.Add(platform);
+                }
+            }
+            return platForLayout;
+        }
+
+        private Point3d GetClosePoint(Point3d point, DBObjectCollection dBObject)
+        {
+            var minDistance = double.MaxValue;
+            var minPoint = new Point3d();
+            foreach (Polyline e in dBObject)
+            {
+                foreach (Point3d vertice in e.Vertices())
+                {
+                    var distance = vertice.DistanceTo(point);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        minPoint = vertice;
+                    }
+                }
+            }
+            return minPoint;
+        }
+
+        private Point3d GetClosePoint(Point3d point, Point3dCollection vertices)
+        {
+            var minDistance = double.MaxValue;
+            var minPoint = new Point3d();
+            foreach (Point3d vertice in vertices)
+            {
+                var distance = vertice.DistanceTo(point);
+                if (distance < minDistance && distance > 1.0)
+                {
+                    minDistance = distance;
+                    minPoint = vertice;
+                }
+            }
+
+            return minPoint;
         }
 
         private void ChangeOrder(ref Point3d downPoint, ref Point3d upPoint)
@@ -263,6 +379,16 @@ namespace ThMEPEngineCore.Engine
             var temp = platform;
             platform = halfPlatform;
             halfPlatform = temp;
+        }
+
+        private Vector3d GetVector(Point3d starPoint, Point3d endPoint)
+        {
+            return endPoint.GetAsVector() - starPoint.GetAsVector();
+        }
+
+        private Point3d ToPoint3d(Vector3d vector)
+        {
+            return new Point3d(vector.X, vector.Y, vector.Z);
         }
     }
 }
