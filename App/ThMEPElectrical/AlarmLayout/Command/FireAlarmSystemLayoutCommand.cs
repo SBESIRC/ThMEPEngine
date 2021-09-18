@@ -9,6 +9,10 @@ using ThMEPEngineCore.Command;
 using ThMEPElectrical.AlarmLayout.Utils;
 using ThMEPElectrical.AlarmLayout.LayoutProcess;
 using ThMEPElectrical.AlarmSensorLayout.Data;
+using NetTopologySuite.Operation.Overlay.Snap;
+using NetTopologySuite.Geometries;
+using ThMEPElectrical.AlarmSensorLayout.Method;
+using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThMEPElectrical.AlarmLayout.Command
 {
@@ -24,13 +28,12 @@ namespace ThMEPElectrical.AlarmLayout.Command
         public List<Polyline> detectArea { get; set; }//探测区域
         public Dictionary<Polyline, Vector3d> ucs { get; set; }//UCS， maybe input or output
         public double radius { get; set; }//保护半径
-       // public bool straightLineMode { get; set; }//盲区类型
         public BlindType equipmentType { get; set; }//盲区类型
 
         //outputs
         public List<Point3d> layoutPoints { get; set; }//布置点位
 
-        public Dictionary<Point3d, UcsTable> pointsWithDirection { get; set; } //布置点位以及其方向//------------------------------UcsTable
+        public Dictionary<Point3d, Vector3d> pointsWithDirection { get; set; } //布置点位以及其方向//------------------------------
         public List<Polyline> blinds { get; set; }//盲区
 
         public override void SubExecute()
@@ -44,11 +47,6 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 {
                     objs.Add(hole);
                 }
-                MPolygon mPolygon = objs.BuildMPolygon();
-                //加入数据库
-                acdb.ModelSpace.Add(mPolygon);
-                mPolygon.SetDatabaseDefaults();
-
 
                 //Get Can not Layout Area List
                 List<Polyline> nonDeployableArea = new List<Polyline>();
@@ -58,6 +56,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                     foreach (var pl in wallList)
                     {
                         nonDeployableArea.Add(pl);
+                        objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), pl.ToNTSPolygon()).ToDbCollection();
                     }
                 }
                 if (columns.Count != 0)
@@ -65,6 +64,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                     foreach (var pl in columns)
                     {
                         nonDeployableArea.Add(pl);
+                        objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), pl.ToNTSPolygon()).ToDbCollection();
                     }
                 }
                 if (prioritys.Count != 0)
@@ -74,17 +74,53 @@ namespace ThMEPElectrical.AlarmLayout.Command
                         nonDeployableArea.Add(pl);
                     }
                 }
-                //Get Can Layout Positions
-                List<Point3d> canLayoutPoints = GetPosiblePositions(nonDeployableArea, layoutList, radius);
+                MPolygon mPolygon = objs.BuildMPolygon();
 
-                layoutPoints = LayoutOpt.Calculate(mPolygon, canLayoutPoints, radius, acdb, equipmentType);
+                //加入数据库
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+
+                pointsWithDirection = new Dictionary<Point3d, Vector3d>();
+                //处理数据
+                layoutPoints = LayoutOpt.Calculate(mPolygon, GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, acdb, equipmentType, pointsWithDirection);
+
+
+                //输出
+                blinds = new List<Polyline>();
+                NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, layoutPoints, radius, equipmentType);
+                foreach(var ucr in unCoverRegion.ToDbCollection())
+                {
+                    blinds.Add((Polyline)ucr);
+                }
+
+                //善后
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+
+                //显示适配信息
+                ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
+                //显示布置点
+                foreach(var dir in pointsWithDirection)
+                {
+                    ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
+                }
+                //ShowInfo.ShowPoints(layoutPoints, 'X');
+                //显示盲区
+                ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
             }
         }
 
+        /// <summary>
+        /// 获取可布置点位
+        /// </summary>
+        /// <param name="nonDeployableArea"></param>
+        /// <param name="layoutList"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
         public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<Polyline> layoutList, double radius)
         {
-            List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius);
-            pointsInLayoutList.Distinct();
+            List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
             Hashtable ht = new Hashtable();
             foreach(var pt in pointsInLayoutList)
             {
@@ -108,10 +144,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                     ans.Add((Point3d)xx.Key);
                 }
             }
-            ans.Distinct();
-            return ans;
+            return ans.Distinct().ToList();
         }
-
-
     }
 }

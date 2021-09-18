@@ -90,9 +90,9 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// 用O显示一个点
         /// </summary>
         /// <param name="pt">点的位置</param>
-        public static void ShowPointAsO(Point3d pt, int colorIndex = 80)
+        public static void ShowPointAsO(Point3d pt, int colorIndex = 80, double radius = 141.59265)
         {
-            Circle circle = new Circle(pt, Vector3d.ZAxis, 141.59265);
+            Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(circle);
         }
@@ -101,12 +101,12 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// 用X显示一个点
         /// </summary>
         /// <param name="pt">点的位置</param>
-        public static void ShowPointAsX(Point3d pt, int colorIndex = 80)
+        public static void ShowPointAsX(Point3d pt, int colorIndex = 80, double radius = 100)
         {
-            Point3d p1 = new Point3d(pt.X - 100, pt.Y - 100, 0);
-            Point3d p2 = new Point3d(pt.X - 100, pt.Y + 100, 0);
-            Point3d p3 = new Point3d(pt.X + 100, pt.Y + 100, 0);
-            Point3d p4 = new Point3d(pt.X + 100, pt.Y - 100, 0);
+            Point3d p1 = new Point3d(pt.X - radius, pt.Y - radius, 0);
+            Point3d p2 = new Point3d(pt.X - radius, pt.Y + radius, 0);
+            Point3d p3 = new Point3d(pt.X + radius, pt.Y + radius, 0);
+            Point3d p4 = new Point3d(pt.X + radius, pt.Y - radius, 0);
 
             Line line1 = new Line(p1, p3);
             line1.ColorIndex = colorIndex;
@@ -122,15 +122,28 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// <param name="pt">设备布置位置</param>
         /// <param name="vector">方向</param>
         /// <param name="colorIndex">颜色</param>
-        public static void ShowPointWithDirection(Point3d pt, Vector3d vector, int colorIndex = 210)
+        public static void ShowPointWithDirection(Point3d pt, Vector3d vec, int colorIndex = 210)
         {
+            /*
             Point3d pt1 = new Point3d(pt.X - 100, pt.Y - 100, 0);
             Point3d pt2 = new Point3d(pt.X + 100, pt.Y - 100, 0);
             Point3d pt3 = new Point3d(pt.X, pt.Y + 100, 0);
+            vec.RotateBy(150, Vector3d.ZAxis);
             Polyline polyline = new Polyline();
             //polyline.AddVertexAt()
             //Line line1 = new Line(p1, p3);
-            vector.GetNormal();//单位化
+            vec.GetNormal();//单位化
+            */
+            Point3d pt1 = pt + vec * 400;
+            Point3d pt2 = pt + vec.RotateBy(Math.PI / 6, -Vector3d.ZAxis) * 200;
+            Point3d pt3 = pt + vec.RotateBy(Math.PI / 6, Vector3d.ZAxis) * 200;
+            Line line1 = new Line(pt, pt1);
+            line1.ColorIndex = colorIndex;
+            Line line2 = new Line(pt2, pt1);
+            line2.ColorIndex = colorIndex;
+            Line line3 = new Line(pt3, pt1);
+            line2.ColorIndex = colorIndex;
+            HostApplicationServices.WorkingDatabase.AddToModelSpace(line1, line2, line3);
         }
 
         /// <summary>
@@ -139,20 +152,20 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// <param name="pts"></param>
         /// <param name="type"></param>
         /// <param name="colorIndex"></param>
-        public static void ShowPoints(List<Point3d> pts, char type = 'X', int colorIndex = 80)
+        public static void ShowPoints(List<Point3d> pts, char type = 'X', int colorIndex = 80, double radius = 100)
         {
             if(type == 'X')
             {
                 foreach (Point3d pt in pts)
                 {
-                    ShowPointAsX(pt, colorIndex);
+                    ShowPointAsX(pt, colorIndex, radius);
                 }
             }
             else
             {
                 foreach (Point3d pt in pts)
                 {
-                    ShowPointAsO(pt, colorIndex);
+                    ShowPointAsO(pt, colorIndex, radius);
                 }
             }
         }

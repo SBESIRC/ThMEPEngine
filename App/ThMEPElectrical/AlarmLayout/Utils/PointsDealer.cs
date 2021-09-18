@@ -6,6 +6,7 @@ using DotNetARX;
 using System.Collections.Generic;
 using System.Collections;
 using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.AlarmLayout.Utils
 {
@@ -22,7 +23,15 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             List<Point3d> pointsInAreas = new List<Point3d>();
             foreach (Polyline poly in areas)
             {
-                List<Point3d> areaPoints = PointsInArea(poly, radius);
+                List<Point3d> areaPoints = new List<Point3d>();
+                if (poly.Area > radius * radius)
+                {
+                    areaPoints = PointsInUncoverArea(poly, 400);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+                }
+                else
+                {
+                    areaPoints = PointsInArea(poly, radius);
+                }
                 foreach (var pt in areaPoints)
                 {
                     pointsInAreas.Add(pt);
@@ -46,8 +55,7 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                 ans.Add(area.GetPoint3dAt(i));
                 //ShowPointAsX(area.GetPoint3dAt(i));
             }
-            ans.Distinct();
-            return ans;
+            return ans.Distinct().ToList();
         }
 
         /// <summary>
@@ -105,7 +113,15 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                     ans.Add(new Point3d((7 * pt0_5.X + pt2_5.X) / 8, (7 * pt0_5.Y + pt2_5.Y) / 8, 0));
                 }
             }
-            return ans;
+            List<Point3d> ptss = new List<Point3d>();
+            foreach (var pt in ans)
+            {
+                if (area.ContainsOrOnBoundary(pt))
+                {
+                    ptss.Add(pt);
+                }
+            }
+            return ptss;
         }
 
         /// <summary>
@@ -146,20 +162,16 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                     ptsInUncoverRectangle.Add(new Point3d((j * ptBC.X + (Ycnt - j) * ptC.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptC.Y) / Ycnt, 0));//ptBC_C
                 }
             }
-            ptsInUncoverRectangle.Distinct();
-            /*
-            //只将在覆盖区域中的点加入ans（但没必要且会增加时间开销）
-            Point3dList ptsInUncoverArea = new Point3dList();
-            foreach (Point3d pt in ptsInUncoverRectangle)
+            //只将在覆盖区域中的点加入ans
+            List<Point3d> ptss = new List<Point3d>();
+            foreach (var pt in ptsInUncoverRectangle)
             {
-                //if (pt在多边形内部)
+                if (((Polyline)uncoverArea).ContainsOrOnBoundary(pt))
                 {
-                    ptsInUncoverArea.Add(pt);
+                    ptss.Add(pt);
                 }
             }
-            return ptsInUncoverArea;
-            */
-            return ptsInUncoverRectangle;
+            return ptss.Distinct().ToList();
         }
 
         /// <summary>
@@ -261,15 +273,5 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         {
             return new Point3d((a.X + b.X) / 2, (a.Y + b.Y) / 2, (a.Z + b.Z) / 2);
         }
-
-
-
-
-
-
-
-
-
-
     }
 }

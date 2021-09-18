@@ -8,6 +8,7 @@ using System.Collections;
 using NetTopologySuite.Operation.Overlay.Snap;
 using Dreambuild.AutoCAD;
 using ThMEPElectrical.AlarmLayout.Utils;
+using ThMEPElectrical.AlarmSensorLayout.Data;
 
 namespace ThMEPElectrical.AlarmLayout.LayoutProcess
 {
@@ -58,13 +59,14 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// 删点的核心操作，尝试依次删除点集中的点
         /// </summary>
         /// <param name="mPolygon"></param>
-        /// <param name="ht">记录点是否被删</param>
+        /// <param name="ht"></param>
         /// <param name="points"></param>
         /// <param name="radius"></param>
-        public static void RemovePoints(MPolygon mPolygon, Hashtable ht, List<Point3d> points, double radius)
+        /// <param name="equipmentType"></param>
+        public static void RemovePoints(MPolygon mPolygon, Hashtable ht, List<Point3d> points, double radius, BlindType equipmentType)
         {
             //计算过当前剩余总面积
-            double totalUncoverArea = SnapIfNeededOverlayOp.Difference(mPolygon.ToNTSPolygon(), AreaCaculator.GetUnion(points, radius)).Area;
+            double totalUncoverArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
 
             foreach (Point3d pt in points)
             {
@@ -80,7 +82,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                         }
                     }
                     //获取删除这个点后的得到的未覆盖区域
-                    var unCoverRegion = SnapIfNeededOverlayOp.Difference(mPolygon.ToNTSPolygon(), AreaCaculator.GetUnion(tmpPt, radius));
+                    NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, tmpPt, radius, equipmentType);
 
                     bool flag = true;//默认删点,false不删点
                     foreach (Entity obj in unCoverRegion.ToDbCollection())
@@ -112,13 +114,11 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
             {
                 if ((int)x.Value > 0)
                 {
-                    /*
-                    //用O显示被优化的点
-                    if ((int)x.Value == 2)
-                    {
-                        ShowPointAsO((Point3d)x.Key);
-                    }
-                    */
+                    ////用O显示被优化的点
+                    //if ((int)x.Value == 2)
+                    //{
+                    //    ShowInfo.ShowPointAsX((Point3d)x.Key, 1, 300);//----------------------------
+                    //}
                     points.Add((Point3d)x.Key);
                 }
             }

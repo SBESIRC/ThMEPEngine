@@ -30,12 +30,25 @@ namespace ThMEPElectrical.AlarmLayout.Utils
 {
     public static class CenterLineSimplify
     {
-        /*
-        public static void CLSimplify(MPolygon mPolygon, AcadDatabase acdb, double interpolationDistance)
+
+        public static void CLSimplify(MPolygon mPolygon)//, AcadDatabase acdb)//, double interpolationDistance)
         {
-            List<Point3d> centerPts = CenterPoints(mPolygon.ToNTSPolygon(), interpolationDistance);
-            centerPts.Distinct();
-            double dis = interpolationDistance * 2;
+            double dis = 300;
+
+            //获取点集
+            List<Point3d> centerPts = new List<Point3d>();
+            CenterPoints(mPolygon.ToNTSPolygon(), dis, centerPts);
+            centerPts.Distinct().ToList();
+
+            //获取边集合
+            List<Line> lines = new List<Line>();
+            CreateLines(centerPts, dis * 2, lines);
+            foreach (var line in lines)
+            {
+                line.ColorIndex = 130;
+                HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+            }
+            /*
             Hashtable ht = new Hashtable();
             //ht(Point3d, int) 
             foreach (Point3d pt in centerPts)
@@ -44,11 +57,42 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             }
             ht[centerPts[0]] = 1;
             List<Point3d> tmpList = new List<Point3d>();
-            DFS(ht, centerPts[0], acdb, dis, centerPts, tmpList);
-            
+            //DFS(ht, centerPts[0], acdb, dis, centerPts, tmpList);
+            */
 
         }
-        
+        public static void CreateLines(List<Point3d> centerPts, double dis, List<Line> lines)
+        {
+            /*
+            Hashtable ht = new Hashtable();
+            foreach (var pt in centerPts)
+            {
+                ht[pt] = false;
+            }
+            ht[centerPts[0]] = true;
+            foreach (var pt in centerPts)
+            {
+                List<Point3d> tmpPts = PointsDealer.GetNearestPoints(pt, centerPts, dis);
+                foreach (var ptt in tmpPts)
+                {
+                    if ((bool)ht[ptt] == false)
+                    {
+                        lines.Add(new Line(pt, ptt));
+                        ht[ptt] = true;
+                        break;
+                    }
+                }
+            }
+            */
+            foreach (var pt in centerPts)
+            {
+                lines.Add(new Line(pt, PointsDealer.GetNearestPoint(pt, centerPts)));
+            }
+
+            lines.Distinct().ToList();
+        }
+
+        /*
         public static void DFS(Hashtable ht, Point3d curPoint, AcadDatabase acdb, double dis, List<Point3d> centerPts, List<Point3d> tmpList, int flag)
         {
             List<Point3d> nearPoints = PointsDealer.GetNearestPoints(curPoint, centerPts, dis);
@@ -107,9 +151,8 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 130);
         }
 
-        public static List<Point3d> CenterPoints(Polygon geometry, double interpolationDistance)
+        public static void CenterPoints(Polygon geometry, double interpolationDistance, List<Point3d> centerPoints)
         {
-            List<Point3d> centerPoints = new List<Point3d>();
             foreach (Polygon polygon in geometry.VoronoiDiagram(interpolationDistance).Geometries)
             {
                 var iterator = new LinearIterator(polygon.Shell);
@@ -126,8 +169,6 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                     }
                 }
             }
-            return centerPoints;
         }
-
     }
 }

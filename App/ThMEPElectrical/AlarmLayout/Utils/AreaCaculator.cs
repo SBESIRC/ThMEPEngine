@@ -24,38 +24,67 @@ using NetTopologySuite.Operation.Overlay;
 using Dreambuild.AutoCAD;
 using ThMEPElectrical.AlarmSensorLayout.Method;
 using NetTopologySuite.Operation.OverlayNG;
+using ThMEPElectrical.AlarmSensorLayout.Data;
 
 namespace ThMEPElectrical.AlarmLayout.Utils
 {
     public static class AreaCaculator
     {
         /// <summary>
-        /// 获取设备覆盖区域集合
+        /// 计算不可视区域集合
         /// </summary>
-        /// <param name="pts">设备布置点集</param>
-        /// <param name="radius">设备覆盖半径</param>
-        /// <returns>返回设备覆盖区域集合</returns>
-        public static NetTopologySuite.Geometries.Geometry GetUnion(List<Point3d> pts, double radius)
+        /// <param name="mPolygon"></param>
+        /// <param name="points"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
+        public static NetTopologySuite.Geometries.Geometry UnVisibleArea(MPolygon mPolygon, List<Point3d> points, double radius)
         {
-            List<Circle> carryAreaUnion = new List<Circle>();
-            foreach (Point3d pt in pts)
+            //计算过点集覆盖的真实面积
+            List<Polygon> Detect = new List<Polygon>();
+            foreach (Point3d pt in points)
             {
-                carryAreaUnion.Add(new Circle(pt, Vector3d.ZAxis, radius));
+                Detect.Add(DetectCalculator.CalculateDetect(new Coordinate(pt.X, pt.Y), mPolygon.ToNTSPolygon(), radius, true));
             }
-            NetTopologySuite.Geometries.Geometry coveredRegion = SnapIfNeededOverlayOp.Union(carryAreaUnion.First().ToNTSPolygon(), carryAreaUnion.Last().ToNTSPolygon());
-            foreach (Circle a in carryAreaUnion)
-            {
-                coveredRegion = SnapIfNeededOverlayOp.Union(coveredRegion, a.ToNTSPolygon());
-            }
-            //ShowGeometry(coveredRegion, acdb, 1);
+            //计算光照盲区
+            NetTopologySuite.Geometries.Geometry blind = mPolygon.ToNTSPolygon().Difference(OverlayNGRobust.Union(Detect.ToArray()));
+            return blind;
+        }
 
-            //var objs = new DBObjectCollection();
-            //foreach (var a in carryAreaUnion)
-            //{
-            //    objs.Add(a.Tessellate(100.0));
-            //}
-            //var results = mPolygon.ToNTSPolygon().Difference(objs, true);
-            return coveredRegion;
+        /// <summary>
+        /// 计算不可覆盖区域集合
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <param name="points"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
+        public static NetTopologySuite.Geometries.Geometry UnCoverArea(MPolygon mPolygon, List<Point3d> points, double radius)
+        {
+            List<Polygon> Detect = new List<Polygon>();
+            foreach (Point3d pt in points)
+            {
+                Detect.Add((new Circle(pt, Vector3d.ZAxis, radius)).ToNTSPolygon());
+            }
+            return mPolygon.ToNTSPolygon().Difference(OverlayNGRobust.Union(Detect.ToArray()));
+        }
+
+        /// <summary>
+        /// 根据探测类型计算盲区
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <param name="points"></param>
+        /// <param name="radius"></param>
+        /// <param name="equipmentType"></param>
+        /// <returns></returns>
+        public static NetTopologySuite.Geometries.Geometry BlandArea(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType)
+        {
+            if (equipmentType == BlindType.VisibleArea)
+            {
+                return UnVisibleArea(mPolygon, points, radius);
+            }
+            else
+            {
+                return UnCoverArea(mPolygon, points, radius);
+            }
         }
     }
 }
