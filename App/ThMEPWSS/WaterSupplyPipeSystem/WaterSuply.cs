@@ -120,9 +120,14 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             using var acadDatabase = AcadDatabase.Active();
             //统计厨房数
             //创建厨房识别引擎
-            var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
-            engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
-            var ele = engineKitchen.Elements;
+
+            var markEngine = new ThRoomMarkRecognitionEngine();
+            markEngine.RecognizeMS(acadDatabase.Database, selectArea);
+            var ele = markEngine.Elements;
+
+            //var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
+            //engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
+            //var ele = engineKitchen.Elements;
             var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
 
             var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
