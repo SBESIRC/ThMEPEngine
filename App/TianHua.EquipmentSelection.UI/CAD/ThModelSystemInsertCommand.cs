@@ -118,11 +118,11 @@ namespace TianHua.FanSelection.UI.CAD
                 var _SubFanDataModel = ThFanSelectionService.Instance.SubModel;
                 if (_SubFanDataModel == null)
                 {
-                    acadDatabase.Database.AppendData(_FanDataModel);
+                    acadDatabase.Database.AppendModelData(_FanDataModel);
                 }
                 else
                 {
-                    acadDatabase.Database.AppendData(_FanDataModel, _SubFanDataModel);
+                    acadDatabase.Database.AppendModelData(_FanDataModel, _SubFanDataModel);
                 }
             }
         }

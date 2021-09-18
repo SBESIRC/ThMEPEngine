@@ -31,15 +31,6 @@ namespace TianHua.FanSelection.UI.CAD
             return ds;
         }
 
-        public static void EraseModels(Database database, FanDataModel model)
-        {
-            Debug.Assert(model != null);
-            Debug.Assert(model.IsValid());
-            Debug.Assert(model.IsMainModel());
-            var ds = new ThFanModelDataDbSource();
-            ds.Erase(database, model.ID);
-        }
-
         /// <summary>
         /// 将风机模型数据存入图纸NOD中
         /// </summary>

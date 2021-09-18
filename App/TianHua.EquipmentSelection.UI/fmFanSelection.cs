@@ -1487,7 +1487,7 @@ namespace TianHua.FanSelection.UI
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
-                            ThFanModelDataDbSource.EraseModels(acadDatabase.Database, _Fan);
+                            acadDatabase.Database.EraseModelData(_Fan);
                             Active.Editor.Regen();
                         }
 
@@ -1526,7 +1526,7 @@ namespace TianHua.FanSelection.UI
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
-                            ThFanModelDataDbSource.EraseModels(acadDatabase.Database, _Fan);
+                            acadDatabase.Database.EraseModelData(_Fan);
                             Active.Editor.Regen();
                         }
                     }
@@ -1547,7 +1547,7 @@ namespace TianHua.FanSelection.UI
                             using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                             {
                                 dbManager.EraseModels(_MainFan.ID);
-                                ThFanModelDataDbSource.EraseModels(acadDatabase.Database, _MainFan);
+                                acadDatabase.Database.EraseModelData(_MainFan);
                                 Active.Editor.Regen();
                             }
                         }

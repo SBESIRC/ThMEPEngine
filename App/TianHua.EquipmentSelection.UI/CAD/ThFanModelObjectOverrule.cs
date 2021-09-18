@@ -26,34 +26,24 @@ namespace TianHua.FanSelection.UI.CAD
             base.Erase(dbObject, erasing);
 
             // 删除风机模型
-            EraseModels(dbObject, erasing);
-        }
-
-        private void EraseModels(DBObject dbObject, bool erasing)
-        {
-            var identifier = dbObject.GetModelIdentifier();
-            if (!string.IsNullOrEmpty(identifier) && erasing)
-            {
-                var ds = new ThFanModelDataDbSource();
-                ds.Erase(dbObject.Database, identifier);
-            }
+            EraseModelData(dbObject, erasing);
         }
 
         public override DBObject DeepClone(DBObject dbObject, DBObject ownerObject, IdMapping idMap, bool isPrimary)
         {
             DBObject result = base.DeepClone(dbObject, ownerObject, idMap, isPrimary);
 
-            // 处理PASTECLIP命令
-            if (idMap.DeepCloneContext == DeepCloneType.Explode)
-            {
-                CloneModels(result, idMap);
-            }
-
             // 处理COPY命令
             if (idMap.DeepCloneContext == DeepCloneType.Copy)
             {
-                CacheModels(dbObject, idMap);
-                CloneModels(result, idMap);
+                CacheModelData(dbObject, idMap);
+                CloneModelData(result, idMap);
+            }
+
+            // 处理PASTECLIP命令
+            if (idMap.DeepCloneContext == DeepCloneType.Explode)
+            {
+                CloneModelData(result, idMap);
             }
 
             return result;
@@ -63,15 +53,16 @@ namespace TianHua.FanSelection.UI.CAD
         {
             DBObject result = base.WblockClone(dbObject, ownerObject, idMap, isPrimary);
 
+            // 处理WBLOCK命令
             if (idMap.DeepCloneContext == DeepCloneType.Wblock)
             {
-                CacheModels(dbObject, idMap);
+                CacheModelData(dbObject, idMap);
             }
 
             return result;
         }
 
-        private void CloneModels(DBObject dbObject, IdMapping idMap)
+        private void CloneModelData(DBObject dbObject, IdMapping idMap)
         {
             //
             var dest = new ThFanModelDataDbSource();
@@ -103,7 +94,7 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
-        private void CacheModels(DBObject dbObject, IdMapping idMap)
+        private void CacheModelData(DBObject dbObject, IdMapping idMap)
         {
             //
             var orig = new ThFanModelDataDbSource();
@@ -111,11 +102,21 @@ namespace TianHua.FanSelection.UI.CAD
 
             // 
             var identifier = dbObject.GetModelIdentifier();
-            if (orig.Models.Where(o => o.ID == identifier).Any() &&
-                !Models.Where(o => o.ID == identifier).Any())
+            if (orig.Models.Any(o => o.ID == identifier) && 
+                !Models.Any(o => o.ID == identifier))
             {
                 Models.AddRange(orig.Models.Where(o => o.ID == identifier));
                 Models.AddRange(orig.Models.Where(o => o.PID == identifier));
+            }
+        }
+
+        private void EraseModelData(DBObject dbObject, bool erasing)
+        {
+            var identifier = dbObject.GetModelIdentifier();
+            if (!string.IsNullOrEmpty(identifier) && erasing)
+            {
+                var ds = new ThFanModelDataDbSource();
+                ds.Erase(dbObject.Database, identifier);
             }
         }
     }
