@@ -181,7 +181,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -199,7 +199,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -217,7 +217,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -492,6 +492,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -502,6 +503,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -512,6 +514,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>
