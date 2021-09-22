@@ -442,7 +442,17 @@ namespace ThMEPHVAC.Model
         {
             return (sp1.IsEqualTo(sp2, point_tor) && ep1.IsEqualTo(ep2, point_tor));
         }
-        public static void Get_max(Point2d sp1, Point2d ep1, Point2d sp2, Point2d ep2, out Point2d p1, out Point2d p2)
+        public static void Get_longest_dis(Point3d sp1, Point3d ep1, Point3d sp2, Point3d ep2, out Point3d p1, out Point3d p2)
+        {
+            var sp_2D_1 = sp1.ToPoint2D();
+            var ep_2D_1 = ep1.ToPoint2D();
+            var sp_2D_2 = sp2.ToPoint2D();
+            var ep_2D_2 = ep2.ToPoint2D();
+            Get_longest_dis(sp_2D_1, ep_2D_1, sp_2D_2, ep_2D_2, out Point2d p_2D_1, out Point2d p_2D_2);
+            p1 = new Point3d(p_2D_1.X, p_2D_1.Y, 0);
+            p2 = new Point3d(p_2D_2.X, p_2D_2.Y, 0);
+        }
+        public static void Get_longest_dis(Point2d sp1, Point2d ep1, Point2d sp2, Point2d ep2, out Point2d p1, out Point2d p2)
         {
             double dis1 = sp1.GetDistanceTo(sp2);
             double dis2 = sp1.GetDistanceTo(ep2);
@@ -792,8 +802,10 @@ namespace ThMEPHVAC.Model
         }
         public static double Get_line_dis(Point3d l1_sp, Point3d l1_ep, Point3d l2_sp, Point3d l2_ep)
         {
-            var l1 = new LineString(new Coordinate[] { l1_sp.ToNTSCoordinate(), l1_ep.ToNTSCoordinate() });
-            var l2 = new LineString(new Coordinate[] { l2_sp.ToNTSCoordinate(), l2_ep.ToNTSCoordinate() });
+            var coordinate1 = new Coordinate[] { l1_sp.ToNTSCoordinate(), l1_ep.ToNTSCoordinate() };
+            var coordinate2 = new Coordinate[] { l2_sp.ToNTSCoordinate(), l2_ep.ToNTSCoordinate() };
+            var l1 = new LineString(coordinate1);
+            var l2 = new LineString(coordinate2);
             return l1.Distance(l2);
         }
         public static Line Get_max_line(DBObjectCollection lines)

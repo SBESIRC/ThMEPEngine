@@ -580,7 +580,7 @@ namespace ThMEPHVAC.Model
             if (modify_size == connect_duct.duct_size)
             {
                 is_direct_duct = true;
-                ThMEPHVACService.Get_max(cur_line.sp, cur_line.ep, connect_duct.sp, connect_duct.ep, out Point2d p1, out Point2d p2);
+                ThMEPHVACService.Get_longest_dis(cur_line.sp, cur_line.ep, connect_duct.sp, connect_duct.ep, out Point2d p1, out Point2d p2);
                 Create_duct_by_duct(connect_duct, p1, p2, width, modify_size);
             }
         }
@@ -621,18 +621,19 @@ namespace ThMEPHVAC.Model
             Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
         }
         private void Insert_reducing(double connect_width,
-                                         double modify_width,
-                                         Point2d new_sp,
-                                         Point2d new_ep,
-                                         Point2d detect_p,
-                                         Vector2d dis_vec)
+                                     double modify_width,
+                                     Point2d new_sp,
+                                     Point2d new_ep,
+                                     Point2d detect_p,
+                                     Vector2d dis_vec)
         {
             if (connect_width > modify_width)
             {
                 var dis1 = detect_p.GetDistanceTo(new_sp);
                 var dis2 = detect_p.GetDistanceTo(new_ep);
+                // dis1 < dis2 风量小的管段比风量大的管段粗(变径反向)
                 var reducing_geo = (dis1 < dis2) ?
-                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, connect_width, modify_width) :
+                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, modify_width, connect_width) :
                     ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, connect_width, modify_width);
                 Update_reducing(reducing_geo);
             }
