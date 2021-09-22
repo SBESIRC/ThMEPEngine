@@ -14,6 +14,7 @@ using ThMEPLighting.ParkingStall.CAD;
 using ThMEPLighting.ParkingStall.Model;
 using ThMEPLighting.ParkingStall.Worker.LightConnect;
 using ThMEPLighting.ParkingStall.Worker.LightConnectAdjust;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.ParkingStall.Core
 {
@@ -42,6 +43,7 @@ namespace ThMEPLighting.ParkingStall.Core
             ErrorMsgs = new List<string>();
             _allCalcALLines = new List<Line>();
             _allGraphRoutes = new List<GraphRoute>();
+            _dbScanClusterSingleMaxCount = ThParkingStallService.Instance.GroupMaxLightCount;
         }
         public void Execute()
         {

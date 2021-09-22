@@ -7,17 +7,14 @@ namespace ThMEPLighting.UI
     public class MEPLightingUIApp : IExtensionApplication
     {
         uiEvaIndicatorSign uiSign = null;
-        ExampleUI exampleUI = null;
         public void Initialize()
         {
             uiSign = null;
-            exampleUI = null;
         }
 
         public void Terminate()
         {
             uiSign = null;
-            exampleUI = null;
         }
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
         public void THSSUI()
@@ -40,12 +37,11 @@ namespace ThMEPLighting.UI
             //    }
             //}
         }
-
-        [CommandMethod("TIANHUACAD", "THEXUI", CommandFlags.Modal)]
-        public void THExampleUI()
+        [CommandMethod("TIANHUACAD", "THCWZM", CommandFlags.Modal)]
+        public void THParkLightUI()
         {
-            //exampleUI = new ExampleUI();
-            //AcadApp.ShowModelessWindow(exampleUI);
+            uiParkingLight uiPLight = new uiParkingLight();
+            AcadApp.ShowModelessWindow(uiPLight);
         }
 
         //照明

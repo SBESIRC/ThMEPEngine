@@ -20,11 +20,17 @@ using ThMEPLighting.ParkingStall.Worker.ParkingGroup;
 using ThMEPLighting.ParkingStall.Worker.PipeConnector;
 using ThMEPLighting.ParkingStall.Worker.PlaceLight;
 using ThMEPLighting.ParkingStall.Worker.RegionLaneConnect;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.ParkingStall.Core
 {
     public class CommandManager
     {
+        private Light_Place_Type lightDirection = Light_Place_Type.LONG_EDGE;
+        public CommandManager() 
+        {
+            lightDirection = ThParkingStallService.Instance.LightDirection;
+        }
         public void ExtractParkStallProfiles()
         {
             var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
@@ -91,7 +97,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 车位分组布置灯信息
                 var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
                 BlockInsertor.MakeBlockInsert(groupLights);
                 //GroupLightViewer.MakeGroupLightViewer(groupLights);
             }
@@ -354,7 +360,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 车位分组布置灯信息
                 var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 if (groupLights == null || groupLights.Count < 1)
                     continue;
@@ -421,7 +427,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 车位分组布置灯信息
                 var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
                 var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
@@ -431,7 +437,7 @@ namespace ThMEPLighting.ParkingStall.Core
 
                 var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
             }
         }
@@ -492,7 +498,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 车位分组布置灯信息
                 var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
                 var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
@@ -503,11 +509,11 @@ namespace ThMEPLighting.ParkingStall.Core
                 //// laneGroups 里面组织结构可能会有无效的灯信息
                 var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
 
                 // 连管处理
-                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, Light_Place_Type.LONG_EDGE);
+                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, lightDirection);
 
                 // print
                 LightConnectViewer.MakeLightConnectViewer(pipeLighterPolyInfos);
@@ -570,7 +576,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 车位分组布置灯信息
                 var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
                 var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
@@ -581,11 +587,11 @@ namespace ThMEPLighting.ParkingStall.Core
                 //// laneGroups 里面组织结构可能会有无效的灯信息
                 var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
 
-                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, Light_Place_Type.LONG_EDGE);
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
 
                 // 车道线单侧部分连管处理
-                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, Light_Place_Type.LONG_EDGE);
+                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, lightDirection);
 
                 // 区域部分连管处理
                 RegionLaneConnector.MakeRegionConnector(pipeLighterPolyInfos);

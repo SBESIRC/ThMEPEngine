@@ -9,6 +9,8 @@ using ThMEPEngineCore.Engine;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.ParkingStall.CAD
 {
@@ -38,7 +40,17 @@ namespace ThMEPLighting.ParkingStall.CAD
         {
             using (var acadDb = AcadDatabase.Active())
             {
+                var layers = ThParkingStallLayerManager.XrefLayers(acadDb.Database);
+                foreach (var item in ThParkingStallService.Instance.ParkingLayerNames) 
+                {
+                    if (layers.Any(c => c.Equals(item)))
+                        continue;
+                    layers.Add(item);
+                }
                 var parkingStallRecognitionEngine = new ThParkingStallRecognitionEngine();
+                parkingStallRecognitionEngine.Visitor.LayerFilter.Clear();
+                foreach (var layerName in layers)
+                    parkingStallRecognitionEngine.Visitor.LayerFilter.Add(layerName);
                 parkingStallRecognitionEngine.Recognize(acadDb.Database, m_previewWindow);
 
                 foreach (var space in parkingStallRecognitionEngine.Elements.Cast<ThIfcParkingStall>().ToList())

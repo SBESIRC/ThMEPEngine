@@ -67,8 +67,13 @@
     <Compile Include="UI\uiEvaIndicatorSign.xaml.cs">
       <DependentUpon>uiEvaIndicatorSign.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiParkingLight.xaml.cs">
+      <DependentUpon>uiParkingLight.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\EvaSignViewModel.cs" />
     <Compile Include="ViewModels\ExampleViewModel.cs" />
+    <Compile Include="ViewModels\MultiCheckItem.cs" />
+    <Compile Include="ViewModels\ParkingLightViewModel.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -129,6 +134,10 @@
     <Page Include="UI\uiEvaIndicatorSign.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiParkingLight.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
