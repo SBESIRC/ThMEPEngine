@@ -75,7 +75,8 @@ namespace ThMEPElectrical.FireAlarm.Service
 
         public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList)
         {
-            var bReadJson = true;
+            var bReadJson = false;
+            var bWriteJson = false;
             var fileInfo = new FileInfo(Active.Document.Name);
             var path = fileInfo.Directory.FullName;
 
@@ -106,7 +107,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                     var sName = psr.StringResult;
                     geos = ThGeometryJsonReader.ReadFromFile(sName);
                 }
-                if (bReadJson == false)
+                if (bWriteJson == true)
                 {
                     ThGeoOutput.Output(geos, path, fileInfo.Name);
                 }
