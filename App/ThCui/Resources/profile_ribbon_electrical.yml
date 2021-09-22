@@ -139,6 +139,8 @@ panels:
     items:
         - text: "地库车道照明"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "地库车位照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "车道应急照明"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "地库疏散指示"

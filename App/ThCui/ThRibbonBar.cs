@@ -191,6 +191,15 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THCDZM_LARGE",
             RibbonButtonStyle.LargeWithText);
 
+            // 地库车位照明
+            row.AddNewButton("地库车位照明",
+            "天华地库车位照明",
+            "THCWZM",
+            "天华地库车位照明",
+            "IDI_THCAD_THCWZM_SMALL",
+            "IDI_THCAD_THCWZM_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
             // 车道应急照明
             row.AddNewButton("车道应急照明",
             "天华车道应急照明",
