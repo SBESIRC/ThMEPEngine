@@ -30,9 +30,11 @@ namespace ThMEPEngineCore.ConnectWiring.Data
     {
         public BlockReference powerBlock;
         public List<Polyline> holes = new List<Polyline>();
+        List<string> configBlocks = new List<string>();
         private List<ThGeometry> Geos { get; set; }
-        public ThFireAlarmWiringDateSetFactory()
+        public ThFireAlarmWiringDateSetFactory(List<string> blockNames)
         {
+            configBlocks = blockNames;
             Geos = new List<ThGeometry>();
         }
         protected override ThMEPDataSet BuildDataSet()
@@ -61,7 +63,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     {
                         holes = holes,
                     },
-                    new ThBlockPointsExtractor()      //连线布置点位
+                    new ThBlockPointsExtractor(configBlocks)      //连线布置点位
                     {
                     },
                 };

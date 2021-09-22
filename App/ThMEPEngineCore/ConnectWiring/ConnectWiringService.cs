@@ -19,39 +19,73 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.ConnectWiring.Data;
+using ThMEPEngineCore.ConnectWiring.Service;
 using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public List<Polyline> Routing()
+        public List<Polyline> Routing(int count, string systemName)
         {
             var lines = new List<Polyline>();
-            var data = GetData();
-            if (data != null)
+            BlockConfigSrervice configSrervice = new BlockConfigSrervice();
+            var configInfo = configSrervice.GetLoopInfo(systemName);
+            foreach (var info in configInfo)
             {
-                ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
-                var res = thCableRouter.RouteCable(data, 25);
-                var serializer = GeoJsonSerializer.Create();
-                using (var stringReader = new StringReader(res))
-                using (var jsonReader = new JsonTextReader(stringReader))
+                var configBlocks = info.loopInfoModels.First().blockNames;
+                var data = GetData(configBlocks);
+                if (data != null)
                 {
-                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
-                    foreach (var f in features)
+                    ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
+                    var res = thCableRouter.RouteCable(data, count);
+                    var serializer = GeoJsonSerializer.Create();
+                    using (var stringReader = new StringReader(res))
+                    using (var jsonReader = new JsonTextReader(stringReader))
                     {
-                        if (f.Geometry is LineString line)
+                        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                        foreach (var f in features)
                         {
-                            lines.Add(line.ToDbPolyline());
+                            if (f.Geometry is LineString line)
+                            {
+                                lines.Add(line.ToDbPolyline());
+                            }
                         }
                     }
-                } 
+                }
             }
+
+
+
+            //var lines = new List<Polyline>();
+            //var data = GetData();
+            //if (data != null)
+            //{
+            //    ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
+            //    var res = thCableRouter.RouteCable(data, count);
+            //    var serializer = GeoJsonSerializer.Create();
+            //    using (var stringReader = new StringReader(res))
+            //    using (var jsonReader = new JsonTextReader(stringReader))
+            //    {
+            //        var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+            //        foreach (var f in features)
+            //        {
+            //            if (f.Geometry is LineString line)
+            //            {
+            //                lines.Add(line.ToDbPolyline());
+            //            }
+            //        }
+            //    }
+            //}
 
             return lines;
         }
 
-        public string GetData()
+        /// <summary>
+        /// 获取数据
+        /// </summary>
+        /// <returns></returns>
+        public string GetData(List<string> configBlocks)
         {
             string geoJson = null;
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -103,7 +137,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 var holeInfos = CalHoles(frameLst);
                 var outFrame = holeInfos.First().Key;
                 var holes = holeInfos.First().Value;
-                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory();
+                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory(configBlocks);
                 factory.holes = holes;
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());

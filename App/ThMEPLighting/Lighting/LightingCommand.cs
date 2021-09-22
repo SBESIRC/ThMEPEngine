@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPLighting.Lighting.ViewModels;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.ConnectWiring;
+
 namespace ThMEPLighting.Lighting.Commands
 {
     public class LightingRouteCableCommand : ThMEPBaseCommand, IDisposable
@@ -20,6 +22,8 @@ namespace ThMEPLighting.Lighting.Commands
         public override void SubExecute()
         {
             //todo: route cables using _UiConfigs
+            ConnectWiringService connectWiringService = new ConnectWiringService();
+            connectWiringService.Routing(25);
         }
         public void Dispose()
         { }
