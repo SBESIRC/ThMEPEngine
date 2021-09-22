@@ -33,5 +33,16 @@ namespace ThMEPWSS.Sprinkler.Service
             });
             vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
         }
+
+        public static Point3d CenterPoint(Point3d first, Point3d second)
+        {
+            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, 0);
+        }
+
+        public static Point3d VerticalPoint(Point3d first, Point3d second, double distance)
+        {
+            var verticalVerctor = second - first;
+            return CenterPoint(first, second) + verticalVerctor / verticalVerctor.Length * distance;
+        }
     }
 }

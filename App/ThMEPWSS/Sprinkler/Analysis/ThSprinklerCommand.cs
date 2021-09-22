@@ -55,13 +55,19 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
                 // 房间布置情况校核
                 //var roomChecker = new ThSprinklerRoomChecker();
-                //var objs = roomChecker.Check(geometries, recognizeAllEngine.Elements);
-                //roomChecker.Present(currentDb.Database, objs);
+                //var objsTidal = roomChecker.Check(geometries, recognizeAllEngine.Elements);
+                //roomChecker.Present(currentDb.Database, objsTidal);
 
-                var distanceChecker = new ThSprinklerDistanceBetweenSprinklerChecker();
-                var distanceCheck = distanceChecker.DistanceCheck(engine.Elements, 1800.0);
-                var buildingCheck = distanceChecker.BuildingCheck(geometries, distanceCheck);
-                distanceChecker.Present(currentDb.Database, buildingCheck);
+                // 喷头间间距校核
+                //var distanceChecker = new ThSprinklerDistanceBetweenSprinklerChecker();
+                //var distanceCheck = distanceChecker.DistanceCheck(engine.Elements, 1800.0);
+                //var buildingCheck = distanceChecker.BuildingCheck(geometries, distanceCheck);
+                //distanceChecker.Present(currentDb.Database, buildingCheck);
+
+                // 喷头距边校核
+                var boundaryChecker = new ThSprinklerDistanceFromBoundaryChecker();
+                var results = boundaryChecker.DistanceCheck(engine.Elements, geometries);
+                boundaryChecker.Present(currentDb.Database, results);
             }
         }
     }

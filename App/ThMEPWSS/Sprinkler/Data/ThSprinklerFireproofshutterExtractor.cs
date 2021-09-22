@@ -1,23 +1,18 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.Sprinkler.Data
 {
@@ -62,6 +57,7 @@ namespace ThMEPWSS.Sprinkler.Data
             localFireproofShutters = localFireproofShutters.FilterSmallArea(SmallAreaTolerance);
             FireproofShutter = localFireproofShutters.Cast<Polyline>().ToList();
         }
+
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -86,35 +82,17 @@ namespace ThMEPWSS.Sprinkler.Data
             return geos;
         }
 
-        public void SetTags(Dictionary<Entity, string> fireApartIds)
-        {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(fireApartIds.Select(o => o.Key).ToCollection());
-            var bufferService = new ThNTSBufferService();
-            FireproofShutter.ForEach(o =>
-            {
-                var enlarge = bufferService.Buffer(o, 5.0);
-                var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count > 0)
-                {
-                    FireDoorNeibourIds.Add(o, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
-                }
-            });
-        }
-
-        public void Set(List<ThStoreyInfo> storeyInfos)
-        {
-            StoreyInfos = storeyInfos;
-        }
-
         public ThStoreyInfo Query(Entity entity)
         {
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
+
         public override List<Entity> GetEntities()
         {
             return FireproofShutter.Cast<Entity>().ToList();
         }
+
         private bool IsClosed(Polyline polyline)
         {
             if (polyline.StartPoint.DistanceTo(polyline.EndPoint) <= 1.0)

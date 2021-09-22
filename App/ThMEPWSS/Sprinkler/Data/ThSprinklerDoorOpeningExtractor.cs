@@ -1,25 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-using Linq2Acad;
 using DotNetARX;
-
+using Linq2Acad;
+using NFox.Cad;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Sprinkler.Service;
 
@@ -46,19 +43,20 @@ namespace ThMEPWSS.Sprinkler.Data
             Category = BuiltInCategory.DoorOpening.ToString();
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
         }
+
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var db3Doors = ExtractDb3Door(database, pts);
-            var localDoors = ExtractMsDoor(database, pts);
+            Doors = ExtractDb3Door(database, pts);
+            //var localDoors = ExtractMsDoor(database, pts);
             //对Clean的结果进一步过虑
-            for (int i = 0; i < localDoors.Count; i++)
-            {
-                localDoors[i].Outline = ThSprinklerCleanEntityService.Buffer(localDoors[i].Outline as Polyline, 25);
-            }
+            //for (int i = 0; i < localDoors.Count; i++)
+            //{
+            //    localDoors[i].Outline = ThSprinklerCleanEntityService.Buffer(localDoors[i].Outline as Polyline, 25);
+            //}
 
             //处理重叠
-            var conflictService = new ThSprinklerHandleConflictService();
-            Doors = conflictService.Union(db3Doors, localDoors);
+            //var conflictService = new ThSprinklerHandleConflictService();
+            //Doors = conflictService.Union(db3Doors, localDoors);
 
             var objs = Doors.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Doors = Doors.Where(o => objs.Contains(o.Outline)).ToList();
@@ -152,6 +150,7 @@ namespace ThMEPWSS.Sprinkler.Data
             dict.Add(BuiltInCategory.Window, db3Windows);
             return dict;
         }
+
         private List<ThIfcDoor> ExtractDb3Door(Database database, Point3dCollection pts)
         {
             // 构件索引服务
@@ -182,21 +181,7 @@ namespace ThMEPWSS.Sprinkler.Data
         }
 
         #endregion
-        private List<ThIfcDoor> ExtractMsDoor(Database database, Point3dCollection pts)
-        {
-            var localdoors = new List<ThIfcDoor>();
-            var instance = new ThExtractPolylineService()
-            {
-                ElementLayer = this.ElementLayer,
-            };
-            instance.Extract(database, pts);
-            instance.Polys.ForEach(o => Transformer.Transform(o));
-            return instance.Polys
-                .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => new ThIfcDoor { Outline = o })
-                .Cast<ThIfcDoor>()
-                .ToList();
-        }
+
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -231,34 +216,11 @@ namespace ThMEPWSS.Sprinkler.Data
             });
             return geos;
         }
-        public void SetTags(Dictionary<Entity, string> fireApartIds)
-        {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(fireApartIds.Select(o => o.Key).ToCollection());
-            var bufferService = new ThNTSBufferService();
-            var fireDoors = Doors.Where(o => IsFireDoor(o)).ToList();
-            fireDoors.ForEach(o =>
-            {
-                var enlarge = bufferService.Buffer(o.Outline, 5.0);
-                var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count == 2)
-                {
-                    FireDoorNeibourIds.Add(o.Outline, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
-                }
-                else if (neibours.Count > 2)
-                {
-                    throw new NotSupportedException();
-                }
-            });
-        }
+
         private bool IsFireDoor(ThIfcDoor door)
         {
             //ToDO
             return door.Spec.ToUpper().Contains("FM");
-        }
-
-        public void Set(List<ThStoreyInfo> storeyInfos)
-        {
-            StoreyInfos = storeyInfos;
         }
 
         public ThStoreyInfo Query(Entity entity)
@@ -285,23 +247,16 @@ namespace ThMEPWSS.Sprinkler.Data
             }
         }
 
-        public void Group(Dictionary<Entity, string> groupId)
-        {
-            Doors.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
-        }
-
         public override List<Entity> GetEntities()
         {
             return Doors.Select(o => o.Outline).ToList();
         }
+
         public override void SetRooms(List<ThIfcRoom> rooms)
         {
             this.Rooms = rooms;
         }
-        public void SetHoles(List<Polyline> holes)
-        {
-            this.Holes = holes;
-        }
+        
         public void Transform()
         {
             Doors.ForEach(o => Transformer.Transform(o.Outline));
