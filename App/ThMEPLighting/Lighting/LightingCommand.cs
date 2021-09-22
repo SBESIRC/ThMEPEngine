@@ -23,7 +23,7 @@ namespace ThMEPLighting.Lighting.Commands
         {
             //todo: route cables using _UiConfigs
             ConnectWiringService connectWiringService = new ConnectWiringService();
-            connectWiringService.Routing(25);
+            connectWiringService.Routing(25, "照明");
         }
         public void Dispose()
         { }
