@@ -124,16 +124,6 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// <param name="colorIndex">颜色</param>
         public static void ShowPointWithDirection(Point3d pt, Vector3d vec, int colorIndex = 210)
         {
-            /*
-            Point3d pt1 = new Point3d(pt.X - 100, pt.Y - 100, 0);
-            Point3d pt2 = new Point3d(pt.X + 100, pt.Y - 100, 0);
-            Point3d pt3 = new Point3d(pt.X, pt.Y + 100, 0);
-            vec.RotateBy(150, Vector3d.ZAxis);
-            Polyline polyline = new Polyline();
-            //polyline.AddVertexAt()
-            //Line line1 = new Line(p1, p3);
-            vec.GetNormal();//单位化
-            */
             Point3d pt1 = pt + vec * 400;
             Point3d pt2 = pt + vec.RotateBy(Math.PI / 6, -Vector3d.ZAxis) * 200;
             Point3d pt3 = pt + vec.RotateBy(Math.PI / 6, Vector3d.ZAxis) * 200;
@@ -142,7 +132,7 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             Line line2 = new Line(pt2, pt1);
             line2.ColorIndex = colorIndex;
             Line line3 = new Line(pt3, pt1);
-            line2.ColorIndex = colorIndex;
+            line3.ColorIndex = colorIndex;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(line1, line2, line3);
         }
 

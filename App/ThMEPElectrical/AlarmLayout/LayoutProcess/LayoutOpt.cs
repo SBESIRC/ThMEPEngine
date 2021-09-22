@@ -27,7 +27,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
 {
     class LayoutOpt
     {
-        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, AcadDatabase acdb, BlindType equipmentType, Dictionary<Point3d, Vector3d> pointsWithDirection)
+        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, AcadDatabase acdb, BlindType equipmentType)//, Dictionary<Point3d, Vector3d> pointsWithDirection)
         {
             //显示中心线
             //CenterLineSimplify.ShowCenterLine(mPolygon, acdb);
@@ -50,55 +50,44 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
 
             //3、删点：删除多余的不需要的点（总覆盖面积不变）
             List<Point3d> thdPoints = ThdStep(mPolygon, sndHalfPoints, radius, equipmentType);
-
-            //4、获取布置点位方向
-            FourStep(mPolygon, thdPoints, pointsWithDirection);
             
             return thdPoints;
         }
 
-
         /// <summary>
-        /// 获取布置设备的方向
+        /// 获取可布置点位
         /// </summary>
-        /// <param name="mPolygon"></param>
-        /// <param name="points"></param>
-        /// <param name="pointsWithDirection"></param>
-        public static void FourStep(MPolygon mPolygon, List<Point3d> points, Dictionary<Point3d, Vector3d> pointsWithDirection)
+        /// <param name="nonDeployableArea"></param>
+        /// <param name="layoutList"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
+        public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<Polyline> layoutList, double radius)
         {
-
-            //var shell = mPolygon.Shell();
-            var lines = new List<Line>();
-            var dbObjs = new DBObjectCollection();
-            mPolygon.Shell().Explode(dbObjs);
-            foreach (var curve in dbObjs)
+            List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
+            Hashtable ht = new Hashtable();
+            foreach (var pt in pointsInLayoutList)
             {
-                if (curve is Line line)
+                ht[pt] = true;
+            }
+            foreach (var pl in nonDeployableArea)
+            {
+                foreach (var pt in pointsInLayoutList)
                 {
-                    if(line.StartPoint != line.EndPoint)
+                    if (pl.ContainsOrOnBoundary(pt))
                     {
-                        lines.Add(line);
-                        line.ColorIndex = 130;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                        ht[pt] = false;
                     }
                 }
-                else if (curve is Polyline poly)
-                {
-                    lines.AddRange(poly.ToLines());
-                }
-                else if (curve is Circle circle)
-                {
-                    lines.AddRange(circle.Tessellate(100.0).ToLines());
-                }
             }
-
-            foreach (var pt in points)
+            List<Point3d> ans = new List<Point3d>();
+            foreach (DictionaryEntry xx in ht)
             {
-                var closestLine = lines.OrderBy(o => o.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
-                HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(pt, closestLine.StartPoint));
-                pointsWithDirection.Add(pt, (closestLine.EndPoint - closestLine.StartPoint).GetNormal());
+                if ((bool)xx.Value == true)
+                {
+                    ans.Add((Point3d)xx.Key);
+                }
             }
-
+            return ans.Distinct().ToList();
         }
 
         /// <summary>
@@ -153,9 +142,11 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <returns>加电后的点集合</returns>
         public static List<Point3d> SndStep(MPolygon mPolygon, List<Point3d> fstPoints, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
         {
+            int loopCnt = 0;
             bool flag = true;
-            while (flag)
+            while (flag && loopCnt < 20)
             {
+                ++loopCnt;
                 flag = false;
                 //当前未覆盖区域集合
                 NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, fstPoints, radius, equipmentType);
@@ -174,6 +165,10 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                             flag = false;
                             continue;
                         }
+                        //if (fstPoints.Contains(pt1))
+                        //{
+                        //    break;
+                        //}
                         fstPoints.Add(pt1);
                     }
                 }
@@ -237,6 +232,51 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         }
 
         /// <summary>
+        /// 获取布置点的方向
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="holeList"></param>
+        /// <param name="points"></param>
+        /// <param name="pointsWithDirection"></param>
+        public static void FourStep(Polyline frame, List<Polyline> holeList, List<Point3d> points, Dictionary<Point3d, Vector3d> pointsWithDirection)
+        {
+            var lines = new List<Line>();
+            var dbObjs = new DBObjectCollection();
+            frame.Explode(dbObjs);
+            foreach (var pl in holeList)
+            {
+                lines.AddRange(pl.ToLines());
+            }
+            foreach (var curve in dbObjs)
+            {
+                if (curve is Line line)
+                {
+                    if (line.StartPoint != line.EndPoint)
+                    {
+                        lines.Add(line);
+                        //line.ColorIndex = 130;//显示边界线
+                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                    }
+                }
+                else if (curve is Polyline poly)
+                {
+                    lines.AddRange(poly.ToLines());
+                }
+                else if (curve is Circle circle)
+                {
+                    lines.AddRange(circle.Tessellate(100.0).ToLines());
+                }
+            }
+
+            foreach (var pt in points)
+            {
+                var closestLine = lines.OrderBy(o => o.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
+                //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(pt, closestLine.StartPoint));//--------------------显示链接线
+                pointsWithDirection.Add(pt, (closestLine.EndPoint - closestLine.StartPoint).GetNormal());
+            }
+        }
+
+        /// <summary>
         /// 根据半径大小改变布点的密集程度
         /// </summary>
         /// <param name="radius">设备覆盖半径</param>
@@ -250,3 +290,4 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         }
     }
 }
+

@@ -10,9 +10,7 @@ using ThMEPElectrical.AlarmLayout.Utils;
 using ThMEPElectrical.AlarmLayout.LayoutProcess;
 using ThMEPElectrical.AlarmSensorLayout.Data;
 using NetTopologySuite.Operation.Overlay.Snap;
-using NetTopologySuite.Geometries;
-using ThMEPElectrical.AlarmSensorLayout.Method;
-using NetTopologySuite.Operation.OverlayNG;
+using ThCADExtension;
 
 namespace ThMEPElectrical.AlarmLayout.Command
 {
@@ -43,8 +41,9 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 //Get MPolygon
                 var objs = new DBObjectCollection();
                 objs.Add(frame);
-                foreach (var hole in holeList)
+                foreach (var hole in holeList)// --------------------------------------------
                 {
+                    hole.Closed = true;
                     objs.Add(hole);
                 }
 
@@ -74,16 +73,35 @@ namespace ThMEPElectrical.AlarmLayout.Command
                         nonDeployableArea.Add(pl);
                     }
                 }
-                MPolygon mPolygon = objs.BuildMPolygon();
+                /*
+                holeList.ForEach(h =>
+                {
+                    acdb.ModelSpace.Add(h.Clone() as Entity);
+                });
+                holeList.ForEach(h =>
+                {
+                    h.Closed = true;
+                });
+                */
+                MPolygon mPolygon = objs.BuildMPolygon();   
+                /*
+                MPolygon mPolygon = ThMPolygonTool.CreateMPolygon(frame, holeList.Cast<Curve>().ToList());
+                    
 
-                //加入数据库
+                foreach (var hole in holeList)
+                {
+                    mPolygon.AppendLoopFromBoundary(hole, false, 0.0);
+                }
+                */
+                var xxxxx = mPolygon.Holes();//-----------------------
                 acdb.ModelSpace.Add(mPolygon);
                 mPolygon.SetDatabaseDefaults();
-
-                pointsWithDirection = new Dictionary<Point3d, Vector3d>();
                 //处理数据
-                layoutPoints = LayoutOpt.Calculate(mPolygon, GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, acdb, equipmentType, pointsWithDirection);
-
+                pointsWithDirection = new Dictionary<Point3d, Vector3d>();
+                //计算布置点位
+                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, acdb, equipmentType);//, pointsWithDirection);
+                //获取布置点位方向
+                LayoutOpt.FourStep(frame, holeList, layoutPoints, pointsWithDirection);
 
                 //输出
                 blinds = new List<Polyline>();
@@ -100,51 +118,14 @@ namespace ThMEPElectrical.AlarmLayout.Command
 
                 //显示适配信息
                 ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
-                //显示布置点
+                //显示布置点及方向
                 foreach(var dir in pointsWithDirection)
                 {
                     ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
                 }
-                //ShowInfo.ShowPoints(layoutPoints, 'X');
                 //显示盲区
                 ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
             }
-        }
-
-        /// <summary>
-        /// 获取可布置点位
-        /// </summary>
-        /// <param name="nonDeployableArea"></param>
-        /// <param name="layoutList"></param>
-        /// <param name="radius"></param>
-        /// <returns></returns>
-        public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<Polyline> layoutList, double radius)
-        {
-            List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
-            Hashtable ht = new Hashtable();
-            foreach(var pt in pointsInLayoutList)
-            {
-                ht[pt] = true;
-            }
-            foreach(var pl in nonDeployableArea)
-            {
-                foreach(var pt in pointsInLayoutList)
-                {
-                    if (pl.ContainsOrOnBoundary(pt))
-                    {
-                        ht[pt] = false;
-                    }
-                }
-            }
-            List<Point3d> ans = new List<Point3d>();
-            foreach (DictionaryEntry xx in ht)
-            {
-                if ((bool)xx.Value == true)
-                {
-                    ans.Add((Point3d)xx.Key);
-                }
-            }
-            return ans.Distinct().ToList();
         }
     }
 }
