@@ -21,9 +21,14 @@ namespace ThMEPElectrical.FireAlarm.Commands
 
         public override void SubExecute()
         {
+#if (ACAD2016 || ACAD2018)
             //todo: route cables using _UiConfigs
             ConnectWiringService connectWiringService = new ConnectWiringService();
             connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
+#else
+            //
+#endif
+
         }
 
         public void Dispose()
