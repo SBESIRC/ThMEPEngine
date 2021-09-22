@@ -500,7 +500,7 @@ namespace ThMEPEngineCore
         public void THWiringGeo()
         {
             ConnectWiringService connectWiring = new ConnectWiringService();
-            var lines = connectWiring.Routing();
+            var lines = connectWiring.Routing(25);
             using (AcadDatabase db = AcadDatabase.Active())
             {
                 foreach (var item in lines)

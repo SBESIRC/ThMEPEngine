@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.ConnectWiring;
+using TianHua.Electrical.ViewModels;
 using ThMEPElectrical.FireAlarm.ViewModels;
-
 using ThMEPElectrical;
-
 namespace ThMEPElectrical.FireAlarm.Commands
 {
     public class FireAlarmRouteCableCommand : ThMEPBaseCommand, IDisposable
@@ -23,6 +23,8 @@ namespace ThMEPElectrical.FireAlarm.Commands
         public override void SubExecute()
         {
             //todo: route cables using _UiConfigs
+            ConnectWiringService connectWiringService = new ConnectWiringService();
+            connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount);
         }
 
         public void Dispose()

@@ -99,6 +99,8 @@
     <Compile Include="ConnectWiring\Data\ThFaRoomExtractor.cs" />
     <Compile Include="ConnectWiring\Data\ThFireAlarmWiringDateSetFactory.cs" />
     <Compile Include="ConnectWiring\Data\ThLaneLineExtractor.cs" />
+    <Compile Include="ConnectWiring\Model\BlockConfigModel.cs" />
+    <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
