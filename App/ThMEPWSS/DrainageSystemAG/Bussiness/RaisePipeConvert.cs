@@ -50,6 +50,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         tag = "Y2L";
                         layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
                         break;
+                    case EnumEquipmentType.roofRainRiser:
+                        dn = SetServicesModel.Instance.roofRainRiserPipeDiameter.ToString();
+                        tag = "Y1L";
+                        layerName = ThWSSCommon.Layout_FloorDrainBlockRainLayerName;
+                        break;
                     case EnumEquipmentType.condensateRiser:
                         dn = SetServicesModel.Instance.condensingRiserPipeDiameter.ToString();
                         tag = "NL";
