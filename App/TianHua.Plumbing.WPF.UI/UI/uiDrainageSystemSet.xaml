@@ -18,10 +18,17 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical">
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                <Label Content="楼层线间距" ></Label>
+                <Button x:Name="btnHeights" Click="btnHeights_Click" Width="80" Margin="50,0,0,0">层高设置</Button>
+            </StackPanel>
+       
         <StackPanel Orientation="Horizontal">
-            <Label Content="楼层线间距"></Label>
-            <TextBox Width="100" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" SpellCheck.IsEnabled="True"/>
+           
+            <TextBox Width="80" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" SpellCheck.IsEnabled="True"/>
             <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+        </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>

@@ -13,6 +13,7 @@ using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
@@ -32,7 +33,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             StartNum = 1;
         }
 
-       
+
         public void CreateFloorFraming()
         {
             Common.Utils.CreateFloorFraming();
@@ -43,19 +44,30 @@ namespace ThMEPWSS.Diagram.ViewModel
             dynamicRadioButtons?.Clear();
             FloorListDatas = new List<string>();
             Common.Utils.FocusMainWindow();
+            SelectedArea = Common.Utils.SelectAreas();
+            if (SelectedArea.Count != 0)
+            {
+                CadCache.SetCache(CadCache.CurrentFile, "SelectedRange", SelectedArea);
+                InitListDatasByArea(SelectedArea);
+                CadCache.UpdateByRange(SelectedArea);
+            }
+        }
+
+        public void InitListDatasByArea(Point3dCollection selectedArea, bool showMessageBox = true)
+        {
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
-                SelectedArea = Common.Utils.SelectAreas();
                 var storeysRecEngine = new ThStoreysRecognitionEngine();//创建楼板识别引擎
-                storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
+                storeysRecEngine.Recognize(acadDatabase.Database, selectedArea);
                 if (storeysRecEngine.Elements.Count == 0)
                 {
-                    MessageBox.Show("框选区域没有有效楼层");
+                    if (showMessageBox)
+                        MessageBox.Show("框选区域没有有效楼层");
                     return;
                 }
-                FloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase,
-                    storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray());
+                var objIds = storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray();
+                FloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase, objIds);
 
                 var FloorNum = storeysRecEngine.Elements
                     .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
@@ -64,7 +76,8 @@ namespace ThMEPWSS.Diagram.ViewModel
 
                 if (FloorNum.Count == 0)
                 {
-                    MessageBox.Show("框选区域没有标准楼层");
+                    if (showMessageBox)
+                        MessageBox.Show("框选区域没有标准楼层");
                     return;
                 }
                 FloorNumList = ThWCompute.CreateFloorNumList(FloorNum);
@@ -72,7 +85,7 @@ namespace ThMEPWSS.Diagram.ViewModel
 
                 var AreaNums = 0;
                 var roomBuilder = new ThRoomBuilderEngine();
-                var rooms = roomBuilder.BuildFromMS(acadDatabase.Database, SelectedArea);
+                var rooms = roomBuilder.BuildFromMS(acadDatabase.Database, selectedArea);
                 if (rooms.Count != 0)
                 {
                     var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.Select(o => o.Boundary).ToCollection());
@@ -81,7 +94,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 else
                 {
                     var roomMarkEngine = new ThDB3RoomMarkRecognitionEngine();
-                    roomMarkEngine.Recognize(acadDatabase.Database, SelectedArea); //来源于参照
+                    roomMarkEngine.Recognize(acadDatabase.Database, selectedArea); //来源于参照
                     var newRooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
                     var kitchenIndex = new ThCADCoreNTSSpatialIndex(newRooms.ToCollection());
                     AreaNums = ThWCompute.CountAreaNums(FloorAreaList, kitchenIndex, ref StartNum);

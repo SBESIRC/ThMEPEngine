@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+<LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,6 +85,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\RadioUiValueConverter.cs" />
     <Compile Include="Converter\WaterColumnAngleBooleanConverter.cs" />
     <Compile Include="Converter\ReductionFactorBooleanConverter.cs" />
     <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
@@ -167,6 +169,9 @@
     </Compile>
     <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
       <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FloorHeightSetting.xaml.cs">
+      <DependentUpon>FloorHeightSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Validations\NearbyDistanceRule.cs" />
     <Compile Include="Validations\SelfLengthRule.cs" />
@@ -291,6 +296,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiWaterWellPumpFilter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\FloorHeightSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

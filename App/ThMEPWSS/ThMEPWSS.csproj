@@ -49,7 +49,9 @@
     <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
     <Compile Include="OutsideFrameRecognition\ThRecogniseOutsideFrame.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
+    <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
+    <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
+    <Compile Include="Pipe\Model\ViewModels.cs" />    <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommand.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommon.cs" />

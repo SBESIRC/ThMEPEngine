@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Pipe.Model;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -59,6 +60,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void CheckBox_Checked_2(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void btnSetHeights(object sender, RoutedEventArgs e)
+        {
+            FloorHeightSettingWindow.ShowModelSingletonWindow();
         }
     }
 }
