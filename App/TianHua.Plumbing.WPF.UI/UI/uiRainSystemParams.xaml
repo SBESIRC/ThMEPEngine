@@ -25,10 +25,15 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
-            <Label Content="楼层线间距"></Label>
-            <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
-            <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="楼层线间距"></Label>
+                <Button Click="btnSetHeights">层高设置</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+                <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>

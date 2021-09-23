@@ -9,22 +9,22 @@ using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Pipe.Model;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
     public class PlumbingWPFUIApp : IExtensionApplication
     {
-        uiDrainageSystem uiDrainage;
+        
         uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
-        uiFireControlSystem uiTHXHSXTT;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
-            uiTHXHSXTT = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -45,11 +45,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
         {
-            if (null != uiDrainage && uiDrainage.IsLoaded)
-                return;
-
-            uiDrainage = new uiDrainageSystem();
-            AcadApp.ShowModelessWindow(uiDrainage);
+            var file = CadCache.CurrentFile;
+            if (file == null) return ;
+            var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
+            if (!ok) return ;
+            var w = new uiDrainageSystem();
+            w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
+            w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
+            AcadApp.ShowModelessWindow(w);
         }
 
         /// <summary>
@@ -58,7 +61,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THWTKSB", CommandFlags.Modal)]
         public void ThBlockNameConfigWithUI()
         {
-            if(!uiBlockNameConfig.staticUIBlockName.IsVisible)
+            if (!uiBlockNameConfig.staticUIBlockName.IsVisible)
                 AcadApp.ShowModelessWindow(uiBlockNameConfig.staticUIBlockName);
         }
 
@@ -78,9 +81,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
-            if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext != null) return;
-            var ui = new uiRainSystem();
-            AcadApp.ShowModelessWindow(ui);
+            var ui = uiRainSystem.TryCreate(RainSystemDiagramViewModel.Singleton);
+            if (ui != null) AcadApp.ShowModelessWindow(ui);
         }
         /// <summary>
         /// 地上排水系统图
@@ -88,9 +90,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THPSXTT", CommandFlags.Modal)]
         public void ThCreateDrainageSystemDiagram()
         {
-            if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext != null) return;
-            var ui = new DrainageSystemUI();
-            AcadApp.ShowModelessWindow(ui);
+            var ui = DrainageSystemUI.TryCreate(DrainageSystemDiagramViewModel.Singleton);
+            if (ui != null) AcadApp.ShowModelessWindow(ui);
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 return;
             }
-            THLayoutFlushPointCmd.FlushPointVM.Parameter.BlockNameDict= 
+            THLayoutFlushPointCmd.FlushPointVM.Parameter.BlockNameDict =
                 uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             uiFlushPoint = new FlushPointUI(THLayoutFlushPointCmd.FlushPointVM);
             AcadApp.ShowModelessWindow(uiFlushPoint);
@@ -168,11 +169,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THXHSXTT", CommandFlags.Modal)]
         public void THXHSXTT()
         {
-            if (null != uiTHXHSXTT && uiTHXHSXTT.IsLoaded)
-                return;
-
-            uiTHXHSXTT = new uiFireControlSystem();
-            AcadApp.ShowModelessWindow(uiTHXHSXTT);
+            var file = CadCache.CurrentFile;
+            if (file == null) return;
+            var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
+            if (!ok) return;
+            var w = new uiFireControlSystem();
+            w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
+            w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
+            AcadApp.ShowModelessWindow(w);
         }
 
         /// <summary>
@@ -192,7 +196,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void ThDrainageAxonoCoolSupply()
         {
             var ui = new DrainageSystemSupplyAxonometricUI();
-            AcadApp .ShowModelessWindow(ui);
+            AcadApp.ShowModelessWindow(ui);
 
         }
 
@@ -202,13 +206,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
             using (var acadDb = AcadDatabase.Active())
             {
                 var per = AcHelper.Active.Editor.GetEntity("请框选一个范围");
-                if(per.Status!=Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                if (per.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
                 {
                     return;
                 }
 
                 var entity = acadDb.Element<Entity>(per.ObjectId);
-                if(entity is Polyline poly)
+                if (entity is Polyline poly)
                 {
                     var pts = poly.EntityVertices();
                     var drainageWellBlkNames = new List<string>();
@@ -253,7 +257,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     if (blkNameDict.ContainsKey("非机械车位"))
                     {
                         parkingStallBlkNames.AddRange(blkNameDict["非机械车位"]);
-                    }  
+                    }
                     var parkingStallExtractor = new ThParkingStallExtractor()
                     {
                         ColorIndex = 1,

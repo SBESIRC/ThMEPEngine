@@ -359,5 +359,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             ((TextBox)e.Source).Text = newStr;
         }
+
+        private void btnHeights_Click(object sender, RoutedEventArgs e)
+        {
+            FloorHeightSettingWindow.ShowModelSingletonWindow();
+        }
     }
 }

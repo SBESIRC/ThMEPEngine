@@ -111,5 +111,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             
         }
+
+        private void btnHeights_Click(object sender, RoutedEventArgs e)
+        {
+            FloorHeightSettingWindow.ShowModelSingletonWindow();
+        }
     }
 }

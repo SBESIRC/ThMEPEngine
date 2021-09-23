@@ -1107,7 +1107,7 @@ new Point2d(maxX, minY)
         {
             public Point3dCollection range;
             public StoreyContext StoreyContext;
-            public Diagram.ViewModel.RainSystemDiagramViewModel rainSystemDiagramViewModel;
+            public RainSystemDiagramViewModel rainSystemDiagramViewModel;
             public System.Windows.Window window;
         }
         public static CommandContext commandContext;

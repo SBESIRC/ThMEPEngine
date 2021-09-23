@@ -35,12 +35,18 @@
             </StackPanel>
             
             <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="楼层线间距：" Height="25" VerticalContentAlignment="Center"/>
-                <cus:InputTextBox TextBoxInputType="InputDouble" Height="20" Width="50" VerticalAlignment="Center" NumCanMinus="False" Text="{Binding FaucetFloor,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="mm" Width="Auto" Margin="5,0,0,0"/>
-            </StackPanel>
+            <StackPanel >
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                    <Label Content="楼层线间距：" Height="25" VerticalContentAlignment="Center"/>
 
+                    <Button x:Name="btnHeights" Click="btnHeights_Click" Width="80">层高设置</Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                <cus:InputTextBox TextBoxInputType="InputDouble" Height="20" Width="80" VerticalAlignment="Center" NumCanMinus="False" Text="{Binding FaucetFloor,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="mm" Width="Auto" Margin="5,0,0,0"/>
+                    </StackPanel>
+                
+            </StackPanel>
             <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
             <Label Content="分区设置(从低到高)" Width="Auto" Margin="0,5,0,5"></Label>
             <DataGrid BorderThickness="0" ItemsSource="{Binding ZoneConfigs,Mode=TwoWay}" MaxHeight="200" RowHeight="24" AllowDrop="False">

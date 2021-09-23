@@ -5582,7 +5582,7 @@
     {
         public Point3dCollection range;
         public StoreyContext StoreyContext;
-        public Diagram.ViewModel.DrainageSystemDiagramViewModel ViewModel;
+        public DrainageSystemDiagramViewModel ViewModel;
         public System.Windows.Window window;
     }
     public class ThDrainageService
@@ -5774,16 +5774,17 @@
                 InitFloorListDatas(adb);
             }
         }
-        public static void CollectFloorListDatas()
+        public static bool CollectFloorListDatas()
         {
             FocusMainWindow();
             var range = TrySelectRange();
-            if (range == null) return;
+            if (range == null) return false;
             var ctx = commandContext;
             ctx.range = range;
             using var adb = AcadDatabase.Active();
             ctx.StoreyContext = GetStoreyContext(range, adb);
             InitFloorListDatas(adb);
+            return true;
         }
         public static StoreyContext GetStoreyContext(Point3dCollection range, AcadDatabase adb)
         {
