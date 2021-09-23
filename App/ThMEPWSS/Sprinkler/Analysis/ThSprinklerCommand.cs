@@ -65,9 +65,16 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //distanceChecker.Present(currentDb.Database, buildingCheck);
 
                 // 喷头距边校核
-                var boundaryChecker = new ThSprinklerDistanceFromBoundaryChecker();
-                var results = boundaryChecker.DistanceCheck(engine.Elements, geometries);
-                boundaryChecker.Present(currentDb.Database, results);
+                //var boundaryChecker = new ThSprinklerDistanceFromBoundaryChecker();
+                //var results = boundaryChecker.DistanceCheck(engine.Elements, geometries);
+                //boundaryChecker.Present(currentDb.Database, results);
+
+                // 计算可布置区域
+                var layoutAreasChecker = new ThSprinklerDistanceFromBeamChecker();
+                var areas = layoutAreasChecker.LayoutAreas(geometries);
+                layoutAreasChecker.Present(currentDb.Database, areas);
+                var results = layoutAreasChecker.BeamCheck(recognizeAllEngine.Elements, areas, geometries);
+                layoutAreasChecker.Present(currentDb.Database, results);
             }
         }
     }

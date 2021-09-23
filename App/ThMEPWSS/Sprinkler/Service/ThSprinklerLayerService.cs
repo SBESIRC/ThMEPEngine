@@ -21,5 +21,15 @@ namespace ThMEPWSS.Sprinkler.Service
         {
             return database.CreateAILayer("AI-喷头校核-喷头距边是否过小", 30);
         }
+
+        public static ObjectId CreateAISprinklerLayoutAreaLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-喷头校核-可布置区域", 3);
+        }
+
+        public static ObjectId CreateAISprinklerDistanceFormBeamCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-喷头校核-喷头距梁是否过小", 4);
+        }
     }
 }

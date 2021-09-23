@@ -56,6 +56,7 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerData.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDataSetFactory.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceBetweenSprinklerChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBeamChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundaryChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
@@ -68,11 +69,13 @@
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCleanEntityService.cs" />
+    <Compile Include="Sprinkler\Service\ThSprinklerCreateLayoutAreaService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerHandleConflictService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerHandleNonClosedPolylineService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerIsExteriorDoorService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerKdTreeService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerLayerService.cs" />
+    <Compile Include="Sprinkler\Service\ThSprinklerLayoutAreaUtils.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerQueryHoleTextInfoService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerRoomService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerUtils.cs" />
