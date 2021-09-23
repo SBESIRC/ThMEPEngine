@@ -93,6 +93,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Room_Category" Guid="{445815C8-645E-44A3-90C9-BDE64D8D9352}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Room_Category" Source="$(var.AutoloaderContentsPath)\Support\房间名称分类处理.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" Guid="{9715CC66-26C8-4CBD-9164-9A2ED4E6D744}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Cable_Routing" Source="$(var.AutoloaderContentsPath)\Support\连线功能白名单.xlsx" KeyPath="yes" />
+            </Component>        
             <Component Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" Guid="{587D587B-DF4E-45B1-9FAA-6A7445665C22}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Evacuation_Direction" Source="$(var.AutoloaderContentsPath)\Support\疏散方向判断.xlsx" KeyPath="yes" />
             </Component>
@@ -154,6 +157,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Room_Category" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
         </ComponentGroup>
     </Fragment>

@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPEngineCore.ConnectWiring.Model;
+using System.Collections.Generic;
 using ThMEPEngineCore.IO.ExcelService;
+using ThMEPEngineCore.ConnectWiring.Model;
 
 namespace ThMEPEngineCore.ConnectWiring.Service
 {
     public class BlockConfigSrervice
     {
-        static string blockConfigUrl = ThCADCommon.SupportPath() + "\\连线功能白名单.xlsx";
+        static string blockConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "连线功能白名单.xlsx");
 
         /// <summary>
         /// 计算回路信息
