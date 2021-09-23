@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.GraphDomain;
 using ThMEPLighting.ParkingStall.CAD;

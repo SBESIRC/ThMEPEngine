@@ -209,7 +209,6 @@
     <Compile Include="ParkingStall\CAD\BaseElement.cs" />
     <Compile Include="ParkingStall\CAD\InfoReader.cs" />
     <Compile Include="ParkingStall\CAD\LoadCraterClear.cs" />
-    <Compile Include="ParkingStall\CAD\ThWallColumnsEngine.cs" />
     <Compile Include="ParkingStall\Core\CommandManager.cs" />
     <Compile Include="ParkingStall\Core\ParkLightConnectCommand.cs" />
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />

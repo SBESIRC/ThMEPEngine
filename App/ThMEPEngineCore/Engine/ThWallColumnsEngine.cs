@@ -5,11 +5,10 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
 
-namespace ThMEPLighting.ParkingStall.CAD
+namespace ThMEPEngineCore.Engine
 {
-    class ThWallColumnsEngine
+    public class ThWallColumnsEngine
     {
         ThColumnExtractionEngine columnEngine = new ThColumnExtractionEngine();
         ThShearWallExtractionEngine shearWallEngine = new ThShearWallExtractionEngine();

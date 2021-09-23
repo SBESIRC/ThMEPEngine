@@ -141,6 +141,7 @@
     <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThWallColumnsEngine.cs" />
     <Compile Include="Engine\ThWindowBuilderEngine.cs" />
     <Compile Include="FireCompartment\ThFireCompartmentExtendEngine.cs" />
     <Compile Include="GeojsonExtractor\Interface\ITransformer.cs" />
