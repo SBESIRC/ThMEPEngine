@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -45,10 +46,11 @@ namespace ThMEPEngineCore.Engine
                 var obb = ToObb(objs);
                 if (obb.Area > 1.0)
                 {
-                    obb.TransformBy(matrix);
+                    var solid = obb.ToSolid();
+                    solid.TransformBy(matrix);
                     elements.Add(new ThRawIfcDistributionElementData()
                     {
-                        Geometry = obb,
+                        Geometry = solid.ToPolyline(),
                         Data = br.GetEffectiveName(),
                     });
                 }

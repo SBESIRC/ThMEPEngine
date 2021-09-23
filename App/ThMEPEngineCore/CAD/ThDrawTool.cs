@@ -183,22 +183,29 @@ namespace ThMEPEngineCore.CAD
         public static DBObjectCollection Explode(BlockReference br)
         {
             var results = new DBObjectCollection();
-            var objs = new DBObjectCollection();
-            br.Explode(objs);
-            foreach (Entity ent in objs)
+            try 
             {
-                if (ent is BlockReference nestBr)
+                var objs = new DBObjectCollection();
+                br.Explode(objs);
+                foreach (Entity ent in objs)
                 {
-                    var nestObjs = Explode(nestBr);
-                    foreach (Entity nestEnt in nestObjs)
+                    if (ent is BlockReference nestBr)
                     {
-                        results.Add(nestEnt);
+                        var nestObjs = Explode(nestBr);
+                        foreach (Entity nestEnt in nestObjs)
+                        {
+                            results.Add(nestEnt);
+                        }
+                    }
+                    else
+                    {
+                        results.Add(ent);
                     }
                 }
-                else
-                {
-                    results.Add(ent);
-                }
+            }
+            catch (Exception ex) 
+            {
+                //当块为空块，或块定义为空，或块内部设置了不能炸开 会出现报错问题,这里进行简便处理，拦截错误。
             }
             return results;
         }
