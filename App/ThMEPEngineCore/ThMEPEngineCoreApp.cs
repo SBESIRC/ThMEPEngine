@@ -501,7 +501,7 @@ namespace ThMEPEngineCore
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
 
-                var layerId = acadDatabase.Database.CreateBeamLayer();
+                var layerId = acadDatabase.Database.CreateAIBeamLayer();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
                 {
                     var curve = n.Outline as Curve;
