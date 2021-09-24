@@ -104,20 +104,20 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
 
             var result = new List<List<Point3d>>();
-            foreach(ThSprinkler sprinkler in sprinklers)
+            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == "上喷").ForEach(o =>
             {
                 var tag = true;
                 foreach (var polylines in layoutAreas)
                 {
-                    foreach(var polyline in polylines)
+                    foreach (var polyline in polylines)
                     {
-                        if(polyline.Contains(sprinkler.Position))
+                        if (polyline.Contains(o.Position))
                         {
                             tag = false;
                             break;
                         }
                     }
-                    if (!tag) 
+                    if (!tag)
                     {
                         break;
                     }
@@ -125,7 +125,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
                 if (tag)
                 {
-                    var circle = new Circle(sprinkler.Position, Vector3d.ZAxis, 300.0);
+                    var circle = new Circle(o.Position, Vector3d.ZAxis, 300.0);
                     var filter = spatialIndex.SelectCrossingPolygon(circle.TessellateCircleWithArc(10.0 * Math.PI));
                     if (filter.Count > 0)
                     {
@@ -133,9 +133,9 @@ namespace ThMEPWSS.Sprinkler.Analysis
                         var closeDistance = double.MaxValue;
                         filter.Cast<Polyline>().ForEach(e =>
                         {
-                            var point = e.GetClosestPointTo(sprinkler.Position, false);
-                            var distance = sprinkler.Position.DistanceTo(point);
-                            if (distance < closeDistance) 
+                            var point = e.GetClosestPointTo(o.Position, false);
+                            var distance = o.Position.DistanceTo(point);
+                            if (distance < closeDistance)
                             {
                                 closePoint = point;
                                 closeDistance = distance;
@@ -144,13 +144,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
                         result.Add(new List<Point3d>
                                   {
-                                     sprinkler.Position,
+                                     o.Position,
                                      closePoint
                                   });
-
                     }
                 }
-            };
+            });
 
             return result;
         }

@@ -17,7 +17,7 @@ namespace ThMEPWSS.Sprinkler.Service
             return database.CreateAILayer("AI-喷头校核-喷头间距是否过小", 6);
         }
 
-        public static ObjectId CreateAISprinklerDistanceFormBoundaryCheckerLayer(this Database database)
+        public static ObjectId CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer(this Database database)
         {
             return database.CreateAILayer("AI-喷头校核-喷头距边是否过小", 30);
         }
@@ -30,6 +30,16 @@ namespace ThMEPWSS.Sprinkler.Service
         public static ObjectId CreateAISprinklerDistanceFormBeamCheckerLayer(this Database database)
         {
             return database.CreateAILayer("AI-喷头校核-喷头距梁是否过小", 4);
+        }
+
+        public static ObjectId CreateAISprinklerBlindZoneCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-喷头校核-盲区检测", 1);
+        }
+
+        public static ObjectId CreateAISprinklerDistanceFormBoundarySoFarCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-喷头校核-喷头距边是否过大", 6);
         }
     }
 }

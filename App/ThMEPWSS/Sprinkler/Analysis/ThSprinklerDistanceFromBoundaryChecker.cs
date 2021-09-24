@@ -78,7 +78,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var layerId = database.CreateAISprinklerDistanceFormBoundaryCheckerLayer();
+                var layerId = database.CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer();
                 var style = "TH-DIM100-W";
                 var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
                 result.ForEach(o =>

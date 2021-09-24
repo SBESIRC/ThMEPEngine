@@ -281,5 +281,27 @@ namespace ThCADCore.NTS
             }
             return objs;
         }
+
+        /// <summary>
+        /// 最近的几个邻居
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public DBObjectCollection NearestNeighbours(Point3d point, int num)
+        {
+            var geometry = point.ToNTSPoint();
+            var neighbours = Engine.NearestNeighbour(
+                geometry.EnvelopeInternal,
+                geometry,
+                new GeometryItemDistance(),
+                num)
+                .Where(o => !o.EqualsExact(geometry));
+            var objs = new DBObjectCollection();
+            foreach (var neighbour in neighbours)
+            {
+                objs.Add(Geometries[neighbour]);
+            }
+            return objs;
+        }
     }
 }

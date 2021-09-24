@@ -70,11 +70,17 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //boundaryChecker.Present(currentDb.Database, results);
 
                 // 计算可布置区域
-                var layoutAreasChecker = new ThSprinklerDistanceFromBeamChecker();
-                var areas = layoutAreasChecker.LayoutAreas(geometries);
-                layoutAreasChecker.Present(currentDb.Database, areas);
-                var results = layoutAreasChecker.BeamCheck(recognizeAllEngine.Elements, areas, geometries);
-                layoutAreasChecker.Present(currentDb.Database, results);
+                //var layoutAreasChecker = new ThSprinklerDistanceFromBeamChecker();
+                //var areas = layoutAreasChecker.LayoutAreas(geometries);
+                //layoutAreasChecker.Present(currentDb.Database, areas);
+                //var results = layoutAreasChecker.BeamCheck(recognizeAllEngine.Elements, areas, geometries);
+                //layoutAreasChecker.Present(currentDb.Database, results);
+
+                // 盲区校核
+                var blindZoneChecker = new ThSprinklerBlindZoneChecker();
+                var distanceCheck = blindZoneChecker.DistanceCheck(engine.Elements, 2200);
+                var results = blindZoneChecker.BuildingCheck(geometries, distanceCheck, 700);
+                blindZoneChecker.Present(currentDb.Database, results);
             }
         }
     }
