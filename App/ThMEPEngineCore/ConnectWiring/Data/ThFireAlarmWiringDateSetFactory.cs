@@ -30,11 +30,9 @@ namespace ThMEPEngineCore.ConnectWiring.Data
     {
         public BlockReference powerBlock;
         public List<Polyline> holes = new List<Polyline>();
-        List<string> configBlocks = new List<string>();
         private List<ThGeometry> Geos { get; set; }
-        public ThFireAlarmWiringDateSetFactory(List<string> blockNames)
+        public ThFireAlarmWiringDateSetFactory()
         {
-            configBlocks = blockNames;
             Geos = new List<ThGeometry>();
         }
         protected override ThMEPDataSet BuildDataSet()
@@ -62,9 +60,6 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     new ThFaRoomExtractor()           //房间
                     {
                         holes = holes,
-                    },
-                    new ThBlockPointsExtractor(configBlocks)      //连线布置点位
-                    {
                     },
                 };
             extractors.ForEach(o => o.Extract(database, collection));

@@ -24,7 +24,8 @@ namespace ThMEPEngineCore.ConnectWiring.Data
 {
     class ThBlockPointsExtractor : ThExtractorBase
     {
-        public List<Point3d> blockPts { get; protected set; }
+        public List<Point3d> blockPts { get; set; }
+        public List<BlockReference> resBlocks { get; set; }
         List<string> configBlockd;
         public ThBlockPointsExtractor(List<string> blockNames)
         {
@@ -70,7 +71,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     Closed = true,
                 };
                 pline.CreatePolyline(pts);
-                var resBlocks = new List<BlockReference>();
+                resBlocks = new List<BlockReference>();
                 blocks.Where(o =>
                 {
                     var geoPts = o.GeometricExtents;
@@ -79,8 +80,6 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                 })
                 .Cast<BlockReference>()
                 .ForEachDbObject(o => resBlocks.Add(o));
-
-                blockPts = resBlocks.Select(x => x.Position).ToList();
             }
         }
     }

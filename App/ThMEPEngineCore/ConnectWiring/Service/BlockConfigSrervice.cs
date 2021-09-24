@@ -27,9 +27,9 @@ namespace ThMEPEngineCore.ConnectWiring.Service
             {
                 WiringLoopModel loopModel = new WiringLoopModel();
                 int count = group.Select(x => x.loops.Count).OrderByDescending(x => x).First();
-                for (int i = 1; i <= count; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    var iGroup = group.Where(x => x.loops.Count == i).ToList();
+                    var iGroup = group.Where(x => x.loops.Count > i).ToList();
                     LoopInfoModel loopInfo = new LoopInfoModel();
                     loopInfo.LineType = iGroup.First().loops[i];
                     foreach (var info in iGroup)
@@ -56,7 +56,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
 
             DataTable table = dataSet.Tables[tableName];
             List<BlockConfigModel> blockModels = new List<BlockConfigModel>();
-            for (int i = 2; i < table.Rows.Count; i++)
+            for (int i = 1; i < table.Rows.Count; i++)
             {
                 DataRow dataRow = table.Rows[i];
                 BlockConfigModel model = new BlockConfigModel();
@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                 model.name = dataRow[1].ToString();
                 for (int j = 2; j < table.Columns.Count; j++)
                 {
-                    if (string.IsNullOrEmpty(dataRow[j].ToString()))
+                    if (!string.IsNullOrEmpty(dataRow[j].ToString()))
                     {
                         model.loops.Add(dataRow[j].ToString());
                     }
