@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
+using System.Collections.Generic;
+using System.Linq;
 using ThCADExtension;
 using ThMEPElectrical.AFASRegion.Model;
 using ThMEPEngineCore.Engine;
@@ -21,7 +23,7 @@ namespace ThMEPElectrical.AFASRegion
                 //选择区域
                 Active.Editor.WriteLine("\n请选择楼层块");
                 var result = Active.Editor.GetSelection();
-                 if (result.Status != PromptStatus.OK)
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
@@ -43,8 +45,26 @@ namespace ThMEPElectrical.AFASRegion
                         var blk = acadDatabase.Element<BlockReference>(sobj.ObjectId);
                         Polyline pline = GetBlockOBB(acadDatabase.Database, blk, blk.BlockTransform);
 
+                        var pts = pline.Vertices();
+                        //提取房间框线
+                        var roomBuidler = new ThRoomBuilderEngine();
+                        var Rooms = roomBuidler.BuildFromMS(acadDatabase.Database, pts);
+                        var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acadDatabase.Database, pts);
+
+                        //建筑墙
+                        var archWallEngine = new ThDB3ArchWallRecognitionEngine();
+                        archWallEngine.Recognize(acadDatabase.Database, pts);
+                        var walls = allStructure.ShearWallEngine.Elements.Union(archWallEngine.Elements).ToList();
+
                         var cmd = new AFASRegion();
+                        cmd.Rooms = Rooms;
+                        cmd.Beams = allStructure.BeamEngine.Elements;
+                        cmd.Columns = allStructure.ColumnEngine.Elements;
+                        cmd.Walls = walls;
+                        cmd.Holes = new List<Polyline>();
                         cmd.BufferDistance = 500;
+                        cmd.ReferBeams = false;
+
                         //获取可布置区域
                         var Arrangeablespace = cmd.DivideRoomWithPlacementRegion(pline);
                         foreach (var polygon in Arrangeablespace)

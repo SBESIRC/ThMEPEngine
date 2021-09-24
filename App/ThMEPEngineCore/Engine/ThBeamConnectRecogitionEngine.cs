@@ -21,9 +21,9 @@ namespace ThMEPEngineCore.Engine
         public List<ThSingleBeamLink> SingleBeamLinks { get; set; } = new List<ThSingleBeamLink>();
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
         public ThMEPOriginTransformer OriginTransformer { get; private set; }
-        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThColumnRecognitionEngine ColumnEngine { get; private set; } 
         public ThDB3BeamRecognitionEngine BeamEngine { get; private set; }
-        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
+        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; } 
 
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
 

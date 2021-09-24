@@ -40,9 +40,9 @@ namespace ThMEPEngineCore.Service
         {
             BeamSpatialIndex = ThSpatialIndexService.CreateBeamSpatialIndex(beamObjs);
         }
-        public void CreateColumnSpatialIndex(DBObjectCollection beamObjs)
+        public void CreateColumnSpatialIndex(DBObjectCollection columnObjs)
         {
-            ColumnSpatialIndex = ThSpatialIndexService.CreateBeamSpatialIndex(beamObjs);
+            ColumnSpatialIndex = ThSpatialIndexService.CreatColumnSpatialIndex(columnObjs);
         }
     }
 }

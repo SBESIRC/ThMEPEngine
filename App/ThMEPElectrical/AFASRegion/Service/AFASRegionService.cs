@@ -9,6 +9,7 @@ using ThMEPEngineCore.Extension;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 using System.Collections.Generic;
 using ThCADExtension;
+using Catel.Collections;
 
 namespace ThMEPElectrical.AFASRegion.Service
 {
@@ -32,17 +33,17 @@ namespace ThMEPElectrical.AFASRegion.Service
         private ThCADCoreNTSSpatialIndex thcolumnsSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex thhighbeamsSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex thnohighbeamsSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndex thshearWallsSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndex tharcWallsSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex thWallsSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex thHolesSpatialIndex { get; set; }
 
-        public void Initialize(ThBeamConnectRecogitionEngine beamConnectEngine, ThDB3ArchWallRecognitionEngine archWallEngine)
+        public void Initialize(List<ThIfcBuildingElement> columns, List<ThIfcBuildingElement> beams, List<ThIfcBuildingElement> walls, List<AcPolygon> holes)
         {
             //获取柱
-            var columns = beamConnectEngine.ColumnEngine.Elements.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
-            thcolumnsSpatialIndex = new ThCADCoreNTSSpatialIndex(columns);
+            var thcolumns = columns.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
+            thcolumnsSpatialIndex = new ThCADCoreNTSSpatialIndex(thcolumns);
 
             //获取梁
-            var thBeams = beamConnectEngine.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
+            var thBeams = beams.Cast<ThIfcLineBeam>().ToList();
             thBeams.ForEach(x => x.ExtendBoth(20, 20));
 
             var highbeams = thBeams.Where(o => -(o.DistanceToFloor + WallThickness) > 600).Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
@@ -51,13 +52,13 @@ namespace ThMEPElectrical.AFASRegion.Service
             var nohighbeams = thBeams.Where(o => -(o.DistanceToFloor + WallThickness) <= 600).Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
             thnohighbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(nohighbeams);
 
-            //获取剪力墙
-            var shearWalls = beamConnectEngine.ShearWallEngine.Elements.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
-            thshearWallsSpatialIndex = new ThCADCoreNTSSpatialIndex(shearWalls);
+            //获取墙
+            var thWalls= walls.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
+            thWallsSpatialIndex = new ThCADCoreNTSSpatialIndex(thWalls);
 
-            //获取建筑墙
-            var arcWalls = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is AcPolygon).Cast<AcPolygon>().ToCollection();
-            tharcWallsSpatialIndex = new ThCADCoreNTSSpatialIndex(arcWalls);
+            //获取洞
+            var thholes = holes.ToCollection();
+            thHolesSpatialIndex = new ThCADCoreNTSSpatialIndex(thholes);
         }
 
         /// <summary>
@@ -77,11 +78,11 @@ namespace ThMEPElectrical.AFASRegion.Service
             //获取非高梁
             var nohighbeams = thnohighbeamsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
 
-            //获取剪力墙
-            var shearWalls = thshearWallsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
+            //获取墙
+            var Walls = thWallsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
 
-            //获取建筑墙
-            var arcWalls = tharcWallsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
+            //获取洞
+            var Holes = thHolesSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
 
             DBObjectCollection dBObjects = new DBObjectCollection();
             foreach (AcPolygon beam in highbeams)
@@ -94,12 +95,7 @@ namespace ThMEPElectrical.AFASRegion.Service
                 dBObjects.Add(cPoly);
             }
 
-            foreach (AcPolygon wPoly in shearWalls)
-            {
-                dBObjects.Add(wPoly);
-            }
-
-            foreach (AcPolygon wPoly in arcWalls)
+            foreach (AcPolygon wPoly in Walls)
             {
                 dBObjects.Add(wPoly);
             }
@@ -118,11 +114,23 @@ namespace ThMEPElectrical.AFASRegion.Service
                     var differencespace = polygon.Buffer(-BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
                     if (differencespace.Count() > 0)
                     {
-                        Objs.AddRange(Difference(space, dBNoHighObjects).Cast<AcPolygon>().SelectMany(x => x.Buffer(-BufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
+                        var buffers = Difference(space, dBNoHighObjects).Cast<AcPolygon>().SelectMany(x => x.Buffer(-BufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0);
+                        DBObjectCollection objs = Holes;
+                        foreach (var polylinespace in buffers)
+                        {
+                            var Truediffobjs = DifferenceMP(polylinespace, objs).Cast<Entity>();
+                            Objs.AddRange(Truediffobjs);
+                        }
                     }
                     else
                     {
-                        Objs.AddRange(polygon.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0));
+                        var buffers = polygon.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
+                        DBObjectCollection objs = Holes;
+                        foreach (var polylinespace in buffers)
+                        {
+                            var Truediffobjs = DifferenceMP(polylinespace, objs).Cast<Entity>();
+                            Objs.AddRange(Truediffobjs);
+                        }
                     }
                 }
                 else if (space is MPolygon mPolygon)
@@ -130,15 +138,53 @@ namespace ThMEPElectrical.AFASRegion.Service
                     var differencespace = mPolygon.Shell().Buffer(-BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
                     if (differencespace.Count() > 0)
                     {
-                        var Diffobjs = Difference(space, dBNoHighObjects).Cast<AcPolygon>();
-                        if (Diffobjs.Count() == 1)
+                        var Diffobjsm = DifferenceMP(space, dBNoHighObjects).Cast<Entity>();
+                        foreach (Entity mpolyline in Diffobjsm)
                         {
-                            Objs.AddRange(Diffobjs.SelectMany(x => x.Buffer(-SmallestBufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
+                            if(mpolyline is Polyline polyline)
+                            {
+                                var buffers = polyline.Buffer(-BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
+                                DBObjectCollection objs = Holes;
+                                foreach (var polylinespace in buffers)
+                                {
+                                    var Truediffobjs = DifferenceMP(polylinespace, objs).Cast<Entity>();
+                                    Objs.AddRange(Truediffobjs);
+                                }
+                            }
+                            else if (mpolyline is MPolygon mpolygon)
+                            {
+                                var shellbuffers = mpolygon.Shell().Buffer(-BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
+                                DBObjectCollection objs = mpolygon.Holes().SelectMany(y => y.Buffer(BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0)).ToCollection();
+                                objs = objs.Union(Holes);
+                                foreach (var shellbuffer in shellbuffers)
+                                {
+                                    var Truediffobjs = DifferenceMP(shellbuffer, objs).Cast<Entity>();
+                                    Objs.AddRange(Truediffobjs);
+                                }
+                            }
                         }
-                        else
-                        {
-                            Objs.AddRange(Diffobjs.SelectMany(x => x.Buffer(-BufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
-                        }
+
+                        //if(Diffobjsm.Any(o=>o is MPolygon))
+                        //{
+                        //    using (Linq2Acad.AcadDatabase acad=Linq2Acad.AcadDatabase.Active())
+                        //    {
+                        //        var a =Diffobjsm.Where(o => o is MPolygon m && m.Holes().Count>0).Cast<MPolygon>();
+                        //        foreach (var item in a)
+                        //        {
+                        //            item.ColorIndex = 5;
+                        //            acad.ModelSpace.Add(item);
+                        //        }
+                        //    }
+                        //}
+                        //var Diffobjs = Difference(space, dBNoHighObjects).Cast<AcPolygon>();
+                        //if (Diffobjs.Count() == 1)
+                        //{
+                        //    Objs.AddRange(Diffobjs.SelectMany(x => x.Buffer(-SmallestBufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
+                        //}
+                        //else
+                        //{
+                        //    Objs.AddRange(Diffobjs.SelectMany(x => x.Buffer(-BufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
+                        //}
                     }  
                     else
                     {
@@ -149,9 +195,15 @@ namespace ThMEPElectrical.AFASRegion.Service
             return Objs.ToCollection();
         }
 
+        
+
         private DBObjectCollection Difference(Entity e, DBObjectCollection objs)
         {
-            if (e is AcPolygon polygon)
+            if (objs.Count == 0)
+            {
+                return new DBObjectCollection() { e };
+            }
+            else if (e is AcPolygon polygon)
             {
                 return polygon.Difference(objs);
             }
@@ -167,18 +219,40 @@ namespace ThMEPElectrical.AFASRegion.Service
 
         private DBObjectCollection DifferenceMP(Entity e, DBObjectCollection objs)
         {
-            if (e is AcPolygon polygon)
+            if(objs.Count ==0)
             {
-                return polygon.DifferenceMP(objs);
+                return new DBObjectCollection() { e };
+            }
+            else if (e is AcPolygon polygon)
+            {
+                return StandardEntityCollection(polygon.DifferenceMP(objs));
             }
             else if (e is MPolygon mPolygon)
             {
-                return mPolygon.DifferenceMP(objs);
+                return StandardEntityCollection(mPolygon.DifferenceMP(objs));
             }
             else
             {
                 throw new NotSupportedException();
             }
+        }
+
+        private DBObjectCollection StandardEntityCollection(DBObjectCollection objs)
+        {
+            DBObjectCollection reobjs = new DBObjectCollection();
+            objs.Cast<Entity>().ForEach(o =>
+            {
+                if (o is Polyline)
+                    reobjs.Add(o);
+                else if(o is MPolygon mPolygon)
+                {
+                    if (mPolygon.Holes().Count > 0)
+                        reobjs.Add(mPolygon);
+                    else
+                        reobjs.Add(mPolygon.Shell());
+                }
+            });
+            return reobjs;
         }
     }
 }

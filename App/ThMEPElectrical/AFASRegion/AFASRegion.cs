@@ -30,6 +30,76 @@ namespace ThMEPElectrical.AFASRegion
         /// 内缩距离
         /// </summary>
         public double BufferDistance { get; set; } = 500;
+        
+        /// <summary>
+        /// 是否考虑梁的影响
+        /// </summary>
+        public bool ReferBeams { get; set; } = true;
+
+        private List<ThIfcBuildingElement> columns;
+        private List<ThIfcBuildingElement> beams;
+        private List<ThIfcBuildingElement> walls;
+        private List<Polyline> holes;
+        public List<ThIfcRoom> Rooms { get; set; }
+
+        /// <summary>
+        /// 柱
+        /// </summary>
+        public List<ThIfcBuildingElement> Columns
+        {
+            private get
+            {
+                return columns;
+            }
+            set
+            {
+                columns = value;
+            }
+        }
+        /// <summary>
+        /// 梁
+        /// </summary>
+        public List<ThIfcBuildingElement> Beams
+        {
+            private get
+            {
+                return beams;
+            }
+            set
+            {
+                beams = value;
+            }
+        }
+
+        /// <summary>
+        /// 墙（包括剪力墙和建筑墙）
+        /// </summary>
+        public List<ThIfcBuildingElement> Walls
+        {
+            private get
+            {
+                return walls;
+            }
+            set
+            {
+                walls = value;
+            }
+        }
+
+        /// <summary>
+        /// 洞 AI-洞
+        /// </summary>
+        public List<Polyline> Holes
+        {
+            private get
+            {
+                return holes;
+            }
+            set
+            {
+                holes = value;
+            }
+        }
 
         /// <summary>
         /// 分割房间探测范围
@@ -82,23 +152,19 @@ namespace ThMEPElectrical.AFASRegion
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var ArrangeableSpace = new List<Entity>();
-                var pts = storyPL.Vertices();
-                //提取房间框线
-                var roomBuidler = new ThRoomBuilderEngine();
-                var Rooms = roomBuidler.BuildFromMS(acadDatabase.Database, pts);
-                if (Rooms.Count == 0)
-                {
+                if (Columns.IsNull())
+                    Columns = new List<ThIfcBuildingElement>();
+                if (Walls.IsNull())
+                    Walls = new List<ThIfcBuildingElement>();
+                if (Holes.IsNull())
+                    Holes = new List<Polyline>();
+                if (!ReferBeams || Beams.IsNull())
+                    Beams = new List<ThIfcBuildingElement>();
+                if (Rooms.IsNull() || Rooms.Count == 0)
                     return ArrangeableSpace;
-                }
-
-                var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acadDatabase.Database, pts);
-                //建筑墙
-                var archWallEngine = new ThDB3ArchWallRecognitionEngine();
-                archWallEngine.Recognize(acadDatabase.Database, pts);
-
                 AFASRegionService regionService = new AFASRegionService();
                 regionService.BufferDistance = BufferDistance;
-                regionService.Initialize(allStructure, archWallEngine);
+                regionService.Initialize(Columns, Beams, Walls,Holes);
                 //计算每个房间可布置区域
                 Rooms.ForEach(room =>
                 {

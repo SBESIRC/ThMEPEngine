@@ -47,7 +47,6 @@ namespace ThMEPEngineCore.Engine
         }
         public void UpdateWithSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var objs = Geometries.Cast<DBObject>();
             var siObjs = spatialIndex.Geometries.Values;
             Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
         }
