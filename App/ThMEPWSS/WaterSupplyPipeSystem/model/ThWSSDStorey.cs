@@ -72,9 +72,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 return new List<Line>() { line1 };
             }
         }
-
         public void DrawStorey(int i, int floorNums, Point3d insertPt, double floorLength, List<int> highestStorey,
             Double[] PipeOffsetX)
+        {
+
+        }
+        public void DrawStorey(int i, int floorNums, Point3d insertPt, double floorLength, List<int> highestStorey,
+            Double[] PipeOffsetX, Dictionary<string , string> floorHeightDic)
         {
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
             var lines = CreateLine(insertPt, floorLength, highestStorey, PipeOffsetX);
@@ -96,7 +100,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             }
             textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(textFirst);
-            var attNameValues = new Dictionary<string, string>() { { "标高", "X.XX" } };
+            string height = "X.XX";
+            if(floorHeightDic.ContainsKey(Convert.ToString(i+1)))
+            {
+                height = floorHeightDic[Convert.ToString(i+1)];
+            }
+            
+            var attNameValues = new Dictionary<string, string>() { { "标高", height } };
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
                 insertPt.OffsetY(i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
         }

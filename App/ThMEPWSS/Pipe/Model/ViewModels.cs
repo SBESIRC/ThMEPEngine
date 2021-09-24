@@ -245,37 +245,44 @@ namespace ThMEPWSS.Pipe.Model
         public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
 
         //齐工提议加的一个函数
-        public Dictionary<string, string> GetSpecialFloorHeightsDict()
+        public Dictionary<string, string> GetSpecialFloorHeightsDict(int maxFloorNum)
         {
-            var d = new Dictionary<string, string>();
+            var dic = new Dictionary<int, double>();
             foreach (var item in Items)
             {
                 foreach (var floor in ParseFloorNums(item.Floor))
                 {
-                    if (floor > 0)
+                    if (floor == 1)
                     {
-                        if (floor == 1)
-                        {
-                            d[floor + "F"] = "±0.00";
-                        }
-                        else
-                        {
-                            d[floor + "F"] = (item.Height / 1000.0).ToString("0.00");
-                        }
-                    }
-                    else if (floor < 0)
-                    {
-                        d[floor + "F"] = (item.Height / 1000.0).ToString("0.00");
-                        d["B" + floor] = (item.Height / 1000.0).ToString("0.00");
+                        dic[floor] = 0;
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        dic[floor] = item.Height;//(item.Height / 1000.0).ToString("0.00");
                     }
                 }
             }
+            var floorHeightDic = new Dictionary<string, string>();
+            double floorHeight = 0.00;
+            for (int floor = 1; floor < maxFloorNum + 2; floor++)
+            {
+                if(floor == 1)
+                {
+                    floorHeight = 0;
+                }
+                if (dic.ContainsKey(floor))
+                {
+                    floorHeight += dic[floor];
+                }
+                else
+                {
+                    floorHeight += _GeneralFloor;
 
-            return d;
+                }
+                floorHeightDic.Add(Convert.ToString(floor), (floorHeight / 1000.0).ToString("0.00"));
+            }
+
+            return floorHeightDic;
         }
 
         public static List<int> ParseFloorNums(string floorStr)
