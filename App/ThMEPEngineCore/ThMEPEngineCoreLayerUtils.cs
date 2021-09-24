@@ -6,59 +6,77 @@ namespace ThMEPEngineCore
 {
     public static class ThMEPEngineCoreLayerUtils
     {
+        public const string BEAM = "AI-梁";
+        public const string DOOR = "AI-门";
+        public const string WALL = "AI-墙";
+        public const string WINDOW = "AI-窗";
+        public const string COLUMN = "AI-柱";
+        public const string OPENING = "AI-洞";
+        public const string RAILING = "AI-栏杆";
+        public const string SHEARWALL = "AI-剪力墙";
+        public const string ROOMOUTLINE = "AI-房间框线";
+        public const string ROOMMARK = "AI-房间名称";
+        public const string FIRECOMPARTMENT = "AI-防火分区";
+        public const string FRS = "AI-防火卷帘";
+
         public static ObjectId CreateAIBeamLayer(this Database database)
         {
-            return database.CreateAILayer("AI-梁", 6);
+            return database.CreateAILayer(BEAM, 6);
         }
 
         public static ObjectId CreateAIDoorLayer(this Database database)
         {
-            return database.CreateAILayer("AI-门", 3);
+            return database.CreateAILayer(DOOR, 3);
+        }
+
+        public static ObjectId CreateAIWallLayer(this Database database)
+        {
+            return database.CreateAILayer(WALL, 7);
         }
 
         public static ObjectId CreateAIWindowLayer(this Database database)
         {
-            return database.CreateAILayer("AI-窗", 6);
+            return database.CreateAILayer(WINDOW, 6);
         }
 
         public static ObjectId CreateAIColumnLayer(this Database database)
         {
-            return database.CreateAILayer("AI-柱", 2);
+            return database.CreateAILayer(COLUMN, 2);
         }
 
         public static ObjectId CreateAIOpeningLayer(this Database database)
         {
-            return database.CreateAILayer("AI-洞", 5);
+            return database.CreateAILayer(OPENING, 5);
         }
 
         public static ObjectId CreateAIRailingLayer(this Database database)
         {
-            return database.CreateAILayer("AI-栏杆", 20);
+            return database.CreateAILayer(RAILING, 20);
         }
 
         public static ObjectId CreateAIShearWallLayer(this Database database)
         {
-            return database.CreateAILayer("AI-剪力墙", 30);
+            return database.CreateAILayer(SHEARWALL, 30);
         }
 
         public static ObjectId CreateAIRoomOutlineLayer(this Database database)
         {
-            return database.CreateAILayer("AI-房间框线", 21);
+            return database.CreateAILayer(ROOMOUTLINE, 21);
         }
 
         public static ObjectId CreateAIRoomMarkLayer(this Database database)
         {
-            return database.CreateAILayer("AI-房间名称", 4);
+            return database.CreateAILayer(ROOMMARK, 4);
         }
 
         public static ObjectId CreateAIFireCompartmentLayer(this Database database)
         {
-            return database.CreateAILayer("AI-防火分区", 1);
+            return database.CreateAILayer(FIRECOMPARTMENT, 1);
         }
 
         public static ObjectId CreateAIFRSLayer(this Database database)
         {
-            return database.CreateAILayer("AI-防火卷帘", 1);
+            return database.CreateAILayer(FRS, 1);
         }
 
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)
@@ -66,6 +84,7 @@ namespace ThMEPEngineCore
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var layerId = database.AddLayer(name);
+                database.UnHidden(name);
                 database.UnOffLayer(name);
                 database.UnLockLayer(name);
                 database.UnPrintLayer(name);
