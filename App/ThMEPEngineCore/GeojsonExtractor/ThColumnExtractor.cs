@@ -57,9 +57,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
             if (UseDb3Engine)
             {
                 var columnBuilder = new ThColumnBuilderEngine();
-                Columns = columnBuilder
-                    .Build(database, pts)
-                    .Select(o=>o.Outline as Polyline)
+                columnBuilder.Build(database, pts);
+                Columns = columnBuilder.Elements
+                    .Select(o => o.Outline)
+                    .OfType<Polyline>()
                     .ToList();
             }
             else

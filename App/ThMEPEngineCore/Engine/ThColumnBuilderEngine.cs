@@ -55,25 +55,33 @@ namespace ThMEPEngineCore.Engine
             return res;
         }
 
-        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        public override void Build(Database db, Point3dCollection pts)
         {
+            // 提取
             var columns = Extract(db);
+
+            // 移动到近原点处
             var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
             columns.ForEach(o => transformer.Transform(o.Geometry));
-
-            var newPts = pts.OfType<Point3d>()
+            var newPts = pts
+                .OfType<Point3d>()
                 .Select(o => transformer.Transform(o))
                 .ToCollection();
 
-            // 后处理
+            // 识别
             var buildingElements = Recognize(columns, newPts);
+
+            // 后处理
             var handleColumns = Union(buildingElements);
 
-            // 回复到原位置
+            // 恢复到原位置
             handleColumns.ForEach(c => transformer.Reset(c.Outline));
 
-            return handleColumns.Cast<ThIfcBuildingElement>().ToList();
+            // 保存结果
+            Elements = handleColumns
+                .OfType<ThIfcBuildingElement>()
+                .ToList();
         }
         public List<ThIfcColumn> Union(List<ThIfcBuildingElement> buildingElements)
         {

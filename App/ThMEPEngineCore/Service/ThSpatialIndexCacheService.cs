@@ -159,12 +159,13 @@ namespace ThMEPEngineCore.Service
         public override void Create(Database database, Point3dCollection polygon)
         {
             var columnBuilder = new ThColumnBuilderEngine();
-            var columns = columnBuilder.Build(database, polygon);
-            columns.ForEach(o => Transformer.Transform(o.Outline));
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                columns.Select(o=>o.Outline)
+            columnBuilder.Build(database, polygon);
+            columnBuilder.Elements.ForEach(o => Transformer.Transform(o.Outline));
+            var columns = columnBuilder.Elements
+                .Select(o => o.Outline)
                 .ToCollection()
-                .FilterSmallArea(1.0));
+                .FilterSmallArea(1.0);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(columns);
         }
         public override void Create(DBObjectCollection elements)
         {

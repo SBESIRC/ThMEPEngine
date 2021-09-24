@@ -136,14 +136,14 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "全部")
                     {
                         var columnBuilder = new ThColumnBuilderEngine();
-                        columnBuilder
-                            .Build(acadDatabase.Database, frame.Vertices())
+                        columnBuilder.Build(acadDatabase.Database, frame.Vertices());
+                        columnBuilder.Elements
                             .Select(o => o.Outline)
                             .ForEach(o =>
-                          {
-                              acadDatabase.ModelSpace.Add(o);
-                              o.SetDatabaseDefaults();
-                          });
+                            {
+                                acadDatabase.ModelSpace.Add(o);
+                                o.SetDatabaseDefaults();
+                            });
                     }
                 }
                 else
@@ -257,14 +257,14 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "全部")
                     {
                         var shearwallBuilder = new ThShearwallBuilderEngine();
-                        shearwallBuilder
-                            .Build(acadDatabase.Database, frame.Vertices())
+                        shearwallBuilder.Build(acadDatabase.Database, frame.Vertices());
+                        shearwallBuilder.Elements
                             .Select(o => o.Outline)
                             .ForEach(e =>
-                          {
-                              acadDatabase.ModelSpace.Add(e);
-                              e.SetDatabaseDefaults();
-                          });
+                            {
+                                acadDatabase.ModelSpace.Add(e);
+                                e.SetDatabaseDefaults();
+                            });
                     }
                 }
                 else

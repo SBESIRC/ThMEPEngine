@@ -1,15 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -28,7 +26,7 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotSupportedException();           
         }
-        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        public override void Build(Database db, Point3dCollection pts)
         {
             var rawelement = new List<ThRawIfcBuildingElementData>();
             var doorExtractor = new ThDB3DoorExtractionEngine();
@@ -49,7 +47,7 @@ namespace ThMEPEngineCore.Engine
 
             var doorRecognize = new ThDB3DoorRecognitionEngine();
             doorRecognize.Recognize(rawelement, newPts);
-            return doorRecognize.Elements;
+            Elements = doorRecognize.Elements;
         }
         private void CreateDoorNeibourSpatialIndex(Database db, Point3dCollection pts, ThMEPOriginTransformer transformer)
         {

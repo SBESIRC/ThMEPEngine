@@ -17,12 +17,24 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
             using (var shearWallEngine = new ThShearwallBuilderEngine())
             using (var archWallEngine = new ThArchWallBuilderEngine())
             {
-                var columns = columnEngine.Build(db, pts);
-                var shearwalls =  shearWallEngine.Build(db, pts);
-                var archwalls = archWallEngine.Build(db, pts);                
-                results.AddRange(ThWaterWellPumpUtils.ToLines(columns.Cast<ThIfcColumn>().Select(o => o.Outline).ToList()));
-                results.AddRange(ThWaterWellPumpUtils.ToLines(shearwalls.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
-                results.AddRange(ThWaterWellPumpUtils.ToLines(archwalls.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
+                columnEngine.Build(db, pts);
+                shearWallEngine.Build(db, pts);
+                archWallEngine.Build(db, pts);
+                var columns = columnEngine.Elements
+                    .OfType<ThIfcColumn>()
+                    .Select(o => o.Outline)
+                    .ToList();
+                var shearwalls = shearWallEngine.Elements
+                    .OfType<ThIfcWall>()
+                    .Select(o => o.Outline)
+                    .ToList();
+                var archwalls = archWallEngine.Elements
+                    .OfType<ThIfcWall>()
+                    .Select(o => o.Outline)
+                    .ToList();
+                results.AddRange(ThWaterWellPumpUtils.ToLines(columns));
+                results.AddRange(ThWaterWellPumpUtils.ToLines(archwalls));
+                results.AddRange(ThWaterWellPumpUtils.ToLines(shearwalls));
                 return results;
             }
         }
