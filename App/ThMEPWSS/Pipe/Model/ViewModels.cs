@@ -119,6 +119,7 @@ namespace ThMEPWSS.Pipe.Model
         public Point2d ContraPoint;
         public GRect Boundary;
     }
+
     public class FloorHeightsViewModel : NotifyPropertyChangedBase
     {
         public static readonly FloorHeightsViewModel Instance = new FloorHeightsViewModel();
@@ -138,6 +139,7 @@ namespace ThMEPWSS.Pipe.Model
                         {
                             okNums.Add(i);
                         }
+
                         return x;
                     }
                     else
@@ -145,6 +147,7 @@ namespace ThMEPWSS.Pipe.Model
                         return null;
                     }
                 }
+
                 m = Regex.Match(x, @"^\-?\d+$");
                 if (m.Success)
                 {
@@ -157,17 +160,158 @@ namespace ThMEPWSS.Pipe.Model
                         }
                     }
                 }
+
                 return null;
             }).Distinct());
         }
-        int _GeneralFloor = 3500; public int GeneralFloor { get => _GeneralFloor; set { if (value != _GeneralFloor) { _GeneralFloor = value; OnPropertyChanged(nameof(GeneralFloor)); } } }
-        bool _ExistsSpecialFloor; public bool ExistsSpecialFloor { get => _ExistsSpecialFloor; set { if (value != _ExistsSpecialFloor) { _ExistsSpecialFloor = value; OnPropertyChanged(nameof(ExistsSpecialFloor)); } } }
-        string _SpecialFloors; public string SpecialFloors { get => _SpecialFloors; set { if (value != _SpecialFloors) { _SpecialFloors = value; OnPropertyChanged(nameof(SpecialFloors)); } } }
+
+        int _GeneralFloor = 3500;
+        public int GeneralFloor
+        {
+            get => _GeneralFloor;
+            set
+            {
+                if (value != _GeneralFloor)
+                {
+                    _GeneralFloor = value;
+                    OnPropertyChanged(nameof(GeneralFloor));
+                }
+            }
+        }
+
+        bool _ExistsSpecialFloor;
+        public bool ExistsSpecialFloor
+        {
+            get => _ExistsSpecialFloor;
+            set
+            {
+                if (value != _ExistsSpecialFloor)
+                {
+                    _ExistsSpecialFloor = value;
+                    OnPropertyChanged(nameof(ExistsSpecialFloor));
+                }
+            }
+        }
+
+        string _SpecialFloors;
+        public string SpecialFloors
+        {
+            get => _SpecialFloors;
+            set
+            {
+                if (value != _SpecialFloors)
+                {
+                    _SpecialFloors = value;
+                    OnPropertyChanged(nameof(SpecialFloors));
+                }
+            }
+        }
+
         public class Item : NotifyPropertyChangedBase
         {
-            string _Floor; public string Floor { get => _Floor; set { if (value != _Floor) { _Floor = value; OnPropertyChanged(nameof(Floor)); } } }
-            int _Height; public int Height { get => _Height; set { if (value != _Height) { if (value > 99999) value = 99999; if (value < 0) value = 0; _Height = value; OnPropertyChanged(nameof(Height)); } } }
+            string _Floor;
+            public string Floor
+            {
+                get => _Floor;
+                set
+                {
+                    if (value != _Floor)
+                    {
+                        _Floor = value;
+                        OnPropertyChanged(nameof(Floor));
+                    }
+                }
+            }
+
+            int _Height;
+            public int Height
+            {
+                get => _Height;
+                set
+                {
+                    if (value != _Height)
+                    {
+                        if (value > 99999)
+                            value = 99999;
+                        if (value < 0)
+                            value = 0;
+                        _Height = value;
+                        OnPropertyChanged(nameof(Height));
+                    }
+                }
+            }
         }
+
         public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
+
+        //齐工提议加的一个函数
+        public Dictionary<string, string> GetSpecialFloorHeightsDict()
+        {
+            var d = new Dictionary<string, string>();
+            foreach (var item in Items)
+            {
+                foreach (var floor in ParseFloorNums(item.Floor))
+                {
+                    if (floor > 0)
+                    {
+                        if (floor == 1)
+                        {
+                            d[floor + "F"] = "±0.00";
+                        }
+                        else
+                        {
+                            d[floor + "F"] = (item.Height / 1000.0).ToString("0.00");
+                        }
+                    }
+                    else if (floor < 0)
+                    {
+                        d[floor + "F"] = (item.Height / 1000.0).ToString("0.00");
+                        d["B" + floor] = (item.Height / 1000.0).ToString("0.00");
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+
+            return d;
+        }
+
+        public static List<int> ParseFloorNums(string floorStr)
+        {
+            if (string.IsNullOrWhiteSpace(floorStr))
+                return new List<int>();
+            floorStr = floorStr.Replace('，', ',').Replace('B', '-').Replace("F", "").Replace("M", "").Replace(" ", "");
+            var hs = new HashSet<int>();
+            foreach (var s in floorStr.Split(','))
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                var m = Regex.Match(s, @"(\-?\d+)-(\-?\d+)");
+                if (m.Success)
+                {
+                    var v1 = int.Parse(m.Groups[1].Value);
+                    var v2 = int.Parse(m.Groups[2].Value);
+                    var min = Math.Min(v1, v2);
+                    var max = Math.Max(v1, v2);
+                    for (int i = min; i <= max; i++)
+                    {
+                        hs.Add(i);
+                    }
+
+                    continue;
+                }
+
+                m = Regex.Match(s, @"\-?\d+");
+                if (m.Success)
+                {
+                    hs.Add(int.Parse(m.Value));
+                }
+            }
+
+            hs.Remove(0);
+            return hs.OrderBy(x => x).ToList();
+        }
     }
 }
