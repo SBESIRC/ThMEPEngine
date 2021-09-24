@@ -11,7 +11,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var layerId = acadDatabase.Database.CreateColumnLayer();
+                var layerId = acadDatabase.Database.CreateAIColumnLayer();
                 Engines.ForEach(e =>
                 {
                     e.Elements.Select(o => o.Outline)
