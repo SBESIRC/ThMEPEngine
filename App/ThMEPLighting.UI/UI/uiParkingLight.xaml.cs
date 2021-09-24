@@ -114,7 +114,7 @@ namespace ThMEPLighting.UI.UI
                 {
                     foreach (var item in parkingLightView.PickLayerNames)
                     {
-                        if (item.IsSelect)
+                        if (!item.IsSelect)
                             continue;
                         ThParkingStallService.Instance.ParkingLayerNames.Add(item.Value);
                     }
