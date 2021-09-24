@@ -635,6 +635,11 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                         hisGroupoint = second;
                 }
             }
+            if (hisGroup.LightPoints.Count < 2 || newGroup.LightPoints.Count < 2) 
+            {
+                newGroup.ConnectParentPoint = nearPoint;
+                return nearPoint;
+            }
             var firstDir = newGroup.LineDir;
             var secondDir = hisGroup.LineDir;
             var angle = firstDir.GetAngleTo(secondDir);
