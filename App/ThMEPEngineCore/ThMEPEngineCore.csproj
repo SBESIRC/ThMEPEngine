@@ -111,8 +111,10 @@
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementBuilder.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
+    <Compile Include="Engine\ThBuildingElementPersister.cs" />
     <Compile Include="Engine\ThBuildingElementVisitorManager.cs" />
     <Compile Include="Engine\ThColumnBuilderEngine.cs" />
+    <Compile Include="Engine\ThColumnPersister.cs" />
     <Compile Include="Engine\ThCornicesBuilderEngine.cs" />
     <Compile Include="Engine\ThDB3BeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3BeamRecognitionEngine.cs" />
@@ -150,6 +152,7 @@
     <Compile Include="GeojsonExtractor\ThFireproofShutterExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThRailingExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThWindowExtractor.cs" />
+    <Compile Include="Interface\IThMEPIPersistable.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcBuildingStoreyFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcCurtainWallFeature.cs" />
     <Compile Include="IO\GeoJSON\Features\ThIfcParkingStallFeature.cs" />
