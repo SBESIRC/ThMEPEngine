@@ -2,17 +2,17 @@
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Catel.Collections;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceFromBoundaryChecker
+    public class ThSprinklerDistanceFromBoundarySoCloseChecker
     {
         public List<List<Point3d>> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
         {

@@ -51,15 +51,15 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
-    <Compile Include="Pipe\Model\ViewModels.cs" />    <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerChecker.cs" />
+    <Compile Include="Pipe\Model\ViewModels.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommand.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommon.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerData.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDataSetFactory.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceBetweenSprinklerChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBeamChecker.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundaryChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoCloseChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoFarChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerBeamExtractor.cs" />

@@ -41,7 +41,6 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var factory = new ThSprinklerDataSetFactory();
                 var geometries = factory.Create(currentDb.Database, frame.Vertices()).Container;
 
-
                 var engine = new ThTCHSprinklerRecognitionEngine();
                 engine.RecognizeMS(currentDb.Database, frame.Vertices());
 
@@ -65,7 +64,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //distanceChecker.Present(currentDb.Database, buildingCheck);
 
                 // 喷头距边校核
-                //var boundaryChecker = new ThSprinklerDistanceFromBoundaryChecker();
+                //var boundaryChecker = new ThSprinklerDistanceFromBoundarySoCloseChecker();
                 //var results = boundaryChecker.DistanceCheck(engine.Elements, geometries);
                 //boundaryChecker.Present(currentDb.Database, results);
 
@@ -77,10 +76,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //layoutAreasChecker.Present(currentDb.Database, results);
 
                 // 盲区校核
-                var blindZoneChecker = new ThSprinklerBlindZoneChecker();
-                var distanceCheck = blindZoneChecker.DistanceCheck(engine.Elements, 2200);
-                var results = blindZoneChecker.BuildingCheck(geometries, distanceCheck, 700);
-                blindZoneChecker.Present(currentDb.Database, results);
+                //var blindZoneChecker = new ThSprinklerBlindZoneChecker();
+                //var distanceCheck = blindZoneChecker.DistanceCheck(engine.Elements, 2200);
+                //var results = blindZoneChecker.BuildingCheck(geometries, distanceCheck, 700);
+                //blindZoneChecker.Present(currentDb.Database, results);
+
+                // 喷头距边是否过大
+                var boundaryChecker = new ThSprinklerDistanceFromBoundarySoFarChecker();
+                var results = boundaryChecker.DistanceCheck(engine.Elements, geometries, 3111, 2200);
+                boundaryChecker.Present(currentDb.Database, results);
             }
         }
     }

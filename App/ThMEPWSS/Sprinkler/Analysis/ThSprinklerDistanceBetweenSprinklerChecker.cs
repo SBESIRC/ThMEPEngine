@@ -36,7 +36,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
             {
-                if (g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < 700)
+                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < 700)
+                 || (g.Properties["Category"] as string).Contains("Room"))
                 {
                     return;
                 }
