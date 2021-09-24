@@ -116,8 +116,10 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 mPolygon.Erase();
                 mPolygon.DowngradeOpen();
 
+#if DEBUG
                 //显示适配信息
                 ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
+
                 //显示布置点及方向
                 foreach(var dir in pointsWithDirection)
                 {
@@ -125,6 +127,8 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 }
                 //显示盲区
                 ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
+#endif
+
             }
         }
     }
