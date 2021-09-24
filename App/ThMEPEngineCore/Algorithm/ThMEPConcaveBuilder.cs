@@ -14,12 +14,12 @@ namespace ThMEPEngineCore.Algorithm
         private const double Point3dTolerance = 1.0;
         private DBObjectCollection Elements { get; set; }
         private double TesslateLength { get; set; }
-        private double Hershold { get; set; }
-        public ThMEPConcaveBuilder(DBObjectCollection objs, double hershold)
+        private double Thershold { get; set; }
+        public ThMEPConcaveBuilder(DBObjectCollection objs, double thershold)
         {
             Elements = objs;
-            Hershold = hershold;
-            TesslateLength = Hershold / 1.2; //建议值
+            Thershold = thershold;
+            TesslateLength = Thershold / 1.2; //建议值
         }
         public DBObjectCollection Build()
         {
@@ -41,7 +41,7 @@ namespace ThMEPEngineCore.Algorithm
             pts = FilterClosedPoints(pts, Point3dTolerance);
 
             // 构建
-            var concaveHull = new ThCADCoreNTSConcaveHull(pts.ToNTSGeometry(), Hershold);
+            var concaveHull = new ThCADCoreNTSConcaveHull(pts.ToNTSGeometry(), Thershold);
             var results = concaveHull.getConcaveHull().ToDbCollection();
 
             // 还原
