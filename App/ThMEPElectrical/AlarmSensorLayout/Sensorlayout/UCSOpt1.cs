@@ -43,7 +43,19 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             double min, double max, double radius, double adjust, double buffer)
         {
             //生成区域
-            area = boundary.ToNTSPolygon().Intersection(room) as Polygon;
+            var geom = boundary.ToNTSPolygon().Intersection(room);
+            if (geom is Polygon polygon)
+                area = polygon;
+            else if (geom is GeometryCollection geometrycollection)
+            {
+                Polygon tmpPoly = Polygon.Empty;
+                foreach (var poly in geometrycollection)
+                {
+                    if (poly is Polygon && poly.Area > tmpPoly.Area)
+                        tmpPoly = poly as Polygon;
+                }
+                area = tmpPoly;
+            }
             this.angle = angle;
             center = Centroid.GetCentroid(area).ToAcGePoint3d();
             //提取旋转后的可布置区域
@@ -113,12 +125,12 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             var yNum = Math.Ceiling((maxY - minY) / adjustGap);
             var dx = (maxX - minX) / xNum;
             var dy = (maxY - minY) / yNum;
-            if (yNum == 1)
-                hLines.Add(new LineSegment(minX, (minY + maxY) / 2, maxX, (minY + maxY) / 2));
+            //if (yNum == 1)
+            //    hLines.Add(new LineSegment(minX, (minY + maxY) / 2, maxX, (minY + maxY) / 2));
             for (double i = 0.5; i < yNum; i++)
                 hLines.Add(new LineSegment(minX, minY + dy * i, maxX, minY + dy * i));
-            if (xNum == 1)
-                vLines.Add(new LineSegment((minX + maxX) / 2, minY, (minX + maxX) / 2, maxY));
+            //if (xNum == 1)
+            //    vLines.Add(new LineSegment((minX + maxX) / 2, minY, (minX + maxX) / 2, maxY));
             for (double i = 0.5; i < xNum; i++)
                 vLines.Add(new LineSegment(minX + dx * i, minY, minX + dx * i, maxY));
             hLines.Reverse();

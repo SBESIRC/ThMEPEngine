@@ -46,11 +46,53 @@ namespace ThMEPElectrical.AlarmSensorLayout
             //生成房间区域
             room = inputArea.room.ToNTSPolygon();
             foreach(var hole in inputArea.holes)
-                room = room.Difference(hole.ToNTSPolygon()) as Polygon;
+            {
+                var geom = room.Difference(hole.ToNTSPolygon());
+                if (geom is Polygon polygon)
+                    room = polygon;
+                else if (geom is GeometryCollection geometrycollection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in geometrycollection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
             foreach(var wall in inputArea.walls)
-                room = room.Difference(wall.ToNTSPolygon()) as Polygon;
+            {
+                var geom = room.Difference(wall.ToNTSPolygon());
+                if (geom is Polygon polygon)
+                    room = polygon;
+                else if (geom is GeometryCollection geometrycollection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in geometrycollection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
             foreach (var column in inputArea.columns)
-                room = room.Difference(column.ToNTSPolygon()) as Polygon;
+            {
+                var geom = room.Difference(column.ToNTSPolygon());
+                if (geom is Polygon polygon)
+                    room = polygon;
+                else if (geom is GeometryCollection geometrycollection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in geometrycollection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
 
             //生成可布置区域
             foreach (var layout in inputArea.layout_area)

@@ -60,6 +60,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
             //调整点位
             AdjustPoints();
             //重新计算盲区
+            CalDetectArea();
             CalBlindArea();
             //转化点位
             ConvertPoints();
@@ -255,7 +256,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
                 resp = resp.Difference(poly);
             }
 
-            return resp.Area < 100;
+            return resp.Area < 20000;
         }
         //转化布置点集
         private void ConvertPoints()

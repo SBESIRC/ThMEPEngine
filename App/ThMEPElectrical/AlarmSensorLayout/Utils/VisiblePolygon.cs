@@ -196,7 +196,9 @@ namespace ThMEPElectrical.AlarmSensorLayout.Method
         //向量的角度制形式
         private static double angle(Coordinate a, Coordinate b)
         {
-            return Math.Atan2(b.Y - a.Y, b.X - a.X) * 180.0 / Math.PI;
+            var ans= Math.Atan2(b.Y - a.Y, b.X - a.X) * 180.0 / Math.PI;
+            if (ans == -180) ans = 180;
+            return ans;
         }
         //角abc的度数
         private static double angle2(Coordinate a,Coordinate b,Coordinate c)
