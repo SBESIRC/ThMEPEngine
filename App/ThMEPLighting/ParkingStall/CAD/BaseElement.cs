@@ -109,7 +109,7 @@ namespace ThMEPLighting.ParkingStall.CAD
             {
                 return otherLanes;
             }
-            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).OfType<Curve>().ToList()).ToList();
 
             //处理车道线
             var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 100.0, 2.0, Math.PI / 180.0);
@@ -153,7 +153,7 @@ namespace ThMEPLighting.ParkingStall.CAD
             {
                 return otherLanes;
             }
-            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).OfType<Curve>().ToList()).ToList();
             otherLanes = ThMEPLineExtension.ExplodeCurves(sprayLines.ToCollection()).Cast<Line>().ToList();
             return otherLanes;
         }

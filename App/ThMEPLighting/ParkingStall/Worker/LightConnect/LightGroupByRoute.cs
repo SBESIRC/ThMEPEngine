@@ -189,10 +189,12 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                         if (CheckLineCrossOutLine(point, line))
                             continue;
                         var routePoint = NearRouteNode(point, line, out double disToEnd);
+                        if (routePoint == null || !routePoint.HasValue)
+                            continue;
                         if (disToEnd < nearDis)
                         {
                             nearDis = disToEnd;
-                            nearRoutePoint = routePoint;
+                            nearRoutePoint = routePoint.Value;
                             groupPoint = point;
                             nearLine = line;
                         }
@@ -219,10 +221,12 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                         if (CheckLineCrossOutLine(point, line))
                             continue;
                         var routePoint = NearRouteNode(point, line, out double disToEnd);
+                        if (routePoint == null || !routePoint.HasValue)
+                            continue;
                         if (disToEnd < nearDis)
                         {
                             nearDis = disToEnd;
-                            nearRoutePoint = routePoint;
+                            nearRoutePoint = routePoint.Value;
                             groupPoint = point;
                             nearLine = line;
                         }
@@ -254,10 +258,12 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
             }
             return nearLines;
         }
-        Point3d NearRouteNode(Point3d point,Line line, out double disToEnd)
+        Point3d? NearRouteNode(Point3d point,Line line, out double disToEnd)
         {
             var lineRoutes = new List<GraphRoute>();
             var linePoints = new List<Point3d>();
+            var testSp = line.StartPoint;
+            var testEp = line.EndPoint;
             foreach (var route in _graphRoutes)
             {
                 if (null == route)
@@ -290,6 +296,10 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                 i += 1;
             }
             disToEnd = nearDis;
+            if (nearRoute == null) 
+            {
+                return null;
+            }
             return (Point3d)nearRoute.currentNode.GraphNode;
         }
 
