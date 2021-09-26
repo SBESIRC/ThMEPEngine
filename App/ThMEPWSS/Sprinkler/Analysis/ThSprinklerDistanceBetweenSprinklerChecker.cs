@@ -11,13 +11,20 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceBetweenSprinklerChecker
+    public class ThSprinklerDistanceBetweenSprinklerChecker : ThSprinklerChecker
     {
-        public List<List<Point3d>> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var distanceCheck = DistanceCheck(sprinklers, 1800.0);
+            var buildingCheck = BuildingCheck(geometries, distanceCheck);
+            Present(buildingCheck);
+        }
+
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance)
         {
             var sprinklersClone = new List<ThIfcDistributionFlowElement>();
             sprinklers.ForEach(o => sprinklersClone.Add(o));
-            var result = new List<List<Point3d>>();
+            var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0) 
             {
                 var position = (sprinklersClone[0] as ThSprinkler).Position;
@@ -25,18 +32,18 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var kdTree = new ThCADCoreNTSKdTree(1.0);
                 sprinklersClone.Cast<ThSprinkler>().ForEach(o => kdTree.InsertPoint(o.Position));
                 var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree,position,tolerance);
-                closePointList.ForEach(o => result.Add(new List<Point3d> { position, o }));
+                closePointList.ForEach(o => result.Add(new Line(position, o)));
             }
             
             return result;
         }
 
-        public List<List<Point3d>> BuildingCheck(List<ThGeometry> geometries, List<List<Point3d>> pointsList)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lineList)
         {
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
             {
-                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < 700)
+                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
                  || (g.Properties["Category"] as string).Contains("Room"))
                 {
                     return;
@@ -44,11 +51,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 geometriesFilter.Add(g.Boundary);
             });
 
-            var result = new List<List<Point3d>>();
+            var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
-            pointsList.ForEach(o =>
+            lineList.ForEach(o =>
             {
-                var line = new Line(o[0], o[1]);
+                var line = new Line(o.StartPoint, o.EndPoint);
                 var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));
                 if(filter.Count == 0)
                 {
@@ -58,30 +65,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        public void Present(Database database, List<List<Point3d>> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerDistanceCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o[0],
-                        XLine2Point = o[1],
-                        DimensionText = "",
-                        DimLinePoint = ThSprinklerUtils.VerticalPoint(o[0], o[1], 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerDistanceCheckerLayer();
+                Present(result, layerId);
             }
         }
+
+       
     }
 }

@@ -82,9 +82,9 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //blindZoneChecker.Present(currentDb.Database, results);
 
                 // 喷头距边是否过大
-                var boundaryChecker = new ThSprinklerDistanceFromBoundarySoFarChecker();
-                var results = boundaryChecker.DistanceCheck(engine.Elements, geometries, 3111, 2200);
-                boundaryChecker.Present(currentDb.Database, results);
+                //var boundaryChecker = new ThSprinklerDistanceFromBoundarySoFarChecker();
+                //var results = boundaryChecker.DistanceCheck(engine.Elements, geometries, 3111, 2200);
+                //boundaryChecker.Present(currentDb.Database, results);
             }
         }
     }

@@ -12,9 +12,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceFromBoundarySoFarChecker
+    public class ThSprinklerDistanceFromBoundarySoFarChecker : ThSprinklerChecker
     {
-        public List<List<Point3d>> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, int radiusA, int radiusB)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var results = DistanceCheck(sprinklers, geometries);
+            Present(results);
+        }
+
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
         {
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -27,23 +33,23 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 geometriesFilter.Add(g.Boundary);
             });
 
-            var result = new List<List<Point3d>>();
+            var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
             sprinklers
                 .Cast<ThSprinkler>()
-                .Where(o => o.Category != "侧喷")
+                .Where(o => o.Category == Category)
                 .ForEach(o =>
                 {
-                    var circle = new Circle(o.Position, Vector3d.ZAxis, radiusA);
-                    var filter = spatialIndex.SelectCrossingPolygon(circle.TessellateCircleWithArc(20.0 * Math.PI));
-                    if (filter.Count == 0) 
+                    var circle = new Circle(o.Position, Vector3d.ZAxis, RadiusA);
+                    var filter = spatialIndex.SelectCrossingPolygon(circle.TessellateCircleWithArc(10.0 * Math.PI));
+                    if (filter.Count == 0)
                     {
                         return;
                     }
                     else if (filter.Count > 0)
                     {
                         var points = new List<Point3d>();
-                        double minDistance = radiusA;
+                        double minDistance = RadiusA;
                         var closestPoint = new Point3d();
                         filter.Cast<Entity>().ForEach(e =>
                         {
@@ -61,38 +67,21 @@ namespace ThMEPWSS.Sprinkler.Analysis
                             });
                         });
 
-                        if (minDistance > radiusB) 
+                        if (minDistance > RadiusB)
                         {
-                            result.Add(new List<Point3d> { o.Position, closestPoint });
+                            result.Add(new Line(o.Position, closestPoint));
                         }
                     }
                 });
             return result;
         }
 
-        public void Present(Database database, List<List<Point3d>> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerDistanceFormBoundarySoFarCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o[0],
-                        XLine2Point = o[1],
-                        DimensionText = "",
-                        DimLinePoint = ThSprinklerUtils.VerticalPoint(o[0], o[1], 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerDistanceFormBoundarySoFarCheckerLayer();
+                Present(result, layerId);
             }
         }
     }

@@ -8,16 +8,22 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerBeamChecker
+    public class ThSprinklerBeamChecker : ThSprinklerChecker
     {
-        public DBObjectCollection Check(List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var objs = Check(geometries);
+            Present(objs);
+        }
+
+        private DBObjectCollection Check(List<ThGeometry> geometries)
         {
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
             {
                 if (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Beam"))
                 {
-                    if(g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) >= 700)
+                    if(g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) >= BeamHeight)
                     {
                         objs.Add(g.Boundary);
                     }
@@ -26,12 +32,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return objs;
         }
 
-        public void Present(Database database, DBObjectCollection objs)
+        private void Present(DBObjectCollection objs)
         {
-            var layerId = database.CreateAIBeamsCheckerLayer();
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                foreach(Polyline pline in objs.Buffer(200))
+                var layerId = acadDatabase.Database.CreateAIBeamsCheckerLayer();
+                foreach (Polyline pline in objs.Buffer(200))
                 {
                     acadDatabase.ModelSpace.Add(pline);
                     pline.LayerId = layerId;

@@ -1,21 +1,29 @@
-﻿using System.Linq;
+﻿using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using Catel.Collections;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Service;
 using System.Collections.Generic;
+using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerRoomChecker
+    public class ThSprinklerRoomChecker : ThSprinklerChecker
     {
         readonly static string LayerName = "AI-喷头校核-房间是否布置喷头";
 
-        public DBObjectCollection Check(List<ThGeometry> geometries, List<ThIfcDistributionFlowElement> sprinklers)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var objs = Check(geometries, sprinklers);
+            Present(objs);
+        }
+
+        private DBObjectCollection Check(List<ThGeometry> geometries, List<ThIfcDistributionFlowElement> sprinklers)
         {
             var outlines = new DBObjectCollection();
-            sprinklers.Cast<ThSprinkler>().Where(o => o.Category != "侧喷").ForEach(o => outlines.Add(o.Outline));
+            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o => outlines.Add(o.Outline));
             var spatialIndex = new ThCADCoreNTSSpatialIndex(outlines);
 
             var objs = new DBObjectCollection();
@@ -43,13 +51,18 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return objs;
         }
 
-        public void Present(Database database, DBObjectCollection objs)
+
+        private void Present(DBObjectCollection objs)
         {
-            foreach (Entity e in objs)
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                foreach (Entity e in objs)
                 {
-                    var service = new ThHydrantPrintService(database, LayerName);
-                    service.Print(e, 2);
+                    var service = new ThSprinklerRoomPrintService(acadDatabase.Database, LayerName);
+                    var colorIndex = 2;
+                    service.Print(e, colorIndex);
                 }
+            }
         }
     }
 }

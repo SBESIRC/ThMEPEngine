@@ -53,6 +53,7 @@
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\ViewModels.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommand.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDataSetFactory.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Sprinkler\Service\ThSprinklerLayerService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerLayoutAreaUtils.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerQueryHoleTextInfoService.cs" />
+    <Compile Include="Sprinkler\Service\ThSprinklerRoomPrintService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerRoomService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerUtils.cs" />
     <Compile Include="ThSystemDiagramCmds.THWTKSB.cs" />

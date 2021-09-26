@@ -14,20 +14,24 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceFromBeamChecker
+    public class ThSprinklerDistanceFromBeamChecker : ThSprinklerChecker
     {
-        public List<List<Polyline>> LayoutAreas(List<ThGeometry> geometries)
-        {
-            var polylines = ThSprinklerLayoutAreaUtils.GetFrames();
-            if (polylines.Count <= 0)
-            {
-                return new List<List<Polyline>>();
-            }
+        private List<Polyline> RoomFrames { get; set; }
 
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var areas = LayoutAreas(geometries);
+            Present(areas);
+            var results = BeamCheck(sprinklers, areas, geometries);
+            Present(results);
+        }
+
+        private List<List<Polyline>> LayoutAreas(List<ThGeometry> geometries)
+        {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var calHolesService = new CalHolesService();
-                var holeDic = calHolesService.CalHoles(polylines);
+                var holeDic = calHolesService.CalHoles(RoomFrames);
                 var layoutAreas = new List<List<Polyline>>();
                 foreach (var holeInfo in holeDic)
                 {
@@ -73,25 +77,24 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return spatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
 
-        public void Present(Database database, List<List<Polyline>> layoutAreas)
+        private void Present(List<List<Polyline>> layoutAreas)
         {
-            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerLayoutAreaLayer();
-
+                var layerId = acadDatabase.Database.CreateAISprinklerLayoutAreaLayer();
                 layoutAreas.ForEach(o =>
                 {
                     o.ForEach(area => 
                     {
                         area.ColorIndex = 3;
                         area.LayerId = layerId;
-                        acdb.ModelSpace.Add(area);
+                        acadDatabase.ModelSpace.Add(area);
                     });
                 });
             }
         }
 
-        public List<List<Point3d>> BeamCheck(List<ThIfcDistributionFlowElement> sprinklers, List<List<Polyline>> layoutAreas, List<ThGeometry> geometries)
+        private HashSet<Line> BeamCheck(List<ThIfcDistributionFlowElement> sprinklers, List<List<Polyline>> layoutAreas, List<ThGeometry> geometries)
         {
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -103,8 +106,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
             });
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
 
-            var result = new List<List<Point3d>>();
-            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == "上喷").ForEach(o =>
+            var result = new HashSet<Line>();
+            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o =>
             {
                 var tag = true;
                 foreach (var polylines in layoutAreas)
@@ -142,11 +145,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                             }
                         });
 
-                        result.Add(new List<Point3d>
-                                  {
-                                     o.Position,
-                                     closePoint
-                                  });
+                        result.Add(new Line(o.Position, closePoint));
                     }
                 }
             });
@@ -154,29 +153,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        public void Present(Database database, List<List<Point3d>> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerDistanceFormBeamCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o[0],
-                        XLine2Point = o[1],
-                        DimensionText = "",
-                        DimLinePoint = ThSprinklerUtils.VerticalPoint(o[0], o[1], 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerDistanceFormBeamCheckerLayer();
+                Present(result, layerId);
             }
         }
     }

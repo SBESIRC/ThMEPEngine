@@ -11,22 +11,21 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerBlindZoneChecker
+    public class ThSprinklerBlindZoneChecker : ThSprinklerChecker
     {
-        public HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, int tolerance)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
         {
-            var results = new HashSet<Line>();
-            results.AddRange(DistanceCheck(sprinklers, tolerance, "上喷"));
-            results.AddRange(DistanceCheck(sprinklers, tolerance, "下喷"));
-            return results;
+            var distanceCheck = DistanceCheck(sprinklers);
+            var results = BuildingCheck(geometries, distanceCheck);
+            Present(results);
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, int tolerance, string category)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers)
         {
             var nodeCapacity = 5;
             var sprinklersTidal = sprinklers
                 .Cast<ThSprinkler>()
-                .Where(o => o.Category == category);
+                .Where(o => o.Category == Category);
             var objs = new DBObjectCollection();
             sprinklersTidal.ForEach(o =>
             {
@@ -43,7 +42,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                          .ToList();
                 points.ForEach(p =>
                 {
-                    if (p.DistanceTo(o.Position) > 2 * tolerance)
+                    if (p.DistanceTo(o.Position) > 2 * RadiusB)
                     {
                         results.Add(new Line(o.Position, p));
                     }
@@ -52,12 +51,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return results;
         }
 
-        public HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, double beamHeight)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines)
         {
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
             {
-                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < beamHeight)
+                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
                  || (g.Properties["Category"] as string).Contains("Room"))
                 {
                     return;
@@ -78,30 +77,14 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        public void Present(Database database, HashSet<Line> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerBlindZoneCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o.StartPoint,
-                        XLine2Point = o.EndPoint,
-                        DimensionText = "",
-                        DimLinePoint = ThSprinklerUtils.VerticalPoint(o.StartPoint, o.EndPoint, 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerBlindZoneCheckerLayer();
+                Present(result, layerId);
             }
         }
+
     }
 }

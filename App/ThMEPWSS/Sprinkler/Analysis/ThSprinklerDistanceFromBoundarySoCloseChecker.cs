@@ -12,14 +12,20 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceFromBoundarySoCloseChecker
+    public class ThSprinklerDistanceFromBoundarySoCloseChecker : ThSprinklerChecker
     {
-        public List<List<Point3d>> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        {
+            var results = DistanceCheck(sprinklers, geometries);
+            Present(results);
+        }
+
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
         {
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
             {
-                if ((g.Properties["Category"] as string).Contains("Room") 
+                if ((g.Properties["Category"] as string).Contains("Room")
                  || (g.Properties["Category"] as string).Contains("Beam"))
                 {
                     return;
@@ -27,15 +33,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 geometriesFilter.Add(g.Boundary);
             });
 
-            var result = new List<List<Point3d>>();
+            var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
             sprinklers
                 .Cast<ThSprinkler>()
-                .Where(o => o.Category != "侧喷")
+                .Where(o => o.Category == Category)
                 .ForEach(o =>
                 {
                     var circle = new Circle(o.Position, Vector3d.ZAxis, 100.0);
-                    var filter = spatialIndex.SelectCrossingPolygon(circle.TessellateCircleWithArc(20.0 * Math.PI));
+                    var filter = spatialIndex.SelectCrossingPolygon(circle.TessellateCircleWithArc(10.0 * Math.PI));
                     if (filter.Count > 0)
                     {
                         var points = new List<Point3d>();
@@ -46,7 +52,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                             objs.Cast<Curve>().ForEach(curve =>
                             {
                                 var closePoint = curve.GetClosestPointTo(o.Position, false);
-                                if(closePoint.DistanceTo(o.Position) < 100.0)
+                                if (closePoint.DistanceTo(o.Position) < 100.0)
                                 {
                                     points.Add(closePoint);
                                 }
@@ -54,18 +60,18 @@ namespace ThMEPWSS.Sprinkler.Analysis
                         });
 
                         var indexs = new List<int>();
-                        for (int i = 0; i < points.Count(); i++) 
+                        for (int i = 0; i < points.Count(); i++)
                         {
-                            for (int j = i + 1; j < points.Count(); j++) 
+                            for (int j = i + 1; j < points.Count(); j++)
                             {
-                                if(points[i].DistanceTo(points[j]) < 1.0)
+                                if (points[i].DistanceTo(points[j]) < 1.0)
                                 {
                                     indexs.Add(j);
                                 }
                             }
-                            if(!indexs.Contains(i))
+                            if (!indexs.Contains(i))
                             {
-                                result.Add(new List<Point3d> { o.Position, points[i] });
+                                result.Add(new Line(o.Position, points[i]));
                             }
                         }
                     }
@@ -74,29 +80,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        public void Present(Database database, List<List<Point3d>> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o[0],
-                        XLine2Point = o[1],
-                        DimensionText = "",
-                        DimLinePoint = ThSprinklerUtils.VerticalPoint(o[0], o[1], 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer();
+                Present(result, layerId);
             }
         }
     }
