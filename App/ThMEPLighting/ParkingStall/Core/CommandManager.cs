@@ -381,6 +381,10 @@ namespace ThMEPLighting.ParkingStall.Core
                 var curves = GetLanes(polygonInfo.ExternalProfile);
                 if (null == curves || curves.Count < 1)
                     continue;
+                using (AcadDatabase acdb = AcadDatabase.Active())
+                {
+                    LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, null); 
+                }
                 var lines = new List<Line>();
                 curves.ForEach(e =>
                 {

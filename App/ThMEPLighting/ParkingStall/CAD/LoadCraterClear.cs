@@ -33,6 +33,45 @@ namespace ThMEPLighting.ParkingStall.CAD
                 }
             }
         }
+        public static void ClaerHistoryBlocks(Database database, string blockName, Polyline outPolyline, List<Polyline> innerPolylines, ThMEPOriginTransformer originTransformer) 
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            {
+                var delEntitys = new List<BlockReference>();
+                var targetEntitys = currentDb.ModelSpace
+                   .OfType<BlockReference>().Where(o => o.GetEffectiveName() == blockName);
+                if (targetEntitys == null || targetEntitys.Count() < 1)
+                    return;
+                targetEntitys.ForEach(x =>
+                {
+                    var transEntity = x.Clone() as BlockReference;
+                    var point = x.Position;
+                    if (null != originTransformer)
+                        point = originTransformer.Transform(point);
+                    bool isDel = outPolyline.Contains(point);
+                    if (isDel && innerPolylines != null && innerPolylines.Count > 0) 
+                    {
+                        foreach (var pl in innerPolylines) 
+                        {
+                            if (!isDel)
+                                continue;
+                            isDel = !outPolyline.Contains(point);
+                        }
+                    }
+                    if (isDel)
+                        delEntitys.Add(x);
+                });
+                if (delEntitys.Count < 1)
+                    return;
+                var objs = new DBObjectCollection();
+                delEntitys.ForEachDbObject(c => objs.Add(c));
+                foreach (Entity spray in objs)
+                {
+                    spray.UpgradeOpen();
+                    spray.Erase();
+                }
+            }
+        }
         public static void ClearHistoryLines(Database database, string layerName, Polyline outPolyline, List<Polyline> innerPolylines, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
