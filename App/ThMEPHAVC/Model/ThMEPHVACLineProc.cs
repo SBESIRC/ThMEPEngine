@@ -26,7 +26,7 @@ namespace ThMEPHVAC.Model
             lines = service.CleanNoding(lines);
             return lines;
         }
-        private void LineMerge(ref DBObjectCollection line_set, double gap_tor)
+        public static void LineMerge(ref DBObjectCollection line_set, double gap_tor)
         {
             var lines = new DBObjectCollection();
             foreach (Line l in line_set)

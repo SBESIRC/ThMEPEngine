@@ -36,38 +36,6 @@ namespace ThMEPHVAC.CAD
                 room_valves = GetValveGroup(fanmodel, wallobjects, bypassobjects, room_width, teewidth, ValveGroupPosionType.Outlet, room_lines);
                 not_room_valves = GetValveGroup(fanmodel, wallobjects, bypassobjects, not_room_width, teewidth, ValveGroupPosionType.Inlet, not_room_lines);
             }
-            //room_valves = GetValveGroup(fanmodel, wallobjects, bypassobjects, room_width, teewidth, ValveGroupPosionType.Inlet, room_lines);
-            //not_room_valves = GetValveGroup(fanmodel, wallobjects, bypassobjects, not_room_width, teewidth, ValveGroupPosionType.Outlet, not_room_lines);
-            //Exclude_redundant_check_valve(fanmodel.is_exhaust);
-        }
-        private void Exclude_redundant_check_valve(bool Is_io_reverse)
-        {
-            if (!Is_io_reverse)
-            {
-                if (room_valves.Any(g => g.ValvesInGroup.Any(v => v.ValveVisibility.Contains("止回阀"))))
-                {
-                    foreach (var group in not_room_valves)
-                    {
-                        if (group.ValvesInGroup.Count > 0)
-                        {
-                            group.ValvesInGroup.RemoveAll(v => v.ValveVisibility.Contains("止回阀"));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (not_room_valves.Any(g => g.ValvesInGroup.Any(v => v.ValveVisibility.Contains("止回阀"))))
-                {
-                    foreach (var group in room_valves)
-                    {
-                        if (group.ValvesInGroup.Count > 0)
-                        {
-                            group.ValvesInGroup.RemoveAll(v => v.ValveVisibility.Contains("止回阀"));
-                        }
-                    }
-                }
-            }
         }
         public void RunInletValvesInsertEngine()
         {
@@ -87,7 +55,6 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-
         public void RunOutletValvesInsertEngine()
         {
             foreach (var valvegroup in not_room_valves)

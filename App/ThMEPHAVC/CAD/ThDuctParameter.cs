@@ -52,7 +52,7 @@ namespace ThMEPHVAC.CAD
                 }
                 return new List<DuctSizeParameter>() { biggerDucts.First() };
             }
-            return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
+            return satisfiedDucts.OrderByDescending(d => d.DuctHeight).OrderBy(d => d.DuctWidth).ToList();
         }
         private List<DuctSizeParameter> Get_candidate_ducts(double air_volume, double air_speed_ceiling, double air_speed_floor)
         {

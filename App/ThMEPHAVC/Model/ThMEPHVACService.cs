@@ -190,6 +190,11 @@ namespace ThMEPHVAC.Model
         {
             return new Vector2d(dir_vec.Y, -dir_vec.X);
         }
+        public static Vector3d Get_dir_vec_by_angle_3(double angle)
+        {
+            var v = Get_dir_vec_by_angle(angle);
+            return new Vector3d(v.X, v.Y, 0);
+        }
         public static Vector2d Get_dir_vec_by_angle(double angle)
         {
             return new Vector2d(Math.Cos(angle), Math.Sin(angle));
@@ -717,6 +722,10 @@ namespace ThMEPHVAC.Model
                 S = 0;
             if (Math.Abs(T) < 1e-9)
                 T = 0;
+            if (Math.Abs(S - 1) < 1e-8)
+                S = 1;
+            if (Math.Abs(T - 1) < 1e-8)
+                T = 1;
             if (S < 0 || S > 1 || T < 0 || T > 1)
                 return Point3d.Origin;//Intersection not within line segments
             else
@@ -833,6 +842,16 @@ namespace ThMEPHVAC.Model
             var poly = new Polyline();
             poly.CreateRectangle(min_p, max_p);
             return poly;
+        }
+        public static double Get_srt_flag_rotation(Vector3d vec)
+        {
+            var angle = vec.GetAngleTo(Vector3d.YAxis);
+            var z = vec.CrossProduct(Vector3d.YAxis).Z;
+            if (Math.Abs(z) < 1e-3)
+                z = 0;
+            if (z > 0)
+                angle = 2 * Math.PI - angle;
+            return angle;
         }
     }
 }

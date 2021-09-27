@@ -6,8 +6,9 @@ namespace ThMEPHVAC.Model
 {
     class ThDuctPortsShapeService
     {
-        public static Matrix3d Create_cross_trans_mat(Entity_modify_param cross)
+        public static Matrix3d Create_cross_trans_mat(Entity_modify_param cross, string modify_duct_size, int port_idx)
         {
+            // 用原数据用于恢复角度
             var in_2vec = cross.pos[0] - cross.pos_ext[0];
             double inner_width = cross.port_widths[2];
             double outter_width = cross.port_widths[3];
@@ -15,9 +16,10 @@ namespace ThMEPHVAC.Model
             var in_2big = cross.pos[idx] - cross.pos_ext[idx];
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             var big_vec = new Vector3d(in_2big.X, in_2big.Y, 0);
-            double rotate_angle =  Get_cross_trans_info(inner_width, outter_width, in_vec, big_vec, out bool is_flip);
-            var center_point = Get_entity_center_p(cross);
-            return ThMEPHVACService.Get_trans_mat(is_flip, rotate_angle, center_point);
+            double rotate_angle = Get_cross_trans_info(inner_width, outter_width, in_vec, big_vec, out bool is_flip);
+
+            var center_point = Get_cross_center_p(cross);
+            return ThMEPHVACService.Get_trans_mat(false, rotate_angle, center_point);
         }
         public static Matrix3d Create_tee_trans_mat(Entity_modify_param tee)
         {
@@ -26,7 +28,7 @@ namespace ThMEPHVAC.Model
             var branch_vec = new Vector3d(branch_2vec.X, branch_2vec.Y, 0);
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             double rotate_angle = Get_tee_trans_info(in_vec, branch_vec, out bool is_flip);
-            var center_point = Get_entity_center_p(tee);
+            var center_point = Get_tee_center_p(tee);
             return ThMEPHVACService.Get_trans_mat(is_flip, rotate_angle, center_point);
         }
         public static Matrix3d Create_elbow_trans_mat(Entity_modify_param elbow)
@@ -36,7 +38,7 @@ namespace ThMEPHVAC.Model
             double open_angle = in_2vec.GetAngleTo(out_2vec);
             var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
             var out_vec = new Vector3d(out_2vec.X, out_2vec.Y, 0);
-            var center_point = Get_entity_center_p(elbow);
+            var center_point = Get_elbow_center_p(elbow);
             double rotate_angle = Get_elbow_trans_info(open_angle, in_vec, out_vec, out bool is_flip);
             return ThMEPHVACService.Get_trans_mat(is_flip, rotate_angle, center_point);
         }
@@ -53,12 +55,17 @@ namespace ThMEPHVAC.Model
         }
         public static Point2d Get_cross_center_p(Entity_modify_param cross)
         {
-            var in_2vec = cross.pos[0] - cross.pos_ext[0];
-            double inner_width = cross.port_widths[2];
-            double outter_width = cross.port_widths[3];
-            int idx = inner_width > outter_width ? 2 : 3;
-            var shrink_len = cross.port_widths[idx] + 50;
-            return cross.pos[0] - in_2vec * shrink_len;
+            // 四通的两条中心线求交
+            var in_p = new Point3d(cross.pos[0].X, cross.pos[0].Y, 0);
+            var out_p = new Point3d(cross.pos[1].X, cross.pos[1].Y, 0);
+            var inner_p = new Point3d(cross.pos[2].X, cross.pos[2].Y, 0);
+            var outter_p = new Point3d(cross.pos[3].X, cross.pos[3].Y, 0);
+            var l1 = new Line(in_p, out_p);
+            var l2 = new Line(inner_p, outter_p);
+            var inter_p = ThMEPHVACService.Intersect_point(l1, l2).ToPoint2D();
+            if (inter_p.IsEqualTo(Point2d.Origin))
+                throw new NotImplementedException("四通中心线无交点");
+            return inter_p;
         }
         public static Point2d Get_tee_center_p(Entity_modify_param tee)
         {

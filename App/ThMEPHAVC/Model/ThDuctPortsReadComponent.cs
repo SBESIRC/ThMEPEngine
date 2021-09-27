@@ -6,6 +6,7 @@ using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.Alg;
 
 namespace ThMEPHVAC.Model
 {
@@ -56,27 +57,6 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        public static List<ObjectId> Read_shape_ids()
-        {
-            var ids = new List<ObjectId>();
-            using (var db = AcadDatabase.Active())
-            {
-                var groups = db.Groups;
-                foreach (var g in groups)
-                {
-                    var id = g.ObjectId;
-                    var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
-                    if (list != null)
-                    {
-                        var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        var type = (string)values.ElementAt(1).Value;
-                        if (type == "Tee" || type == "Cross" || type == "Reducing" || type == "Elbow")
-                            ids.Add(id);
-                    }
-                }
-            }
-            return ids;
-        }
         public static Dictionary<ObjectId, Polyline> Read_group_id2geo_dic()
         {
             var dic = new Dictionary<ObjectId, Polyline>();
@@ -93,9 +73,8 @@ namespace ThMEPHVAC.Model
                         var type = (string)values.ElementAt(1).Value;
                         if (type == "Tee" || type == "Cross" || type == "Reducing" || type == "Elbow")
                         {
-                            var pl = new Polyline();
-                            var extents = Get_group_bounds(g);
-                            pl.CreateRectangle(extents.MinPoint.ToPoint2D(), extents.MaxPoint.ToPoint2D());
+                            var entitys = Get_group_entitys(g);
+                            var pl = ThMEPHAVCBounds.getConnectorBounds(entitys, 1);
                             dic.Add(id, pl);
                         }
                     }
@@ -103,19 +82,18 @@ namespace ThMEPHVAC.Model
             }
             return dic;
         }
-        private static Extents3d Get_group_bounds(Group g)
+        private static DBObjectCollection Get_group_entitys(Group g)
         {
             var entity_ids = g.GetAllEntityIds();
-            var extents = new Extents3d();
+            var entitys = new DBObjectCollection();
             foreach (var e_id in entity_ids)
             {
                 var e = e_id.GetDBObject();
                 if (!(e is Line))
                     continue;
-                var l = e as Line;
-                extents.AddExtents(l.GeometricExtents);
+                entitys.Add(e);
             }
-            return extents;
+            return entitys;
         }
         public static List<ObjectId> Read_group_ids_by_type(string range)
         {

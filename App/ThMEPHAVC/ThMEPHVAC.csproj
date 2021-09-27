@@ -28,7 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="Alg\ThMEPHAVCBounds.cs" />
     <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
@@ -165,5 +165,6 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

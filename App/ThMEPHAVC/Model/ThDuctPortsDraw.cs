@@ -46,7 +46,7 @@ namespace ThMEPHVAC.Model
         public void Draw(ThDuctPortsAnalysis anay_res, ThDuctPortsConstructor endlines)
         {
             have_main = anay_res.main_ducts.Count != 0;
-            var angle = anay_res.start_dir_vec.GetAngleTo(-Vector3d.YAxis) - Math.PI / 3;
+            var angle = ThMEPHVACService.Get_srt_flag_rotation(anay_res.start_dir_vec);
             start_id = service.Insert_start_flag(start_point, angle);
             Draw_endlines(endlines);
             Draw_mainlines(anay_res);
