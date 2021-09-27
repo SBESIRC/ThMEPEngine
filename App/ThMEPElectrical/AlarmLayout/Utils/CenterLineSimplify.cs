@@ -17,7 +17,6 @@ using ThMEPEngineCore.Algorithm;
 using ThCADExtension;
 using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.Runtime;
-using NFox.Collections;//树
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Overlay.Snap;
 using NetTopologySuite.Operation.Overlay;
@@ -30,128 +29,209 @@ namespace ThMEPElectrical.AlarmLayout.Utils
 {
     public static class CenterLineSimplify
     {
-
-        public static void CLSimplify(MPolygon mPolygon)//, AcadDatabase acdb)//, double interpolationDistance)
+        public static List<Line> CLSimplify(MPolygon mPolygon, double interpolationDistance = 300)
         {
-            double dis = 300;
+            //1.init
+            var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), interpolationDistance);
+            Dictionary<Point3d, List<Point3d>> pt_edges = new Dictionary<Point3d, List<Point3d>>();
+            Dictionary<Point3d, int> degree = new Dictionary<Point3d, int>();
+            //points on centerline 1:has this point 2:watched and ready to delete 3:can not backtrace from now on
+            Dictionary<Point3d, int> edgPts = new Dictionary<Point3d, int>();
+            List<Point3d> leaves = new List<Point3d>();
+            Point3d tmpStPt = new Point3d();
+            Point3d tmpEdPt = new Point3d();
+            foreach (var cl in centerlines)
+            {
+                if (cl is Polyline line)
+                {
+                    tmpStPt = line.StartPoint;
+                    tmpEdPt = line.EndPoint;
+                    degree[tmpStPt] = 0;
+                    degree[tmpEdPt] = 0;
+                    pt_edges[tmpStPt] = new List<Point3d>();
+                }
+            }
+            foreach (var cl in centerlines)
+            {
+                if (cl is Polyline line)
+                {
+                    tmpStPt = line.StartPoint;
+                    tmpEdPt = line.EndPoint;
+                    pt_edges[tmpStPt].Add(tmpEdPt);
+                    ++degree[tmpStPt];
+                    ++degree[tmpEdPt];
+                    //record the pole of a line
+                    edgPts[tmpStPt] = 1;
+                    edgPts[tmpEdPt] = 1;
+                }
+            }
+            //abortable
+            int bigPtCnt = 0;
+            Queue<Point3d> que = new Queue<Point3d>();
+            foreach (var node in degree)
+            {
+                if (node.Value <= 2)
+                {
+                    leaves.Add(node.Key);
+                    que.Enqueue(node.Key);
+                    edgPts[node.Key] = 2;
+                }
+                else if (node.Value > 4)
+                {
+                    edgPts[node.Key] = 3;
+                    ShowInfo.ShowPointAsO(node.Key);
+                    ++bigPtCnt;
+                }
+            }
+            if (bigPtCnt == 0)//special case(leave like shape)
+            {
+                return centerlines.Cast<Line>().ToList();
+            }
 
-            //获取点集
-            List<Point3d> centerPts = new List<Point3d>();
-            CenterPoints(mPolygon.ToNTSPolygon(), dis, centerPts);
-            centerPts.Distinct().ToList();
+            //2.backtrace
+            List<Point3d> toDeletePt = new List<Point3d>();
+            while (que.Count != 0)
+            {
+                Point3d lineStart = que.Dequeue();
+                toDeletePt.Add(lineStart);
+                foreach(var lineEnd in pt_edges[lineStart])
+                {
+                    toDeletePt.Add(lineEnd);
+                    if (edgPts[lineEnd] != 2 && edgPts[lineEnd] != 3)
+                    {
+                        edgPts[lineEnd] = 2;
+                        que.Enqueue(lineEnd);
+                    }
+                }
+            }
 
-            //获取边集合
+            //3.output
+            foreach(var pt in toDeletePt)
+            {
+                if (pt_edges.ContainsKey(pt) && edgPts[pt] != 3)
+                {
+                    pt_edges.Remove(pt);
+                    ShowInfo.ShowPointAsX(pt);
+                }
+            }
             List<Line> lines = new List<Line>();
-            CreateLines(centerPts, dis * 2, lines);
-            foreach (var line in lines)
+            foreach(var node in pt_edges)
             {
-                line.ColorIndex = 130;
-                HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                foreach(var pt in node.Value)
+                {
+                    if (edgPts[pt] != 2)
+                    {
+                        lines.Add(new Line(node.Key, pt));
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(node.Key, pt));//show line
+                    }
+                }
             }
-            /*
-            Hashtable ht = new Hashtable();
-            //ht(Point3d, int) 
-            foreach (Point3d pt in centerPts)
-            {
-                ht.Add(pt, 0);
-            }
-            ht[centerPts[0]] = 1;
-            List<Point3d> tmpList = new List<Point3d>();
-            //DFS(ht, centerPts[0], acdb, dis, centerPts, tmpList);
-            */
-
+            return lines;
         }
-        public static void CreateLines(List<Point3d> centerPts, double dis, List<Line> lines)
+
+        public static List<Point3d> CLSimplifyPts(MPolygon mPolygon, double interpolationDistance = 300)
         {
-            /*
-            Hashtable ht = new Hashtable();
-            foreach (var pt in centerPts)
+            //1.init
+            var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), interpolationDistance);
+            Dictionary<Point3d, List<Point3d>> pt_edges = new Dictionary<Point3d, List<Point3d>>();
+            Dictionary<Point3d, int> degree = new Dictionary<Point3d, int>();
+            //points on centerline 1:has this point 2:watched and ready to delete 3:can not backtrace from now on
+            Dictionary<Point3d, int> edgPts = new Dictionary<Point3d, int>();
+            List<Point3d> leaves = new List<Point3d>();
+            Point3d tmpStPt = new Point3d();
+            Point3d tmpEdPt = new Point3d();
+            foreach (var cl in centerlines)
             {
-                ht[pt] = false;
-            }
-            ht[centerPts[0]] = true;
-            foreach (var pt in centerPts)
-            {
-                List<Point3d> tmpPts = PointsDealer.GetNearestPoints(pt, centerPts, dis);
-                foreach (var ptt in tmpPts)
+                if (cl is Polyline line)
                 {
-                    if ((bool)ht[ptt] == false)
+                    tmpStPt = line.StartPoint;
+                    tmpEdPt = line.EndPoint;
+                    degree[tmpStPt] = 0;
+                    degree[tmpEdPt] = 0;
+                    pt_edges[tmpStPt] = new List<Point3d>();
+                }
+            }
+            foreach (var cl in centerlines)
+            {
+                if (cl is Polyline line)
+                {
+                    tmpStPt = line.StartPoint;
+                    tmpEdPt = line.EndPoint;
+                    pt_edges[tmpStPt].Add(tmpEdPt);
+                    ++degree[tmpStPt];
+                    ++degree[tmpEdPt];
+                    //record the pole of a line
+                    edgPts[tmpStPt] = 1;
+                    edgPts[tmpEdPt] = 1;
+                }
+            }
+            //abortable
+            int bigPtCnt = 0;
+            Queue<Point3d> que = new Queue<Point3d>();
+            foreach (var node in degree)
+            {
+                if (node.Value <= 2)
+                {
+                    leaves.Add(node.Key);
+                    que.Enqueue(node.Key);
+                    edgPts[node.Key] = 2;
+                }
+                else if (node.Value > 4)
+                {
+                    edgPts[node.Key] = 3;
+                    ++bigPtCnt;
+                }
+            }
+
+            List<Point3d> ans = new List<Point3d>();
+            if (bigPtCnt == 0)//special case(leave like shape)
+            {
+                CenterPoints(mPolygon.ToNTSPolygon(), ans);
+                return ans;
+            }
+
+            List<Point3d> toDeletePt = new List<Point3d>();
+
+            //2.backtrace
+            while (que.Count != 0)
+            {
+                Point3d lineStart = que.Dequeue();
+                toDeletePt.Add(lineStart);
+                foreach (var lineEnd in pt_edges[lineStart])
+                {
+                    toDeletePt.Add(lineEnd);
+                    if (edgPts[lineEnd] != 2 && edgPts[lineEnd] != 3)
                     {
-                        lines.Add(new Line(pt, ptt));
-                        ht[ptt] = true;
-                        break;
+                        edgPts[lineEnd] = 2;
+                        que.Enqueue(lineEnd);
                     }
                 }
             }
-            */
-            foreach (var pt in centerPts)
-            {
-                lines.Add(new Line(pt, PointsDealer.GetNearestPoint(pt, centerPts)));
-            }
 
-            lines.Distinct().ToList();
+            //3.output
+            foreach (var pt in toDeletePt)
+            {
+                if (pt_edges.ContainsKey(pt))
+                {
+                    pt_edges.Remove(pt);
+                }
+            }
+            foreach (var node in pt_edges)
+            {
+                ans.Add(node.Key);
+            }
+            return ans;
         }
 
-        /*
-        public static void DFS(Hashtable ht, Point3d curPoint, AcadDatabase acdb, double dis, List<Point3d> centerPts, List<Point3d> tmpList, int flag)
-        {
-            List<Point3d> nearPoints = PointsDealer.GetNearestPoints(curPoint, centerPts, dis);
-            //bool flag0 = false;
-            //bool flag1 = false;
-            //bool flag2 = false;
-            int cntFlag0 = 0;
-            foreach(Point3d pt in nearPoints)
-            {
-                if ((int)ht[pt] == 0)
-                {
-
-                    ++cntFlag0;
-                    if(cntFlag0 >= 2)
-                    {
-                        //闭合tmpList，并把里面填充为2
-                        foreach(var ptt in tmpList)
-                        {
-                            ht[ptt] = 2;
-
-                            Line line = new Line(curPoint, pt);
-                            line.ColorIndex = 130;
-                            HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-
-                        }
-
-                        //生成新的list
-                        List<Point3d> newList = new List<Point3d>();
-                        newList.Add(pt);
-                        DFS(ht, pt, acdb, dis, centerPts, newList);
-                    }
-                    else
-                    {
-                        tmpList.Add(pt);
-                        //flag0 = true;
-                        DFS(ht, pt, acdb, dis, centerPts, tmpList);
-                    }
-                }
-            }
-            if(cntFlag0 == 0)//没必要， 肯定等于0
-            {
-                //闭合list，并把里面填充为1
-                foreach (var pt in tmpList)
-                {
-                    ht[pt] = 1;
-                }
-                return;
-            }
-        }
-        */
-
-        public static void ShowCenterLine(MPolygon mPolygon, AcadDatabase acdb)
+        // show centerline
+        public static void ShowCenterLine(MPolygon mPolygon, AcadDatabase acdb, int colorindex = 220)
         {
             var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), 300);
-            // 生成、显示中线
-            centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 130);
+            centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, colorindex);
         }
 
-        public static void CenterPoints(Polygon geometry, double interpolationDistance, List<Point3d> centerPoints)
+        // get the points on the centerline
+        public static void CenterPoints(Polygon geometry, List<Point3d> centerPoints, double interpolationDistance = 300)
         {
             foreach (Polygon polygon in geometry.VoronoiDiagram(interpolationDistance).Geometries)
             {
@@ -172,4 +252,3 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         }
     }
 }
-

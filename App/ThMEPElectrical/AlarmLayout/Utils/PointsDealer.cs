@@ -23,8 +23,13 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             List<Point3d> pointsInAreas = new List<Point3d>();
             foreach (Polyline poly in areas)
             {
+                //List<Point3d> pts = PointsOnPolyline(poly.CalObb());
+                //double disX = pts[0].DistanceTo(pts[1]);
+                //double disY = pts[1].DistanceTo(pts[2]);
+
                 List<Point3d> areaPoints = new List<Point3d>();
-                if (poly.Area > radius * radius)
+                if (poly.Area > radius * radius * 0.2)
+                //if(disX > radius || disY > radius)
                 {
                     areaPoints = PointsInUncoverArea(poly, 400);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
                 }
@@ -41,7 +46,7 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         }
 
         /// <summary>
-        /// 获取多边形上的所有点------------var points = area.GetPoints().ToList();可用代替(目前不要代替，会出bug)
+        /// 获取多边形上的所有点
         /// </summary>
         /// <param name="area">多边形</param>
         /// <returns>返回多边形上的点</returns>
@@ -53,9 +58,9 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             for (int i = 0; i < n; ++i)
             {
                 ans.Add(area.GetPoint3dAt(i));
-                //ShowPointAsX(area.GetPoint3dAt(i));
             }
-            return ans.Distinct().ToList();
+            //ans = ans.Distinct().ToList();
+            return ans;
         }
 
         /// <summary>
@@ -94,7 +99,6 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             //加入四等分点
             if (disX > radius)
             {
-
                 ans.Add(new Point3d((pt1_5.X + 3 * pt3_5.X) / 4, (pt1_5.Y + 3 * pt3_5.Y) / 4, 0));
                 ans.Add(new Point3d((3 * pt1_5.X + pt3_5.X) / 4, (3 * pt1_5.Y + pt3_5.Y) / 4, 0));
                 if (disX > radius * 1.5)//加入八等分点
@@ -137,29 +141,47 @@ namespace ThMEPElectrical.AlarmLayout.Utils
             Point3d pt0 = pts[0];
             Point3d pt01 = CenterOfTwoPoints(pts[0], pts[1]);
             Point3d pt1 = pts[1];
-            //Point3d pt12 = CenterOfTwoPoints(pts[1], pts[2]);
             Point3d pt2 = pts[2];
             Point3d pt23 = CenterOfTwoPoints(pts[2], pts[3]);
             Point3d pt3 = pts[3];
-            //Point3d pt30 = CenterOfTwoPoints(pts[3], pts[0]);
+            ptsInUncoverRectangle.Add(CenterOfTwoPoints(pt0, pt2));
             double disX = pt0.DistanceTo(pt1);
             double disY = pt1.DistanceTo(pt2);
             int Xcnt = (int)(disX / dis);
+            Xcnt += Xcnt % 2;
             int Ycnt = (int)(disY / dis);
-            for (int i = Xcnt % 2 + 1; i <= Xcnt; i += 2)
+            Ycnt += Ycnt % 2;
+            for (int i = 0; i < Xcnt; i += 2)
             {
                 Point3d ptA = new Point3d((i * pt01.X + (Xcnt - i) * pt0.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt0.Y) / Xcnt, 0);//Apt01_0
                 Point3d ptB = new Point3d((i * pt01.X + (Xcnt - i) * pt1.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt1.Y) / Xcnt, 0);//Bpt01_1
-                Point3d ptD = new Point3d((i * pt23.X + (Xcnt - i) * pt3.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt3.Y) / Xcnt, 0);//Dpt23_3
                 Point3d ptC = new Point3d((i * pt23.X + (Xcnt - i) * pt2.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt2.Y) / Xcnt, 0);//Cpt23_2
+                Point3d ptD = new Point3d((i * pt23.X + (Xcnt - i) * pt3.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt3.Y) / Xcnt, 0);//Dpt23_3
                 Point3d ptAD = CenterOfTwoPoints(ptA, ptD);//AD中点
                 Point3d ptBC = CenterOfTwoPoints(ptB, ptC);//BC中点
-                for (int j = Ycnt % 2 + 1; j <= Ycnt; j += 2)
+                ptsInUncoverRectangle.Add(ptAD);//
+                ptsInUncoverRectangle.Add(ptBC);//
+                bool flag = true;
+                for (int j = 0; j < Ycnt; j += 2)
                 {
-                    ptsInUncoverRectangle.Add(new Point3d((j * ptAD.X + (Ycnt - j) * ptA.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptA.Y) / Ycnt, 0));//ptAD_A
-                    ptsInUncoverRectangle.Add(new Point3d((j * ptAD.X + (Ycnt - j) * ptD.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptD.Y) / Ycnt, 0));//ptAD_D
-                    ptsInUncoverRectangle.Add(new Point3d((j * ptBC.X + (Ycnt - j) * ptB.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptB.Y) / Ycnt, 0));//ptBC_B
-                    ptsInUncoverRectangle.Add(new Point3d((j * ptBC.X + (Ycnt - j) * ptC.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptC.Y) / Ycnt, 0));//ptBC_C
+                    Point3d ptAD_A = new Point3d((j * ptAD.X + (Ycnt - j) * ptA.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptA.Y) / Ycnt, 0);
+                    Point3d ptAD_D = new Point3d((j * ptAD.X + (Ycnt - j) * ptD.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptD.Y) / Ycnt, 0);
+                    Point3d ptBC_B = new Point3d((j * ptBC.X + (Ycnt - j) * ptB.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptB.Y) / Ycnt, 0);
+                    Point3d ptBC_C = new Point3d((j * ptBC.X + (Ycnt - j) * ptC.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptC.Y) / Ycnt, 0);
+                    ptsInUncoverRectangle.Add(ptAD_A);//ptAD_A
+                    ptsInUncoverRectangle.Add(ptAD_D);//ptAD_D
+                    ptsInUncoverRectangle.Add(ptBC_B);//ptBC_B
+                    ptsInUncoverRectangle.Add(ptBC_C);//ptBC_C
+                    if (flag)
+                    {
+                        flag = false;
+                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_A, ptBC_B));
+                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
+                    }
+                }
+                for(int j = 0; j < Ycnt; ++j)
+                {
+                    ptsInUncoverRectangle.Add(new Point3d((j * pt01.X + (Ycnt - j) * pt23.X) / Ycnt, (j * pt01.Y + (Ycnt - j) * pt23.Y) / Ycnt, 0));
                 }
             }
             //只将在覆盖区域中的点加入ans
@@ -171,7 +193,8 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                     ptss.Add(pt);
                 }
             }
-            return ptss.Distinct().ToList();
+            ptss = ptss.Distinct().ToList();
+            return ptss;
         }
 
         /// <summary>
@@ -213,16 +236,6 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// <returns></returns>
         public static List<Point3d> GetNearestPoints(Point3d center, List<Point3d> points, double radius)
         {
-            /*
-            List<Point3d> ans = new List<Point3d>();
-            foreach (Point3d pt in points)
-            {
-                if (center.DistanceTo(pt) < radius)
-                {
-                    ans.Add(pt);
-                }
-            }
-            */
             List<Point3d> ans = new List<Point3d>();
             SortedList sl = new SortedList();
             foreach (Point3d pt in points)

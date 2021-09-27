@@ -16,7 +16,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
 {
     class FireAlarmSystemLayoutCommand : ThMEPBaseCommand
     {
-        //inputs
+        //input
         public Polyline frame { get; set; }//房间外框线
         public List<Polyline> holeList { get; set; }//洞
         public List<Polyline> layoutList { get; set; }//可布置区域
@@ -28,9 +28,8 @@ namespace ThMEPElectrical.AlarmLayout.Command
         public double radius { get; set; }//保护半径
         public BlindType equipmentType { get; set; }//盲区类型
 
-        //outputs
+        //output
         public List<Point3d> layoutPoints { get; set; }//布置点位
-
         public Dictionary<Point3d, Vector3d> pointsWithDirection { get; set; } //布置点位以及其方向//------------------------------
         public List<Polyline> blinds { get; set; }//盲区
 
@@ -46,7 +45,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                     hole.Closed = true;
                     objs.Add(hole);
                 }
-
+                MPolygon mPolygonShell = objs.BuildMPolygon();
                 //Get Can not Layout Area List
                 List<Polyline> nonDeployableArea = new List<Polyline>();
                 
@@ -73,35 +72,16 @@ namespace ThMEPElectrical.AlarmLayout.Command
                         nonDeployableArea.Add(pl);
                     }
                 }
-                /*
-                holeList.ForEach(h =>
-                {
-                    acdb.ModelSpace.Add(h.Clone() as Entity);
-                });
-                holeList.ForEach(h =>
-                {
-                    h.Closed = true;
-                });
-                */
-                MPolygon mPolygon = objs.BuildMPolygon();   
-                /*
-                MPolygon mPolygon = ThMPolygonTool.CreateMPolygon(frame, holeList.Cast<Curve>().ToList());
-                    
-
-                foreach (var hole in holeList)
-                {
-                    mPolygon.AppendLoopFromBoundary(hole, false, 0.0);
-                }
-                */
-                var xxxxx = mPolygon.Holes();//-----------------------
+                MPolygon mPolygon = objs.BuildMPolygon();
                 acdb.ModelSpace.Add(mPolygon);
                 mPolygon.SetDatabaseDefaults();
+
                 //处理数据
                 pointsWithDirection = new Dictionary<Point3d, Vector3d>();
                 //计算布置点位
-                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, acdb, equipmentType);//, pointsWithDirection);
+                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, equipmentType, acdb);
                 //获取布置点位方向
-                LayoutOpt.FourStep(frame, holeList, layoutPoints, pointsWithDirection);
+                LayoutOpt.PointsWithDirection(frame, holeList, layoutPoints, pointsWithDirection);
 
                 //输出
                 blinds = new List<Polyline>();
@@ -110,7 +90,6 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 {
                     blinds.Add((Polyline)ucr);
                 }
-
                 //善后
                 mPolygon.UpgradeOpen();
                 mPolygon.Erase();
@@ -123,13 +102,12 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 //显示布置点及方向
                 foreach(var dir in pointsWithDirection)
                 {
+                    ShowInfo.ShowPointAsO(dir.Key, 130, 200);
                     ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
                 }
                 //显示盲区
                 ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
-#endif
-
-            }
+#endif            }
         }
     }
 }

@@ -17,12 +17,11 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <summary>
         /// 删点测试的预先操作，排除极大可能不会被删除的点
         /// </summary>
-        /// <param name="ht">记录点是否被删</param>
+        /// <param name="ht">ht<Point3d, int>:0要删除的点，1需要进行删除测试的点，2"孤独点"不需要进行删除测试的点</param>
         /// <param name="points"></param>
         /// <param name="radius"></param>
         public static void ReducePoints(Hashtable ht, List<Point3d> points, double radius)
         {
-            //ht<Point3d, int>:0要删除的点，1需要进行删除测试的点，2"孤独点"不需要进行删除测试的点
             int cntNear, cntMiddle;
             double distence;
             int middleCmp = radius < 3300 ? 10 : 1;//20 : 2//越小越准确：两个值至少为1：1
@@ -56,10 +55,10 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         }
 
         /// <summary>
-        /// 删点的核心操作，尝试依次删除点集中的点
+        /// 删点，尝试依次删除点集中的点
         /// </summary>
         /// <param name="mPolygon"></param>
-        /// <param name="ht"></param>
+        /// <param name="ht">ht<Point3d, int>:0要删除的点，1需要进行删除测试的点，2"孤独点"不需要进行删除测试的点</param>
         /// <param name="points"></param>
         /// <param name="radius"></param>
         /// <param name="equipmentType"></param>
@@ -94,7 +93,6 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                     }
                     if (flag == true)
                     {
-                        //ShowPointAsX(pt, 1);
                         continue;
                     }
                     ht[pt] = 1;
@@ -105,7 +103,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <summary>
         /// 获取哈希表中不能被删除的点
         /// </summary>
-        /// <param name="ht"></param>
+        /// <param name="ht">ht<Point3d, int>:0要删除的点，1需要进行删除测试的点，2"孤独点"不需要进行删除测试的点</param>
         /// <returns></returns>
         public static List<Point3d> SummaryPoints(Hashtable ht)
         {
@@ -117,7 +115,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                     ////用O显示被优化的点
                     //if ((int)x.Value == 2)
                     //{
-                    //    ShowInfo.ShowPointAsX((Point3d)x.Key, 1, 300);//----------------------------
+                    //    ShowInfo.ShowPointAsX((Point3d)x.Key, 1, 300);
                     //}
                     points.Add((Point3d)x.Key);
                 }
@@ -126,4 +124,3 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         }
     }
 }
-

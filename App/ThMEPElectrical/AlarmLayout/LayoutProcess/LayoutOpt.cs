@@ -13,12 +13,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPElectrical.Broadcast.Service;
 using System.Collections.Generic;
 using System.Collections;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Overlay.Snap;
-using NetTopologySuite.Operation.Overlay;
 using Dreambuild.AutoCAD;
-using ThMEPElectrical.AlarmSensorLayout.Method;
-using NetTopologySuite.Operation.OverlayNG;
 using ThMEPElectrical.AlarmLayout.Utils;
 using ThMEPElectrical.AlarmSensorLayout.Data;
 using ThCADExtension;
@@ -27,30 +22,26 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
 {
     class LayoutOpt
     {
-        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, AcadDatabase acdb, BlindType equipmentType)//, Dictionary<Point3d, Vector3d> pointsWithDirection)
+        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb)
         {
-            //显示中心线
-            //CenterLineSimplify.ShowCenterLine(mPolygon, acdb);
-
-            //简化中心线
-            //CenterLineSimplify.CLSimplify(mPolygon);//, acdb);
-
-            //1、初选：初步筛选设备布置点
-            List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius);
-
-            //2、加点：加入点以补全未覆盖区域，此步会产生多余的点
-            List<Point3d> sndPoints = SndStep(mPolygon, fstPoints, pointsInLayoutList, radius, equipmentType);
-            //ShowInfo.ShowPoints(sndHalfPoints, 'O', 130, 200);
-
-            //由于第二步加点策略有缺陷（超大区域加不上点放弃策略），可以在中间加一个步骤专门处理剩余的超大区域
-            //若将此步骤放入第二步会导致时间复杂度增加，因此单独出来，对总复杂度没影响（常数+1）
-            //2.5、加点：对于大区域，以radius拆分区域，每个点找一个最近的pointsInLayoutList加入到sndPoints，最后sndPoints.Distinct();
-            List<Point3d> sndHalfPoints = SndHalfStep(mPolygon, sndPoints, pointsInLayoutList, radius, equipmentType);
-            //ShowInfo.ShowPoints(sndHalfPoints, 'O', 130, 240);
-
-            //3、删点：删除多余的不需要的点（总覆盖面积不变）
-            List<Point3d> thdPoints = ThdStep(mPolygon, sndHalfPoints, radius, equipmentType);
             
+            List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius); //1、初选
+
+            List<Point3d> sndPoints = SndStep(mPolygon, fstPoints, pointsInLayoutList, radius, equipmentType); //2、加点
+
+            List<Point3d> sndHalfPoints = SndHalfStep(mPolygon, sndPoints, pointsInLayoutList, radius, equipmentType); //2.5、加点：针对大盲区
+
+            List<Point3d> ans = new List<Point3d>();//2.7、针对一个房间只布置一个点
+            if (sndHalfPoints.Count == 1)
+            {
+                ans.Add(PointsDealer.GetNearestPoint(mPolygon.ToNTSPolygon().Centroid.ToAcGePoint3d(), pointsInLayoutList));
+                return ans;
+            }
+           
+            List<Point3d> fourPoints = FourStep(mPolygon, sndHalfPoints, pointsInLayoutList, radius, equipmentType); //4、移点：修补需求：将一些点更加靠近中心线
+
+            List<Point3d> thdPoints = ThdStep(mPolygon, fourPoints, radius, equipmentType); //3、删点
+
             return thdPoints;
         }
 
@@ -105,7 +96,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                 ht.Add(pt, false);
             }
             bool flag;
-            double adaptRadius = radius * AdaptRadius(radius);//----------------------------
+            double adaptRadius = radius * AdaptRadius(radius);
             foreach (Point3d pt in pointsInAreas)
             {
                 flag = false;
@@ -140,16 +131,16 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="pointsInLayoutList">可能布置的点位</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>加电后的点集合</returns>
-        public static List<Point3d> SndStep(MPolygon mPolygon, List<Point3d> fstPoints, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        public static List<Point3d> SndStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
         {
             int loopCnt = 0;
             bool flag = true;
-            while (flag && loopCnt < 20)
+            while (flag && loopCnt < 200)
             {
                 ++loopCnt;
                 flag = false;
                 //当前未覆盖区域集合
-                NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, fstPoints, radius, equipmentType);
+                NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType);
 
                 //在未覆盖区域附近加点
                 foreach (Entity obj in unCoverRegion.ToDbCollection())
@@ -165,15 +156,12 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                             flag = false;
                             continue;
                         }
-                        //if (fstPoints.Contains(pt1))
-                        //{
-                        //    break;
-                        //}
-                        fstPoints.Add(pt1);
+                        points.Add(pt1);
                     }
                 }
             }
-            return fstPoints.Distinct().ToList();
+            points = points.Distinct().ToList();
+            return points;
         }
 
         /// <summary>
@@ -184,11 +172,10 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="pointsInLayoutList"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static List<Point3d> SndHalfStep(MPolygon mPolygon, List<Point3d> sndPoints, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        public static List<Point3d> SndHalfStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
         {
             //1、获得所有大面积未覆盖区域（多个）中所有的未覆盖区域中所有的未覆盖区域中的点（统一处理）
-            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, sndPoints, radius, equipmentType);
-
+            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType);
             List<Point3d> pointsInUncoverAreas = new List<Point3d>();
             foreach (Entity obj in unCoverRegion.ToDbCollection())
             {
@@ -197,7 +184,6 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                     List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(obj, 400);//-------------------
                     foreach (Point3d pt in tmpPoints)
                     {
-                        //ShowInfo.ShowPointAsX(pt, 130);
                         pointsInUncoverAreas.Add(pt);
                     }
                 }
@@ -205,10 +191,10 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
             //2、找到以上获得的点（radius或者radius / 2）最近的可布置点
             foreach (Point3d pt in pointsInUncoverAreas)
             {
-                //ShowPointAsO(GetNearestPoint(pt, pointsInLayoutList), 130);
-                sndPoints.Add(PointsDealer.GetNearestPoint(pt, pointsInLayoutList));
+                points.Add(PointsDealer.GetNearestPoint(pt, pointsInLayoutList));
             }
-            return sndPoints.Distinct().ToList();
+            points = points.Distinct().ToList();
+            return points;
         }
 
         /// <summary>
@@ -218,17 +204,49 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="sndHalfPoints">第二次操作后的点集</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>返回删除后的点集</returns>
-        public static List<Point3d> ThdStep(MPolygon mPolygon, List<Point3d> sndHalfPoints, double radius,BlindType equipmentType)
+        public static List<Point3d> ThdStep(MPolygon mPolygon, List<Point3d> points, double radius,BlindType equipmentType)
         {
             Hashtable ht = new Hashtable();
-            //PRE PROCESS
-            DeletePoints.ReducePoints(ht, sndHalfPoints, radius);
-
-            //CORE PROCESS
-            DeletePoints.RemovePoints(mPolygon, ht, sndHalfPoints, radius, equipmentType);
-
-            //AFTER PROCESS
+            DeletePoints.ReducePoints(ht, points, radius);
+            DeletePoints.RemovePoints(mPolygon, ht, points, radius, equipmentType);
             return DeletePoints.SummaryPoints(ht);
+        }
+
+        /// <summary>
+        /// 移动布置好的点位，使之尽量靠近中间线。
+        /// </summary>
+        /// <param name="mPolygon"></param>
+        /// <param name="points"></param>
+        /// <param name="radius"></param>
+        /// <param name="equipmentType"></param>
+        /// <returns></returns>
+        public static List<Point3d> FourStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        {
+            double preBlandArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
+            List<Point3d> centerPts = CenterLineSimplify.CLSimplifyPts(mPolygon);
+            //key原始点，value原始点最近的中心点
+            Dictionary<Point3d, Point3d> pt2center = new Dictionary<Point3d, Point3d>();
+            foreach (var pt in points)
+            {
+                pt2center[pt] = PointsDealer.GetNearestPoint(pt, centerPts);
+            }
+            //key原始点，value原始点最近的中心点最近的可布置点
+            Dictionary<Point3d, Point3d> pt2move = new Dictionary<Point3d, Point3d>();
+            foreach(var node in pt2center)
+            {
+                pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, pointsInLayoutList);
+            }
+            foreach(var node in pt2move)
+            {
+                points.Remove(node.Key);
+                points.Add(node.Value);
+                double curBlandArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
+                if (Math.Abs(preBlandArea - curBlandArea) > 500000)
+                {
+                    points.Add(node.Key);
+                }
+            }
+            return points;
         }
 
         /// <summary>
@@ -238,7 +256,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="holeList"></param>
         /// <param name="points"></param>
         /// <param name="pointsWithDirection"></param>
-        public static void FourStep(Polyline frame, List<Polyline> holeList, List<Point3d> points, Dictionary<Point3d, Vector3d> pointsWithDirection)
+        public static void PointsWithDirection(Polyline frame, List<Polyline> holeList, List<Point3d> points, Dictionary<Point3d, Vector3d> pointsWithDirection)
         {
             var lines = new List<Line>();
             var dbObjs = new DBObjectCollection();
@@ -254,8 +272,6 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                     if (line.StartPoint != line.EndPoint)
                     {
                         lines.Add(line);
-                        //line.ColorIndex = 130;//显示边界线
-                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                     }
                 }
                 else if (curve is Polyline poly)
@@ -267,7 +283,6 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                     lines.AddRange(circle.Tessellate(100.0).ToLines());
                 }
             }
-
             foreach (var pt in points)
             {
                 var closestLine = lines.OrderBy(o => o.GetClosestPointTo(pt, false).DistanceTo(pt)).First();

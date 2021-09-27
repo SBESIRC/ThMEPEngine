@@ -1,29 +1,14 @@
-﻿using AcHelper.Commands;
-using System;
+﻿using System;
 using System.Linq;
 using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
-using Autodesk.AutoCAD.ApplicationServices;
-using ThMEPElectrical.Broadcast.Service;
 using System.Collections.Generic;
-using System.Collections;
-using ThMEPEngineCore.Algorithm;
-using ThCADExtension;
-using ThMEPElectrical.Assistant;
-using Autodesk.AutoCAD.Runtime;
-using NFox.Collections;//树
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Overlay.Snap;
-using NetTopologySuite.Operation.Overlay;
 using Dreambuild.AutoCAD;
-using ThMEPElectrical.AlarmSensorLayout.Method;
-using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThMEPElectrical.AlarmLayout.Utils
 {
