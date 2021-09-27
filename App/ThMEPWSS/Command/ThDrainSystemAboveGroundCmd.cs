@@ -181,6 +181,13 @@ namespace ThMEPWSS.Command
                 var pipeConverter = RaisePipeConvert.ConvetPipeToBlock(livingHighestFloor.floorUid, _classifyResult.Where(c => converterTypes.Any(x => x == c.enumEquipmentType)).ToList());
                 if (null != pipeConverter && pipeConverter.Count > 0) 
                     createBlockInfos.AddRange(pipeConverter);
+                //PL和TL增加连线
+                var pipeConnectPipe =new PipeConnectPipe(pipeConverter.Where(c=>!string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
+                    pipeConverter.Where(c=> !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
+                var connectLines = pipeConnectPipe.GetConnectLines();
+                if (connectLines.Count > 0)
+                    createBasicElems.AddRange(connectLines);
+
 
                 //阳台逻辑
                 var balconyRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Balcony).ToList();

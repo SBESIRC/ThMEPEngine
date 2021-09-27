@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\PipeConnectPipe.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLabelLayoutDirection.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\ToiletRoomCleanout.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThOtherLineRecognitionEngine.cs" />
