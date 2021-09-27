@@ -329,17 +329,7 @@ namespace ThMEPWSS.Hydrant.Service
 
         private DBObjectCollection RemoveRepeatedGeometry(DBObjectCollection objs)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return spatialIndex.Geometries.Values.ToCollection();
-        }
-
-        private List<DBPoint> RemoveRepeatedPoints(List<DBPoint> dbPoints, double tolerance = 1.0)
-        {
-            var kdTree = new ThCADCoreNTSKdTree(tolerance);
-            dbPoints.ForEach(p => kdTree.InsertPoint(p.Position));
-            return kdTree.Nodes.Keys
-                .Select(k => new DBPoint(k.Coordinate.ToAcGePoint3d()))
-                .ToList();
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }
     }
 #endif

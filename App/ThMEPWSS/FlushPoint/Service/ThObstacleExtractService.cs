@@ -76,7 +76,10 @@ namespace ThMEPWSS.FlushPoint.Service
                 {
                     var objs = BlkEntityDic[keys[i]].ToCollection();
                     transformer.Transform(objs);
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(objs);
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs)
+                    {
+                        AllowDuplicate = true,
+                    };
                     objs = spatialIndex.SelectCrossingPolygon(newPts);
                     transformer.Reset(objs);
                     BlkEntityDic[keys[i]] = objs.Cast<Curve>().ToList();

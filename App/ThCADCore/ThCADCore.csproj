@@ -40,6 +40,7 @@
     <Compile Include="NTS\ThCADCoreNTSDbExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbObjCollectionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSGeometryFilter.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometrySmoother.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSInscribedCircle.cs" />
@@ -59,7 +60,6 @@
     <Compile Include="NTS\ThCADCoreNTSRelateExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSService.cs" />
     <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />
-    <Compile Include="NTS\ThCADCoreNTSSpatialIndexEx.cs" />
     <Compile Include="NTS\ThCADCoreNTSSpatialIndex.cs" />
     <Compile Include="NTS\ThCADCoreNTSTriangleExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSTriangulate.cs" />

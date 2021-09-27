@@ -167,8 +167,8 @@ namespace ThMEPWSS.Uitl.ShadowIn2D
                 }
             }
 
-            var si = new ThCADCoreNTSSpatialIndex(rayLine.ToCollection());
-            return si.Geometries.Values.Cast<Line>().ToList();
+            var results = ThCADCoreNTSGeometryFilter.GeometryEquality(rayLine.ToCollection());
+            return results.OfType<Line>().ToList();
         } 
 
         private List<Point3d> AllVertices(List<Polyline> polylines)

@@ -68,7 +68,10 @@ namespace ThMEPEngineCore.Temp
             TempSpaces = TempSpaces.OrderBy(o => o.Area).ToList();
             TempSpaces.ForEach(o =>
             {
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(texts.ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(texts.ToCollection())
+                {
+                    AllowDuplicate = true,
+                };
                 var objs = spatialIndex.SelectCrossingPolygon(o.Outline);
                 var filters =objs.Cast<Entity>().Where(t =>
                 {

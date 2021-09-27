@@ -64,8 +64,8 @@ namespace ThMEPWSS.FlushPoint.Data
         private void DuplicatedRemove()
         {
             ParkingStalls = ParkingStalls.Distinct().ToList();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(ParkingStalls.ToCollection());
-            ParkingStalls = spatialIndex.Geometries.Values.ToCollection().Cast<Curve>().ToList();
+            var results = ThCADCoreNTSGeometryFilter.GeometryEquality(ParkingStalls.ToCollection());
+            ParkingStalls = results.OfType<Curve>().ToList();
         }
 
         public override List<ThGeometry> BuildGeometries()

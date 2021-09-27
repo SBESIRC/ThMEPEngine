@@ -206,9 +206,8 @@ namespace ThMEPWSS.FlushPoint.Data
 
         private void DuplicatedRemove(List<Entity> entities)
         {
-            entities = entities.Distinct().ToList();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
-            entities = spatialIndex.Geometries.Values.ToCollection().Cast<Entity>().ToList();
+            var results = ThCADCoreNTSGeometryFilter.GeometryEquality(entities.ToCollection());
+            entities = results.OfType<Entity>().ToList();
         }
 
         private Curve Tesslate(Entity curve,double tesslateLength =100.0)

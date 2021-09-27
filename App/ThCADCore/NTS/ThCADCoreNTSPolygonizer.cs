@@ -13,15 +13,10 @@ namespace ThCADCore.NTS
     {
         public static ICollection<Geometry> Polygonize(this DBObjectCollection curves)
         {
-            // 空间索引会过滤几何意义上“完全重叠”的图形
-            // 对于几何意义上"完全重叠"的图形，Polygonizer会失败
-            // 这里正好借用空间索引的特性，来解决Polygonizer会失败的问题
-            using (var si = new ThCADCoreNTSSpatialIndex(curves))
-            {
-                var polygonizer = new Polygonizer();
-                polygonizer.Add(si.Geometries.Values.Select(o => o).ToCollection().ToNTSNodedLineStrings());
-                return polygonizer.GetPolygons();
-            }
+            var polygonizer = new Polygonizer();
+            var dbObjs = ThCADCoreNTSGeometryFilter.GeometryEquality(curves);
+            polygonizer.Add(dbObjs.ToNTSNodedLineStrings());
+            return polygonizer.GetPolygons();
         }
 
         public static ICollection<Geometry> Polygonize(this MultiLineString lineStrings)

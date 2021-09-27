@@ -108,8 +108,7 @@ namespace ThMEPWSS.Hydrant.Service
         }
         private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
         {
-            var sptialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return sptialIndex.Geometries.Values.ToCollection();
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }     
         private DBObjectCollection ClearZeroPolygon(DBObjectCollection objs)
         {

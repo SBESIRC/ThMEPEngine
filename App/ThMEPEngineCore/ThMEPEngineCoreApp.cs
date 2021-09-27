@@ -292,7 +292,10 @@ namespace ThMEPEngineCore
                         engine2.Extract(acadDatabase.Database);
                         engine2.Results.ForEach(o => results.Add(o.Geometry));
                     }
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(results);
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(results)
+                    {
+                        AllowDuplicate = true,
+                    };
                     spatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
@@ -378,7 +381,10 @@ namespace ThMEPEngineCore
                     var engine = new ThDB3ArchWallExtractionEngine();
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(engine.Results.Select(o => o.Geometry).ToCollection())
+                    {
+                        AllowDuplicate = true,
+                    };
                     foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
                     {
                         results.Add(filterObj as Entity);
@@ -406,7 +412,10 @@ namespace ThMEPEngineCore
                 var engine = new ThDB3CurtainWallExtractionEngine();
                 engine.Extract(acadDatabase.Database);
                 var results = new DBObjectCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(engine.Results.Select(o => o.Geometry).ToCollection())
+                {
+                    AllowDuplicate = true,
+                };
                 foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
                     results.Add(filterObj as Entity);

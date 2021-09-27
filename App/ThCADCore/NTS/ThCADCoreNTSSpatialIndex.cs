@@ -1,7 +1,6 @@
 ﻿using System;
 using NFox.Cad;
 using DotNetARX;
-using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
@@ -20,13 +19,13 @@ namespace ThCADCore.NTS
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<Geometry> Engine { get; set; }
-        public Dictionary<Geometry, DBObject> Geometries { get; set; }
+        public bool AllowDuplicate { get; set; }
+        private Dictionary<DBObject, Geometry> Geometries { get; set; }
+        private Lookup<Geometry, DBObject> GeometryLookup { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
-            Geometries = new Dictionary<Geometry, DBObject>();
-            Update(objs, new DBObjectCollection());
+            Reset(objs);
         }
-
         public void Dispose()
         {
             //
@@ -57,7 +56,7 @@ namespace ThCADCore.NTS
             var geometry = ToNTSPolygon(entity);
             var queriedObjs = Query(geometry.EnvelopeInternal);
 
-            if(precisely == false)
+            if (precisely == false)
                 return queriedObjs.Count > 0;
 
             var preparedGeometry = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry);
@@ -97,7 +96,7 @@ namespace ThCADCore.NTS
                 else if (obj is MPolygon mPolygon)
                 {
                     return mPolygon.ToNTSPolygon();
-                }              
+                }
                 else if (obj is Entity entity)
                 {
                     try
@@ -144,22 +143,37 @@ namespace ThCADCore.NTS
         public void Update(DBObjectCollection adds, DBObjectCollection removals)
         {
             // 添加新的对象
-            adds.Cast<DBObject>().ForEachDbObject(o =>
+            adds.OfType<DBObject>().ForEach(o =>
             {
-                var geometry = ToNTSGeometry(o);
-                if (!Geometries.Keys.Contains(geometry))
+                if (!Geometries.ContainsKey(o))
                 {
-                    Geometries.Add(geometry, o);
+                    Geometries[o] = ToNTSGeometry(o);
                 }
             });
+
             // 移除删除对象
-            Geometries.RemoveAll((k, v) => removals.Contains(v));
+            removals.OfType<DBObject>().ForEach(o =>
+            {
+                if (Geometries.ContainsKey(o))
+                {
+                    Geometries.Remove(o);
+                }
+            });
 
             // 创建新的索引
             Engine = new STRtree<Geometry>();
-            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
+            GeometryLookup = (Lookup<Geometry, DBObject>)Geometries.ToLookup(p => p.Value, p => p.Key);
+            GeometryLookup.Select(o => o.Key).ForEach(o => Engine.Insert(o.EnvelopeInternal, o));
         }
 
+        /// <summary>
+        /// 重置索引
+        /// </summary>
+        public void Reset(DBObjectCollection objs)
+        {
+            Geometries = new Dictionary<DBObject, Geometry>();
+            Update(objs, new DBObjectCollection());
+        }
 
         /// <summary>
         /// Crossing selection
@@ -223,40 +237,54 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectAll()
         {
             var objs = new DBObjectCollection();
-            foreach (var item in Geometries.Values)
+            GeometryLookup.ForEach(o =>
             {
-                objs.Add(item);
-            }
+                if (AllowDuplicate)
+                {
+                    o.ForEach(e => objs.Add(e));
+                }
+                else
+                {
+                    objs.Add(o.First());
+                }
+            });
             return objs;
         }
 
         public void AddTag(DBObject obj, object tag)
         {
-            if (Geometries.ContainsValue(obj))
+            if (Geometries.ContainsKey(obj))
             {
-                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
+                Geometries[obj].UserData = tag;
             }
         }
 
         public object Tag(DBObject obj)
         {
-            if (!Geometries.ContainsValue(obj))
+            if (Geometries.ContainsKey(obj))
             {
-                return null;
+                return Geometries[obj].UserData;
             }
-            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
+            return null;
         }
 
         public DBObjectCollection Query(Envelope envelope)
         {
             var objs = new DBObjectCollection();
-            foreach (var geometry in Engine.Query(envelope))
-            {
-                if (Geometries.ContainsKey(geometry))
+            var results = Engine.Query(envelope).ToList();
+            GeometryLookup
+                .Where(o => results.Contains(o.Key))
+                .ForEach(o =>
                 {
-                    objs.Add(Geometries[geometry]);
-                }
-            }
+                    if (AllowDuplicate)
+                    {
+                        o.ForEach(e => objs.Add(e));
+                    }
+                    else
+                    {
+                        objs.Add(o.First());
+                    }
+                });
             return objs;
         }
 
@@ -267,19 +295,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection NearestNeighbours(Curve curve, int num)
         {
-            var geometry = ToNTSGeometry(curve);
-            var neighbours = Engine.NearestNeighbour(
-                geometry.EnvelopeInternal,
-                geometry,
-                new GeometryItemDistance(),
-                num)
-                .Where(o => !o.EqualsExact(geometry));
-            var objs = new DBObjectCollection();
-            foreach (var neighbour in neighbours)
-            {
-                objs.Add(Geometries[neighbour]);
-            }
-            return objs;
+            return NearestGeometries(ToNTSGeometry(curve), num);
         }
 
         /// <summary>
@@ -289,18 +305,32 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection NearestNeighbours(Point3d point, int num)
         {
-            var geometry = point.ToNTSPoint();
+            return NearestGeometries(point.ToNTSPoint(), num);
+        }
+
+        private DBObjectCollection NearestGeometries(Geometry geometry, int k)
+        {
             var neighbours = Engine.NearestNeighbour(
                 geometry.EnvelopeInternal,
                 geometry,
                 new GeometryItemDistance(),
-                num)
-                .Where(o => !o.EqualsExact(geometry));
+                k)
+                .Where(o => !o.EqualsExact(geometry))
+                .ToList();
             var objs = new DBObjectCollection();
-            foreach (var neighbour in neighbours)
-            {
-                objs.Add(Geometries[neighbour]);
-            }
+            GeometryLookup
+                .Where(o => neighbours.Contains(o.Key))
+                .ForEach(o =>
+                {
+                    if (AllowDuplicate)
+                    {
+                        o.ForEach(e => objs.Add(e));
+                    }
+                    else
+                    {
+                        objs.Add(o.First());
+                    }
+                });
             return objs;
         }
     }
