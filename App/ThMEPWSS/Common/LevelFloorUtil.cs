@@ -85,7 +85,7 @@ namespace ThMEPWSS.Common
                     continue;
                 var lineStartPoint = origin + _yAxis.MultiplyBy(i * _floorSpace);
                 var lineEndPoint = lineStartPoint + _xAxis.MultiplyBy(_floorLineLength);
-                AddLevlBlock(database, lineStartPoint, floor.Elevation);
+                AddLevlBlock(database, lineStartPoint, floor.ShowElevation);
                 AddLevelLine(database,lineStartPoint,lineEndPoint);
                 AddLevelNumText(database,lineStartPoint, floor.LevelName);
             }
@@ -126,22 +126,22 @@ namespace ThMEPWSS.Common
                 
             }
         }
-        void AddLevlBlock(Database database,Point3d levelLineStartPoint,double elevation) 
+        void AddLevlBlock(Database database,Point3d levelLineStartPoint,string elevation) 
         {
             var blockCreatePoint = levelLineStartPoint + _xAxis.MultiplyBy(_levelDistanceToStart);
             
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                var attrs = new Dictionary<string, string>();
+                if(!string.IsNullOrEmpty(elevation))
+                    attrs.Add("标高", elevation.ToString());
                 var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                           "W-WSUP-NOTE",
                           "标高",
                           blockCreatePoint,
                           new Scale3d(0),
                           GetRotation(),
-                          new Dictionary<string,string>());
-                if (null == id || !id.IsValid)
-                    return;
-                id.SetDynBlockValue("标高", elevation);
+                          attrs);
             }
         }
         void LoadBlockLayerToDocument(Database database)
@@ -191,6 +191,7 @@ namespace ThMEPWSS.Common
     {
         public int LevelNum { get;}
         public double Elevation { get; set; }
+        public string ShowElevation { get; set; }
         public string LevelName { get; set; }
         public LevelFloor(int levelNum,double elevation,string levelName) 
         {

@@ -270,7 +270,7 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     floorHeight = 0;
                 }
-                if (dic.ContainsKey(floor))
+                else if (dic.ContainsKey(floor))
                 {
                     floorHeight += dic[floor];
                 }
@@ -279,7 +279,7 @@ namespace ThMEPWSS.Pipe.Model
                     floorHeight += _GeneralFloor;
 
                 }
-                floorHeightDic.Add(Convert.ToString(floor), (floorHeight / 1000.0).ToString("0.00"));
+                floorHeightDic.Add(Convert.ToString(floor),(floor==1? "±" : "")+ (floorHeight / 1000.0).ToString("0.00"));
             }
 
             return floorHeightDic;
