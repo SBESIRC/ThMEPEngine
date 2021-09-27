@@ -48,7 +48,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 MPolygon mPolygonShell = objs.BuildMPolygon();
                 //Get Can not Layout Area List
                 List<Polyline> nonDeployableArea = new List<Polyline>();
-                
+
                 if (wallList.Count != 0)
                 {
                     foreach (var pl in wallList)
@@ -86,7 +86,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 //输出
                 blinds = new List<Polyline>();
                 NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, layoutPoints, radius, equipmentType);
-                foreach(var ucr in unCoverRegion.ToDbCollection())
+                foreach (var ucr in unCoverRegion.ToDbCollection())
                 {
                     blinds.Add((Polyline)ucr);
                 }
@@ -100,14 +100,15 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
 
                 //显示布置点及方向
-                foreach(var dir in pointsWithDirection)
+                foreach (var dir in pointsWithDirection)
                 {
                     ShowInfo.ShowPointAsO(dir.Key, 130, 200);
                     ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
                 }
                 //显示盲区
                 ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
-#endif            }
+#endif      
+            }
         }
     }
 }
