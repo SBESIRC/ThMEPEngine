@@ -45,6 +45,7 @@ namespace ThMEPHVAC.CAD
         public Tolerance point_tor;
         public Point3d move_srt_p;
         public Point3d fan_break_p;
+        public List<Line> aux_lines;             // 风机进出口到起始搜索点的线段
         public HashSet<Line> room_lines;
         public HashSet<Line> not_room_lines;
         public List<TextAlignLine> text_alignment;
@@ -72,6 +73,7 @@ namespace ThMEPHVAC.CAD
             Move_to_zero(fan.FanInletBasePoint, fan.FanOutletBasePoint, center_line, wall_lines, out Point3d room_p, out Point3d not_room_p);
             Update_search_point(room_p, not_room_p, param, ref center_line, out Point3d i_room_p, out Point3d i_not_room_p, 
                                                                             out Line room_line, out Line not_room_line);
+            aux_lines = new List<Line>() { new Line(room_p, i_room_p) , new Line(not_room_p, i_not_room_p) };
             start_dir_vec = ThMEPHVACService.Get_edge_direction(room_line);
             spatial_index = new ThCADCoreNTSSpatialIndex(center_line);
             Get_duct_info(i_room_p, room_line, room_lines);
