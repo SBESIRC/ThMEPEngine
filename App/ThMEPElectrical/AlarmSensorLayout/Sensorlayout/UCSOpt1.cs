@@ -44,12 +44,12 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         {
             //生成区域
             var geom = boundary.ToNTSPolygon().Intersection(room);
-            if (geom is Polygon polygon)
+            if(geom is Polygon polygon)
                 area = polygon;
-            else if (geom is GeometryCollection geometrycollection)
+            else if(geom is GeometryCollection geometrycollection)
             {
                 Polygon tmpPoly = Polygon.Empty;
-                foreach (var poly in geometrycollection)
+                foreach(var poly in geometrycollection)
                 {
                     if (poly is Polygon && poly.Area > tmpPoly.Area)
                         tmpPoly = poly as Polygon;

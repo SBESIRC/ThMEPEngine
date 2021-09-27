@@ -26,7 +26,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Command
         //inputs
         public Polyline frame { get; set; }//房间外框线
         public List<Polyline> holeList { get; set; }//洞
-        public List<Polyline> layoutList { get; set; }//可布置区域
+        public List<MPolygon> layoutList { get; set; }//可布置区域
         public List<Polyline> wallList { get; set; } //墙
         public List<Polyline> columns { get; set; }//柱子
         public List<Polyline> prioritys { get; set; }//优先级更高点位，比如要躲避已布置好的区域
@@ -67,8 +67,8 @@ namespace ThMEPElectrical.AlarmSensorLayout.Command
                 //输出参数
                 blinds = sensorOpt.Blinds;
                 layoutPoints = sensorOpt.PlacePoints;
-                //ShowPoints();
-                //ShowBlind();
+                ShowPoints();
+                ShowBlind();
                 //ShowDetect();
             }
         }
@@ -100,38 +100,26 @@ namespace ThMEPElectrical.AlarmSensorLayout.Command
                 //}
             }
         }
-        //private void ShowDetect()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        foreach (var id in detect_List)
-        //        {
-        //            id.Erase();
-        //        }
-        //        detect_List.Clear();
-        //        foreach (var d in sensorOpt.Detect)
-        //        {
-        //            var dbDetect = d.ToDbMPolygon();
-        //            dbDetect.ColorIndex = 4;
-        //            var id = acadDatabase.ModelSpace.Add(dbDetect);
-        //            detect_List.Add(id);
-        //        }
-        //    }
-        //}
+        private void ShowDetect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var d in sensorOpt.Detect)
+                {
+                    var dbDetect = d.ToDbMPolygon();
+                    dbDetect.ColorIndex = 4;
+                    acadDatabase.ModelSpace.Add(dbDetect);
+                }
+            }
+        }
         private void ShowBlind()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                foreach (var id in blind_List)
-                {
-                    id.Erase();
-                }
-                blind_List.Clear();
                 foreach(var blind in blinds)
                 {
                     blind.ColorIndex = 1;
-                    var id = acadDatabase.ModelSpace.Add(blind);
-                    blind_List.Add(id);
+                    acadDatabase.ModelSpace.Add(blind);
                 }
             }
         }

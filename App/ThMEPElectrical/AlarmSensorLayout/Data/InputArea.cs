@@ -12,7 +12,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Data
     public class InputArea
     {
         public Polyline room { get; private set; }//房间区域
-        public List<Polyline> layout_area { get; private set; }//可布置区域
+        public List<MPolygon> layout_area { get; private set; }//可布置区域
         public List<Polyline> detect_area { get; private set; }//探测区域
         public List<Polyline> holes { get; private set; }//洞
         public List<Polyline> walls { get; private set; }//墙
@@ -20,7 +20,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Data
         public List<Polyline> prioritys { get; private set; }//更高级别的点位
         public Dictionary<Polyline, Vector3d> UCS { get; private set; }//UCS
         public InputArea(Polyline room,
-                         List<Polyline> layout_area,
+                         List<MPolygon> layout_area,
                          List<Polyline> holes = null, List<Polyline> walls = null, List<Polyline> columns = null, List<Polyline> prioritys = null,
                          List<Polyline> detect_area = null,
                          Dictionary<Polyline, Vector3d> UCS = null)

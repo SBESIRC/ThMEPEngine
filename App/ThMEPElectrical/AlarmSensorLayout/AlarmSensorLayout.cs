@@ -47,13 +47,13 @@ namespace ThMEPElectrical.AlarmSensorLayout
             room = inputArea.room.ToNTSPolygon();
             foreach(var hole in inputArea.holes)
             {
-                var geom = room.Difference(hole.ToNTSPolygon());
-                if (geom is Polygon polygon)
+                var geo = room.Difference(hole.ToNTSPolygon());
+                if (geo is Polygon polygon)
                     room = polygon;
-                else if (geom is GeometryCollection geometrycollection)
+                else if(geo is GeometryCollection collection)
                 {
                     Polygon tmpPoly = Polygon.Empty;
-                    foreach (var poly in geometrycollection)
+                    foreach (var poly in collection)
                     {
                         if (poly is Polygon && poly.Area > tmpPoly.Area)
                             tmpPoly = poly as Polygon;
@@ -61,15 +61,16 @@ namespace ThMEPElectrical.AlarmSensorLayout
                     room = tmpPoly;
                 }
             }
+                
             foreach(var wall in inputArea.walls)
             {
-                var geom = room.Difference(wall.ToNTSPolygon());
-                if (geom is Polygon polygon)
+                var geo = room.Difference(wall.ToNTSPolygon());
+                if (geo is Polygon polygon)
                     room = polygon;
-                else if (geom is GeometryCollection geometrycollection)
+                else if (geo is GeometryCollection collection)
                 {
                     Polygon tmpPoly = Polygon.Empty;
-                    foreach (var poly in geometrycollection)
+                    foreach (var poly in collection)
                     {
                         if (poly is Polygon && poly.Area > tmpPoly.Area)
                             tmpPoly = poly as Polygon;
@@ -79,13 +80,13 @@ namespace ThMEPElectrical.AlarmSensorLayout
             }
             foreach (var column in inputArea.columns)
             {
-                var geom = room.Difference(column.ToNTSPolygon());
-                if (geom is Polygon polygon)
+                var geo = room.Difference(column.ToNTSPolygon());
+                if (geo is Polygon polygon)
                     room = polygon;
-                else if (geom is GeometryCollection geometrycollection)
+                else if (geo is GeometryCollection collection)
                 {
                     Polygon tmpPoly = Polygon.Empty;
-                    foreach (var poly in geometrycollection)
+                    foreach (var poly in collection)
                     {
                         if (poly is Polygon && poly.Area > tmpPoly.Area)
                             tmpPoly = poly as Polygon;

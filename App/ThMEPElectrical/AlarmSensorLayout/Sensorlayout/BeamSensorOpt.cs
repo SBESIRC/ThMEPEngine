@@ -70,6 +70,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         //计算探测范围
         public void CalDetectArea()
         {
+            Detect.Clear();
             foreach (var p in Positions)
                 Detect.Add(DetectCalculator.CalculateDetect(p, room, Radius, IsDetectVisible));
         }

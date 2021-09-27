@@ -30,7 +30,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         /// </summary>
         /// <param name="polylines">可布置区域轮廓</param>
         /// <param name="frame">房间框线</param>
-        public void Compute(Polyline frame, List<Polyline> polylines)
+        public void Compute(Polyline frame, List<MPolygon> polylines)
         {
             layouts = new List<Layout>();
             for(int i=0;i<polylines.Count;i++)
@@ -138,17 +138,17 @@ namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
         public int ID;
         public int GroupID;
 
-        public Layout(Polyline poly,int index)
+        public Layout(MPolygon poly,int index)
         {
-            ent = poly;
+            ent = poly.ToNTSPolygon().Shell.ToDbPolyline();
             //var minRect = ent.OBB();
             //var dir = minRect.GetPoint3dAt(1) - minRect.GetPoint3dAt(0);
             var angle_list = new List<double>();
             var len_list = new List<double>();
 
-            for (int i=0;i<poly.NumberOfVertices-1;i++)
+            for (int i=0;i<ent.NumberOfVertices-1;i++)
             {
-                var dir = poly.GetPoint3dAt(i + 1) - poly.GetPoint3dAt(i);
+                var dir = ent.GetPoint3dAt(i + 1) - ent.GetPoint3dAt(i);
                 var tmpAngle = GetAngle(dir.X, dir.Y);
                 int maxIndex = -1;
                 for (int j=0;j<angle_list.Count;j++)
