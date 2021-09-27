@@ -1,0 +1,60 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.UI.uiFanLayoutMainWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    SizeToContent="Height"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI" xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
+                    mc:Ignorable="d" Width="212">
+    <Window.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="PSLists" Type ="sys:String">
+                <sys:String>1:50</sys:String>
+                <sys:String>1:100</sys:String>
+                <sys:String>1:150</sys:String>
+                <sys:String>1:200</sys:String>
+            </x:Array>
+            <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
+            <local1:FanLayoutIntToVisibilty x:Key="layoutVisibiltyConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="0,0,0,0" Height="Auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <Label x:Name="label" Content="风机类型："/>
+            <RadioButton x:Name="radBtnFanWAF" Height="25" VerticalContentAlignment="Center" Content="壁式轴流风机" Margin="15,0,0,0" 
+                         IsChecked="{Binding FanType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
+                         />
+            <RadioButton x:Name="radBtnFanWEXH" Height="25" VerticalContentAlignment="Center" Content="壁式排气扇" Margin="15,0,0,0"
+                         IsChecked="{Binding FanType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
+                         />
+            <RadioButton x:Name="radBtnFanCEXH" Height="25" VerticalContentAlignment="Center" Content="吊顶式排气扇" Margin="15,0,0,0"
+                         IsChecked="{Binding FanType,Converter={StaticResource layoutTypeConverter},ConverterParameter=2}"
+                         />
+            <Rectangle Margin="0,10,0,10" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <local:uiFanWAFWidget  Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=0}"/>
+            <local:uiFanWEXHWidget Height="Auto" Width="Auto"  Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=1}"></local:uiFanWEXHWidget>
+            <local:uiFanCEXHWidget Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=2}"></local:uiFanCEXHWidget>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="2">
+            <CheckBox x:Name="ckBoxInsertHole" Content="墙体留洞" Margin="4,0,0,0" IsChecked="{Binding IsInsertHole}"/>
+            <WrapPanel  Height="25" Orientation="Horizontal" VerticalAlignment="Bottom" >
+                <Label x:Name="label1" Content="出图比例："/>
+                <ComboBox x:Name="comBoxMapScale" Height="20" Width="80" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="1" SelectedValue="{Binding MapScale}"/>
+            </WrapPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="3" Margin="0,10,0,10">
+            <Button x:Name="btnInsertFan" Height="30" Content="插入" Margin="5,0,5,10" Click="btnInsertFan_Click"/>
+            <Button x:Name="btnExportMat" Height="30" Content="导出材料表" Margin="5,0,5,0" Click="btnExportMat_Click"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

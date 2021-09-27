@@ -41,10 +41,13 @@
     <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,6 +57,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThHvacCmdService.cs" />
@@ -61,6 +65,7 @@
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
+    <Compile Include="Convertor\FanLayoutIntToBool.cs" />
     <Compile Include="fmBypass.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,6 +99,21 @@
     <Compile Include="HvacUiApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThHvacUIService.cs" />
+    <Compile Include="UI\uiFanCEXHWidget.xaml.cs">
+      <DependentUpon>uiFanCEXHWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFanInfoWidget.xaml.cs">
+      <DependentUpon>uiFanInfoWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFanLayoutMainWidget.xaml.cs">
+      <DependentUpon>uiFanLayoutMainWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFanWAFWidget.xaml.cs">
+      <DependentUpon>uiFanWAFWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFanWEXHWidget.xaml.cs">
+      <DependentUpon>uiFanWEXHWidget.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -162,6 +182,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
@@ -193,6 +217,27 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Page Include="UI\uiFanCEXHWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFanInfoWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFanLayoutMainWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFanWAFWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFanWEXHWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

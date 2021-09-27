@@ -110,6 +110,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>

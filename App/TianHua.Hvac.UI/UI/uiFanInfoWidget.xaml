@@ -1,0 +1,67 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.UI.uiFanInfoWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI"
+             mc:Ignorable="d" Width="163.612" Height="311.876">
+    <Grid Margin="0,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <WrapPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label x:Name="label" Content="编号：" Margin="6,0,0,0"/>
+                <TextBox x:Name="textBox" Height="20" TextWrapping="Wrap" Text="BLD-150" Width="60" VerticalContentAlignment="Center"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label1" Content="*风量："/>
+                <TextBox x:Name="textBox1" Height="20" TextWrapping="Wrap" Text="150" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label2" Content="m3/h"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label21" Content="*全压："/>
+                <TextBox x:Name="textBox21" Height="20" TextWrapping="Wrap" Text="50" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label22" Content="Pa"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label3" Content="*功率："/>
+                <TextBox x:Name="textBox2" Height="20" TextWrapping="Wrap" Text="50" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label4" Content="W"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label5" Content="重量：" Margin="6,0,0,0"/>
+                <TextBox x:Name="textBox3" Height="20" TextWrapping="Wrap" Text="50" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label6" Content="kg"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label7" Content="*噪音："/>
+                <TextBox x:Name="textBox4" Height="20" TextWrapping="Wrap" Text="37" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label8" Content="dB(A)"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label9" Content="尺寸：" Margin="5,0,0,0"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label10" Content="*深：" Margin="10,0,0,0"/>
+                <TextBox x:Name="textBox5" Height="20" TextWrapping="Wrap" Text="175" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label11" Content="mm"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label12" Content="*长：" Margin="10,0,0,0"/>
+                <TextBox x:Name="textBox6" Height="20" TextWrapping="Wrap" Text="290" Width="60" VerticalContentAlignment="Center"/>
+                <Label x:Name="label13" Content="mm"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal">
+                <Label x:Name="label14" Content="*宽：" Margin="10,0,0,0"/>
+                <TextBox x:Name="textBox7" Height="20" TextWrapping="Wrap" Text="290" Width="60"/>
+                <Label x:Name="label15" Content="mm"/>
+            </WrapPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <Button x:Name="button" Content="确定" Height="25" Margin="5,0,5,0"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

@@ -1,0 +1,90 @@
+﻿<UserControl x:Class="TianHua.Hvac.UI.UI.uiFanCEXHWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI"
+             mc:Ignorable="d" d:DesignWidth="211" Height="385">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="3,0,0,0">
+            <WrapPanel Orientation="Horizontal"  Margin="0,0,0,5">
+                <Label x:Name="label" Content="风量序列："/>
+                <Button x:Name="btnAddFan" Content="新增" Height="20" Width="75" Click="btnAddFan_Click"/>
+            </WrapPanel>
+            <DataGrid BorderThickness="0" ColumnHeaderHeight="24"  MaxHeight="200" RowHeight="24" AllowDrop="False" HorizontalContentAlignment="Center">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="编号" Width="50" CanUserSort="False" IsReadOnly="True" CanUserResize="False">
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="风量" Width="60" CanUserSort="False" IsReadOnly="True" CanUserResize="False">
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="机外静压" Width="80" CanUserSort="False" IsReadOnly="True" CanUserResize="False">
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,0,0,0">
+            <Rectangle Margin="0,10,0,10" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+            <Label x:Name="label1" Content="生成其他："/>
+            <CheckBox x:Name="checkBox" Height="25" Content="风管及排风口" Margin="5,0,0,0"  VerticalContentAlignment="Center" />
+            <WrapPanel Orientation="Horizontal" Margin="20,0,0,0">
+                <Label x:Name="label2" Content="风管尺寸："/>
+                <TextBox x:Name="textBox" Height="20" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="160" Width="35"/>
+                <Label x:Name="label3" Content="x"/>
+                <TextBox x:Name="textBox1" Height="20" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="120" Width="35"/>
+                <Label x:Name="label4" Content="mm"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="115,0,0,0">
+                <Label x:Name="label5" Content="风速"/>
+                <Label x:Name="label6" Content="0.00 m/s"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="20,0,0,0">
+                <Label x:Name="label7" Content="底边标高："/>
+                <Label x:Name="label8" Content="h+"/>
+                <TextBox x:Name="textBox2" Height="20" TextWrapping="Wrap" Text="2.5" Width="70" VerticalContentAlignment="Center"/>
+                <Label x:Name="label9" Content="m"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="20,0,0,0">
+                <Label x:Name="label10" Content="排风百叶："/>
+                <TextBox x:Name="textBox3" Height="20" TextWrapping="Wrap" Text="300" Width="35" VerticalContentAlignment="Center"/>
+                <Label x:Name="label11" Content="x"/>
+                <TextBox x:Name="textBox4" Height="20" TextWrapping="Wrap" Text="150" Width="35" VerticalContentAlignment="Center"/>
+                <Label x:Name="label12" Content="mm"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="105,0,0,0">
+                <Label x:Name="label13" Content="风速："/>
+                <Label x:Name="label14" Content="0.00 m/s"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="5,0,0,0">
+                <CheckBox x:Name="checkBox1" Content="补风百叶：" Height="25" VerticalContentAlignment="Center" />
+                <TextBox x:Name="textBox5" Height="20" TextWrapping="Wrap" Text="300" Width="35"  VerticalContentAlignment="Center"/>
+                <Label x:Name="label15" Content="x"/>
+                <TextBox x:Name="textBox6" Height="20" TextWrapping="Wrap" Text="150" Width="35"  VerticalContentAlignment="Center"/>
+                <Label x:Name="label16" Content="mm"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" Margin="35,0,0,0">
+                <CheckBox x:Name="checkBox2" Content="防火阀" Height="30" VerticalContentAlignment="Center" Margin="0,0,15,0"/>
+                <Label x:Name="label17"  Height="25" VerticalContentAlignment="Center" Content="风速:"/>
+                <Label x:Name="label18"  Height="25" VerticalContentAlignment="Center" Content="0.00 m/s"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Vertical" Margin="30,0,0,0">
+                <Label x:Name="label19" Content="底边标高："/>
+                <WrapPanel Orientation="Horizontal" Margin="15,0,0,0">
+                    <WrapPanel Orientation="Vertical">
+                        <RadioButton x:Name="radioButton" Content="顶边贴梁底" Height="25" VerticalContentAlignment="Center"/>
+                        <RadioButton x:Name="radioButton1" Content="相对标高" Height="25" VerticalContentAlignment="Center"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <Label x:Name="label20" Content="h+"/>
+                        <TextBox x:Name="textBox7" Height="20" TextWrapping="Wrap" Text="2.5" Width="35" VerticalContentAlignment="Center"/>
+                        <Label x:Name="label21" Content="m"/>
+
+                    </WrapPanel>
+                </WrapPanel>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
