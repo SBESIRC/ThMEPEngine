@@ -30,6 +30,17 @@
   <ItemGroup>
     <Compile Include="Alg\ThMEPHAVCBounds.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
+    <Compile Include="FanLayout\Model\ThFanAirPortMarkModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanAirPortModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanCEXHModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanFireValveModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanHoleModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanWAFModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanWEXHModel.cs" />
+    <Compile Include="FanLayout\Service\ThFanLayoutDealService.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
     <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
