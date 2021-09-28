@@ -8,10 +8,9 @@ using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.OverlayNG;
 using ThCADCore.NTS;
-using ThMEPElectrical.AlarmSensorLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
-
-namespace ThMEPElectrical.AlarmSensorLayout
+namespace ThMEPEngineCore.AreaLayout.GridLayout
 {
     public abstract class AlarmSensorLayout
     {

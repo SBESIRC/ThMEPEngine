@@ -1,24 +1,18 @@
-﻿using AcHelper.Commands;
-using System;
+﻿using System;
 using System.Linq;
-using AcHelper;
 using Linq2Acad;
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using Autodesk.AutoCAD.ApplicationServices;
-using ThMEPElectrical.Broadcast.Service;
 using System.Collections.Generic;
 using System.Collections;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
-using ThMEPElectrical.AlarmLayout.Utils;
-using ThMEPElectrical.AlarmSensorLayout.Data;
 using ThCADExtension;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
-namespace ThMEPElectrical.AlarmLayout.LayoutProcess
+namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
     class LayoutOpt
     {

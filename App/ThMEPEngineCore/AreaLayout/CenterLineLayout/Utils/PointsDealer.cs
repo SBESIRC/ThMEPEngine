@@ -1,16 +1,14 @@
-﻿
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
+using System.Collections;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
-using System.Collections.Generic;
-using System.Collections;
-using ThMEPEngineCore.Algorithm;
-using ThCADCore.NTS;
 using ThCADExtension;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 
-
-namespace ThMEPElectrical.AlarmLayout.Utils
+namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
 {
     public static class PointsDealer
     {

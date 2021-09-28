@@ -10,10 +10,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPElectrical.AlarmSensorLayout.Data;
-using ThMEPElectrical.AlarmSensorLayout.Method;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Method;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
 {
     public class UCSOpt
     {

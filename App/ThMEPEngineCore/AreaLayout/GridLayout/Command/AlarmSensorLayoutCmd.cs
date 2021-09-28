@@ -10,13 +10,14 @@ using DotNetARX;
 using Linq2Acad;
 using NetTopologySuite.Geometries;
 using ThCADCore.NTS;
-using ThMEPElectrical.AlarmSensorLayout.Data;
-using ThMEPElectrical.AlarmSensorLayout.Sensorlayout;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Command
+
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
 {
-    class AlarmSensorLayoutCmd : ThMEPBaseCommand
+  public  class AlarmSensorLayoutCmd : ThMEPBaseCommand
     {
         private BeamSensorOpt sensorOpt;
         private List<ObjectId> pointId_list { get; set; } = new List<ObjectId>();

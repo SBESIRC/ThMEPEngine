@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Data
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
 {
     public enum BlindType
     {

@@ -11,12 +11,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPElectrical.AlarmSensorLayout.Data;
-using ThMEPElectrical.AlarmSensorLayout.Method;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Method;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
 {
-    class BeamSensorOpt : AlarmSensorLayout
+   public class BeamSensorOpt : AlarmSensorLayout
     {
         public List<UCSOpt1> UCSs { get; set; } = new List<UCSOpt1>();//UCS列表
         public List<Coordinate> Positions { get; set; } = new List<Coordinate>();//交点位置

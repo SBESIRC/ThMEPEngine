@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Method
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
 {
     public static class DetectCalculator
     {

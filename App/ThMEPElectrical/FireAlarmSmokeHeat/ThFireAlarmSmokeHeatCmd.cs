@@ -24,8 +24,8 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.GeoJSON;
 
-using ThMEPElectrical.AlarmSensorLayout.Command;
-using ThMEPElectrical.AlarmSensorLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
 using ThMEPElectrical.Staircase;
 
@@ -220,8 +220,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 ThFireAlarmInsertBlk.InsertBlock(heatResult.layoutPts.ToList(), _scale, layoutBlkNameHeat, ThFaCommon.blk_layer[layoutBlkNameHeat]); ;
                 ThFireAlarmInsertBlk.InsertBlock(smokeResult.layoutPts.ToList(), _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke]);
                 ThFireAlarmInsertBlk.InsertBlock(stairFireDetector, _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke]);
-
-
 
             }
         }

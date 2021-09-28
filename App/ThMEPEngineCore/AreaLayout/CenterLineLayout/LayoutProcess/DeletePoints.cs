@@ -1,16 +1,14 @@
-﻿
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+﻿using System.Collections.Generic;
+using System.Collections;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
-using System.Collections;
-using NetTopologySuite.Operation.Overlay.Snap;
 using Dreambuild.AutoCAD;
-using ThMEPElectrical.AlarmLayout.Utils;
-using ThMEPElectrical.AlarmSensorLayout.Data;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
-namespace ThMEPElectrical.AlarmLayout.LayoutProcess
+namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
     public static class DeletePoints
     {

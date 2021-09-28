@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Linq;
-using AcHelper;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using Linq2Acad;
 using DotNetARX;
-using System.Collections.Generic;
 using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
 
-namespace ThMEPElectrical.AlarmLayout.Utils
+namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
 {
     public static class ShowInfo
     {

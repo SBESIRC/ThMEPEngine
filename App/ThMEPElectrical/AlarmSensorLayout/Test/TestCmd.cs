@@ -10,11 +10,12 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
-using ThMEPElectrical.AlarmSensorLayout.Data;
-using ThMEPElectrical.AlarmSensorLayout.Command;
-using ThMEPElectrical.AlarmSensorLayout.Sensorlayout;
 using DotNetARX;
 using NetTopologySuite.Geometries;
+
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.AreaLayout.GridLayout.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Test
 {

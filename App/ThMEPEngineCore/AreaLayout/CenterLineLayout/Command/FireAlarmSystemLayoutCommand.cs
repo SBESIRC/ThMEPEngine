@@ -1,20 +1,20 @@
 ﻿using System.Linq;
-using Linq2Acad;
-using ThCADCore.NTS;
+using System.Collections;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
-using System.Collections;
-using ThMEPEngineCore.Command;
-using ThMEPElectrical.AlarmLayout.Utils;
-using ThMEPElectrical.AlarmLayout.LayoutProcess;
-using ThMEPElectrical.AlarmSensorLayout.Data;
 using NetTopologySuite.Operation.Overlay.Snap;
+using Linq2Acad;
+using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess;
 
-namespace ThMEPElectrical.AlarmLayout.Command
+namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 {
-    class FireAlarmSystemLayoutCommand : ThMEPBaseCommand
+    public class FireAlarmSystemLayoutCommand : ThMEPBaseCommand
     {
         //input
         public Polyline frame { get; set; }//房间外框线
@@ -55,12 +55,12 @@ namespace ThMEPElectrical.AlarmLayout.Command
                         nonDeployableArea.Add(pl);
                     }
                 }
-                if (layoutList.Count !=0)
+                if (layoutList.Count != 0)
                 {
-                    foreach (var layout in layoutList )
+                    foreach (var layout in layoutList)
                     {
                         var layoutHole = layout.Holes();
-                        nonDeployableArea.AddRange (layoutHole);
+                        nonDeployableArea.AddRange(layoutHole);
                         layoutHole.ForEach(x => objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), x.ToNTSPolygon()).ToDbCollection());
                     }
                 }

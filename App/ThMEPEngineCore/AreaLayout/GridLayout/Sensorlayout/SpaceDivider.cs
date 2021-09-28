@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Sensorlayout
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
 {
     /// <summary>
     /// 计算UCS及其方向

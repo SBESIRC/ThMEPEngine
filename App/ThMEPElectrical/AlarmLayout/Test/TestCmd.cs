@@ -12,8 +12,8 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Algorithm;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
-using ThMEPElectrical.AlarmLayout.Command;
-using ThMEPElectrical.AlarmSensorLayout.Data;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
 
 using ThMEPEngineCore.Command;
@@ -21,7 +21,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.GeoJSON;
 
-using ThMEPElectrical.AlarmSensorLayout.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
@@ -29,7 +29,7 @@ using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
 using ThMEPEngineCore.CAD;
-using ThMEPElectrical.AlarmLayout.Utils;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 
 namespace ThMEPElectrical.AlarmLayout.Test
 {

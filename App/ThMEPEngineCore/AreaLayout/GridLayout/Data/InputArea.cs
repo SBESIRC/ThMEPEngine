@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Geometries;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Data
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
 {
     public class InputArea
     {

@@ -7,7 +7,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Algorithm.Locate;
 using NetTopologySuite.Algorithm.Distance;
 
-namespace ThMEPElectrical.AlarmSensorLayout.Method
+namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
 {
     public static class FireAlarmUtils
     {
