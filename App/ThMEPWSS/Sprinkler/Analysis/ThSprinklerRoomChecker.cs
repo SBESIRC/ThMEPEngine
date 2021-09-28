@@ -1,13 +1,14 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Catel.Collections;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Service;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -18,21 +19,26 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var objs = Check(geometries, sprinklers, pline);
-            Present(objs);
+            if (objs.Count > 0) 
+            {
+                Present(objs);
+            }
         }
 
         private DBObjectCollection Check(List<ThGeometry> geometries, List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
         {
-            var outlines = new DBObjectCollection();
-            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o => outlines.Add(o.Outline));
+            var outlines = sprinklers.OfType<ThSprinkler>()
+                                     .Where(o => o.Category == Category)
+                                     .Where(o => pline.Contains(o.Position))
+                                     .Select(o => o.Outline)
+                                     .ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(outlines);
-
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
             {
                 if (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Room"))
                 {
-                    if(!pline.ToNTSPolygon().Contains(g.Boundary.ToNTSGeometry()))
+                    if(!pline.ToNTSPolygon().Intersects(g.Boundary.ToNTSGeometry()))
                     {
                         return;
                     }
@@ -55,7 +61,6 @@ namespace ThMEPWSS.Sprinkler.Analysis
             });
             return objs;
         }
-
 
         private void Present(DBObjectCollection objs)
         {

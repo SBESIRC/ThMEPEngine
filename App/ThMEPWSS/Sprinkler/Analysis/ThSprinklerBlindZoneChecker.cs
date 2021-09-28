@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using Catel.Linq;
 using System.Linq;
@@ -18,25 +19,24 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var distanceCheck = DistanceCheck(sprinklers, pline);
             if (distanceCheck.Count > 0) 
             {
-                var results = BuildingCheck(geometries, distanceCheck);
-                Present(results);
+                var results = BuildingCheck(geometries, distanceCheck, pline);
+                if (results.Count > 0)
+                {
+                    Present(results);
+                }
             }
         }
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
         {
             var nodeCapacity = 5;
-            var sprinklersTidal = sprinklers
+            var objs = sprinklers
                 .OfType<ThSprinkler>()
-                .Where(o => o.Category == Category);
-            var objs = new DBObjectCollection();
-            sprinklersTidal.ForEach(o =>
-            {
-                objs.Add(new DBPoint(o.Position));
-            });
-            var pointsSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var pointsFilter = pointsSpatialIndex.SelectCrossingPolygon(pline);
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(pointsFilter);
+                .Where(o => o.Category == Category)
+                .Where(o => pline.Contains(o.Position))
+                .Select(o => new DBPoint(o.Position))
+                .ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var results = new HashSet<Line>();
             var num = spatialIndex.SelectAll().Count;
             if (num <= 1) 
@@ -47,10 +47,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 nodeCapacity = num; 
             }
-            sprinklersTidal.ForEach(o =>
+            objs.OfType<DBPoint>().ForEach(o =>
             {
                 var points = spatialIndex.NearestNeighbours(o.Position, nodeCapacity)
-                                         .Cast<DBPoint>()
+                                         .OfType<DBPoint>()
                                          .Select(o => o.Position)
                                          .ToList();
                 points.ForEach(p =>
@@ -64,19 +64,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return results;
         }
 
-        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
         {
-            var geometriesFilter = new DBObjectCollection();
-            geometries.ForEach(g =>
-            {
-                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
-                 || (g.Properties["Category"] as string).Contains("Room"))
-                {
-                    return;
-                }
-                geometriesFilter.Add(g.Boundary);
-            });
-
+            var polygon = pline.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor") 
+                                                         && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
+                                                         || (g.Properties["Category"] as string).Contains("Room")))
+                                             .Select(g => g.Boundary)
+                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                                             .ToCollection();
             var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
             lines.ForEach(o =>

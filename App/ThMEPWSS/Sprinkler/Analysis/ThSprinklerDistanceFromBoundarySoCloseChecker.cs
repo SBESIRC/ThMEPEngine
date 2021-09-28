@@ -1,9 +1,11 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Catel.Collections;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
@@ -17,26 +19,32 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var results = DistanceCheck(sprinklers, geometries, pline);
-            Present(results);
+            if (results.Count > 0)
+            {
+                Present(results);
+            }
         }
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var geometriesFilter = new DBObjectCollection();
-            geometries.ForEach(g =>
+            var polygon = pline.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g =>
             {
-                if ((g.Properties["Category"] as string).Contains("Room")
-                 || (g.Properties["Category"] as string).Contains("Beam"))
+                var category = g.Properties["Category"] as string;
+                if(category.Contains("Beam"))
                 {
-                    return;
+                    return false;
                 }
-                geometriesFilter.Add(g.Boundary);
-            });
-
+                if(!polygon.Intersects(g.Boundary.ToNTSGeometry()))
+                {
+                    return false;
+                }
+                return true;
+            }).Select(g => g.Boundary).ToCollection();
             var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
             sprinklers
-                .Cast<ThSprinkler>()
+                .OfType<ThSprinkler>()
                 .Where(o => o.Category == Category)
                 .Where(o => pline.Contains(o.Position))
                 .ForEach(o =>
@@ -46,11 +54,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     if (filter.Count > 0)
                     {
                         var points = new List<Point3d>();
-                        filter.Cast<Entity>().ForEach(e =>
+                        filter.OfType<Entity>().ForEach(e =>
                         {
                             var objs = new DBObjectCollection();
                             e.Explode(objs);
-                            objs.Cast<Curve>().ForEach(curve =>
+                            objs.OfType<Curve>().ForEach(curve =>
                             {
                                 var closePoint = curve.GetClosestPointTo(o.Position, false);
                                 if (closePoint.DistanceTo(o.Position) < 100.0)
@@ -60,23 +68,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
                             });
                         });
 
-                        var indexs = new List<int>();
-                        for (int i = 0; i < points.Count(); i++)
-                        {
-                            for (int j = i + 1; j < points.Count(); j++)
-                            {
-                                if (points[i].DistanceTo(points[j]) < 1.0)
-                                {
-                                    indexs.Add(j);
-                                }
-                            }
-                            if (!indexs.Contains(i))
-                            {
-                                result.Add(new Line(o.Position, points[i]));
-                            }
-                        }
+                        points.ForEach(p => result.Add(new Line(o.Position, p)));
                     }
-
                 });
             return result;
         }

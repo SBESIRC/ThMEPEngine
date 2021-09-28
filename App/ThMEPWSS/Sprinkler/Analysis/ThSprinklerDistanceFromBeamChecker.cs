@@ -23,7 +23,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var areas = LayoutAreas(geometries);
             Present(areas);
             var results = BeamCheck(sprinklers, areas, geometries, pline);
-            Present(results);
+            if (results.Count > 0) 
+            {
+                Present(results);
+            }
         }
 
         private List<List<Polyline>> LayoutAreas(List<ThGeometry> geometries)
@@ -96,21 +99,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         private HashSet<Line> BeamCheck(List<ThIfcDistributionFlowElement> sprinklers, List<List<Polyline>> layoutAreas, List<ThGeometry> geometries, Polyline pline)
         {
-            var objs = new DBObjectCollection();
-            geometries.ForEach(g =>
-            {
-                if (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Beam"))
-                {
-                    objs.Add(g.Boundary);
-                }
-            });
-
-            var pointsIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var points = pointsIndex.SelectCrossingPolygon(pline);
-
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(points);
+            var polygon = pline.ToNTSPolygon();
+            var objs = geometries
+                .Where(g => (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Beam")))
+                .Select(g => g.Boundary)
+                .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                .ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var result = new HashSet<Line>();
-            sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o =>
+            sprinklers.OfType<ThSprinkler>().Where(o => o.Category == Category).ForEach(o =>
             {
                 var tag = true;
                 foreach (var polylines in layoutAreas)
@@ -147,12 +144,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                 closeDistance = distance;
                             }
                         });
-
                         result.Add(new Line(o.Position, closePoint));
                     }
                 }
             });
-
             return result;
         }
 

@@ -13,7 +13,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var objs = Check(geometries, pline);
-            Present(objs);
+            if (objs.Count > 0) 
+            {
+                Present(objs);
+            }
         }
 
         private DBObjectCollection Check(List<ThGeometry> geometries, Polyline pline)

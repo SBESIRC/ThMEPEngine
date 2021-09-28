@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
@@ -16,51 +17,47 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var distanceCheck = DistanceCheck(sprinklers, 1800.0, pline);
-            var buildingCheck = BuildingCheck(geometries, distanceCheck);
-            Present(buildingCheck);
+            if (distanceCheck.Count > 0)
+            {
+                var buildingCheck = BuildingCheck(geometries, distanceCheck, pline);
+                if (buildingCheck.Count > 0) 
+                {
+                    Present(buildingCheck);
+                }
+            }
         }
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Polyline pline)
         {
-
-            var sprinklersClone = new List<ThSprinkler>();
-            sprinklers.Cast<ThSprinkler>().ForEach(o =>
-            {
-                if(pline.Contains(o.Position))
-                {
-                    sprinklersClone.Add(o);
-                }
-            });
+            var sprinklersClone = sprinklers.OfType<ThSprinkler>()
+                                            .Where(o => o.Category == Category)
+                                            .Where(o => pline.Contains(o.Position))
+                                            .ToList();
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0) 
             {
                 var position = sprinklersClone[0].Position;
                 sprinklersClone.RemoveAt(0);
                 var kdTree = new ThCADCoreNTSKdTree(1.0);
-                sprinklersClone.Cast<ThSprinkler>().ForEach(o => kdTree.InsertPoint(o.Position));
-                var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree,position,tolerance);
+                sprinklersClone.ForEach(o => kdTree.InsertPoint(o.Position));
+                var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree, position, tolerance);
                 closePointList.ForEach(o => result.Add(new Line(position, o)));
             }
-            
             return result;
         }
 
-        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lineList)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
         {
-            var geometriesFilter = new DBObjectCollection();
-            geometries.ForEach(g =>
-            {
-                if ((g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
-                 || (g.Properties["Category"] as string).Contains("Room"))
-                {
-                    return;
-                }
-                geometriesFilter.Add(g.Boundary);
-            });
-
+            var polygon = pline.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor")
+                                                         && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
+                                                         || (g.Properties["Category"] as string).Contains("Room")))
+                                             .Select(g => g.Boundary)
+                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                                             .ToCollection();
             var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
-            lineList.ForEach(o =>
+            lines.ForEach(o =>
             {
                 var line = new Line(o.StartPoint, o.EndPoint);
                 var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));

@@ -361,9 +361,8 @@ namespace ThMEPEngineCore.CAD
             if (relateMatrix.IsContains || relateMatrix.IsCovers)
             {
                 var vertices = second.EntityVertices();
-                //second所有的点都在First里面,且second上的点没有一个在first边界上     
-                return vertices.Cast<Point3d>().Where(o => first.IsContains(o)).Count() == vertices.Count &&
-                    vertices.Cast<Point3d>().Where(o => firstPolygon.OnBoundary(o)).Count() == 0;
+                //second上的点没有一个在first边界上         
+                return vertices.Cast<Point3d>().Where(o => firstPolygon.OnBoundary(o)).Count() == 0;
             }
             else
             {
