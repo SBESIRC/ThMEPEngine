@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
 using AcHelper.Commands;
+using ThMEPWSS.ViewModel;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.Engine;
@@ -15,6 +16,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerCommand : IAcadCommand, IDisposable
     {
+        public static ThSprinklerCheckerVM SprinklerCheckerVM { get; set; }
         public void Dispose()
         {
             //
@@ -68,7 +70,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 //var results = boundaryChecker.DistanceCheck(engine.Elements, geometries);
                 //boundaryChecker.Present(currentDb.Database, results);
 
-                // 计算可布置区域
+                // 喷头距梁距离校核
                 //var layoutAreasChecker = new ThSprinklerDistanceFromBeamChecker();
                 //var areas = layoutAreasChecker.LayoutAreas(geometries);
                 //layoutAreasChecker.Present(currentDb.Database, areas);

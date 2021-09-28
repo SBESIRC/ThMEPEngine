@@ -13,21 +13,28 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerDistanceBetweenSprinklerChecker : ThSprinklerChecker
     {
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var distanceCheck = DistanceCheck(sprinklers, 1800.0);
+            var distanceCheck = DistanceCheck(sprinklers, 1800.0, pline);
             var buildingCheck = BuildingCheck(geometries, distanceCheck);
             Present(buildingCheck);
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Polyline pline)
         {
-            var sprinklersClone = new List<ThIfcDistributionFlowElement>();
-            sprinklers.ForEach(o => sprinklersClone.Add(o));
+
+            var sprinklersClone = new List<ThSprinkler>();
+            sprinklers.Cast<ThSprinkler>().ForEach(o =>
+            {
+                if(pline.Contains(o.Position))
+                {
+                    sprinklersClone.Add(o);
+                }
+            });
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0) 
             {
-                var position = (sprinklersClone[0] as ThSprinkler).Position;
+                var position = sprinklersClone[0].Position;
                 sprinklersClone.RemoveAt(0);
                 var kdTree = new ThCADCoreNTSKdTree(1.0);
                 sprinklersClone.Cast<ThSprinkler>().ForEach(o => kdTree.InsertPoint(o.Position));
@@ -73,7 +80,5 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 Present(result, layerId);
             }
         }
-
-       
     }
 }

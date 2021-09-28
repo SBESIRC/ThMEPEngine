@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Command\ThSprinklerCheckCmd.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeConnectPipe.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLabelLayoutDirection.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\ToiletRoomCleanout.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Sprinkler\Data\ThSprinklerHoleExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerRoomExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
+    <Compile Include="Sprinkler\Model\ThSprinklerModel.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCleanEntityService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCreateLayoutAreaService.cs" />
@@ -508,6 +510,7 @@
     <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\ThSprinklerCheckerVM.cs" />
     <Compile Include="ViewModel\ThFlushPointVM.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />

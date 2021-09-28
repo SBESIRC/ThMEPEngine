@@ -49,7 +49,7 @@
                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                      IsHitTestVisible="True"
                                      TabIndex="{Binding Path=TabIndex, RelativeSource={RelativeSource AncestorType={x:Type local:InputTextBox}}}"
-                                     Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, Mode=TwoWay}"
+                                     Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                                      ContextMenu="{x:Null}"
                                      FontSize="{TemplateBinding FontSize}"
                                      InputMethod.IsInputMethodEnabled="False"

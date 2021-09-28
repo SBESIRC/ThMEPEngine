@@ -14,13 +14,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerDistanceFromBoundarySoFarChecker : ThSprinklerChecker
     {
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var results = DistanceCheck(sprinklers, geometries);
+            var results = DistanceCheck(sprinklers, geometries, pline);
             Present(results);
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var geometriesFilter = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -38,6 +38,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             sprinklers
                 .Cast<ThSprinkler>()
                 .Where(o => o.Category == Category)
+                .Where(o => pline.Contains(o.Position))
                 .ForEach(o =>
                 {
                     var circle = new Circle(o.Position, Vector3d.ZAxis, RadiusA);

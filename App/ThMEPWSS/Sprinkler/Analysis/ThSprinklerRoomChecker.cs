@@ -7,6 +7,7 @@ using ThMEPWSS.Hydrant.Service;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -14,13 +15,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
     {
         readonly static string LayerName = "AI-喷头校核-房间是否布置喷头";
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var objs = Check(geometries, sprinklers);
+            var objs = Check(geometries, sprinklers, pline);
             Present(objs);
         }
 
-        private DBObjectCollection Check(List<ThGeometry> geometries, List<ThIfcDistributionFlowElement> sprinklers)
+        private DBObjectCollection Check(List<ThGeometry> geometries, List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
         {
             var outlines = new DBObjectCollection();
             sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o => outlines.Add(o.Outline));
@@ -31,6 +32,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 if (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Room"))
                 {
+                    if(!pline.ToNTSPolygon().Contains(g.Boundary.ToNTSGeometry()))
+                    {
+                        return;
+                    }
                     var result = spatialIndex.SelectCrossingPolygon(g.Boundary);
                     if (g.Properties.ContainsKey("Placement") && (g.Properties["Placement"] as string).Contains("不可布区域"))
                     {

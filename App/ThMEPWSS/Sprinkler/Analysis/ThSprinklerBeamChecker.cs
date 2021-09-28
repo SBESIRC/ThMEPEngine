@@ -10,13 +10,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerBeamChecker : ThSprinklerChecker
     {
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var objs = Check(geometries);
+            var objs = Check(geometries, pline);
             Present(objs);
         }
 
-        private DBObjectCollection Check(List<ThGeometry> geometries)
+        private DBObjectCollection Check(List<ThGeometry> geometries, Polyline pline)
         {
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -29,7 +29,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     }
                 }
             });
-            return objs;
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            return spatialIndex.SelectCrossingPolygon(pline);
         }
 
         private void Present(DBObjectCollection objs)

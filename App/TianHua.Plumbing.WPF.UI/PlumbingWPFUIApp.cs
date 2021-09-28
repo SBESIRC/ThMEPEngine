@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Sprinkler.Analysis;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -21,10 +22,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
+        SprinklerCheckersUI uiSprinklerCheckers;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
+            uiSprinklerCheckers = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -32,6 +35,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (THLayoutFlushPointCmd.FlushPointVM == null)
             {
                 THLayoutFlushPointCmd.FlushPointVM = new ThFlushPointVM();
+            }
+            if (ThSprinklerCheckCmd.SprinklerCheckerVM == null)
+            {
+                ThSprinklerCheckCmd.SprinklerCheckerVM = new ThSprinklerCheckerVM();
             }
         }
 
@@ -199,6 +206,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
 
         }
+
+        /// <summary>
+        /// 喷头校核
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPTJH", CommandFlags.Modal)]
+        public void THPTJH()
+        {
+            if (uiSprinklerCheckers != null && uiSprinklerCheckers.IsLoaded)
+                return;
+            uiSprinklerCheckers = new SprinklerCheckersUI(ThSprinklerCheckCmd.SprinklerCheckerVM);
+            uiSprinklerCheckers.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiSprinklerCheckers);
+        }
+
 
         [CommandMethod("TIANHUACAD", "THExtractWSSDrainageWell", CommandFlags.Modal)]
         public void THExtractWSSDrainageWell()

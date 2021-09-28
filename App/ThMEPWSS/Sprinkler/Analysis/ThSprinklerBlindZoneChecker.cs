@@ -13,27 +13,40 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerBlindZoneChecker : ThSprinklerChecker
     {
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var distanceCheck = DistanceCheck(sprinklers);
-            var results = BuildingCheck(geometries, distanceCheck);
-            Present(results);
+            var distanceCheck = DistanceCheck(sprinklers, pline);
+            if (distanceCheck.Count > 0) 
+            {
+                var results = BuildingCheck(geometries, distanceCheck);
+                Present(results);
+            }
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
         {
             var nodeCapacity = 5;
             var sprinklersTidal = sprinklers
-                .Cast<ThSprinkler>()
+                .OfType<ThSprinkler>()
                 .Where(o => o.Category == Category);
             var objs = new DBObjectCollection();
             sprinklersTidal.ForEach(o =>
             {
                 objs.Add(new DBPoint(o.Position));
             });
-
+            var pointsSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var pointsFilter = pointsSpatialIndex.SelectCrossingPolygon(pline);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(pointsFilter);
             var results = new HashSet<Line>();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var num = spatialIndex.SelectAll().Count;
+            if (num <= 1) 
+            {
+                return results;
+            }
+            else if (num > 1 && num < 5) 
+            {
+                nodeCapacity = num; 
+            }
             sprinklersTidal.ForEach(o =>
             {
                 var points = spatialIndex.NearestNeighbours(o.Position, nodeCapacity)

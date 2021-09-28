@@ -16,13 +16,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerDistanceFromBeamChecker : ThSprinklerChecker
     {
-        private List<Polyline> RoomFrames { get; set; }
+        public List<Polyline> RoomFrames { get; set; }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var areas = LayoutAreas(geometries);
             Present(areas);
-            var results = BeamCheck(sprinklers, areas, geometries);
+            var results = BeamCheck(sprinklers, areas, geometries, pline);
             Present(results);
         }
 
@@ -94,7 +94,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             }
         }
 
-        private HashSet<Line> BeamCheck(List<ThIfcDistributionFlowElement> sprinklers, List<List<Polyline>> layoutAreas, List<ThGeometry> geometries)
+        private HashSet<Line> BeamCheck(List<ThIfcDistributionFlowElement> sprinklers, List<List<Polyline>> layoutAreas, List<ThGeometry> geometries, Polyline pline)
         {
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -104,8 +104,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     objs.Add(g.Boundary);
                 }
             });
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
 
+            var pointsIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var points = pointsIndex.SelectCrossingPolygon(pline);
+
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(points);
             var result = new HashSet<Line>();
             sprinklers.Cast<ThSprinkler>().Where(o => o.Category == Category).ForEach(o =>
             {
