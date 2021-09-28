@@ -71,14 +71,19 @@ namespace ThMEPHVAC.CAD
         }
         private double GetFanVolume()
         {
-            var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
-            str_air_volume = fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "");
-            if (str_air_volume.Contains("/"))
+            var service = new ThFanModelDataService();
+            var volums = service.CalcAirVolume(Data.ObjId);
+            if (volums.Count == 1)
             {
-                string []str = str_air_volume.Split('/');
-                return Double.Parse(str[1]);
+                str_air_volume = volums[0].ToString();
+                return volums[0];
             }
-            return str_air_volume.NullToDouble();
+            if (volums.Count == 2)
+            {
+                str_air_volume = volums[0].ToString() + "/" + volums[1].ToString();
+                return volums[1];
+            }
+            throw new NotImplementedException("输入风量格式错误");
         }
         private double GetLowFanVolume()
         {

@@ -97,7 +97,7 @@ namespace ThMEPHVAC.Model
             {
                 var param = ThMEPHVACService.Create_reducing_modify_param(red, start_id.Handle);
                 service.Draw_shape(red, dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
-                                                              out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                                                 out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
                 ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
             }
         }

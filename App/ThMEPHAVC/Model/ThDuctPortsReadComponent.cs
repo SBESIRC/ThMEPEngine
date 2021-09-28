@@ -75,7 +75,8 @@ namespace ThMEPHVAC.Model
                         {
                             var entitys = Get_group_entitys(g);
                             var pl = ThMEPHAVCBounds.getConnectorBounds(entitys, 1);
-                            dic.Add(id, pl);
+                            if (pl.Bounds != null)
+                                dic.Add(id, pl);
                         }
                     }
                 }

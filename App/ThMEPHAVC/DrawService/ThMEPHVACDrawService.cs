@@ -36,7 +36,14 @@ namespace ThMEPHVAC.DrawService
             ThDuctPortsRecoder.Create_duct_group(gids, fids, cids, ports_ids, ext_ports_ids, duct_param);
             service.text_service.Draw_duct_text(duct_param, scale);
         }
-
+        public void Draw_reducing(Line centerLine, double bigWidth, double smallWidth, bool isAxis, Matrix3d mat)
+        {
+            var reducing = ThDuctPortsReDrawFactory.Create_reducing(centerLine, bigWidth, smallWidth, isAxis);
+            var param = ThMEPHVACService.Create_reducing_modify_param(reducing, start_id.Handle);
+            service.Draw_shape(reducing, mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
+                                              out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+            ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
+        }
         public void Draw_special_shape(List<Special_graph_Info> special_shapes_info)
         {
             var org_dis_mat = Matrix3d.Displacement(srt_flag_pos.GetAsVector());
