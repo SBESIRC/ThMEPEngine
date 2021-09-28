@@ -25,6 +25,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         private ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex;
         private double bufferDist =500;
         private double bufferArea = 500000;
+        private double bufferAreaToMove = 20000;
         private NetTopologySuite.Geometries.Geometry blind;
 
         public BeamSensorOpt(InputArea inputArea, EquipmentParameter parameter)
@@ -91,7 +92,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 {
                     var geometryCollection = new List<Polygon>();
                     foreach (var geo in geom)
-                        if (geo is Polygon polygon)
+                        if (geo is Polygon polygon && polygon.Area > 10) 
                             geometryCollection.Add(polygon);
                     blind = new MultiPolygon(geometryCollection.ToArray());
                 }
@@ -215,7 +216,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             var target = new Coordinate(center.X + Radius, center.Y + Radius);
             foreach (var poly in polygon_layouts)
             {
-                Coordinate temp = Centroid.GetCentroid(poly);
+                Coordinate temp = FireAlarmUtils.AdjustedCenterPoint(poly);
                 if (FireAlarmUtils.PolygonContainPoint(vis, temp) && temp.Distance(center) < target.Distance(center))
                     target = temp;
             }
@@ -257,7 +258,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 resp = resp.Difference(poly);
             }
 
-            return resp.Area < 20000;
+            return resp.Area < bufferAreaToMove;
         }
         //转化布置点集
         private void ConvertPoints()

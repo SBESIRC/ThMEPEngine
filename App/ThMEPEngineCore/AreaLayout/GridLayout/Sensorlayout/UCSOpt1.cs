@@ -632,6 +632,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     //略过不在区域内的点和不共线的点
                     if (validPoints[h][j] == false || Positions[h][j].X != point.X)
                         continue;
+                    if(!FireAlarmUtils.PolygonContainPoint(area,Positions[h][j]))
+                    {
+                        UpdateVLine(i, j, old_X);
+                        return false;
+                    }
                     if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, Positions[h][j]))
                         checkFalsePoints.Add(new KeyValuePair<int, int>(h, j));
                 }
@@ -698,6 +703,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 {
                     if (validPoints[i][v] == false || Positions[i][v].Y != point.Y)
                         continue;
+                    if (!FireAlarmUtils.PolygonContainPoint(area, Positions[i][v]))
+                    {
+                        UpdateHLine(i, j, old_Y);
+                        return false;
+                    }
                     if (!FireAlarmUtils.MultiPolygonContainPoint(layouts, Positions[i][v]))
                         checkFalsePoints.Add(new KeyValuePair<int, int>(i, v));
                 }
