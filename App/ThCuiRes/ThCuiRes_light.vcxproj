@@ -290,6 +290,8 @@
     <Image Include="Images\THZM_light_large.ico" />
 	<Image Include="Images\THAFPM_light_small.ico" />    
     <Image Include="Images\THAFPM_light_large.ico" />
+	<Image Include="Images\THHZBJ_light_small.ico" />    
+    <Image Include="Images\THHZBJ_light_large.ico" />
     <Image Include="Images\THALIGN_bottom_light_small.ico" />
     <Image Include="Images\THALIGN_bottom_light_large.ico" />
     <Image Include="Images\THALIGN_horizontal_light_small.ico" />
