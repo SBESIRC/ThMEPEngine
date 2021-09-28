@@ -88,13 +88,17 @@ panels:
     items:
         - text: "风机选型"
           attributes: { "IsVisible": true, "IsEnabled": true }
-        - text: "压力排水"
+        - text: "小风机"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlHVACPLAN"
     name: "HVACPLAN"
     title: "平面图"
     rowPanels:
+      - text: ""
+        items:
+          - text: "风平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
           - text: "机房平面"

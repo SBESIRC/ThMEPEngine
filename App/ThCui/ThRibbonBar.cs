@@ -37,12 +37,35 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THFJ_SMALL",
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            // 小风机
+            row.AddNewButton("小风机",
+                "天华小风机",
+                "THXFJ",
+                "天华小风机",
+                "IDI_THCAD_THXFJ_SMALL",
+                "IDI_THCAD_THXFJ_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateHVACPlanPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("HVACPLAN", "平面图");
             var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 风平面
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("风平面",
+                    "天华风平面",
+                    "THFPM",
+                    "天华风平面",
+                    "IDI_THCAD_THFPM_SMALL",
+                    "IDI_THCAD_THFPM_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
