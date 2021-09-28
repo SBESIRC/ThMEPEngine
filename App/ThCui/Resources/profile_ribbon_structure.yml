@@ -116,6 +116,10 @@ panels:
     rowPanels:
       - text: ""
         items:
+          - text: "火灾报警"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
           - text: "烟感温感布置"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
@@ -148,6 +152,13 @@ panels:
         - text: "地库应急\r\n照明连线"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlELECTRONIC"
+    name: "ELECTRONIC"
+    title: "弱电系统"
+    items:
+        - text: "安防平面"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEEXCHANGE"
     name: "EEXCHANGE"
     title: "提资接收"

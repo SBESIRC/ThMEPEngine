@@ -102,6 +102,7 @@ namespace TianHua.AutoCAD.ThCui
         {
             CreateEAFASPanel(tab);
             CreateELightingPanel(tab);
+            CreateElectronicPanel(tab);
             CreateEExchangePanel(tab);
         }
 
@@ -109,6 +110,20 @@ namespace TianHua.AutoCAD.ThCui
         {
             var panel = tab.AddNewPanel("EAFAS", "火灾报警系统");
             var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 火灾报警
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("火灾报警",
+                    "天华火灾报警",
+                    "THHZBJ",
+                    "天华火灾报警",
+                    "IDI_THCAD_THHZBJ_SMALL",
+                    "IDI_THCAD_THHZBJ_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
@@ -175,6 +190,20 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THGBMQ_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
+        }
+        private static void CreateElectronicPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("ELECTRONIC", "弱电系统");
+            var row = panel.AddNewRibbonRow();
+
+            // 安防平面
+            row.AddNewButton("安防平面",
+            "天华安防平面",
+            "THAFPM",
+            "天华安防平面",
+            "IDI_THCAD_THAFPM_SMALL",
+            "IDI_THCAD_THAFPM_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateELightingPanel(RibbonTabSource tab)
