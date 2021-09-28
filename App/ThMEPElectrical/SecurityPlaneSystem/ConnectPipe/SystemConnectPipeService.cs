@@ -145,7 +145,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             Point3d connectPoint = model.position;
             PipePathService pipePathService = new PipePathService();
             Polyline snappath = pipePathService.CreatePipePath(polyline, closetLine, connectPoint, columns.Union(blocks).ToList());
-            if (snappath == null)
+            if (snappath == null) 
             {
                 snappath = pipePathService.CreatePipePath(polyline, closetLine, connectPoint, columns);
                 if (snappath == null)
