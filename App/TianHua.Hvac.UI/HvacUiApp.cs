@@ -60,8 +60,8 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "THXFJBZ", CommandFlags.Modal)]
-        public void THXFJBZ()
+        [CommandMethod("TIANHUACAD", "THXFJ", CommandFlags.Modal)]
+        public void THXFJ()
         {
             var ui = new uiFanLayoutMainWidget();
             AcadApp.ShowModelessWindow(ui);
