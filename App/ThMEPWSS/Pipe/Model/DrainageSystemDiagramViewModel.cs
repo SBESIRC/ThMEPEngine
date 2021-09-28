@@ -176,29 +176,29 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
-        private bool _通气H件隔层布置;
-        public bool 通气H件隔层布置
+        private bool _H;
+        public bool H
         {
             get
             {
-                return _通气H件隔层布置;
+                return _H;
             }
             set
             {
-                _通气H件隔层布置 = value;
+                _H = value;
                 this.RaisePropertyChanged();
             }
         }
-        private string _厨房洗涤盆 = "双池S弯";
-        public string 厨房洗涤盆
+        private string _Basin = "双池S弯";
+        public string Basin
         {
             get
             {
-                return _厨房洗涤盆;
+                return _Basin;
             }
             set
             {
-                _厨房洗涤盆 = value;
+                _Basin = value;
                 this.RaisePropertyChanged();
             }
         }

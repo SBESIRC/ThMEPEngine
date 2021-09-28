@@ -24,6 +24,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiRainSystemParams : ThCustomWindow
     {
+        public bool Ok;
         RainSystemDiagramParamsViewModel vm;
         RainSystemDiagramParamsViewModel _vm;
         public uiRainSystemParams(RainSystemDiagramParamsViewModel vm)
@@ -32,12 +33,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = vm.Clone();
             this.vm = vm;
             this.DataContext = _vm;
-            this.阳台地漏.ItemsSource = new string[] { "DN50", "DN75", };
+            cbxWellFD.ItemsSource = cbxBalFD.ItemsSource = new string[] { "DN50", "DN75", };
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
             _vm.CopyTo(vm);
+            Ok = true;
             this.Close();
         }
 

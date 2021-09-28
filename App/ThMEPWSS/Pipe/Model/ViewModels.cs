@@ -229,12 +229,12 @@ namespace ThMEPWSS.Pipe.Model
                 get => _Height;
                 set
                 {
+                    if (value > 99999)
+                        value = 99999;
+                    if (value < 0)
+                        value = 0;
                     if (value != _Height)
                     {
-                        if (value > 99999)
-                            value = 99999;
-                        if (value < 0)
-                            value = 0;
                         _Height = value;
                         OnPropertyChanged(nameof(Height));
                     }

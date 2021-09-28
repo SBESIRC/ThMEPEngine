@@ -159,7 +159,19 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
-
+        private string _WaterWellFloorDrainDN = "DN50";
+        public string WaterWellFloorDrainDN
+        {
+            get
+            {
+                return _WaterWellFloorDrainDN;
+            }
+            set
+            {
+                _WaterWellFloorDrainDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
         private bool _HasAirConditionerFloorDrain = false;
         public bool HasAirConditionerFloorDrain
         {
