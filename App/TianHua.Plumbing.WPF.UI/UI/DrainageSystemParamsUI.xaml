@@ -73,10 +73,10 @@
                 <!--<CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>-->
                 <CheckBox Grid.Row="0" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
                 <CheckBox Grid.Row="1" Checked="CheckBox_Checked" IsChecked="{Binding CanHaveDownboard,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">卫生间降板</CheckBox>
-                <CheckBox Grid.Row="2" Checked="CheckBox_Checked" IsChecked="{Binding 通气H件隔层布置,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
+                <CheckBox Grid.Row="2" Checked="CheckBox_Checked" IsChecked="{Binding H,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5,0,0">
                     <Label Content="厨房洗涤盆："></Label>
-                    <ComboBox x:Name="Basin" Width="100" Text="{Binding 厨房洗涤盆,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <ComboBox x:Name="Basin" Width="100" Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
                 </StackPanel>
             </Grid>
         </StackPanel>

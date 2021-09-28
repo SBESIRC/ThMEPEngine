@@ -25,7 +25,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class DrainageSystemParamsUI : ThCustomWindow
     {
-        public bool CloseWithOkReturned;
+        public bool Ok;
         dynamic vm;
         dynamic _vm;
         public DrainageSystemParamsUI(dynamic vm)
@@ -43,7 +43,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void OK_Click(object sender, RoutedEventArgs e)
         {
             ObjFac.CopyProperties(_vm, vm);
-            CloseWithOkReturned = true;
+            Ok = true;
             this.Close();
         }
       
