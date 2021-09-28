@@ -101,6 +101,7 @@
     <Compile Include="ConnectWiring\Data\ThLaneLineExtractor.cs" />
     <Compile Include="ConnectWiring\Model\BlockConfigModel.cs" />
     <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
+    <Compile Include="ConnectWiring\Service\BranchConnectingService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />

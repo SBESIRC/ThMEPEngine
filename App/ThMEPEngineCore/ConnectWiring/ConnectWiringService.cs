@@ -50,13 +50,20 @@ namespace ThMEPEngineCore.ConnectWiring
             }
             var allBlocks = thBlockPointsExtractor.resBlocks;
 
+            BranchConnectingService branchConnecting = new BranchConnectingService();
             var data = GetData(holes, outFrame, block);
             foreach (var info in configInfo)
             {
                 var configBlocks = info.loopInfoModels.First().blockNames;
-                var blockGeos = GetBlockPts(allBlocks, configBlocks);
-                if (data.Count > 0 && blockGeos.Count > 0)
+                var resBlocks = allBlocks.Where(x => !x.BlockTableRecord.IsNull)
+                .Where(x =>
                 {
+                    var name = x.GetEffectiveName();
+                    return configBlocks.Contains(name);
+                }).ToList();
+                if (data.Count > 0 && resBlocks.Count > 0)
+                {
+                    var blockGeos = GetBlockPts(resBlocks, configBlocks);
                     ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
@@ -73,7 +80,8 @@ namespace ThMEPEngineCore.ConnectWiring
                             {
                                 if (f.Geometry is LineString line)
                                 {
-                                    lines.Add(line.ToDbPolyline());
+                                    var wiring = branchConnecting.CreateBranch(line.ToDbPolyline(), resBlocks);
+                                    lines.Add(wiring);
                                 }
                             }
                         }
@@ -132,7 +140,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 PromptSelectionOptions blockOptions = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
+                    MessageForAdding = "选择电源箱",
                     RejectObjectsOnLockedLayers = true,
                     SingleOnly = true,
                 };
@@ -182,13 +190,7 @@ namespace ThMEPEngineCore.ConnectWiring
             var geos = new List<ThGeometry>();
             if (allBlocks.Count > 0 && blockNames.Count > 0)
             {
-                var resBlock = allBlocks.Where(x => !x.BlockTableRecord.IsNull)
-                .Where(x =>
-                {
-                    var name = x.GetEffectiveName();
-                    return blockNames.Contains(name);
-                }).ToList();
-                resBlock.ForEach(o =>
+                allBlocks.ForEach(o =>
                 {
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WiringPosition.ToString());
