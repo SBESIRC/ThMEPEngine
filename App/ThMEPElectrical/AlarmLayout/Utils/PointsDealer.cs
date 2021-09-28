@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Collections;
 using ThMEPEngineCore.Algorithm;
 using ThCADCore.NTS;
+using ThCADExtension;
+
 
 namespace ThMEPElectrical.AlarmLayout.Utils
 {
@@ -18,11 +20,12 @@ namespace ThMEPElectrical.AlarmLayout.Utils
         /// <param name="areas">可布置区域列表</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>返回可布置点集</returns>
-        public static List<Point3d> PointsInAreas(List<Polyline> areas, double radius)
+        public static List<Point3d> PointsInAreas(List<MPolygon> areas, double radius)
         {
             List<Point3d> pointsInAreas = new List<Point3d>();
-            foreach (Polyline poly in areas)
+            foreach (MPolygon mPoly in areas)
             {
+                var poly = mPoly.Shell();
                 //List<Point3d> pts = PointsOnPolyline(poly.CalObb());
                 //double disX = pts[0].DistanceTo(pts[1]);
                 //double disY = pts[1].DistanceTo(pts[2]);
@@ -179,7 +182,7 @@ namespace ThMEPElectrical.AlarmLayout.Utils
                         ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
                     }
                 }
-                for(int j = 0; j < Ycnt; ++j)
+                for (int j = 0; j < Ycnt; ++j)
                 {
                     ptsInUncoverRectangle.Add(new Point3d((j * pt01.X + (Ycnt - j) * pt23.X) / Ycnt, (j * pt01.Y + (Ycnt - j) * pt23.Y) / Ycnt, 0));
                 }

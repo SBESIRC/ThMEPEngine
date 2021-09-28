@@ -136,7 +136,7 @@ namespace ThMEPElectrical.AlarmLayout.Test
                 var frame = frameList.OrderByDescending(x => x.Area).First();
                 var holeList = getPoly(frame, "AI-房间框线", transformer, true);//IOcl-room    AI-房间框线
                 //holeList.AddRange(getPoly(frame, "AI-洞", transformer, false));
-                var layoutList = getPoly(frame, "AI-可布区域", transformer, false);//AI-可布区域
+                var layoutList = getMPoly(frame, "AI-可布区域", transformer, false);//AI-可布区域
                 var wallList = getPoly(frame, "AI-墙", transformer, false);
                 wallList.AddRange(getPoly(frame, "AI-剪力墙", transformer, false));
                 //var columns = new List<Polyline>();
@@ -153,6 +153,11 @@ namespace ThMEPElectrical.AlarmLayout.Test
                 {
                     return;
                 }
+
+                DrawUtils.ShowGeometry(wallList, "l0Wall", 10);
+                DrawUtils.ShowGeometry(columns, "l0Column", 3);
+                DrawUtils.ShowGeometry(layoutList.Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
+
                 var layoutCmd = new FireAlarmSystemLayoutCommand();
                 layoutCmd.radius = equipRadius.Value;
                 layoutCmd.frame = frame;
@@ -170,6 +175,18 @@ namespace ThMEPElectrical.AlarmLayout.Test
         {
             var layoutArea = ExtractPolyline(frame, sLayer, transformer, onlyContains);
             var layoutList = layoutArea.Select(x => x.Value).ToList();
+            return layoutList;
+        }
+
+        private static List<MPolygon> getMPoly(Polyline frame, string sLayer, ThMEPOriginTransformer transformer, bool onlyContains)
+        {
+            var layoutArea = ExtractPolyline(frame, sLayer, transformer, onlyContains);
+            var layoutList = layoutArea.Select(x => ThMPolygonTool.CreateMPolygon(x.Value)).ToList();
+
+            var layoutAreaM = ExtractMPolygon(frame, sLayer, transformer, onlyContains);
+            var layoutListM = layoutAreaM.Select(x => x.Value).ToList();
+            layoutList.AddRange(layoutListM);
+
             return layoutList;
         }
         private static Dictionary<Polyline, Polyline> ExtractPolyline(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer, bool onlyContain)
@@ -206,6 +223,45 @@ namespace ThMEPElectrical.AlarmLayout.Test
                 return plInFrame;
             }
         }
+
+
+        private static Dictionary<MPolygon, MPolygon> ExtractMPolygon(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer, bool onlyContain)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line = acadDatabase.ModelSpace
+                      .OfType<MPolygon>()
+                      .Where(o => o.Layer == LayerName);
+
+                var lineList = line.Select(x => x.Clone() as MPolygon).ToList();
+
+                var plInFrame = new Dictionary<MPolygon, MPolygon>();
+
+                foreach (MPolygon pl in lineList)
+                {
+                    if (pl != null)
+                    {
+                        var plTrans = pl.Clone() as MPolygon;
+
+                        transformer.Transform(plTrans);
+                        plInFrame.Add(pl, plTrans);
+                    }
+                }
+
+                if (onlyContain == false)
+                {
+                    plInFrame = plInFrame.Where(o => bufferFrame.Contains(o.Value.Shell()) || bufferFrame.Intersects(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+                else
+                {
+                    plInFrame = plInFrame.Where(o => bufferFrame.Contains(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+                return plInFrame;
+            }
+        }
+
+
         private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
         {
             var tol = 1000;

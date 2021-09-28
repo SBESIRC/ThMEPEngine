@@ -47,7 +47,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label>θ</Label>
-                        <ComboBox SelectedIndex="{Binding SelectedIndexForAngle}" Text="{Binding SelectedValueForTheta}" Height="20" Width="85">
+                        <ComboBox SelectedIndex="{Binding SelectedIndexForAngle}" Text="{Binding SelectedValueForTheta, Mode=OneWayToSource}" Height="20" Width="85">
                             <ComboBoxItem Content="θ &lt;=15°"/>
                             <ComboBoxItem Content="15° &lt; θ &lt;=30°"></ComboBoxItem>
                             <ComboBoxItem Content="θ > 30°"></ComboBoxItem>
@@ -126,7 +126,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label>比例:</Label>
-                    <ComboBox Width="80" Height="20" SelectedIndex="{Binding BlockRatioIndex}" Text="{Binding BlockRatio}">
+                    <ComboBox Width="80" Height="20" SelectedIndex="{Binding BlockRatioIndex}" Text="{Binding BlockRatio , Mode=OneWayToSource}">
                         <ComboBoxItem>1:100</ComboBoxItem>
                         <ComboBoxItem>1:150</ComboBoxItem>
                     </ComboBox>

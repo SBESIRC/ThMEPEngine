@@ -20,8 +20,18 @@ using ThMEPElectrical.FireAlarm.Interface;
 
 namespace ThMEPElectrical.FireAlarm.Data
 {
-    public class ThFaPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer,IGroup,ISetStorey
+    public class ThFaPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer, IGroup, ISetStorey
     {
+        #region input
+        public List<ThIfcRoom> Rooms { get; set; } = new List<ThIfcRoom>();
+        public List<ThIfcBeam> Beams { get; set; } = new List<ThIfcBeam>();
+        public List<ThIfcColumn> Columns { get; set; } = new List<ThIfcColumn>();
+        public List<ThIfcWall> Walls { get; set; } = new List<ThIfcWall>();
+        public List<Polyline> Holes { get; set; } = new List<Polyline>();
+        public bool ReferBeam { get; set; } = true;
+        #endregion 
+
+
         public List<Entity> CanLayoutAreas { get; set; }
         public ThMEPOriginTransformer Transformer
         {
@@ -53,14 +63,23 @@ namespace ThMEPElectrical.FireAlarm.Data
             });
             return geos;
         }
+
         public override void Extract(Database database, Point3dCollection pts)
         {
             var cmd = new AFASRegion.AFASRegion();
+
+            cmd.Rooms = Rooms;
+            cmd.Beams = Beams.Cast<ThIfcBuildingElement>().ToList();
+            cmd.Columns = Columns.Cast<ThIfcBuildingElement>().ToList();
+            cmd.Walls = Walls.Cast<ThIfcBuildingElement>().ToList();
+            cmd.Holes = Holes;
             cmd.BufferDistance = 500;
+            cmd.ReferBeams = ReferBeam;
+
             //获取可布置区域
             var poly = pts.CreatePolyline();
             CanLayoutAreas = cmd.DivideRoomWithPlacementRegion(poly);
-            CanLayoutAreas.ForEach(e=>transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
+          //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
         }
 
         public void Print(Database database)
@@ -83,7 +102,7 @@ namespace ThMEPElectrical.FireAlarm.Data
         }
 
         public void Set(List<ThStoreyInfo> storeyInfos)
-        {            
+        {
         }
 
         public ThStoreyInfo Query(Entity entity)

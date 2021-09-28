@@ -283,10 +283,9 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
 
         public FireAlarmViewModel()
         {
-            _SelectedIndexForH = 0;
-            _valueOfD = 5800;
-            _SelectedIndexForAngle = 0;
-
+            SelectedIndexForH = 0;
+            SelectedIndexForAngle = 0;
+            BlockRatioIndex = 0;
         }
 
     }

@@ -37,11 +37,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 
             var extractors = new List<ThExtractorBase>()
             {
-                new ThFaPlaceCoverageExtractor()
-                {
-                    Transformer = Transformer,
-                },
-
                 new ThFireAlarmBlkExtractor ()
                 {
                     Transformer = Transformer ,

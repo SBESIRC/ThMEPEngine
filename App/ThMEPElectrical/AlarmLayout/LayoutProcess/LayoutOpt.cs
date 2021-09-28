@@ -24,7 +24,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
     {
         public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb)
         {
-            
+
             List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius); //1、初选
 
             List<Point3d> sndPoints = SndStep(mPolygon, fstPoints, pointsInLayoutList, radius, equipmentType); //2、加点
@@ -37,7 +37,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
                 ans.Add(PointsDealer.GetNearestPoint(mPolygon.ToNTSPolygon().Centroid.ToAcGePoint3d(), pointsInLayoutList));
                 return ans;
             }
-           
+
             List<Point3d> fourPoints = FourStep(mPolygon, sndHalfPoints, pointsInLayoutList, radius, equipmentType); //4、移点：修补需求：将一些点更加靠近中心线
 
             List<Point3d> thdPoints = ThdStep(mPolygon, fourPoints, radius, equipmentType); //3、删点
@@ -52,7 +52,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="layoutList"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<Polyline> layoutList, double radius)
+        public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<MPolygon> layoutList, double radius)
         {
             List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
             Hashtable ht = new Hashtable();
@@ -204,7 +204,7 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
         /// <param name="sndHalfPoints">第二次操作后的点集</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>返回删除后的点集</returns>
-        public static List<Point3d> ThdStep(MPolygon mPolygon, List<Point3d> points, double radius,BlindType equipmentType)
+        public static List<Point3d> ThdStep(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType)
         {
             Hashtable ht = new Hashtable();
             DeletePoints.ReducePoints(ht, points, radius);
@@ -232,11 +232,11 @@ namespace ThMEPElectrical.AlarmLayout.LayoutProcess
             }
             //key原始点，value原始点最近的中心点最近的可布置点
             Dictionary<Point3d, Point3d> pt2move = new Dictionary<Point3d, Point3d>();
-            foreach(var node in pt2center)
+            foreach (var node in pt2center)
             {
                 pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, pointsInLayoutList);
             }
-            foreach(var node in pt2move)
+            foreach (var node in pt2move)
             {
                 points.Remove(node.Key);
                 points.Add(node.Value);

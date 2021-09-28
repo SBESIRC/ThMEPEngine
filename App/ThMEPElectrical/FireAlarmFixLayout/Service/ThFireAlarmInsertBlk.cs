@@ -26,9 +26,33 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 foreach (var ptInfo in insertPtInfo)
                 {
-                    var size = ThFaCommon.blk_move_length[blkName] / 2;
+                    var size = ThFaCommon.blk_size[blkName].Item2 / 2;
                     var pt = ptInfo.Key + ptInfo.Value * scale * size;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Value, Vector3d.ZAxis);
+                    var attNameValues = new Dictionary<string, string>() { };
+
+                    db.ModelSpace.ObjectId.InsertBlockReference(
+                                            layserName,
+                                            blkName,
+                                            pt,
+                                            new Scale3d(scale),
+                                            rotateAngle,
+                                            attNameValues);
+                }
+            }
+        }
+
+        public static void InsertBlock(Dictionary<Point3d, double> insertPtInfo, double scale, string blkName, string layserName)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                db.Database.ImportBlock(blkName);
+                db.Database.ImportLayer(layserName);
+
+                foreach (var ptInfo in insertPtInfo)
+                {
+                    var pt = ptInfo.Key;
+                    double rotateAngle = ptInfo.Value;
                     var attNameValues = new Dictionary<string, string>() { };
 
                     db.ModelSpace.ObjectId.InsertBlockReference(

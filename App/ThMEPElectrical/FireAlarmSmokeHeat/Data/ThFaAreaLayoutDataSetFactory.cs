@@ -1,4 +1,6 @@
-﻿using ThMEPEngineCore.Data;
+﻿using System.Linq;
+
+using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
@@ -14,7 +16,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
     public class ThFaAreaLayoutDataSetFactory : ThMEPDataSetFactory
     {
+        public bool ReferBeam { get; set; } = true;
+
         private List<ThGeometry> Geos { get; set; }
+
         public ThFaAreaLayoutDataSetFactory()
         {
             Geos = new List<ThGeometry>();
@@ -50,7 +55,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                     },
                     new ThFaRoomExtractor()
                     {
-                        IsWithHole=false,
+                        //IsWithHole=false,
                         UseDb3Engine=true,
                         Transformer = Transformer,
                     },
@@ -59,8 +64,20 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
+                    new ThFaBeamExtractor()
+                    {
+                        ElementLayer = "AI-梁",
+                        Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3BeamVisitor.Results,
+                    },
+
             };
             extractors.ForEach(o => o.Extract(database, collection));
+
+            //提取可布区域
+            var palceConverage = BuildPlaceCoverage(extractors, ReferBeam);
+            extractors.Add(palceConverage);
+
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
             // 移回原位
@@ -75,6 +92,32 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             ThFireAlarmUtils.MoveToXYPlane(Geos);
         }
 
+        private ThFaPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, bool referBeam)
+        {
+            var roomExtract = extractors.Where(x => x is ThFaRoomExtractor).FirstOrDefault() as ThFaRoomExtractor;
+            var wallExtract = extractors.Where(x => x is ThFaShearWallExtractor).FirstOrDefault() as ThFaShearWallExtractor;
+            var columnExtract = extractors.Where(x => x is ThFaColumnExtractor).FirstOrDefault() as ThFaColumnExtractor;
+            var beamExtract = extractors.Where(x => x is ThFaBeamExtractor).FirstOrDefault() as ThFaBeamExtractor;
+            var holeExtract = extractors.Where(x => x is ThHoleExtractor).FirstOrDefault() as ThHoleExtractor;
+
+            var placeConverageExtract = new ThFaPlaceCoverageExtractor()
+            {
+                Rooms = roomExtract.Rooms,
+                Walls = wallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList(),
+                Columns = columnExtract.Columns.Select(x => ThIfcColumn.Create(x)).ToList(),
+                Beams = beamExtract.Beams,
+                Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
+                ReferBeam = referBeam,
+                Transformer = Transformer,
+            };
+
+            placeConverageExtract.Extract(null, new Point3dCollection());
+
+            return placeConverageExtract;
+        }
+
+
+
         private ThBuildingElementVisitorManager Extract(Database database)
         {
             var visitors = new ThBuildingElementVisitorManager(database);
@@ -84,6 +127,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             extractor.Accept(visitors.DB3ColumnVisitor);
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);
+            extractor.Accept(visitors.DB3BeamVisitor);
             extractor.Extract(database);
             return visitors;
         }

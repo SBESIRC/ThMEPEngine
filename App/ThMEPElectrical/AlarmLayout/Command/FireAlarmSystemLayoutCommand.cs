@@ -19,7 +19,7 @@ namespace ThMEPElectrical.AlarmLayout.Command
         //input
         public Polyline frame { get; set; }//房间外框线
         public List<Polyline> holeList { get; set; }//洞
-        public List<Polyline> layoutList { get; set; }//可布置区域
+        public List<MPolygon> layoutList { get; set; }//可布置区域
         public List<Polyline> wallList { get; set; } //墙
         public List<Polyline> columns { get; set; }//柱子
         public List<Polyline> prioritys { get; set; }//优先级更高点位，比如要躲避已布置好的区域
@@ -48,6 +48,22 @@ namespace ThMEPElectrical.AlarmLayout.Command
                 MPolygon mPolygonShell = objs.BuildMPolygon();
                 //Get Can not Layout Area List
                 List<Polyline> nonDeployableArea = new List<Polyline>();
+                if (holeList.Count != 0)
+                {
+                    foreach (var pl in holeList)
+                    {
+                        nonDeployableArea.Add(pl);
+                    }
+                }
+                if (layoutList.Count !=0)
+                {
+                    foreach (var layout in layoutList )
+                    {
+                        var layoutHole = layout.Holes();
+                        nonDeployableArea.AddRange (layoutHole);
+                        layoutHole.ForEach(x => objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), x.ToNTSPolygon()).ToDbCollection());
+                    }
+                }
 
                 if (wallList.Count != 0)
                 {

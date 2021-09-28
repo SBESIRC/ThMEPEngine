@@ -73,21 +73,22 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList)
+        public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList,bool referBeam)
         {
-            var bReadJson = false;
-            var bWriteJson = false;
-            var fileInfo = new FileInfo(Active.Document.Name);
-            var path = fileInfo.Directory.FullName;
+            var bReadJson = true;
 
             var geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 if (bReadJson == false)
                 {
-                    var datasetFactory = new ThFaAreaLayoutDataSetFactory();
+                    var datasetFactory = new ThFaAreaLayoutDataSetFactory()
+                    { 
+                        ReferBeam = referBeam
+                    };
                     var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                     geos.AddRange(dataset.Container);
+
                     var businessDataFactory = new ThFaAreaLayoutBusinessDataSetFactory()
                     {
                         BlkNameList = extractBlkList,
@@ -106,11 +107,42 @@ namespace ThMEPElectrical.FireAlarm.Service
                     }
                     var sName = psr.StringResult;
                     geos = ThGeometryJsonReader.ReadFromFile(sName);
+                    var businessDataFactory = new ThFaAreaLayoutBusinessDataSetFactory()
+                    {
+                        BlkNameList = extractBlkList,
+                    };
+                    var businessDataSet = businessDataFactory.Create(acadDatabase.Database, pts);
+                    geos.AddRange(businessDataSet.Container);
                 }
-                if (bWriteJson == true)
+            }
+
+            return geos;
+        }
+
+        /// <summary>
+        /// for debug
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="extractBlkList"></param>
+        /// <returns></returns>
+        public static List<ThGeometry> writeSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
+        {
+            var fileInfo = new FileInfo(Active.Document.Name);
+            var path = fileInfo.Directory.FullName;
+
+            var geos = new List<ThGeometry>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var datasetFactory = new ThFaAreaLayoutDataSetFactory()
                 {
-                    ThGeoOutput.Output(geos, path, fileInfo.Name);
-                }
+                    ReferBeam = referBeam
+                }; ;
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
+
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
+
             }
 
             return geos;
