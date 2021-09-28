@@ -55,16 +55,6 @@ namespace ThMEPEngineCore.ConnectWiring.Service
         /// <returns></returns>
         private Polyline TrimWiring(Polyline wiring, DBObjectCollection blockGeos)
         {
-            //using (Application.DocumentManager.MdiActiveDocument.LockDocument())
-            //using (Linq2Acad.AcadDatabase fb = Linq2Acad.AcadDatabase.Active())
-            //{
-            //    foreach (Entity item in blockGeos)
-            //    {
-            //        fb.ModelSpace.Add(item);
-            //    }
-            //    fb.ModelSpace.Add(wiring);
-            //}
-
             blockGeos.Add(wiring);
             var nodeGeo = blockGeos.ToNTSNodedLineStrings();
             var handleLine = wiring;

@@ -500,14 +500,7 @@ namespace ThMEPEngineCore
         public void THWiringGeo()
         {
             ConnectWiringService connectWiring = new ConnectWiringService();
-            var lines = connectWiring.Routing(25, "照明");
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in lines)
-                {
-                    db.ModelSpace.Add(item);
-                }
-            }
+            connectWiring.Routing(25, "照明");
         }
 
         [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]

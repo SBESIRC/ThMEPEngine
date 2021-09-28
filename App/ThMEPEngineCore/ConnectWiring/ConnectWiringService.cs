@@ -29,13 +29,12 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public List<Polyline> Routing(int count, string systemName)
+        public void Routing(int count, string systemName)
         {
-            var lines = new List<Polyline>();
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
             {
-                return lines;
+                return;
             }
 
             BlockConfigSrervice configSrervice = new BlockConfigSrervice();
@@ -71,6 +70,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var res = thCableRouter.RouteCable(dataGeoJson, count);
                     if (!res.Contains("error"))
                     {
+                        var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
                         using (var stringReader = new StringReader(res))
                         using (var jsonReader = new JsonTextReader(stringReader))
@@ -85,19 +85,12 @@ namespace ThMEPEngineCore.ConnectWiring
                                 }
                             }
                         }
+
+                        //插入线
+                        LineTypeService.InsertConnectPipe(lines, info.loopInfoModels.First().LineType);
                     }
                 }
             }
-
-            using (Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in lines)
-                {
-                    db.ModelSpace.Add(item);
-                }
-            }
-            return lines;
         }
 
         /// <summary>
