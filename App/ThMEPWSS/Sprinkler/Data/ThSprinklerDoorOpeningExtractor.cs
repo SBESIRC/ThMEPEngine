@@ -1,24 +1,24 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using ThMEPWSS.Sprinkler.Service;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
-using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.Sprinkler.Data
 {
@@ -75,6 +75,7 @@ namespace ThMEPWSS.Sprinkler.Data
             columnEngine.Recognize(VisitorManager.DB3ColumnVisitor.Results, newPts);
             return columnEngine.Elements.Select(o => o.Outline).ToCollection();
         }
+
         private DBObjectCollection ExtractColumn(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
@@ -83,6 +84,7 @@ namespace ThMEPWSS.Sprinkler.Data
             columnEngine.Recognize(VisitorManager.ColumnVisitor.Results, newPts);
             return columnEngine.Elements.Select(o => o.Outline).ToCollection();
         }
+
         private DBObjectCollection ExtractDb3ArchitectureWall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
@@ -91,6 +93,7 @@ namespace ThMEPWSS.Sprinkler.Data
             wallEngine.Recognize(VisitorManager.DB3ArchWallVisitor.Results, newPts);
             return wallEngine.Elements.Select(o => o.Outline).ToCollection();
         }
+
         private DBObjectCollection ExtractDb3Curtainwall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
@@ -108,6 +111,7 @@ namespace ThMEPWSS.Sprinkler.Data
             shearWallEngine.Recognize(VisitorManager.DB3ShearWallVisitor.Results, newPts);
             return shearWallEngine.Elements.Select(o => o.Outline).ToCollection();
         }
+
         private DBObjectCollection ExtractShearwall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点

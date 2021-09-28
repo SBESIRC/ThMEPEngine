@@ -14,6 +14,7 @@ namespace ThMEPWSS.Sprinkler.Service
             holes.ForEach(p => objs.Add(p));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
+
         public bool IsExteriorDoor(Polyline door)
         {
             var crossObjs = SpatialIndex.SelectCrossingPolygon(door);

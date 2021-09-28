@@ -38,27 +38,6 @@ namespace ThMEPWSS.Sprinkler.Data
             xRefWalls = xRefWalls.UnionPolygons();
             xRefWalls = xRefWalls.FilterSmallArea(SmallAreaTolerance);
             Walls = xRefWalls.Cast<Entity>().ToList();
-
-            //var localWalls = ExtractMsWall(database, pts);
-
-            //var clean = new ThSprinklerCleanEntityService();
-            //localWalls = localWalls.FilterSmallArea(SmallAreaTolerance)
-            //    .Cast<Polyline>()
-            //    .Select(o => clean.Clean(o))
-            //    .Cast<Entity>()
-            //    .ToCollection();
-            ////对Clean的结果进一步过虑
-            //localWalls = localWalls.FilterSmallArea(SmallAreaTolerance);
-
-            ////处理重叠
-            //var conflictService = new ThSprinklerHandleConflictService(
-            //    localWalls.Cast<Entity>().ToList(),
-            //    xRefWalls.Cast<Entity>().ToList());
-            //conflictService.Handle();
-            //var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
-            //var handleContainService = new ThHandleContainsService();
-            //handleObjs = handleContainService.Handle(handleObjs.Cast<Entity>().ToList()).ToCollection();
-            //Walls = handleObjs.Cast<Entity>().ToList();
         }
 
         private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)

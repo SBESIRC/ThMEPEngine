@@ -28,6 +28,7 @@ namespace ThMEPWSS.Sprinkler.Data
             StoreyInfos = new List<ThStoreyInfo>();
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
         }
+
         public override void Extract(Database database, Point3dCollection pts)
         {
             var localFireproofShutters = new DBObjectCollection();

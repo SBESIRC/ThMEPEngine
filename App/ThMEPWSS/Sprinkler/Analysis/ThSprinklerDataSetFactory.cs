@@ -116,18 +116,5 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 Container = Geos,
             };
         }
-
-        private void Print(Database database, List<ThExtractorBase> extractors)
-        {
-            short colorIndex = 1;
-            extractors.ForEach(o =>
-            {
-                o.ColorIndex = colorIndex++;
-                if (o is IPrint printer)
-                {
-                    printer.Print(database);
-                }
-            });
-        }
     }
 }

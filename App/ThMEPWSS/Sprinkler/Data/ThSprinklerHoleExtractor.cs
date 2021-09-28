@@ -30,6 +30,7 @@ namespace ThMEPWSS.Sprinkler.Data
             StoreyInfos = new List<ThStoreyInfo>();
             HoleDic = new Dictionary<Polyline, List<string>>();
         }
+
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();

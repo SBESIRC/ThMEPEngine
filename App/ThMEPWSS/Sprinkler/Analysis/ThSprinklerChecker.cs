@@ -11,8 +11,6 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public abstract class ThSprinklerChecker
     {
-        public ThMEPDataSet DataSet { get; set; }
-
         // 校核喷头类型
         public string Category { get; set; }
         // 半径A
@@ -27,15 +25,6 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public ThSprinklerChecker()
         {
             //
-        }
-
-        public ThSprinklerChecker(string category, string dangerGrade, string range, int beamHeight)
-        {
-            Category = category;
-            BeamHeight = beamHeight;
-            var data = DangerGradeDataManager.Query(dangerGrade, range);
-            RadiusA = data.A;
-            RadiusB = data.B;
         }
 
         public abstract void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline);

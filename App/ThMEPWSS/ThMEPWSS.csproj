@@ -56,8 +56,6 @@
     <Compile Include="Pipe\Model\ViewModels.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBlindZoneChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerChecker.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerCommand.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDataSetFactory.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceBetweenSprinklerChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBeamChecker.cs" />
