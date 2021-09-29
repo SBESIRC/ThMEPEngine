@@ -230,6 +230,7 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThDrawPolylineEntJigger.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThLineUnionService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />

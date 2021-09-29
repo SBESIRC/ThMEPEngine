@@ -16,8 +16,10 @@ namespace ThMEPEngineCore
         public const string SHEARWALL = "AI-剪力墙";
         public const string ROOMOUTLINE = "AI-房间框线";
         public const string ROOMMARK = "AI-房间名称";
+        public const string ROOMSPLITLINE = "AI-房间分割线";
         public const string FIRECOMPARTMENT = "AI-防火分区";
         public const string FRS = "AI-防火卷帘";
+
 
         public static ObjectId CreateAIBeamLayer(this Database database)
         {
@@ -62,6 +64,11 @@ namespace ThMEPEngineCore
         public static ObjectId CreateAIRoomOutlineLayer(this Database database)
         {
             return database.CreateAILayer(ROOMOUTLINE, 21);
+        }
+
+        public static ObjectId CreateAIRoomSplitlineLayer(this Database database)
+        {
+            return database.CreateAILayer(ROOMSPLITLINE, 41);
         }
 
         public static ObjectId CreateAIRoomMarkLayer(this Database database)

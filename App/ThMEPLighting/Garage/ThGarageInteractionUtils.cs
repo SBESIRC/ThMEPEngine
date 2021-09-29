@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPLighting.Garage
 {
@@ -160,29 +161,6 @@ namespace ThMEPLighting.Garage
             return arrangeParameter;
         }
 
-        public static Point3dCollection PolylineJig(short colorIndex)
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                try
-                {
-                    var jigger = new ThDrawPolylineJigger(colorIndex);
-                    PromptResult jigRes;
-                    do
-                    {
-                        jigRes = Active.Editor.Drag(jigger);
-                        if (jigRes.Status == PromptStatus.OK)
-                            jigger.AllVertexes.Add(jigger.LastVertex);
-                    } while (jigRes.Status == PromptStatus.OK);
-                    return jigger.WcsVertexes;
-                }
-                catch (System.Exception ex)
-                {
-                    Active.Editor.WriteMessage(ex.ToString());
-                }
-            }
-            return new Point3dCollection();
-        }
         public static Point3dCollection SelectPolylinePoints()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())

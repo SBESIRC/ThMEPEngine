@@ -23,11 +23,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
         SprinklerCheckersUI uiSprinklerCheckers;
+        RoomOutlineUI uiRoomOutline;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
             uiSprinklerCheckers = null;
+            uiRoomOutline = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -218,6 +220,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
             uiSprinklerCheckers = new SprinklerCheckersUI(ThSprinklerCheckCmd.SprinklerCheckerVM);
             uiSprinklerCheckers.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiSprinklerCheckers);
+        }
+
+        /// <summary>
+        /// 房间框线UI
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDrawRoomOutline", CommandFlags.Modal)]
+        public void THDrawRoomOutline()
+        {
+            if (uiRoomOutline != null && uiRoomOutline.IsLoaded)
+                return;
+            uiRoomOutline = new RoomOutlineUI();
+            uiRoomOutline.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiRoomOutline);
         }
 
 

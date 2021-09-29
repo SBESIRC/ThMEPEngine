@@ -12,9 +12,8 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomOutlineBuilderEngine
     {
-        private const double SimplifyTolerance = 10.0;
-        private const double AreaTolerance = 20.0;
-        private const double RoomBufferDistance = 5.0;
+        private const double AreaTolerance = 1e-6;
+        private const double ExtendDistance = 10.0; //用于处理墙、门、窗、柱等元素之间不相接的Case
         public List<DBObjectCollection> results { get; set; }
         public int Count { get { return _data.Count; }}
         private DBObjectCollection _data;
@@ -30,12 +29,12 @@ namespace ThMEPEngineCore.Engine
         //此时拿到的数据均作了初步处理，但可能存在缝隙
         public void CloseAndFilter()
         {
-            _data = _data.FilterSmallArea(AreaTolerance);//这里不知道还需不需要
+            var lines = _data.ExplodeLines().Where(l=>l.Length>0.0);
+            _data = lines.Select(l => l.ExtendLine(ExtendDistance)).ToCollection();
             //进行Polygonizer以便Build使用
-            _data = _data.Polygons();
+            _data = _data.PolygonsEx();
             _data = _data.FilterSmallArea(AreaTolerance);
         }
-
 
         public void Build(Point3d point)
         {
@@ -61,7 +60,9 @@ namespace ThMEPEngineCore.Engine
                 result.Add(dbObj);
             }
             result = result.BuildArea();
+
             result = ContainsPoint(result, point);
+
             results.Add(result);
             //makevalid似乎不支持DBObjectCollection作为参数
         }
@@ -72,19 +73,11 @@ namespace ThMEPEngineCore.Engine
             {
                 if (obj is Polyline polyline && polyline.Contains(point))
                 {
-                    var Dbobjs = polyline.Buffer(Roomdata.BufferDistance);
-                    foreach (DBObject o in Dbobjs)
-                    {
-                        result.Add(o);
-                    }
+                    result.Add(polyline);
                 }
                 else if (obj is MPolygon polygon && polygon.Contains(point))
                 {
-                    var Dbobjs = polygon.Buffer(Roomdata.BufferDistance);
-                    foreach (DBObject o in Dbobjs)
-                    {
-                        result.Add(o);
-                    }
+                    result.Add(polygon);
                 }
             }
             return result;

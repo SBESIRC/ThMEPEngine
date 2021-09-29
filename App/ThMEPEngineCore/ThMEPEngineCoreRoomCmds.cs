@@ -114,6 +114,7 @@ namespace ThMEPEngineCore
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
                 data.Deburring();
                 var totaldata = data.MergeData();
+
                 selectPts = selectPts.Where(o => !data.ContatinPoint3d(o)).ToList();
                 var builder = new ThRoomOutlineBuilderEngine(totaldata);
 
@@ -124,7 +125,7 @@ namespace ThMEPEngineCore
 
                 //交互+获取房间
                 // 输出房间
-                var layerId = acadDb.Database.CreateAILayer("AI-房间框线", 30);
+                var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
 
                 selectPts.ForEach(p =>
                 {

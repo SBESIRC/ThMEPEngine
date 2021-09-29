@@ -1,4 +1,6 @@
 ﻿using System;
+using AcHelper;
+using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.GraphicsInterface;
@@ -115,6 +117,30 @@ namespace ThMEPLighting.Garage.Service
             //    return SamplerStatus.NoChange;
             //}
             return SamplerStatus.OK;
+        }
+
+        public static Point3dCollection PolylineJig(short colorIndex)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                try
+                {
+                    var jigger = new ThDrawPolylineJigger(colorIndex);
+                    PromptResult jigRes;
+                    do
+                    {
+                        jigRes = Active.Editor.Drag(jigger);
+                        if (jigRes.Status == PromptStatus.OK)
+                            jigger.AllVertexes.Add(jigger.LastVertex);
+                    } while (jigRes.Status == PromptStatus.OK);
+                    return jigger.WcsVertexes;
+                }
+                catch (System.Exception ex)
+                {
+                    Active.Editor.WriteMessage(ex.ToString());
+                }
+            }
+            return new Point3dCollection();
         }
     }
 }

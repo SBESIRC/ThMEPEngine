@@ -894,10 +894,11 @@ namespace ThMEPEngineCore
                 frame.TransformBy(Active.Editor.UCS2WCS());
                 var engine = new ThDB3RoomMarkRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
+                acadDatabase.Database.CreateAIRoomMarkLayer();
                 engine.Elements.Cast<ThIfcTextNote>().Select(o => o.Geometry).ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o);
-                    o.SetDatabaseDefaults();
+                    o.Layer = ThMEPEngineCoreLayerUtils.ROOMMARK;
                 });
             }
         }
