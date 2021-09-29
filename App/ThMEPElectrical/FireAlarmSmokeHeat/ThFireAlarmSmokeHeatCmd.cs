@@ -6,27 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
-using GeometryExtensions;
-using NFox.Cad;
 
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.GeoJSON;
-
-using ThMEPEngineCore.AreaLayout.GridLayout.Command;
-using ThMEPEngineCore.AreaLayout.GridLayout.Data;
-
+using ThMEPEngineCore.Stair;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
@@ -34,7 +20,6 @@ using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
-using ThMEPEngineCore.Stair;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat
 {
@@ -116,7 +101,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
         {
             _UiConfigs = uiConfigs;
             CommandName = "THFireAlarmSmokeLayout";
-            ActionName = "生成";
+            ActionName = "布置";
             setInfo();
         }
 

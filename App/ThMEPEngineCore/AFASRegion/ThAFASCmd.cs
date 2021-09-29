@@ -7,11 +7,11 @@ using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
-using ThMEPElectrical.AFASRegion.Model;
+using ThMEPEngineCore.AFASRegion.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Electrical;
 
-namespace ThMEPElectrical.AFASRegion
+namespace ThMEPEngineCore.AFASRegion
 {
     public class ThAFASCmd
     {

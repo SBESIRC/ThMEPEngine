@@ -92,23 +92,21 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         }
 
 
-        public static List<Polyline> getPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale, string blkName)
+        public static List<Polyline> getPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale,  (double, double) size)
         {
             var blkBoundary = new List<Polyline>();
 
             foreach (var blk in layoutPts)
             {
-                var boundary = getBoundary(blk.Key, blk.Value, scale, blkName);
+                var boundary = getBoundary(blk.Key, blk.Value, scale, size);
                 blkBoundary.Add(boundary);
             }
 
             return blkBoundary;
         }
 
-        private static Polyline getBoundary(Point3d pt, Vector3d dir, double scale, string blkName)
+        private static Polyline getBoundary(Point3d pt, Vector3d dir, double scale,  (double, double) size)
         {
-            var size = ThFaCommon.blk_size[blkName];
-
             var xDir = dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
             var pt0 = pt + dir * (size.Item2 * scale / 2) - xDir * (size.Item1 * scale / 2);
             var pt1 = pt + dir * (size.Item2 * scale / 2) + xDir * (size.Item1 * scale / 2);

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPElectrical.AFASRegion.Model;
+using ThMEPEngineCore.AFASRegion.Model;
 
-namespace ThMEPElectrical.AFASRegion.Expand
+namespace ThMEPEngineCore.AFASRegion.Expand
 {
     public static class DetectorExtend
     {

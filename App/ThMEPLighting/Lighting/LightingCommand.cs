@@ -44,10 +44,14 @@ namespace ThMEPLighting.Lighting.Commands
         public override void SubExecute()
         {
             //todo: layout lighting components using _UiConfigs
+            if (_UiConfigs.IsIlluminationLightChecked == true)
+            {
 
+            }
         }
         public void Dispose()
-        { }
+        {
+        }
     }
 }
 

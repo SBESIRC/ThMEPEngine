@@ -17,9 +17,9 @@ using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.AFASRegion;
 
-using ThMEPElectrical.FireAlarm.Interface;
+using ThMEPLighting.IlluminationLighting.Interface;
 
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPLighting.IlluminationLighting.Data
 {
     public class ThFaPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer, IGroup, ISetStorey
     {

@@ -9,14 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.AFASRegion.Model;
-using ThMEPElectrical.AFASRegion.Model.DetectionRegionGraphModel;
+using ThMEPEngineCore.AFASRegion.Model;
+using ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Model;
 
-namespace ThMEPElectrical.AFASRegion.Service
+namespace ThMEPEngineCore.AFASRegion.Service
 {
     public class AFASBeamExtendFactory
     {

@@ -25,7 +25,7 @@ namespace TianHua.Lighting.UI
     /// </summary>
     public partial class uiThLighting : ThCustomWindow
     {
-        public static readonly LightingViewModel UIConfigs = new LightingViewModel();
+        static readonly LightingViewModel UIConfigs = new LightingViewModel();
         static uiThLighting()
         {
             var items = UIConfigs.Items;
@@ -36,6 +36,7 @@ namespace TianHua.Lighting.UI
         public uiThLighting()
         {
             InitializeComponent();
+            DataContext = UIConfigs;
             InitUI();
             //For single form instance
             MutexName = "Mutext_uiThLighting";
@@ -43,9 +44,8 @@ namespace TianHua.Lighting.UI
 
         private void InitUI()
         {
-            cbRatio.ItemsSource = new string[] { "1:100" };
             cbSignLightSize.ItemsSource = new string[] { "中型", "大型" };
-            DataContext = UIConfigs;
+          
             SelectionChangedEventHandler f = null;
             int lastSelCount = 0;
             

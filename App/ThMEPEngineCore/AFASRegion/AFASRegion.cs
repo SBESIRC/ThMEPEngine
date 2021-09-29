@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPElectrical.AFASRegion.Model;
+using ThMEPEngineCore.AFASRegion.Model;
 using ThMEPEngineCore.Engine;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,10 +14,10 @@ using ThMEPEngineCore.Model;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
-using ThMEPElectrical.AFASRegion.Service;
+using ThMEPEngineCore.AFASRegion.Service;
 using ThMEPEngineCore.Algorithm;
 
-namespace ThMEPElectrical.AFASRegion
+namespace ThMEPEngineCore.AFASRegion
 {
     public class AFASRegion
     {

@@ -5,12 +5,13 @@
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:s="clr-namespace:System;assembly=mscorlib"
                          xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
-                                         Title="照明" SizeToContent="Manual" Height="750"
+                                         Title="照明" SizeToContent="Manual" Height="780"
                                         Width="450" MaxWidth="1000" MaxHeight="1000"
                          mc:Ignorable="d" >
     <Window.Resources>
         <ResourceDictionary>
             <viewmodels:RadioUiValueConverter x:Key="RadioUiValueConverter" ></viewmodels:RadioUiValueConverter>
+            <viewmodels:EnumBooleanConverter x:Key="EnumBooleanConverter" ></viewmodels:EnumBooleanConverter>
         </ResourceDictionary>
     </Window.Resources>
     <StackPanel Orientation="Vertical">
@@ -18,31 +19,31 @@
             <StackPanel >
                 <GroupBox>
                     <GroupBox.Header>
-                        <CheckBox FontSize="20" FontWeight="Bold">
+                        <CheckBox FontSize="20" FontWeight="Bold" IsChecked="{Binding IsIlluminationLightChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                             照明灯具
                         </CheckBox>
                     </GroupBox.Header>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <StackPanel Orientation="Vertical">
-                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
-                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=圆形吸顶灯}">圆形吸顶灯</RadioButton>
+                            <StackPanel Margin="5,5,0,0" Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/圆形吸顶灯.png"></Image>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.circleCeiling }}">圆形吸顶灯</RadioButton>
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
-                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=半球吸顶灯}">半球吸顶灯</RadioButton>
+                            <StackPanel Margin="5,5,0,0" Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/半球吸顶灯.png"></Image>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.domeCeiling }}">半球吸顶灯</RadioButton>
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
-                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=感应吸顶灯}">感应吸顶灯</RadioButton>
+                            <StackPanel Margin="5,5,0,0"  Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/感应吸顶灯.png"></Image>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.inductionCeiling}}">感应吸顶灯</RadioButton>
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
-                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=筒灯}">筒灯</RadioButton>
+                            <StackPanel Margin="5,5,0,0" Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/筒灯.png"></Image>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.downlight}}">筒灯</RadioButton>
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
-                                <RadioButton Margin="5,5,0,0" IsChecked="{Binding LightingLamps, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=应急照明灯}">应急照明灯</RadioButton>
+                            <StackPanel Margin="25,5,0,0"  Orientation="Vertical">
+                                <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/应急照明灯.png"></Image>
+                                <CheckBox Margin="5,5,0,0" IsChecked="{Binding IfLayoutEmgChecked,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">应急照明灯</CheckBox>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -54,17 +55,21 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,5,0,0">正常照明灯具布置半径(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding LayoutRadiusOfNormalLightingLamps}"></TextBox>
+                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding RadiusNormal, Mode=TwoWay}"></TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,5,0,0">应急照明灯具布置半径(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding LayoutRadiusOfEmergencyLightingLamps}"></TextBox>
+                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding RadiusEmg, Mode=TwoWay }"></TextBox>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="5,5,0,0">应急照明是否兼做平时照明</TextBlock>
-                <RadioButton Height="15" Margin="5,5,0,0"  IsChecked="{Binding WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=true}">是</RadioButton>
-                <RadioButton Height="15" Margin="5,5,0,0"  IsChecked="{Binding WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=false}">否</RadioButton>
+                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal, Mode=TwoWay , ConverterParameter=true}">是</RadioButton>
+                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal, Mode=TwoWay , ConverterParameter=false}">否</RadioButton>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="rbBeam" Margin="5,5,0,0" IsChecked="{Binding ShouldConsiderBeam, Mode=TwoWay, ConverterParameter=true}">考虑梁</RadioButton>
+                <RadioButton GroupName="rbBeam" Margin="5,5,0,0" IsChecked="{Binding ShouldConsiderBeam, Mode=TwoWay, ConverterParameter=true}">不考虑梁</RadioButton>
             </StackPanel>
         </StackPanel>
         <GroupBox>
@@ -114,17 +119,17 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                            <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Control.Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" Name="Bd" SnapsToDevicePixels="True">
+                                            <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" x:Name="Bd" SnapsToDevicePixels="True">
                                                 <CheckBox
-                                                                                        IsChecked="{Binding Path=IsSelected,RelativeSource={RelativeSource TemplatedParent},Mode=TwoWay}"
+                                                                                        IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                                                         >
-                                                    <ContentPresenter Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                                    <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                                 </CheckBox>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <MultiTrigger>
                                                     <MultiTrigger.Conditions>
-                                                        <Condition Property="UIElement.IsMouseOver">
+                                                        <Condition Property="IsMouseOver">
                                                             <Condition.Value>
                                                                 <s:Boolean>True</s:Boolean>
                                                             </Condition.Value>
@@ -135,7 +140,7 @@
                                                             <SolidColorBrush>#1F26A0DA</SolidColorBrush>
                                                         </Setter.Value>
                                                     </Setter>
-                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                    <Setter Property="BorderBrush" TargetName="Bd">
                                                         <Setter.Value>
                                                             <SolidColorBrush>#A826A0DA</SolidColorBrush>
                                                         </Setter.Value>
@@ -159,7 +164,7 @@
                                                             <SolidColorBrush>#3DDADADA</SolidColorBrush>
                                                         </Setter.Value>
                                                     </Setter>
-                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                    <Setter Property="BorderBrush" TargetName="Bd">
                                                         <Setter.Value>
                                                             <SolidColorBrush>#FFDADADA</SolidColorBrush>
                                                         </Setter.Value>
@@ -183,21 +188,17 @@
                                                             <SolidColorBrush>#3D26A0DA</SolidColorBrush>
                                                         </Setter.Value>
                                                     </Setter>
-                                                    <Setter Property="Border.BorderBrush" TargetName="Bd">
+                                                    <Setter Property="BorderBrush" TargetName="Bd">
                                                         <Setter.Value>
                                                             <SolidColorBrush>#FF26A0DA</SolidColorBrush>
                                                         </Setter.Value>
                                                     </Setter>
                                                 </MultiTrigger>
-                                                <Trigger Property="UIElement.IsEnabled">
-                                                    <Setter Property="TextElement.Foreground" TargetName="Bd">
-                                                        <Setter.Value>
-                                                            <DynamicResource ResourceKey="{x:Static SystemColors.GrayTextBrushKey}" />
-                                                        </Setter.Value>
-                                                    </Setter>
+                                                <Trigger Property="IsEnabled">
                                                     <Trigger.Value>
                                                         <s:Boolean>False</s:Boolean>
                                                     </Trigger.Value>
+                                                    <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -207,7 +208,7 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Text}"></TextBlock>
+                                <TextBlock Text="{Binding Text}"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -316,11 +317,11 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Orientation="Vertical">
-                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/优先壁装.png"></Image>
                         <RadioButton Margin="5,5,0,0"   IsChecked="{Binding EvacuationInstructions, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=优先壁装}">优先壁装</RadioButton>
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
-                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/优先吊装.png"></Image>
                         <RadioButton Margin="5,5,0,0"  IsChecked="{Binding EvacuationInstructions, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=优先吊装}">优先吊装</RadioButton>
                     </StackPanel>
                 </StackPanel>
@@ -355,11 +356,11 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                     <StackPanel Orientation="Vertical">
-                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/疏散照明壁灯.png"></Image>
                         <RadioButton Margin="5,5,0,0"   IsChecked="{Binding BasementEmergencyLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=疏散照明壁灯}">疏散照明壁灯</RadioButton>
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
-                        <Image Width="50" Height="50" Source="C:\Program Files (x86)\kingsoft\kingsoft antivirus\data\!trapfile1.jpg"></Image>
+                        <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/消防专用投光灯.png"></Image>
                         <RadioButton Margin="5,5,0,0"   IsChecked="{Binding BasementEmergencyLighting, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=消防专用投光灯}">消防专用投光灯</RadioButton>
                     </StackPanel>
                 </StackPanel>
@@ -373,7 +374,10 @@
         </GroupBox>
         <StackPanel Orientation="Horizontal">
             <TextBlock Height="20" >全局比例：</TextBlock>
-            <ComboBox x:Name="cbRatio" Width="60" Height="20" SelectedItem="{Binding GlobalScale}"></ComboBox>
+            <ComboBox x:Name="cbRatio" Width="60" Height="20" SelectedItem="{Binding BlockRatioIndex}" Text="{Binding BlockRatio , Mode=OneWayToSource}">
+                <ComboBoxItem>1:100</ComboBoxItem>
+                <ComboBoxItem>1:150</ComboBoxItem>
+            </ComboBox>
             <Button Name="btnLayout" Width="116" Height="25" Click="btnPlace_Click" Margin="10,0,0,0">布置</Button>
             <Button Name="btnRouting" Width="120" Height="25" Click="btnRouting_Click" Margin="10,0,0,0">连线</Button>
         </StackPanel>

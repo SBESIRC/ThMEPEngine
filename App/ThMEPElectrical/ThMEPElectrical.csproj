@@ -29,17 +29,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AFASRegion\AFASRegion.cs" />
-    <Compile Include="AFASRegion\Expand\DetectorExtend.cs" />
-    <Compile Include="AFASRegion\Model\AFASBeamContour.cs" />
-    <Compile Include="AFASRegion\Model\AFASDetector.cs" />
-    <Compile Include="AFASRegion\AFASBeamExtendFactory.cs" />
-    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\DetectionRegionGraphModel.cs" />
-    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\LineCompare.cs" />
-    <Compile Include="AFASRegion\Model\ScoringModel.cs" />
-    <Compile Include="AFASRegion\Service\AFASRegionService.cs" />
-    <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
-    <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="AlarmLayout\Test\TestCmd.cs" />
     <Compile Include="AlarmSensorLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
@@ -401,10 +390,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
-    <Folder Include="FireAlarmLayout\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

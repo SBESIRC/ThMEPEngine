@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPEngineCore.AFASRegion.Utls;
 
-namespace ThMEPElectrical.AFASRegion.Model.DetectionRegionGraphModel
+namespace ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel
 {
     public class LineCompare : IEqualityComparer<Line>
     {

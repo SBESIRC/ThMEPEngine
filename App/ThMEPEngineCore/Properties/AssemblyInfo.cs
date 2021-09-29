@@ -42,3 +42,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreApp))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreRoomCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreInternalCmds))]
+[assembly: CommandClass(typeof(ThMEPEngineCore.AFASRegion.ThAFASCmd))]

@@ -28,6 +28,7 @@ using ThMEPEngineCore.Config;
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
+using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
@@ -55,7 +56,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                         var localHeatResult = layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, heatResult);
                         if (localHeatResult.layoutPts != null && localHeatResult.layoutPts.Count > 0)
                         {
-                            priority = ThFaAreaLayoutParamterCalculationService.getPriorityBoundary(localHeatResult.layoutPts, layoutParameter.Scale, layoutParameter.BlkNameHeat);
+                            var size = ThFaCommon.blk_size[layoutParameter.BlkNameHeat];
+                            priority = ThFaAreaLayoutParamterCalculationService.getPriorityBoundary(localHeatResult.layoutPts, layoutParameter.Scale, size);
                         }
                         dataQuery.FramePriorityList[frame].AddRange(priority);
                     }

@@ -29,70 +29,65 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmSmokeHeat.Data;
+using ThMEPLighting.IlluminationLighting.Common;
 
 
-namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
+namespace ThMEPLighting.IlluminationLighting.Service
 {
     class ThFaAreaLayoutRoomTypeService
     {
         /// <summary>
-        /// 读配置表.value:0:楼梯，1：烟感，2：温感，3：烟温感，4:非布置，5：找不到tag（当成非布置处理）
+        /// 读配置表.
         /// </summary>
         /// <param name="frameList"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> getAreaSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
+        public static Dictionary<Polyline, ThIlluminationCommon.layoutType> getAreaLightType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
-            var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
+            var frameLightType = new Dictionary<Polyline, ThIlluminationCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-            var roomTableTree = ThFireAlarmUtils.ReadRoomConfigTable(roomConfigUrl);
-            var stairName = ThFaSmokeCommon.stairName;
-            var smokeTag = ThFaSmokeCommon.smokeTag;
-            var heatTag = ThFaSmokeCommon.heatTag;
-            var nonLayoutTag = ThFaSmokeCommon.nonLayoutTag;
+            var roomTableTree = ThIlluminationUtils.ReadRoomConfigTable(roomConfigUrl);
+            var stairName = ThIlluminationCommon.stairName;
+            var evacuationTag = ThIlluminationCommon.evacuationTag;
+            var normalTag = ThIlluminationCommon.normalTag;
+
 
             foreach (var room in Room)
             {
-                var typeInt = ThFaSmokeCommon.layoutType.noName;
+                var typeInt = ThIlluminationCommon.layoutType.noName;
                 var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
 
                 if (isRoom(roomTableTree, roomName, stairName))
                 {
-                    typeInt = ThFaSmokeCommon.layoutType.stair;
+                    typeInt = ThIlluminationCommon.layoutType.stair;
                 }
                 else if (roomName != "")
                 {
                     var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
-                    if (tagList.Contains(smokeTag) && tagList.Contains(heatTag))
+                    if (tagList.Contains(normalTag) && tagList.Contains(evacuationTag))
                     {
-                        typeInt = ThFaSmokeCommon.layoutType.smokeHeat;
+                        typeInt = ThIlluminationCommon.layoutType.normalEvac;
                     }
-                    else if (tagList.Contains(smokeTag))
+                    else if (tagList.Contains(normalTag))
                     {
-                        typeInt = ThFaSmokeCommon.layoutType.smoke;
+                        typeInt = ThIlluminationCommon.layoutType.normal;
                     }
-                    else if (tagList.Contains(heatTag))
+                    else if (tagList.Contains(evacuationTag))
                     {
-                        typeInt = ThFaSmokeCommon.layoutType.heat;
-                    }
-                    else if (tagList.Contains(nonLayoutTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.nonLayout;
+                        typeInt = ThIlluminationCommon.layoutType.evacuation;
                     }
                 }
 
                 if (room.Boundary is MPolygon)
                 {
-                    frameSensorType.Add(roomFrameDict[room], typeInt);
+                    frameLightType.Add(roomFrameDict[room], typeInt);
                 }
                 else if (room.Boundary is Polyline frame)
                 {
-                    frameSensorType.Add(frame, typeInt);
+                    frameLightType.Add(frame, typeInt);
                 }
             }
 
-            return frameSensorType;
+            return frameLightType;
 
         }
 

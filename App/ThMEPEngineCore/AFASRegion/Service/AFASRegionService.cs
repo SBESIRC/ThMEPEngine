@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using ThCADExtension;
 using Catel.Collections;
 
-namespace ThMEPElectrical.AFASRegion.Service
+namespace ThMEPEngineCore.AFASRegion.Service
 {
     public class AFASRegionService
     {

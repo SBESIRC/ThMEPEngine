@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPElectrical.AFASRegion.Model
+namespace ThMEPEngineCore.AFASRegion.Model
 {
     /// <summary>
     /// 梁 轮廓

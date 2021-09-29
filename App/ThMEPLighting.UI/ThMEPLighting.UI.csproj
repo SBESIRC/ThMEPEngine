@@ -169,5 +169,12 @@
     <Resource Include="Resource\Image\消防专用投光灯.png" />
     <Resource Include="Resource\Image\疏散照明壁灯.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resource\Image\半球吸顶灯.png" />
+    <Content Include="Resource\Image\圆形吸顶灯.png" />
+    <Content Include="Resource\Image\应急照明灯.png" />
+    <Content Include="Resource\Image\感应吸顶灯.png" />
+    <Content Include="Resource\Image\筒灯.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

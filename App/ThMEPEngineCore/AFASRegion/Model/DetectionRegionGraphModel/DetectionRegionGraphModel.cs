@@ -7,11 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.AFASRegion.Expand;
-using ThMEPElectrical.SecurityPlaneSystem.Utls;
+using ThMEPEngineCore.AFASRegion.Expand;
+using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.CAD;
 
-namespace ThMEPElectrical.AFASRegion.Model.DetectionRegionGraphModel
+namespace ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel
 {
     public class DetectionRegionGraphModel
     {
