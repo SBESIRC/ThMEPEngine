@@ -43,7 +43,6 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             MarkHeigthType = 1;
             FanMarkHeight = 2.5;
             FanInfoList = new ObservableCollection<ThFanConfigInfo>();
-            FanInfoList.Add(new ThFanConfigInfo());
         }
     }
     public class ThAirPortSideConfigInfo

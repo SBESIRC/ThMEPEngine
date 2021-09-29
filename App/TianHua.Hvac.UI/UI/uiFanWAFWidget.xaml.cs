@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,10 @@ namespace TianHua.Hvac.UI.UI
         public ThFanWAFConfigInfo GetFanWAFConfigInfo()
         {
             return ViewModel.fanWAFConfigInfo;
+        }
+        public void SetFanConfigInfoList(ObservableCollection<ThFanConfigInfo> fanInfoList)
+        {
+            ViewModel.fanWAFConfigInfo.FanSideConfigInfo.FanInfoList = fanInfoList;
         }
         private void btnAddFan_Click(object sender, RoutedEventArgs e)
         {

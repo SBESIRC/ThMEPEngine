@@ -150,7 +150,11 @@ namespace ThCADExtension
         {
             return Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
         }
-
+        //风机参数表
+        public static string FanParameterTablePath()
+        {
+            return Path.Combine(ThCADCommon.SupportPath(), "风机参数表.xlsx");
+        }
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

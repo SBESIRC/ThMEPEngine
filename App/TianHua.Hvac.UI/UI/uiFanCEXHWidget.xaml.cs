@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,6 +33,10 @@ namespace TianHua.Hvac.UI.UI
                 ViewModel = new ThFanCEXHViewModel();
             }
             CEXHGrid.DataContext = ViewModel;
+        }
+        public void SetFanConfigInfoList(ObservableCollection<ThFanConfigInfo> fanInfoList)
+        {
+            ViewModel.FanCEXHConfigInfo.FanSideConfigInfo.FanInfoList = fanInfoList;
         }
         public ThFanCEXHConfigInfo GetFanCEXHConfigInfo()
         {
