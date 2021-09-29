@@ -56,19 +56,19 @@ namespace ThMEPEngineCore.Engine
             OriginTransformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
             var newPts = pts.OfType<Point3d>().Select(o => OriginTransformer.Transform(o)).ToCollection();
 
-            // 启动柱识别引擎
-            var extractor = new ThColumnExtractionEngine();
-            extractor.Extract(database);
-            extractor.Results.ForEach(x => OriginTransformer.Transform(x.Geometry));
+            // 启动柱识别引擎(识别引擎更新为ThColumnBuilderEngine)
+            var columnBuilder = new ThColumnBuilderEngine();
+            columnBuilder.Build(database, pts);
             ColumnEngine = new ThColumnRecognitionEngine();
-            ColumnEngine.Recognize(extractor.Results, newPts);
+            ColumnEngine.Elements= columnBuilder.Elements;
+            ColumnEngine.Elements.ForEach(x => OriginTransformer.Transform(x.Outline));
 
-            // 启动墙识别引擎
-            var extractor2 = new ThShearWallExtractionEngine();
-            extractor2.Extract(database);
-            extractor2.Results.ForEach(x => OriginTransformer.Transform(x.Geometry));
+            // 启动墙识别引擎(识别引擎更新为ThShearwallBuilderEngine)
+            var shearWallEngine = new ThShearwallBuilderEngine();
+            shearWallEngine.Build(database, pts);
             ShearWallEngine = new ThShearWallRecognitionEngine();
-            ShearWallEngine.Recognize(extractor2.Results, newPts);
+            ShearWallEngine.Elements = shearWallEngine.Elements;
+            ShearWallEngine.Elements.ForEach(x => OriginTransformer.Transform(x.Outline));
 
             // 启动梁识别引擎
             BeamEngine = new ThDB3BeamRecognitionEngine();
