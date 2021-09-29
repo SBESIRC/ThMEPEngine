@@ -12,13 +12,13 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
         private int _SelectedIndexForH = 0;
 
         //H
-        public int SelectedIndexForH 
+        public int SelectedIndexForH
         {
             get 
             { 
                 return _SelectedIndexForH; 
             }
-            set 
+            set
             {
                 _SelectedIndexForH = value;
                 OnPropertyChanged("SelectedIndexForH");
@@ -188,6 +188,33 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
             {
                 _IsPublicChecked = value;
                 OnPropertyChanged("IsPublicChecked");
+            }
+        }
+
+        //楼层回路显示盘: GS
+        private bool _IsGasSensorChecked = false;
+        public bool IsGasSensorChecked
+        {
+            get
+            {
+                return _IsGasSensorChecked;
+            }
+            set
+            {
+                _IsGasSensorChecked = value;
+                OnPropertyChanged("IsGasSensorChecked");
+            }
+        }
+
+
+        private double _protectRadius = 0;
+        public double ProtectRadius
+        {
+            get { return _protectRadius; }
+            set
+            {
+                _protectRadius = value;
+                OnPropertyChanged("ProtectRadius");
             }
         }
 

@@ -29,7 +29,7 @@
 
                     <StackPanel Orientation="Horizontal">
                         <Label Content="H:"/>
-                        <ComboBox Width="85" SelectedIndex="{Binding SelectedIndexForH}" Text="{Binding SelectedHValue, Mode=OneWayToSource}" Height="20">
+                        <ComboBox Width="85" SelectedIndex="{Binding SelectedIndexForH}" Text="{Binding SelectedHValue, Mode=OneWayToSource}" Height="20" SelectionChanged="ComboBox_SelectionChanged">
                             <ComboBoxItem Content="h &lt;=12"/>
                             <ComboBoxItem Content="6 &lt; h &lt;=12"></ComboBoxItem>
                             <ComboBoxItem Content="h &lt;=6"></ComboBoxItem>
@@ -95,7 +95,7 @@
                           IsChecked="{Binding IsGasSensorChecked,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           ></CheckBox>
-                    <TextBox Text="8000" Height="15" VerticalAlignment="Top"></TextBox>
+                    <cus:InputTextBox TextBoxInputType="InputInteger"  NumCanMinus="False" Height="15" VerticalAlignment="Top" Text="{Binding ProtectRadius, Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Orientation="Horizontal">
                     <CheckBox  Content="防火门监控模块" IsThreeState="False"

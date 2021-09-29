@@ -139,6 +139,10 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarmCombustibleGas\Model\ThFaAreaLayoutParameter.cs" />
+    <Compile Include="FireAlarmCombustibleGas\Service\ThFaAreaLayoutRoomTypeService.cs" />
+    <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasCmd.cs" />
+    <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasEngine.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
@@ -400,6 +404,7 @@
     <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
+    <Folder Include="FireAlarmLayout\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

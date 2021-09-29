@@ -177,7 +177,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 dataQuery.analysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                dataQuery.getAreaSensorType();
+                //dataQuery.getAreaSensorType();
+                var roomType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
 
                 foreach (var frame in dataQuery.FrameHoleList)
                 {
@@ -185,8 +186,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                     DrawUtils.ShowGeometry(frame.Value, string.Format("l0hole"), 140);
                 }
 
+                var layoutParameter = new ThFaAreaLayoutParameter();
+
                 //接入楼梯
-                var stairBoundary = dataQuery.FrameSensorType.Where(x => x.Value == ThFaSmokeCommon.layoutType.stair).Select(x => x.Key).ToList();
+                var stairBoundary = layoutParameter.RoomType.Where(x => x.Value == ThFaSmokeCommon.layoutType.stair).Select(x => x.Key).ToList();
                 //boundary 到原位置
                 stairBoundary.ForEach(x => transformer.Reset(x));
                 var stairEngine = new ThStairEquimentLayout();
@@ -200,13 +203,14 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 var smokeResult = new ThFaAreaLayoutResult();
                 var heatResult = new ThFaAreaLayoutResult();
 
-                var layoutParameter = new ThFaAreaLayoutParameter();
+                
                 layoutParameter.FloorHightIdx = _floorHight;
                 layoutParameter.RootThetaIdx = _theta;
                 layoutParameter.Scale = _scale;
                 layoutParameter.AisleAreaThreshold = 0.025;
                 layoutParameter.BlkNameHeat = layoutBlkNameHeat;
                 layoutParameter.stairPartResult = stairFirePts;
+                layoutParameter.RoomType = roomType;
 
                 ThFireAlarmSmokeHeatEngine.thFaSmokeHeatLayoutEngine(dataQuery, heatResult, smokeResult, layoutParameter);
 

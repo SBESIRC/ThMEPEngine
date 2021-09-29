@@ -50,3 +50,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmSmokeHeat.ThFireAlarmSmokeHeatCmdsNoUI))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd))]
+

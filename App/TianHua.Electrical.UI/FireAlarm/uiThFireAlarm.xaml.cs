@@ -64,5 +64,10 @@ namespace TianHua.Electrical.UI
             Active.Document.Window.Focus();
 #endif
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

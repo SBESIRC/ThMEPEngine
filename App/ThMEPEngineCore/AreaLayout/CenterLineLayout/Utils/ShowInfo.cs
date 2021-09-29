@@ -99,7 +99,6 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             HostApplicationServices.WorkingDatabase.AddToModelSpace(line1, line2);
         }
 
-
         /// <summary>
         /// 用带有方向的箭头表示一个布置设备的方向
         /// </summary>

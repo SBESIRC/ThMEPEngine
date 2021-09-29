@@ -59,6 +59,12 @@ namespace ThMEPElectrical.FireAlarm.Commands
                 var displayCmd = new ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmDisplayDeviceLayoutCmd(_UiConfigs);
                 displayCmd.Execute();
             }
+            else if (_UiConfigs.IsGasSensorChecked)
+            {
+                //可燃气体探测
+                var gasCmd = new ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd(_UiConfigs);
+                gasCmd.Execute();
+            }
             else if (_UiConfigs.IsFireMonitorModuleChecked)
             {
                 //防火门监控

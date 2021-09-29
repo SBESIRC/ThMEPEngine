@@ -21,6 +21,12 @@ namespace ThMEPElectrical.FireAlarm
         public static string BlkName_Heat = "E-BFAS120";
         #endregion
 
+        #region 可燃气体
+        public static string BlkName_Gas = "E-BCGS210";//--------------------------------------------------------------
+        public static string BlkName_Gas_ExplosionProf = "E-BCGS210-2";//--------------------------------------------------------------
+        #endregion
+
+
         public static List<string> BlkNameListFixLayout = new List<string>() {
                                                                       BlkName_Display_Fire,
                                                                         BlkName_Display_Floor,
@@ -32,6 +38,9 @@ namespace ThMEPElectrical.FireAlarm
         public static List<string> BlkNameListAreaLayout = new List<string>() {
                                                                       BlkName_Smoke,
                                                                       BlkName_Heat,
+                                                                      BlkName_Gas,//--------------------------------------------------------------
+                                                                      BlkName_Gas_ExplosionProf,//--------------------------------------------------------------
+
                                                                     };
 
 
@@ -45,6 +54,8 @@ namespace ThMEPElectrical.FireAlarm
                                                                     {BlkName_FireTel, (3, 3)},
                                                                     {BlkName_Smoke,(3, 3)},
                                                                     {BlkName_Heat, (3, 3) },
+                                                                    {BlkName_Gas, (3, 3) },//--------------------------------------------------------------
+                                                                    {BlkName_Gas_ExplosionProf, (3, 3) },//--------------------------------------------------------------
                                                                 };
 
         public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
@@ -55,6 +66,9 @@ namespace ThMEPElectrical.FireAlarm
                                                                     {BlkName_FireTel, "E-FAS-DEVC"},
                                                                     {BlkName_Smoke,"E-FAS-DEVC"},
                                                                     {BlkName_Heat, "E-FAS-DEVC" },
+                                                                    {BlkName_Gas,"E-FAS-DEVC"},//--------------------------------------------------------------
+                                                                    {BlkName_Gas_ExplosionProf, "E-FAS-DEVC" },//--------------------------------------------------------------
+
                                                                  };
 
 
