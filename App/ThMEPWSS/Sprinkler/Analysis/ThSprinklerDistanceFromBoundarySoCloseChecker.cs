@@ -16,6 +16,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerDistanceFromBoundarySoCloseChecker : ThSprinklerChecker
     {
+        public override void Clean(Polyline pline)
+        {
+            Clean(ThSprinklerCheckerLayer.From_Boundary_So_Close_LayerName, pline);
+        }
+
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
             var results = DistanceCheck(sprinklers, geometries, pline);

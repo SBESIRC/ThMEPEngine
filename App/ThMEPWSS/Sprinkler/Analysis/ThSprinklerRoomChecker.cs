@@ -9,12 +9,16 @@ using ThMEPWSS.Hydrant.Service;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerRoomChecker : ThSprinklerChecker
     {
-        readonly static string LayerName = "AI-喷头校核-房间是否布置喷头";
+        public override void Clean(Polyline pline)
+        {
+            CleanHatch(ThSprinklerCheckerLayer.Room_Checker_LayerName, pline);
+        }
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
@@ -62,13 +66,37 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return objs;
         }
 
+        private void CleanHatch(string layerName, Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(layerName);
+                acadDatabase.Database.UnLockLayer(layerName);
+                acadDatabase.Database.UnOffLayer(layerName);
+
+                var objs = acadDatabase.ModelSpace
+                    .OfType<Hatch>()
+                    .Where(o => o.Layer == layerName).ToCollection();
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                spatialIndex.SelectCrossingPolygon(bufferPoly)
+                            .OfType<Hatch>()
+                            .ToList()
+                            .ForEach(o =>
+                            {
+                                o.UpgradeOpen();
+                                o.Erase();
+                            });
+            }
+        }
+
         private void Present(DBObjectCollection objs)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
                 foreach (Entity e in objs)
                 {
-                    var service = new ThSprinklerRoomPrintService(acadDatabase.Database, LayerName);
+                    var service = new ThSprinklerRoomPrintService(acadDatabase.Database, ThSprinklerCheckerLayer.Room_Checker_LayerName);
                     var colorIndex = 2;
                     service.Print(e, colorIndex);
                 }

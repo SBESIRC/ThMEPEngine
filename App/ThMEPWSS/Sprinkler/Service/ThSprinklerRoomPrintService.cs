@@ -38,7 +38,7 @@ namespace ThMEPWSS.Sprinkler.Service
                     clone.ColorIndex = colorIndex;
                     clone.Layer = LayerName;
 
-                    Hatch oHatch = new Hatch();
+                    var oHatch = new Hatch();
                     var normal = new Vector3d(0.0, 0.0, 1.0);
                     oHatch.Normal = normal;
                     oHatch.Elevation = 0.0;

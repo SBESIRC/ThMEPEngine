@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Linq;
+using DotNetARX;
+using ThCADCore.NTS;
+using NFox.Cad;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -29,6 +32,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public abstract void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline);
 
+        public abstract void Clean(Polyline pline);
+
         public void Present(HashSet<Line> result, ObjectId layerId)
         {
             using (var acadDatabase = AcadDatabase.Active())
@@ -51,6 +56,30 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
                     acadDatabase.ModelSpace.Add(alignedDimension);
                 });
+            }
+        }
+
+        public void Clean(string layerName, Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(layerName);
+                acadDatabase.Database.UnLockLayer(layerName);
+                acadDatabase.Database.UnOffLayer(layerName);
+
+                var objs = acadDatabase.ModelSpace
+                    .OfType<AlignedDimension>()
+                    .Where(o => o.Layer == layerName).ToCollection();
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                spatialIndex.SelectCrossingPolygon(bufferPoly)
+                            .OfType<AlignedDimension>()
+                            .ToList()
+                            .ForEach(o =>
+                            {
+                                o.UpgradeOpen();
+                                o.Erase();
+                            });
             }
         }
     }

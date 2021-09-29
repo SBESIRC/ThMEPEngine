@@ -10,13 +10,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Stair
 {
-    public class ThStairElectricalEngine : IDisposable
+    public class ThStairElectricalEngine
     {
-        public void Dispose()
-        {
-            //
-        }
-
         public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, Point3dCollection points, double scale, string equimentName, bool platOnly)
         {
             // 提取楼梯块

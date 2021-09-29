@@ -80,16 +80,19 @@ namespace ThMEPWSS.Command
                     o.RadiusB = data.B;
                 });
 
-                polylines.ForEach(p =>
+                var frame = new Extents3d();
+                polylines.ForEach(p => frame.AddExtents(p.GeometricExtents));
+                for (int i = 0; i < checkers.Count; i++)
                 {
-                    for (int i = 0; i < checkers.Count; i++)
+                    if (checkBoxs[i])
                     {
-                        if (checkBoxs[i])
+                        checkers[i].Clean(frame.ToRectangle());
+                        polylines.ForEach(p =>
                         {
                             checkers[i].Check(recognizeAllEngine.Elements, geometries, p);
-                        }
+                        });
                     }
-                });
+                }
             }
         }
 

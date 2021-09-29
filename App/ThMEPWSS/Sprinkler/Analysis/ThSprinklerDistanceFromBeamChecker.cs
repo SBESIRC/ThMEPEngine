@@ -11,12 +11,19 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerDistanceFromBeamChecker : ThSprinklerChecker
     {
         public List<Polyline> RoomFrames { get; set; }
+
+        public override void Clean(Polyline pline)
+        {
+            CleanLayoutArea(ThSprinklerCheckerLayer.Layout_Area_LayerName, pline);
+            Clean(ThSprinklerCheckerLayer.Distance_Form_Beam_LayerName, pline);
+        }
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
@@ -78,6 +85,30 @@ namespace ThMEPWSS.Sprinkler.Analysis
             });
             var spatialIndex = new ThCADCoreNTSSpatialIndex(structure.ToCollection());
             return spatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+        }
+
+        private void CleanLayoutArea(string layerName, Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(layerName);
+                acadDatabase.Database.UnLockLayer(layerName);
+                acadDatabase.Database.UnOffLayer(layerName);
+
+                var objs = acadDatabase.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(o => o.Layer == layerName).ToCollection();
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                spatialIndex.SelectCrossingPolygon(bufferPoly)
+                            .OfType<Polyline>()
+                            .ToList()
+                            .ForEach(o =>
+                            {
+                                o.UpgradeOpen();
+                                o.Erase();
+                            });
+            }
         }
 
         private void Present(List<List<Polyline>> layoutAreas)

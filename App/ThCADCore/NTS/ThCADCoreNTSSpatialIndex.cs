@@ -97,6 +97,15 @@ namespace ThCADCore.NTS
                 {
                     return mPolygon.ToNTSPolygon();
                 }
+                else if (obj is AlignedDimension dimension)
+                {
+                    var distanceLine = new Line(dimension.XLine1Point, dimension.XLine2Point);
+                    return distanceLine.ToNTSLineString();
+                }
+                else if (obj is Hatch hatch)
+                {
+                    return hatch.GeometricExtents.ToNTSPolygon();
+                }
                 else if (obj is Entity entity)
                 {
                     try
