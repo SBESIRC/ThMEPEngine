@@ -99,6 +99,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" Guid="{587D587B-DF4E-45B1-9FAA-6A7445665C22}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Evacuation_Direction" Source="$(var.AutoloaderContentsPath)\Support\疏散方向判断.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Fan_Parameters" Guid="{A2F02A07-89B2-4F30-AA5A-D050DA559B64}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Fan_Parameters" Source="$(var.AutoloaderContentsPath)\Support\风机参数表.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -158,6 +161,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Room_Category" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Parameters" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
         </ComponentGroup>
     </Fragment>
