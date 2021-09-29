@@ -23,18 +23,26 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             get;
             set;
         }
-
+        public List<LightPlaceInfo> NotHaveLaneLineParks 
+        {
+            get;
+            set;
+        }
         public LaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> polylines, bool bView)
         {
             m_lightPlaceInfos = lightPlaceInfos;
             m_extendPolylines = polylines;
             m_bView = bView;
+            NotHaveLaneLineParks = new List<LightPlaceInfo>();
         }
 
-        public static List<LaneGroup> MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys, bool bView)
+        public static List<LaneGroup> MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys,out List<LightPlaceInfo> noLaneLineParks, bool bView)
         {
             var laneGroupCalculator = new LaneGroupCalculator(lightPlaceInfos, extendLanePolys, bView);
             laneGroupCalculator.Do();
+            noLaneLineParks = new List<LightPlaceInfo>();
+            if (laneGroupCalculator.NotHaveLaneLineParks.Count > 0)
+                noLaneLineParks.AddRange(laneGroupCalculator.NotHaveLaneLineParks);
             return laneGroupCalculator.LaneGroups;
         }
 
@@ -42,8 +50,6 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
         {
             // 初步计算再细分
             LaneGroups = CalculateLaneGroupFirstStep();
-            
-
             //无归属车位基本不会再处于两个车道交界处，这里对无归属车位找车道线不在处理交界问题
             var noLaneLineParks = NoLaneLineParks();
             foreach(var item in LaneGroups) 
@@ -51,42 +57,22 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
                 if (noLaneLineParks.Count < 1)
                     break;
                 var laneGroup = IndexerCalculator.MakeLaneGroupInfo(item.LanePoly, noLaneLineParks, 8000.0);
-                //laneGroups.Add(laneGroup);
-                bool isAdd = false;
                 if (laneGroup.OneSideLightPlaceInfos.LightPlaceInfos.Count >0)
                 {
                     var addLights = laneGroup.OneSideLightPlaceInfos.LightPlaceInfos;
                     item.OneSideLightPlaceInfos.LightPlaceInfos.AddRange(addLights);
                     noLaneLineParks = noLaneLineParks.Where(c => !addLights.Any(x => x.Position.DistanceTo(c.Position) < 1)).ToList();
-                    isAdd = true;
                 }
                 if (laneGroup.AnotherSideLightPlaceInfos.LightPlaceInfos.Count > 0) 
                 {
                     var addLights = laneGroup.AnotherSideLightPlaceInfos.LightPlaceInfos;
                     item.AnotherSideLightPlaceInfos.LightPlaceInfos.AddRange(addLights);
                     noLaneLineParks = noLaneLineParks.Where(c => !addLights.Any(x => x.Position.DistanceTo(c.Position) < 1)).ToList();
-                    isAdd = true;
                 }
-                //if(isAdd)
-                //    GroupInfoDifferentiation.MakeGroupInfoDifferentiation(item);
             }
             // 删除无效的车位块
             DifferentiationGroupInfo(LaneGroups);
-            //while (true) 
-            //{
-            //    //防止有需要临近的临近去找车位
-            //    if (noLaneLineParks.Count < 1)
-            //        break;
-            //    bool havePark = false;
-            //    foreach (var item in noLaneLineParks)
-            //    {
-            //        //获取最近的车位
-            //        var parkOrders = m_lightPlaceInfos.OrderBy(c => c.BigGroupInfo.BigGroupPoly.EndPoint.DistanceTo(item.BigGroupInfo.BigGroupPoly.EndPoint)).ToList();
-            //    }
-            //    if (!havePark)
-            //        break;
-            //}
-            //再针对无归属车道的找离的近的车位
+            NotHaveLaneLineParks.AddRange(m_lightPlaceInfos.Where(c => !c.IsUsed).ToList());
             if (m_bView) 
             {
                 foreach (var drawLaneGroup in LaneGroups)

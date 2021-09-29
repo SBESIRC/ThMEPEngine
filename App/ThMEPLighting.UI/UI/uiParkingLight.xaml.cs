@@ -53,9 +53,12 @@ namespace ThMEPLighting.UI.UI
                 bool isAddToView = true;
                 foreach (var item in parkingLightView.PickLayerNames) 
                 {
-                    if (!isAddToView)
-                        break;
                     isAddToView = !item.Value.Equals(layerName);
+                    if (!isAddToView)
+                    { 
+                        item.IsSelect = true;
+                        break;
+                    }
                 }
                 if (isAddToView)
                     parkingLightView.PickLayerNames.Add(new MultiCheckItem(layerName, layerName, true));

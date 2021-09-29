@@ -200,7 +200,7 @@ namespace ThMEPLighting.ParkingStall.Core
             }
             if (isExit)
             {
-                ErrorMsgs.Add("有无法到达出口的线，请修改后再次进行相应的操作");
+                ErrorMsgs.Add("有不连通的线槽，请修改后再次进行相应的操作");
                 return false;
             }
             return true;

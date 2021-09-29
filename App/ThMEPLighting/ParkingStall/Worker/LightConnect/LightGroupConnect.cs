@@ -298,6 +298,25 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                         }
                     }
                 }
+                else if(minCrossConnects.Count>1)
+                {
+                    //获取方向和最短方向差不多，且接近平行的
+                    var connectDir =(currentConnect.SecondPoint - currentConnect.FirstPoint).GetNormal();
+                    for (int i = 1; i < minCrossConnects.Count; i++) 
+                    {
+                        var tempConnect = minCrossConnects[i];
+                        var tempDir = (tempConnect.SecondPoint - tempConnect.FirstPoint).GetNormal();
+                        if (tempDir.DotProduct(connectDir) < 0)
+                            continue;
+                        var grouDirDot = tempDir.DotProduct(group.LineDir);
+                        if (Math.Abs(grouDirDot) > 0.9 || Math.Abs(grouDirDot) < 0.1)
+                        {
+                            //有连接垂直或平行的
+                            currentConnect = tempConnect;
+                            break;
+                        }
+                    }
+                }
                 var thisDis = currentConnect.DistanceToEnd;
                 if (thisDis > nearDis)
                     continue;
@@ -649,8 +668,12 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
             {
                 //如果两个分组方向平行，且连接方向和本身接近平行时，获取的两个点可能不合适，
                 //有些计算出来的数据可能会穿框线
-                if (_lightConnectLight.IsCrossOutPolyline(new Line(nearPoint, hisGroupoint)))
+                var tempLine = new Line(nearPoint, hisGroupoint);
+                if (_lightConnectLight.IsCrossOutPolyline(tempLine) ||  _lightConnectLight.IsCrossInnerPolyline(tempLine))
                 {
+                    var tempPoints = new List<Point3d>();
+                    tempPoints.AddRange(newGroup.LightPoints);
+                    tempPoints = tempPoints.OrderBy(c => c.DistanceTo(hisGroupBasePoint)).ToList();
                     //后面跑A*后会和其它点有重复，交叉问题，这种要每个点和其它点跑A*搜索，进行修正最后两个点
                     var dir = (nearPoint - hisGroupoint).GetNormal();
                     Point3d tempFirst = new Point3d();
@@ -659,10 +682,12 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                     {
                         var point1 = newGroup.LightPoints[i];
                         var point2 = hisGroup.LightPoints.OrderBy(c => c.DistanceTo(point1)).First();
-                        if (_lightConnectLight.IsCrossOutPolyline(new Line(point1, point2)))
+                        tempLine = new Line(point1, point2);
+                        if (_lightConnectLight.IsCrossOutPolyline(tempLine) || _lightConnectLight.IsCrossInnerPolyline(tempLine))
                             continue;
                         tempFirst = point1;
                         tempSecond = point2;
+                        break;
                     }
                     if (tempFirst.DistanceTo(tempSecond) > 10)
                     {

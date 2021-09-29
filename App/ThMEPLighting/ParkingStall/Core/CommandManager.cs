@@ -365,7 +365,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 if (groupLights == null || groupLights.Count < 1)
                     continue;
                 // 根据车道线信息编组
-                LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
+                LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, out List<LightPlaceInfo> noLaneLineParks, true);
             }
         }
 
@@ -434,15 +434,27 @@ namespace ThMEPLighting.ParkingStall.Core
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
-                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, out List<LightPlaceInfo> noLaneLineParks, true);
 
                 // 子分组点位调整
                 SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
 
                 var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
-
+                if (noLaneLineParks != null && noLaneLineParks.Count > 0)
+                    optimzeLightPlaceInfos.AddRange(noLaneLineParks);
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
+                //生成的灯图层前置
+                if (null == optimzeLightPlaceInfos || optimzeLightPlaceInfos.Count < 1)
+                    return;
+                var lightBlockIds = new List<ObjectId>();
+                foreach (var lightBlock in optimzeLightPlaceInfos)
+                {
+                    if (lightBlock.InsertBlockId == null || lightBlock.InsertBlockId.IsErased)
+                        continue;
+                    lightBlockIds.Add(lightBlock.InsertBlockId);
+                }
+                LoadCraterClear.ChangeBlockDrawOrders(lightBlockIds);
             }
         }
 
@@ -505,7 +517,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
-                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, out List<LightPlaceInfo> noLaneLineParks, false);
 
                 // 子分组点位调整
                 SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
@@ -583,7 +595,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, lightDirection);
 
                 // 根据车道线信息编组
-                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, out List<LightPlaceInfo> noLaneLineParks, false);
 
                 // 子分组点位调整
                 SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
