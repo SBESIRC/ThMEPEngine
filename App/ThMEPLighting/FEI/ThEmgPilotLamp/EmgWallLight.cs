@@ -56,16 +56,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));
             _targetInfo.assistLines.ForEach(x => objs.Add(x));
-            var lines = ThMEPLineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
+            var lines = ThFEILineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
             objs.Clear();
             foreach (var line in lines)
                 objs.Add(line);
-            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 2500, 20.0, Math.PI * _wallLightMergeAngle / 180).Cast<Line>().ToList();
+            lines = ThFEILineExtension.LineSimplifier(objs, 50, 2500, 20.0, Math.PI * _wallLightMergeAngle / 180).Cast<Line>().ToList();
             lines = lines.Where(c => c.Length > 100).ToList();
             //合并后可能会导致线角度有变化，这里的线为后面的实际的线提供排布侧方向，
             //这里合并时给的间距过大有些情况会报错，这里不给太大间距
             var tempNodes = InitAllLineNode(lines);
-            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 500.0, 20.0, Math.PI * 15 / 180).Cast<Line>().ToList();
+            lines = ThFEILineExtension.LineSimplifier(objs, 50, 500.0, 20.0, Math.PI * 15 / 180).Cast<Line>().ToList();
             var _wallGraphNodes = CalcLineLayoutSide(lines, tempNodes);
             return _wallGraphNodes;
         }

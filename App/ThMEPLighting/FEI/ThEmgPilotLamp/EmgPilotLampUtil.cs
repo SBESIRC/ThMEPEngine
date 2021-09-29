@@ -360,7 +360,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             if (objs.Count < 40)
             {
                 //这里主要时处理柱墙的，一般不会有太多线，线太多时合并太影响效率，这里只在线不是特别多时进行合成操作
-                newLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 5, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();
+                newLines = ThFEILineExtension.LineSimplifier(objs, 5, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();
             }
             else 
             {

@@ -30,11 +30,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             var objs = new DBObjectCollection();
             laneLines.ForEach(x => objs.Add(x));
-            _laneLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
+            _laneLines = ThFEILineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
 
             objs = new DBObjectCollection();
             exitLines.ForEach(x => objs.Add(x));
-            _exitLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
+            _exitLines = ThFEILineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
 
             _exitBlocks = exitBlocks;
 
@@ -60,7 +60,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             tempCurves.AddRange(_exitLines);
             var objs = new DBObjectCollection();
             tempCurves.ForEach(x => objs.Add(x));
-            var allLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 50, 20.0, 2.0, Math.PI / 180.0);
+            var allLines = ThFEILineExtension.LineSimplifier(objs, 50, 20.0, 2.0, Math.PI / 180.0);
             //allLines = allLines.Where(c => c.Length > 500).ToList();
             allLines = allLines.Select(y =>
             {

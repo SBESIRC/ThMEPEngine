@@ -108,6 +108,7 @@
     <Compile Include="FEI\ThEmgPilotLamp\GraphUtils.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\LayoutToStructure.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\ThEmgPilotLampCommand.cs" />
+    <Compile Include="FEI\ThEmgPilotLamp\ThFEILineExtension.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />
