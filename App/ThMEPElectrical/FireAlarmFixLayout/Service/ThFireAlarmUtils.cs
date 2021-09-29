@@ -75,7 +75,7 @@ namespace ThMEPElectrical.FireAlarm.Service
 
         public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList,bool referBeam)
         {
-            var bReadJson = true;
+            var bReadJson = false;
 
             var geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
