@@ -556,6 +556,9 @@
     <Compile Include="Service\ThWellsLayerManager.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="Service\ThSlabLayerManager.cs" />
+    <Compile Include="Stair\ThStairCommon.cs" />
+    <Compile Include="Stair\ThStairLayoutEngine.cs" />
+    <Compile Include="Stair\ThStairEquimentLayout.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IColumnData.cs" />
     <Compile Include="Temp\IElevationQuery.cs" />

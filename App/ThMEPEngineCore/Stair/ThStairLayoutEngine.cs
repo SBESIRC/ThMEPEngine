@@ -2,15 +2,16 @@
 using System.Linq;
 using ThCADExtension;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Stair;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.Stair
+namespace ThMEPEngineCore.Stair
 {
-    public class ThStairElectricalEngine
+    public class ThStairLayoutEngine
     {
         public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, Point3dCollection points, double scale, string equimentName, bool platOnly)
         {
@@ -30,7 +31,7 @@ namespace ThMEPElectrical.Stair
             {
                 var doorsEngine = new ThStairDoorService();
                 var doors = doorsEngine.GetDoorList(stair.SrcBlock);
-                var layoutEngine = new ThStairElectricalEngine();
+                var layoutEngine = new ThStairLayoutEngine();
                 var angle = 0.0;
                 stair.PlatForLayout.ForEach(o =>
                 {

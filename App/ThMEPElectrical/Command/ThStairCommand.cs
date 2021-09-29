@@ -10,14 +10,13 @@ using AcHelper.Commands;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPElectrical.Stair;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Stair;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.Staircase;
 
 namespace ThMEPElectrical.Command
 {

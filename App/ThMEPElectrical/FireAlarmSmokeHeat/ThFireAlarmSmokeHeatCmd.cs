@@ -27,8 +27,6 @@ using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
-using ThMEPElectrical.Staircase;
-
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
@@ -36,6 +34,7 @@ using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
+using ThMEPEngineCore.Stair;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat
 {

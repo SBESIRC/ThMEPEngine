@@ -301,9 +301,6 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
-    <Compile Include="Staircase\ThStairCommon.cs" />
-    <Compile Include="Staircase\ThStairElectricalEngine.cs" />
-    <Compile Include="Staircase\ThStairEquimentLayout.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
