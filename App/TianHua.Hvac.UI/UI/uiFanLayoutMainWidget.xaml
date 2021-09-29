@@ -4,10 +4,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    SizeToContent="Height"
+             SizeToContent="Height"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI" xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
-                    mc:Ignorable="d" Width="212">
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI" 
+             xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
+             mc:Ignorable="d" Width="212">
     <Window.Resources>
         <ResourceDictionary>
             <x:Array x:Key="PSLists" Type ="sys:String">
@@ -41,9 +42,9 @@
             <Rectangle Margin="0,10,0,10" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">
-            <local:uiFanWAFWidget  Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=0}"/>
-            <local:uiFanWEXHWidget Height="Auto" Width="Auto"  Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=1}"></local:uiFanWEXHWidget>
-            <local:uiFanCEXHWidget Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=2}"></local:uiFanCEXHWidget>
+            <local:uiFanWAFWidget  x:Name="FanWAFWidget" Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=0}"/>
+            <local:uiFanWEXHWidget x:Name="FanWEXHWidget" Height="Auto" Width="Auto"  Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=1}"></local:uiFanWEXHWidget>
+            <local:uiFanCEXHWidget x:Name="FanCEXHWidget" Height="Auto" Width="Auto" Visibility="{Binding FanType,Converter={StaticResource layoutVisibiltyConverter},ConverterParameter=2}"></local:uiFanCEXHWidget>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2">
             <CheckBox x:Name="ckBoxInsertHole" Content="墙体留洞" Margin="4,0,0,0" IsChecked="{Binding IsInsertHole}"/>

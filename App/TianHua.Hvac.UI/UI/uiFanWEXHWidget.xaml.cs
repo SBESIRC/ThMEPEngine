@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ThMEPHVAC.FanLayout.ViewModel;
 /// <summary>
 /// 壁式排气扇
 /// </summary>
@@ -22,14 +23,27 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanWEXHWidget : UserControl
     {
+        private static ThFanWEXHViewModel ViewModel = null;
         public uiFanWEXHWidget()
         {
             InitializeComponent();
+            if (ViewModel == null)
+            {
+                ViewModel = new ThFanWEXHViewModel();
+            }
+            WEXHGrid.DataContext = ViewModel;
         }
-
+        public ThFanWEXHConfigInfo GetFanWEXHConfigInfo()
+        {
+            return ViewModel.fanWEXHConfigInfo;
+        }
         private void btnAddFan_Click(object sender, RoutedEventArgs e)
         {
-
+            uiFanInfoWidget fanWidget = new uiFanInfoWidget();
+            if (fanWidget.ShowDialog() == true)
+            {
+                ViewModel.FanInfoConfigs.Add(fanWidget.GetFanConfigInfo());
+            }
         }
     }
 }

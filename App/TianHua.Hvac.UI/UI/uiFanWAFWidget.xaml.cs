@@ -23,18 +23,27 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanWAFWidget : UserControl
     {
-        public ThFanWAFConfigInfo fanWAFConfigInfo = new ThFanWAFConfigInfo();
+        private static ThFanWAFViewModel ViewModel = null;
+        
         public uiFanWAFWidget()
         {
             InitializeComponent();
+            if (ViewModel == null)
+            {
+                ViewModel = new ThFanWAFViewModel();
+            }
+            WAFGrid.DataContext = ViewModel;
         }
-
+        public ThFanWAFConfigInfo GetFanWAFConfigInfo()
+        {
+            return ViewModel.fanWAFConfigInfo;
+        }
         private void btnAddFan_Click(object sender, RoutedEventArgs e)
         {
             uiFanInfoWidget fanWidget = new uiFanInfoWidget();
             if (fanWidget.ShowDialog() == true)
             {
-                fanWAFConfigInfo.FanInfoList.Add(fanWidget.GetFanConfigInfo());
+                ViewModel.FanInfoConfigs.Add(fanWidget.GetFanConfigInfo());
             }
         }
     }

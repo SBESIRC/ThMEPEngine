@@ -41,8 +41,11 @@
     <Compile Include="FanLayout\Model\ThFanWAFModel.cs" />
     <Compile Include="FanLayout\Model\ThFanWEXHModel.cs" />
     <Compile Include="FanLayout\Service\ThFanLayoutDealService.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanCEXHViewModel.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanWEXHViewModel.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanWAFViewModel.cs" />
     <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />

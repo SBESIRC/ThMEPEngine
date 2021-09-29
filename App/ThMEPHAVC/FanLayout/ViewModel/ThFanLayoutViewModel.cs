@@ -25,6 +25,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set 
             { 
                 thFanLayoutConfigInfo.FanType = value;
+
                 this.RaisePropertyChanged();
             }
         }

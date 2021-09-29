@@ -30,7 +30,22 @@ namespace TianHua.Hvac.UI.UI
         public ThFanConfigInfo GetFanConfigInfo()
         {
             var fanInfo = new ThFanConfigInfo();
+            fanInfo.FanNumber = textBoxNumber.Text;
+            fanInfo.FanVolume = double.Parse(textBoxVolume.Text);
+            fanInfo.FanPressure = double.Parse(textBoxPressure.Text);
+            fanInfo.FanPower = double.Parse(textBoxPower.Text);
+            fanInfo.FanWeight = double.Parse(textBoxWeight.Text);
+            fanInfo.FanNoise = double.Parse(textBoxNoise.Text);
+            fanInfo.FanDepth = double.Parse(textBoxDepth.Text);
+            fanInfo.FanLength = double.Parse(textBoxLength.Text);
+            fanInfo.FanWidth = double.Parse(textBoxWidth.Text);
             return fanInfo;
+        }
+
+        private void btnOK_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+            this.Close();
         }
     }
 }

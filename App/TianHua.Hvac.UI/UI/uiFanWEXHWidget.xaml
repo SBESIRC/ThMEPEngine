@@ -4,8 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Hvac.UI.UI"
+             xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
              mc:Ignorable="d" Height="285" Width="211">
-    <Grid>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <local1:FanLayoutIntToBool x:Key="layoutTypeConverter2"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Name="WEXHGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -15,11 +21,13 @@
                 <Label x:Name="label" Content="风量序列："/>
                 <Button x:Name="btnAddFan" Content="新增" Height="20" Width="75" Click="btnAddFan_Click"/>
             </WrapPanel>
-            <DataGrid BorderThickness="0" ColumnHeaderHeight="24"  MaxHeight="200" RowHeight="24" AllowDrop="False" HorizontalContentAlignment="Center">
+            <DataGrid BorderThickness="0" ColumnHeaderHeight="24"  MaxHeight="200" RowHeight="24" AllowDrop="False" HorizontalContentAlignment="Center" 
+                      ItemsSource="{Binding FanInfoConfigs,Mode=TwoWay}"  SelectionMode="Single"
+                      SelectedItem="{Binding SelectFanConfig,Mode=TwoWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="编号" Width="50" CanUserSort="False" IsReadOnly="True" CanUserResize="False">
+                    <DataGridTextColumn Header="编号" Width="50" CanUserSort="False" IsReadOnly="True" CanUserResize="False" Binding="{Binding FanNumber}">
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="风量" Width="80" CanUserSort="False" IsReadOnly="True" CanUserResize="False">
+                    <DataGridTextColumn Header="风量" Width="60" CanUserSort="False" IsReadOnly="True" CanUserResize="False" Binding="{Binding FanVolume}">
                     </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
@@ -28,12 +36,14 @@
             <Label x:Name="label1" Content="风机标高："/>
             <WrapPanel Orientation="Horizontal" Margin="15,0,0,0">
                 <WrapPanel Orientation="Vertical">
-                    <RadioButton x:Name="radioButton"  Height="25" VerticalContentAlignment="Center" Content="贴梁底安装"/>
-                    <RadioButton x:Name="radioButton1" Height="25" VerticalContentAlignment="Center" Content="下缘相对标高"/>
+                    <RadioButton x:Name="radioButton"  Height="25" VerticalContentAlignment="Center" Content="贴梁底安装"
+                                 IsChecked="{Binding FanMarkHeigthType,Converter={StaticResource layoutTypeConverter2},ConverterParameter=0}"/>
+                    <RadioButton x:Name="radioButton1" Height="25" VerticalContentAlignment="Center" Content="下缘相对标高"
+                                 IsChecked="{Binding FanMarkHeigthType,Converter={StaticResource layoutTypeConverter2},ConverterParameter=1}"/>
                 </WrapPanel>
                 <WrapPanel  Height="25" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="8,0,0,0">
                     <Label x:Name="label3" Content="h+"/>
-                    <TextBox x:Name="textBox" Height="20" Width="50" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="2.50" />
+                    <TextBox x:Name="textBox" Height="20" Width="50" TextWrapping="Wrap" VerticalContentAlignment="Center"   Text="{Binding FanMarkHeight}"/>
                     <Label x:Name="label4" Content="m"/>
                 </WrapPanel>
             </WrapPanel>
@@ -41,13 +51,13 @@
             <Label x:Name="label2" Content="生成其他："/>
             <WrapPanel Orientation="Horizontal" Margin="15,0,0,0">
                 <WrapPanel Orientation="Vertical">
-                    <CheckBox x:Name="checkBox" Height="25" VerticalContentAlignment="Center" Content="防火阀"/>
-                    <CheckBox x:Name="checkBox1" Height="25" VerticalContentAlignment="Center" Content="补风百叶"/>
+                    <CheckBox x:Name="checkBox" Height="25" VerticalContentAlignment="Center" Content="防火阀" IsChecked="{Binding IsInsertValve}"/>
+                    <CheckBox x:Name="checkBox1" Height="25" VerticalContentAlignment="Center" Content="补风百叶" IsChecked="{Binding IsInsertAirPort}"/>
                 </WrapPanel>
                 <WrapPanel  Height="25" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="10,0,0,0">
-                    <TextBox x:Name="textBox1" Height="20" Width="35" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="500"/>
+                    <TextBox x:Name="textBox1" Height="20" Width="35" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="{Binding AirPortLength}"/>
                     <Label x:Name="label5" Content="x"/>
-                    <TextBox x:Name="textBox2" Height="20" Width="35" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="150"/>
+                    <TextBox x:Name="textBox2" Height="20" Width="35" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="{Binding AirPortHeight}"/>
                     <Label x:Name="label6" VerticalContentAlignment="Center" Content="mm"/>
                 </WrapPanel>
             </WrapPanel>
@@ -58,12 +68,14 @@
             </WrapPanel>
             <WrapPanel Orientation="Horizontal" Margin="30,0,0,0">
                 <WrapPanel Orientation="Vertical">
-                    <RadioButton x:Name="radioButton2" Height="25" VerticalContentAlignment="Center" Content="顶边贴梁底"/>
-                    <RadioButton x:Name="radioButton3" Height="25" VerticalContentAlignment="Center"  Content="相对标高"/>
+                    <RadioButton x:Name="radioButton2" Height="25" VerticalContentAlignment="Center" Content="顶边贴梁底"
+                                 IsChecked="{Binding AirMarkHeigthType,Converter={StaticResource layoutTypeConverter2},ConverterParameter=0}"/>
+                    <RadioButton x:Name="radioButton3" Height="25" VerticalContentAlignment="Center"  Content="相对标高"
+                                 IsChecked="{Binding AirMarkHeigthType,Converter={StaticResource layoutTypeConverter2},ConverterParameter=1}"/>
                 </WrapPanel>
                 <WrapPanel Orientation="Horizontal"  VerticalAlignment="Bottom" Margin="3,0,0,0">
                     <Label x:Name="label10" Content="h+"/>
-                    <TextBox x:Name="textBox3" Height="20" TextWrapping="Wrap" Text="2.50" Width="50" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="textBox3" Height="20" TextWrapping="Wrap" Width="50" VerticalContentAlignment="Center" Text="{Binding AirMarkHeight}"/>
                     <Label x:Name="label11" Content="m"/>
                 </WrapPanel>
             </WrapPanel>

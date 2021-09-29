@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,109 +31,101 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             FanLength = 370;
         }
     }
-
-    public class ThFanCEXHConfigInfo
+    
+    public class ThFanSideConfigInfo
     {
-        public int HoleMarkHeigthType { set; get; }//洞口标高类型
-        public bool IsInsertHole { set; get; }//是否插入洞口
-        public bool IsInsertValve { set; get; }//是否插入防火阀
-        public bool IsInsertAirPortAndPipe { set; get; }//是否插入风管和排风口
-        public double HoleMarkHeigth { set; get; }//洞口标高
-        public double AirPipeLength { set; get; }//风管长度
-        public double AirPipeWidth { set; get; }//风管宽度
-        public double AirPipeWindSpeed { set; get; }//风管风速
-        public double AirPipeMarkHeigth { set; get; }//底部标高
-        public double ExAirPortLength { set; get; }//排风百叶长度
-        public double ExAirPortWidth { set; get; }//排风百叶宽
-        public double ExAirPortWindSpeed { set; get; }//排风百叶风速
-        public double InAirPortLength { set; get; }//补风百叶长度
-        public double InAirPortWidth { set; get; }//补风百叶宽度
-        public double InAirPortWindSpeed { set; get; }//补风百叶风速
-        public ThFanConfigInfo FanConfigInfo { get; }//选择的风机属性
-        public List<ThFanConfigInfo> FanInfoList { set; get; }
-        public ThFanCEXHConfigInfo()
+        public int MarkHeigthType { set; get; }//风机标高类型
+        public double FanMarkHeight { set; get; }//标高高度
+        public ThFanConfigInfo FanConfigInfo { get; set; }//选择的风机属性
+        public ObservableCollection<ThFanConfigInfo> FanInfoList { set; get; }//风机属性列表
+        public ThFanSideConfigInfo()
         {
-            HoleMarkHeigthType = 1;
-            IsInsertHole = true;
+            MarkHeigthType = 1;
+            FanMarkHeight = 2.5;
+            FanInfoList = new ObservableCollection<ThFanConfigInfo>();
+            FanInfoList.Add(new ThFanConfigInfo());
+        }
+    }
+    public class ThAirPortSideConfigInfo
+    {
+        public int MarkHeigthType { set; get; }//底边标高类型
+        public bool IsInsertValve { set; get; }//是否插入蝶阀
+        public bool IsInsertAirPort { set; get; }//是否插入风口
+        public double AirPortLength { set; get; }//风口长度
+        public double AirPortHeight { set; get; }//风口高度
+        public double AirPortDeepth { set; get; }//风口深度(默认)
+        public double AirPortMarkHeight { set; get; }//风口标记高度
+        public double AirPortWindSpeed { set; get; }//风速
+        public ThAirPortSideConfigInfo()
+        {
+            MarkHeigthType = 1;
             IsInsertValve = true;
-            IsInsertAirPortAndPipe = true;
-            HoleMarkHeigth = 2.5;
-            AirPipeLength = 800.0;
-            AirPipeWidth = 300.0;
-            AirPipeWindSpeed = 100.0;
-            AirPipeMarkHeigth = 2.5;
-            ExAirPortLength = 800;
-            ExAirPortWidth = 300;
-            ExAirPortWindSpeed = 100;
-            InAirPortLength = 800;
-            InAirPortWidth = 300;
-            InAirPortWindSpeed = 100;
-            FanInfoList = new List<ThFanConfigInfo>();
-            FanConfigInfo = new ThFanConfigInfo();
+            IsInsertAirPort = true;
+            AirPortLength = 320;
+            AirPortHeight = 150;
+            AirPortDeepth = 200;
+            AirPortMarkHeight = 2.5;
+            AirPortWindSpeed = 0.0;
+        }
+    }
+    public class ThAirPipeConfigInfo
+    {
+        public int AirPortMarkType { set; get; }//风口底边标高类型
+        public bool IsInsertPipe { set; get; }//是否插入风管
+        public double AirPipeLength { set; get; }//风管长度
+        public double AirPipeHeight { set; get; }//风管高度
+        public double AirPipeWindSpeed { set; get; }//风管风速
+        public double AirPipeMarkHeight { set; get; }//风管标记高度
+        public double AirPortLength { set; get; }//风口长度
+        public double AirPortHeight { set; get; }//风口高度
+        public double AirPortDeepth { set; get; }//风口深度(默认)
+        public double AirPortMarkHeight { set; get; }//风口标记高度
+        public double AirPortWindSpeed { set; get; }//风速
+        public ThAirPipeConfigInfo()
+        {
+            AirPortMarkType = 1;
+            IsInsertPipe = true;
+            AirPipeLength = 160.0;
+            AirPipeHeight = 120.0;
+            AirPipeWindSpeed = 0.0;
+            AirPipeMarkHeight = 2.5;
+            AirPortLength = 300;
+            AirPortHeight = 150;
+            AirPortDeepth = 200;
+            AirPortMarkHeight = 2.5;
+            AirPortWindSpeed = 0.0;
         }
     }
     public class ThFanWAFConfigInfo
     {
-        public int FanMarkHeigthType { set; get; }
-        public int AirPortMarkHeigthType { set; get; }
-        public bool IsInsertHole { set; get; }
-        public bool IsInsertValve { set; get; }
-        public bool IsInsertAirPort { set; get; }
-        public double FanMarkHeight { set; get; }
-        public double AirPortLength { set; get; }
-        public double AirPortHeight { set; get; }
-        public double AirPortDeepth { set; get; }
-        public double AirPortMarkHeight { set; get; }
-        public double AirPortWindSpeed { set; get; }
-        public ThFanConfigInfo FanConfigInfo { get; }//选择的风机属性
-        public List<ThFanConfigInfo> FanInfoList { set; get; }
+        public ThFanSideConfigInfo FanSideConfigInfo { set; get; }
+        public ThAirPortSideConfigInfo AirPortSideConfigInfo { set; get; }
         public ThFanWAFConfigInfo()
         {
-            FanMarkHeigthType = 1;
-            AirPortMarkHeigthType = 1;
-            IsInsertHole = true;
-            IsInsertValve = true;
-            IsInsertAirPort = true;
-            FanMarkHeight = 2.5;
-            AirPortLength = 320;
-            AirPortHeight = 150;
-            AirPortDeepth = 200;
-            AirPortMarkHeight = 2.5;
-            AirPortWindSpeed = 0.0;
-            FanInfoList = new List<ThFanConfigInfo>();
-            FanConfigInfo = new ThFanConfigInfo();
+            FanSideConfigInfo = new ThFanSideConfigInfo();
+            AirPortSideConfigInfo = new ThAirPortSideConfigInfo();
         }
     }
     public class ThFanWEXHConfigInfo
     {
-        public int FanMarkHeigthType { set; get; }
-        public int AirPortMarkHeigthType { set; get; }
-        public bool IsInsertHole { set; get; }
-        public bool IsInsertValve { set; get; }
-        public bool IsInsertAirPort { set; get; }
-        public double FanMarkHeight { set; get; }
-        public double AirPortLength { set; get; }
-        public double AirPortHeight { set; get; }
-        public double AirPortDeepth { set; get; }
-        public double AirPortMarkHeight { set; get; }
-        public double AirPortWindSpeed { set; get; }
-        public ThFanConfigInfo FanConfigInfo { get; }//选择的风机属性
-        public List<ThFanConfigInfo> FanInfoList { set; get; }
+        public ThFanSideConfigInfo FanSideConfigInfo { set; get; }
+        public ThAirPortSideConfigInfo AirPortSideConfigInfo { set; get; }
         public ThFanWEXHConfigInfo()
         {
-            FanMarkHeigthType = 1;
-            AirPortMarkHeigthType = 1;
-            IsInsertHole = true;
-            IsInsertValve = true;
-            IsInsertAirPort = true;
-            FanMarkHeight = 2.5;
-            AirPortLength = 320;
-            AirPortHeight = 150;
-            AirPortDeepth = 200;
-            AirPortMarkHeight = 2.5;
-            AirPortWindSpeed = 0.0;
-            FanInfoList = new List<ThFanConfigInfo>();
-            FanConfigInfo = new ThFanConfigInfo();
+            FanSideConfigInfo = new ThFanSideConfigInfo();
+            AirPortSideConfigInfo = new ThAirPortSideConfigInfo();
+        }
+    }
+    public class ThFanCEXHConfigInfo
+    {
+        public ThFanSideConfigInfo FanSideConfigInfo { set; get; }//风机侧信息
+        public ThAirPipeConfigInfo AirPipeConfigInfo { set; get; }//风管信息
+        public ThAirPortSideConfigInfo AirPortSideConfigInfo { set; get; }//补风侧信息
+        public ThFanCEXHConfigInfo()
+        {
+            FanSideConfigInfo = new ThFanSideConfigInfo();
+            AirPipeConfigInfo = new ThAirPipeConfigInfo();
+            AirPortSideConfigInfo = new ThAirPortSideConfigInfo();
         }
     }
     public class ThFanLayoutConfigInfo
@@ -140,9 +133,9 @@ namespace ThMEPHVAC.FanLayout.ViewModel
         public int FanType { set; get; }//风机类型
         public bool IsInsertHole { set; get; }//插入墙洞
         public string MapScale { set; get; }//出图比例
-        public ThFanWAFConfigInfo WAFConfigInfo { get; }//壁式轴流风机
-        public ThFanWEXHConfigInfo WEXHConfigInfo { get; }//壁式排气扇
-        public ThFanCEXHConfigInfo CEXHConfigInfo { get; }//吊顶式排气扇信息
+        public ThFanWAFConfigInfo WAFConfigInfo { set; get; }//壁式轴流风机
+        public ThFanWEXHConfigInfo WEXHConfigInfo { set; get; }//壁式排气扇
+        public ThFanCEXHConfigInfo CEXHConfigInfo { set; get; }//吊顶式排气扇信息
         public ThFanLayoutConfigInfo()
         {
             FanType = 0;

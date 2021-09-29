@@ -85,7 +85,6 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "暖通图层图块.dwg");
         }
-
         // 电气烟感/温感图块
         public static string ElectricalSensorDwgPath()
         {
