@@ -47,7 +47,7 @@ FocusToCAD();
         }
         public void ImportBlockFile()
         {
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacStandardPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 if (blockDb.Blocks.Contains("AI-壁式轴流风机"))
