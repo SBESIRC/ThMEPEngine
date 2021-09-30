@@ -32,10 +32,17 @@ namespace ThMEPEngineCore.CAD
         /// <returns></returns>
         public static string DecompressString(string str)
         {
-            var compressBeforeByte = Convert.FromBase64String(str);
-            var compressAfterByte = Decompress(compressBeforeByte);
-            string compressString = Encoding.GetEncoding("UTF-8").GetString(compressAfterByte);
-            return compressString;
+            try
+            {
+                var compressBeforeByte = Convert.FromBase64String(str);
+                var compressAfterByte = Decompress(compressBeforeByte);
+                string compressString = Encoding.GetEncoding("UTF-8").GetString(compressAfterByte);
+                return compressString;
+            }
+            catch
+            {
+                return str;
+            }
         }
 
         /// <summary>
