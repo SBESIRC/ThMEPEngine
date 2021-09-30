@@ -78,8 +78,11 @@ namespace ThMEPEngineCore.CAD
                 {
                     var pr = ed.Drag(jig);
                     if (pr.Status == PromptStatus.Cancel)
-                        return new Polyline();
-                    if (pr.Status == PromptStatus.OK)
+                    {
+                        pline.RemoveVertexAt(pline.NumberOfVertices - 1);
+                        break;
+                    }
+                    else if (pr.Status == PromptStatus.OK)
                     {
                         pline.AddVertexAt(pline.NumberOfVertices, Point2d.Origin, 0.0, 0.0, 0.0);
                     }

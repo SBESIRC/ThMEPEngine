@@ -110,7 +110,10 @@ namespace ThMEPEngineCore
             {   
                 // 获取框选范围
                 var frame = GetRange();
-
+                if(frame.Area<1.0)
+                {
+                    return;
+                }
                 // 选择房间点
                 var selectPts = new List<Point3d>();
                 signObjs = SelectUserPoints(selectPts);
@@ -218,7 +221,7 @@ namespace ThMEPEngineCore
         private DBObjectCollection CreateSign(Point3d pt)
         {
             var results = new DBObjectCollection();
-            var length = 15.0;
+            var length = 200.0;
             var mt1 = Matrix3d.Rotation(Math.PI * 0.25, Vector3d.ZAxis, Point3d.Origin);
             var mt2 = Matrix3d.Rotation(Math.PI * 0.75, Vector3d.ZAxis, Point3d.Origin);
             var vec1 = Vector3d.XAxis.TransformBy(mt1);
