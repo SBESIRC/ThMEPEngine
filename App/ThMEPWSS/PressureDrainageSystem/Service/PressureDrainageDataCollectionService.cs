@@ -112,12 +112,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 this.CollectedData.LabelLines = new List<Line>();
-                foreach (var e in Entities.OfType<Line>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-FRPT-NOTE") && e.Length > 0))
+                foreach (var e in Entities.OfType<Line>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-FRPT-NOTE" || e.Layer == "W-RAIN-DIMS") && e.Length > 0))
                 {
                     Line line = new Line(e.StartPoint.ToPoint2d().ToPoint3d(), e.EndPoint.ToPoint2d().ToPoint3d());
                     this.CollectedData.LabelLines.Add(line);
                 }
-                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-FRPT-NOTE") && IsTianZhengElement(e)))
+                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-FRPT-NOTE" || e.Layer == "W-RAIN-DIMS") && IsTianZhengElement(e)))
                 {
                     foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Line>())
                     {
@@ -135,7 +135,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 this.CollectedData.Labels = new List<DBText>();
-                foreach (var e in Entities.OfType<DBText>().Where(e => e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS"))
+                foreach (var e in Entities.OfType<DBText>().Where(e => e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-RAIN-DIMS"))
                 {
                     if (e.Bounds is Extents3d)
                     {
@@ -149,7 +149,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         this.CollectedData.Labels.Add(dBText);
                     }
                 }
-                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS") && IsTianZhengElement(e)))
+                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-HYDT-DIMS" || e.Layer == "W-DRAI-DIMS" || e.Layer == "W-RAIN-DIMS") && IsTianZhengElement(e)))
                 {
                     foreach (var e in entity.ExplodeToDBObjectCollection().OfType<DBText>())
                     {
