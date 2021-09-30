@@ -17,28 +17,49 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0" >
             <Label Content="车位图层拾取" Padding="0,5,0,5"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,5" VerticalAlignment="Center">
-                <CheckBox  Content="全选" VerticalAlignment="Center" IsChecked="{Binding SelectAll,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
-                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取外参" Name="btnPickExternal"  TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0"  Click="btnPickExternal_Click"></cus:ImageButton>
-                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取本图" Name="btnPickModel" TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0" Click="btnPickModel_Click"></cus:ImageButton>
+                <CheckBox  Content="全选" VerticalAlignment="Center" IsChecked="{Binding SelectAllLayer,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取外参" TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0"  Click="btnPickExternal_Click"></cus:ImageButton>
+                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取本图" TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0" Click="btnPickModel_Click"></cus:ImageButton>
             </StackPanel>
             <ListView x:Name="list" Grid.Row="1" Height="100" ItemsSource="{Binding PickLayerNames}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelect}"
-                                  Command="{Binding Path=DataContext.ListCheckedChange, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ItemsControl}} }">
+                                  Command="{Binding Path=DataContext.ListCheckedChange, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ItemsControl}} }"
+                                  CommandParameter="Layer">
                         </CheckBox>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
         </StackPanel>
-        <StackPanel Grid.Row="1">
+        <StackPanel Orientation="Vertical" Grid.Row="1" >
+            <Label Content="车位块拾取" Padding="0,5,0,5"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5" VerticalAlignment="Center">
+                <CheckBox  Content="全选" VerticalAlignment="Center" IsChecked="{Binding SelectAllBlock,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取外参" TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0"  Click="btnPickBlockExternal_Click"></cus:ImageButton>
+                <cus:ImageButton ImageTextLocation="TextOnly" Content="拾取本图" TextMargin="5,0,5,0" Height="25" Margin="10,0,0,0" Click="btnPickBlockModel_Click"></cus:ImageButton>
+            </StackPanel>
+            <ListView Grid.Row="1" Height="100" ItemsSource="{Binding PickBlockNames}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelect}"
+                                  Command="{Binding Path=DataContext.ListCheckedChange, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ItemsControl}} }"
+                                  CommandParameter="Block">
+                        </CheckBox>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
             <Grid Margin="0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
@@ -47,24 +68,28 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label Margin="0" Padding="0" Content="布灯方向：" Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <Label Margin="0" Padding="0" Content="车位识别来源：" Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center"></Label>
                 <ComboBox Grid.Row="0" Grid.Column="1" Height="22" 
+                          ItemsSource="{Binding ListParkSources,Mode=OneWay,NotifyOnSourceUpdated=True}"
+                          SelectedItem="{Binding ParkSourcesSelect,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                <Label Margin="0" Padding="0" Content="布灯方向：" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <ComboBox Grid.Row="1" Grid.Column="1" Height="22" 
                           ItemsSource="{Binding ListLightDirections,Mode=OneWay,NotifyOnSourceUpdated=True}"
                           SelectedItem="{Binding LightDirSelect,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
 
-                <Label Margin="0" Padding="0" Content="回路数量控制：" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center"></Label>
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <Label Margin="0" Padding="0" Content="回路数量控制：" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                     <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Width="50" Height="22" Text="{Binding GroupMaxCount,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                     <Label Content="盏/回路" VerticalContentAlignment="Center"></Label>
                 </StackPanel>
 
-                <Label Margin="0" Padding="0" Content="全局比例：" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center"></Label>
-                <ComboBox Grid.Row="2" Grid.Column="1" Height="22" 
+                <Label Margin="0" Padding="0" Content="全局比例：" Grid.Row="3" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <ComboBox Grid.Row="3" Grid.Column="1" Height="22" 
                           ItemsSource="{Binding ListScales,Mode=OneWay,NotifyOnSourceUpdated=True}"
                           SelectedItem="{Binding ScaleSelect,Mode=TwoWay,NotifyOnSourceUpdated=True}" />
             </Grid>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center">
             <cus:ImageButton ImageTextLocation="TextOnly" Name="btnLayoutLight" Content="灯具布置" TextMargin="10,0,10,0" Height="25" Click="btnLayoutLight_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly" Name="btnConnectLine" Content="自动连线" TextMargin="10,0,10,0" Height="25" Margin="10,0,0,0" Click="btnConnectLine_Click"></cus:ImageButton>
         </StackPanel>

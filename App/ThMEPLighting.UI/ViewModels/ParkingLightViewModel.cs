@@ -1,10 +1,7 @@
 ﻿using GalaSoft.MvvmLight.Command;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPLighting.Common;
@@ -20,6 +17,11 @@ namespace ThMEPLighting.UI.ViewModels
             ListLightDirections.Add(new UListItemData("垂直短边方向", 2));
             LightDirSelect = ListLightDirections.FirstOrDefault();
 
+            var sources = CommonUtil.EnumDescriptionToList(typeof(EnumParkingSource));
+            foreach (var item in sources)
+                ListParkSources.Add(item);
+            ParkSourcesSelect = ListParkSources.Where(c=>c.Value == (int)EnumParkingSource.BlokcAndLayer).FirstOrDefault();
+
             List<int> values = new List<int>
             {
                 (int)ThEnumBlockScale.DrawingScale1_100,
@@ -32,14 +34,25 @@ namespace ThMEPLighting.UI.ViewModels
             }
             ScaleSelect = ListScales.Where(c => c.Value == (int)ThEnumBlockScale.DrawingScale1_100).FirstOrDefault();
         }
-        private bool? _selectAll { get; set; }
-        public bool? SelectAll
+        private bool? _selectAllLayer { get; set; }
+        public bool? SelectAllLayer
         {
-            get { return _selectAll; }
+            get { return _selectAllLayer; }
             set
             {
-                _selectAll = value;
+                _selectAllLayer = value;
                 SelectAllLayerName();
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool? _selectAllBlock { get; set; }
+        public bool? SelectAllBlock
+        {
+            get { return _selectAllBlock; }
+            set
+            {
+                _selectAllBlock = value;
+                SelectAllBlockName();
                 this.RaisePropertyChanged();
             }
         }
@@ -56,6 +69,22 @@ namespace ThMEPLighting.UI.ViewModels
             set
             {
                 _lightDirSelect = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private ObservableCollection<UListItemData> _parkSources = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> ListParkSources
+        {
+            get { return _parkSources; }
+            set { _parkSources = value; this.RaisePropertyChanged(); }
+        }
+        private UListItemData _parkSourcesSelect { get; set; }
+        public UListItemData ParkSourcesSelect
+        {
+            get { return _parkSourcesSelect; }
+            set
+            {
+                _parkSourcesSelect = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -87,45 +116,100 @@ namespace ThMEPLighting.UI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
-        RelayCommand listCheckedChange;
+        private ObservableCollection<MultiCheckItem> _pickBlockNames = new ObservableCollection<MultiCheckItem>();
+        public ObservableCollection<MultiCheckItem> PickBlockNames
+        {
+            get { return _pickBlockNames; }
+            set
+            {
+                _pickBlockNames = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        RelayCommand<string> listCheckedChange;
         public ICommand ListCheckedChange
         {
             get
             {
                 if (listCheckedChange == null)
-                    listCheckedChange = new RelayCommand(() => UpdateSelectAllState());
+                    listCheckedChange = new RelayCommand<string>((type) => UpdateSelectAllState(type));
 
                 return listCheckedChange;
             }
         }
+        /// <summary>
+        /// 根据当前选择的个数来更新全选框的状态
+        /// </summary>
+        public void UpdateSelectAllState(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+                return;
+            var typeName = type.ToUpper();
+            if (typeName.Equals("LAYER"))
+            {
+                UpdateSelectAllLayerState();
+            }
+            else if (typeName.Equals("BLOCK"))
+            {
+                UpdateSelectAllBlockState();
+            }
+        }
         private void SelectAllLayerName() 
         {
-            if (_selectAll == null)
+            if (_selectAllLayer == null)
                 return;
             foreach (var item in PickLayerNames)
-                item.IsSelect = _selectAll.Value;
+                item.IsSelect = _selectAllLayer.Value;
+        }
+        private void SelectAllBlockName()
+        {
+            if (_selectAllBlock == null)
+                return;
+            foreach (var item in PickBlockNames)
+                item.IsSelect = _selectAllBlock.Value;
         }
         /// <summary>
         /// 根据当前选择的个数来更新全选框的状态
         /// </summary>
-        public void UpdateSelectAllState()
+        public void UpdateSelectAllLayerState()
         {
-            if (_pickLayerNames == null)
+            if (SelectAllLayer == null)
                 return;
-
             // 获取列表项中 IsSelected 值为 True 的个数，并通过该值来确定 IsSelectAllChecked 的值
             int count = _pickLayerNames.Where(item => item.IsSelect).Count();
             if (count == _pickLayerNames.Count)
             {
-                SelectAll = true;
+                SelectAllLayer = true;
             }
             else if (count == 0)
             {
-                SelectAll = false;
+                SelectAllLayer = false;
             }
             else
             {
-                SelectAll = null;
+                SelectAllLayer = null;
+            }
+        }
+        /// <summary>
+        /// 根据当前选择的个数来更新全选框的状态
+        /// </summary>
+        public void UpdateSelectAllBlockState()
+        {
+            if (SelectAllBlock == null)
+                return;
+            // 获取列表项中 IsSelected 值为 True 的个数，并通过该值来确定 IsSelectAllChecked 的值
+            int count = _pickBlockNames.Where(item => item.IsSelect).Count();
+            if (count == _pickBlockNames.Count)
+            {
+                SelectAllBlock = true;
+            }
+            else if (count == 0)
+            {
+                SelectAllBlock = false;
+            }
+            else
+            {
+                SelectAllBlock = null;
             }
         }
     }

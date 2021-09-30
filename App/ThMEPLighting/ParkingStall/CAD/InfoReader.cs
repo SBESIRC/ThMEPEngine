@@ -17,7 +17,8 @@ namespace ThMEPLighting.ParkingStall.CAD
     public class InfoReader
     {
         private Point3dCollection m_previewWindow;
-
+        private List<string> m_layerNames = new List<string>();
+        private List<string> m_blockNames = new List<string>();
         public List<Polyline> ParkingStallPolys
         {
             get;
@@ -28,7 +29,6 @@ namespace ThMEPLighting.ParkingStall.CAD
         {
             m_previewWindow = preViewWindow;
         }
-
         public static List<Polyline> MakeParkingStallPolys(Point3dCollection preViewWindow)
         {
             var infoReader = new InfoReader(preViewWindow);
@@ -40,17 +40,30 @@ namespace ThMEPLighting.ParkingStall.CAD
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                var layers = ThParkingStallLayerManager.XrefLayers(acadDb.Database);
-                foreach (var item in ThParkingStallService.Instance.ParkingLayerNames) 
-                {
-                    if (layers.Any(c => c.Equals(item)))
-                        continue;
-                    layers.Add(item);
-                }
                 var parkingStallRecognitionEngine = new ThParkingStallRecognitionEngine();
                 parkingStallRecognitionEngine.Visitor.LayerFilter.Clear();
-                foreach (var layerName in layers)
-                    parkingStallRecognitionEngine.Visitor.LayerFilter.Add(layerName);
+                GetLayerBlockNames(acadDb.Database);
+                switch (ThParkingStallService.Instance.ParkingSource) 
+                {
+                    case Common.EnumParkingSource.OnlyLayerName:
+                        //仅图层获取
+                        foreach (var layerName in m_layerNames)
+                            parkingStallRecognitionEngine.Visitor.LayerFilter.Add(layerName);
+                        m_blockNames.Clear();
+                        m_layerNames.Clear();
+                        break;
+                    case Common.EnumParkingSource.OnlyBlockName:
+                        //仅通过图块名称获取
+                        parkingStallRecognitionEngine.Visitor.CheckQualifiedLayer = (Entity e) => true;
+                        parkingStallRecognitionEngine.Visitor.CheckQualifiedBlockName = CheckLayerBlockNameQualified;
+                        m_layerNames.Clear();
+                        break;
+                    case Common.EnumParkingSource.BlokcAndLayer:
+                        //图块名称和图层名称都可以
+                        parkingStallRecognitionEngine.Visitor.CheckQualifiedLayer = CheckLayerBlockNameQualified;
+                        parkingStallRecognitionEngine.Visitor.CheckQualifiedBlockName = CheckLayerBlockNameQualified;
+                        break;
+                }
                 parkingStallRecognitionEngine.Recognize(acadDb.Database, m_previewWindow);
 
                 foreach (var space in parkingStallRecognitionEngine.Elements.Cast<ThIfcParkingStall>().ToList())
@@ -65,6 +78,35 @@ namespace ThMEPLighting.ParkingStall.CAD
                     }
                 }
             }
+        }
+        private void GetLayerBlockNames(Database database) 
+        {
+            m_layerNames = ThParkingStallLayerManager.XrefLayers(database);
+            foreach (var layerName in ThParkingStallService.Instance.ParkingLayerNames)
+            {
+                if (m_layerNames.Any(c => c.Equals(layerName)))
+                    continue;
+                m_layerNames.Add(layerName);
+            }
+            m_blockNames.Clear();
+            foreach (var blockName in ThParkingStallService.Instance.ParkingBlockNames)
+            {
+                string name = blockName.ToUpper();
+                if (m_blockNames.Any(c => c.Equals(name)))
+                    continue;
+                m_blockNames.Add(name);
+            }
+        }
+        private bool CheckLayerBlockNameQualified(Entity entity) 
+        {
+            if (entity is BlockReference br)
+            {
+                var layerName = ThMEPEngineCore.Algorithm.ThMEPXRefService.OriginalFromXref(entity.Layer);
+                var blockName = ThMEPEngineCore.Algorithm.ThMEPXRefService.OriginalFromXref(br.GetEffectiveName().ToUpper());
+                if (m_layerNames.Any(c => c.Equals(layerName)) || m_blockNames.Any(c => c.Equals(blockName)))
+                    return true;
+            }
+            return false;
         }
     }
 }

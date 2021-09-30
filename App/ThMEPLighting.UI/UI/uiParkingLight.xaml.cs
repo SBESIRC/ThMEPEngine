@@ -26,15 +26,62 @@ namespace ThMEPLighting.UI.UI
 
         private void btnPickModel_Click(object sender, RoutedEventArgs e)
         {
-            PickParkingBlock(false);
+            PickParkingBlockLayers(false);
         }
 
         private void btnPickExternal_Click(object sender, RoutedEventArgs e)
         {
-            PickParkingBlock(true);
+            PickParkingBlockLayers(true);
         }
-        private void PickParkingBlock(bool isExternal) 
+        private void btnPickBlockModel_Click(object sender, RoutedEventArgs e)
         {
+            PickParkingBlockNames(false);
+        }
+
+        private void btnPickBlockExternal_Click(object sender, RoutedEventArgs e)
+        {
+            PickParkingBlockNames(true);
+        }
+        private void PickParkingBlockLayers(bool isExternal)
+        {
+            var strLayer = PickParkingBlockLayerName(isExternal, out string blockName);
+            if (string.IsNullOrEmpty(strLayer))
+                return;
+            bool isAddToView = true;
+            foreach (var item in parkingLightView.PickLayerNames)
+            {
+                isAddToView = !item.Value.Equals(strLayer);
+                if (!isAddToView)
+                {
+                    item.IsSelect = true;
+                    break;
+                }
+            }
+            if (isAddToView)
+                parkingLightView.PickLayerNames.Add(new MultiCheckItem(strLayer, strLayer, true));
+        }
+        private void PickParkingBlockNames(bool isExternal)
+        {
+            var strLayer = PickParkingBlockLayerName(isExternal, out string blockName);
+            if (string.IsNullOrEmpty(blockName))
+                return;
+            bool isAddToView = true;
+            foreach (var item in parkingLightView.PickBlockNames)
+            {
+                isAddToView = !item.Value.Equals(blockName);
+                if (!isAddToView)
+                {
+                    item.IsSelect = true;
+                    break;
+                }
+            }
+            if (isAddToView)
+                parkingLightView.PickBlockNames.Add(new MultiCheckItem(blockName, blockName, true));
+        }
+        string PickParkingBlockLayerName(bool isExternal,out string blockName) 
+        {
+            string layerName = string.Empty;
+            blockName = string.Empty;
             try
             {
                 this.Hide();
@@ -45,26 +92,15 @@ namespace ThMEPLighting.UI.UI
                 else
                     selectSucceed = pickEntityCommand.PickModelSpaceBlock("请选择本图纸中的车位块");
                 if (!selectSucceed)
-                    return;
-                string layerName = pickEntityCommand.GetEntityLayerName();
-                var blockName = pickEntityCommand.GetBlockName();
-                if (string.IsNullOrEmpty(layerName))
-                    return;
-                bool isAddToView = true;
-                foreach (var item in parkingLightView.PickLayerNames) 
-                {
-                    isAddToView = !item.Value.Equals(layerName);
-                    if (!isAddToView)
-                    { 
-                        item.IsSelect = true;
-                        break;
-                    }
-                }
-                if (isAddToView)
-                    parkingLightView.PickLayerNames.Add(new MultiCheckItem(layerName, layerName, true));
+                    return layerName;
+                layerName = pickEntityCommand.GetEntityLayerName();
+                blockName = pickEntityCommand.GetBlockName();
+                return layerName;
             }
-            catch (Exception ex) 
-            { }
+            catch
+            {
+                return string.Empty;
+            }
             finally
             {
                 this.Show();
@@ -73,6 +109,24 @@ namespace ThMEPLighting.UI.UI
 
         private void btnLayoutLight_Click(object sender, RoutedEventArgs e)
         {
+            var type = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;
+            if (type == Common.EnumParkingSource.OnlyBlockName)
+            {
+                bool haveSelectBlock = false;
+                foreach (var item in parkingLightView.PickBlockNames)
+                {
+                    if (item.IsSelect)
+                    {
+                        haveSelectBlock = true;
+                        break;
+                    }
+                }
+                if (!haveSelectBlock)
+                {
+                    MessageBox.Show("选择了仅块名称，但没有选择相应的块名称，请选择块名称后再进行后续操作");
+                    return;
+                }
+            }
             BtnClick(true);
         }
 
@@ -113,19 +167,50 @@ namespace ThMEPLighting.UI.UI
                 ThParkingStallService.Instance.ParkingLayerNames.Clear();
                 ThParkingStallService.Instance.BlockScale = parkingLightView.ScaleSelect.Value;
                 ThParkingStallService.Instance.SetLightDir(parkingLightView.LightDirSelect.Value == 1);
-                if (parkingLightView.PickLayerNames != null && parkingLightView.PickLayerNames.Count > 0) 
+                ThParkingStallService.Instance.ParkingLayerNames.Clear();
+                ThParkingStallService.Instance.ParkingBlockNames.Clear();
+                ThParkingStallService.Instance.ParkingSource = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;
+                switch (ThParkingStallService.Instance.ParkingSource) 
                 {
-                    foreach (var item in parkingLightView.PickLayerNames)
-                    {
-                        if (!item.IsSelect)
-                            continue;
-                        ThParkingStallService.Instance.ParkingLayerNames.Add(item.Value);
-                    }
+                    case Common.EnumParkingSource.OnlyLayerName://仅图层名称
+                        AddLayerNames();
+                        break;
+                    case Common.EnumParkingSource.OnlyBlockName://仅块名称
+                        AddBlockNames();
+                        break;
+                    case Common.EnumParkingSource.BlokcAndLayer://图层和块
+                        AddBlockNames();
+                        AddLayerNames();
+                        break;
                 }
             }
             else 
             {
                 ThParkingStallService.Instance.GroupMaxLightCount = parkingLightView.GroupMaxCount;
+            }
+        }
+        void AddBlockNames() 
+        {
+            if (parkingLightView.PickBlockNames != null && parkingLightView.PickBlockNames.Count > 0)
+            {
+                foreach (var item in parkingLightView.PickBlockNames)
+                {
+                    if (!item.IsSelect)
+                        continue;
+                    ThParkingStallService.Instance.ParkingBlockNames.Add(item.Value);
+                }
+            }
+        }
+        void AddLayerNames()
+        {
+            if (parkingLightView.PickLayerNames != null && parkingLightView.PickLayerNames.Count > 0)
+            {
+                foreach (var item in parkingLightView.PickLayerNames)
+                {
+                    if (!item.IsSelect)
+                        continue;
+                    ThParkingStallService.Instance.ParkingLayerNames.Add(item.Value);
+                }
             }
         }
         void FocusToCAD()

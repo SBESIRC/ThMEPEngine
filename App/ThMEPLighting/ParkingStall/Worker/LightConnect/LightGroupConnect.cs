@@ -656,6 +656,9 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
             }
             if (hisGroup.LightPoints.Count < 2 || newGroup.LightPoints.Count < 2) 
             {
+                if (!HaveCanConnectLine(hisGroup.LightPoints, newGroup.LightPoints))
+                    nearPoint = CorrectGroupConnectPoint(hisGroup, newGroup, nearPoint, ref hisGroupoint);
+               
                 newGroup.ConnectParentPoint = nearPoint;
                 return nearPoint;
             }
@@ -696,38 +699,8 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                     }
                     else if (newGroup.LightPoints.Count > 1 && hisGroup.LightPoints.Count > 1)
                     {
-                        //没有可以直接连接的需要对分组中的每个点进行跑A星进行修正
-                        var tempNewGroupPoint = nearPoint;
-                        var tempHisGroupPoint = hisGroupoint;
-                        int maxCount = Math.Max(newGroup.LightPoints.Count, hisGroup.LightPoints.Count);//防止死循环
-                        bool newIsChange = true;
-                        bool hisIsChange = true;
-                        while ((newIsChange || hisIsChange) && maxCount > 0)
-                        {
-                            var lightConnect = CalcLightConnectLines(tempNewGroupPoint, tempHisGroupPoint);
-                            var lines = lightConnect.ConnectLines;
-                            var thisDirLines = new List<Line>();
-                            foreach (var line in lines)
-                            {
-                                var tempAngle = line.CurveDirection().GetAngleTo(newGroup.LineDir);
-                                tempAngle = tempAngle > Math.PI / 2.0 ? Math.PI - tempAngle : tempAngle;
-                                if (tempAngle > Math.PI * 10 / 180.0)
-                                    continue;
-                                thisDirLines.Add(line);
-                            }
-                            if (thisDirLines.Count < 1)
-                                break;
-                            newIsChange = false;
-                            hisIsChange = false;
-                            tempNewGroupPoint = PointChangeToNext(tempNewGroupPoint, newGroup.LightPoints, thisDirLines, out newIsChange);
-                            tempHisGroupPoint = PointChangeToNext(tempHisGroupPoint, hisGroup.LightPoints, thisDirLines, out hisIsChange);
-                            maxCount -= 1;
-                        }
-                        if (tempNewGroupPoint.DistanceTo(tempHisGroupPoint) > 10)
-                        {
-                            nearPoint = tempNewGroupPoint;
-                            hisGroupoint = tempHisGroupPoint;
-                        }
+                        nearPoint = CorrectGroupConnectPoint(hisGroup, newGroup, nearPoint, ref hisGroupoint);
+                        
                     }
                 }
             }
@@ -840,6 +813,59 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                 }
             }
             return count;
+        }
+
+        Point3d CorrectGroupConnectPoint(LightDirGroup hisGroup, LightDirGroup newGroup,Point3d nearPoint,ref Point3d hisGroupoint) 
+        {
+            //没有可以直接连接的需要对分组中的每个点进行跑A星进行修正
+            var tempNewGroupPoint = nearPoint;
+            var tempHisGroupPoint = hisGroupoint;
+            int maxCount = Math.Max(newGroup.LightPoints.Count, hisGroup.LightPoints.Count);//防止死循环
+            bool newIsChange = true;
+            bool hisIsChange = true;
+            while ((newIsChange || hisIsChange) && maxCount > 0)
+            {
+                var lightConnect = CalcLightConnectLines(tempNewGroupPoint, tempHisGroupPoint);
+                var lines = lightConnect.ConnectLines;
+                var thisDirLines = new List<Line>();
+                foreach (var line in lines)
+                {
+                    var tempAngle = line.CurveDirection().GetAngleTo(newGroup.LineDir);
+                    tempAngle = tempAngle > Math.PI / 2.0 ? Math.PI - tempAngle : tempAngle;
+                    if (tempAngle > Math.PI * 10 / 180.0)
+                        continue;
+                    thisDirLines.Add(line);
+                }
+                if (thisDirLines.Count < 1)
+                    break;
+                newIsChange = false;
+                hisIsChange = false;
+                tempNewGroupPoint = PointChangeToNext(tempNewGroupPoint, newGroup.LightPoints, thisDirLines, out newIsChange);
+                tempHisGroupPoint = PointChangeToNext(tempHisGroupPoint, hisGroup.LightPoints, thisDirLines, out hisIsChange);
+                maxCount -= 1;
+            }
+            if (tempNewGroupPoint.DistanceTo(tempHisGroupPoint) > 10)
+            {
+                nearPoint = tempNewGroupPoint;
+                hisGroupoint = tempHisGroupPoint;
+            }
+            return nearPoint;
+            
+        }
+        bool HaveCanConnectLine(List<Point3d> groupPoints,List<Point3d> checkGroupPoints) 
+        {
+            bool isCross = true;
+            for (int i = 0; i < groupPoints.Count; i++)
+            {
+                var point1 = groupPoints[i];
+                var point2 = checkGroupPoints.OrderBy(c => c.DistanceTo(point1)).First();
+                var tempLine = new Line(point1, point2);
+                if (_lightConnectLight.IsCrossOutPolyline(tempLine) || _lightConnectLight.IsCrossInnerPolyline(tempLine))
+                    continue;
+                isCross = false;
+                break;
+            }
+            return !isCross;
         }
     }
     class GroupConnect

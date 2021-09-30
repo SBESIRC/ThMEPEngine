@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
+    <Compile Include="Common\EnumParkingSource.cs" />
     <Compile Include="Common\ThEnumBlockScale.cs" />
     <Compile Include="DSFEL\DSFELConfigCommon.cs" />
     <Compile Include="DSFEL\ExitService\CalExitService.cs" />
