@@ -77,7 +77,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 {
                     acadDatabase.ModelSpace.Add(pline);
                     pline.LayerId = layerId;
-                    pline.ConstantWidth = 100;
+                    pline.ConstantWidth = 50;
                 }
             }
         }

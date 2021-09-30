@@ -14,29 +14,32 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void rbUpSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            //ToDO
-            Clean();
+            IsEnabledOpen();
         }
 
         private void rbDownSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            //ToDO
-            Clean();
+            IsEnabledOpen();
             this.chkItem8.IsEnabled = false;
+            this.chkItem8.IsChecked = false;
         }
 
         private void rbSideSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            //ToDO
-            Clean();
+            IsEnabledOpen();
             this.chkItem1.IsEnabled = false;
             this.chkItem2.IsEnabled = false;
             this.chkItem3.IsEnabled = false;
             this.chkItem7.IsEnabled = false;
             this.chkItem8.IsEnabled = false;
+            this.chkItem1.IsChecked = false;
+            this.chkItem2.IsChecked = false;
+            this.chkItem3.IsChecked = false;
+            this.chkItem7.IsChecked = false;
+            this.chkItem8.IsChecked = false;
         }
 
-        private void Clean()
+        private void IsEnabledOpen()
         {
             this.chkItem1.IsEnabled = true;
             this.chkItem2.IsEnabled = true;
@@ -45,13 +48,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem7.IsEnabled = true;
             this.chkItem8.IsEnabled = true;
             this.chkItem9.IsEnabled = true;
-            this.chkItem1.IsChecked = false;
-            this.chkItem2.IsChecked = false;
-            this.chkItem3.IsChecked = false;
-            this.chkItem6.IsChecked = false;
-            this.chkItem7.IsChecked = false;
-            this.chkItem8.IsChecked = false;
-            this.chkItem9.IsChecked = false;
+            this.chkItem1.IsChecked = true;
+            this.chkItem2.IsChecked = true;
+            this.chkItem3.IsChecked = true;
+            this.chkItem6.IsChecked = true;
+            this.chkItem7.IsChecked = true;
+            this.chkItem8.IsChecked = true;
+            this.chkItem9.IsChecked = true;
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)

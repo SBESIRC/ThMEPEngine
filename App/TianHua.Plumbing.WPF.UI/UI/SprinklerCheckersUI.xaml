@@ -78,7 +78,7 @@
                 <StackPanel Grid.Row="0">
                     <CheckBox x:Name="chkItem1" Margin="0,3,0,0" Content="1. 盲区检测（喷头间距过大）" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem1,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox x:Name="chkItem2" Margin="0,3,0,0" Content="2. 喷头距边过大" IsThreeState="False"
+                    <CheckBox x:Name="chkItem2" Margin="0,3,0,0" Content="2. 喷头距边是否过大" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox x:Name="chkItem3" Margin="0,3,0,0" Content="3. 房间是否布置喷头" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem3,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>

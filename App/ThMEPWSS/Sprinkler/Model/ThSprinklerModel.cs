@@ -14,8 +14,15 @@ namespace ThMEPWSS.Sprinkler.Model
             sprinklerRange = SprinklerRange.Standard;
             var items = DangerGradeDataManager.Datas.Select(o => o.DangerGrade).Distinct();
             DangerGrades = new ObservableCollection<string>(items);
-            dangerGrade = items.First();
+            dangerGrade = items.ToList()[2];
             aboveBeamHeight = 900;
+            checkItem1 = true;
+            checkItem2 = true;
+            checkItem3 = true;
+            checkItem6 = true;
+            checkItem7 = true;
+            checkItem8 = true;
+            checkItem9 = true;
         }
 
         private SprinklerType checkSprinklerType;

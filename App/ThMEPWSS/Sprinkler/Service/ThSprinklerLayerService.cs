@@ -14,7 +14,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAIBeamCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Beam_Checker_LayerName, 60);
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Beam_Checker_LayerName, 1);
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Sprinkler_Distance_LayerName, 6);
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Sprinkler_Distance_LayerName, 4);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.From_Boundary_So_Close_LayerName, 30);
+            return database.CreateAILayer(ThSprinklerCheckerLayer.From_Boundary_So_Close_LayerName, 4);
         }
 
         /// <summary>

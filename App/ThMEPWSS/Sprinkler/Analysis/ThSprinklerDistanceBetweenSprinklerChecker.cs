@@ -54,9 +54,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
         private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
         {
             var polygon = pline.ToNTSPolygon();
-            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor")
-                                                         && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
-                                                         || (g.Properties["Category"] as string).Contains("Room")))
+            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
+                                                      || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
                                              .Select(g => g.Boundary)
                                              .Where(g => polygon.Intersects(g.ToNTSGeometry()))
                                              .ToCollection();

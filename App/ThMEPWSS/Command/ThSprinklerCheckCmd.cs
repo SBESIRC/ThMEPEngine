@@ -1,21 +1,15 @@
 ﻿using System;
 using AcHelper;
-using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Sprinkler.Service;
 using ThMEPWSS.Sprinkler.Analysis;
-using ThCADCore.NTS;
-using System.Linq;
-using NFox.Cad;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Command
 {
@@ -33,6 +27,20 @@ namespace ThMEPWSS.Command
             using (Active.Document.LockDocument())
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
+                var range = SprinklerRange();
+                var category = SprinklerType();
+                var data = DangerGradeDataManager.Query(SprinklerCheckerVM.Parameter.DangerGrade, range);
+                var checkBoxs = new List<bool>
+                {
+                    SprinklerCheckerVM.Parameter.CheckItem1,
+                    SprinklerCheckerVM.Parameter.CheckItem2,
+                    SprinklerCheckerVM.Parameter.CheckItem3,
+                    SprinklerCheckerVM.Parameter.CheckItem6,
+                    SprinklerCheckerVM.Parameter.CheckItem7,
+                    SprinklerCheckerVM.Parameter.CheckItem8,
+                    SprinklerCheckerVM.Parameter.CheckItem9,
+                };
+
                 var polylines = ThSprinklerLayoutAreaUtils.GetFrames();
                 if (polylines.Count <= 0)
                 {
@@ -47,20 +55,6 @@ namespace ThMEPWSS.Command
 
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
                 recognizeAllEngine.RecognizeMS(currentDb.Database);
-
-                var range = SprinklerRange();
-                var category = SprinklerType();
-                var data = DangerGradeDataManager.Query(SprinklerCheckerVM.Parameter.DangerGrade, range);
-                var checkBoxs = new List<bool>
-                {
-                    SprinklerCheckerVM.Parameter.CheckItem1,
-                    SprinklerCheckerVM.Parameter.CheckItem2,
-                    SprinklerCheckerVM.Parameter.CheckItem3,
-                    SprinklerCheckerVM.Parameter.CheckItem6,
-                    SprinklerCheckerVM.Parameter.CheckItem7,
-                    SprinklerCheckerVM.Parameter.CheckItem8,
-                    SprinklerCheckerVM.Parameter.CheckItem9,
-                };
 
                 var checkers = new List<ThSprinklerChecker>
                     {

@@ -15,14 +15,13 @@ namespace ThMEPWSS.Sprinkler.Service
         public override bool CannotLayoutArea(ThIfcRoom room)
         {
             var cannotLayoutArea = new List<string> { 
-                "室外区域", 
-                "井道", 
-                "控制室", 
-                "电气机房", 
-                "电子设备间", 
-                "游泳池", 
-                "溜冰场", 
-                "滑雪场" };
+                "楼梯间", 
+                "井道",
+                "消防水池",
+                "控制室",
+                "电气机房",
+                "电子设备间",
+                "涉水运动场所",};
             var specialArea = new List<string> { 
                 "水管井", 
                 "水井", 
