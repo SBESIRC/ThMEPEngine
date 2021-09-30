@@ -8,6 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:TianHua.Hvac.UI.UI" 
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
+                    Closing="ThCustomWindow_Closing"
              mc:Ignorable="d" Width="212">
     <Window.Resources>
         <ResourceDictionary>
@@ -19,6 +20,9 @@
             </x:Array>
             <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
             <local1:FanLayoutIntToVisibilty x:Key="layoutVisibiltyConverter"/>
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="AcceptsTab" Value="False"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="0,0,0,0" Height="Auto">

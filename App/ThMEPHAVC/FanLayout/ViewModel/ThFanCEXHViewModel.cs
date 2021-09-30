@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPHVAC.FanLayout.Service;
 
 namespace ThMEPHVAC.FanLayout.ViewModel
 {
@@ -43,6 +44,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPipeConfigInfo.AirPipeLength = value;
+                AirPipeWindSpeed = ThFanLayoutDealService.GetAirPipeSpeed(SelectFanConfig.FanVolume, AirPipeLenght, AirPipeHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -53,6 +55,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPipeConfigInfo.AirPipeHeight = value;
+                AirPipeWindSpeed = ThFanLayoutDealService.GetAirPipeSpeed(SelectFanConfig.FanVolume, AirPipeLenght, AirPipeHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -89,6 +92,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPipeConfigInfo.AirPortHeight = value;
+                ExAirPortWindSpeed = ThFanLayoutDealService.GetAirPipeSpeed(SelectFanConfig.FanVolume, ExAirPortLength, ExAirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -98,6 +102,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPipeConfigInfo.AirPortLength = value;
+                ExAirPortWindSpeed = ThFanLayoutDealService.GetAirPipeSpeed(SelectFanConfig.FanVolume, ExAirPortLength, ExAirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -161,6 +166,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPortSideConfigInfo.AirPortHeight = value;
+                EnAirPortWindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, EnAirPortLength, EnAirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -170,6 +176,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPortSideConfigInfo.AirPortLength = value;
+                EnAirPortWindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, EnAirPortLength, EnAirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -179,6 +186,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.AirPortSideConfigInfo.AirPortMarkHeight = value;
+                
                 this.RaisePropertyChanged();
             }
         }
@@ -197,6 +205,9 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 FanCEXHConfigInfo.FanSideConfigInfo.FanConfigInfo = value;
+                AirPipeWindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, AirPipeLenght, AirPipeHeight);
+                ExAirPortWindSpeed = ThFanLayoutDealService.GetAirPipeSpeed(SelectFanConfig.FanVolume, ExAirPortLength, ExAirPortHeight);
+                EnAirPortWindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, EnAirPortLength, EnAirPortHeight);
                 this.RaisePropertyChanged();
             }
         }

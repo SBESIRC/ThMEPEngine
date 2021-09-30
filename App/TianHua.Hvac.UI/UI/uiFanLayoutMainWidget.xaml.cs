@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
@@ -13,17 +14,21 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanLayoutMainWidget : ThCustomWindow
     {
-        private static ThFanLayoutViewModel ViewModel = null;
         public uiFanLayoutMainWidget()
         {
             InitializeComponent();
-            if (ViewModel == null)
-            {
-                ViewModel = new ThFanLayoutViewModel();
-            }
-            this.DataContext = ViewModel;
+            this.DataContext = new ThFanLayoutViewModel();
             ReadFanParaTable(ThCADCommon.FanParameterTablePath());
         }
+
+        private ThFanLayoutViewModel ViewModel
+        {
+            get
+            {
+                return this.DataContext as ThFanLayoutViewModel;
+            }
+        }
+
         private void ReadFanParaTable(string path)
         {
             ObservableCollection<ThFanConfigInfo> WAFInfoList = new ObservableCollection<ThFanConfigInfo>();
@@ -46,7 +51,7 @@ namespace TianHua.Hvac.UI.UI
                 }
                 fanInfo.FanVolume = double.Parse((string)row[2]);
                 fanInfo.FanPressure = double.Parse((string)row[3]);
-                fanInfo.FanPower = double.Parse((string)row[4]);
+                fanInfo.FanPower = double.Parse((string)row[4])*1000.0;
                 fanInfo.FanNoise = double.Parse((string)row[7]);
                 fanInfo.FanWeight = double.Parse((string)row[8]);
                 fanInfo.FanDepth = double.Parse((string)row[9]);
@@ -54,6 +59,7 @@ namespace TianHua.Hvac.UI.UI
                 fanInfo.FanLength = double.Parse((string)row[11]);
                 WAFInfoList.Add(fanInfo);
             }
+
 
             var WEXHDataSet = dataSet.Tables["壁式式排气扇-风量序列 "];
             for (int i = 1; i < WEXHDataSet.Rows.Count; i++)
@@ -66,12 +72,15 @@ namespace TianHua.Hvac.UI.UI
                     continue;
                 }
                 fanInfo.FanVolume = double.Parse((string)row[2]);
-                fanInfo.FanPower = double.Parse((string)row[3]);
+                fanInfo.FanPower = double.Parse((string)row[3]) * 1000.0;
                 fanInfo.FanNoise = double.Parse((string)row[5]);
                 fanInfo.FanWeight = double.Parse((string)row[6]);
+                string size = (string)row[7];
+                MatchCollection results = Regex.Matches(size, @"[\d+\.?\d*]+");
+
+                fanInfo.FanLength = double.Parse(results[0].ToString());
+                fanInfo.FanWidth = double.Parse(results[1].ToString());
                 fanInfo.FanDepth = double.Parse((string)row[8]);
-                fanInfo.FanWidth = double.Parse((string)row[9]);
-                fanInfo.FanLength = double.Parse((string)row[10]);
                 WEXHInfoList.Add(fanInfo);
             }
 
@@ -87,7 +96,7 @@ namespace TianHua.Hvac.UI.UI
                 }
                 fanInfo.FanVolume = double.Parse((string)row[1]);
                 fanInfo.FanPressure = double.Parse((string)row[2]);
-                fanInfo.FanPower = double.Parse((string)row[3]);
+                fanInfo.FanPower = double.Parse((string)row[3]) * 1000.0;
                 fanInfo.FanNoise = double.Parse((string)row[5]);
                 fanInfo.FanWeight = double.Parse((string)row[6]);
                 fanInfo.FanDepth = double.Parse((string)row[10]);
@@ -95,7 +104,6 @@ namespace TianHua.Hvac.UI.UI
                 fanInfo.FanLength = double.Parse((string)row[8]);
                 CEXHInfoList.Add(fanInfo);
             }
-
             FanWAFWidget.SetFanConfigInfoList(WAFInfoList);
             FanWEXHWidget.SetFanConfigInfoList(WEXHInfoList);
             FanCEXHWidget.SetFanConfigInfoList(CEXHInfoList);
@@ -109,10 +117,16 @@ namespace TianHua.Hvac.UI.UI
             cmd.thFanLayoutConfigInfo = ViewModel.thFanLayoutConfigInfo;
             cmd.Execute();
         }
-
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            var cmd = new ThFanMaterialTableExtractCmd();
+            cmd.Execute();
+        }
 
+        private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
     }
 }

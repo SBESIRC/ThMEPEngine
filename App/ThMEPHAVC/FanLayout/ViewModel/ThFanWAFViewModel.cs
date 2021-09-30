@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPHVAC.FanLayout.Service;
 
 namespace ThMEPHVAC.FanLayout.ViewModel
 {
@@ -81,6 +82,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 fanWAFConfigInfo.AirPortSideConfigInfo.AirPortLength = value;
+                WindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, AirPortLength, AirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -90,6 +92,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 fanWAFConfigInfo.AirPortSideConfigInfo.AirPortHeight = value;
+                WindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, AirPortLength, AirPortHeight);
                 this.RaisePropertyChanged();
             }
         }
@@ -98,6 +101,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             get { return fanWAFConfigInfo.AirPortSideConfigInfo.AirPortWindSpeed; }
             set
             {
+                fanWAFConfigInfo.AirPortSideConfigInfo.AirPortWindSpeed = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -107,6 +111,7 @@ namespace ThMEPHVAC.FanLayout.ViewModel
             set
             {
                 fanWAFConfigInfo.FanSideConfigInfo.FanConfigInfo = value;
+                WindSpeed = ThFanLayoutDealService.GetAirPortSpeed(SelectFanConfig.FanVolume, AirPortLength, AirPortHeight);
                 this.RaisePropertyChanged();
             }
         }

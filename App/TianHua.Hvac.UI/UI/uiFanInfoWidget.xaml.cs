@@ -22,9 +22,14 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanInfoWidget : ThCustomWindow
     {
-        public uiFanInfoWidget()
+        string StrFanType { set; get; }
+        public uiFanInfoWidget(string type)
         {
             InitializeComponent();
+            StrFanType = type;
+            string strVolume = textBoxVolume.Text;
+            string tmpStr = StrFanType + "-" + strVolume;
+            textBoxNumber.Text = tmpStr;
         }
 
         public ThFanConfigInfo GetFanConfigInfo()
@@ -46,6 +51,13 @@ namespace TianHua.Hvac.UI.UI
         {
             this.DialogResult = true;
             this.Close();
+        }
+
+        private void textBoxVolume_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string strVolume = textBoxVolume.Text;
+            string tmpStr = StrFanType + "-" + strVolume;
+            textBoxNumber.Text = tmpStr;
         }
     }
 }

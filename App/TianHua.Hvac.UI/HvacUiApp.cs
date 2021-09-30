@@ -1,12 +1,11 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using TianHua.Hvac.UI.Command;
-using TianHua.Hvac.UI.UI;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI
 {
     public class HvacUiApp : IExtensionApplication
     {
+
         public void Initialize()
         {
 
@@ -63,9 +62,11 @@ namespace TianHua.Hvac.UI
         [CommandMethod("TIANHUACAD", "THXFJ", CommandFlags.Modal)]
         public void THXFJ()
         {
-            var ui = new uiFanLayoutMainWidget();
-            AcadApp.ShowModelessWindow(ui);
+            using (var cmd = new ThHvacXfjCmd())
+            {
+                cmd.Execute();
+            }
         }
-        
+
     }
 }

@@ -47,7 +47,7 @@ namespace ThMEPHVAC.FanLayout.Service
             return airPortMarkVolume;
         }
 
-        public static string GetFanHoleSize(double width, double heigth, double space = 50)
+        public static string GetFanHoleSize(double width, double heigth, double space = 100)
         {
             string strWidth = (width + space).ToString();
             string strHeigth = (heigth + space).ToString();
@@ -63,7 +63,7 @@ namespace ThMEPHVAC.FanLayout.Service
             }
             else
             {
-                string strHeigth = heigth.ToString();
+                string strHeigth = heigth.ToString("0.00");
                 fanHoleMark = "高度："+"h+" + strHeigth;
             }
             return fanHoleMark;
@@ -117,6 +117,18 @@ namespace ThMEPHVAC.FanLayout.Service
                     break;
             }
             return height;
+        }
+
+        public static double GetAirPortSpeed(double volume,double length,double width)
+        {
+            //风速 = 风机风量 * 0.8 * 3600 /（(风口长 / 1000) * (风速宽 / 1000)）
+            double speed = volume * 0.8 / (length / 1000 * (width / 1000)*3600);
+            return speed;
+        }
+        public static double GetAirPipeSpeed(double volume ,double width,double heigth)
+        {
+            double speed = volume / ((width / 1000) * (heigth / 1000)*3600);
+            return speed;
         }
     }
 }

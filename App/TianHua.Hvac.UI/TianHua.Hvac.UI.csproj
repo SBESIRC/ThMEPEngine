@@ -65,6 +65,7 @@
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
+    <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
     <Compile Include="fmBypass.cs">
       <SubType>Form</SubType>

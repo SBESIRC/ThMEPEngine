@@ -24,19 +24,23 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanWEXHWidget : UserControl
     {
-        private static ThFanWEXHViewModel ViewModel = null;
+        
         public uiFanWEXHWidget()
         {
             InitializeComponent();
-            if (ViewModel == null)
+            WEXHGrid.DataContext = new ThFanWEXHViewModel();
+        }
+        private ThFanWEXHViewModel ViewModel
+        {
+            get
             {
-                ViewModel = new ThFanWEXHViewModel();
+                return WEXHGrid.DataContext as ThFanWEXHViewModel;
             }
-            WEXHGrid.DataContext = ViewModel;
         }
         public void SetFanConfigInfoList(ObservableCollection<ThFanConfigInfo> fanInfoList)
         {
             ViewModel.fanWEXHConfigInfo.FanSideConfigInfo.FanInfoList = fanInfoList;
+            ViewModel.fanWEXHConfigInfo.FanSideConfigInfo.FanConfigInfo = fanInfoList.FirstOrDefault();
         }
         public ThFanWEXHConfigInfo GetFanWEXHConfigInfo()
         {
@@ -44,7 +48,7 @@ namespace TianHua.Hvac.UI.UI
         }
         private void btnAddFan_Click(object sender, RoutedEventArgs e)
         {
-            uiFanInfoWidget fanWidget = new uiFanInfoWidget();
+            uiFanInfoWidget fanWidget = new uiFanInfoWidget("BLB");
             if (fanWidget.ShowDialog() == true)
             {
                 ViewModel.FanInfoConfigs.Add(fanWidget.GetFanConfigInfo());

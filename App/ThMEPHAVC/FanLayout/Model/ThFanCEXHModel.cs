@@ -27,37 +27,5 @@ namespace ThMEPHVAC.FanLayout.Model
         public double FanDepth { set; get; }//深度
         public double FanWidth { set; get; }//宽度
         public double FanLength { set; get; }//长度
-
-        public void InsertCEXHFan(AcadDatabase acadDatabase)
-        {
-            Dictionary<string, string> attNameValues = new Dictionary<string, string>();
-            attNameValues.Add("设备编号", FanNumber);
-            attNameValues.Add("风量", FanVolume);
-            attNameValues.Add("电量", FanPower);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-吊顶式排风扇", FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
-            var blk = acadDatabase.Element<BlockReference>(blkId);
-            if (blk.IsDynamicBlock)
-            {
-                foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
-                {
-                    if (property.PropertyName == "设备长度")
-                    {
-                        property.Value = FanLength;
-                    }
-                    else if (property.PropertyName == "设备宽度")
-                    {
-                        property.Value = FanWidth;
-                    }
-                    else if(property.PropertyName == "设备角度")
-                    {
-                        property.Value = FanAngle;
-                    }
-                    else if(property.PropertyName == "文字高度")
-                    {
-                        property.Value = FontHeight;
-                    }
-                }
-            }
-        }
     }
 }

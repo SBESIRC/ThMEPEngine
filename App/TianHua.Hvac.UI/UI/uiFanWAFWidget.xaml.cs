@@ -24,16 +24,19 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanWAFWidget : UserControl
     {
-        private static ThFanWAFViewModel ViewModel = null;
+        
         
         public uiFanWAFWidget()
         {
             InitializeComponent();
-            if (ViewModel == null)
-            {
-                ViewModel = new ThFanWAFViewModel();
+            WAFGrid.DataContext = new ThFanWAFViewModel();
+        }
+        private ThFanWAFViewModel ViewModel
+        {
+            get 
+            { 
+                return WAFGrid.DataContext as ThFanWAFViewModel; 
             }
-            WAFGrid.DataContext = ViewModel;
         }
         public ThFanWAFConfigInfo GetFanWAFConfigInfo()
         {
@@ -42,10 +45,11 @@ namespace TianHua.Hvac.UI.UI
         public void SetFanConfigInfoList(ObservableCollection<ThFanConfigInfo> fanInfoList)
         {
             ViewModel.fanWAFConfigInfo.FanSideConfigInfo.FanInfoList = fanInfoList;
+            ViewModel.fanWAFConfigInfo.FanSideConfigInfo.FanConfigInfo = fanInfoList.FirstOrDefault();
         }
         private void btnAddFan_Click(object sender, RoutedEventArgs e)
         {
-            uiFanInfoWidget fanWidget = new uiFanInfoWidget();
+            uiFanInfoWidget fanWidget = new uiFanInfoWidget("DZ");
             if (fanWidget.ShowDialog() == true)
             {
                 ViewModel.FanInfoConfigs.Add(fanWidget.GetFanConfigInfo());

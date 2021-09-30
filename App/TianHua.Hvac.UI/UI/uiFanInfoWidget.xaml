@@ -6,6 +6,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Hvac.UI.UI"
              mc:Ignorable="d" Width="163.612" Height="311.876">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="AcceptsTab" Value="False"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid Margin="0,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -14,11 +21,11 @@
         <StackPanel Orientation="Vertical" Grid.Row="0">
             <WrapPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label x:Name="label" Content="编号：" Margin="6,0,0,0"/>
-                <TextBox x:Name="textBoxNumber" Height="20" TextWrapping="Wrap" Text="BLD-150" Width="60" VerticalContentAlignment="Center"/>
+                <TextBox x:Name="textBoxNumber" Height="20" TextWrapping="Wrap" Text="BLD-150" Width="60" IsEnabled="False" VerticalContentAlignment="Center"/>
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
                 <Label x:Name="label1" Content="*风量："/>
-                <TextBox x:Name="textBoxVolume" Height="20" TextWrapping="Wrap" Text="150" Width="60" VerticalContentAlignment="Center"/>
+                <TextBox x:Name="textBoxVolume" Height="20" TextWrapping="Wrap" Text="150" Width="60" VerticalContentAlignment="Center" TextChanged="textBoxVolume_TextChanged"/>
                 <Label x:Name="label2" Content="m3/h"/>
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">

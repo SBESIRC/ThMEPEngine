@@ -27,37 +27,5 @@ namespace ThMEPHVAC.FanLayout.Model
         public double FanWidth { set; get; }//宽度
         public double FanLength { set; get; }//长度
         public string FanMark { set; get; }//标高
-        public void InsertWAFFan(AcadDatabase acadDatabase)
-        {
-            Dictionary<string, string> attNameValues = new Dictionary<string, string>();
-            attNameValues.Add("设备编号", FanNumber);
-            attNameValues.Add("风量", FanVolume);
-            attNameValues.Add("电量", FanPower);
-            attNameValues.Add("标高", FanMark);
-            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式轴流风机", FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
-            var blk = acadDatabase.Element<BlockReference>(blkId);
-            if (blk.IsDynamicBlock)
-            {
-                foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
-                {
-                    if (property.PropertyName == "风机深度")
-                    {
-                        property.Value = FanDepth;
-                    }
-                    if (property.PropertyName == "风机宽度")
-                    {
-                        property.Value = FanWidth;
-                    }
-                    if (property.PropertyName == "风机角度")
-                    {
-                        property.Value = FanAngle;
-                    }
-                    if(property.PropertyName == "文字高度")
-                    {
-                        property.Value = FontHeight;
-                    }
-                }
-            }
-        }
     }
 }
