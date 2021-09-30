@@ -155,7 +155,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 }
 
                 //转回原点
-                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                // var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+                newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+                var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
 
                 var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线
