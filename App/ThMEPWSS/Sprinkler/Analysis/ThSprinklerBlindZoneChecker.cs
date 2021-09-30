@@ -4,11 +4,11 @@ using Linq2Acad;
 using Catel.Linq;
 using System.Linq;
 using ThCADCore.NTS;
-using Catel.Collections;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {

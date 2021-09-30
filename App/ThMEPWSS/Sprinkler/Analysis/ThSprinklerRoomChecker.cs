@@ -2,7 +2,7 @@
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Hydrant.Service;

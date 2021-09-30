@@ -4,7 +4,7 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;

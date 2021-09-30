@@ -16,7 +16,6 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThCADExtension;
 using ThCADCore.NTS;
 using NFox.Cad;
-using Catel.Collections;
 
 namespace ThMEPWSS.Hydrant.Service
 {

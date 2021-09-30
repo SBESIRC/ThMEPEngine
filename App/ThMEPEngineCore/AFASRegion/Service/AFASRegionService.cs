@@ -2,14 +2,14 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
-using System.Collections.Generic;
-using ThCADExtension;
-using Catel.Collections;
 
 namespace ThMEPEngineCore.AFASRegion.Service
 {

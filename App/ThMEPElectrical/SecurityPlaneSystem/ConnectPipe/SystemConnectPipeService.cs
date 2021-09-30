@@ -17,8 +17,8 @@ using ThMEPEngineCore.CAD;
 using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPWSS.HydrantConnectPipe.Service;
-using Catel.Collections;
 using ThMEPElectrical.ConnectPipe.Service;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {

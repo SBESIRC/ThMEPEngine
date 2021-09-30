@@ -5,7 +5,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.Service;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;

@@ -3,7 +3,7 @@ using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
