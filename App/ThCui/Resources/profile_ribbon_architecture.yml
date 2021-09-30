@@ -21,9 +21,9 @@ panels:
           attributes: { "IsVisible": false, "IsEnabled": false }
         - text: "图块配置"
           attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "提取空间"
+        - text: "房间框线"
           attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "空间拾取"
+        - text: "房间名称"
           attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWGROUNDPLAN"

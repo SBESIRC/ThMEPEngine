@@ -499,22 +499,22 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THWTKSB_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 提取空间
-            row.AddNewButton("提取空间",
-                "天华提取空间",
-                "THKJTQ",
-                "天华提取空间",
-                "IDI_THCAD_THKJTQ_SMALL",
-                "IDI_THCAD_THKJTQ_LARGE",
+            // 房间框线
+            row.AddNewButton("房间框线",
+                "天华房间框线",
+                "THFJKX",
+                "天华房间框线",
+                "IDI_THCAD_THFJKX_SMALL",
+                "IDI_THCAD_THFJKX_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 空间拾取
-            row.AddNewButton("空间拾取",
-                "天华空间拾取",
-                "THKJSQ",
-                "天华空间拾取",
-                "IDI_THCAD_THKJSQ_SMALL",
-                "IDI_THCAD_THKJSQ_LARGE",
+            // 房间名称
+            row.AddNewButton("房间名称",
+                "天华房间名称",
+                "THKJMCTQ",
+                "天华房间名称",
+                "IDI_THCAD_THKJMCTQ_SMALL",
+                "IDI_THCAD_THKJMCTQ_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
 
