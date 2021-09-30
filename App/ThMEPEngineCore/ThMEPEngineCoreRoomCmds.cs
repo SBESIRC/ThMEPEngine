@@ -20,7 +20,7 @@ namespace ThMEPEngineCore
     public class ThMEPEngineCoreRoomCmds
     {
         /// <summary>
-        /// 提取空间
+        /// 空间提取
         /// </summary>
         [CommandMethod("TIANHUACAD", "THKJTQ", CommandFlags.Modal)]
         public void THKJTQ()
@@ -61,6 +61,38 @@ namespace ThMEPEngineCore
                     };
                     dbText.AlignmentPoint = outline.GetMaximumInscribedCircleCenter();
                     acadDatabase.ModelSpace.Add(dbText);
+                });
+            }
+        }
+
+        /// <summary>
+        /// 空间名称提取
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKJMCTQ", CommandFlags.Modal)]
+        public void THKJMCTQ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                var engine = new ThDB3RoomMarkRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                acadDatabase.Database.CreateAIRoomMarkLayer();
+                engine.Elements.Cast<ThIfcTextNote>().Select(o => o.Geometry).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.Layer = ThMEPEngineCoreLayerUtils.ROOMMARK;
                 });
             }
         }
@@ -145,7 +177,6 @@ namespace ThMEPEngineCore
                         o.Linetype = "ByLayer";
                     });
                 });
-                    
             }
         }
     }
