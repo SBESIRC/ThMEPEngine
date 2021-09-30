@@ -110,6 +110,7 @@
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
+    <Compile Include="CAD\ThMEPPolylineEntityJig.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
@@ -242,7 +243,6 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
-    <Compile Include="Service\ThDrawPolylineEntJigger.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThLineUnionService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />

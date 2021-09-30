@@ -6,6 +6,7 @@ using AcHelper.Commands;
 using System.Windows.Input;
 using ThMEPEngineCore.Service;
 using GalaSoft.MvvmLight.Command;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -42,7 +43,7 @@ namespace ThMEPWSS.ViewModel
             using (var lockDoc = Active.Document.LockDocument())
             using (var acdb = AcadDatabase.Active())
             {
-                var poly = PlineJig.PolylineJig(256, "\n选择下一个点");
+                var poly = ThMEPPolylineEntityJig.PolylineJig(256, "\n选择下一个点");
                 var roomOutline = poly.WashClone();
                 if (roomOutline == null || roomOutline.Area < 1.0)
                 {
@@ -65,7 +66,7 @@ namespace ThMEPWSS.ViewModel
             using (var lockDoc = Active.Document.LockDocument())
             using (var acdb = AcadDatabase.Active())
             {
-                var roomSplitline = PlineJig.PolylineJig(256,"\n选择下一个点",false);
+                var roomSplitline = ThMEPPolylineEntityJig.PolylineJig(256,"\n选择下一个点",false);
                 if (roomSplitline == null )
                 {
                     return;

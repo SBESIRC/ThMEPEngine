@@ -1,14 +1,12 @@
-﻿using System;
+﻿using AcHelper;
+using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
-using MgdAcApplication = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using AcHelper;
 
-namespace ThMEPEngineCore.Service
+namespace ThMEPEngineCore.CAD
 {
-    public class PlineJig : EntityJig
+    public class ThMEPPolylineEntityJig : EntityJig
     {
         Polyline pline;
         Point3d dragPt;
@@ -17,9 +15,9 @@ namespace ThMEPEngineCore.Service
         private short mColorIndex;
         public bool ClosedTipSwitch { get; set; }
 
-        public PlineJig(Polyline pline,string tip,short colorIndex) : base(pline)
+        public ThMEPPolylineEntityJig(Polyline pline, string tip, short colorIndex) : base(pline)
         {
-            mTip = tip;            
+            mTip = tip;
             this.pline = pline;
             mColorIndex = colorIndex;
             ClosedTipSwitch = true;
@@ -60,7 +58,7 @@ namespace ThMEPEngineCore.Service
         /// <param name="tip"></param>
         /// <param name="closedTipSwitch">是否显示闭合[c]关键字</param>
         /// <returns></returns>
-        public static Polyline PolylineJig(short colorIndex,string tip,bool closedTipSwitch = true)
+        public static Polyline PolylineJig(short colorIndex, string tip, bool closedTipSwitch = true)
         {
             using (var acdb = AcadDatabase.Active())
             {
@@ -71,9 +69,9 @@ namespace ThMEPEngineCore.Service
                 pline.AddVertexAt(0, ppr.Value.Convert2d(new Plane()), 0.0, 0.0, 0.0);
                 pline.AddVertexAt(1, Point2d.Origin, 0.0, 0.0, 0.0);
                 pline.TransformBy(ed.CurrentUserCoordinateSystem);
-                var jig = new PlineJig(pline, tip, colorIndex)
+                var jig = new ThMEPPolylineEntityJig(pline, tip, colorIndex)
                 {
-                    ClosedTipSwitch = closedTipSwitch ,
+                    ClosedTipSwitch = closedTipSwitch,
                 };
 
                 while (true)
