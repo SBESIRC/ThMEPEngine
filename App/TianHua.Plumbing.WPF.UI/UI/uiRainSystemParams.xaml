@@ -25,10 +25,15 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
-            <Label Content="楼层线间距"></Label>
-            <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
-            <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="楼层线间距"></Label>
+                <Button Click="btnSetHeights">层高设置</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding StoreySpan,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+                <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
@@ -38,7 +43,11 @@
             </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="阳台地漏："></Label>
-                <ComboBox x:Name="阳台地漏" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                <ComboBox x:Name="cbxBalFD" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label Content="水井地漏："></Label>
+                <ComboBox x:Name="cbxWellFD" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding WaterWellFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="冷凝横管："></Label>

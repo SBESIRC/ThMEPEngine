@@ -1,19 +1,16 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
-using NFox.Cad;
+﻿using NFox.Cad;
+using System.Linq;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Data
 {
@@ -35,26 +32,7 @@ namespace ThMEPWSS.Sprinkler.Data
         {
             //提取,并移动到原点
             var db3Walls = ExtractDb3Wall(pts);
-
-            var localWalls = ExtractMsWall(database, pts);
-
-            //清洗
-            var clean = new ThSprinklerCleanEntityService();
-            localWalls = localWalls.FilterSmallArea(SmallAreaTolerance)
-                .Cast<Polyline>()
-                .Select(o => clean.Clean(o))
-                .Cast<Entity>()
-                .ToCollection();
-            //对Clean的结果进一步过虑
-            localWalls = localWalls.FilterSmallArea(SmallAreaTolerance);
-
-            //处理重叠
-            var conflictService = new ThSprinklerHandleConflictService(
-                localWalls.Cast<Entity>().ToList(),
-                db3Walls.Cast<Entity>().ToList());
-            conflictService.Handle();
-            var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
-            Walls = handleObjs.Cast<Entity>().ToList();
+            Walls = db3Walls.Cast<Entity>().ToList();
         }
 
         private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
@@ -64,18 +42,6 @@ namespace ThMEPWSS.Sprinkler.Data
             var wallEngine = new ThDB3ArchWallRecognitionEngine();
             wallEngine.Recognize(Db3ExtractResults, newPts);
             return wallEngine.Elements.Select(o => o.Outline).ToCollection();
-        }
-
-        private DBObjectCollection ExtractMsWall(Database database, Point3dCollection pts)
-        {
-            //提取了本地图纸中的墙，并移动到原点
-            var instance = new ThExtractPolylineService()
-            {
-                ElementLayer = this.ElementLayer,
-            };
-            instance.Extract(database, pts);
-            instance.Polys.ForEach(o => Transformer.Transform(o));
-            return instance.Polys.ToCollection();
         }
 
         public override List<ThGeometry> BuildGeometries()

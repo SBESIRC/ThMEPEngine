@@ -5,15 +5,14 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using Dreambuild;
 using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPEngineCore.Engine
 {
     public class Roomdata
     {
-        public static double BufferDistance = 10.0;
         private const double WallBufferDistance = 20.0;
         private const double SlabBufferDistance = 20.0;
         private DBObjectCollection _wall; //仅支持Polyline
@@ -21,6 +20,7 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _window; //仅支持Polyline
         private DBObjectCollection _slab;  //仅支持Polyline
         private DBObjectCollection _cornice; //仅支持Polyline
+        private DBObjectCollection _roomSplitline;
         public Roomdata(Database database, Point3dCollection polygon)
         {
             var wallengine = new ThDB3ArchWallRecognitionEngine();
@@ -38,6 +38,13 @@ namespace ThMEPEngineCore.Engine
             var corniceengine = new ThDB3CorniceRecognitionEngine();
             corniceengine.Recognize(database, polygon);
             _cornice = corniceengine.Elements.Select(o => o.Outline).ToList().ToCollection();
+
+            var extractPolyService = new ThExtractPolylineService()
+            {
+                ElementLayer = ThMEPEngineCoreLayerUtils.ROOMSPLITLINE,
+            };
+            extractPolyService.Extract(database, polygon);
+            _roomSplitline = extractPolyService.Polys.ToCollection();
         }
         /// <summary>
         /// 拿到数据后根据需求去毛皮
@@ -53,13 +60,6 @@ namespace ThMEPEngineCore.Engine
             _wall = Buffer(_wall, WallBufferDistance);
             _slab = BufferCollectionContainsLines(_slab, -SlabBufferDistance);
             _slab = BufferCollectionContainsLines(_slab, SlabBufferDistance);
-            //墙和门再buffer以便形成房间洞
-            _door = Buffer(_door, BufferDistance);
-            _wall = Buffer(_wall, BufferDistance);
-            //窗和线脚也可能出现没有完全搭接的情况
-            _window = Buffer(_window, BufferDistance);
-            _cornice = BufferCollectionContainsLines(_cornice, BufferDistance, true);
-            _slab = BufferCollectionContainsLines(_slab, BufferDistance, true);
         }
 
         /// <summary>
@@ -127,6 +127,7 @@ namespace ThMEPEngineCore.Engine
             _window.Cast<DBObject>().ForEach(o => result.Add(o));
             _slab.Cast<DBObject>().ForEach(o => result.Add(o));
             _cornice.Cast<DBObject>().ForEach(o => result.Add(o));
+            _roomSplitline.Cast<DBObject>().ForEach(o => result.Add(o));
             return result;
         }
         public bool ContatinPoint3d(Point3d p)

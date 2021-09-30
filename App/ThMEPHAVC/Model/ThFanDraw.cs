@@ -38,7 +38,7 @@ namespace ThMEPHVAC.Model
             bypass = anay_res.bypass;
             point_tor = anay_res.point_tor;
             service = new ThDuctPortsDrawService(fan.scenario, param.scale);
-            var angle = anay_res.start_dir_vec.GetAngleTo(-Vector3d.YAxis) - Math.PI / 3;
+            var angle = ThMEPHVACService.Get_srt_flag_rotation(anay_res.start_dir_vec);
             start_id = service.Insert_start_flag(anay_res.fan_break_p, angle);
             var par = new ThMEPHVACParam() { scenario = fan.scenario, scale = param.scale };
             ThDuctPortsRecoder.Attach_start_param(start_id, par);
@@ -52,6 +52,8 @@ namespace ThMEPHVAC.Model
                 foreach (var l in anay_res.not_room_lines)
                     lines.Add(l);
                 foreach (var l in anay_res.room_lines)
+                    lines.Add(l);
+                foreach (var l in anay_res.aux_lines)
                     lines.Add(l);
                 ThDuctPortsDrawService.Draw_lines(lines, dis_mat, "0", out _);
                 lines.Clear();
@@ -95,7 +97,7 @@ namespace ThMEPHVAC.Model
             {
                 var param = ThMEPHVACService.Create_reducing_modify_param(red, start_id.Handle);
                 service.Draw_shape(red, dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
-                                                              out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
+                                                 out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
                 ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
             }
         }

@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
+using ThMEPHVAC.Alg;
 
 namespace ThMEPHVAC.Model
 {
@@ -128,8 +129,8 @@ namespace ThMEPHVAC.Model
             foreach (var id in hoseIds)
             {
                 var blk = (BlockReference)id.GetEntity();
-                var poly = new Polyline();
-                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
+                ThDuctPortsDrawService.Get_hose_dyn_block_properity(id, out double len, out double width);
+                var poly = ThMEPHAVCBounds.getHoseBounds(blk, len, width);
                 list.Add(poly);
             }
         }
@@ -142,13 +143,8 @@ namespace ThMEPHVAC.Model
             {
                 var fan = new ThDbModelFan(id);
                 var ext_len = Math.Max(fan.FanInlet.Width, fan.FanOutlet.Width);
-                var p1 = fan.FanInletBasePoint.ToPoint2D();
-                var p2 = fan.FanOutletBasePoint.ToPoint2D();
-                var dir_vec = (p1 - p2).GetNormal();
-                var l_vec = ThMEPHVACService.Get_left_vertical_vec(dir_vec);
-                var r_vec = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
-                var poly = new Polyline();
-                poly.CreateRectangle(p1 + l_vec * 0.5 * ext_len, p2 + r_vec * 0.5 * ext_len);
+                var l = new Line(fan.FanInletBasePoint, fan.FanOutletBasePoint);
+                var poly = ThMEPHVACService.Get_line_extend(l, ext_len);
                 dic.Add(poly, Get_fan_param(id));
             }
         }
@@ -164,9 +160,9 @@ namespace ThMEPHVAC.Model
             foreach (var id in valveIds)
             {
                 var blk = (BlockReference)id.GetEntity();
-                var poly = new Polyline();
-                poly.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
-                dic.Add(poly, Get_valve_param(id, valve_name));
+                var param = Get_valve_param(id, valve_name);
+                var poly = ThMEPHAVCBounds.getValveBounds(blk, param);
+                dic.Add(poly, param);
             }
         }
         public static void Get_holes_dic(out Dictionary<Polyline, Hole_modify_param> dic)
@@ -230,7 +226,6 @@ namespace ThMEPHVAC.Model
             param.valve_layer = id.GetBlockLayer();
             param.valve_visibility = valve_visibility;
             param.insert_p = insert_p.ToPoint2D();
-            param.judge_p = param.insert_p - 0.5 * width * vertical_r;
             param.rotate_angle = rotate_angle;
             param.width = width;
             param.height = height;

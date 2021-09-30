@@ -1,23 +1,19 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
+﻿using NFox.Cad;
 using DotNetARX;
+using System.Linq;
 using Dreambuild.AutoCAD;
-
-using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Service;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.Sprinkler.Data
 {
@@ -34,6 +30,7 @@ namespace ThMEPWSS.Sprinkler.Data
             StoreyInfos = new List<ThStoreyInfo>();
             HoleDic = new Dictionary<Polyline, List<string>>();
         }
+
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -86,18 +83,9 @@ namespace ThMEPWSS.Sprinkler.Data
             HoleDic = textInfoService.Query(holes, textService.Texts);
         }
 
-        public void Group(Dictionary<Entity, string> groupId)
-        {
-            HoleDic.ForEach(o => GroupOwner.Add(o.Key, FindCurveGroupIds(groupId, o.Key)));
-        }
         public void Print(Database database)
         {
             HoleDic.Select(o => o.Key).Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
-        }
-
-        public void Set(List<ThStoreyInfo> storeyInfos)
-        {
-            StoreyInfos = storeyInfos;
         }
 
         public ThStoreyInfo Query(Entity entity)

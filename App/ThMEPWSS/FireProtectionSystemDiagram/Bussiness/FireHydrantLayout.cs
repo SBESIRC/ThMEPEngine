@@ -115,6 +115,9 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             _createBasicElements.Add(new CreateBasicElement(new Line(txtLineStartPoint, txtLineEndPoint), ThWSSCommon.Layout_FireHydrantDescriptionLayerName));
             _createBasicElements.Add(new CreateBasicElement(new Line(txtLineEndPoint, txtLineTopPoint), ThWSSCommon.Layout_FireHydrantDescriptionLayerName));
             _AddTextToCreateElemsWSUP("试验消火栓", txtLineStartPoint + _xAxis.MultiplyBy(_textOffSet), 0, true);
+            //实现消火栓下方加入DN65标注
+            var midPoint = testFireHUpStartPoint - _yAxis.MultiplyBy(_textHeight+50)-_xAxis.MultiplyBy(100);
+            _AddTextToCreateElems("DN65", midPoint, 0);
             var lineElements = new List<LineElementCreate>();
             var butterflyValve = _AddButterflyToCreateElement(testFireHUpStartPoint, false);
             lineElements.Add(new LineElementCreate(butterflyValve, _GetButterflyValveScaleWidth(), _testFireHydrantButterflyValveDisctanceToStart, EnumPosition.LeftCenter));

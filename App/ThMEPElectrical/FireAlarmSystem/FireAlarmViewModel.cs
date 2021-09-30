@@ -12,13 +12,13 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
         private int _SelectedIndexForH = 0;
 
         //H
-        public int SelectedIndexForH 
+        public int SelectedIndexForH
         {
             get 
             { 
                 return _SelectedIndexForH; 
             }
-            set 
+            set
             {
                 _SelectedIndexForH = value;
                 OnPropertyChanged("SelectedIndexForH");
@@ -191,6 +191,33 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
             }
         }
 
+        //楼层回路显示盘: GS
+        private bool _IsGasSensorChecked = false;
+        public bool IsGasSensorChecked
+        {
+            get
+            {
+                return _IsGasSensorChecked;
+            }
+            set
+            {
+                _IsGasSensorChecked = value;
+                OnPropertyChanged("IsGasSensorChecked");
+            }
+        }
+
+
+        private double _protectRadius = 0;
+        public double ProtectRadius
+        {
+            get { return _protectRadius; }
+            set
+            {
+                _protectRadius = value;
+                OnPropertyChanged("ProtectRadius");
+            }
+        }
+
         //防火门监控模块
         private bool _IsFireMonitorModuleChecked = false;
         public bool IsFireMonitorModuleChecked
@@ -233,6 +260,20 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
             {
                 _ShouldConsiderBeam = value;
                 OnPropertyChanged("ShouldConsiderBeam");
+            }
+        }
+        //需要加这个值。否则存不住结果
+        private bool _NotShouldConsiderBeam = false;
+        public bool NotShouldConsiderBeam
+        {
+            get
+            {
+                return _NotShouldConsiderBeam;
+            }
+            set
+            {
+                _NotShouldConsiderBeam = value;
+                OnPropertyChanged("NotShouldConsiderBeam");
             }
         }
 
@@ -283,10 +324,11 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
 
         public FireAlarmViewModel()
         {
-            _SelectedIndexForH = 0;
-            _valueOfD = 5800;
-            _SelectedIndexForAngle = 0;
-
+            SelectedIndexForH = 0;
+            SelectedIndexForAngle = 0;
+            BlockRatioIndex = 0;
+            ShouldConsiderBeam = true;
+            IsSmokeTempratureSensorChecked = true;
         }
 
     }

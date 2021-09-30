@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -39,19 +40,36 @@ namespace ThMEPHVAC.Model
             tee.port_widths[port_idx] = modify_width;
             return ThDuctPortsFactory.Create_tee(tee.port_widths[1], tee.port_widths[0], tee.port_widths[2], type);
         }
-        public static Line_Info Create_cross(Entity_modify_param cross, int port_idx, double modify_width)
+        public static Line_Info Create_cross(Entity_modify_param cross, string modify_duct_size, int port_idx)
         {
+            var modify_width = ThMEPHVACService.Get_width(modify_duct_size);
+            var org_width = cross.port_widths[port_idx];
             cross.port_widths[port_idx] = modify_width;
-            if (cross.port_widths[2] != cross.port_widths[3])
+            var big = Math.Max(cross.port_widths[2], cross.port_widths[3]);
+            var small = Math.Min(cross.port_widths[2], cross.port_widths[3]);
+            var in_2vec = cross.pos[0] - cross.pos_ext[0];
+            var modify_2vec = cross.pos[port_idx] - cross.pos_ext[port_idx];
+            var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
+            var modify_vec = new Vector3d(modify_2vec.X, modify_2vec.Y, 0);
+            if (port_idx == 2 || port_idx == 3)
             {
-                if (cross.port_widths[2] < cross.port_widths[3])
+                var z = in_vec.CrossProduct(modify_vec).Z;
+                if (modify_width > org_width)
                 {
-                    double tmp = cross.port_widths[2];
-                    cross.port_widths[2] = cross.port_widths[3];
-                    cross.port_widths[3] = tmp;
+                    return z < 0 ? ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big) :
+                                   ThDuctPortsFactory.Create_cross(cross.port_widths[0], big, cross.port_widths[1], small);
+                }
+                else
+                {
+                    return z < 0 ? ThDuctPortsFactory.Create_cross(cross.port_widths[0], big, cross.port_widths[1], small) :
+                                   ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big);
                 }
             }
-            return ThDuctPortsFactory.Create_cross(cross.port_widths[0], cross.port_widths[2], cross.port_widths[1], cross.port_widths[3]);
+            else
+            {
+                // 主路管段修改
+                return ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big);
+            }
         }
     }
 }

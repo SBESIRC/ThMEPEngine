@@ -12,13 +12,87 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Algorithm;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
-using ThMEPElectrical.AlarmLayout.Command;
-using ThMEPElectrical.AlarmSensorLayout.Data;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+
+
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.IO.GeoJSON;
+
+using ThMEPEngineCore.AreaLayout.GridLayout.Command;
+
+using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.FireAlarmSmokeHeat.Data;
+using ThMEPElectrical.FireAlarmSmokeHeat.Service;
+using ThMEPElectrical.FireAlarm.ViewModels;
+using ThMEPElectrical.FireAlarm;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 
 namespace ThMEPElectrical.AlarmLayout.Test
 {
     class TestCmd
     {
+        [CommandMethod("TIANHUACAD", "CLSP", CommandFlags.Modal)]
+        public void CLSP()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = getMpolygon();
+                PromptDoubleResult result2 = Active.Editor.GetDistance("\n请输入差值距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                List<Line> lines = CenterLineSimplify.CLSimplify(mPolygon, 300);
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygonCenterLine", CommandFlags.Modal)]
+        public void ThBuildMPolygonCenterLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = getMpolygon();
+                PromptDoubleResult result2 = Active.Editor.GetDistance("\n请输入差值距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), result2.Value);
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+                centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
+            }
+        }
+        public static MPolygon getMpolygon()
+        {
+            MPolygon mPolygon;
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return null;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acdb.Element<Entity>(obj));
+                }
+                mPolygon = objs.BuildMPolygon();
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+            return mPolygon;
+        }
+
         [CommandMethod("TIANHUACAD", "THFALCL", CommandFlags.Modal)]
         public void THFALCL()
         {
@@ -56,15 +130,17 @@ namespace ThMEPElectrical.AlarmLayout.Test
                     {
                         continue;
                     }
-
                     frameList.Add(nFrame);
                 }
 
                 var frame = frameList.OrderByDescending(x => x.Area).First();
-                var holeList = getPoly(frame, "AI-房间框线", transformer, true);
-                var layoutList = getPoly(frame, "AI-可布区域", transformer, false);
+                var holeList = getPoly(frame, "AI-房间框线", transformer, true);//IOcl-room    AI-房间框线
+                //holeList.AddRange(getPoly(frame, "AI-洞", transformer, false));
+                var layoutList = getMPoly(frame, "AI-可布区域", transformer, false);//AI-可布区域
                 var wallList = getPoly(frame, "AI-墙", transformer, false);
-                var columns = new List<Polyline>();
+                wallList.AddRange(getPoly(frame, "AI-剪力墙", transformer, false));
+                //var columns = new List<Polyline>();
+                var columns = getPoly(frame, "AI-柱", transformer, false);
                 var prioritys = new List<Polyline>();
 
                 PromptDoubleResult equipRadius = Active.Editor.GetDistance("\n设备覆盖半径");
@@ -77,6 +153,11 @@ namespace ThMEPElectrical.AlarmLayout.Test
                 {
                     return;
                 }
+
+                DrawUtils.ShowGeometry(wallList, "l0Wall", 10);
+                DrawUtils.ShowGeometry(columns, "l0Column", 3);
+                DrawUtils.ShowGeometry(layoutList.Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
+
                 var layoutCmd = new FireAlarmSystemLayoutCommand();
                 layoutCmd.radius = equipRadius.Value;
                 layoutCmd.frame = frame;
@@ -94,6 +175,18 @@ namespace ThMEPElectrical.AlarmLayout.Test
         {
             var layoutArea = ExtractPolyline(frame, sLayer, transformer, onlyContains);
             var layoutList = layoutArea.Select(x => x.Value).ToList();
+            return layoutList;
+        }
+
+        private static List<MPolygon> getMPoly(Polyline frame, string sLayer, ThMEPOriginTransformer transformer, bool onlyContains)
+        {
+            var layoutArea = ExtractPolyline(frame, sLayer, transformer, onlyContains);
+            var layoutList = layoutArea.Select(x => ThMPolygonTool.CreateMPolygon(x.Value)).ToList();
+
+            var layoutAreaM = ExtractMPolygon(frame, sLayer, transformer, onlyContains);
+            var layoutListM = layoutAreaM.Select(x => x.Value).ToList();
+            layoutList.AddRange(layoutListM);
+
             return layoutList;
         }
         private static Dictionary<Polyline, Polyline> ExtractPolyline(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer, bool onlyContain)
@@ -130,6 +223,45 @@ namespace ThMEPElectrical.AlarmLayout.Test
                 return plInFrame;
             }
         }
+
+
+        private static Dictionary<MPolygon, MPolygon> ExtractMPolygon(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer, bool onlyContain)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line = acadDatabase.ModelSpace
+                      .OfType<MPolygon>()
+                      .Where(o => o.Layer == LayerName);
+
+                var lineList = line.Select(x => x.Clone() as MPolygon).ToList();
+
+                var plInFrame = new Dictionary<MPolygon, MPolygon>();
+
+                foreach (MPolygon pl in lineList)
+                {
+                    if (pl != null)
+                    {
+                        var plTrans = pl.Clone() as MPolygon;
+
+                        transformer.Transform(plTrans);
+                        plInFrame.Add(pl, plTrans);
+                    }
+                }
+
+                if (onlyContain == false)
+                {
+                    plInFrame = plInFrame.Where(o => bufferFrame.Contains(o.Value.Shell()) || bufferFrame.Intersects(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+                else
+                {
+                    plInFrame = plInFrame.Where(o => bufferFrame.Contains(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+                return plInFrame;
+            }
+        }
+
+
         private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
         {
             var tol = 1000;

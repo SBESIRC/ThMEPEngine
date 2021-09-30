@@ -4,13 +4,13 @@ using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -59,14 +59,15 @@ namespace ThMEPEngineCore.Engine
             return res;
         }
 
-        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        public override void Build(Database db, Point3dCollection pts)
         {
             var rawdata = Extract(db);
             // 处理极远情况（>1E+10）
             var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
             rawdata.ForEach(o => transformer.Transform(o.Geometry));
-            var newPts = pts.OfType<Point3d>()
+            var newPts = pts
+                .OfType<Point3d>()
                 .Select(o => transformer.Transform(o))
                 .ToCollection();
 
@@ -79,8 +80,11 @@ namespace ThMEPEngineCore.Engine
             // 回复到原位置
             transformer.Reset(shearwalls);
 
-            // 返回
-            return shearwalls.Cast<Polyline>().Select(e => ThIfcWall.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            // 保存结果
+            Elements = shearwalls.OfType<Polyline>()
+                .Select(e => ThIfcWall.Create(e))
+                .OfType<ThIfcBuildingElement>()
+                .ToList();
         }
         private DBObjectCollection Preprocess(DBObjectCollection walls)
         {

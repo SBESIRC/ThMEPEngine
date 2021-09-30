@@ -14,8 +14,8 @@ namespace ThMEPLighting
         /// <summary>
         /// 车位照明布置
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THCWZM", CommandFlags.Modal)]
-        public void THCWZM()
+        [CommandMethod("TIANHUACAD", "THCWZMBZ", CommandFlags.Modal)]
+        public void THCWZMBZ()
         {
             //根据车位分组和车道线生成相应的数据
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

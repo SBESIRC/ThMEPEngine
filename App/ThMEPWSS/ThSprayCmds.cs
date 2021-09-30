@@ -152,15 +152,6 @@ namespace ThMEPWSS
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THPTJH", CommandFlags.Modal)]
-        public void THPTJH()
-        {
-            using (var cmd = new ThSprinklerCommand())
-            {
-                cmd.Execute();
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THPL18", CommandFlags.Modal)]
         public void THPL18()
         {

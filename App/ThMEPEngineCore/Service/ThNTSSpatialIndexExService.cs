@@ -8,10 +8,13 @@ namespace ThMEPEngineCore.Service
     public class ThNTSSpatialIndexExService : ISpatialIndex
     {
         private DBObjectCollection Objs { get; set; }
-        private ThCADCoreNTSSpatialIndexEx SpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public ThNTSSpatialIndexExService(DBObjectCollection objs)
         {
-            SpatialIndex = new ThCADCoreNTSSpatialIndexEx(objs);
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(objs)
+            {
+                AllowDuplicate = true,
+            };
         }
         public void Dispose()
         {            

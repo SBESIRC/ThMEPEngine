@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using Catel.Collections;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -855,8 +854,6 @@ namespace ThMEPWSS.Uitl
         Horizontal,
         Vertical,
     }
-
-
     public static class LinqAlgorithm
     {
         public static IEnumerable<V> SelectNotNull<T, V>(this IEnumerable<T> source, Func<T, V> f) where V : class
@@ -1271,110 +1268,6 @@ namespace ThMEPWSS.Uitl
             var v3 = p3 - p2;
             var v4 = p4 - p2;
             return new Vector2d[] { v1, v2, v3, v4 }.Select(v => v.Length).Min();
-        }
-        public static bool IsOnSameLine(GLineSegment seg1, GLineSegment seg2, double tollerance)
-        {
-            var distanceTollerance = 5;
-            if (seg1.IsHorizontal(tollerance) && seg2.IsHorizontal(tollerance))
-            {
-                //Dbg.PrintLine(seg1.MaxY);
-                //Dbg.PrintLine(seg2.MaxY);
-                return (Math.Abs(seg1.MaxY - seg2.MaxY) < distanceTollerance);
-            }
-            if (seg1.IsVertical(tollerance) && seg2.IsVertical(tollerance))
-            {
-                //Dbg.PrintLine(seg1.MaxX);
-                //Dbg.PrintLine(seg2.MaxX);
-                return (Math.Abs(seg1.MaxX - seg2.MaxX) < distanceTollerance);
-            }
-            if (seg1.IsHorizontal(tollerance) && seg2.IsVertical(tollerance)) return false;
-            if (seg2.IsHorizontal(tollerance) && seg1.IsVertical(tollerance)) return false;
-            //Dbg.PrintLine(seg2.AngleDegree);
-            //Dbg.PrintLine(seg1.Line.k);
-            //Dbg.PrintLine(seg1.Line.k == double.NegativeInfinity);
-            //Dbg.PrintLine(seg2.Line.k);
-            //Dbg.PrintLine(seg2.Line.k == double.NegativeInfinity);
-            var p1 = seg1.StartPoint;
-            var p2 = seg1.EndPoint;
-            var p3 = seg2.StartPoint;
-            var p4 = seg2.EndPoint;
-            bool ok;
-            void Test(Vector2d v1, Vector2d v2)
-            {
-                var d1 = GeoAlgorithm.AngleToDegree(v1.Angle);
-                var d2 = GeoAlgorithm.AngleToDegree(v2.Angle);
-                //Dbg.PrintLine((GeoAlgorithm.AngleToDegree(v1.Angle)).ToString());
-                //Dbg.PrintLine((GeoAlgorithm.AngleToDegree(v2.Angle)).ToString());
-                //Dbg.PrintLine(Math.Abs(GeoAlgorithm.AngleToDegree(v1.Angle) - GeoAlgorithm.AngleToDegree(v2.Angle)).ToString());
-                ok = Math.Abs(d1 - d2) <= tollerance;
-            }
-            {
-                var v1 = p3 - p1;
-                var v2 = p4 - p1;
-                Test(v1, v2);
-                if (!ok) return false;
-            }
-            {
-                var v1 = p3 - p2;
-                var v2 = p4 - p2;
-                Test(v1, v2);
-                if (!ok) return false;
-            }
-            return ok;
-        }
-        public static void CollectLineSegments(IDictionary<Entity, List<GLineSegment>> dict, Entity ent)
-        {
-            if (ent is Polyline pline)
-            {
-                dict[ent] = pline.GetLineSegments();
-            }
-            else
-            {
-                if (TryConvertToLineSegment(ent, out GLineSegment seg))
-                {
-                    dict[ent] = new List<GLineSegment>() { seg };
-                }
-            }
-        }
-        public static void CollectLineSegments(IList<GLineSegment> list, Entity ent)
-        {
-            if (ent is Polyline pline)
-            {
-                list.AddRange(pline.GetLineSegments());
-            }
-            else
-            {
-                if (TryConvertToLineSegment(ent, out GLineSegment seg))
-                {
-                    list.Add(seg);
-                }
-            }
-        }
-        public static List<GLineSegment> GetLineSegments(this Polyline polyline)
-        {
-            var n = polyline.NumberOfVertices;
-            var list = new List<GLineSegment>();
-            if (n == 0 || n == 1) return list;
-            Point2d pt1 = default, pt2 = default, first = polyline.GetPoint2dAt(0);
-            for (int i = 0; i < n; i++)
-            {
-                var pt = polyline.GetPoint2dAt(i);
-                if (i == 0)
-                {
-                    pt1 = pt;
-                }
-                else
-                {
-                    pt2 = pt;
-                    list.Add(new GLineSegment(pt1, pt2));
-                    pt1 = pt2;
-                }
-            }
-            if (polyline.Closed && n > 2)
-            {
-                list.Add(new GLineSegment(pt2, first));
-            }
-            return list;
         }
         public static bool TryConvertToLineSegment(Entity ent, out GLineSegment lineSeg)
         {

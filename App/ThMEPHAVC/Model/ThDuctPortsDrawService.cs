@@ -324,6 +324,13 @@ namespace ThMEPHVAC.Model
             if (properity.Contains("字高"))
                 properity.SetValue("字高", muffler.text_height);
         }
+        public static void Get_hose_dyn_block_properity(ObjectId obj, out double len, out double width)
+        {
+            var data = new ThBlockReferenceData(obj);
+            var properity = data.CustomProperties;
+            len = properity.Contains("长度") ? (double)properity.GetValue("长度") : 0;
+            width = properity.Contains("宽度或直径") ? (double)properity.GetValue("宽度或直径") : 0;
+        }
         public static void Get_valve_dyn_block_properity(ObjectId obj,
                                                          out Point3d pos,
                                                          out double width, 

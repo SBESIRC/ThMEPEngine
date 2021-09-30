@@ -142,6 +142,30 @@ namespace ThMEPEngineCore.Config
             return false;
         }
 
+        public static List<string> getRoomTag(this List<RoomTableTree> roomTree, string roomName)
+        {
+            List<string> roomTages = new List<string>();
+            foreach (var treeNode in roomTree)
+            {
+                var thisNode = treeNode;
+                if (thisNode.nodeName == roomName || CompareRoom(thisNode.synonym, roomName))
+                {
+                    return treeNode.tags;
+                }
+
+               else if (thisNode.child.Count > 0)
+                {
+                    roomTages = getRoomTag(thisNode.child, roomName);
+                    if (roomTages.Count > 0)
+                    {
+                        return roomTages;
+                    }
+                }
+            }
+
+            return roomTages;
+        }
+
         /// <summary>
         /// 查找目标级别节点
         /// </summary>
@@ -201,7 +225,7 @@ namespace ThMEPEngineCore.Config
         /// <returns></returns>
         public static bool CompareRoom(List<string> roomList, string room)
         {
-            foreach(var roomTidal in roomList)
+            foreach (var roomTidal in roomList)
             {
                 if (roomTidal == room)
                 {
@@ -220,7 +244,7 @@ namespace ThMEPEngineCore.Config
                         str = str + '$';
                     }
                     str = str.Replace("*", ".*");
-                    if (Regex.IsMatch(room, str)) 
+                    if (Regex.IsMatch(room, str))
                     {
                         return true;
                     }

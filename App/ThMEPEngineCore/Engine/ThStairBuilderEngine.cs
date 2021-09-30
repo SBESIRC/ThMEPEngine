@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -41,20 +39,24 @@ namespace ThMEPEngineCore.Engine
             return res;
         }
 
-        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        public override void Build(Database db, Point3dCollection pts)
         {
             var rawElement = Extract(db);
             var center = pts.Envelope().CenterPoint();
             var transFormer = new ThMEPOriginTransformer(center);
             rawElement.ForEach(o => transFormer.Transform(o.Geometry));
-            var newPts = pts.OfType<Point3d>()
+            var newPts = pts
+                .OfType<Point3d>()
                 .Select(o => transFormer.Transform(o))
                 .ToCollection();
             var stairList = Recognize(rawElement, newPts);
             var stairCollection = stairList.Select(o => o.Outline).ToCollection();
             transFormer.Reset(stairCollection);
-            return stairCollection.Cast<Polyline>().Select(e => ThIfcStair.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            Elements = stairCollection
+                .OfType<Polyline>()
+                .Select(e => ThIfcStair.Create(e))
+                .OfType<ThIfcBuildingElement>()
+                .ToList();
         }
-
     }
 }

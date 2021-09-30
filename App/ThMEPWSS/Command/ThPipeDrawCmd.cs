@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
@@ -107,10 +108,12 @@ namespace ThMEPWSS.Command
         {
             try
             {
+                string layerName = "W-辅助";
                 ThMEPWSS.Common.Utils.FocusMainWindow();
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 {
                     ImportBlockFile();
+                    CheckCreateLayer(layerName, Color.FromColorIndex(ColorMethod.ByLayer,253));
                     while (true)
                     {
                         using (var acadDb = Linq2Acad.AcadDatabase.Active())
@@ -120,7 +123,7 @@ namespace ThMEPWSS.Command
                                 break;
 
                             var pt = insertPtRst.Value;
-                            var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference("0", BlockName, pt, new Scale3d(1, 1, 1), 0);
+                            var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layerName, BlockName, pt, new Scale3d(1, 1, 1), 0);
                             var blk = acadDb.Element<BlockReference>(blkId);
 
                             if (blk.IsDynamicBlock)
@@ -142,6 +145,40 @@ namespace ThMEPWSS.Command
             {
                 Active.Editor.WriteMessage(ex.Message);
             }
+        }
+        bool CheckCreateLayer(string aimLayer, Color color)
+        {
+            LayerTableRecord layerRecord = null;
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var layer in db.Layers)
+                {
+                    if (layer.Name.Equals(aimLayer))
+                    {
+                        layerRecord = db.Layers.Element(aimLayer);
+                        break;
+                    }
+                }
+                // 创建新的图层
+                if (layerRecord == null)
+                    layerRecord = db.Layers.Create(aimLayer);
+                if (layerRecord != null)
+                {
+                    layerRecord.UpgradeOpen();
+                    layerRecord.Color = color;
+                    layerRecord.IsOff = false;
+                    layerRecord.IsPlottable = false;
+                    layerRecord.IsHidden = false;
+                    layerRecord.IsLocked = false;
+                    if (!layerRecord.IsUsed)
+                    {
+                        //当前图层正在使用，无法进行冻结,也不能设置冻结，会报无效图层问题
+                        layerRecord.IsFrozen = false;
+                    }
+                    layerRecord.DowngradeOpen();
+                }
+            }
+            return layerRecord != null;
         }
     }
 }

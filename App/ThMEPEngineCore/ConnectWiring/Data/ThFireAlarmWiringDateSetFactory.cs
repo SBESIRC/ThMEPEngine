@@ -61,9 +61,6 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     {
                         holes = holes,
                     },
-                    new ThBlockPointsExtractor()      //连线布置点位
-                    {
-                    },
                 };
             extractors.ForEach(o => o.Extract(database, collection));
             //收集数据

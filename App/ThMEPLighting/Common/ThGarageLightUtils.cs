@@ -47,7 +47,10 @@ namespace ThMEPLighting.Common
         public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
         {
             var pts = border.Vertices();
-            var spatialIndex = new ThCADCoreNTSSpatialIndexEx(dbObjs);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs)
+            {
+                AllowDuplicate = true,
+            };
             return spatialIndex.SelectCrossingPolygon(pts);
         }
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using ThCADCore.NTS;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 

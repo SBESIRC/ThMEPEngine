@@ -29,7 +29,11 @@ namespace ThMEPEngineCore.Temp
             if (UseDb3Engine)
             {
                 var columnEngine = new ThColumnBuilderEngine();
-                Columns = columnEngine.Build(database, pts).Select(o => o.Outline as Polyline).ToList();
+                columnEngine.Build(database, pts);
+                Columns = columnEngine.Elements
+                    .Select(o => o.Outline)
+                    .OfType <Polyline>()
+                    .ToList();
             }
             else
             {

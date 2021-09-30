@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Pipe.Model;
 using static ThMEPWSS.Assistant.DrawUtils;
 using MessageBox = System.Windows.MessageBox;
 
@@ -15,19 +19,45 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class DrainageSystemUI : ThCustomWindow
     {
-        private DrainageSystemDiagramViewModel viewModel = new DrainageSystemDiagramViewModel();
-        public DrainageSystemUI()
+        private DrainageSystemDiagramViewModel vm;
+        public static DrainageSystemUI TryCreate(DrainageSystemDiagramViewModel vm)
+        {
+            if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext != null) return null;
+            var file = CadCache.CurrentFile;
+            if (file == null) return null;
+            var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
+            if (!ok) return null;
+            var w = new DrainageSystemUI(vm);
+            w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
+            w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
+            return w;
+        }
+        private DrainageSystemUI(DrainageSystemDiagramViewModel vm)
         {
             InitializeComponent();
-            this.DataContext = viewModel;
+            this.vm = vm;
+            this.DataContext = vm;
             this.Topmost = true;
-            Loaded += (s, e) => { ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext =new ThMEPWSS.ReleaseNs.DrainageSystemNs.CommandContext() { ViewModel = viewModel, window = this }; };
+            Loaded += (s, e) =>
+            {
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = new ThMEPWSS.ReleaseNs.DrainageSystemNs.CommandContext()
+                { ViewModel = vm, window = this };
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.TryUpdateByRange(CadCache.TryGetRange(),true);
+            };
             Closed += (s, e) => { ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = null; };
+
+            Loaded += (s, e) => { CadCache.Register(this); };
+            {
+                DocumentCollectionEventHandler f = (s, e) => { CadCache.CloseAllWindows(); };
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.DocumentActivated += f;
+                Closed += (s, e) => { Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.DocumentActivated -= f; };
+            }
+
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var uiParams = new DrainageSystemParamsUI(viewModel.Params);
+            var uiParams = new DrainageSystemParamsUI(vm.Params);
             uiParams.Topmost = true;
             uiParams.ShowDialog();
         }
@@ -37,8 +67,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
-                Hide(); FocusMainWindow();
-                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(viewModel,false);
+                if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
+                CadCache.HideAllWindows(); ;
+                FocusMainWindow();
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(vm, false);
             }
             catch (Exception ex)
             {
@@ -46,7 +78,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             finally
             {
-                Show();
+                CadCache.ShowAllWindows();
             }
         }
         //选择楼层
@@ -54,8 +86,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
-                Hide(); FocusMainWindow();
-                viewModel.CollectFloorListDatas(false);
+                CadCache.HideAllWindows(); ;
+                FocusMainWindow();
+                vm.CollectFloorListDatas(false);
+                var file = CadCache.CurrentFile;
+                if (file == null) return;
+                var _ctx = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext;
+                if (_ctx == null) return;
+                CadCache.SetCache(file, "StoreyContext", _ctx.StoreyContext);
+                CadCache.SetCache(file, "FloorListDatas", _ctx.ViewModel.FloorListDatas);
             }
             catch (Exception ex)
             {
@@ -63,7 +102,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             finally
             {
-                Show();
+                CadCache.ShowAllWindows();
             }
         }
         //这明明是“新建楼层图框”
@@ -71,7 +110,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
-                Hide(); FocusMainWindow();
+                CadCache.HideAllWindows(); ;
+                FocusMainWindow();
                 ThMEPWSS.Common.Utils.CreateFloorFraming(false);
             }
             catch (System.Exception ex)
@@ -80,7 +120,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             finally
             {
-                Show();
+                CadCache.ShowAllWindows();
             }
         }
     }

@@ -33,15 +33,13 @@ namespace ThMEPWSS.Hydrant.Data
             {
                 doors = FilterWindowPolygon(pts, doors.Cast<Entity>().ToList()).ToCollection();
             }
-            // 去重
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(doors);
-            doors = spatialIndex.Geometries.Values.ToCollection();
+            doors = ThCADCoreNTSGeometryFilter.GeometryEquality(doors);
             doors = doors.FilterSmallArea(MinimumAreaTolerance);
             doors = doors.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToCollection();
             doors = doors.UnionPolygons();
             doors = doors.FilterSmallArea(MinimumAreaTolerance);
             Doors.AddRange(doors.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList());
-        }  
+        }
 
         public void FilterOuterDoors(List<Entity> rooms)
         {

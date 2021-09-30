@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{F1CD2D14-32EB-4E8B-870C-8780AD6E6380}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{0ED79E00-D939-46E2-B980-89EFEC90FFE9}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -181,7 +181,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -199,7 +199,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -217,7 +217,7 @@
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
-                <Command Local="THCWZM" Global="THCWZM" />
+                <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
             </Commands>
         </ComponentEntry>
@@ -234,7 +234,6 @@
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
                 <Command Local="THLGLC" Global="THLGLC" />
-                <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
@@ -254,7 +253,6 @@
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
                 <Command Local="THLGLC" Global="THLGLC" />
-                <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
@@ -275,7 +273,6 @@
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
                 <Command Local="THLGLC" Global="THLGLC" />
-                <Command Local="THKJTQ" Global="THKJTQ" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THTQKJ" />
                 <Command Local="THDXCXBZ" Global="THDXCXBZ" />
@@ -334,6 +331,7 @@
                 <Command Local="THCDZM" Global="THCDZM" />
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
+                <Command Local="THHZBJ" Global="THHZBJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -347,6 +345,7 @@
                 <Command Local="THCDZM" Global="THCDZM" />
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
+                <Command Local="THHZBJ" Global="THHZBJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -399,6 +398,8 @@
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
+                <Command Local="THPTJH" Global="THPTJH" />
+                <Command Local="THFJKX" Global="THFJKX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -421,6 +422,8 @@
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
+                <Command Local="THPTJH" Global="THPTJH" />
+                <Command Local="THFJKX" Global="THFJKX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -443,6 +446,8 @@
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
 				<Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
+                <Command Local="THPTJH" Global="THPTJH" />
+                <Command Local="THFJKX" Global="THFJKX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -453,6 +458,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
+				<Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -466,6 +472,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
+				<Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -479,6 +486,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
+				<Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -492,6 +500,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -502,6 +511,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -512,6 +522,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THCWZM" Global="THCWZM" />
             </Commands>
         </ComponentEntry>
     </Components>

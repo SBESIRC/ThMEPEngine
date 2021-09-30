@@ -28,7 +28,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alg\ThMEPHAVCBounds.cs" />
+    <Compile Include="CAD\ThFanModelDataDbSource.cs" />
+    <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
+    <Compile Include="FanLayout\Command\ThFanMaterialTableExtractCmd.cs" />
+    <Compile Include="FanLayout\Engine\ThFanCEXHRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Engine\ThFanWAFRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Engine\ThFanWEXHRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Model\ThFanAirPortMarkModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanAirPortModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanCEXHModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanFireValveModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanHoleModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanWAFModel.cs" />
+    <Compile Include="FanLayout\Model\ThFanWEXHModel.cs" />
+    <Compile Include="FanLayout\Service\ThFanExtractServiece.cs" />
+    <Compile Include="FanLayout\Service\ThFanLayoutDealService.cs" />
+    <Compile Include="FanLayout\Service\ThFanToDBServiece.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanCEXHViewModel.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanWEXHViewModel.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
+    <Compile Include="FanLayout\ViewModel\ThFanWAFViewModel.cs" />
     <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
@@ -109,6 +132,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
@@ -165,5 +192,6 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -10,7 +10,14 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPLighting.Lighting.ViewModels
 {
-
+    public enum LightTypeEnum
+    {
+        circleCeiling,
+        domeCeiling,
+        inductionCeiling,
+        downlight,
+        //emergencyLight
+    }
     public class EnumBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -65,61 +72,109 @@ namespace ThMEPLighting.Lighting.ViewModels
     }
     public class LightingViewModel : NotifyPropertyChangedBase
     {
-        string _LightingLamps = "圆形吸顶灯";
-        public string LightingLamps
+        #region illuminationLight
+        bool _IsIlluminationLightChecked = false;
+        public bool IsIlluminationLightChecked
         {
-            get => _LightingLamps;
+            get { return _IsIlluminationLightChecked; }
             set
             {
-                if (value != _LightingLamps)
-                {
-                    _LightingLamps = value;
-                    OnPropertyChanged(nameof(LightingLamps));
-                }
+                _IsIlluminationLightChecked = value;
+                OnPropertyChanged("IsIlluminationLightChecked");
             }
         }
 
-        double _LayoutRadiusOfNormalLightingLamps = 3000;
-        public double LayoutRadiusOfNormalLightingLamps
+        //照明灯类型
+        private LightTypeEnum _LightingType = LightTypeEnum.circleCeiling;
+        public LightTypeEnum LightingType
         {
-            get => _LayoutRadiusOfNormalLightingLamps;
+            get
+            {
+                return _LightingType;
+            }
             set
             {
-                if (value != _LayoutRadiusOfNormalLightingLamps)
-                {
-                    _LayoutRadiusOfNormalLightingLamps = value;
-                    OnPropertyChanged(nameof(LayoutRadiusOfNormalLightingLamps));
-                }
+                _LightingType = value;
+                OnPropertyChanged("LightingType");
             }
         }
 
-        double _LayoutRadiusOfEmergencyLightingLamps = 6000;
-        public double LayoutRadiusOfEmergencyLightingLamps
+        //是否做应急照明
+        private bool _IfLayoutEmgChecked = false;
+        public bool IfLayoutEmgChecked
         {
-            get => _LayoutRadiusOfEmergencyLightingLamps;
+            get { return _IfLayoutEmgChecked; }
             set
             {
-                if (value != _LayoutRadiusOfEmergencyLightingLamps)
-                {
-                    _LayoutRadiusOfEmergencyLightingLamps = value;
-                    OnPropertyChanged(nameof(LayoutRadiusOfEmergencyLightingLamps));
-                }
+                _IfLayoutEmgChecked = value;
+                OnPropertyChanged("IfLayoutEmgChecked");
+            }
+
+        }
+        //照明灯半径
+        double _RadiusNormal = 3000;
+        public double RadiusNormal
+        {
+            get { return _RadiusNormal; }
+            set
+            {
+                _RadiusNormal = value;
+                OnPropertyChanged("RadiusNormal");
             }
         }
 
-        bool _WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting = false;
-        public bool WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting
+        //照明灯半径
+        double _RadiusEmg = 6000;
+        public double RadiusEmg
         {
-            get => _WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting;
+            get { return _RadiusEmg; }
             set
             {
-                if (value != _WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting)
-                {
-                    _WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting = value;
-                    OnPropertyChanged(nameof(WhetherEmergencyLightingIsAlsoUsedAsOrdinaryLighting));
-                }
+                _RadiusEmg = value;
+                OnPropertyChanged("RadiusEmg");
             }
         }
+        //照明灯兼用
+        bool _IfEmgUsedForNormal = false;
+        public bool IfEmgUsedForNormal
+        {
+            get => _IfEmgUsedForNormal;
+            set
+            {
+                _IfEmgUsedForNormal = value;
+                OnPropertyChanged("IfEmgUsedForNormal");
+            }
+        }
+
+        //是否考虑梁
+        private bool _ShouldConsiderBeam = true;
+        public bool ShouldConsiderBeam
+        {
+            get
+            {
+                return _ShouldConsiderBeam;
+            }
+            set
+            {
+                _ShouldConsiderBeam = value;
+                OnPropertyChanged("ShouldConsiderBeam");
+            }
+        }
+        //需要加这个值。否则存不住结果
+        private bool _NotShouldConsiderBeam = false;
+        public bool NotShouldConsiderBeam
+        {
+            get
+            {
+                return _NotShouldConsiderBeam;
+            }
+            set
+            {
+                _NotShouldConsiderBeam = value;
+                OnPropertyChanged("NotShouldConsiderBeam");
+            }
+        }
+        #endregion 
 
         string _IlluminanceControl = "单排布置";
         public string IlluminanceControl
@@ -331,18 +386,40 @@ namespace ThMEPLighting.Lighting.ViewModels
             }
         }
 
-        string _GlobalScale = "1:100";
-        public string GlobalScale
+        //块参照比例index
+        private int _ScaleSelectIndex = 0;
+        public int ScaleSelectIndex
         {
-            get => _GlobalScale;
+            get
+            {
+                return _ScaleSelectIndex;
+            }
             set
             {
-                if (value != _GlobalScale)
-                {
-                    _GlobalScale = value;
-                    OnPropertyChanged(nameof(GlobalScale));
-                }
+                _ScaleSelectIndex = value;
+                OnPropertyChanged("ScaleSelectIndex");
             }
+        }
+        //块参照比例string
+        private string _BlockRatio = string.Empty;
+        public string BlockRatio
+        {
+            get
+            {
+                return _BlockRatio;
+            }
+            set
+            {
+                _BlockRatio = value;
+                OnPropertyChanged("BlockRatio");
+            }
+        }
+        public LightingViewModel()
+        {
+            ScaleSelectIndex = 0;
+            LightingType = LightTypeEnum.circleCeiling;
+            ShouldConsiderBeam = true;
+            IsIlluminationLightChecked = true;
         }
 
         public class Item : NotifyPropertyChangedBase
@@ -365,8 +442,4 @@ namespace ThMEPLighting.Lighting.ViewModels
         ObservableCollection<Item> _items = new ObservableCollection<Item>();
         public ObservableCollection<Item> Items => _items;
     }
-
-
-
-
 }

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.ConnectWiring;
 using ThMEPElectrical.FireAlarm.ViewModels;
-
 using ThMEPElectrical;
-
 namespace ThMEPElectrical.FireAlarm.Commands
 {
     public class FireAlarmRouteCableCommand : ThMEPBaseCommand, IDisposable
@@ -22,7 +21,14 @@ namespace ThMEPElectrical.FireAlarm.Commands
 
         public override void SubExecute()
         {
+#if (ACAD2016 || ACAD2018)
             //todo: route cables using _UiConfigs
+            ConnectWiringService connectWiringService = new ConnectWiringService();
+            connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
+#else
+            //
+#endif
+
         }
 
         public void Dispose()
@@ -52,6 +58,12 @@ namespace ThMEPElectrical.FireAlarm.Commands
                 //楼层显示器
                 var displayCmd = new ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmDisplayDeviceLayoutCmd(_UiConfigs);
                 displayCmd.Execute();
+            }
+            else if (_UiConfigs.IsGasSensorChecked)
+            {
+                //可燃气体探测
+                var gasCmd = new ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd(_UiConfigs);
+                gasCmd.Execute();
             }
             else if (_UiConfigs.IsFireMonitorModuleChecked)
             {

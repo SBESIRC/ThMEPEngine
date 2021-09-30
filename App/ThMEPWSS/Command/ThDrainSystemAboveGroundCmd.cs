@@ -176,10 +176,18 @@ namespace ThMEPWSS.Command
                     EnumEquipmentType.ventRiser,
                     EnumEquipmentType.balconyRiser,
                     EnumEquipmentType.condensateRiser,
+                    EnumEquipmentType.roofRainRiser,
                 };
                 var pipeConverter = RaisePipeConvert.ConvetPipeToBlock(livingHighestFloor.floorUid, _classifyResult.Where(c => converterTypes.Any(x => x == c.enumEquipmentType)).ToList());
                 if (null != pipeConverter && pipeConverter.Count > 0) 
                     createBlockInfos.AddRange(pipeConverter);
+                //PL和TL增加连线
+                var pipeConnectPipe =new PipeConnectPipe(pipeConverter.Where(c=>!string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("PL")).ToList(),
+                    pipeConverter.Where(c=> !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("TL")).ToList());
+                var connectLines = pipeConnectPipe.GetConnectLines();
+                if (connectLines.Count > 0)
+                    createBasicElems.AddRange(connectLines);
+
 
                 //阳台逻辑
                 var balconyRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Balcony).ToList();
@@ -328,8 +336,9 @@ namespace ThMEPWSS.Command
             if (null != addBlocks && addBlocks.Count > 0)
                 createBlockInfos.AddRange(addBlocks);
 
-            //Y1L转换
-            var addY1Ls = roofLayout.RoofY1LConverter(livingHighestFloor, livingFloorY1LBlocks, out List<CreateBasicElement> addLines, _roofY1ConvertAddLineDistance);
+            //Y1L转换,重力和侧入雨水斗转换在不同的楼层
+            var y1 = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("Y1L")).ToList();
+            var addY1Ls = roofLayout.RoofY1LGravityConverter(livingHighestFloor, y1, out List<CreateBasicElement> addLines, _roofY1ConvertAddLineDistance);
             if (null != addY1Ls && addY1Ls.Count > 0)
                 createBlockInfos.AddRange(addY1Ls);
             if (null != addLines && addLines.Count > 0) 
@@ -340,7 +349,14 @@ namespace ThMEPWSS.Command
                     if (item.baseCurce is Line)
                         _roofY1ConvertLines.Add(item);
                 }
-            } 
+            }
+            addY1Ls.Clear();
+            //侧入雨水斗的转换线在屋面
+            addY1Ls = roofLayout.RoofY1LSideConverter(livingHighestFloor, y1, out addLines, _roofY1ConvertAddLineDistance);
+            if (null != addY1Ls && addY1Ls.Count > 0)
+                createBlockInfos.AddRange(addY1Ls);
+            if (null != addLines && addLines.Count > 0)
+                createBasicElems.AddRange(addLines);
         }
         void LivingFloorLabelLayout(double midY) 
         {

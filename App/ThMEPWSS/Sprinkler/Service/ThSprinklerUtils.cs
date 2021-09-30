@@ -7,12 +7,6 @@ namespace ThMEPWSS.Sprinkler.Service
 {
     public static class ThSprinklerUtils
     {
-        public static bool IsPositiveInfinity(this Point3d pt)
-        {
-            return double.IsPositiveInfinity(pt.X) ||
-                double.IsPositiveInfinity(pt.Y) ||
-                double.IsPositiveInfinity(pt.Z);
-        }
         public static void MoveToOrigin(this ThBuildingElementVisitorManager vm, ThMEPOriginTransformer transformer)
         {
             vm.DB3ArchWallVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
@@ -32,6 +26,17 @@ namespace ThMEPWSS.Sprinkler.Service
                 transformer.Transform(o.Geometry);
             });
             vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
+        }
+
+        public static Point3d VerticalPoint(Point3d first, Point3d second, double distance)
+        {
+            var verticalVerctor = second - first;
+            return CenterPoint(first, second) + verticalVerctor / verticalVerctor.Length * distance;
+        }
+
+        public static Point3d CenterPoint(Point3d first, Point3d second)
+        {
+            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, 0);
         }
     }
 }

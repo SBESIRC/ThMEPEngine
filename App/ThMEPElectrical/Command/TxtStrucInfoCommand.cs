@@ -9,6 +9,7 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -25,8 +26,8 @@ namespace ThMEPElectrical.Command
 {
     public class TxtStrucInfoCommand : IAcadCommand, IDisposable
     {
-        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-        static string blockConfigUrl = "D:\\连线功能白名单.xlsx";
+        static string roomConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
+        static string blockConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "连线功能白名单.xlsx");
         List<RoomTableTree> roomTableConfig = null;
         public void Dispose()
         {

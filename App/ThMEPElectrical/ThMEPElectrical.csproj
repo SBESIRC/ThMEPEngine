@@ -29,36 +29,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AFASRegion\AFASRegion.cs" />
-    <Compile Include="AFASRegion\Expand\DetectorExtend.cs" />
-    <Compile Include="AFASRegion\Model\AFASBeamContour.cs" />
-    <Compile Include="AFASRegion\Model\AFASDetector.cs" />
-    <Compile Include="AFASRegion\AFASBeamExtendFactory.cs" />
-    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\DetectionRegionGraphModel.cs" />
-    <Compile Include="AFASRegion\Model\DetectionRegionGraphModel\LineCompare.cs" />
-    <Compile Include="AFASRegion\Model\ScoringModel.cs" />
-    <Compile Include="AFASRegion\Service\AFASRegionService.cs" />
-    <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
-    <Compile Include="AFASRegion\ThAFASCmd.cs" />
-    <Compile Include="AlarmLayout\Command\FireAlarmSystemLayoutCommand.cs" />
-    <Compile Include="AlarmLayout\LayoutProcess\DeletePoints.cs" />
-    <Compile Include="AlarmLayout\LayoutProcess\LayoutOpt.cs" />
     <Compile Include="AlarmLayout\Test\TestCmd.cs" />
-    <Compile Include="AlarmLayout\Utils\AreaCaculator.cs" />
-    <Compile Include="AlarmLayout\Utils\CenterLineSimplify.cs" />
-    <Compile Include="AlarmLayout\Utils\PointsDealer.cs" />
-    <Compile Include="AlarmLayout\Utils\ShowInfo.cs" />
-    <Compile Include="AlarmSensorLayout\AlarmSensorLayout.cs" />
-    <Compile Include="AlarmSensorLayout\Command\AlarmSensorLayoutCmd.cs" />
-    <Compile Include="AlarmSensorLayout\Data\InputArea.cs" />
-    <Compile Include="AlarmSensorLayout\Data\EquipmentParameter.cs" />
-    <Compile Include="AlarmSensorLayout\Sensorlayout\UCSOpt1.cs" />
-    <Compile Include="AlarmSensorLayout\Utils\DetectCalculator.cs" />
-    <Compile Include="AlarmSensorLayout\Utils\FireAlarmUtils.cs" />
-    <Compile Include="AlarmSensorLayout\Utils\VisiblePolygon.cs" />
-    <Compile Include="AlarmSensorLayout\Sensorlayout\BeamSensorOpt.cs" />
-    <Compile Include="AlarmSensorLayout\Sensorlayout\SpaceDivider.cs" />
-    <Compile Include="AlarmSensorLayout\Sensorlayout\UCSOpt.cs" />
     <Compile Include="AlarmSensorLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
@@ -157,22 +128,34 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarmCombustibleGas\Model\ThFaAreaLayoutParameter.cs" />
+    <Compile Include="FireAlarmCombustibleGas\Service\ThFaAreaLayoutRoomTypeService.cs" />
+    <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasCmd.cs" />
+    <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasEngine.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutBusinessDataSetFactory.cs" />
-    <Compile Include="FireAlarmSmokeHygro\Common\ThFaCleanService.cs" />
-    <Compile Include="FireAlarmSmokeHygro\Data\ThFaAreaLayoutBusinessDataSetFactory.cs" />
-    <Compile Include="FireAlarmSmokeHygro\Data\ThSmokeDataQueryService.cs" />
-    <Compile Include="FireAlarmSmokeHygro\Service\ThFaAreaLayoutService.cs" />
-    <Compile Include="FireAlarmSmokeHygro\ThFireAlarmSmokeHeatCmd.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Common\ThFaCleanService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutBusinessDataSetFactory.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutDataSetFactory.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Data\ThSmokeDataQueryService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Model\ThFaAreaLayoutParameter.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Model\ThFaAreaLayoutResult.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Model\ThLayoutPt.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Service\ThStairService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutParamterCalculationService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutRoomTypeService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutService.cs" />
+    <Compile Include="FireAlarmSmokeHeat\ThFaSmokeCommon.cs" />
+    <Compile Include="FireAlarmSmokeHeat\ThFireAlarmSmokeHeatCmd.cs" />
+    <Compile Include="FireAlarmSmokeHeat\ThFireAlarmSmokeHeatEngine.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmCommand.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmViewModel.cs" />
     <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaPlaceCoverageExtractor.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFireAlarmBlkExtractor.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutDataSetFactory.cs" />
-    <Compile Include="FireAlarmSmokeHygro\Data\ThFaAreaLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDataQueryService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
@@ -182,7 +165,6 @@
     <Compile Include="FireAlarmFixLayout\Service\ThFireAlarmInsertBlk.cs" />
     <Compile Include="FireAlarmFixLayout\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="FireAlarmFixLayout\Service\ThQueryHoleTextInfoService.cs" />
-    <Compile Include="FireAlarmFixLayout\ThFixLayoutCommon.cs" />
     <Compile Include="FireAlarmSystem\ThFaCommon.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
@@ -314,9 +296,6 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
-    <Compile Include="Staircase\ThStairCommon.cs" />
-    <Compile Include="Staircase\ThStairElectricalEngine.cs" />
-    <Compile Include="Staircase\ThStairEquimentLayout.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
@@ -413,7 +392,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AFASRegion\Engion\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
   </ItemGroup>

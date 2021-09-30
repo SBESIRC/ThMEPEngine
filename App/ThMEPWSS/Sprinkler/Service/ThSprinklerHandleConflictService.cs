@@ -45,46 +45,7 @@ namespace ThMEPWSS.Sprinkler.Service
                 }
             }
         }
-        public List<ThIfcDoor> Union(List<ThIfcDoor> db3Doors, List<ThIfcDoor> localDoors)
-        {
-            var results = new List<ThIfcDoor>();
-            results.AddRange(db3Doors);
-            results.AddRange(localDoors);
-            foreach (ThIfcDoor first in localDoors)
-            {
-                foreach (ThIfcDoor second in db3Doors)
-                {
-                    if (IsOverlap(first.Outline, second.Outline))
-                    {
-                        var temp = new DBObjectCollection
-                        {
-                            first.Outline,
-                            second.Outline
-                        };
-                        var mergeObjs = temp.UnionPolygons();
-                        if (mergeObjs.Count > 0)
-                        {
-                            results.Remove(first);
-                            results.Remove(second);
-                            var result = new ThIfcDoor
-                            {
-                                Spec = second.Spec,
-                                Switch = second.Switch,
-                                OpenAngle = second.OpenAngle,
-                                Height = second.Height,
-                            };
-                            var firstPoly = mergeObjs
-                                .Cast<Polyline>()
-                                .OrderByDescending(p => p.Area).First();
-                            result.Outline = firstPoly.GetMinimumRectangle();
-                            results.Add(result);
-                        }
-                        break;
-                    }
-                }
-            }
-            return results;
-        }
+
         private bool IsOverlap(Entity first, Entity second)
         {
             //规则待定

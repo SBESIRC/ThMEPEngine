@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -16,7 +17,7 @@ namespace ThMEPEngineCore.Engine
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
         public ThParkingStallExtractionVisitor()
         {
-            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedLayer = CheckLayerIsValid;
             CheckQualifiedBlockName = (Entity entity) => true;
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -45,10 +46,11 @@ namespace ThMEPEngineCore.Engine
                 var obb = ToObb(objs);
                 if (obb.Area > 1.0)
                 {
-                    obb.TransformBy(matrix);
+                    var solid = obb.ToSolid();
+                    solid.TransformBy(matrix);
                     elements.Add(new ThRawIfcDistributionElementData()
                     {
-                        Geometry = obb,
+                        Geometry = solid.ToPolyline(),
                         Data = br.GetEffectiveName(),
                     });
                 }
@@ -86,7 +88,7 @@ namespace ThMEPEngineCore.Engine
 
         private DBObjectCollection ExplodeToBasic(DBObjectCollection objs)
         {
-            //理想是炸到Line,Arc,Circle,Ellipse
+            //理想是炸到Line,Arc,Circle,Ellipse,目前不支持对椭圆的处理，这里不抛出不支持的异常
             var results = new DBObjectCollection();
             objs.Cast<Entity>().Where(o => o is Curve).ForEach(c =>
                 {
@@ -106,10 +108,6 @@ namespace ThMEPEngineCore.Engine
                         poly2d.Explode(subObjs);
                         subObjs.Cast<Curve>().ForEach(e => results.Add(e));
                     }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
                 });
             return results;
         }
@@ -122,6 +120,13 @@ namespace ThMEPEngineCore.Engine
         public override bool CheckLayerValid(Entity curve)
         {
             return CheckQualifiedLayer(curve);
+        }
+        private bool CheckLayerIsValid(Entity curve) 
+        {
+            var name = ThMEPXRefService.OriginalFromXref(curve.Layer);
+            if (string.IsNullOrEmpty(name))
+                return false;
+            return LayerFilter.Contains(name);
         }
     }
 }

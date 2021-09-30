@@ -49,7 +49,10 @@ namespace ThMEPLighting.Garage.Service
                 });
 
                 // 过滤
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(totalObjs);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(totalObjs)
+                {
+                    AllowDuplicate = true,
+                };
                 var filters = new DBObjectCollection();
                 regions.ForEach(r =>
                 {

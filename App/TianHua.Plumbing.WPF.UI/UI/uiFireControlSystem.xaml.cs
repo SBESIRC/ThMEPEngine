@@ -5,6 +5,7 @@ using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -81,6 +82,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 MessageBox.Show("输入的数据有错误，请检查输入后在进行后续操作", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            
             try 
             {
                 FormUtil.DisableForm(gridForm);
@@ -92,13 +94,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     MessageBox.Show(showMsg, "天华-警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+                var dicFloorHeight = FloorHeightsViewModel.Instance.GetSpecialFloorHeightsDict(999);
                 //避难层消火栓数量>=普通层的消火栓数量
                 if (vm.CountsGeneral > vm.CountsRefuge)
                 {
                     vm.CountsRefuge = vm.CountsGeneral;
                 }
                 ThMEPWSS.Common.Utils.FocusToCAD();
-                var cmd = new ThFireControlSystemDiagramCmd(vm);
+                var cmd = new ThFireControlSystemDiagramCmd(vm,dicFloorHeight);
                 cmd.Execute();
             }
             catch (Exception ex)
@@ -110,6 +113,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 FormUtil.EnableForm(gridForm);
             }
             
+        }
+
+        private void btnHeights_Click(object sender, RoutedEventArgs e)
+        {
+            FloorHeightSettingWindow.ShowModelSingletonWindow();
         }
     }
 }

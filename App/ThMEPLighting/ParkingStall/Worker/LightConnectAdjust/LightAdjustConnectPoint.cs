@@ -19,7 +19,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnectAdjust
         List<Polyline> _allWalls;
         List<Polyline> _allColumns;
         List<LightBlockReference> _areaLightBlocks;
-        double _changeLineMinLength = 50.0;
+        double _changeLineMinLength = 100.0;
         double _changeLinePrjLength = 800.0;
         double _lineExtendToCheck = 500.0;//连接线拐角处延长长度
         double _angleLineToConver = Math.PI * 20.0 / 180.0;

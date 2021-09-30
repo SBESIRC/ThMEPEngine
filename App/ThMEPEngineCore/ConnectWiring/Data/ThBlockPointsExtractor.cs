@@ -24,10 +24,12 @@ namespace ThMEPEngineCore.ConnectWiring.Data
 {
     class ThBlockPointsExtractor : ThExtractorBase
     {
-        public List<Point3d> blockPts { get; protected set; }
-        static string blockConfigUrl = ThCADCommon.SupportPath() + "\\连线功能白名单.xlsx";
-        public ThBlockPointsExtractor()
+        public List<Point3d> blockPts { get; set; }
+        public List<BlockReference> resBlocks { get; set; }
+        List<string> configBlockd;
+        public ThBlockPointsExtractor(List<string> blockNames)
         {
+            configBlockd = blockNames;
             Category = BuiltInCategory.WiringPosition.ToString();
         }
 
@@ -53,7 +55,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
                 var filterlist = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.BlockName) == string.Join(",", ReadBlockConfig()) &
+                o.Dxf((int)DxfCode.BlockName) == string.Join(",", configBlockd) &
                 o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
                 var blocks = new List<Entity>();
                 var status = Active.Editor.SelectAll(filterlist);
@@ -69,7 +71,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     Closed = true,
                 };
                 pline.CreatePolyline(pts);
-                var resBlocks = new List<BlockReference>();
+                resBlocks = new List<BlockReference>();
                 blocks.Where(o =>
                 {
                     var geoPts = o.GeometricExtents;
@@ -78,28 +80,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                 })
                 .Cast<BlockReference>()
                 .ForEachDbObject(o => resBlocks.Add(o));
-
-                blockPts = resBlocks.Select(x => x.Position).ToList();
             }
-        }
-
-        /// <summary>
-        /// 读取块名配置表
-        /// </summary>
-        private List<string> ReadBlockConfig()
-        {
-            ReadExcelService excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(blockConfigUrl, true);
-            List<string> layerNames = new List<string>();
-            foreach (System.Data.DataTable table in dataSet.Tables)
-            {
-                for (int i = 2; i < table.Rows.Count; i++)
-                {
-                    DataRow dataRow = table.Rows[i];
-                    layerNames.Add(dataRow[0].ToString());
-                }
-            }
-            return layerNames;
         }
     }
 }

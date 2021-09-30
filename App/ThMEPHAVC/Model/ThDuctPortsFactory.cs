@@ -58,12 +58,6 @@ namespace ThMEPHVAC.Model
         }
         public static Line_Info Create_cross(double i_width, double o_width1, double o_width2, double o_width3)
         {
-            if (o_width1 > o_width3)
-            {
-                double tmp = o_width1;
-                o_width1 = o_width3;
-                o_width3 = tmp;
-            }
             //创建大端的端线
             Line mainBigEndLine = new Line()
             {

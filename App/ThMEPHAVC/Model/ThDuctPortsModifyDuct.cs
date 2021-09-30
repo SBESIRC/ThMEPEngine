@@ -286,7 +286,7 @@ namespace ThMEPHVAC.Model
             if (conn_duct.handle == ObjectId.Null.Handle && elbow.handle == ObjectId.Null.Handle)
             {
                 // 变径另一端连接风机
-                bool is_axis = Is_conn_axis_fan(p);
+                bool is_axis = Is_conn_axis_fan(p, red.pos[port_idx]);
                 var reducing_geo = ThDuctPortsReDrawFactory.Create_reducing(red, port_idx, modify_size, is_axis);
                 Update_reducing(reducing_geo);
                 ThDuctPortsDrawService.Clear_graph(red.handle);
@@ -311,12 +311,15 @@ namespace ThMEPHVAC.Model
             }
             ThDuctPortsDrawService.Clear_graph(red.handle);
         }
-        private bool Is_conn_axis_fan(Point2d p)
+        private bool Is_conn_axis_fan(Point2d p, Point2d org_p)// p->与风机相接的变径的点 org_p->与风机相接的变径的另一边
         {
             var p3 = new Point3d(p.X, p.Y, 0);
+            var org_p3 = new Point3d(org_p.X, org_p.Y, 0);
+            var dir_vec = (p3 - org_p3).GetNormal();
             var detect_pl = ThMEPHVACService.Create_detect_poly(p3);
             var res = hoses_index.SelectCrossingPolygon(detect_pl);
             var detect_len = res.Count == 0 ? 10 : 200;
+            p3 += (dir_vec * detect_len);
             detect_pl = ThMEPHVACService.Create_detect_poly(p3, detect_len);
             res = fans_index.SelectCrossingPolygon(detect_pl);
             if (res.Count == 1)
@@ -459,9 +462,8 @@ namespace ThMEPHVAC.Model
         }
         private void Do_proc_cross(int port_idx, string modify_duct_size, Entity_modify_param cross, ref Point2d detect_p)
         {
-            var modify_width = ThMEPHVACService.Get_width(modify_duct_size);
-            var mat = ThDuctPortsShapeService.Create_cross_trans_mat(cross);
-            var cross_geo = ThDuctPortsReDrawFactory.Create_cross(cross, port_idx, modify_width);
+            var mat = ThDuctPortsShapeService.Create_cross_trans_mat(cross, modify_duct_size, port_idx);
+            var cross_geo = ThDuctPortsReDrawFactory.Create_cross(cross, modify_duct_size, port_idx);
             Search_tee_neig_duct(port_idx, cross.pos, out List<Duct_modify_param> connect_duct);
             var new_cross = ThMEPHVACService.Create_special_modify_param("Cross", mat, start_handle, cross_geo.flg, cross_geo.center_line);
             Update_new_shape(cross_geo, mat, new_cross);
@@ -580,7 +582,7 @@ namespace ThMEPHVAC.Model
             if (modify_size == connect_duct.duct_size)
             {
                 is_direct_duct = true;
-                ThMEPHVACService.Get_max(cur_line.sp, cur_line.ep, connect_duct.sp, connect_duct.ep, out Point2d p1, out Point2d p2);
+                ThMEPHVACService.Get_longest_dis(cur_line.sp, cur_line.ep, connect_duct.sp, connect_duct.ep, out Point2d p1, out Point2d p2);
                 Create_duct_by_duct(connect_duct, p1, p2, width, modify_size);
             }
         }
@@ -621,18 +623,19 @@ namespace ThMEPHVAC.Model
             Insert_reducing(connect_width, modify_width, new_sp, new_ep, detect_p, dis_vec);
         }
         private void Insert_reducing(double connect_width,
-                                         double modify_width,
-                                         Point2d new_sp,
-                                         Point2d new_ep,
-                                         Point2d detect_p,
-                                         Vector2d dis_vec)
+                                     double modify_width,
+                                     Point2d new_sp,
+                                     Point2d new_ep,
+                                     Point2d detect_p,
+                                     Vector2d dis_vec)
         {
             if (connect_width > modify_width)
             {
                 var dis1 = detect_p.GetDistanceTo(new_sp);
                 var dis2 = detect_p.GetDistanceTo(new_ep);
+                // dis1 < dis2 风量小的管段比风量大的管段粗(变径反向)
                 var reducing_geo = (dis1 < dis2) ?
-                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, connect_width, modify_width) :
+                    ThDuctPortsReDrawFactory.Create_reducing(detect_p - dis_vec, new_sp, modify_width, connect_width) :
                     ThDuctPortsReDrawFactory.Create_reducing(new_ep, detect_p + dis_vec, connect_width, modify_width);
                 Update_reducing(reducing_geo);
             }

@@ -45,6 +45,7 @@ namespace ThMEPHVAC.CAD
         public Tolerance point_tor;
         public Point3d move_srt_p;
         public Point3d fan_break_p;
+        public List<Line> aux_lines;             // 风机进出口到起始搜索点的线段
         public HashSet<Line> room_lines;
         public HashSet<Line> not_room_lines;
         public List<TextAlignLine> text_alignment;
@@ -59,17 +60,20 @@ namespace ThMEPHVAC.CAD
         private Line last_line;
         private bool is_axis;
         private bool is_exhaust;
+        private double type3_sep_dis;
         private ThCADCoreNTSSpatialIndex spatial_index;
-        public ThFanAnalysis(ThDbModelFan fan, 
+        public ThFanAnalysis(double type3_sep_dis,
+                             ThDbModelFan fan, 
                              Duct_InParam param,
                              DBObjectCollection bypass,
                              DBObjectCollection center_line, 
                              DBObjectCollection wall_lines)
         {
-            Init(fan, bypass, param);
+            Init(type3_sep_dis, fan, bypass, param);
             Move_to_zero(fan.FanInletBasePoint, fan.FanOutletBasePoint, center_line, wall_lines, out Point3d room_p, out Point3d not_room_p);
             Update_search_point(room_p, not_room_p, param, ref center_line, out Point3d i_room_p, out Point3d i_not_room_p, 
                                                                             out Line room_line, out Line not_room_line);
+            aux_lines = new List<Line>() { new Line(room_p, i_room_p) , new Line(not_room_p, i_not_room_p) };
             start_dir_vec = ThMEPHVACService.Get_edge_direction(room_line);
             spatial_index = new ThCADCoreNTSSpatialIndex(center_line);
             Get_duct_info(i_room_p, room_line, room_lines);
@@ -84,6 +88,7 @@ namespace ThMEPHVAC.CAD
             Get_special_shape_info(i_not_room_p, not_room_line, not_room_lines, param.other_duct_size);
             Collect_lines();
             Shrink_duct();
+            Merge_bypass();
             if (bypass.Count == 0 && param.bypass_size != null)
             {
                 Get_vt_elbow_pos(i_room_p, i_not_room_p);
@@ -91,11 +96,12 @@ namespace ThMEPHVAC.CAD
             }
             Move_to_org();
         }
-        private void Init(ThDbModelFan fan, DBObjectCollection bypass, Duct_InParam param)
+        private void Init(double type3_sep_dis, ThDbModelFan fan, DBObjectCollection bypass, Duct_InParam param)
         {
             this.fan = fan;
             this.param = param;
             this.bypass = bypass;
+            this.type3_sep_dis = type3_sep_dis;
             is_axis = (fan.Name.Contains("轴流风机"));
             is_exhaust = fan.is_exhaust;
             move_srt_p = is_exhaust ? fan.FanInletBasePoint : fan.FanOutletBasePoint;
@@ -108,6 +114,42 @@ namespace ThMEPHVAC.CAD
             center_lines = new List<Fan_duct_Info>();
             out_center_line = new DBObjectCollection();
             special_shapes_info = new List<Special_graph_Info>();
+        }
+        private void Merge_bypass()
+        {
+            if (param.bypass_pattern == "RBType3")
+            {
+                var sep_info1 = new Fan_duct_Info();
+                var sep_info2 = new Fan_duct_Info();
+                foreach (var info1 in center_lines)
+                {
+                    foreach (var info2 in center_lines)
+                    {
+                        if (info1.Equals(info2))
+                            continue;
+                        var dis = ThMEPHVACService.Get_line_dis(info1.sp, info1.ep, info2.sp, info2.ep);
+                        if (Math.Abs(dis - type3_sep_dis) < 1e-3)
+                        {
+                            sep_info1 = info1;
+                            sep_info2 = info2;
+                            break;
+                        }
+                    }
+                    if (!String.IsNullOrEmpty(sep_info1.size))
+                        break;
+                }
+                if (String.IsNullOrEmpty(sep_info1.size) || String.IsNullOrEmpty(sep_info2.size))
+                    throw new NotImplementedException("风机进出口旁通未找到打断的旁通");
+                Update_center_line(sep_info1, sep_info2);
+            }
+        }
+        private void Update_center_line(Fan_duct_Info info1, Fan_duct_Info info2)
+        {
+            ThMEPHVACService.Get_longest_dis(info1.sp, info1.ep, info2.sp, info2.ep, out Point3d p1, out Point3d p2);
+            var new_duct = new Fan_duct_Info(p1, p2, param.bypass_size, info1.src_shrink, info2.src_shrink);
+            center_lines.Remove(info1);
+            center_lines.Remove(info2);
+            center_lines.Add(new_duct);
         }
         private void Do_add_inner_duct(Line start_line, Point3d srt_p, string duct_size)
         {
@@ -375,19 +417,22 @@ namespace ThMEPHVAC.CAD
                     out_center_line.Add(l);
                 else
                 {
-                    var pl = ThMEPHVACService.Get_line_extend(l, 1);
+                    var e_l = ThMEPHVACService.Extend_line(l, 1);
+                    var pl = ThMEPHVACService.Get_line_extend(e_l, 1);
                     var res = index.SelectCrossingPolygon(pl);
                     if (res.Count > 0)
                     {
                         var line = res[0] as Line;
-                        fan_break_p = ThMEPHVACService.Intersect_point(l, line);
+                        fan_break_p = ThMEPHVACService.Intersect_point(e_l, line);
                         if (fan_break_p.IsEqualTo(Point3d.Origin))
-                            return;
+                            continue;
                         cross_line = l;
                         break;
                     }
                 }
             }
+            if (fan_break_p.IsEqualTo(Point3d.Origin))
+                return;
             Update_break_point(wall_lines, center_lines, duct_size);
             if (!fan_break_p.IsEqualTo(Point3d.Origin))
                 Update_center_line(center_lines, cross_line, wall_lines);

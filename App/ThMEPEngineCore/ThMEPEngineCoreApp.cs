@@ -136,14 +136,14 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "全部")
                     {
                         var columnBuilder = new ThColumnBuilderEngine();
-                        columnBuilder
-                            .Build(acadDatabase.Database, frame.Vertices())
+                        columnBuilder.Build(acadDatabase.Database, frame.Vertices());
+                        columnBuilder.Elements
                             .Select(o => o.Outline)
                             .ForEach(o =>
-                          {
-                              acadDatabase.ModelSpace.Add(o);
-                              o.SetDatabaseDefaults();
-                          });
+                            {
+                                acadDatabase.ModelSpace.Add(o);
+                                o.SetDatabaseDefaults();
+                            });
                     }
                 }
                 else
@@ -257,14 +257,14 @@ namespace ThMEPEngineCore
                     else if (result3.StringResult == "全部")
                     {
                         var shearwallBuilder = new ThShearwallBuilderEngine();
-                        shearwallBuilder
-                            .Build(acadDatabase.Database, frame.Vertices())
+                        shearwallBuilder.Build(acadDatabase.Database, frame.Vertices());
+                        shearwallBuilder.Elements
                             .Select(o => o.Outline)
                             .ForEach(e =>
-                          {
-                              acadDatabase.ModelSpace.Add(e);
-                              e.SetDatabaseDefaults();
-                          });
+                            {
+                                acadDatabase.ModelSpace.Add(e);
+                                e.SetDatabaseDefaults();
+                            });
                     }
                 }
                 else
@@ -292,7 +292,10 @@ namespace ThMEPEngineCore
                         engine2.Extract(acadDatabase.Database);
                         engine2.Results.ForEach(o => results.Add(o.Geometry));
                     }
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(results);
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(results)
+                    {
+                        AllowDuplicate = true,
+                    };
                     spatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
@@ -378,7 +381,10 @@ namespace ThMEPEngineCore
                     var engine = new ThDB3ArchWallExtractionEngine();
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(engine.Results.Select(o => o.Geometry).ToCollection())
+                    {
+                        AllowDuplicate = true,
+                    };
                     foreach (var filterObj in spatialIndex.SelectCrossingPolygon(frame))
                     {
                         results.Add(filterObj as Entity);
@@ -406,7 +412,10 @@ namespace ThMEPEngineCore
                 var engine = new ThDB3CurtainWallExtractionEngine();
                 engine.Extract(acadDatabase.Database);
                 var results = new DBObjectCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(engine.Results.Select(o => o.Geometry).ToCollection())
+                {
+                    AllowDuplicate = true,
+                };
                 foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
                     results.Add(filterObj as Entity);
@@ -501,7 +510,7 @@ namespace ThMEPEngineCore
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
 
-                var layerId = acadDatabase.Database.CreateBeamLayer();
+                var layerId = acadDatabase.Database.CreateAIBeamLayer();
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
                 {
                     var curve = n.Outline as Curve;
@@ -858,34 +867,6 @@ namespace ThMEPEngineCore
                 var builder = new ThRoomBuilderEngine();
                 var rooms = builder.BuildFromMS(acadDatabase.Database, frame.Vertices());
                 rooms.Select(o => o.Boundary).ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(o);
-                    o.SetDatabaseDefaults();
-                });
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THExtractRoomMark", CommandFlags.Modal)]
-        public void THExtractRoomMark()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                var engine = new ThDB3RoomMarkRecognitionEngine();
-                engine.Recognize(acadDatabase.Database, frame.Vertices());
-                engine.Elements.Cast<ThIfcTextNote>().Select(o => o.Geometry).ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o);
                     o.SetDatabaseDefaults();

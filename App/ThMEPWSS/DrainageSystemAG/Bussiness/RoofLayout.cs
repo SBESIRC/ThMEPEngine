@@ -95,46 +95,73 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 retRes.AddRange(maxToMinRoofs);
             return retRes;
         }
-        public List<CreateBlockInfo> RoofY1LConverter(FloorFramed livingFloor, List<EquipmentBlockSpace> floorY1LBlcoks,out List<CreateBasicElement> addLines,double findY1LDis) 
+        public List<CreateBlockInfo> RoofY1LGravityConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines,double findY1LDis) 
         {
             //获取改楼层的Y1L
             addLines = new List<CreateBasicElement>();
             var retRes = new List<CreateBlockInfo>();
+            if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1)
+                return retRes;
             var maxRoofConvert = MaxRoofPipeConvert();
             var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
             foreach (var item in copyMaxRoofPipeToLiving) 
             {
-                if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1) 
-                {
-                    retRes.Add(item);
+                var roofPipe = maxRoofConvert.Where(c => c.uid.Equals(item.copyId)).FirstOrDefault();
+                var roofPoint = GetRoofPointInfo(roofPipe.createPoint);
+                if (roofPoint == null || roofPoint.equipmentType != EnumEquipmentType.gravityRainBucket)
                     continue;
-                }
-                var liveFloorY1L = floorY1LBlcoks.Where(c => c.blockCenterPoint.DistanceTo(item.createPoint) < findY1LDis).FirstOrDefault();
+                var liveFloorY1L = floorY1LBlcoks.Where(c => c.createPoint.DistanceTo(item.createPoint) < findY1LDis).FirstOrDefault();
                 if (null == liveFloorY1L)
-                {
-                    retRes.Add(item);
                     continue;
-                }
-                var copyBlock = DrainSysAGCommon.CopyOneBlock(item, livingFloor.datumPoint, livingFloor.datumPoint, livingFloor.floorUid);
-                var changePoint = liveFloorY1L.blockCenterPoint;
-                var offSet = changePoint - item.createPoint;
-                var itemOldPoint = item.createPoint;
-                item.createPoint = changePoint;
+                if (item.createPoint.DistanceTo(liveFloorY1L.createPoint) < 100)
+                    continue;
+                item.tag = DrainSysAGCommon.NOTCOPYTAG;
                 retRes.Add(item);
-
-                if (itemOldPoint.DistanceTo(changePoint) < 100)
-                    continue;
                 //位置偏差大需要连线
-                copyBlock.tag = DrainSysAGCommon.NOTCOPYTAG;
-                retRes.Add(copyBlock);
-                var lineDir = (copyBlock.createPoint - item.createPoint).GetNormal();
+                var lineDir = (liveFloorY1L.createPoint - item.createPoint).GetNormal();
                 var lineSp = item.createPoint;
-                var lineEp = copyBlock.createPoint - lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(copyBlock, "可见性1"));
+                var lineEp = liveFloorY1L.createPoint - lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(item, "可见性1"));
                 if (lineSp.DistanceTo(lineEp) < 10)
                     continue;
-                if (lineSp.DistanceTo(lineEp) > item.createPoint.DistanceTo(copyBlock.createPoint))
+                if (lineSp.DistanceTo(lineEp) > item.createPoint.DistanceTo(liveFloorY1L.createPoint))
                     continue;
-                addLines.Add(new CreateBasicElement(copyBlock.floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+                addLines.Add(new CreateBasicElement(item.floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+            }
+            return retRes;
+        }
+        public List<CreateBlockInfo> RoofY1LSideConverter(FloorFramed livingFloor, List<CreateBlockInfo> floorY1LBlcoks, out List<CreateBasicElement> addLines, double findY1LDis)
+        {
+            addLines = new List<CreateBasicElement>();
+            var retRes = new List<CreateBlockInfo>();
+            if (null == floorY1LBlcoks || floorY1LBlcoks.Count < 1)
+                return retRes;
+            var maxRoofConvert = MaxRoofPipeConvert();
+            foreach (var roof in _maxRoofFloors) 
+            {
+                var copyY1ToRoof = CopyY1LToRoof(roof,livingFloor, floorY1LBlcoks);
+                if (copyY1ToRoof == null || copyY1ToRoof.Count < 1)
+                    continue;
+                foreach (var item in copyY1ToRoof)
+                {
+                    var maxY1L = maxRoofConvert.Where(c => c.createPoint.DistanceTo(item.createPoint) < findY1LDis).FirstOrDefault();
+                    if (null == maxY1L)
+                        continue;
+                    var roofPoint = GetRoofPointInfo(maxY1L.createPoint);
+                    if (roofPoint == null || roofPoint.equipmentType != EnumEquipmentType.sideRainBucket)
+                        continue;
+                    if (item.createPoint.DistanceTo(maxY1L.createPoint) < 100)
+                        continue;
+                    retRes.Add(item);
+                    //位置偏差大需要连线
+                    var lineDir = (maxY1L.createPoint - item.createPoint).GetNormal();
+                    var lineSp = item.createPoint + lineDir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(item, "可见性1"));
+                    var lineEp = maxY1L.createPoint;
+                    if (lineSp.DistanceTo(lineEp) < 10)
+                        continue;
+                    if (lineSp.DistanceTo(lineEp) > item.createPoint.DistanceTo(maxY1L.createPoint))
+                        continue;
+                    addLines.Add(new CreateBasicElement(maxY1L.floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeRainDrainConnectLayerName, "", DrainSysAGCommon.NOTCOPYTAG));
+                }
             }
             return retRes;
         }
@@ -204,6 +231,18 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return retRes;
         }
+        List<CreateBlockInfo> CopyY1LToRoof(FloorFramed maxRoofFloor, FloorFramed livingFloor, List<CreateBlockInfo> copyBlocks)
+        {
+            var retRes = new List<CreateBlockInfo>();
+            if (copyBlocks == null || copyBlocks.Count < 1)
+                return retRes;
+            var targetBlocks = copyBlocks.Where(c => c.floorId.Equals(livingFloor.floorUid)).ToList();
+            foreach (var cBlock in targetBlocks)
+            {
+                retRes.Add(DrainSysAGCommon.CopyOneBlock(cBlock, livingFloor.datumPoint, maxRoofFloor.datumPoint, maxRoofFloor.floorUid));
+            }
+            return retRes;
+        }
         List<CreateBlockInfo> CopyPipeToMaxRoof(List<CreateBlockInfo> copyBlocks,Point3d oldBasePoint) 
         {
             //有大屋面时，找到住人顶层的所有污废立管（PL）和废水立管（FL）。将所有的立管和编号标注根据基点复制到大屋面。
@@ -258,7 +297,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return retRes;
         }
-
+        RoofPointInfo GetRoofPointInfo(Point3d centerPoint) 
+        {
+            if (null == _roofWaterBuckets || _roofWaterBuckets.Count < 1)
+                return null;
+            foreach (var item in _roofWaterBuckets) 
+            {
+                if (item.centerPoint.DistanceTo(centerPoint) < 5)
+                    return item;
+            }
+            return null;
+        }
     }
     class RoofPointInfo 
     {

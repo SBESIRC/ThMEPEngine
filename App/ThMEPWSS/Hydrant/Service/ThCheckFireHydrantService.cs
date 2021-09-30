@@ -16,7 +16,6 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThCADExtension;
 using ThCADCore.NTS;
 using NFox.Cad;
-using Catel.Collections;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -324,8 +323,7 @@ namespace ThMEPWSS.Hydrant.Service
         // 去重
         private DBObjectCollection RemoveRepeatedGeometry(DBObjectCollection objs)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return spatialIndex.Geometries.Values.ToCollection();
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPHVAC.Command;
+using ThMEPHVAC.FanLayout.Command;
 
 namespace ThMEPHVAC
 {

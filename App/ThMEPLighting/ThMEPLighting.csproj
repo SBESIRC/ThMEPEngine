@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
+    <Compile Include="Common\EnumParkingSource.cs" />
     <Compile Include="Common\ThEnumBlockScale.cs" />
     <Compile Include="DSFEL\DSFELConfigCommon.cs" />
     <Compile Include="DSFEL\ExitService\CalExitService.cs" />
@@ -108,6 +109,35 @@
     <Compile Include="FEI\ThEmgPilotLamp\GraphUtils.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\LayoutToStructure.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\ThEmgPilotLampCommand.cs" />
+    <Compile Include="FEI\ThEmgPilotLamp\ThFEILineExtension.cs" />
+    <Compile Include="IlluminationLighting\Common\ThIlluminationUtils.cs" />
+    <Compile Include="IlluminationLighting\Data\ThIlluminationDataQueryService.cs" />
+    <Compile Include="IlluminationLighting\Data\ThIlluminationLayoutBusinessDataSetFactory.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThBlkExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaArchitectureWallExtractor.cs" />
+    <Compile Include="IlluminationLighting\Data\ThIlluminationLayoutDataSetFactory.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaBeamExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaColumnExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaPlaceCoverageExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaRoomExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThFaShearWallExtractor.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThHoleExtractor.cs" />
+    <Compile Include="IlluminationLighting\Interface\ISetStorey.cs" />
+    <Compile Include="IlluminationLighting\Model\ThLayoutParameter.cs" />
+    <Compile Include="IlluminationLighting\Model\ThLayoutPt.cs" />
+    <Compile Include="IlluminationLighting\Model\ThLayoutResult.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThCleanEntityService.cs" />
+    <Compile Include="IlluminationLighting\Service\ThFaAreaLayoutRoomTypeService.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThHandleConflictService.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThHandleContainsService.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThHandleNonClosedPolylineService.cs" />
+    <Compile Include="IlluminationLighting\Service\ThIlluminationLayoutService.cs" />
+    <Compile Include="IlluminationLighting\Service\ThInsertBlk.cs" />
+    <Compile Include="IlluminationLighting\Service\ThParamterCalculationService.cs" />
+    <Compile Include="IlluminationLighting\ExtractData\ThQueryHoleTextInfoService.cs" />
+    <Compile Include="IlluminationLighting\Service\ThStairService.cs" />
+    <Compile Include="IlluminationLighting\ThIlluminationEngine.cs" />
+    <Compile Include="IlluminationLighting\ThIlluminationLightingCmd.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />
@@ -128,6 +158,7 @@
     <Compile Include="Garage\Service\ThAdjustSingleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThCdzmLightGraphService.cs" />
     <Compile Include="Garage\Service\ThClearPreviouResultService.cs" />
+    <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
     <Compile Include="Garage\Service\ThFindCenterLinePortsService.cs" />
     <Compile Include="Garage\Service\ThSeparateLightEdgeService.cs" />
     <Compile Include="Garage\Service\ThBuildFirstSecondPairService.cs" />
@@ -156,7 +187,6 @@
     <Compile Include="Garage\Service\ThAdjustDoubleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
-    <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
     <Compile Include="Garage\Service\ThEliminateNumberTextService.cs" />
     <Compile Include="Garage\Service\ThEliminateService.cs" />
     <Compile Include="Garage\Service\ThCollectCutLinesService.cs" />
@@ -198,6 +228,7 @@
     <Compile Include="Garage\Service\ThWireOffsetDataService.cs" />
     <Compile Include="Common\ThGarageLightCommon.cs" />
     <Compile Include="Common\ThGarageLightUtils.cs" />
+    <Compile Include="IlluminationLighting\ThIlluminationCommon.cs" />
     <Compile Include="Lighting\LightingCommand.cs" />
     <Compile Include="Lighting\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
@@ -209,7 +240,6 @@
     <Compile Include="ParkingStall\CAD\BaseElement.cs" />
     <Compile Include="ParkingStall\CAD\InfoReader.cs" />
     <Compile Include="ParkingStall\CAD\LoadCraterClear.cs" />
-    <Compile Include="ParkingStall\CAD\ThWallColumnsEngine.cs" />
     <Compile Include="ParkingStall\Core\CommandManager.cs" />
     <Compile Include="ParkingStall\Core\ParkLightConnectCommand.cs" />
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />
@@ -275,8 +305,10 @@
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
     <Compile Include="ParkingStall\Worker\RegionLaneConnect\RegionLaneConnector.cs" />
+    <Compile Include="PickEntityCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceModels\ThEmgLightService.cs" />
+    <Compile Include="ServiceModels\ThParkingStallService.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThFEICmds.cs" />
     <Compile Include="ThMEPLightingService.cs" />

@@ -58,7 +58,7 @@ namespace TianHua.Hvac.UI.Command
                 var bypass_lines = Get_bypass(tee_pattern, out Line max_bypass);
                 if (!Checkout_input(tee_pattern, bypass_lines, center_lines))
                     return;
-                var anay_res = new ThFanAnalysis(fan, fjf_param, bypass_lines, center_lines, wall_lines);
+                var anay_res = new ThFanAnalysis(type3_sep_dis, fan, fjf_param, bypass_lines, center_lines, wall_lines);
                 if (anay_res.center_lines.Count == 0)
                 {
                     ThMEPHVACService.Prompt_msg("未搜索到与风机相连的中心线");
@@ -91,7 +91,7 @@ namespace TianHua.Hvac.UI.Command
             else
             {
                 var bypass_lines = Get_bypass(fjf_param.bypass_pattern, out Line _);
-                var anay_res = new ThFanAnalysis(fan, fjf_param, bypass_lines, center_lines, wall_lines);
+                var anay_res = new ThFanAnalysis(type3_sep_dis, fan, fjf_param, bypass_lines, center_lines, wall_lines);
                 if (anay_res.center_lines.Count == 0)
                     return;
                 var valve_hole = new ThHolesAndValvesEngine(fan, wall_lines, bypass_lines, fjf_param, anay_res.room_lines, anay_res.not_room_lines);
@@ -135,11 +135,15 @@ namespace TianHua.Hvac.UI.Command
         {
             if (param.bypass_size == null)
                 return;
+            var dis_mat = Matrix3d.Displacement(-move_srt_p.GetAsVector());
             if (bypass.Count == 0)
-                text_alignment.Add(new TextAlignLine(new Line(fan.FanInletBasePoint, fan.FanOutletBasePoint), true, param.bypass_size));
+            {
+                var p1 = fan.FanInletBasePoint.TransformBy(dis_mat);
+                var p2 = fan.FanOutletBasePoint.TransformBy(dis_mat);
+                text_alignment.Add(new TextAlignLine(new Line(p1, p2), true, param.bypass_size));
+            }
             else
             {
-                var dis_mat = Matrix3d.Displacement(-move_srt_p.GetAsVector());
                 max_bypass.TransformBy(dis_mat);
                 text_alignment.Add(new TextAlignLine(max_bypass, true, param.bypass_size));
             }
@@ -283,22 +287,25 @@ namespace TianHua.Hvac.UI.Command
         }
         private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass_line)
         {
-            max_bypass_line = new Line();
-            if (tee_pattern == null)
-                return new DBObjectCollection();
-            if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
-                return new DBObjectCollection();
-            var objIds = ThHvacCmdService.Get_from_prompt("请选择旁通管", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            var bypass = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
-            bypass = ThMEPHVACLineProc.Explode(bypass);
-            var bypass_line = ThMEPHVACService.Get_max_line(bypass);
-            // 给较长的线段上插点
-            if (tee_pattern == "RBType3")
-                Cut_max_bypass(bypass, bypass_line);//修改线集里的旁通
-            max_bypass_line = new Line(bypass_line.StartPoint, bypass_line.EndPoint);//保存最长旁通防止被修改
-            return bypass;
+            using (var db = AcadDatabase.Active())
+            {
+                max_bypass_line = new Line();
+                if (tee_pattern == null)
+                    return new DBObjectCollection();
+                if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
+                    return new DBObjectCollection();
+                var objIds = ThHvacCmdService.Get_from_prompt("请选择旁通管", false);
+                if (objIds.Count == 0)
+                    return new DBObjectCollection();
+                var bypass = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Curve).ToCollection();
+                bypass = ThMEPHVACLineProc.Explode(bypass);
+                var bypass_line = ThMEPHVACService.Get_max_line(bypass);
+                // 给较长的线段上插点
+                if (tee_pattern == "RBType3")
+                    Cut_max_bypass(bypass, bypass_line);//修改线集里的旁通
+                max_bypass_line = new Line(bypass_line.StartPoint, bypass_line.EndPoint);//保存最长旁通防止被修改
+                return bypass;
+            }   
         }
         
         private void Cut_max_bypass(DBObjectCollection bypass, Line max_bypass)

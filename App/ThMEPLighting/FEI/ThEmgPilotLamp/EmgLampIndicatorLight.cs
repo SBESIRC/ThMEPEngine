@@ -74,7 +74,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));
             _targetInfo.assistLines.ForEach(x => objs.Add(x));
-            _mainLines = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI * 15 / 180.0).Cast<Line>().ToList();
+            _mainLines = ThFEILineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI * 15 / 180.0).Cast<Line>().ToList();
 
         }
         public List<LightLayout> CalcLayout(bool isHostFirst)
@@ -147,7 +147,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var objs = new DBObjectCollection();
                 _targetInfo.mainLines.ForEach(x => objs.Add(x));
                 _targetInfo.assistLines.ForEach(x => objs.Add(x));
-                List<Curve> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI * 15 / 180.0).Cast<Curve>().ToList();
+                List<Curve> curves = ThFEILineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI * 15 / 180.0).Cast<Curve>().ToList();
                 GetLightLayoutPlanB(curves);
             }
         }
@@ -160,7 +160,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             _targetInfo.exitLines.ForEach(x => objs.Add(x));
            // List<Curve> exitLines = ThMEPLineExtension.ExplodeCurves(objs);
-            List<Line> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 200.0, 200.0, Math.PI * 15 / 180.0).Cast<Line>().ToList();
+            List<Line> curves = ThFEILineExtension.LineSimplifier(objs, 500, 200.0, 200.0, Math.PI * 15 / 180.0).Cast<Line>().ToList();
             curves = curves.Where(c => c.Length > 500).ToList();
             var lineAllNodes = GetHostLineNodes(curves.Cast<Curve>().ToList(), out Dictionary<Line, List<NodeDirection>> lineTwoExits, out Dictionary<Line, List<NodeDirection>> noNodeLines,out Dictionary<Line, List<NodeDirection>> lineDirNotEixtDir);
             _hostLightNodes.AddRange(lineAllNodes.Select(c => c.graphNode));
@@ -227,11 +227,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var otherLineObj = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(c => otherLineObj.Add(c));
             _targetInfo.assistLines.ForEach(c => otherLineObj.Add(c));
-            var otherLines = ThMEPLineExtension.LineSimplifier(otherLineObj, 50, 20.0, 2.0, Math.PI / 180.0);
+            var otherLines = ThFEILineExtension.LineSimplifier(otherLineObj, 50, 20.0, 2.0, Math.PI / 180.0);
 
             var objs = new DBObjectCollection();
             _targetInfo.exitLines.ForEach(x => objs.Add(x));
-            var allLines = ThMEPLineExtension.LineSimplifier(objs, 50, 20.0, 2.0, Math.PI / 180.0);
+            var allLines = ThFEILineExtension.LineSimplifier(objs, 50, 20.0, 2.0, Math.PI / 180.0);
             allLines = allLines.Select(y =>
             {
                 var dir = (y.EndPoint - y.StartPoint).GetNormal();
@@ -394,7 +394,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 return;
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));
-            List<Curve> mainLines = ThMEPLineExtension.ExplodeCurves(objs);
+            List<Curve> mainLines = ThFEILineExtension.ExplodeCurves(objs);
             if (null == mainLines || mainLines.Count < 1)
                 return;
             var allLineNodes = GetHostLineNodes(mainLines, out Dictionary<Line, List<NodeDirection>> lineTwoExits, out Dictionary<Line, List<NodeDirection>> noNodeLines,out Dictionary < Line, List < NodeDirection >> lineDirNotEixtDir);
@@ -539,7 +539,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         {
             var objs = new DBObjectCollection();
             _targetInfo.assistHostLines.ForEach(x => objs.Add(x));
-            List<Curve> assistHost = ThMEPLineExtension.ExplodeCurves(objs);
+            List<Curve> assistHost = ThFEILineExtension.ExplodeCurves(objs);
             if (null == assistHost || assistHost.Count < 1)
                 return;
             //获取这些线上的节点，优先排布距离出口处距离远的节点
@@ -1303,11 +1303,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));
             _targetInfo.assistLines.ForEach(x => objs.Add(x));
-            var lines = ThMEPLineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
+            var lines = ThFEILineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
             objs.Clear();
             foreach (var line in lines)
                 objs.Add(line);
-            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 2500, 50.0, Math.PI * 15 / 180).Cast<Line>().ToList();
+            lines = ThFEILineExtension.LineSimplifier(objs, 50, 2500, 50.0, Math.PI * 15 / 180).Cast<Line>().ToList();
             lines = lines.Where(c => c.Length > 100).OrderByDescending(c=>c.Length).ToList();
             foreach (var mLine in lines)
             {
@@ -1568,10 +1568,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var tempNotCreate =new List<Point3d>(); 
             var objs = new DBObjectCollection();
             lines.ForEach(x => objs.Add(x));
-            List<Line> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 1500.0, 2500.0, Math.PI * 30 / 180.0).Cast<Line>().ToList();
+            List<Line> curves = ThFEILineExtension.LineSimplifier(objs, 500, 1500.0, 2500.0, Math.PI * 30 / 180.0).Cast<Line>().ToList();
             objs.Clear();
             curves.ForEach(x => objs.Add(x));
-            curves = ThMEPLineExtension.LineSimplifier(objs, 500, 1500.0, 2500.0, Math.PI * 30 / 180.0).Cast<Line>().ToList();
+            curves = ThFEILineExtension.LineSimplifier(objs, 500, 1500.0, 2500.0, Math.PI * 30 / 180.0).Cast<Line>().ToList();
             if(curves.Count>1)
                 curves = curves.Where(c => c.Length > 1500).ToList();
 

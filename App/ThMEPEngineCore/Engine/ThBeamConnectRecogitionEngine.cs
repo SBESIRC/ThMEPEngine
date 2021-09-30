@@ -21,9 +21,9 @@ namespace ThMEPEngineCore.Engine
         public List<ThSingleBeamLink> SingleBeamLinks { get; set; } = new List<ThSingleBeamLink>();
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
         public ThMEPOriginTransformer OriginTransformer { get; private set; }
-        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThColumnRecognitionEngine ColumnEngine { get; private set; } 
         public ThDB3BeamRecognitionEngine BeamEngine { get; private set; }
-        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
+        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; } 
 
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
 
@@ -150,22 +150,18 @@ namespace ThMEPEngineCore.Engine
         private void CreateColumnSpatialIndex()
         {
             SpatialIndexManager.CreateColumnSpatialIndex(ColumnEngine.Geometries);
-            ColumnEngine.UpdateWithSpatialIndex(SpatialIndexManager.ColumnSpatialIndex);
         }
         private void CreateWallSpatialIndex()
         {
             SpatialIndexManager.CreateWallSpatialIndex(ShearWallEngine.Geometries);
-            ShearWallEngine.UpdateWithSpatialIndex(SpatialIndexManager.WallSpatialIndex);
         }
         private void CreateBeamSpatialIndex()
         {
             SpatialIndexManager.CreateBeamSpatialIndex(BeamEngine.Geometries);
-            BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
         }
         public void SyncBeamSpatialIndex()
         {
-            BeamEngine.UpdateSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
-            BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
+            BeamEngine.ResetSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
         }
         private void CreateSingleBeamLink()
         {

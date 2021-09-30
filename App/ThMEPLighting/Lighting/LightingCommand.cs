@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPLighting.Lighting.ViewModels;
 using ThMEPEngineCore.Command;
+using ThMEPLighting.Lighting.ViewModels;
+#if (ACAD2016 || ACAD2018)
+using ThMEPEngineCore.ConnectWiring;
+#endif
+
 namespace ThMEPLighting.Lighting.Commands
 {
     public class LightingRouteCableCommand : ThMEPBaseCommand, IDisposable
@@ -19,7 +19,13 @@ namespace ThMEPLighting.Lighting.Commands
 
         public override void SubExecute()
         {
+#if (ACAD2016 || ACAD2018)
             //todo: route cables using _UiConfigs
+            ConnectWiringService connectWiringService = new ConnectWiringService();
+            connectWiringService.Routing(25, "照明");
+#else
+            
+#endif
         }
         public void Dispose()
         { }
@@ -38,10 +44,15 @@ namespace ThMEPLighting.Lighting.Commands
         public override void SubExecute()
         {
             //todo: layout lighting components using _UiConfigs
-
+            if (_UiConfigs.IsIlluminationLightChecked == true)
+            {
+                var cmd = new IlluminationLighting.IlluminationLightingCmd(_UiConfigs);
+                cmd.Execute();
+            }
         }
         public void Dispose()
-        { }
+        {
+        }
     }
 }
 

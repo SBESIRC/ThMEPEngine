@@ -32,6 +32,22 @@ using NetTopologySuite.Algorithm;
 
 namespace ThMEPWSS.Assistant
 {
+    public static class ObjFac
+    {
+        public static T CloneByJson<T>(T o) => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(o));
+        public static object CloneObjByJson(object o)
+        {
+            return JsonConvert.DeserializeObject(JsonConvert.SerializeObject(o), o.GetType());
+        }
+        public static void CopyProperties(object src, object dst)
+        {
+            src.GetType().GetProperties().Join(dst.GetType().GetProperties(), x => new KeyValuePair<string, Type>(x.Name, x.PropertyType), x => new KeyValuePair<string, Type>(x.Name, x.PropertyType), (x, y) =>
+            {
+                y.SetValue(dst, x.GetValue(src));
+                return 666;
+            }).Count();
+        }
+    }
     public static class GeoNTSConvertion
     {
         public static Coordinate[] ConvertToCoordinateArray(GRect r)

@@ -37,12 +37,35 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THFJ_SMALL",
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            // 小风机
+            row.AddNewButton("小风机",
+                "天华小风机",
+                "THXFJ",
+                "天华小风机",
+                "IDI_THCAD_THXFJ_SMALL",
+                "IDI_THCAD_THXFJ_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateHVACPlanPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("HVACPLAN", "平面图");
             var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 风平面
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("风平面",
+                    "天华风平面",
+                    "THFPM",
+                    "天华风平面",
+                    "IDI_THCAD_THFPM_SMALL",
+                    "IDI_THCAD_THFPM_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
@@ -102,6 +125,7 @@ namespace TianHua.AutoCAD.ThCui
         {
             CreateEAFASPanel(tab);
             CreateELightingPanel(tab);
+            CreateElectronicPanel(tab);
             CreateEExchangePanel(tab);
         }
 
@@ -109,6 +133,20 @@ namespace TianHua.AutoCAD.ThCui
         {
             var panel = tab.AddNewPanel("EAFAS", "火灾报警系统");
             var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 火灾报警
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("火灾报警",
+                    "天华火灾报警",
+                    "THHZBJ",
+                    "天华火灾报警",
+                    "IDI_THCAD_THHZBJ_SMALL",
+                    "IDI_THCAD_THHZBJ_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
@@ -176,6 +214,20 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
             }
         }
+        private static void CreateElectronicPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("ELECTRONIC", "弱电系统");
+            var row = panel.AddNewRibbonRow();
+
+            // 安防平面
+            row.AddNewButton("安防平面",
+            "天华安防平面",
+            "THAFPM",
+            "天华安防平面",
+            "IDI_THCAD_THAFPM_SMALL",
+            "IDI_THCAD_THAFPM_LARGE",
+            RibbonButtonStyle.LargeWithText);
+        }
 
         private static void CreateELightingPanel(RibbonTabSource tab)
         {
@@ -189,6 +241,15 @@ namespace TianHua.AutoCAD.ThCui
             "基于提取出的车道中心线，一键布置车道线槽灯",
             "IDI_THCAD_THCDZM_SMALL",
             "IDI_THCAD_THCDZM_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            // 地库车位照明
+            row.AddNewButton("地库车位照明",
+            "天华地库车位照明",
+            "THCWZM",
+            "天华地库车位照明",
+            "IDI_THCAD_THCWZM_SMALL",
+            "IDI_THCAD_THCWZM_LARGE",
             RibbonButtonStyle.LargeWithText);
 
             // 车道应急照明
@@ -438,22 +499,22 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THWTKSB_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 提取空间
-            row.AddNewButton("提取空间",
-                "天华提取空间",
-                "THKJTQ",
-                "天华提取空间",
-                "IDI_THCAD_THKJTQ_SMALL",
-                "IDI_THCAD_THKJTQ_LARGE",
+            // 房间框线
+            row.AddNewButton("房间框线",
+                "天华房间框线",
+                "THFJKX",
+                "天华房间框线",
+                "IDI_THCAD_THFJKX_SMALL",
+                "IDI_THCAD_THFJKX_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 空间拾取
-            row.AddNewButton("空间拾取",
-                "天华空间拾取",
-                "THKJSQ",
-                "天华空间拾取",
-                "IDI_THCAD_THKJSQ_SMALL",
-                "IDI_THCAD_THKJSQ_LARGE",
+            // 房间名称
+            row.AddNewButton("房间名称",
+                "天华房间名称",
+                "THKJMCTQ",
+                "天华房间名称",
+                "IDI_THCAD_THKJMCTQ_SMALL",
+                "IDI_THCAD_THKJMCTQ_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
 

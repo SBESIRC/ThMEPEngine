@@ -1,14 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -35,11 +33,11 @@ namespace ThMEPEngineCore.Engine
         {
             var res = new List<ThIfcBuildingElement>();
             var archwallRecognize = new ThDB3ArchWallRecognitionEngine();
-            archwallRecognize.Recognize(datas.Where(o=>o.Source==DataSource.DB3).ToList(), pts);
+            archwallRecognize.Recognize(datas.Where(o => o.Source == DataSource.DB3).ToList(), pts);
             res.AddRange(archwallRecognize.Elements);
             return res;
         }
-        public override List<ThIfcBuildingElement> Build(Database db, Point3dCollection pts)
+        public override void Build(Database db, Point3dCollection pts)
         {
             var rawelement = Extract(db);
             var center = pts.Envelope().CenterPoint();
@@ -51,7 +49,11 @@ namespace ThMEPEngineCore.Engine
             var archwalllist = Recognize(rawelement, newPts);
             var archwallcollection = archwalllist.Select(o => o.Outline).ToCollection();
             transformer.Reset(archwallcollection);
-            return archwallcollection.Cast<Entity>().Select(e => ThIfcWall.Create(e)).Cast<ThIfcBuildingElement>().ToList();
+            Elements = archwallcollection
+                .OfType<Entity>()
+                .Select(e => ThIfcWall.Create(e))
+                .OfType<ThIfcBuildingElement>()
+                .ToList();
         }
     }
 }

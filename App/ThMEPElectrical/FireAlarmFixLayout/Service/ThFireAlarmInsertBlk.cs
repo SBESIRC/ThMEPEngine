@@ -11,13 +11,13 @@ using DotNetARX;
 using Linq2Acad;
 
 using ThCADExtension;
-using ThMEPElectrical.FireAlarmFixLayout;
+using ThMEPElectrical.FireAlarmSmokeHeat.Model;
 
 namespace ThMEPElectrical.FireAlarm.Service
 {
     public static class ThFireAlarmInsertBlk
     {
-        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPtInfo, double scale, string blkName, string layserName)
+        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPtInfo, double scale, string blkName, string layserName,bool needMove)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -26,7 +26,11 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 foreach (var ptInfo in insertPtInfo)
                 {
-                    var size = ThFaCommon.blk_move_length[blkName] / 2;
+                    double size = 0;
+                    if (needMove== true)
+                    {
+                         size = ThFaCommon.blk_size[blkName].Item2 / 2;
+                    }
                     var pt = ptInfo.Key + ptInfo.Value * scale * size;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Value, Vector3d.ZAxis);
                     var attNameValues = new Dictionary<string, string>() { };
@@ -41,6 +45,84 @@ namespace ThMEPElectrical.FireAlarm.Service
                 }
             }
         }
+
+        public static void InsertBlock(Dictionary<Point3d, double> insertPtInfo, double scale, string blkName, string layserName)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                db.Database.ImportBlock(blkName);
+                db.Database.ImportLayer(layserName);
+
+                foreach (var ptInfo in insertPtInfo)
+                {
+                    var pt = ptInfo.Key;
+                    double rotateAngle = ptInfo.Value;
+                    var attNameValues = new Dictionary<string, string>() { };
+
+                    db.ModelSpace.ObjectId.InsertBlockReference(
+                                            layserName,
+                                            blkName,
+                                            pt,
+                                            new Scale3d(scale),
+                                            rotateAngle,
+                                            attNameValues);
+                }
+            }
+        }
+
+        public static void prepareInsert(List<string> blkName, List<string> layerName)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                blkName.ForEach(x => db.Database.ImportBlock(x));
+                layerName.ForEach(x => db.Database.ImportLayer(x));
+            }
+        }
+       
+        public static void InsertBlock(List<ThLayoutPt> insertPtInfo, double scale)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var ptInfo in insertPtInfo)
+                {
+                    var blkName = ptInfo.BlkName;
+                    var pt = ptInfo.Pt;
+                    double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
+                    var attNameValues = new Dictionary<string, string>() { };
+                    var layerName = ThFaCommon.blk_layer[blkName];
+                    db.ModelSpace.ObjectId.InsertBlockReference(
+                                            layerName,
+                                            blkName,
+                                            pt,
+                                            new Scale3d(scale),
+                                            rotateAngle,
+                                            attNameValues);
+                }
+            }
+        }
+
+        public static void InsertBlockAngle(List<ThLayoutPt> insertPtInfo, double scale)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var ptInfo in insertPtInfo)
+                {
+                    var pt = ptInfo.Pt;
+                    double rotateAngle = ptInfo.Angle;
+                    var blkName = ptInfo.BlkName;
+                    var attNameValues = new Dictionary<string, string>() { };
+                    var layerName = ThFaCommon.blk_layer[blkName];
+                    db.ModelSpace.ObjectId.InsertBlockReference(
+                                            layerName,
+                                            blkName,
+                                            pt,
+                                            new Scale3d(scale),
+                                            rotateAngle,
+                                            attNameValues);
+                }
+            }
+        }
+
     }
 
 

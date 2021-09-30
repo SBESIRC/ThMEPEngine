@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThMEPElectrical.PostProcess;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 
 namespace ThMEPElectrical.Geometry
 {
@@ -274,30 +275,13 @@ namespace ThMEPElectrical.Geometry
 
         public static DBObjectCollection Curves2DBCollection(List<Curve> curves)
         {
-            var objs = new DBObjectCollection();
-            foreach (var curve in curves)
-            {
-                objs.Add(curve);
-            }
-
-            return objs;
+            return curves.OfType<DBObject>().ToCollection();
         }
 
         public static List<Curve> EraseSameObjects(List<Curve> srcCurves)
         {
             var objs = Curves2DBCollection(srcCurves);
-            var resCurves = new List<Curve>();
-            using (var si = new ThCADCoreNTSSpatialIndex(objs))
-            {
-                var entitys = si.Geometries.Values;
-                foreach (DBObject entity in entitys)
-                {
-                    if (entity is Curve curve)
-                        resCurves.Add(curve);
-                }
-            }
-
-            return resCurves;
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs).OfType<Curve>().ToList();
         }
 
         public static Polyline OptimizePolyline(Polyline polyline)

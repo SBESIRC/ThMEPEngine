@@ -1,8 +1,9 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
@@ -11,41 +12,58 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerDistanceBetweenSprinklerChecker
+    public class ThSprinklerDistanceBetweenSprinklerChecker : ThSprinklerChecker
     {
-        public List<List<Point3d>> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers,double tolerance)
+        public override void Clean(Polyline pline)
         {
-            var result = new List<List<Point3d>>();
-            while (sprinklers.Count > 0) 
+            Clean(ThSprinklerCheckerLayer.Sprinkler_Distance_LayerName, pline);
+        }
+
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        {
+            var distanceCheck = DistanceCheck(sprinklers, 1800.0, pline);
+            if (distanceCheck.Count > 0)
             {
-                var position = (sprinklers[0] as ThSprinkler).Position;
-                sprinklers.RemoveAt(0);
-                var kdTree = new ThCADCoreNTSKdTree(1.0);
-                sprinklers.Cast<ThSprinkler>().ForEach(o => kdTree.InsertPoint(o.Position));
-                var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree,position,tolerance);
-                closePointList.ForEach(o => result.Add(new List<Point3d> { position, o }));
+                var buildingCheck = BuildingCheck(geometries, distanceCheck, pline);
+                if (buildingCheck.Count > 0) 
+                {
+                    Present(buildingCheck);
+                }
             }
-            
+        }
+
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Polyline pline)
+        {
+            var sprinklersClone = sprinklers.OfType<ThSprinkler>()
+                                            .Where(o => o.Category == Category)
+                                            .Where(o => pline.Contains(o.Position))
+                                            .ToList();
+            var result = new HashSet<Line>();
+            while (sprinklersClone.Count > 0) 
+            {
+                var position = sprinklersClone[0].Position;
+                sprinklersClone.RemoveAt(0);
+                var kdTree = new ThCADCoreNTSKdTree(1.0);
+                sprinklersClone.ForEach(o => kdTree.InsertPoint(o.Position));
+                var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree, position, tolerance);
+                closePointList.ForEach(o => result.Add(new Line(position, o)));
+            }
             return result;
         }
 
-        public List<List<Point3d>> BuildingCheck(List<ThGeometry> geometries, List<List<Point3d>> pointsList)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
         {
-            var geometriesFilter = new DBObjectCollection();
-            geometries.ForEach(g =>
-            {
-                if (g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < 700)
-                {
-                    return;
-                }
-                geometriesFilter.Add(g.Boundary);
-            });
-
-            var result = new List<List<Point3d>>();
+            var polygon = pline.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
+                                                      || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
+                                             .Select(g => g.Boundary)
+                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                                             .ToCollection();
+            var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
-            pointsList.ForEach(o =>
+            lines.ForEach(o =>
             {
-                var line = new Line(o[0], o[1]);
+                var line = new Line(o.StartPoint, o.EndPoint);
                 var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));
                 if(filter.Count == 0)
                 {
@@ -55,41 +73,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        public void Present(Database database, List<List<Point3d>> result)
+        private void Present(HashSet<Line> result)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                var layerId = database.CreateAISprinklerDistanceCheckerLayer();
-                var style = "TH-DIM100-W";
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, acadDatabase.Database);
-                result.ForEach(o =>
-                {
-                    var alignedDimension = new AlignedDimension
-                    {
-                        XLine1Point = o[0],
-                        XLine2Point = o[1],
-                        DimensionText = "",
-                        DimLinePoint = VerticalPoint(o[0], o[1], 2000.0),
-                        ColorIndex = 256,
-                        DimensionStyle = id,
-                        LayerId = layerId,
-                        Linetype = "ByLayer"
-                    };
-
-                    acadDatabase.ModelSpace.Add(alignedDimension);
-                });
+                var layerId = acadDatabase.Database.CreateAISprinklerDistanceCheckerLayer();
+                Present(result, layerId);
             }
-        }
-
-        private Point3d CenterPoint(Point3d first, Point3d second)
-        {
-            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, 0);
-        }
-
-        private Point3d VerticalPoint(Point3d first, Point3d second, double distance)
-        {
-            var verticalVerctor = second - first;
-            return CenterPoint(first, second) + verticalVerctor / verticalVerctor.Length * distance;
         }
     }
 }

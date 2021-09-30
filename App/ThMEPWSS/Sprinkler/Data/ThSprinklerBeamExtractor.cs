@@ -1,25 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
-
+using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThCADCore.NTS;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.GeojsonExtractor;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Model;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.Sprinkler.Data
 {
@@ -42,6 +39,7 @@ namespace ThMEPWSS.Sprinkler.Data
             StoreyInfos = new List<ThStoreyInfo>();
             Db3ExtractResults = new List<ThRawIfcBuildingElementData>();
         }
+
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
@@ -93,6 +91,7 @@ namespace ThMEPWSS.Sprinkler.Data
             var objs = Beams.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Beams = Beams.Where(o => objs.Contains(o.Outline)).ToList();
         }
+
         private List<ThIfcBeam> ExtractDb3Beam(Database database, Point3dCollection pts)
         {
             var beams = new List<ThIfcBeam>();
@@ -113,6 +112,7 @@ namespace ThMEPWSS.Sprinkler.Data
             }
             return beams;
         }
+
         private List<ThIfcBeam> ExtractMsBeam(Database database, Point3dCollection pts)
         {
             var localBeams = new List<ThIfcBeam>();
@@ -127,10 +127,6 @@ namespace ThMEPWSS.Sprinkler.Data
                 .Select(o => ThIfcLineBeam.Create(o))
                 .Cast<ThIfcBeam>()
                 .ToList();
-        }
-        public void Group(Dictionary<Entity, string> groupId)
-        {
-            Beams.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
         }
 
         public void Print(Database database)
@@ -151,11 +147,6 @@ namespace ThMEPWSS.Sprinkler.Data
             }
         }
 
-        public void Set(List<ThStoreyInfo> storeyInfos)
-        {
-            StoreyInfos = storeyInfos;
-        }
-
         public ThStoreyInfo Query(Entity entity)
         {
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
@@ -166,6 +157,7 @@ namespace ThMEPWSS.Sprinkler.Data
         {
             return Beams.Select(o => o.Outline).ToList();
         }
+
         private double GetDistancd(double distance)
         {
             if (distance > 0)

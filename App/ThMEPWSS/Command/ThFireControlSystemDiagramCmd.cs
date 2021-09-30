@@ -1,14 +1,10 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.Common;
 using ThMEPWSS.FireProtectionSystemDiagram.Bussiness;
 using ThMEPWSS.FireProtectionSystemDiagram.Models;
@@ -20,9 +16,16 @@ namespace ThMEPWSS.Command
     public class ThFireControlSystemDiagramCmd : IAcadCommand, IDisposable
     {
         FireControlSystemDiagramViewModel _vm;
-        public ThFireControlSystemDiagramCmd(FireControlSystemDiagramViewModel vm)
+        Dictionary<string, string> _floorHeights;
+        public ThFireControlSystemDiagramCmd(FireControlSystemDiagramViewModel vm,Dictionary<string,string> floorHeights)
         {
             _vm = vm;
+            _floorHeights = new Dictionary<string, string>();
+            if(null != floorHeights && floorHeights.Count>0)
+            {
+                foreach (var keyValue in floorHeights)
+                    _floorHeights.Add(keyValue.Key,keyValue.Value);
+            }
         }
         List<CreateDBTextElement> _createTextElements;
         List<CreateBasicElement> _createBasicElements;
@@ -79,12 +82,28 @@ namespace ThMEPWSS.Command
 
                 //楼层信息绘制
                 LevelFloorUtil levelFloor = new LevelFloorUtil(floorWidth, _vm.FaucetFloor);
+                var strShowLevel = "0.00";
                 foreach (var item in floorDatas)
                 {
-                    levelFloor.AddFloorLevel(new LevelFloor(item.floorNum, item.floorLevel, string.Format("{0}F", item.floorNum)));
+                    var strFloor = item.floorNum.ToString();
+                    strShowLevel = "0.00";
+                    if (null != _floorHeights)
+                    {
+                        var value = _floorHeights.Where(c => c.Key == strFloor).FirstOrDefault().Value;
+                        strShowLevel = value;
+                    }
+                    var level = new LevelFloor(item.floorNum, item.floorLevel, string.Format("{0}F", item.floorNum));
+                    level.ShowElevation = strShowLevel;
+                    levelFloor.AddFloorLevel(level);
                 }
-                var last = floorDatas.Last();
-                levelFloor.AddFloorLevel(new LevelFloor(last.floorNum + 1, last.floorLevel, string.Format("RF", last.floorNum)));
+                var lastLevel = new LevelFloor(floorDatas.Last().floorNum + 1, floorDatas.Last().floorLevel, "RF");
+                if (null != _floorHeights)
+                {
+                    var value = _floorHeights.Where(c => c.Key == lastLevel.LevelNum.ToString()).FirstOrDefault().Value;
+                    strShowLevel = value;
+                    lastLevel.ShowElevation = strShowLevel;
+                }
+                levelFloor.AddFloorLevel(lastLevel);
                 levelFloor.CreateFloorLines(acdb.Database, startPoint);
 
                 //最后生成数据

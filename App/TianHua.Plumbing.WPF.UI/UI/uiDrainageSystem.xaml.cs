@@ -1,11 +1,12 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using System.Windows;
 using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
-
+using ThMEPWSS.Pipe.Model;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -18,7 +19,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public uiDrainageSystem()
         {
             InitializeComponent();
-            if(null == viewModel)
+            //给水系统图相关
+            if (null == viewModel)
                 viewModel = new DrainageViewModel();
             this.DataContext = viewModel;
         }
@@ -28,7 +30,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var oldViewModel = viewModel.SetViewModel?.Clone();
             uiDrainageSystemSet systemSet = new uiDrainageSystemSet(viewModel.SetViewModel);
             systemSet.Owner = this;
-            var ret= systemSet.ShowDialog();
+            var ret = systemSet.ShowDialog();
             if (ret == false)
             {
                 //用户取消了操作
@@ -86,6 +88,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             catch
             {
 
+            }
+        }
+
+        private void ThCustomWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            var cachedArea = CadCache.TryGetRange();
+            if (cachedArea != null)
+            {
+                viewModel.InitListDatasByArea(cachedArea, false);
             }
         }
     }

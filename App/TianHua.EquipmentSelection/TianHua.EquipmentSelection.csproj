@@ -77,6 +77,7 @@
     <Compile Include="Messaging\ThModelMessageArgs.cs" />
     <Compile Include="Messaging\ThModelSaveMessage.cs" />
     <Compile Include="Messaging\ThModelUndoMessage.cs" />
+    <Compile Include="Service\FanAirVolumeService.cs" />
     <Compile Include="ThFanSelectionCommon.cs" />
     <Compile Include="Function\ThFanSelectionModelPick.cs" />
     <Compile Include="Function\ThFanSelectionModelPicker.cs" />
@@ -146,8 +147,6 @@
     <PackageReference Include="Catel.Core" Version="5.12.10" />
     <PackageReference Include="NetTopologySuite" Version="2.3.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FanLayout\Command\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

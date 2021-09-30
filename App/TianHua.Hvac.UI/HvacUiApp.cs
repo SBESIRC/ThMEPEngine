@@ -5,6 +5,7 @@ namespace TianHua.Hvac.UI
 {
     public class HvacUiApp : IExtensionApplication
     {
+
         public void Initialize()
         {
 
@@ -58,5 +59,14 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
+        [CommandMethod("TIANHUACAD", "THXFJ", CommandFlags.Modal)]
+        public void THXFJ()
+        {
+            using (var cmd = new ThHvacXfjCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
     }
 }

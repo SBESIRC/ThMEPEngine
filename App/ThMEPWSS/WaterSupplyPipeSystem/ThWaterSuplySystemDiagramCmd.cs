@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.WaterSupplyPipeSystem;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
@@ -337,6 +338,7 @@ namespace ThMEPWSS.Command
         public void Execute(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
             var tmpUiConfigs = uiConfigs;
+            
             if (tmpUiConfigs.SelectRadionButton.Content is null)
             {
                 MessageBox.Show("不存在有效分组，请重新读取");
@@ -390,7 +392,7 @@ namespace ThMEPWSS.Command
                     floorNumbers = fn.Max();
                 }
             }
-
+            var floorHeightDic = FloorHeightsViewModel.Instance.GetSpecialFloorHeightsDict(floorNumbers);
             var QL = setViewModel.MaxDayQuota;  //最高日用水定额 QL            
             var Kh = Convert.ToDouble(setViewModel.MaxDayHourCoefficient.ToString("0.0"));  //最高日小时变化系数  Kh
             var m = Convert.ToDouble(setViewModel.NumberOfHouseholds.ToString("0.0"));   //每户人数  m
@@ -528,7 +530,7 @@ namespace ThMEPWSS.Command
                 //楼层线绘制
                 for (int i = 0; i < floorNumbers + 1; i++)
                 {
-                    StoreyList[i].DrawStorey(i, floorNumbers, insertPt, floorLength, highestStorey, PipeOffsetX);
+                    StoreyList[i].DrawStorey(i, floorNumbers, insertPt, floorLength, highestStorey, PipeOffsetX, floorHeightDic);
                 }
 
                 //创建支管对象

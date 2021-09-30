@@ -85,7 +85,6 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "暖通图层图块.dwg");
         }
-
         // 电气烟感/温感图块
         public static string ElectricalSensorDwgPath()
         {
@@ -151,7 +150,11 @@ namespace ThCADExtension
         {
             return Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
         }
-
+        //风机参数表
+        public static string FanParameterTablePath()
+        {
+            return Path.Combine(ThCADCommon.SupportPath(), "风机参数表.xlsx");
+        }
         // ToolPalette 路径
         public static string ToolPalettePath()
         {
@@ -221,13 +224,8 @@ namespace ThCADExtension
         // 运行时根目录
         private static string RootPath()
         {
-#if DEBUG
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 @"Autodesk\ApplicationPlugins\ThMEPPlugin.bundle");
-#else
-            var fi = new FileInfo(Assembly.GetCallingAssembly().Location);
-            return fi.Directory.Parent.Parent.Parent.FullName;
-#endif
         }
     }
 }

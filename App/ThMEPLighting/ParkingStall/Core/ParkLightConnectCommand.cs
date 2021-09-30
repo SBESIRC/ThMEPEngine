@@ -8,12 +8,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.GraphDomain;
 using ThMEPLighting.ParkingStall.CAD;
 using ThMEPLighting.ParkingStall.Model;
 using ThMEPLighting.ParkingStall.Worker.LightConnect;
 using ThMEPLighting.ParkingStall.Worker.LightConnectAdjust;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.ParkingStall.Core
 {
@@ -42,6 +44,7 @@ namespace ThMEPLighting.ParkingStall.Core
             ErrorMsgs = new List<string>();
             _allCalcALLines = new List<Line>();
             _allGraphRoutes = new List<GraphRoute>();
+            _dbScanClusterSingleMaxCount = ThParkingStallService.Instance.GroupMaxLightCount;
         }
         public void Execute()
         {
@@ -79,7 +82,16 @@ namespace ThMEPLighting.ParkingStall.Core
                 if (!BaseCheck(outPLine, innerPLines, alPoint))
                     return;
 
-                _thWallColumns = new ThWallColumnsEngine(_originTransformer);
+                try 
+                {
+                    _thWallColumns = new ThWallColumnsEngine(_originTransformer);
+                }
+                catch
+                {
+                    //柱梁获取失败不进行报错，后面不进行躲避
+                    ErrorMsgs.Add("柱墙提取失败");
+                }
+                
                 LoadCraterClear.LoadBlockLayerToDocument(acdb.Database);
                 LoadCraterClear.ClearHistoryLines(acdb.Database, ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME, outPLine, innerPLines, _originTransformer);
 
@@ -131,13 +143,7 @@ namespace ThMEPLighting.ParkingStall.Core
                     copyLine.Layer = ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME;
                     copyLine.ColorIndex = (int)ColorIndex.BYLAYER;
                     _originTransformer.Reset(copyLine);
-                    try
-                    {
-                        acdb.ModelSpace.Add(copyLine);
-                    }
-                    catch (Exception ex) 
-                    {
-                    }
+                    acdb.ModelSpace.Add(copyLine);
                 }
             }
         }
@@ -194,14 +200,24 @@ namespace ThMEPLighting.ParkingStall.Core
             }
             if (isExit)
             {
-                ErrorMsgs.Add("有无法到达出口的线，请修改后再次进行相应的操作");
+                ErrorMsgs.Add("有不连通的线槽，请修改后再次进行相应的操作");
                 return false;
             }
             return true;
         }
         List<MaxGroupLight> AreaLightConnect(Polyline outPolylin,List<Polyline> innerPolylines,Point3d alPoint) 
         {
-            _thWallColumns.GetStructureInfo(outPolylin, out List<Polyline> allColumns, out List<Polyline> allWalls);
+            var allColumns = new List<Polyline>();
+            var allWalls = new List<Polyline>();
+            try
+            {
+                //柱墙获取不在进行报错处理，后面如果获取不到就不进行躲避
+                _thWallColumns.GetStructureInfo(outPolylin, out allColumns, out allWalls);
+            }
+            catch 
+            {
+                ErrorMsgs.Add("柱墙获取数据失败");
+            }
             //根据线槽线、车道线进行密度聚类对灯进行聚类预分组
             var preLightGroups = LightPreGroup(outPolylin, innerPolylines);
 

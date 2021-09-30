@@ -18,15 +18,21 @@ namespace ThMEPEngineCore.Service
         /// 不能用于判断包含其它物体的元素
         /// </summary>
         private Dictionary<Entity, string> ElementDict { get; set; }
-        private ThCADCoreNTSSpatialIndexEx SpaceSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndexEx ElementSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex ElementSpatialIndex { get; set; }
         public ThEntityContainerBuilder(Dictionary<Entity, string> spaceDict,
             Dictionary<Entity, string> elementDict)
         {
             SpaceDict = spaceDict;
-            ElementDict = elementDict;         
-            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndexEx(SpaceDict.Keys.ToCollection());
-            ElementSpatialIndex = new ThCADCoreNTSSpatialIndexEx(ElementDict.Keys.ToCollection());
+            ElementDict = elementDict;
+            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(SpaceDict.Keys.ToCollection())
+            {
+                AllowDuplicate = true,
+            };
+            ElementSpatialIndex = new ThCADCoreNTSSpatialIndex(ElementDict.Keys.ToCollection())
+            {
+                AllowDuplicate = true,
+            };
         }
         public Dictionary<Entity, string> Build()
         {

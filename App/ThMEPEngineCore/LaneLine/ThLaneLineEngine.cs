@@ -87,9 +87,8 @@ namespace ThMEPEngineCore.LaneLine
 
         protected static List<DBObjectCollection> GroupParallelLines(DBObjectCollection curves)
         { 
-            // 利用建立空间索引并剔除重复对象（几何意义上的重复）
             var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
-            var lines = spatialIndex.Geometries.Values.Cast<Line>();
+            var lines = spatialIndex.SelectAll().OfType<Line>();
             lines.ForEach(o =>
             {
                 var buffer = Expand(o, extend_distance, collinear_gap_distance);

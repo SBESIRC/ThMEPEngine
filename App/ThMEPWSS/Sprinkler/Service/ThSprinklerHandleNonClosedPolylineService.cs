@@ -21,6 +21,7 @@ namespace ThMEPWSS.Sprinkler.Service
                 return origin;
             }
         }
+
         private static bool IsValid(Polyline polyline)
         {
             if (polyline.NumberOfVertices == 2)

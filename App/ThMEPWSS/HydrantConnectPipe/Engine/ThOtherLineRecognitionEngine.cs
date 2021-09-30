@@ -20,7 +20,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
             {
                 var results = acadDatabase.ModelSpace.OfType<Entity>().Where(o => IsHydrantLineLayer(o.Layer));
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(results.ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection())
+                {
+                    AllowDuplicate = true,
+                };
                 Dbjs = spatialIndex.SelectCrossingPolygon(selectArea);
             }
         }

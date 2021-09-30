@@ -39,7 +39,10 @@ namespace ThMEPLighting.Garage.Service
         {
             using (var acdb = AcadDatabase.Active())
             {
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(LightRegion.Texts.ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(LightRegion.Texts.ToCollection())
+                {
+                    AllowDuplicate = true,
+                };
                 var texts = new DBObjectCollection();
                 LightRegion.Edges.ForEach(o =>
                 {

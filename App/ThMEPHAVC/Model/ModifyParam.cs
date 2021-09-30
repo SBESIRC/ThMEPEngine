@@ -69,7 +69,6 @@ namespace ThMEPHVAC.Model
         public string valve_name;
         public string valve_layer;
         public string valve_visibility;
-        public Point2d judge_p;
         public Point2d insert_p;
         public double rotate_angle;
         public double width;

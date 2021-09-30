@@ -819,6 +819,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     if (crossedCount > 1)
                     {
+                        bool processed = false;
                         for (int i = 0; i < crossedCount - 1; i++)
                         {
                             int cond_QuitCycle = 0;
@@ -827,6 +828,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 if (unit.PipeLineUnits[w].VerticalPipes.Count <= crossedPipedIndexes[p] && unit.CrossLayerConnectedArrs[w][crossedPipedIndexesPreFloor[p], crossedPipedIndexes[p]] == 1)
                                 {
                                     cond_QuitCycle = 1;
+                                    processed = true;
                                     unit.CrossLayerConnectedArrs[w][crossedPipedIndexesPreFloor[p], crossedPipedIndexes[p]] = 0;
                                 }
                             }
@@ -836,9 +838,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 {
                                     if (unit.PipeLineUnits[w].VerticalPipes[crossedPipedIndexes[p]].AppendedSubmergedPump != null)
                                     {
+                                        processed = true;
                                         unit.CrossLayerConnectedArrs[w][crossedPipedIndexesPreFloor[p], crossedPipedIndexes[p]] = 0;
                                     }
                                 }
+                            }
+                        }
+                        if (!processed)
+                        {
+                            for (int i = 1; i < crossedPipedIndexes.Count; i++)
+                            {
+                                unit.CrossLayerConnectedArrs[w][crossedPipedIndexesPreFloor[i], crossedPipedIndexes[i]] = 0;
                             }
                         }
                     }

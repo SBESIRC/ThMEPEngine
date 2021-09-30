@@ -60,8 +60,11 @@ namespace ThMEPEngineCore.GeojsonExtractor
             if (UseDb3Engine)
             {
                 var shearWallEngine = new ThShearwallBuilderEngine();
-                var results = shearWallEngine.Build(database, pts);
-                results.ForEach(o => Walls.Add(o.Outline));
+                shearWallEngine.Build(database, pts);
+                Walls = shearWallEngine.Elements
+                    .Select(o => o.Outline)
+                    .OfType<Entity>()
+                    .ToList();
             }
             else
             {

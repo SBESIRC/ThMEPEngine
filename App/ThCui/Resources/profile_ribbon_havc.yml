@@ -21,10 +21,10 @@ panels:
           attributes: { "IsVisible": false, "IsEnabled": false }
         - text: "图块配置"
           attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "提取空间"
-          attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "空间拾取"
+        - text: "房间框线"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "房间名称"
+          attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWGROUNDPLAN"
     name: "WGROUNDPLAN"
@@ -90,11 +90,17 @@ panels:
     items:
         - text: "风机选型"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "小风机"
+          attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlHVACPLAN"
     name: "HVACPLAN"
     title: "平面图"
     rowPanels:
+      - text: ""
+        items:
+          - text: "风平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
           - text: "机房平面"
@@ -114,6 +120,10 @@ panels:
     name: "EAFAS"
     title: "火灾报警系统"
     rowPanels:
+      - text: ""
+        items:
+          - text: "火灾报警"
+            attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
           - text: "烟感温感布置"
@@ -139,11 +149,20 @@ panels:
     items:
         - text: "地库车道照明"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "地库车位照明"
+          attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "车道应急照明"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "地库疏散指示"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "地库应急\r\n照明连线"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlELECTRONIC"
+    name: "ELECTRONIC"
+    title: "弱电系统"
+    items:
+        - text: "安防平面"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEEXCHANGE"
