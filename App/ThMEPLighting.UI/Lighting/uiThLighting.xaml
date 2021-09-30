@@ -1,4 +1,16 @@
-﻿<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" x:Class="TianHua.Lighting.UI.uiThLighting"
+﻿<!--<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+                     x:Class="TianHua.Lighting.UI.uiThLighting"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:s="clr-namespace:System;assembly=mscorlib"
+                         xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
+                                         Title="照明" SizeToContent="Manual" Height="780"
+                                        Width="450" MaxWidth="1000" MaxHeight="1000"
+                         mc:Ignorable="d" >-->
+<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+                     x:Class="TianHua.Lighting.UI.uiThLighting"
                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,7 +31,7 @@
             <StackPanel >
                 <GroupBox>
                     <GroupBox.Header>
-                        <CheckBox FontSize="20" FontWeight="Bold" IsChecked="{Binding IsIlluminationLightChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                        <CheckBox  FontSize="20" FontWeight="Bold" IsChecked="{Binding IsIlluminationLightChecked,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}">
                             照明灯具
                         </CheckBox>
                     </GroupBox.Header>
@@ -27,23 +39,23 @@
                         <StackPanel Orientation="Horizontal">
                             <StackPanel Margin="5,5,0,0" Orientation="Vertical">
                                 <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/圆形吸顶灯.png"></Image>
-                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.circleCeiling }}">圆形吸顶灯</RadioButton>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.circleCeiling },UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">圆形吸顶灯</RadioButton>
                             </StackPanel>
                             <StackPanel Margin="5,5,0,0" Orientation="Vertical">
                                 <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/半球吸顶灯.png"></Image>
-                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.domeCeiling }}">半球吸顶灯</RadioButton>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.domeCeiling },UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">半球吸顶灯</RadioButton>
                             </StackPanel>
                             <StackPanel Margin="5,5,0,0"  Orientation="Vertical">
                                 <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/感应吸顶灯.png"></Image>
-                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.inductionCeiling}}">感应吸顶灯</RadioButton>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.inductionCeiling},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">感应吸顶灯</RadioButton>
                             </StackPanel>
                             <StackPanel Margin="5,5,0,0" Orientation="Vertical">
                                 <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/筒灯.png"></Image>
-                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.downlight}}">筒灯</RadioButton>
+                                <RadioButton Margin="0,5,0,0" GroupName="rbIlluminationType" IsChecked="{Binding LightingType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightTypeEnum.downlight},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">筒灯</RadioButton>
                             </StackPanel>
                             <StackPanel Margin="25,5,0,0"  Orientation="Vertical">
                                 <Image Width="50" Height="50" Source="/ThMEPLighting.UI;component/Resource/Image/应急照明灯.png"></Image>
-                                <CheckBox Margin="5,5,0,0" IsChecked="{Binding IfLayoutEmgChecked,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">应急照明灯</CheckBox>
+                                <CheckBox Margin="5,5,0,0" IsChecked="{Binding IfLayoutEmgChecked,Mode=OneWayToSource ,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">应急照明灯</CheckBox>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -55,24 +67,26 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,5,0,0">正常照明灯具布置半径(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding RadiusNormal, Mode=TwoWay}"></TextBox>
+                    <cus:InputTextBox  TextBoxInputType="InputInteger"  NumCanMinus="False" Width="40" Margin="5,5,0,0" Text="{Binding RadiusNormal, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="5,5,0,0">应急照明灯具布置半径(mm)</TextBlock>
-                    <TextBox Width="40" Margin="5,5,0,0" Text="{Binding RadiusEmg, Mode=TwoWay }"></TextBox>
+                    <cus:InputTextBox  TextBoxInputType="InputInteger"  NumCanMinus="False" Width="40" Margin="5,5,0,0" Text="{Binding RadiusEmg, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel IsEnabled="False"  Orientation="Horizontal">
                 <TextBlock Margin="5,5,0,0">应急照明是否兼做平时照明</TextBlock>
-                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal, Mode=TwoWay , ConverterParameter=true}">是</RadioButton>
-                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal, Mode=TwoWay , ConverterParameter=false}">否</RadioButton>
+                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=true,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">是</RadioButton>
+                <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=false,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">否</RadioButton>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <RadioButton GroupName="rbBeam" Margin="5,5,0,0" IsChecked="{Binding ShouldConsiderBeam, Mode=TwoWay, ConverterParameter=true}">考虑梁</RadioButton>
-                <RadioButton GroupName="rbBeam" Margin="5,5,0,0" IsChecked="{Binding ShouldConsiderBeam, Mode=TwoWay, ConverterParameter=true}">不考虑梁</RadioButton>
+                <RadioButton GroupName="rbBeam" Margin="5,5,0,0" 
+                             IsChecked="{Binding ShouldConsiderBeam}">考虑梁</RadioButton>
+                <RadioButton GroupName="rbBeam" Margin="5,5,0,0"
+                             IsChecked ="{Binding NotShouldConsiderBeam }" >不考虑梁</RadioButton>
             </StackPanel>
         </StackPanel>
-        <GroupBox>
+        <GroupBox IsEnabled="False" >
             <GroupBox.Header>
                 <CheckBox FontSize="20" FontWeight="Bold">
                     车道照明
@@ -301,7 +315,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox>
+        <GroupBox IsEnabled="False">
             <GroupBox.Header>
                 <CheckBox FontSize="20" FontWeight="Bold">
                     疏散指示
@@ -338,7 +352,7 @@
 
             </Grid>
         </GroupBox>
-        <GroupBox>
+        <GroupBox IsEnabled="False">
             <GroupBox.Header>
                 <CheckBox FontSize="20" FontWeight="Bold">
                     地库应急照明
@@ -372,9 +386,10 @@
                 </StackPanel>
             </Grid>
         </GroupBox>
+
         <StackPanel Orientation="Horizontal">
             <TextBlock Height="20" >全局比例：</TextBlock>
-            <ComboBox x:Name="cbRatio" Width="60" Height="20" SelectedItem="{Binding BlockRatioIndex}" Text="{Binding BlockRatio , Mode=OneWayToSource}">
+            <ComboBox Width="60" Height="20"  SelectedIndex="{Binding ScaleSelectIndex}" Text="{Binding BlockRatio,Mode=OneWayToSource}">
                 <ComboBoxItem>1:100</ComboBoxItem>
                 <ComboBoxItem>1:150</ComboBoxItem>
             </ComboBox>

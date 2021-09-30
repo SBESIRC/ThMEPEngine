@@ -64,7 +64,7 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             _UiConfigs = uiConfigs;
             CommandName = "THFireGasLayout";
             ActionName = "布置";
-         
+
             setInfo();
         }
 
@@ -154,8 +154,8 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 gasPrfResult.transformBack(transformer);
 
                 //打印
-                ThFireAlarmInsertBlk.InsertBlock(gasResult.layoutPts.ToList(), _scale, layoutBlkNameGas, ThFaCommon.blk_layer[layoutBlkNameGas]);
-                ThFireAlarmInsertBlk.InsertBlock(gasPrfResult.layoutPts.ToList(), _scale, layoutBlkNameProfGas, ThFaCommon.blk_layer[layoutBlkNameProfGas]);
+                ThFireAlarmInsertBlk.InsertBlock(gasResult.layoutPts.ToList(), _scale, layoutBlkNameGas, ThFaCommon.blk_layer[layoutBlkNameGas], false);
+                ThFireAlarmInsertBlk.InsertBlock(gasPrfResult.layoutPts.ToList(), _scale, layoutBlkNameProfGas, ThFaCommon.blk_layer[layoutBlkNameProfGas], false);
             }
         }
     }

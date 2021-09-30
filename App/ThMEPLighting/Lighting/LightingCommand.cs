@@ -46,7 +46,8 @@ namespace ThMEPLighting.Lighting.Commands
             //todo: layout lighting components using _UiConfigs
             if (_UiConfigs.IsIlluminationLightChecked == true)
             {
-
+                var cmd = new IlluminationLighting.IlluminationLightingCmd(_UiConfigs);
+                cmd.Execute();
             }
         }
         public void Dispose()

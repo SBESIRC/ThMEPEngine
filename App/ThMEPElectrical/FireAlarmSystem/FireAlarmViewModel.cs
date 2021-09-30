@@ -262,6 +262,20 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
                 OnPropertyChanged("ShouldConsiderBeam");
             }
         }
+        //需要加这个值。否则存不住结果
+        private bool _NotShouldConsiderBeam = false;
+        public bool NotShouldConsiderBeam
+        {
+            get
+            {
+                return _NotShouldConsiderBeam;
+            }
+            set
+            {
+                _NotShouldConsiderBeam = value;
+                OnPropertyChanged("NotShouldConsiderBeam");
+            }
+        }
 
         //块参照比例index
         private int _BlockRatioIndex = 0;
@@ -313,6 +327,8 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
             SelectedIndexForH = 0;
             SelectedIndexForAngle = 0;
             BlockRatioIndex = 0;
+            ShouldConsiderBeam = true;
+            IsSmokeTempratureSensorChecked = true;
         }
 
     }

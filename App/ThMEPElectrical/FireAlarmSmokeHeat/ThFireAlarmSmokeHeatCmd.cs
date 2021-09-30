@@ -205,8 +205,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 stairFireDetector = stairFireDetector.ToDictionary(x => transformer.Reset(x.Key), x => x.Value);
 
                 //打印
-                ThFireAlarmInsertBlk.InsertBlock(heatResult.layoutPts.ToList(), _scale, layoutBlkNameHeat, ThFaCommon.blk_layer[layoutBlkNameHeat]); ;
-                ThFireAlarmInsertBlk.InsertBlock(smokeResult.layoutPts.ToList(), _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke]);
+                ThFireAlarmInsertBlk.InsertBlock(heatResult.layoutPts.ToList(), _scale, layoutBlkNameHeat, ThFaCommon.blk_layer[layoutBlkNameHeat],false); ;
+                ThFireAlarmInsertBlk.InsertBlock(smokeResult.layoutPts.ToList(), _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke],false);
                 ThFireAlarmInsertBlk.InsertBlock(stairFireDetector, _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke]);
 
             }

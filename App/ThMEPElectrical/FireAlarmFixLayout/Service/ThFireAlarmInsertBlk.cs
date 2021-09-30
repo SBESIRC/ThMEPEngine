@@ -17,7 +17,7 @@ namespace ThMEPElectrical.FireAlarm.Service
 {
     public static class ThFireAlarmInsertBlk
     {
-        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPtInfo, double scale, string blkName, string layserName)
+        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPtInfo, double scale, string blkName, string layserName,bool needMove)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -26,7 +26,11 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 foreach (var ptInfo in insertPtInfo)
                 {
-                    var size = ThFaCommon.blk_size[blkName].Item2 / 2;
+                    double size = 0;
+                    if (needMove== true)
+                    {
+                         size = ThFaCommon.blk_size[blkName].Item2 / 2;
+                    }
                     var pt = ptInfo.Key + ptInfo.Value * scale * size;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Value, Vector3d.ZAxis);
                     var attNameValues = new Dictionary<string, string>() { };

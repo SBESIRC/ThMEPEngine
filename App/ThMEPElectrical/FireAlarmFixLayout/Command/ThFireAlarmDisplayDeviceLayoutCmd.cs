@@ -178,20 +178,20 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 });
 
                 //插入真实块
-                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName]);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName],true);
 
-                //Print
-                pairs.ForEach(p =>
-                {
-                    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
-                    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
-                    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
-                    var ents1 = new List<Entity>() { circlePoint, line };
-                    var ents2 = new List<Entity>() { circleArea };
-                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
-                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
-                });
-                //pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
+                ////Print
+                //pairs.ForEach(p =>
+                //{
+                //    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
+                //    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
+                //    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
+                //    var ents1 = new List<Entity>() { circlePoint, line };
+                //    var ents2 = new List<Entity>() { circleArea };
+                //    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
+                //    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
+                //});
+                ////pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
             }
         }
     }

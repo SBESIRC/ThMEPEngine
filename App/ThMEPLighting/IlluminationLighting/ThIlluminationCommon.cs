@@ -26,11 +26,11 @@ namespace ThMEPLighting.IlluminationLighting
 
         public static Dictionary<string, (double, double)> blk_size = new Dictionary<string, (double, double)>()
                                                                 {
-                                                                    {BlkName_CircleCeiling,(1,1)},
-                                                                    {BlkName_DomeCeiling, (1,1)},
-                                                                    {BlkName_InductionCeiling, (1,1)},
-                                                                    {BlkName_Downlight, (1,1)},
-                                                                    {BlkName_EmergencyLight,(1,1)},
+                                                                    {BlkName_CircleCeiling,(3,3)},
+                                                                    {BlkName_DomeCeiling, (3,3)},
+                                                                    {BlkName_InductionCeiling, (3,3)},
+                                                                    {BlkName_Downlight, (3,3)},
+                                                                    {BlkName_EmergencyLight,(2.5,2.5)},
                                                                 };
 
         public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()

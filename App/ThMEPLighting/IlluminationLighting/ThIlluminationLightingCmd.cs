@@ -59,7 +59,7 @@ namespace ThMEPLighting.IlluminationLighting
         {
             if (_UiConfigs != null)
             {
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
+                _scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
                 _lightType = _UiConfigs.LightingType;
                 _radiusN = _UiConfigs.RadiusNormal;
                 _radiusE = _UiConfigs.RadiusEmg;

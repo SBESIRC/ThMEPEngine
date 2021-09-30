@@ -115,14 +115,11 @@ namespace ThMEPLighting.Lighting.ViewModels
         double _RadiusNormal = 3000;
         public double RadiusNormal
         {
-            get => _RadiusNormal;
+            get { return _RadiusNormal; }
             set
             {
-                if (value != RadiusNormal)
-                {
-                    RadiusNormal = value;
-                    OnPropertyChanged("RadiusNormal");
-                }
+                _RadiusNormal = value;
+                OnPropertyChanged("RadiusNormal");
             }
         }
 
@@ -130,7 +127,7 @@ namespace ThMEPLighting.Lighting.ViewModels
         double _RadiusEmg = 6000;
         public double RadiusEmg
         {
-            get => _RadiusEmg;
+            get { return _RadiusEmg; }
             set
             {
                 _RadiusEmg = value;
@@ -161,6 +158,20 @@ namespace ThMEPLighting.Lighting.ViewModels
             {
                 _ShouldConsiderBeam = value;
                 OnPropertyChanged("ShouldConsiderBeam");
+            }
+        }
+        //需要加这个值。否则存不住结果
+        private bool _NotShouldConsiderBeam = false;
+        public bool NotShouldConsiderBeam
+        {
+            get
+            {
+                return _NotShouldConsiderBeam;
+            }
+            set
+            {
+                _NotShouldConsiderBeam = value;
+                OnPropertyChanged("NotShouldConsiderBeam");
             }
         }
         #endregion 
@@ -376,17 +387,17 @@ namespace ThMEPLighting.Lighting.ViewModels
         }
 
         //块参照比例index
-        private int _BlockRatioIndex = 0;
-        public int BlockRatioIndex
+        private int _ScaleSelectIndex = 0;
+        public int ScaleSelectIndex
         {
             get
             {
-                return _BlockRatioIndex;
+                return _ScaleSelectIndex;
             }
             set
             {
-                _BlockRatioIndex = value;
-                OnPropertyChanged("BlockRatioIndex");
+                _ScaleSelectIndex = value;
+                OnPropertyChanged("ScaleSelectIndex");
             }
         }
         //块参照比例string
@@ -405,10 +416,11 @@ namespace ThMEPLighting.Lighting.ViewModels
         }
         public LightingViewModel()
         {
-            BlockRatioIndex = 0;
+            ScaleSelectIndex = 0;
             LightingType = LightTypeEnum.circleCeiling;
+            ShouldConsiderBeam = true;
+            IsIlluminationLightChecked = true;
         }
-
 
         public class Item : NotifyPropertyChangedBase
         {

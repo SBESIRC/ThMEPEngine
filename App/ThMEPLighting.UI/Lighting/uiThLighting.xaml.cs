@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AcHelper;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPLighting.Lighting.ViewModels;
 using ThMEPLighting.Lighting.Commands;
@@ -25,17 +26,22 @@ namespace TianHua.Lighting.UI
     /// </summary>
     public partial class uiThLighting : ThCustomWindow
     {
-        static readonly LightingViewModel UIConfigs = new LightingViewModel();
-        static uiThLighting()
-        {
-            var items = UIConfigs.Items;
-            items.Add(new LightingViewModel.Item() { Text = "全选" });
-            items.Add(new LightingViewModel.Item() { Text = "AD-SIGN" });
-        }
+        static LightingViewModel UIConfigs = null;
+
+        //static uiThLighting()
+        //{
+        //    var items = UIConfigs.Items;
+        //    items.Add(new LightingViewModel.Item() { Text = "全选" });
+        //    items.Add(new LightingViewModel.Item() { Text = "AD-SIGN" });
+        //}
 
         public uiThLighting()
         {
             InitializeComponent();
+            if (UIConfigs == null)
+            {
+                UIConfigs = new LightingViewModel();
+            }
             DataContext = UIConfigs;
             InitUI();
             //For single form instance
@@ -45,10 +51,10 @@ namespace TianHua.Lighting.UI
         private void InitUI()
         {
             cbSignLightSize.ItemsSource = new string[] { "中型", "大型" };
-          
+
             SelectionChangedEventHandler f = null;
             int lastSelCount = 0;
-            
+
             //控制拾取车道线listbox 全选事件
             f = (s, e) =>
             {
@@ -101,8 +107,18 @@ namespace TianHua.Lighting.UI
         {
             using (var cmd = new LightingLayoutCommand(UIConfigs))
             {
+                FocusToCAD();
                 cmd.Execute();
             }
+        }
+        void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
         private void btnRouting_Click(object sender, RoutedEventArgs e)
         {
@@ -143,6 +159,5 @@ namespace TianHua.Lighting.UI
 
         }
 
-        
     }
 }
