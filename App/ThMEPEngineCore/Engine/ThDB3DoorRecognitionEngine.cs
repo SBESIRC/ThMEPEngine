@@ -67,6 +67,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if(e is ThRawDoorMark doorMark)
                 {
+                    transformer.Transform(doorMark.Geometry as Entity);
                     transformer.Transform(doorMark.Data as Entity);
                 }
             });
