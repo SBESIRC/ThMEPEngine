@@ -26,7 +26,6 @@ namespace ThMEPEngineCore.Service
         public List<SpatialIndexFactory> Factories { get; set; }
         public void Build(Database database, Point3dCollection polygon)
         {
-            Factories = new List<SpatialIndexFactory>();
             foreach (var factory in Factories)
             {
                 factory.Transformer = Transformer;
