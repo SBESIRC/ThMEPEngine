@@ -225,8 +225,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// <summary>
         /// 房间框线UI
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THDrawRoomOutline", CommandFlags.Modal)]
-        public void THDrawRoomOutline()
+        [CommandMethod("TIANHUACAD", "THFJKX", CommandFlags.Modal)]
+        public void THFJKX()
         {
             if (uiRoomOutline != null && uiRoomOutline.IsLoaded)
                 return;
