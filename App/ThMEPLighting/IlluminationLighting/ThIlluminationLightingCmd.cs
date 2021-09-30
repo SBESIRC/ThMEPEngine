@@ -135,19 +135,18 @@ namespace ThMEPLighting.IlluminationLighting
                 layoutParameter.roomType = roomType;
 
                 //接入楼梯
-                var stairBlkResult = ThStairService.layoutStair(dataQuery, layoutParameter);
+                var stairBlkResult = ThStairService.layoutStair(layoutParameter);
                 ////
 
-                ThIlluminationEngine.thIlluminationLayoutEngine(dataQuery, layoutParameter,out var lightResult,out var blindsResult);
+                ThIlluminationEngine.thIlluminationLayoutEngine(dataQuery, layoutParameter, out var lightResult, out var blindsResult);
 
                 //转回到原始位置
                 lightResult.ForEach(x => x.transformBack(transformer));
-                //stairBlkResult.ForEach(x => x.transformBack(transformer));
-
+              
                 //打印
                 ThInsertBlk.prepareInsert(extractBlkList, extractBlkList.Select(x => ThIlluminationCommon.blk_layer[x]).ToList());
                 ThInsertBlk.InsertBlock(lightResult, _scale);
-                ThInsertBlk.InsertBlock(stairBlkResult, _scale);
+                ThInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
 
             }
         }

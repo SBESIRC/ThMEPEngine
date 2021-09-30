@@ -142,6 +142,8 @@
     <Compile Include="FireAlarmSmokeHeat\Data\ThSmokeDataQueryService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Model\ThFaAreaLayoutParameter.cs" />
     <Compile Include="FireAlarmSmokeHeat\Model\ThFaAreaLayoutResult.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Model\ThLayoutPt.cs" />
+    <Compile Include="FireAlarmSmokeHeat\Service\ThStairService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutParamterCalculationService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutRoomTypeService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Service\ThFaAreaLayoutService.cs" />

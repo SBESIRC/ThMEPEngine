@@ -25,9 +25,8 @@ namespace ThMEPLighting.IlluminationLighting.Service
         /// <param name="dataQuery"></param>
         /// <param name="layoutParameter"></param>
         /// <returns></returns>
-        public static List<ThLayoutPt> layoutStair(ThIlluminationDataQueryService dataQuery, ThLayoutParameter layoutParameter)
+        public static List<ThLayoutPt> layoutStair(ThLayoutParameter layoutParameter)
         {
-            //has bug split emg and noraml
             var transformer = layoutParameter.transformer;
             var pts = layoutParameter.framePts;
             var scale = layoutParameter.Scale;
@@ -61,9 +60,9 @@ namespace ThMEPLighting.IlluminationLighting.Service
                 }
 
                 //楼梯间结果，楼梯房间框线转到原点位置
-                stairNormalPts.ForEach(x => transformer.Transform(x));
-                stairEmgPts.ForEach(x => transformer.Transform(x));
                 stairBoundary.ForEach(x => transformer.Transform(x));
+                stairNormalPts = stairNormalPts.Select(x => transformer.Transform(x)).ToList();
+                stairEmgPts = stairEmgPts.Select(x => transformer.Transform(x)).ToList();
 
                 layoutParameter.stairPartResult.AddRange(stairNormalPts);
                 layoutParameter.stairPartResult.AddRange(stairEmgPts);

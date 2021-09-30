@@ -69,16 +69,16 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             }
 
             var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
-           
-            DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select (x=>x.Boundary ).ToList (), "l0Wall", 10);
+
+            DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
             DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
             DrawUtils.ShowGeometry(dataQuery.Columns.Select(x => x.Boundary).ToList(), "l0Column", 3);
-            DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary ).ToList(), "l0PlaceCoverage", 200);
+            DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
 
             //洞,必须先做找到框线
             dataQuery.analysisHoles();
             //墙，柱，可布区域，避让
-           
+
             foreach (var frame in dataQuery.FrameHoleList)
             {
                 DrawUtils.ShowGeometry(frame.Key, string.Format("l0room"), 30);
@@ -162,7 +162,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 dataQuery.analysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                //dataQuery.getAreaSensorType();
                 var roomType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
 
                 foreach (var frame in dataQuery.FrameHoleList)
@@ -172,42 +171,33 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 }
 
                 var layoutParameter = new ThFaAreaLayoutParameter();
-
-                //接入楼梯
-                var stairBoundary = layoutParameter.RoomType.Where(x => x.Value == ThFaSmokeCommon.layoutType.stair).Select(x => x.Key).ToList();
-                //boundary 到原位置
-                stairBoundary.ForEach(x => transformer.Reset(x));
-                var stairEngine = new ThStairEquimentLayout();
-                var stairFireDetector = stairEngine.StairFireDetector(acadDatabase.Database, stairBoundary, pts, _scale);
-                var stairFirePts = stairFireDetector.Select(x => x.Key).ToList();
-                //楼梯间结果，楼梯房间框线转到原点位置
-                stairFirePts.ForEach(x => transformer.Transform(x));
-                stairBoundary.ForEach(x => transformer.Transform(x));
-                ////
-
-                var smokeResult = new ThFaAreaLayoutResult();
-                var heatResult = new ThFaAreaLayoutResult();
-
-                
                 layoutParameter.FloorHightIdx = _floorHight;
                 layoutParameter.RootThetaIdx = _theta;
                 layoutParameter.Scale = _scale;
                 layoutParameter.AisleAreaThreshold = 0.025;
                 layoutParameter.BlkNameHeat = layoutBlkNameHeat;
-                layoutParameter.stairPartResult = stairFirePts;
+                layoutParameter.BlkNameSmoke = layoutBlkNameSmoke;
                 layoutParameter.RoomType = roomType;
+                layoutParameter.framePts = pts;
+                layoutParameter.transformer = transformer;
+
+                //接入楼梯
+                var stairBlkResult = ThStairService.layoutStair(layoutParameter);
+                ////
+
+                var smokeResult = new ThFaAreaLayoutResult();
+                var heatResult = new ThFaAreaLayoutResult();
 
                 ThFireAlarmSmokeHeatEngine.thFaSmokeHeatLayoutEngine(dataQuery, heatResult, smokeResult, layoutParameter);
 
                 //转回到原始位置
                 heatResult.transformBack(transformer);
                 smokeResult.transformBack(transformer);
-                stairFireDetector = stairFireDetector.ToDictionary(x => transformer.Reset(x.Key), x => x.Value);
 
                 //打印
-                ThFireAlarmInsertBlk.InsertBlock(heatResult.layoutPts.ToList(), _scale, layoutBlkNameHeat, ThFaCommon.blk_layer[layoutBlkNameHeat],false); ;
-                ThFireAlarmInsertBlk.InsertBlock(smokeResult.layoutPts.ToList(), _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke],false);
-                ThFireAlarmInsertBlk.InsertBlock(stairFireDetector, _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke]);
+                ThFireAlarmInsertBlk.InsertBlock(heatResult.layoutPts.ToList(), _scale, layoutBlkNameHeat, ThFaCommon.blk_layer[layoutBlkNameHeat], false); ;
+                ThFireAlarmInsertBlk.InsertBlock(smokeResult.layoutPts.ToList(), _scale, layoutBlkNameSmoke, ThFaCommon.blk_layer[layoutBlkNameSmoke], false);
+                ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
 
             }
         }
