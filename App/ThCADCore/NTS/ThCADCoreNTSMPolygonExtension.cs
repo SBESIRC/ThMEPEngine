@@ -154,12 +154,12 @@ namespace ThCADCore.NTS
             return mPolygon.ToNTSPolygon().Buffer(0).ToDbCollection(keepHoles);
         }
 
-        public static DBObjectCollection Buffer(this MPolygon mPolygon, double length)
+        public static DBObjectCollection Buffer(this MPolygon mPolygon, double length,bool keepHoles=false)
         {
             return mPolygon.ToNTSPolygon().Buffer(length, new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
-            }).ToDbCollection();
+            }).ToDbCollection(keepHoles);
         }
 
         public static DBObjectCollection Difference(this MPolygon mPolygon, DBObjectCollection objs)

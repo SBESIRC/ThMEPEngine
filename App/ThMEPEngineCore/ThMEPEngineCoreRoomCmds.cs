@@ -134,31 +134,30 @@ namespace ThMEPEngineCore
             }
         }
 
-        private void PrintRoom(List<DBObjectCollection> roomResults)
+        private void PrintRoom(DBObjectCollection roomOutlines)
         {
             using (var acadDb = AcadDatabase.Active())
             {               
                 //交互+获取房间
                 // 输出房间
                 var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
-                roomResults.ForEach(e =>
+                roomOutlines.Cast<Entity>().ForEach(e =>
                 {
-                    e.Cast<Entity>().ForEach(o =>
-                    {
-                        acadDb.ModelSpace.Add(o);
-                        o.LayerId = layerId;
-                        o.ColorIndex = (int)ColorIndex.BYLAYER;
-                        o.LineWeight = LineWeight.ByLayer;
-                        o.Linetype = "ByLayer";
-                    });
+                    acadDb.ModelSpace.Add(e);
+                    e.LayerId = layerId;
+                    e.ColorIndex = (int)ColorIndex.BYLAYER;
+                    e.LineWeight = LineWeight.ByLayer;
+                    e.Linetype = "ByLayer";
                 });
             }
         }
 
-        private List<DBObjectCollection> GetRoomBoundaries(Polyline frame, List<Point3d> selectPts)
+        private DBObjectCollection GetRoomBoundaries(Polyline frame, List<Point3d> selectPts)
         {
             using (var acadDb = AcadDatabase.Active())
             {
+                var results = new DBObjectCollection();
+
                 //提取数据+封面
                 Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
@@ -167,21 +166,18 @@ namespace ThMEPEngineCore
 
                 selectPts = selectPts.Where(o => !data.ContatinPoint3d(o)).ToList();
                 var builder = new ThRoomOutlineBuilderEngine(totaldata);
-
-                if (builder.Count == 0)
-                    return new List<DBObjectCollection>();
-                //从CAD中获取点
                 builder.CloseAndFilter();
 
                 selectPts.ForEach(p =>
                 {
-                    if (!builder.RoomContainPoint(p))
+                    var roomOutline = builder.Query(p);
+                    if (roomOutline!=null)
                     {
-                        builder.Build(p);
+                        results.Add(roomOutline);
                     }
                 });
 
-                return builder.results;
+                return results;
             }
         }
 

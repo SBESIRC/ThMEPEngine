@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore.Interface;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Interface;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -24,6 +22,10 @@ namespace ThMEPEngineCore.Service
             else if (entity is Circle circle)
             {
                 return BufferCircle(circle, length);
+            }
+            else if(entity is Line line && length>0.0)
+            {
+                return line.Buffer(length);
             }
             else
             {
@@ -54,13 +56,14 @@ namespace ThMEPEngineCore.Service
 
         private MPolygon BufferPolygon(MPolygon mPolygon, double length)
         {
-            var polygon = mPolygon.ToNTSPolygon().Buffer(length).ToDbCollection(true);
-            if(polygon.Count>0)
+            var polygons = mPolygon.Buffer(length,true);
+            if(polygons.Count>0)
             {
-                return polygon.Cast<Entity>().OrderByDescending(e => e.GetArea()).First() as MPolygon;
+                return polygons.Cast<Entity>().OrderByDescending(e => e.GetArea()).First() as MPolygon;
             }
             return null;
         }
+
         private Circle BufferCircle(Circle circle , double length)
         {
             if (length > 0)
