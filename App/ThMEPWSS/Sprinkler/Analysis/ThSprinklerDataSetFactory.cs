@@ -62,17 +62,23 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     Transformer = Transformer,
                     VisitorManager = manger,
                 },
-                new ThSprinklerFireproofshutterExtractor()
-                {
-                    ElementLayer = "AI-防火卷帘",
-                    Transformer = Transformer,
-                },
+                //new ThSprinklerFireproofshutterExtractor()
+                //{
+                //    ElementLayer = "AI-防火卷帘",
+                //    Transformer = Transformer,
+                //},
                 new ThSprinklerBeamExtractor()
                 {
                     ElementLayer = "AI-梁",
                     Transformer = Transformer,
                     Db3ExtractResults = manger.DB3BeamVisitor.Results,
                 },
+                new ThSprinklerWindowExtractor()
+                    {
+                        ElementLayer="AI-窗",
+                        Transformer = Transformer,
+                        Db3ExtractResults = manger.DB3WindowVisitor.Results,
+                    },
                 new ThSprinklerRoomExtractor()
                 {
                     IsWithHole=false,
@@ -103,6 +109,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             extractor.Accept(visitors.DB3BeamVisitor);
             extractor.Accept(visitors.DB3DoorMarkVisitor);
             extractor.Accept(visitors.DB3DoorStoneVisitor);
+            extractor.Accept(visitors.DB3WindowVisitor);
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);
             extractor.Extract(database);

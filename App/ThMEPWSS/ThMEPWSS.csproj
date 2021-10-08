@@ -62,6 +62,7 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoCloseChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoFarChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerSoDenseChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerBeamExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerColumnExtractor.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Sprinkler\Data\ThSprinklerHoleExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerRoomExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
+    <Compile Include="Sprinkler\Data\ThSprinklerWindowExtractor.cs" />
     <Compile Include="Sprinkler\Model\ThSprinklerModel.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCheckerLayer.cs" />

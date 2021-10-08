@@ -16,6 +16,7 @@ namespace ThMEPWSS.Sprinkler.Model
             DangerGrades = new ObservableCollection<string>(items);
             dangerGrade = items.ToList()[2];
             aboveBeamHeight = 900;
+            areaDensity = 2400;
             checkItem1 = true;
             checkItem2 = true;
             checkItem3 = true;
@@ -23,6 +24,7 @@ namespace ThMEPWSS.Sprinkler.Model
             checkItem7 = true;
             checkItem8 = true;
             checkItem9 = true;
+            checkItem12 = true;
         }
 
         private SprinklerType checkSprinklerType;
@@ -207,6 +209,40 @@ namespace ThMEPWSS.Sprinkler.Model
             {
                 aboveBeamHeight = value;
                 RaisePropertyChanged("AboveBeamHeight");
+            }
+        }
+
+        private bool checkItem12;
+        /// <summary>
+        /// 区域喷头过密
+        /// </summary>
+        public bool CheckItem12
+        {
+            get
+            {
+                return checkItem12;
+            }
+            set
+            {
+                checkItem12 = value;
+                RaisePropertyChanged("CheckItem12");
+            }
+        }
+
+        private int areaDensity;
+        /// <summary>
+        /// 喷头间距阈值
+        /// </summary>
+        public int AreaDensity
+        {
+            get
+            {
+                return areaDensity;
+            }
+            set
+            {
+                areaDensity = value;
+                RaisePropertyChanged("AreaDensity");
             }
         }
         #endregion

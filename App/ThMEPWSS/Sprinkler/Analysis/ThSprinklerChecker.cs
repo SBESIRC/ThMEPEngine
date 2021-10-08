@@ -23,7 +23,6 @@ namespace ThMEPWSS.Sprinkler.Analysis
         // 梁高
         public int BeamHeight { get; set; }
         // 三连喷头间距阈值
-        // public int Spacing { get; }
 
         public ThSprinklerChecker()
         {
@@ -59,7 +58,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             }
         }
 
-        public void Clean(string layerName, Polyline polyline)
+        public void CleanDimension(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -74,6 +73,30 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 spatialIndex.SelectCrossingPolygon(bufferPoly)
                             .OfType<AlignedDimension>()
+                            .ToList()
+                            .ForEach(o =>
+                            {
+                                o.UpgradeOpen();
+                                o.Erase();
+                            });
+            }
+        }
+
+        public void CleanPline(string layerName, Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(layerName);
+                acadDatabase.Database.UnLockLayer(layerName);
+                acadDatabase.Database.UnOffLayer(layerName);
+
+                var objs = acadDatabase.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(o => o.Layer == layerName).ToCollection();
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                spatialIndex.SelectCrossingPolygon(bufferPoly)
+                            .OfType<Polyline>()
                             .ToList()
                             .ForEach(o =>
                             {

@@ -39,6 +39,7 @@ namespace ThMEPWSS.Command
                     SprinklerCheckerVM.Parameter.CheckItem7,
                     SprinklerCheckerVM.Parameter.CheckItem8,
                     SprinklerCheckerVM.Parameter.CheckItem9,
+                    SprinklerCheckerVM.Parameter.CheckItem12,
                 };
 
                 var polylines = ThSprinklerLayoutAreaUtils.GetFrames();
@@ -46,15 +47,6 @@ namespace ThMEPWSS.Command
                 {
                     return;
                 }
-
-                var factory = new ThSprinklerDataSetFactory();
-                var geometries = factory.Create(currentDb.Database, new Point3dCollection()).Container;
-
-                //var engine = new ThTCHSprinklerRecognitionEngine();
-                //engine.RecognizeMS(currentDb.Database, frame.Vertices());
-
-                var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
-                recognizeAllEngine.RecognizeMS(currentDb.Database);
 
                 var checkers = new List<ThSprinklerChecker>
                     {
@@ -64,7 +56,8 @@ namespace ThMEPWSS.Command
                         new ThSprinklerDistanceBetweenSprinklerChecker(),
                         new ThSprinklerDistanceFromBoundarySoCloseChecker(),
                         new ThSprinklerDistanceFromBeamChecker{RoomFrames = polylines },
-                        new ThSprinklerBeamChecker()
+                        new ThSprinklerBeamChecker(),
+                        new ThSprinklerSoDenseChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
                     };
                 checkers.ForEach(o =>
                 {
@@ -73,6 +66,14 @@ namespace ThMEPWSS.Command
                     o.RadiusA = data.A;
                     o.RadiusB = data.B;
                 });
+
+                //提取数据
+                var factory = new ThSprinklerDataSetFactory();
+                var geometries = factory.Create(currentDb.Database, new Point3dCollection()).Container;
+                //var engine = new ThTCHSprinklerRecognitionEngine();
+                //engine.RecognizeMS(currentDb.Database, frame.Vertices());
+                var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
+                recognizeAllEngine.RecognizeMS(currentDb.Database);
 
                 var frame = new Extents3d();
                 polylines.ForEach(p => frame.AddExtents(p.GeometricExtents));

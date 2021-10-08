@@ -182,6 +182,7 @@
       <DependentUpon>FloorHeightSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Validations\AboveBeamRule.cs" />
+    <Compile Include="Validations\AreaDensityRule.cs" />
     <Compile Include="Validations\NearbyDistanceRule.cs" />
     <Compile Include="Validations\SelfLengthRule.cs" />
     <Compile Include="Validations\HoseLengthRule.cs" />

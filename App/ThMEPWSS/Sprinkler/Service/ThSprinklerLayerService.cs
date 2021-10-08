@@ -76,5 +76,15 @@ namespace ThMEPWSS.Sprinkler.Service
         {
             return database.CreateAILayer(ThSprinklerCheckerLayer.From_Boundary_So_Far_LayerName, 6);
         }
+
+        /// <summary>
+        /// 区域喷头过密
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public static ObjectId CreateAISprinklerSoDenseLayer(this Database database)
+        {
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Sprinkler_So_Dense_LayerName, 6);
+        }
     }
 }

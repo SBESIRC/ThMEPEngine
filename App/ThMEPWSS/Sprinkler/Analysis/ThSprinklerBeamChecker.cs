@@ -41,31 +41,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline polyline)
         {
-            CleanBeam(ThSprinklerCheckerLayer.Beam_Checker_LayerName, polyline);
-        }
-
-        private void CleanBeam(string layerName, Polyline polyline)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                acadDatabase.Database.UnFrozenLayer(layerName);
-                acadDatabase.Database.UnLockLayer(layerName);
-                acadDatabase.Database.UnOffLayer(layerName);
-
-                var objs = acadDatabase.ModelSpace
-                    .OfType<Polyline>()
-                    .Where(o => o.Layer == layerName).ToCollection();
-                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                spatialIndex.SelectCrossingPolygon(bufferPoly)
-                            .OfType<Polyline>()
-                            .ToList()
-                            .ForEach(o =>
-                            {
-                                o.UpgradeOpen();
-                                o.Erase();
-                            });
-            }
+            CleanPline(ThSprinklerCheckerLayer.Beam_Checker_LayerName, polyline);
         }
 
         private void Present(DBObjectCollection objs)
