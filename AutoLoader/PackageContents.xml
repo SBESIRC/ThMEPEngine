@@ -396,7 +396,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
-				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
@@ -420,7 +420,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
-				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
@@ -444,7 +444,7 @@
                 <Command Local="THXHSXTT" Global="THXHSXTT" />
                 <Command Local="THDXPSXTT" Global="THDXPSXTT" />
                 <Command Local="THDXXHSXTT" Global="THDXXHSXTT" />
-				<Command Local="THWTKSB" Global="THWTKSB" />
+                <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
@@ -458,7 +458,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-				<Command Local="THXFJ" Global="THXFJ" />
+                <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -472,7 +472,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-				<Command Local="THXFJ" Global="THXFJ" />
+                <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -486,7 +486,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-				<Command Local="THXFJ" Global="THXFJ" />
+                <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
@@ -498,6 +498,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THCWZM" Global="THCWZM" />
@@ -509,6 +510,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THCWZM" Global="THCWZM" />
@@ -520,6 +522,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="LightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
                 <Command Local="THCWZM" Global="THCWZM" />
