@@ -66,7 +66,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 else if (node.Value > 4)
                 {
                     edgPts[node.Key] = 3;
-                    ShowInfo.ShowPointAsO(node.Key);
+                    //ShowInfo.ShowPointAsO(node.Key);//请勿删除
                     ++bigPtCnt;
                 }
             }
@@ -98,7 +98,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 if (pt_edges.ContainsKey(pt) && edgPts[pt] != 3)
                 {
                     pt_edges.Remove(pt);
-                    ShowInfo.ShowPointAsX(pt);
+                    //ShowInfo.ShowPointAsX(pt);//请勿删除
                 }
             }
             List<Line> lines = new List<Line>();
@@ -198,13 +198,15 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             //3.output
             foreach (var pt in toDeletePt)
             {
-                if (pt_edges.ContainsKey(pt))
+                if (pt_edges.ContainsKey(pt) && edgPts[pt] != 3)
                 {
                     pt_edges.Remove(pt);
+                    //ShowInfo.ShowPointAsX(pt);//请勿删除
                 }
             }
             foreach (var node in pt_edges)
             {
+                //ShowInfo.ShowPointAsX(node.Key, 1, 25);//请勿删除
                 ans.Add(node.Key);
             }
             return ans;

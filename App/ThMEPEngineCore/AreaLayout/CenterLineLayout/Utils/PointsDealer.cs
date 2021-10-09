@@ -36,7 +36,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 }
                 else
                 {
-                    areaPoints = PointsInArea(poly, radius);
+                    //areaPoints = PointsInArea(poly, radius);
+                    areaPoints = PointsInUncoverArea(poly, 100);
                 }
                 foreach (var pt in areaPoints)
                 {
@@ -87,32 +88,38 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             //加入中心点
             ans.Add(new Point3d((pt0.X + pt1.X + pt2.X + pt3.X) / 4, (pt0.Y + pt1.Y + pt2.Y + pt3.Y) / 4, 0));
             //加入三等分点
-            if (disY > radius * 0.5)
+            if (disX < disY || disY > radius * 0.5)
+            //if (disY > 1000)
             {
                 ans.Add(new Point3d((pt0_5.X + 2 * pt2_5.X) / 3, (pt0_5.Y + 2 * pt2_5.Y) / 3, 0));
                 ans.Add(new Point3d((2 * pt0_5.X + pt2_5.X) / 3, (2 * pt0_5.Y + pt2_5.Y) / 3, 0));
             }
-            if (disX > radius * 0.5)
+            if (disX > disY || disX > radius * 0.5)
+            //if (disX > 1000)
             {
                 ans.Add(new Point3d((pt1_5.X + 2 * pt3_5.X) / 3, (pt1_5.Y + 2 * pt3_5.Y) / 3, 0));
                 ans.Add(new Point3d((2 * pt1_5.X + pt3_5.X) / 3, (2 * pt1_5.Y + pt3_5.Y) / 3, 0));
             }
             //加入四等分点
             if (disX > radius)
+            //if (disX > 2000)
             {
                 ans.Add(new Point3d((pt1_5.X + 3 * pt3_5.X) / 4, (pt1_5.Y + 3 * pt3_5.Y) / 4, 0));
                 ans.Add(new Point3d((3 * pt1_5.X + pt3_5.X) / 4, (3 * pt1_5.Y + pt3_5.Y) / 4, 0));
                 if (disX > radius * 1.5)//加入八等分点
+                //if (disX > 3000)
                 {
                     ans.Add(new Point3d((pt1_5.X + 7 * pt3_5.X) / 8, (pt1_5.Y + 7 * pt3_5.Y) / 8, 0));
                     ans.Add(new Point3d((7 * pt1_5.X + pt3_5.X) / 8, (7 * pt1_5.Y + pt3_5.Y) / 8, 0));
                 }
             }
             if (disY > radius)
+            //if (disY > 2000)
             {
                 ans.Add(new Point3d((pt0_5.X + 3 * pt2_5.X) / 4, (pt0_5.Y + 3 * pt2_5.Y) / 4, 0));
                 ans.Add(new Point3d((3 * pt0_5.X + pt2_5.X) / 4, (3 * pt0_5.Y + pt2_5.Y) / 4, 0));
                 if (disY > radius * 1.5)//加入八等分点
+                //if (disY > 3000)
                 {
                     ans.Add(new Point3d((pt0_5.X + 7 * pt2_5.X) / 8, (pt0_5.Y + 7 * pt2_5.Y) / 8, 0));
                     ans.Add(new Point3d((7 * pt0_5.X + pt2_5.X) / 8, (7 * pt0_5.Y + pt2_5.Y) / 8, 0));
@@ -149,10 +156,15 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             double disX = pt0.DistanceTo(pt1);
             double disY = pt1.DistanceTo(pt2);
             int Xcnt = (int)(disX / dis);
-            Xcnt += Xcnt % 2;
+            Xcnt -= Xcnt % 2;
             int Ycnt = (int)(disY / dis);
-            Ycnt += Ycnt % 2;
+            Ycnt -= Ycnt % 2;
+            //int mode = 0; // 1: Y比较大，削减Y的数量 2: X比较长
+            //Ycnt = Ycnt > 1 ? (Xcnt > 3 ? Ycnt - 2 : Ycnt) : Ycnt;
+            //Xcnt = Xcnt > 1 ? (Ycnt > 3 ? Xcnt - 2 : Xcnt) : Xcnt;
+
             for (int i = 0; i < Xcnt; i += 2)
+            //for (int i = Xcnt - 1; i >= 0; i -= 2)
             {
                 Point3d ptA = new Point3d((i * pt01.X + (Xcnt - i) * pt0.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt0.Y) / Xcnt, 0);//Apt01_0
                 Point3d ptB = new Point3d((i * pt01.X + (Xcnt - i) * pt1.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt1.Y) / Xcnt, 0);//Bpt01_1
@@ -160,37 +172,40 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 Point3d ptD = new Point3d((i * pt23.X + (Xcnt - i) * pt3.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt3.Y) / Xcnt, 0);//Dpt23_3
                 Point3d ptAD = CenterOfTwoPoints(ptA, ptD);//AD中点
                 Point3d ptBC = CenterOfTwoPoints(ptB, ptC);//BC中点
-                ptsInUncoverRectangle.Add(ptAD);//
-                ptsInUncoverRectangle.Add(ptBC);//
                 bool flag = true;
+                //for (int j = 0; j > 0 && j < (Xcnt > 3 ? Ycnt - 2 : Ycnt); j += 2)
                 for (int j = 0; j < Ycnt; j += 2)
+                //for (int j = Ycnt - 1; j >= 0; j -= 2)
                 {
                     Point3d ptAD_A = new Point3d((j * ptAD.X + (Ycnt - j) * ptA.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptA.Y) / Ycnt, 0);
                     Point3d ptAD_D = new Point3d((j * ptAD.X + (Ycnt - j) * ptD.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptD.Y) / Ycnt, 0);
                     Point3d ptBC_B = new Point3d((j * ptBC.X + (Ycnt - j) * ptB.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptB.Y) / Ycnt, 0);
                     Point3d ptBC_C = new Point3d((j * ptBC.X + (Ycnt - j) * ptC.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptC.Y) / Ycnt, 0);
-                    ptsInUncoverRectangle.Add(ptAD_A);//ptAD_A
-                    ptsInUncoverRectangle.Add(ptAD_D);//ptAD_D
-                    ptsInUncoverRectangle.Add(ptBC_B);//ptBC_B
-                    ptsInUncoverRectangle.Add(ptBC_C);//ptBC_C
                     if (flag)
                     {
                         flag = false;
                         ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_A, ptBC_B));
                         ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
                     }
+                    ptsInUncoverRectangle.Add(ptAD_A);//ptAD_A
+                    ptsInUncoverRectangle.Add(ptAD_D);//ptAD_D
+                    ptsInUncoverRectangle.Add(ptBC_B);//ptBC_B
+                    ptsInUncoverRectangle.Add(ptBC_C);//ptBC_C
                 }
                 for (int j = 0; j < Ycnt; ++j)
                 {
                     ptsInUncoverRectangle.Add(new Point3d((j * pt01.X + (Ycnt - j) * pt23.X) / Ycnt, (j * pt01.Y + (Ycnt - j) * pt23.Y) / Ycnt, 0));
                 }
+                ptsInUncoverRectangle.Add(ptAD);//
+                ptsInUncoverRectangle.Add(ptBC);//
             }
             //只将在覆盖区域中的点加入ans
             List<Point3d> ptss = new List<Point3d>();
             foreach (var pt in ptsInUncoverRectangle)
             {
-                if (((Polyline)uncoverArea).ContainsOrOnBoundary(pt))
+                if (((Polyline)uncoverArea).Contains(pt))
                 {
+                    //ShowInfo.ShowPointAsX(pt, 1, 25);
                     ptss.Add(pt);
                 }
             }

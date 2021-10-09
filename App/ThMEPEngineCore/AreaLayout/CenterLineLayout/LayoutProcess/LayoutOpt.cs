@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
     class LayoutOpt
     {
-        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb)
+        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb, MPolygon mPolygonShell)
         {
 
             List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius); //1、初选
@@ -32,7 +32,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return ans;
             }
 
-            List<Point3d> fourPoints = FourStep(mPolygon, sndHalfPoints, pointsInLayoutList, radius, equipmentType); //4、移点：修补需求：将一些点更加靠近中心线
+            List<Point3d> fourPoints = FourStep(mPolygonShell, sndHalfPoints, pointsInLayoutList, radius, equipmentType); //4、移点：修补需求：将一些点更加靠近中心线
 
             List<Point3d> thdPoints = ThdStep(mPolygon, fourPoints, radius, equipmentType); //3、删点
 
