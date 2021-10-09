@@ -68,22 +68,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThConvexHull", CommandFlags.Modal)]
-        public void ThConvexHull()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                acadDatabase.ModelSpace.Add(pline.ConvexHull());
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
         public void ThOutline()
         {
