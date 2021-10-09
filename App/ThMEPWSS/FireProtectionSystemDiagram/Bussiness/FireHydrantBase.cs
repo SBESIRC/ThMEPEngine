@@ -146,16 +146,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
         {
 
             var topPoint = raiseOrigin + Vector3d.YAxis.MultiplyBy((topFloor - 1) * _floorSpace);
-            double pointDisLine = 0;
-            if (topFloor == _maxFloor)
-            {
-                pointDisLine = _topRingInRoof ? (_floorSpace * _scaleVerticalFireH) : (_floorSpace * _scaleRefugeFireH);
-            }
-            else
-            {
-                bool isRefugeFloor = _floorDatas.Where(c => c.floorNum == topFloor).FirstOrDefault().isRefugeFloor;
-                pointDisLine = isRefugeFloor ? (_floorSpace * _scaleRefugeFireH) : (_floorSpace * _scaleVerticalFireH);
-            }
+            double pointDisLine = 400;
             topPoint += Vector3d.YAxis.MultiplyBy(pointDisLine);
             return topPoint;
         }
@@ -172,7 +163,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             var topPoint = origin + Vector3d.XAxis.MultiplyBy(raiseNum * _raisePipeSpace);
             topPoint += Vector3d.YAxis.MultiplyBy((topFloor - 1) * _floorSpace);
             //是否是顶层
-            double pointDisLine = 0;
+            double pointDisLine;
             if (topFloor == _maxFloor)
             {
                 if (_topRingInRoof)
@@ -199,22 +190,7 @@ namespace ThMEPWSS.FireProtectionSystemDiagram.Bussiness
             }
             else
             {
-                //非顶层，判断是否是避难层
-                bool isRefugeFloor = _floorDatas.Where(c => c.floorNum == topFloor).FirstOrDefault().isRefugeFloor;
-                if (isRefugeFloor)
-                {
-                    //避难层
-                    pointDisLine = _floorSpace * _scaleRefugeFloorTopLine;
-                    if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
-                        pointDisLine = _floorSpace * _scaleRefugeFloorTopInnerLine;
-                }
-                else
-                {
-                    //非避难层
-                    pointDisLine = _floorSpace * _scaleVerticalFloorTopLine;
-                    if (raiseNum > 0 && raiseNum < _raisePipeCount - 1)
-                        pointDisLine -= _GetButterflyValveDistanceToLine();
-                }
+                pointDisLine = _floorSpace - 550;
             }
             topPoint += Vector3d.YAxis.MultiplyBy(pointDisLine);
             return topPoint;
