@@ -11,8 +11,16 @@
 	<module path="DotNetARX.dll" />
 	<module path="ThCADCore.dll" />
 	<module path="ThCADExtension.dll" />
-	<module path="THMEPCore3D.dll" />
-	<module path="ThMEPEngineCore.dll" />
+	<module path="THMEPCore3D.dll"/>
+	<module path="ThMEPEngineCore.dll" >
+		<rule pattern="true" inherit="false">
+		  <protection id="anti ildasm" />
+		  <protection id="resources" />
+		  <protection id="invalid metadata" />
+		  <protection id="rename" />
+		  <protection id="ref proxy" />
+		</rule>
+	</module>
 	<module path="ThMEPHVAC.dll" />
 	<module path="ThMEPElectrical.dll" />
 	<module path="ThMEPLighting.dll" />
