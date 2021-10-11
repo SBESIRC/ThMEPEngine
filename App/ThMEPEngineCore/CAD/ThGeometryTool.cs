@@ -476,5 +476,28 @@ namespace ThMEPEngineCore.CAD
             result.Add(pt4);
             return result;
         }
+
+        /// <summary>
+        /// CAD GetOffsetCurves 外扩内缩闭合polyline。
+        /// offset为正，外扩。为负，内缩。
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public static Polyline GetOffsetClosePolyline(this Polyline polyline, double offset)
+        {
+            var dir = 1;
+            var newPolyline = new Polyline();
+            if (polyline.Closed == true)
+            {
+                if (polyline.IsCCW() == false)
+                {
+                    dir = -1;
+                }
+                 newPolyline = polyline.GetOffsetCurves(dir * offset).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
+            }
+
+            return newPolyline;
+        }
     }
 }

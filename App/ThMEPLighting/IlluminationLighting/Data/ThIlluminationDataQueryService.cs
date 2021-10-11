@@ -259,9 +259,13 @@ namespace ThMEPLighting.IlluminationLighting.Data
             return polyDict;
         }
 
-        //public void getAreaSensorType()
-        //{
-        //    FrameLightType = ThFaAreaLayoutRoomTypeService.getAreaLightType(Rooms, roomFrameDict);
-        //}
+        public void extendPriority(double priorityExtend)
+        {
+            foreach (var frame in FrameList)
+            {
+                FramePriorityList[frame] = FramePriorityList[frame].Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+            }
+        }
+
     }
 }

@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Stair;
-using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Service

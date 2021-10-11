@@ -19,6 +19,8 @@ namespace ThMEPElectrical.FireAlarm
         #region 烟温感
         public static string BlkName_Smoke = "E-BFAS110";
         public static string BlkName_Heat = "E-BFAS120";
+        public static string BlkName_Smoke_ExplosionProf = "E-BFAS110-3";
+        public static string BlkName_Heat_ExplosionProf = "E-BFAS120-3";
         #endregion
 
         #region 可燃气体
@@ -26,25 +28,31 @@ namespace ThMEPElectrical.FireAlarm
         public static string BlkName_Gas_ExplosionProf = "E-BCGS210-2";//--------------------------------------------------------------
         #endregion
 
+        #region 灯
+        public static string BlkName_CircleCeiling = "E-BL302";
+        public static string BlkName_DomeCeiling = "E-BL302-2";
+        public static string BlkName_InductionCeiling = "E-BL302-3";
+        public static string BlkName_Downlight = "E-BL201";
+        public static string BlkName_EmergencyLight = "E-BFEL800";
+        #endregion
 
-        public static List<string> BlkNameListFixLayout = new List<string>() {
+        public static List<string> BlkNameList = new List<string>() {
                                                                       BlkName_Display_Fire,
-                                                                        BlkName_Display_Floor,
-                                                                        BlkName_Monitor,
-                                                                        BlkName_FireTel,
-
-                                                                    };
-
-        public static List<string> BlkNameListAreaLayout = new List<string>() {
+                                                                      BlkName_Display_Floor,
+                                                                      BlkName_Monitor,
+                                                                      BlkName_FireTel,
                                                                       BlkName_Smoke,
+                                                                      BlkName_Smoke_ExplosionProf,
                                                                       BlkName_Heat,
-                                                                      BlkName_Gas,//--------------------------------------------------------------
-                                                                      BlkName_Gas_ExplosionProf,//--------------------------------------------------------------
-
+                                                                      BlkName_Heat_ExplosionProf,
+                                                                      BlkName_Gas,
+                                                                      BlkName_Gas_ExplosionProf,
+                                                                      BlkName_CircleCeiling,
+                                                                      BlkName_DomeCeiling,
+                                                                      BlkName_InductionCeiling,
+                                                                      BlkName_Downlight,
+                                                                      BlkName_EmergencyLight,
                                                                     };
-
-
-        //public static int blk_scale = 100;
 
         public static Dictionary<string, (double, double)> blk_size = new Dictionary<string, (double, double)>()
                                                                 {
@@ -54,20 +62,35 @@ namespace ThMEPElectrical.FireAlarm
                                                                     {BlkName_FireTel, (3, 3)},
                                                                     {BlkName_Smoke,(3, 3)},
                                                                     {BlkName_Heat, (3, 3) },
-                                                                    {BlkName_Gas, (3, 3) },//--------------------------------------------------------------
-                                                                    {BlkName_Gas_ExplosionProf, (3, 3) },//--------------------------------------------------------------
+                                                                    {BlkName_Smoke_ExplosionProf,(3, 3)},
+                                                                    {BlkName_Heat_ExplosionProf, (3, 3) },
+                                                                    {BlkName_Gas, (3, 3) },
+                                                                    {BlkName_Gas_ExplosionProf, (3, 3) },
+                                                                    {BlkName_CircleCeiling,(3,3)},
+                                                                    {BlkName_DomeCeiling, (3,3)},
+                                                                    {BlkName_InductionCeiling, (3,3)},
+                                                                    {BlkName_Downlight, (3,3)},
+                                                                    {BlkName_EmergencyLight,(2.5,2.5)},
+
                                                                 };
 
         public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
                                                                 {
-                                                                    {BlkName_Display_Fire,"E-FAS-DEVC"},
-                                                                    {BlkName_Display_Floor, "E-FAS-DEVC"},
-                                                                    {BlkName_Monitor, "E-FAS-DEVC"},
+                                                                    {BlkName_Display_Fire,"E-FAS-EQPM"},
+                                                                    {BlkName_Display_Floor, "E-FAS-EQPM"},
+                                                                    {BlkName_Monitor, "E-EFPS-DEVC"},
                                                                     {BlkName_FireTel, "E-FAS-DEVC"},
                                                                     {BlkName_Smoke,"E-FAS-DEVC"},
                                                                     {BlkName_Heat, "E-FAS-DEVC" },
-                                                                    {BlkName_Gas,"E-FAS-DEVC"},//--------------------------------------------------------------
-                                                                    {BlkName_Gas_ExplosionProf, "E-FAS-DEVC" },//--------------------------------------------------------------
+                                                                    {BlkName_Smoke_ExplosionProf,"E-FAS-DEVC"},
+                                                                    {BlkName_Heat_ExplosionProf, "E-FAS-DEVC" },
+                                                                    {BlkName_Gas,"E-FAS-DEVC"},
+                                                                    {BlkName_Gas_ExplosionProf, "E-FAS-DEVC" },
+                                                                    {BlkName_CircleCeiling,"E-LITE-LITE"},
+                                                                    {BlkName_DomeCeiling, "E-LITE-LITE"},
+                                                                    {BlkName_InductionCeiling, "E-LITE-LITE"},
+                                                                    {BlkName_Downlight, "E-LITE-LITE"},
+                                                                    {BlkName_EmergencyLight,"E-LITE-LITE"},
 
                                                                  };
 

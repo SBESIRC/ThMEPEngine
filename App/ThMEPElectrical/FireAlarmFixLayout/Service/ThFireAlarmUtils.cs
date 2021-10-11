@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 
+
 using AcHelper;
 using Linq2Acad;
 using NFox.Cad;
@@ -73,7 +74,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList,bool referBeam)
+        public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
         {
             var bReadJson = false;
 
@@ -83,7 +84,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                 if (bReadJson == false)
                 {
                     var datasetFactory = new ThFaAreaLayoutDataSetFactory()
-                    { 
+                    {
                         ReferBeam = referBeam
                     };
                     var dataset = datasetFactory.Create(acadDatabase.Database, pts);
@@ -119,35 +120,6 @@ namespace ThMEPElectrical.FireAlarm.Service
             return geos;
         }
 
-        /// <summary>
-        /// for debug
-        /// </summary>
-        /// <param name="pts"></param>
-        /// <param name="extractBlkList"></param>
-        /// <returns></returns>
-        public static List<ThGeometry> writeSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
-        {
-            var fileInfo = new FileInfo(Active.Document.Name);
-            var path = fileInfo.Directory.FullName;
-
-            var geos = new List<ThGeometry>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-
-                var datasetFactory = new ThFaAreaLayoutDataSetFactory()
-                {
-                    ReferBeam = referBeam
-                }; ;
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                geos.AddRange(dataset.Container);
-
-                ThGeoOutput.Output(geos, path, fileInfo.Name);
-
-            }
-
-            return geos;
-        }
-
         public static List<ThGeometry> getFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
         {
             var geos = new List<ThGeometry>();
@@ -167,7 +139,6 @@ namespace ThMEPElectrical.FireAlarm.Service
                 return geos;
             }
         }
-
 
         /// <summary>
         /// 将数据转回原点。同时返回transformer
@@ -257,5 +228,97 @@ namespace ThMEPElectrical.FireAlarm.Service
 
             return roomTableConfig;
         }
+
+
+
+        #region DebugFunction
+        /// <summary>
+        /// for debug
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="extractBlkList"></param>
+        /// <returns></returns>
+        public static List<ThGeometry> writeSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
+        {
+            var fileInfo = new FileInfo(Active.Document.Name);
+            var path = fileInfo.Directory.FullName;
+
+            var geos = new List<ThGeometry>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var datasetFactory = new ThFaAreaLayoutDataSetFactory()
+                {
+                    ReferBeam = referBeam
+                }; ;
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
+
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
+
+            }
+
+            return geos;
+        }
+
+        /// <summary>
+        /// for debug
+        /// </summary>
+        public static Polyline SelectFrame()
+        {
+            var frame = new Polyline();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return frame;
+                }
+
+                var frameList = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    //获取外包框
+                    var frameTemp = acdb.Element<Polyline>(obj);
+                    var nFrame = processFrame(frameTemp);
+                    if (nFrame.Area < 1)
+                    {
+                        continue;
+                    }
+
+                    frameList.Add(nFrame);
+                }
+                frame = frameList.OrderByDescending(x => x.Area).First();
+
+                return frame;
+            }
+        }
+
+        private static Polyline processFrame(Polyline frame)
+        {
+            var tol = 1000;
+            //获取外包框
+            var frameClone = frame.WashClone() as Polyline;
+            //处理外包框
+            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
+
+            return nFrame;
+
+        }
+
+        #endregion
     }
 }

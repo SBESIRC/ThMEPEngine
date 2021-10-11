@@ -48,7 +48,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             var spatialCrossingDoorsIndex = new ThCADCoreNTSSpatialIndex(DataQueryWorker.DoorOpenings.Select(x => x.Boundary).ToCollection());
             var releventElementSet = DataQueryWorker.Avoidence.Select(x => x.Boundary).ToCollection();//避让元素（门窗）
             var spatialAvoidenceIndex = new ThCADCoreNTSSpatialIndex(releventElementSet);
-            //DataQueryWorker.Avoidence.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0avoide", 4));
+
+            DataQueryWorker.Avoidence.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0avoide", 4));
+
             foreach (Polyline room in rooms)
             {
                 DrawUtils.ShowGeometry(room, "l0Room", 3);

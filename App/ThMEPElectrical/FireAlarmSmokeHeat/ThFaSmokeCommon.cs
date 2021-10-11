@@ -17,8 +17,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
         public static string stairName = "楼梯间";
         public static string smokeTag = "感烟火灾探测器";
         public static string heatTag = "感温火灾探测器";
-        public static string gasTag = "可燃气体探测器";//-----------------------------------------------------
-        public static string expPrfTag = "防爆";//-----------------------------------------------------------
+        public static string gasTag = "可燃气体探测器";
+        public static string expPrfTag = "防爆";
         public static string nonLayoutTag = "非火灾探测区域";
 
         public enum layoutType
@@ -27,11 +27,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             smoke = 1,
             heat = 2,
             smokeHeat = 3,
-            gas = 4,//---------------------------------------------------
-            //expPrf = 1,//---------------------------------------------------
-            gasPrf = 5,//---------------------------------------------------
+            gas = 4,
+            gasPrf = 5,
             nonLayout = 6,
             noName = 7,
+            heatPrf=8,
+            smokePrf=9,
+            smokeHeatPrf = 10,
         }
     }
 }

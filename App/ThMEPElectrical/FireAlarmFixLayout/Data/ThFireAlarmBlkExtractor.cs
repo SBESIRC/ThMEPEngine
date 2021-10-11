@@ -7,9 +7,10 @@ using Autodesk.AutoCAD.Geometry;
 
 using NFox.Cad;
 using Dreambuild.AutoCAD;
-
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -59,7 +60,8 @@ namespace ThMEPElectrical.FireAlarm.Data
                     var obb = x.ToOBB(x.BlockTransform);
                     if (obb != null && obb.Area > 1.0)
                     {
-                        var bufferObb = obb.GetOffsetCurves(15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
+                        //var bufferObb = obb.GetOffsetCurves(15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
+                        var bufferObb = obb.GetOffsetClosePolyline(15);
                         if (bufferObb != null)
                         {
                             Equipment.Add(x, bufferObb);

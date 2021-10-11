@@ -5,46 +5,28 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using AcHelper;
-using Linq2Acad;
-using GeometryExtensions;
-using NFox.Cad;
-
 using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.GeoJSON;
-using ThMEPEngineCore.Config;
-
-
-using ThMEPEngineCore.AreaLayout.GridLayout.Command;
-using ThMEPEngineCore.AreaLayout.GridLayout.Data;
-using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 
 using ThMEPElectrical.FireAlarm.Service;
-
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
 using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat;
+
 using ThFaAreaLayoutParameter = ThMEPElectrical.FireAlarmCombustibleGas.Model.ThFaAreaLayoutParameter;
 
 namespace ThMEPElectrical.FireAlarmCombustibleGas
 {
     class ThFireAlarmGasEngine
     {
-
-        public static void thFaGasLayoutEngine(ThSmokeDataQueryService dataQuery, ThFaAreaLayoutResult gasResult, ThFaAreaLayoutResult gasPrfResult, ThFaAreaLayoutParameter layoutParameter)
+        public static void thFaGasLayoutEngine(ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, out List<ThLayoutPt> layoutResult, out List<Polyline> blindsResult)
         {
+            blindsResult = new List<Polyline>();
+            layoutResult = new List<ThLayoutPt>();
+
             foreach (var frame in dataQuery.FrameList)
             {
                 try
@@ -52,11 +34,13 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                     var priority = new List<Polyline>();
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.gasPrf)
                     {
-                        var localGasPrfResult = layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gasPrf, gasPrfResult);
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gasPrf, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGasPrf);
                     }
                     else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.gas)
                     {
-                        var localGasResult = layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gas, gasResult);
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gas, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGasPrf);
                     }
                 }
                 catch
@@ -66,9 +50,8 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             }
         }
 
-        private static ThFaAreaLayoutResult layoutProcess(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, ThFaAreaLayoutResult layoutResult)
+        private static void layoutProcess(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
-            var localResult = new ThFaAreaLayoutResult();
             var radius = layoutParameter.ProtectRadius;
 
             DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
@@ -77,23 +60,15 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             if (bIsAisleArea == false)
             {
                 debugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                localResult = ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius);
-                debugShowResult(localResult.layoutPts, localResult.blind, layoutType, bIsAisleArea);
+                ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius, out localPts, out blines);
+                debugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
             else
             {
                 debugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                localResult = ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius);
-                debugShowResult(localResult.layoutPts, localResult.blind, layoutType, bIsAisleArea);
+                ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius, out localPts, out blines);
+                debugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
-
-            foreach (var re in localResult.layoutPts)
-            {
-                layoutResult.layoutPts.Add(re.Key, re.Value);
-            }
-            layoutResult.blind.AddRange(localResult.blind);
-
-            return localResult;
         }
 
         private static void debugShowFrame(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaSmokeCommon.layoutType type, bool isCenterLine)

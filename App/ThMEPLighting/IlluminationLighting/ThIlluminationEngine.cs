@@ -14,7 +14,7 @@ using GeometryExtensions;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.EmgLight.Assistant;
 
 using ThMEPLighting.IlluminationLighting.Data;
@@ -44,32 +44,14 @@ namespace ThMEPLighting.IlluminationLighting
                     if (layoutParameter.roomType[frame] == ThIlluminationCommon.layoutType.normal || layoutParameter.roomType[frame] == ThIlluminationCommon.layoutType.normalEvac)
                     {
                         layoutProcess(frame, dataQuery, layoutParameter, ThIlluminationCommon.layoutType.normal, out var localPts, out var blines);
-
-                        if (localPts != null && localPts.Count > 0)
-                        {
-                            foreach (var r in localPts)
-                            {
-                                layoutResult.Add(new ThLayoutPt() { Pt = r.Key, Dir = r.Value, BlkName = layoutParameter.BlkNameN });
-                            }
-
-                            var size = ThIlluminationCommon.blk_size[layoutParameter.BlkNameN];
-                            priority = ThParamterCalculationService.getPriorityBoundary(localPts, layoutParameter.Scale, size);
-                        }
-                        dataQuery.FramePriorityList[frame].AddRange(priority);
-                        blindsResult.AddRange(blines);
-
+                        addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameN);
+                        dataQuery.FramePriorityList[frame].AddRange(toPriority(localPts, ThIlluminationCommon.blk_size[layoutParameter.BlkNameN], layoutParameter.Scale, layoutParameter.priorityExtend));
                     }
                     if (layoutParameter.ifLayoutEmg == true &&
                         (layoutParameter.roomType[frame] == ThIlluminationCommon.layoutType.evacuation || layoutParameter.roomType[frame] == ThIlluminationCommon.layoutType.normalEvac))
                     {
                         layoutProcess(frame, dataQuery, layoutParameter, ThIlluminationCommon.layoutType.evacuation, out var localPts, out var blines);
-                        if (localPts != null && localPts.Count > 0)
-                        {
-                            foreach (var r in localPts)
-                            {
-                                layoutResult.Add(new ThLayoutPt() { Pt = r.Key, Dir = r.Value, BlkName = layoutParameter.BlkNameE });
-                            }
-                        }
+                        addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameE);
                     }
                 }
                 catch
@@ -104,6 +86,27 @@ namespace ThMEPLighting.IlluminationLighting
             }
         }
 
+        private static void addResult(List<ThLayoutPt> layoutResult, List<Polyline> blindsResult, Dictionary<Point3d, Vector3d> localPts, List<Polyline> localBlinds, string blkName)
+        {
+            foreach (var r in localPts)
+            {
+                layoutResult.Add(new ThLayoutPt() { Pt = r.Key, Dir = r.Value, BlkName = blkName });
+            }
+
+            blindsResult.AddRange(localBlinds);
+        }
+
+        private static List<Polyline> toPriority(Dictionary<Point3d, Vector3d> localPts, (double, double) size, double Scale, double priorityExtend)
+        {
+            var priority = new List<Polyline>();
+
+            if (localPts != null && localPts.Count > 0)
+            {
+                priority = ThParamterCalculationService.getPriorityBoundary(localPts, Scale, size);
+                priority = priority.Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+            }
+            return priority;
+        }
 
         private static void debugShowFrame(Polyline frame, ThIlluminationDataQueryService dataQuery, ThIlluminationCommon.layoutType type, bool isCenterLine)
         {

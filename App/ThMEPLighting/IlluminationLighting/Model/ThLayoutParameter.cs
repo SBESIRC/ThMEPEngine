@@ -22,6 +22,7 @@ namespace ThMEPLighting.IlluminationLighting.Model
         public double radiusN = 3000;
         public double radiusE = 6000;
         public bool ifLayoutEmg = true;
+        public double priorityExtend = 0;
         public List<Point3d> stairPartResult { get; set; } = new List<Point3d>();
         public Dictionary<Polyline, ThIlluminationCommon.layoutType> roomType { get; set; } = new Dictionary<Polyline, ThIlluminationCommon.layoutType>();
     }

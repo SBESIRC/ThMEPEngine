@@ -53,7 +53,7 @@ namespace ThMEPLighting.IlluminationLighting.Service
             layoutCmd.prioritys = dataQuery.FramePriorityList[frame];
             layoutCmd.detectArea = dataQuery.FrameDetectAreaList[frame];
             layoutCmd.protectRadius = radius;
-            layoutCmd.equipmentType = BlindType.CoverArea;
+            layoutCmd.equipmentType = BlindType.VisibleArea ;
 
             layoutCmd.Execute();
 
@@ -91,7 +91,7 @@ namespace ThMEPLighting.IlluminationLighting.Service
             layoutCmd.prioritys = dataQuery.FramePriorityList[frame];
             layoutCmd.detectArea = dataQuery.FrameDetectAreaList[frame];
             layoutCmd.radius = radius;
-            layoutCmd.equipmentType = BlindType.CoverArea;
+            layoutCmd.equipmentType = BlindType.VisibleArea;
 
             layoutCmd.Execute();
 
